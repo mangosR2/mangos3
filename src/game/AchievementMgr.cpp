@@ -2035,7 +2035,7 @@ uint32 AchievementMgr::GetCriteriaProgressMaxCounter(AchievementCriteriaEntry co
         case ACHIEVEMENT_CRITERIA_TYPE_LEARN_SKILL_LEVEL:
             return achievementCriteria->learn_skill_level.skillLevel * 75;
         case ACHIEVEMENT_CRITERIA_TYPE_USE_ITEM:
-            return achievementCriteria->use_item.itemCount;
+            return (achievementCriteria->use_item.itemCount ? achievementCriteria->use_item.itemCount : 1);
         case ACHIEVEMENT_CRITERIA_TYPE_LOOT_ITEM:
             return achievementCriteria->loot_item.itemCount;
         case ACHIEVEMENT_CRITERIA_TYPE_EXPLORE_AREA:
@@ -2312,7 +2312,7 @@ void AchievementMgr::SetCriteriaProgress(AchievementCriteriaEntry const* criteri
     SendCriteriaUpdate(criteria->ID,progress);
 
     // nothing do for counter case
-    if (achievement->flags & ACHIEVEMENT_FLAG_COUNTER)
+    if (achievement->flags & ACHIEVEMENT_FLAG_COUNTER && !(achievement->flags & ACHIEVEMENT_FLAG_SUMM)) //second check for "Tastes Like Chicken" and alike
         return;
 
     // update dependent achievements state at criteria complete
