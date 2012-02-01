@@ -5443,6 +5443,25 @@ SpellCastResult Spell::CheckCast(bool strict)
                 if (m_spellInfo != sSpellMgr.SelectAuraRankForLevel(m_spellInfo, target->getLevel()))
                     return SPELL_FAILED_LOWLEVEL;
             }
+
+            if (m_caster->GetTypeId() == TYPEID_PLAYER && m_spellInfo->Mechanic == MECHANIC_DISARM)
+            {
+                if (target->GetTypeId() == TYPEID_PLAYER)
+                {
+                    Player *player = (Player*)target;
+                    if (m_spellInfo->Id == 51722)                           // Dismantle
+                    {
+                        if (!player->GetWeaponForAttack(BASE_ATTACK) && !player->GetShield() && !player->GetWeaponForAttack(RANGED_ATTACK))
+                            return SPELL_FAILED_TARGET_NO_WEAPONS;
+                    }
+                    else if ((!player->GetWeaponForAttack(BASE_ATTACK) && !player->GetWeaponForAttack(RANGED_ATTACK)) || !player->IsUsingEquippedWeapon(true))
+                    {
+                        return SPELL_FAILED_TARGET_NO_WEAPONS;
+                    }
+                }
+                else if (!target->GetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_ID))
+                    return SPELL_FAILED_TARGET_NO_WEAPONS;
+            }
         }
         else if (m_caster == target)
         {
