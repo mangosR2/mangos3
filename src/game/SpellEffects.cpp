@@ -9614,6 +9614,21 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     unitTarget->RemoveAurasDueToSpell(m_spellInfo->EffectBasePoints[eff_idx]);
                     return;
                 }
+                case 64412:                                 // Algalon Phase Punch
+                {
+                    if (!unitTarget)
+                        return;
+
+                    unitTarget->MonsterSay("Test", 0, unitTarget);
+                    // On phase punch, check if stacks is greater than 4, if so phase out with spell 64417
+                    if (Aura *phasePunch = unitTarget->GetAura(64412, EFFECT_INDEX_0))
+                        if(phasePunch->GetStackAmount() > 4)
+                        {
+                            unitTarget->RemoveAurasDueToSpell(64412);
+                            unitTarget->CastSpell(unitTarget, 64417, true);
+                        }
+                    return;
+                }
                 case 62003:                                 // Algalon - Black Hole Spawn
                 {
                     if (!unitTarget)
