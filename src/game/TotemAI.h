@@ -26,6 +26,8 @@
 class Creature;
 class Totem;
 
+#define SENTRY_TOTEM_ENTRY  3968
+
 class MANGOS_DLL_DECL TotemAI : public CreatureAI
 {
     public:
