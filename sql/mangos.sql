@@ -4018,26 +4018,6 @@ LOCK TABLES `milling_loot_template` WRITE;
 UNLOCK TABLES;
 
 --
--- Table structure for table `npc_gossip`
---
-
-DROP TABLE IF EXISTS `npc_gossip`;
-CREATE TABLE `npc_gossip` (
-  `npc_guid` int(10) unsigned NOT NULL default '0',
-  `textid` mediumint(8) unsigned NOT NULL default '0',
-  PRIMARY KEY  (`npc_guid`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
-
---
--- Dumping data for table `npc_gossip`
---
-
-LOCK TABLES `npc_gossip` WRITE;
-/*!40000 ALTER TABLE `npc_gossip` DISABLE KEYS */;
-/*!40000 ALTER TABLE `npc_gossip` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
 -- Table structure for table `npc_spellclick_spells`
 --
 
