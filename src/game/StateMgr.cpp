@@ -330,9 +330,12 @@ void UnitStateMgr::DropAction(UnitActionPriority priority)
     if (priority < UNIT_ACTION_PRIORITY_IDLE)
         return;
 
-    MAPLOCK_WRITE(GetOwner(), MAP_LOCK_TYPE_MOVEMENT);
     ActionInfo* oldInfo = CurrentState();
-    UnitActionStorage::iterator itr = m_actions.find(priority);
+    UnitActionStorage::iterator itr;
+    {
+        MAPLOCK_READ(GetOwner(), MAP_LOCK_TYPE_MOVEMENT);
+        itr = m_actions.find(priority);
+    }
     if (itr != m_actions.end())
     {
         bool bActiveActionChanged = false;
@@ -343,9 +346,10 @@ void UnitStateMgr::DropAction(UnitActionPriority priority)
 
         if (&itr->second == m_oldAction)
             m_oldAction = NULL;
-
-        m_actions.erase(itr);
-
+        {
+            MAPLOCK_WRITE(GetOwner(), MAP_LOCK_TYPE_MOVEMENT);
+            m_actions.erase(itr);
+        }
         // Finalized not ActionInfo, but real action (saved before), due to ActionInfo wrapper already deleted.
         if (bActiveActionChanged && oldAction)
         {
