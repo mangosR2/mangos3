@@ -2631,16 +2631,15 @@ bool AttackResumeEvent::Execute(uint64 /*e_time*/, uint32 /*p_time*/)
 
     Unit* victim = m_owner.getVictim();
 
-    if (!victim)
+    if (!victim || !victim->IsInMap(&m_owner))
         return true;
-
-    m_owner.AttackStop(!b_force);
 
     switch(m_owner.GetObjectGuid().GetHigh())
     {
         case HIGHGUID_UNIT:
         case HIGHGUID_VEHICLE:
         {
+            m_owner.AttackStop(!b_force);
             CreatureAI* ai = ((Creature*)&m_owner)->AI();
             if (ai)
             {
@@ -2653,10 +2652,12 @@ bool AttackResumeEvent::Execute(uint64 /*e_time*/, uint32 /*p_time*/)
         }
         case HIGHGUID_PET:
         {
+            m_owner.AttackStop(!b_force);
            ((Pet*)&m_owner)->AI()->AttackStart(victim);
             break;
         }
         case HIGHGUID_PLAYER:
+            break;
         default:
             sLog.outError("AttackResumeEvent::Execute try execute for unsupported owner %s!", m_owner.GetObjectGuid().GetString().c_str());
         break;
