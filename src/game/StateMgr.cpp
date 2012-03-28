@@ -37,8 +37,9 @@ static const class staticActionInfo
         actionInfo[UNIT_ACTION_CONTROLLED](UNIT_ACTION_PRIORITY_CONTROLLED);
         actionInfo[UNIT_ACTION_CONFUSED](UNIT_ACTION_PRIORITY_CONFUSED);
         actionInfo[UNIT_ACTION_FEARED]( UNIT_ACTION_PRIORITY_FEARED);
-        actionInfo[UNIT_ACTION_STUN](UNIT_ACTION_PRIORITY_STUN);
         actionInfo[UNIT_ACTION_ROOT](UNIT_ACTION_PRIORITY_ROOT);
+        actionInfo[UNIT_ACTION_STUN](UNIT_ACTION_PRIORITY_STUN);
+        actionInfo[UNIT_ACTION_FEIGNDEATH](UNIT_ACTION_PRIORITY_FEIGNDEATH);
         actionInfo[UNIT_ACTION_ONVEHICLE](UNIT_ACTION_PRIORITY_ONVEHICLE);
         actionInfo[UNIT_ACTION_TAXI](UNIT_ACTION_PRIORITY_TAXI,ACTION_TYPE_NONRESTOREABLE);
         actionInfo[UNIT_ACTION_EFFECT](UNIT_ACTION_PRIORITY_EFFECT,ACTION_TYPE_NONRESTOREABLE);
@@ -177,6 +178,48 @@ public:
     }
 };
 
+class FeignDeathState : public IdleMovementGenerator
+{
+public:
+
+    const char* Name() const { return "<FeignDeath>"; }
+    void Interrupt(Unit &u) {Finalize(u);}
+    void Reset(Unit &u) {Initialize(u);}
+    void Initialize(Unit &u)
+    {
+        Unit* const target = &u;
+        if (!target)
+            return;
+
+        if (target->GetTypeId() != TYPEID_PLAYER)
+            target->StopMoving();
+
+        target->m_movementInfo.RemoveMovementFlag(movementFlagsMask);
+        target->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNK_29);
+        target->SetFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_FEIGN_DEATH);
+        target->SetFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_DEAD);
+
+        target->InterruptNonMeleeSpells(true);
+        target->CombatStop();
+        target->getHostileRefManager().deleteReferences();
+        target->addUnitState(UNIT_STAT_DIED);
+        target->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_IMMUNE_OR_LOST_SELECTION);
+
+    }
+
+    void Finalize(Unit &u)
+    {
+        Unit* const target = &u;
+        if (!target)
+            return;
+
+        target->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNK_29);
+        target->RemoveFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_FEIGN_DEATH);
+        target->RemoveFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_DEAD);
+        target->clearUnitState(UNIT_STAT_DIED);
+    }
+};
+
 class OnVehicleState : public IdleMovementGenerator
 {
 public:
@@ -243,6 +286,9 @@ UnitActionPtr UnitStateMgr::CreateStandartState(UnitActionId stateId, int32 para
             break;
         case UNIT_ACTION_STUN:
             state = UnitActionPtr(new StunnedState());
+            break;
+        case UNIT_ACTION_FEIGNDEATH:
+            state = UnitActionPtr(new FeignDeathState());
             break;
         case UNIT_ACTION_ROOT:
             state = UnitActionPtr(new RootState());

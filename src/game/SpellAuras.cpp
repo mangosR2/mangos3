@@ -5021,6 +5021,9 @@ void Aura::HandleModConfuse(bool apply, bool Real)
     if(!Real)
         return;
 
+    if(!apply && GetTarget()->HasAuraType(GetModifier()->m_auraname))
+        return;
+
     GetTarget()->SetConfused(apply, GetCasterGuid(), GetId());
 }
 
@@ -5029,12 +5032,18 @@ void Aura::HandleModFear(bool apply, bool Real)
     if (!Real)
         return;
 
+    if(!apply && GetTarget()->HasAuraType(GetModifier()->m_auraname))
+        return;
+
     GetTarget()->SetFeared(apply, GetCasterGuid(), GetId());
 }
 
 void Aura::HandleFeignDeath(bool apply, bool Real)
 {
     if(!Real)
+        return;
+
+    if(!apply && GetTarget()->HasAuraType(GetModifier()->m_auraname))
         return;
 
     GetTarget()->SetFeignDeath(apply, GetCasterGuid(), GetId());
