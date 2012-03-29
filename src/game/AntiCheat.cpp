@@ -444,7 +444,6 @@ bool AntiCheat::CheckNeeded(AntiCheatCheck checktype)
         case CHECK_MOVEMENT_AIRJUMP:
             if (isCanFly() ||
                 !isActiveMover() ||
-                GetMover()->HasAuraType(SPELL_AURA_FEATHER_FALL) ||
                 GetMover()->GetTerrain()->IsUnderWater(m_currentmovementInfo->GetPos()->x, m_currentmovementInfo->GetPos()->y, m_currentmovementInfo->GetPos()->z-5.0f))
                 return false;
             break;
@@ -656,17 +655,11 @@ bool AntiCheat::CheckFly()
     if (GetMover()->GetTerrain()->IsUnderWater(m_currentmovementInfo->GetPos()->x, m_currentmovementInfo->GetPos()->y, m_currentmovementInfo->GetPos()->z - 2.0f))
         return true;
 
-    if (GetMover()->HasAuraType(SPELL_AURA_FEATHER_FALL))
-        return true;
-
     float ground_z = GetMover()->GetTerrain()->GetHeight(GetPlayer()->GetPositionX(),GetPlayer()->GetPositionY(),MAX_HEIGHT);
     float floor_z  = GetMover()->GetTerrain()->GetHeight(GetPlayer()->GetPositionX(),GetPlayer()->GetPositionY(),GetPlayer()->GetPositionZ());
     float map_z    = ((floor_z <= (INVALID_HEIGHT+5.0f)) ? ground_z : floor_z);
 
     if (map_z + m_currentConfig->checkFloatParam[0] > GetPlayer()->GetPositionZ() && map_z > (INVALID_HEIGHT + m_currentConfig->checkFloatParam[0] + 5.0f))
-        return true;
-
-    if (m_currentDeltaZ > 0.0f)
         return true;
 
     char buffer[255];
