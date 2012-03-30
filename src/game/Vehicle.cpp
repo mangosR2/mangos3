@@ -255,6 +255,7 @@ bool VehicleKit::AddPassenger(Unit *passenger, int8 seatId)
         m_pBase->SetCharmerGuid(passenger->GetObjectGuid());
         m_pBase->addUnitState(UNIT_STAT_CONTROLLED);
 
+        // TODO: Realy right?!
         passenger->SetCharm(m_pBase);
 
         if (m_pBase->HasAuraType(SPELL_AURA_FLY) || m_pBase->HasAuraType(SPELL_AURA_MOD_FLIGHT_SPEED))
@@ -414,6 +415,21 @@ void VehicleKit::InstallAllAccessories(uint32 entry)
 
     for (VehicleAccessoryList::const_iterator itr = mVehicleList->begin(); itr != mVehicleList->end(); ++itr)
         InstallAccessory(&*itr);
+}
+
+void VehicleKit::InstallAccessoryWithSpecificEntry(uint32 entry, uint32 accessoryEntry)
+{
+    VehicleAccessoryList const* mVehicleList = sObjectMgr.GetVehicleAccessoryList(entry);
+    if (!mVehicleList)
+        return;
+
+    for (VehicleAccessoryList::const_iterator itr = mVehicleList->begin(); itr != mVehicleList->end(); ++itr)
+    {
+        if (itr->uiAccessory == accessoryEntry)
+        {
+            InstallAccessory(&*itr);
+        }
+    }
 }
 
 void VehicleKit::InstallAccessory(VehicleAccessory const* accessory)

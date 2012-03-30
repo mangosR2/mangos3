@@ -6495,7 +6495,7 @@ SpellCastResult Spell::CheckCast(bool strict)
                 if (!pTarget || !pTarget->GetVehicleKit())
                     return SPELL_FAILED_BAD_TARGETS;
 
-                int32 seat = m_spellInfo->EffectBasePoints[i] < 8 ? m_spellInfo->EffectBasePoints[i] : -1;
+                int32 seat = m_currentBasePoints[i] < 8 ? m_currentBasePoints[i] : -1;
 
                 if (!pTarget->GetVehicleKit()->HasEmptySeat(seat))
                 {

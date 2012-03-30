@@ -12588,7 +12588,7 @@ void Unit::EnterVehicle(Unit* vehicleBase, int8 seatId)
         {
             if (spellInfo->EffectApplyAuraName[i] == SPELL_AURA_CONTROL_VEHICLE)
             {
-                bp[i] = seatId + 1;
+                bp[i] = seatId;
             }
             else
                 bp[i] = NULL;
