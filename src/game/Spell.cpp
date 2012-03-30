@@ -46,8 +46,6 @@
 #include "Vehicle.h"
 #include "Chat.h"
 
-#define SPELL_CHANNEL_UPDATE_INTERVAL (1 * IN_MILLISECONDS)
-
 extern pEffect SpellEffects[TOTAL_SPELL_EFFECTS];
 
 class PrioritizeManaUnitWraper
