@@ -5699,6 +5699,20 @@ Aura* Unit::GetAura(AuraType type, SpellFamily family, ClassFamilyMask const& cl
     return NULL;
 }
 
+Aura* Unit::GetAuraByEffectMask(AuraType type, SpellFamily family, ClassFamilyMask const& classMask, ObjectGuid casterGuid)
+{
+    AuraList const& auras = GetAurasByType(type);
+    for (AuraList::const_iterator i = auras.begin();i != auras.end(); ++i)
+    {
+        if ((*i)->GetAuraSpellClassMask() == classMask &&
+            (family <= SPELLFAMILY_PET &&  (*i)->GetSpellProto()->SpellFamilyName == family) &&
+            (!casterGuid || (*i)->GetCasterGuid() == casterGuid))
+            return *i;
+    }
+
+    return NULL;
+}
+
 Aura* Unit::GetTriggeredByClientAura(uint32 spellId)
 {
     if (spellId)
@@ -7509,17 +7523,20 @@ uint32 Unit::SpellDamageBonusDone(Unit *pVictim, SpellEntry const *spellProto, u
                 }
             }
             // Torment the weak affected (Arcane Barrage, Arcane Blast, Frostfire Bolt, Arcane Missiles, Fireball, Pyroblast)
-            if (spellProto->SpellFamilyFlags.test<CF_MAGE_FIREBALL, CF_MAGE_FROSTBOLT, CF_MAGE_ARCANE_MISSILES2, CF_MAGE_ARCANE_BLAST, CF_MAGE_FROSTFIRE_BOLT, CF_MAGE_ARCANE_BARRAGE>() &&
-                (pVictim->HasAuraType(SPELL_AURA_MOD_DECREASE_SPEED) || pVictim->HasAuraType(SPELL_AURA_HASTE_ALL)))
+            if (spellProto->SpellFamilyFlags.test<CF_MAGE_FIREBALL, CF_MAGE_FROSTBOLT, CF_MAGE_ARCANE_MISSILES2, CF_MAGE_ARCANE_BLAST, CF_MAGE_FROSTFIRE_BOLT, CF_MAGE_ARCANE_BARRAGE>())
             {
                 //Search for Torment the weak dummy aura
-                Unit::AuraList const& ttw = GetAurasByType(SPELL_AURA_DUMMY);
-                for(Unit::AuraList::const_iterator i = ttw.begin(); i != ttw.end(); ++i)
+                if (Aura* ttwAura = GetAuraByEffectMask(SPELL_AURA_DUMMY,SpellFamily(spellProto->SpellFamilyName),ClassFamilyMask(0,0, 0x00240000)))
                 {
-                    if ((*i)->GetSpellProto()->SpellIconID == 3263)
+                    Unit::SpellAuraHolderMap const& holderMap = pVictim->GetSpellAuraHolderMap();
+                    for (Unit::SpellAuraHolderMap::const_iterator itr = holderMap.begin(); itr != holderMap.end(); ++itr)
                     {
-                        DoneTotalMod *= ((*i)->GetModifier()->m_amount+100.0f) / 100.0f;
-                        break;
+                        if (itr->second && !itr->second->IsDeleted() && 
+                            itr->second->GetSpellProto()->Mechanic == ttwAura->GetModifier()->m_miscvalue)
+                        {
+                            DoneTotalMod *= ((float)ttwAura->GetModifier()->m_amount + 100.0f) / 100.0f;
+                            break;
+                        }
                     }
                 }
             }
