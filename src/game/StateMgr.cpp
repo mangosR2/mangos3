@@ -20,6 +20,7 @@
 #include "ConfusedMovementGenerator.h"
 #include "TargetedMovementGenerator.h"
 #include "IdleMovementGenerator.h"
+#include "WaypointMovementGenerator.h"
 #include "Timer.h"
 #include "StateMgr.h"
 #include "Player.h"
@@ -220,6 +221,72 @@ public:
     }
 };
 
+class TaxiState : public FlightPathMovementGenerator
+{
+public:
+    TaxiState(uint32 mountDisplayId, uint32 path, uint32 startNode = 0) :
+        m_displayId(mountDisplayId), FlightPathMovementGenerator(sTaxiPathNodesByPath[path], startNode), m_previewDisplayId(0)
+    {
+    };
+
+public:
+    const char* Name() const { return "<FlightPath>"; }
+    void Interrupt(Player &u) 
+    {
+        _Interrupt(u);
+        u.clearUnitState(UNIT_STAT_TAXI_FLIGHT);
+        if (m_displayId)
+            u.Unmount();
+        u.RemoveFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_DISABLE_MOVE | UNIT_FLAG_TAXI_FLIGHT);
+        if (m_previewDisplayId)
+        {
+            u.Mount(m_previewDisplayId);
+        }
+    };
+
+    void Reset(Player &u) 
+    {
+        Initialize(u);
+    };
+
+    void Initialize(Player &u)
+    {
+        if (m_displayId)
+        {
+            if (!m_previewDisplayId)
+                m_previewDisplayId = u.GetUInt32Value(UNIT_FIELD_MOUNTDISPLAYID);
+            u.Mount(m_displayId);
+        }
+        u.getHostileRefManager().setOnlineOfflineState(false);
+        u.addUnitState(UNIT_STAT_TAXI_FLIGHT);
+        u.SetFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_DISABLE_MOVE | UNIT_FLAG_TAXI_FLIGHT);
+        _Initialize(u);
+    };
+
+    void Finalize(Player &u)
+    {
+        // remove flag to prevent send object build movement packets for flight state and crash (movement generator already not at top of stack)
+        if (m_displayId)
+            u.Unmount();
+        u.clearUnitState(UNIT_STAT_TAXI_FLIGHT);
+        u.RemoveFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_DISABLE_MOVE | UNIT_FLAG_TAXI_FLIGHT);
+        u.getHostileRefManager().setOnlineOfflineState(true);
+        if(u.pvpInfo.inHostileArea)
+            u.CastSpell(&u, 2479, true);
+
+        _Finalize(u);
+
+        if (m_previewDisplayId)
+        {
+            u.Mount(m_previewDisplayId);
+        }
+    };
+
+private:
+    uint32 m_displayId;
+    uint32 m_previewDisplayId;
+};
+
 class OnVehicleState : public IdleMovementGenerator
 {
 public:
@@ -249,7 +316,6 @@ private:
 
 class ControlledState : public IdleMovementGenerator
 {
-
 public:
     ControlledState(int32 _type) : m_state(uint8(_type))
     {};
@@ -275,8 +341,11 @@ private:
     uint8 m_state;
 };
 
-UnitActionPtr UnitStateMgr::CreateStandartState(UnitActionId stateId, int32 param)
+UnitActionPtr UnitStateMgr::CreateStandartState(UnitActionId stateId, ...)
 {
+    va_list vargs;
+    va_start(vargs, stateId);
+
     UnitActionPtr state = UnitActionPtr(NULL);
     switch (stateId)
     {
@@ -294,14 +363,19 @@ UnitActionPtr UnitStateMgr::CreateStandartState(UnitActionId stateId, int32 para
             state = UnitActionPtr(new RootState());
             break;
         case UNIT_ACTION_ONVEHICLE:
-            state = UnitActionPtr(new OnVehicleState(param));
+            state = UnitActionPtr(new OnVehicleState(va_arg(vargs,int32)));
             break;
         case UNIT_ACTION_CONTROLLED:
-            state = UnitActionPtr(new ControlledState(param));
+            state = UnitActionPtr(new ControlledState(va_arg(vargs,int32)));
+            break;
+        case UNIT_ACTION_TAXI:
+            state = UnitActionPtr(new TaxiState(va_arg(vargs,uint32), va_arg(vargs,uint32), va_arg(vargs,uint32)));
             break;
         default:
             break;
     }
+
+    va_end(vargs);
 
     if (!state)
         state = UnitActionPtr(new IdleMovementGenerator());
@@ -399,6 +473,7 @@ void UnitStateMgr::DropAction(UnitActionPriority priority)
         // Finalized not ActionInfo, but real action (saved before), due to ActionInfo wrapper already deleted.
         if (bActiveActionChanged && oldAction)
         {
+            DEBUG_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS, "DropAction: %s finalize (direct) action %s", GetOwnerStr().c_str(), oldAction->Name());
             oldAction->Finalize(*GetOwner());
         }
 
@@ -406,15 +481,15 @@ void UnitStateMgr::DropAction(UnitActionPriority priority)
     }
 }
 
-void UnitStateMgr::PushAction(UnitActionId actionId, int32 param)
+void UnitStateMgr::PushAction(UnitActionId actionId)
 {
-    UnitActionPtr state = CreateStandartState(actionId, param);
+    UnitActionPtr state = CreateStandartState(actionId);
     PushAction(actionId, state, staticActionInfo[actionId].priority, staticActionInfo[actionId].restoreable); 
 }
 
-void UnitStateMgr::PushAction(UnitActionId actionId, UnitActionPriority priority, int32 param)
+void UnitStateMgr::PushAction(UnitActionId actionId, UnitActionPriority priority)
 {
-    UnitActionPtr state = CreateStandartState(actionId, param);
+    UnitActionPtr state = CreateStandartState(actionId);
     PushAction(actionId, state, priority, ACTION_TYPE_NONRESTOREABLE);
 }
 
