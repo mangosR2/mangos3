@@ -3152,7 +3152,7 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
 
                         Creature* pCreature = NULL;
 
-                        MaNGOS::NearestCreatureEntryWithLiveStateInObjectRangeCheck creature_check(*Caster,  26591, true, 15.0f);
+                        MaNGOS::NearestCreatureEntryWithLiveStateInObjectRangeCheck creature_check(*Caster,  26591, true, false, 15.0f);
                         MaNGOS::CreatureLastSearcher<MaNGOS::NearestCreatureEntryWithLiveStateInObjectRangeCheck> searcher(pCreature, creature_check);
 
                         Cell::VisitGridObjects(Caster, searcher, 15.0f);
