@@ -2628,7 +2628,7 @@ void Unit::CalculateDamageAbsorbAndResist(Unit *pCaster, SpellSchoolMask schoolM
 
             DamageInfo damageInfo = DamageInfo(pCaster, caster, (*i)->GetSpellProto());
             damageInfo.CleanDamage(0, 0, BASE_ATTACK, MELEE_HIT_NORMAL);
-            damageInfo.damageType = DIRECT_DAMAGE;
+            damageInfo.damageType = damagetype;
 
             if (RemainingDamage >= (*i)->GetModifier()->m_amount)
                 damageInfo.damage = (*i)->GetModifier()->m_amount;
@@ -2660,7 +2660,7 @@ void Unit::CalculateDamageAbsorbAndResist(Unit *pCaster, SpellSchoolMask schoolM
 
             DamageInfo damageInfo = DamageInfo(pCaster, caster, (*i)->GetSpellProto());
             damageInfo.CleanDamage(0, 0, BASE_ATTACK, MELEE_HIT_NORMAL);
-            damageInfo.damageType = DIRECT_DAMAGE;
+            damageInfo.damageType = damagetype;
 
             damageInfo.damage = uint32(RemainingDamage * (*i)->GetModifier()->m_amount / 100.0f);
 
