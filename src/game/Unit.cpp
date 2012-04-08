@@ -7526,13 +7526,14 @@ uint32 Unit::SpellDamageBonusDone(Unit *pVictim, SpellEntry const *spellProto, u
             if (spellProto->SpellFamilyFlags.test<CF_MAGE_FIREBALL, CF_MAGE_FROSTBOLT, CF_MAGE_ARCANE_MISSILES2, CF_MAGE_ARCANE_BLAST, CF_MAGE_FROSTFIRE_BOLT, CF_MAGE_ARCANE_BARRAGE>())
             {
                 //Search for Torment the weak dummy aura
-                if (Aura* ttwAura = GetAuraByEffectMask(SPELL_AURA_DUMMY,SpellFamily(spellProto->SpellFamilyName),ClassFamilyMask(0,0, 0x00240000)))
+                if (Aura* ttwAura = GetAuraByEffectMask(SPELL_AURA_DUMMY,SPELLFAMILY_GENERIC,ClassFamilyMask(0x00240000,0,0),GetObjectGuid()))
                 {
                     Unit::SpellAuraHolderMap const& holderMap = pVictim->GetSpellAuraHolderMap();
                     for (Unit::SpellAuraHolderMap::const_iterator itr = holderMap.begin(); itr != holderMap.end(); ++itr)
                     {
-                        if (itr->second && !itr->second->IsDeleted() && 
-                            itr->second->GetSpellProto()->Mechanic == ttwAura->GetModifier()->m_miscvalue)
+                        if (itr->second && 
+                            !itr->second->IsDeleted() && 
+                            itr->second->HasMechanic(ttwAura->GetModifier()->m_miscvalue))
                         {
                             DoneTotalMod *= ((float)ttwAura->GetModifier()->m_amount + 100.0f) / 100.0f;
                             break;
