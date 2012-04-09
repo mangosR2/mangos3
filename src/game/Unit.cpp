@@ -12543,12 +12543,6 @@ void Unit::EnterVehicle(Unit* vehicleBase, int8 seatId)
     InterruptNonMeleeSpells(false);
     RemoveSpellsCausingAura(SPELL_AURA_MOUNTED);
 
-    if (GetTypeId() == TYPEID_PLAYER)
-        ((Player*)this)->UnsummonPetTemporaryIfAny(true);
-    else
-        if (Pet *pet = GetPet())
-            pet->Unsummon(PET_SAVE_AS_CURRENT,this);
-
     SpellEntry const* spellInfo = NULL;
     int32 bp[MAX_EFFECT_INDEX];
     Unit* caster = NULL;
@@ -12637,9 +12631,6 @@ void Unit::ExitVehicle()
         _ExitVehicle();
         sLog.outDetail("Unit::ExitVehicle: unit %s leave vehicle %s but no control aura!", GetObjectGuid().GetString().c_str(), vehicleBase->GetObjectGuid().GetString().c_str());
     }
-
-    if (isAlive() && GetTypeId() == TYPEID_PLAYER)
-        ((Player*)this)->ResummonPetTemporaryUnSummonedIfAny();
 }
 
 void Unit::ChangeSeat(int8 seatId, bool next)
@@ -12681,6 +12672,16 @@ void Unit::_EnterVehicle(VehicleKit* vehicle, int8 seatId)
         else
             ExitVehicle();
     }
+    else
+    {
+        if (Pet* pet = GetPet())
+        {
+            if (GetTypeId() == TYPEID_PLAYER)
+                ((Player*)this)->UnsummonPetTemporaryIfAny(true);
+            else
+                pet->Unsummon(PET_SAVE_AS_CURRENT,this);
+        }
+    }
 
     if (!vehicle->AddPassenger(this, seatId))
         return;
@@ -12719,6 +12720,9 @@ void Unit::_ExitVehicle()
     GetVehicle()->RemovePassenger(this, true);
 
     m_pVehicle = NULL;
+
+    if (isAlive() && GetTypeId() == TYPEID_PLAYER)
+        ((Player*)this)->ResummonPetTemporaryUnSummonedIfAny();
 }
 
 void Unit::SetPvP( bool state )
