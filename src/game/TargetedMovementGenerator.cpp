@@ -207,7 +207,8 @@ bool TargetedMovementGeneratorMedium<T,D>::Update(T &owner, const uint32 & time_
 
         if (targetIsVictim && owner.GetTypeId() == TYPEID_UNIT && !((Creature*)&owner)->IsPet())
         {
-            if (!i_offset && owner.movespline->Finalized() && !owner.CanReachWithMeleeAttack(owner.getVictim()))
+            if (!i_offset && owner.movespline->Finalized() && !owner.CanReachWithMeleeAttack(owner.getVictim())
+                && !i_target->m_movementInfo.HasMovementFlag(MOVEFLAG_PENDINGSTOP))
             {
                 if (i_targetSearchingTimer >= 500)
                 {
