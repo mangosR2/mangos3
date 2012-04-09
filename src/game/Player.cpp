@@ -6783,9 +6783,11 @@ void Player::UpdateHonorFields()
         uint32 HonorKills = GetUInt32Value(PLAYER_FIELD_LIFETIME_HONORBALE_KILLS);
         uint32 victim_rank = 0;
 
-        // lets check if player fits to title brackets (none of players reached by now 100k HK. this is bad condition in aspect
-        // of making code generic, but allows to save some CPU and avoid fourther steps execution
-        if (HonorKills < 15 || HonorKills >= 100000)
+        //this may consume a lot of cpu cycles.
+        //You can use this sql query: "SELECT max( totalKills ) FROM characters" to get the max totalKills 
+        //of yours players and edit this condition to:  "if (HonorKills < 15 || HonorKills > max(totalKills)+1)) return;"
+        //don't forget to replace max(totalKills) with the result of query
+        if (HonorKills < 15)
             return;
 
         if (HonorKills >= 15 && HonorKills < 2000)
