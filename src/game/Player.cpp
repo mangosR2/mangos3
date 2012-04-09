@@ -6777,38 +6777,38 @@ void Player::UpdateHonorFields()
         uint32 HonorKills = GetUInt32Value(PLAYER_FIELD_LIFETIME_HONORBALE_KILLS);
         uint32 victim_rank = 0;
 
-        // lets check if player fits to title brackets (none of players reached by now 50k HK. this is bad condition in aspect
+        // lets check if player fits to title brackets (none of players reached by now 100k HK. this is bad condition in aspect
         // of making code generic, but allows to save some CPU and avoid fourther steps execution
-        if (HonorKills < 100 || HonorKills > 50000)
+        if (HonorKills < 15 || HonorKills >= 100000)
             return;
 
-        if (HonorKills >= 100 && HonorKills < 200)
+        if (HonorKills >= 15 && HonorKills < 2000)
             victim_rank = 1;
-        else if (HonorKills >= 200 && HonorKills < 500)
+        else if (HonorKills >= 2000 && HonorKills < 5000)
             victim_rank = 2;
-        else if (HonorKills >= 500 && HonorKills < 1000)
+        else if (HonorKills >= 5000 && HonorKills < 10000)
             victim_rank = 3;
-        else if (HonorKills >= 1000 && HonorKills < 2100)
+        else if (HonorKills >= 10000 && HonorKills < 15000)
             victim_rank = 4;
-        else if (HonorKills >= 2100 && HonorKills < 3200)
+        else if (HonorKills >= 15000 && HonorKills < 20000)
             victim_rank = 5;
-        else if (HonorKills >= 3200 && HonorKills < 4300)
+        else if (HonorKills >= 20000 && HonorKills < 25000)
             victim_rank = 6;
-        else if (HonorKills >= 4300 && HonorKills < 5400)
+        else if (HonorKills >= 25000 && HonorKills < 30000)
             victim_rank = 7;
-        else if (HonorKills >= 5400 && HonorKills < 6500)
+        else if (HonorKills >= 30000 && HonorKills < 35000)
             victim_rank = 8;
-        else if (HonorKills >= 6500 && HonorKills < 7600)
+        else if (HonorKills >= 35000 && HonorKills < 40000)
             victim_rank = 9;
-        else if (HonorKills >= 7600 && HonorKills < 9000)
+        else if (HonorKills >= 40000 && HonorKills < 45000)
             victim_rank = 10;
-        else if (HonorKills >= 9000 && HonorKills < 15000)
+        else if (HonorKills >= 45000 && HonorKills < 50000)
             victim_rank = 11;
-        else if (HonorKills >= 15000 && HonorKills < 30000)
+        else if (HonorKills >= 50000 && HonorKills < 55000)
             victim_rank = 12;
-        else if (HonorKills >= 30000 && HonorKills < 50000)
+        else if (HonorKills >= 55000 && HonorKills < 60000)
             victim_rank = 13;
-        else if (HonorKills == 50000)
+        else if (HonorKills >= 60000)
             victim_rank = 14;
 
         // horde titles starting from 15+
