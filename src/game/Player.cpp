@@ -2733,6 +2733,12 @@ void Player::GiveLevel(uint32 level)
 
     GetLFGState()->Update();
 
+    // resend quests status directly
+    if (GetSession())
+    {
+        WorldPacket packet = WorldPacket();
+        GetSession()->HandleQuestgiverStatusMultipleQuery(packet);
+    }
 }
 
 void Player::UpdateFreeTalentPoints(bool resetIfNeed)
