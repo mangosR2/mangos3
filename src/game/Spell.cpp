@@ -1098,7 +1098,7 @@ void Spell::DoAllEffectOnTarget(TargetInfo *target)
         damageInfo.procVictim   = PROC_FLAG_NONE;
     }
 
-    if (m_spellInfo->speed > 0)
+    if (m_spellInfo->speed > 0 || GetDelayStart())
     {
         // mark effects that were already handled in Spell::HandleDelayedSpellLaunch on spell launch as processed
         for (int32 i = 0; i < MAX_EFFECT_INDEX; ++i)
