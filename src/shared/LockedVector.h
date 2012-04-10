@@ -62,6 +62,12 @@ namespace ACE_Based
                 WriteGuard Guard(GetLock());
             }
 
+            void reserve(size_type idx)
+            {
+                WriteGuard Guard(GetLock());
+                m_storage.reserve(idx);
+            }
+
             // Methods
             void push_back(const T& item)
             {
@@ -141,10 +147,22 @@ namespace ACE_Based
                 return m_storage[idx];
             }
 
+            T& at(size_type idx) 
+            {
+                ReadGuard Guard(GetLock());
+                return m_storage.at(idx);
+            }
+
             T& front()
             {
                 ReadGuard Guard(GetLock());
                 return m_storage.front();
+            }
+
+            T& back()
+            {
+                ReadGuard Guard(GetLock());
+                return m_storage.back();
             }
 
             iterator begin()
@@ -273,6 +291,12 @@ namespace ACE_Based
 
             LockType&       GetLock() { return i_lock; }
             LockType&       GetLock() const { return i_lock; }
+
+            // may be used _ONLY_ with external locking!
+            std::vector<T>&  getSource()
+            {
+                return m_storage;
+            }
 
         protected:
             mutable LockType           i_lock;
