@@ -5,7 +5,7 @@ SET FOREIGN_KEY_CHECKS=0;
 -- Table structure for `player_factionchange_titles`
 -- ----------------------------
 
-DROP TABLE IF EXISTS `player_factionchange_items`;
+DROP TABLE IF EXISTS `player_factionchange_titles`;
 CREATE TABLE `player_factionchange_titles` (
   `alliance_id` int(8) NOT NULL,
   `alliance_comment` varchar(255) NOT NULL,
