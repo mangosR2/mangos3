@@ -136,8 +136,8 @@ namespace ACE_Based
             T& operator[](size_type idx) 
             {
                 ReadGuard Guard(GetLock());
-                if (idx >= m_storage.size() || idx < 0)
-                    return NULL;
+//                if (idx >= m_storage.size() || idx < 0)
+//                    return NULL;
                 return m_storage[idx];
             }
 
