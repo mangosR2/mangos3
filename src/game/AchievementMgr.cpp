@@ -612,7 +612,7 @@ void AchievementMgr::LoadFromDB(QueryResult *achievementResult, QueryResult *cri
             if (!criteria)
             {
                 // we will remove nonexistent criteria for all characters
-                sLog.outError("Nonexistent achievement criteria %u data removed from table `character_achievement_progress`.",id);
+                sLog.outError("AchievementMgr::LoadFromDB Nonexistent achievement criteria %u data removed from table `character_achievement_progress`.",id);
                 CharacterDatabase.PExecute("DELETE FROM character_achievement_progress WHERE criteria = %u",id);
                 continue;
             }
@@ -624,6 +624,13 @@ void AchievementMgr::LoadFromDB(QueryResult *achievementResult, QueryResult *cri
             progress.timedCriteriaFailed = false;
 
             AchievementEntry const* achievement = sAchievementStore.LookupEntry(criteria->referredAchievement);
+            if (!achievement)
+            {
+                // we will remove nonexistent referred achievement for all characters
+                sLog.outError("AchievementMgr::LoadFromDB Nonexistent achievement criteria %u (referred achievement %u) data removed from table `character_achievement_progress`.",id, criteria->referredAchievement);
+                CharacterDatabase.PExecute("DELETE FROM character_achievement_progress WHERE criteria = %u",id);
+                continue;
+            }
 
             // A failed achievement will be removed on next tick - TODO: Possible that timer 2 is reseted
             if (criteria->timeLimit)
@@ -2179,7 +2186,7 @@ uint32 AchievementMgr::GetCriteriaProgressMaxCounter(AchievementCriteriaEntry co
             break;
     }
 
-    if (achievement->flags & ACHIEVEMENT_FLAG_COUNTER)
+    if (achievement && achievement->flags & ACHIEVEMENT_FLAG_COUNTER)
         resultValue = std::numeric_limits<uint32>::max();
 
     return resultValue;
