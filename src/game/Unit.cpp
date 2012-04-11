@@ -7199,8 +7199,13 @@ void Unit::EnergizeBySpell(Unit *pVictim, uint32 SpellID, uint32 Damage, Powers 
 
 int32 Unit::SpellBonusWithCoeffs(SpellEntry const *spellProto, int32 total, int32 benefit, int32 ap_benefit,  DamageEffectType damagetype, bool donePart, float defCoeffMod)
 {
+
+    // Not apply this to spells with SPELL_ATTR_EX3_DISABLE_MODS attribute
+    if (spellProto->AttributesEx3 & SPELL_ATTR_EX3_DISABLE_MODS)
+        return total;
+
     // Distribute Damage over multiple effects, reduce by AoE
-    float coeff;
+    float coeff = 1.0f;
 
     // Not apply this to creature casted spells
     if (GetTypeId()==TYPEID_UNIT && !((Creature*)this)->IsPet())
