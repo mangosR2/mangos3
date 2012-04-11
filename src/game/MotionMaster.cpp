@@ -91,7 +91,7 @@ void MotionMaster::MoveTargetedHome()
         else
         {
             DEBUG_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS, "MotionMaster: %s targeted home", m_owner->GetGuidStr().c_str());
-            Mutate(new HomeMovementGenerator<Creature>(), UNIT_ACTION_EFFECT);
+            Mutate(new HomeMovementGenerator<Creature>(), UNIT_ACTION_DOWAYPOINTS);
         }
     }
     else if (m_owner->GetTypeId() == TYPEID_UNIT && ((Creature*)m_owner)->GetCharmerOrOwnerGuid())
@@ -143,9 +143,9 @@ void MotionMaster::MoveFollow(Unit* target, float dist, float angle)
     DEBUG_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS, "MotionMaster: %s follow to %s", m_owner->GetGuidStr().c_str(), target->GetGuidStr().c_str());
 
     if (m_owner->GetTypeId() == TYPEID_PLAYER)
-        Mutate(new FollowMovementGenerator<Player>(*target,dist,angle), UNIT_ACTION_CHASE);
+        Mutate(new FollowMovementGenerator<Player>(*target,dist,angle), UNIT_ACTION_DOWAYPOINTS);
     else
-        Mutate(new FollowMovementGenerator<Creature>(*target,dist,angle), UNIT_ACTION_CHASE);
+        Mutate(new FollowMovementGenerator<Creature>(*target,dist,angle), UNIT_ACTION_DOWAYPOINTS);
 }
 
 void MotionMaster::MovePoint(uint32 id, float x, float y, float z, bool generatePath)

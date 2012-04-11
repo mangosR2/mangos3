@@ -9784,7 +9784,7 @@ void Unit::SetDeathState(DeathState s)
         RemoveMiniPet();
         UnsummonAllTotems();
 
-        GetUnitStateMgr().InitDefaults();
+        GetUnitStateMgr().InitDefaults(false);
         StopMoving();
 
         ModifyAuraState(AURA_STATE_HEALTHLESS_20_PERCENT, false);
@@ -9800,6 +9800,10 @@ void Unit::SetDeathState(DeathState s)
     else if (s == JUST_ALIVED)
     {
         RemoveFlag (UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE); // clear skinnable for creature and player (at battleground)
+    }
+    else if (s == DEAD || s == CORPSE)
+    {
+        GetUnitStateMgr().DropAllStates();
     }
 
     if (m_deathState != ALIVE && s == ALIVE)
@@ -10863,7 +10867,7 @@ void Unit::CleanupsBeforeDelete()
         else
             getHostileRefManager().deleteReferences();
         RemoveAllAuras(AURA_REMOVE_BY_DELETE);
-        GetUnitStateMgr().InitDefaults();
+        GetUnitStateMgr().InitDefaults(false);
     }
     WorldObject::CleanupsBeforeDelete();
 }

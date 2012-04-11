@@ -104,7 +104,7 @@ enum ActionUpdateState
 
 struct StaticActionInfo
 {
-    explicit StaticActionInfo() : priority(UNIT_ACTION_PRIORITY_NONE), restoreable(ACTION_TYPE_RESTOREABLE) {}
+    explicit StaticActionInfo() : priority(UNIT_ACTION_PRIORITY_IDLE), restoreable(ACTION_TYPE_RESTOREABLE) {}
 
     explicit StaticActionInfo(UnitActionPriority _priority, eActionType _restoreable = ACTION_TYPE_RESTOREABLE) : priority(_priority), restoreable(_restoreable) {}
 

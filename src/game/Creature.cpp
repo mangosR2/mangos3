@@ -512,7 +512,7 @@ void Creature::Update(uint32 update_diff, uint32 diff)
                 {
                     SetDeathState(JUST_DIED);
                     SetHealth(0);
-                    GetUnitStateMgr().InitDefaults();
+                    GetUnitStateMgr().InitDefaults(true);
                     clearUnitState(UNIT_STAT_ALL_STATE);
                     LoadCreatureAddon(true);
                 }
@@ -1538,7 +1538,7 @@ void Creature::SetDeathState(DeathState s)
             UpdateSpeed(MOVE_RUN, false);
         }
 
-        GetUnitStateMgr().InitDefaults();
+        GetUnitStateMgr().InitDefaults(true);
 
         if (CanFly())
             GetMotionMaster()->MoveFall();

@@ -6204,7 +6204,7 @@ bool ChatHandler::HandleMovegensCommand(char* /*args*/)
     UnitStateMgr& statemgr = unit->GetUnitStateMgr();
 
     float x,y,z;
-    for (int32 i = UNIT_ACTION_PRIORITY_NONE; i != UNIT_ACTION_PRIORITY_END; ++i)
+    for (int32 i = UNIT_ACTION_PRIORITY_IDLE; i != UNIT_ACTION_PRIORITY_END; ++i)
     {
         ActionInfo* actionInfo = statemgr.GetAction(UnitActionPriority(i));
         if (!actionInfo)
