@@ -916,12 +916,14 @@ void Spell::AddUnitTarget(Unit* pVictim, SpellEffectIndex effIndex)
         if (dist < 5.0f)
             dist = 5.0f;
         target.timeDelay = (uint64) floor(dist / speed_proto * 1000.0f);
-
+/*
+this piece of code make delayed stun and other effects for charge-like spells. seems not offlike...
         if (m_spellInfo->AttributesEx7 & SPELL_ATTR_EX7_HAS_CHARGE_EFFECT)
         {
             if (target.timeDelay > GetDelayStart())
                 SetDelayStart(target.timeDelay);
         }
+*/
     }
     // Spell cast on self - mostly TRIGGER_MISSILE code
     else if ((speed_proto > M_NULL_F) && affectiveObject && (pVictim == affectiveObject))
