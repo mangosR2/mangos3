@@ -1513,6 +1513,12 @@ float Creature::GetAttackDistance(Unit const* pl) const
     return (RetDistance*aggroRate);
 }
 
+float Creature::GetReachDistance(Unit const* unit) const
+{
+    //require realization of creature strategy (melee/spellcaster diffirent).
+    return GetAttackDistance(unit);
+}
+
 void Creature::SetDeathState(DeathState s)
 {
     if ((s == JUST_DIED && !m_isDeadByDefault) || (s == JUST_ALIVED && m_isDeadByDefault))

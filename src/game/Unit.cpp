@@ -4085,8 +4085,16 @@ bool Unit::isInAccessablePlaceFor(Unit const* unit) const
 
     if (unit->GetObjectGuid().IsAnyTypeCreature())
     {
-        if (IsInWater())
+        float targetReach = ((Creature*)unit)->GetReachDistance(this);
+        if (IsWithinDistInMap(unit, targetReach, true))
+            return true;
+
+        if (IsInWater() || IsUnderWater())
             return ((Creature*)unit)->CanSwim();
+        else if (IsLevitating())
+            return (unit->IsLevitating() || ((Creature*)unit)->CanFly());
+        else if (GetTypeId() == TYPEID_PLAYER && ((Player*)this)->IsFlying())
+            return (unit->IsLevitating() || ((Creature*)unit)->CanFly());
         else
             return ((Creature*)unit)->CanWalk() || ((Creature*)unit)->CanFly();
     }
