@@ -16792,8 +16792,11 @@ bool Player::LoadFromDB(ObjectGuid guid, SqlQueryHolder *holder )
     if (m_bgData.HasTaxiPath())
     {
         m_taxi.ClearTaxiDestinations();
-        for (int i = 0; i < 2; ++i)
-            m_taxi.AddTaxiDestination(m_bgData.taxiPath[i]);
+        if (!player_at_bg)
+        {
+            for (int i = 0; i < 2; ++i)
+                m_taxi.AddTaxiDestination(m_bgData.taxiPath[i]);
+        }
     }
     else if (!m_taxi.LoadTaxiDestinationsFromString(taxi_nodes, GetTeam()))
     {
