@@ -2013,6 +2013,8 @@ void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, ui
             }
             case ACHIEVEMENT_CRITERIA_TYPE_GET_KILLING_BLOWS:
             {
+                // miscvalue1 = kills count
+                // miscvalue2 = creature entry
                 if (!miscvalue1)
                     continue;
 
@@ -2035,24 +2037,90 @@ void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, ui
                 {
                     if(!data)
                         continue;
-
                     if(!data->Meets(GetPlayer(),unit))
                         continue;
                 }
 
                 BattleGround* bg = GetPlayer()->GetBattleGround();
+
                 // some hardcoded requirements
                 switch(achievementCriteria->referredAchievement)
                 {
                     case 231:                   // Wrecking Ball
-                    {
                         if(!bg || bg->GetPlayerScore(GetPlayer(),SCORE_DEATHS) != 0)
                             continue;
                         break;
+                    case 233:                   // Bloodthirsty Berserker
+                        if(!bg || !GetPlayer()->HasAura(24378))
+                            continue;
+                        break;
+                    case 1488:                  // World Killing Blows
+                    {
+                        if(bg)
+                            continue;
+                        if( (achievementCriteria->ID == 5512 && GetPlayer()->GetMapId() == 0) ||    // Eastern Kingdoms
+                            (achievementCriteria->ID == 5530 && GetPlayer()->GetMapId() == 1) ||    // Kalimdor
+                            (achievementCriteria->ID == 5531 && GetPlayer()->GetMapId() == 530) ||  // Burning Crusade Areas
+                            (achievementCriteria->ID == 5532 && GetPlayer()->GetMapId() == 571) )   // Northrend
+                            break;
+                        continue;
+                    }
+                    case 1490:                  // Arena Killing Blows
+                    {
+                        if(!bg)
+                            continue;
+                        if(!bg->isArena())
+                            continue;
+                        if( (achievementCriteria->ID == 5533 && GetPlayer()->GetMapId() == 559) ||  // Nagrand Arena
+                            (achievementCriteria->ID == 5534 && GetPlayer()->GetMapId() == 562) ||  // Blade's Edge Arena
+                            (achievementCriteria->ID == 5535 && GetPlayer()->GetMapId() == 572) ||  // Ruins of Lordaeron
+                            (achievementCriteria->ID == 9165 && GetPlayer()->GetMapId() == 617) ||  // Dalaran Sewers
+                            (achievementCriteria->ID == 9166 && GetPlayer()->GetMapId() == 618) )   // Ring of Valor
+                            break;
+                        continue;
+                    }
+                    case 1491:                  // Battleground Killing Blows
+                    {
+                        if(!bg)
+                            continue;
+                        if( (achievementCriteria->ID == 5436 && GetPlayer()->GetMapId() == 30) ||   // AV
+                            (achievementCriteria->ID == 5537 && GetPlayer()->GetMapId() == 529) ||  // AB
+                            (achievementCriteria->ID == 5538 && GetPlayer()->GetMapId() == 489) ||  // WS
+                            (achievementCriteria->ID == 5539 && GetPlayer()->GetMapId() == 566) ||  // EY
+                            (achievementCriteria->ID == 5540 && GetPlayer()->GetMapId() == 607) ||  // SA
+                            (achievementCriteria->ID == 13224 && GetPlayer()->GetMapId() == 628) )  // IC
+                            break;
+                        continue;
+                    }
+                    case 1492:                  // 2v2 Arena Killing Blows
+                    case 1493:                  // 3v3 Arena Killing Blows
+                    case 1494:                  // 5v5 Arena Killing Blows
+                    {
+                        if(!bg)
+                            continue;
+                        if(!bg->isArena())
+                            continue;
+                        if( (achievementCriteria->ID == 5441 && bg->GetArenaType() == ARENA_TYPE_2v2) ||
+                            (achievementCriteria->ID == 5442 && bg->GetArenaType() == ARENA_TYPE_3v3) ||
+                            (achievementCriteria->ID == 5443 && bg->GetArenaType() == ARENA_TYPE_5v5) )
+                            break;
+                        continue;
+                    }
+                    case 3856:                  // Demolition Derby (alliance)
+                    case 4256:                  // Demolition Derby (horde)
+                    {
+                        uint32 AchCrID = achievementCriteria->ID;
+                        if( ((AchCrID == 11497 || AchCrID == 12178) && miscvalue2 == 34802) ||  // Glaive Thrower
+                            ((AchCrID == 11498 || AchCrID == 12179) && miscvalue2 == 34775) ||  // Demolisher
+                            ((AchCrID == 11500 || AchCrID == 12181) && miscvalue2 == 34793) ||  // Catapult
+                            ((AchCrID == 11501 || AchCrID == 12182) && miscvalue2 == 34776) )   // Siege Engine
+                            break;
+                        continue;
                     }
                 }
 
-                SetCriteriaProgress(achievementCriteria, achievement, miscvalue1, PROGRESS_ACCUMULATE);
+                change = miscvalue1;
+                progressType = PROGRESS_ACCUMULATE;
                 break;
             }
             case ACHIEVEMENT_CRITERIA_TYPE_HONORABLE_KILL_AT_AREA:
