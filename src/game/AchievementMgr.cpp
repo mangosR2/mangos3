@@ -1697,11 +1697,11 @@ void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, ui
                 if (!miscvalue1)
                     continue;
 
+                BattleGround* bg = GetPlayer()->GetBattleGround();
                 switch(achievementCriteria->referredAchievement)
                 {
                     case 207:                       // Save The Day
                     {
-                        BattleGround* bg = GetPlayer()->GetBattleGround();
                         if (!bg || !unit)
                             continue;
 
@@ -1723,11 +1723,54 @@ void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, ui
                         }
                         break;
                     }
+                    case 1259:                      // Not So Fast (WS)
+                        if (!bg || !unit)
+                            continue;
+                        if (bg->GetTypeID(true) != BATTLEGROUND_WS)
+                            continue;
+                        if(!unit->HasAura(23451))
+                            continue;
+                        break;
+                    case 1764:                      // Drop It (SotA)
+                    case 2190:                      // Drop It Now (SotA)
+                        if (!bg || !unit)
+                            continue;
+                        if (bg->GetTypeID(true) != BATTLEGROUND_SA)
+                            continue;
+                        if(!unit->HasAura(52418))
+                            continue;
+                        break;
+                    case 1109:                      // 5v5 Honorable Kills
+                        if(!bg)
+                            continue;
+                        if(!bg->isArena())
+                            continue;
+                        if(bg->GetArenaType() != ARENA_TYPE_5v5)
+                            continue;
+                        break;
+                    case 1110:                      // 3v3 Honorable Kills
+                        if(!bg)
+                            continue;
+                        if(!bg->isArena())
+                            continue;
+                        if(bg->GetArenaType() != ARENA_TYPE_3v3)
+                            continue;
+                        break;
+                    case 1111:                      // 2v2 Honorable Kills
+                        if(!bg)
+                            continue;
+                        if(!bg->isArena())
+                            continue;
+                        if(bg->GetArenaType() != ARENA_TYPE_2v2)
+                            continue;
+                        break;
                     default:
                     {
                         // those requirements couldn't be found in the dbc
                         AchievementCriteriaRequirementSet const* data = sAchievementMgr.GetCriteriaRequirementSet(achievementCriteria);
-                        if(!data || !data->Meets(GetPlayer(),unit))
+                        if(!data)
+                            continue;
+                        if(!data->Meets(GetPlayer(),unit))
                             continue;
                         break;
                     }
