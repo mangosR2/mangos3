@@ -1902,6 +1902,9 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
         {
             switch(m_spellInfo->Id)
             {
+                case 67732:                                 // Destroy all Frost Patches (Trial of the Crusader, Anub'arak)
+                    radius = 9.0f;
+                    break;
                 case 69075:                                 // Bone Storm
                 case 69832:                                 // Unstable Ooze Explosion (Rotface)
                 case 70341:                                 // Slime Puddle (Putricide)
@@ -1920,15 +1923,31 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
                 case 72934:                                 // Blood infusion credit
                     radius = DEFAULT_VISIBILITY_INSTANCE;
                     break;
-                case 69845:                                 // Sindragosa Frost bomb (hack!)
-                case 71053:
-                case 71054:
-                case 71055:
-                    radius = 50;
-                    break;
                 case 72350:                                 // Fury of Frostmourne
                 case 72351:                                 // Fury of Frostmourne
-                    radius = 300;
+                    radius = 300.0f;
+                    break;
+                // Custom (calculated) radiuses here
+                case 24811:                                 // Draw Spirit (Lethon)
+                {
+                    if (effIndex == EFFECT_INDEX_0)         // Copy range from EFF_1 to 0
+                        radius = GetSpellRadius(sSpellRadiusStore.LookupEntry(m_spellInfo->EffectRadiusIndex[EFFECT_INDEX_1]));
+                    break;
+                }
+                case 28241:                                 // Poison (Naxxramas, Grobbulus Cloud)
+                case 54363:                                 // Poison (Naxxramas, Grobbulus Cloud) (H)
+                {
+                    uint32 auraId = (m_spellInfo->Id == 28241 ? 28158 : 54362);
+                    if (SpellAuraHolderPtr auraHolder = m_caster->GetSpellAuraHolder(auraId))
+                        radius = 0.5f * (60000 - auraHolder->GetAuraDuration()) * 0.001f;
+                    break;
+                }
+                case 66881:                                 // Slime Pool (ToCrusader, Acidmaw & Dreadscale)
+                case 67638:                                 // Slime Pool (ToCrusader, Acidmaw & Dreadscale) (Mode 1)
+                case 67639:                                 // Slime Pool (ToCrusader, Acidmaw & Dreadscale) (Mode 2)
+                case 67640:                                 // Slime Pool (ToCrusader, Acidmaw & Dreadscale) (Mode 3)
+                    if (SpellAuraHolderPtr auraHolder = m_caster->GetSpellAuraHolder(66882))
+                        radius = 0.5f * (60000 - auraHolder->GetAuraDuration()) * 0.001f;
                     break;
                 case 72754:                                 // Defile. Radius depended from scale.
                 case 73708:                                 // Defile 25
@@ -1936,30 +1955,6 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
                 case 73710:                                 // Defile 25H
                     if (Unit* realCaster = GetAffectiveCaster())
                         radius = realCaster->GetObjectScale() * 6;
-                    break;
-                case 28241:                                 // Grobbulus Slime pool
-                case 54363:                                 // Grobbulus Slime pool H
-                {
-                    uint32 auraId = (m_spellInfo->Id == 28241 ? 28158 : 54362);
-                    if (m_caster->HasAura(auraId))
-                    {
-                        if (Aura* pAura = m_caster->GetAura(auraId, EFFECT_INDEX_0))
-                            radius = 0.5*(60-(pAura->GetAuraDuration()/IN_MILLISECONDS));
-                    }
-                    break;
-                }
-                case 66881:                                 // Slime Pool (Acidmaw & Dreadscale encounter)
-                case 67638:                                 // (Trial of the Crusader, all difficulties)
-                case 67639:                                 // ----- // -----
-                case 67640:                                 // ----- // -----
-                    if (m_caster->HasAura(66882))
-                    {
-                        if (Aura* pAura = m_caster->GetAura(66882, EFFECT_INDEX_0))
-                            radius = 0.5*(60-(pAura->GetAuraDuration()/IN_MILLISECONDS));
-                    }
-                    break;
-                case 67732:                                 // Destroy all Frost Patches (Trial of the Crusader, Anub'arak)
-                    radius = 9.0f;
                     break;
                 default:
                     break;
