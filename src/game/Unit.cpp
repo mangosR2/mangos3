@@ -7163,7 +7163,7 @@ Unit* Unit::SelectMagnetTarget(Unit *victim, Spell* spell, SpellEffectIndex eff)
                 if (Unit* magnet = aura->GetCaster())
                 {
                     // spell->CheckTarget() include LOS check
-                    if (magnet->isAlive() && ((!spell && magnet->IsWithinLOSInMap(this) || (spell && spell->CheckTarget(magnet, eff)))))
+                    if (magnet->isAlive() && ((!spell && magnet->IsWithinLOSInMap(this)) || (spell && spell->CheckTarget(magnet, eff))))
                     {
                         if (roll_chance_i(aura->GetModifier()->m_amount))
                             return magnet;
