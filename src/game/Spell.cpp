@@ -499,6 +499,7 @@ void Spell::FillTargetMap()
         if (IsAreaAuraEffect(m_spellInfo->Effect[i]))
             AddUnitTarget(m_caster, SpellEffectIndex(i));
 
+/*
         // no double fill for same targets
         for (int j = 0; j < i; ++j)
         {
@@ -510,7 +511,7 @@ void Spell::FillTargetMap()
                 effToIndex[i] = j;                          // effect i has same targeting list as effect j
             }
         }
-
+*/
         // New target combination and fail custom fill method
         if (!FillCustomTargetMap(SpellEffectIndex(i),tmpUnitLists[i]) && effToIndex[i] == i)
         {
