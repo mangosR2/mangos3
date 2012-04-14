@@ -1486,12 +1486,19 @@ void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, ui
                 break;
             }
             case ACHIEVEMENT_CRITERIA_TYPE_OWN_ITEM:
+            {
                 // speedup for non-login case
                 if(miscvalue1 && achievementCriteria->own_item.itemID != miscvalue1)
                     continue;
-                change = GetPlayer()->GetItemCount(achievementCriteria->own_item.itemID, true);
-                progressType = PROGRESS_HIGHEST;
+
+                // check item count
+                if(!miscvalue2)
+                    continue;
+
+                change = miscvalue2;
+                progressType = PROGRESS_ACCUMULATE;
                 break;
+            }
             case ACHIEVEMENT_CRITERIA_TYPE_WIN_ARENA:
             {
                 //miscvalue1 = mapID
