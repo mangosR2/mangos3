@@ -1738,6 +1738,57 @@ void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, ui
                 change = 1;
                 progressType = PROGRESS_ACCUMULATE;
                 break;
+            case ACHIEVEMENT_CRITERIA_TYPE_KILL_CREATURE_TYPE:
+            {
+                // miscvalue1 = CreatureType
+                // miscvalue2 = Given XP
+                if(!miscvalue1)
+                    continue;
+
+                switch(achievementCriteria->referredAchievement)
+                {
+                    case 107:               // Creature kills
+                    {
+                        // Creature types is not stored in dbc
+                        if( (achievementCriteria->ID == 4948 && miscvalue1 == CREATURE_TYPE_BEAST) ||
+                            (achievementCriteria->ID == 4949 && miscvalue1 == CREATURE_TYPE_DEMON) ||
+                            (achievementCriteria->ID == 4950 && miscvalue1 == CREATURE_TYPE_DRAGONKIN) ||
+                            (achievementCriteria->ID == 4951 && miscvalue1 == CREATURE_TYPE_ELEMENTAL) ||
+                            (achievementCriteria->ID == 4952 && miscvalue1 == CREATURE_TYPE_GIANT) ||
+                            (achievementCriteria->ID == 4953 && miscvalue1 == CREATURE_TYPE_HUMANOID) ||
+                            (achievementCriteria->ID == 4954 && miscvalue1 == CREATURE_TYPE_MECHANICAL) ||
+                            (achievementCriteria->ID == 4955 && miscvalue1 == CREATURE_TYPE_UNDEAD) ||
+                            (achievementCriteria->ID == 4956 && miscvalue1 == CREATURE_TYPE_NOT_SPECIFIED) ||
+                            (achievementCriteria->ID == 4957 && miscvalue1 == CREATURE_TYPE_TOTEM) )
+                            break;
+                        continue;
+                    }
+                    case 108:               // Critters kills
+                    {
+                        if(miscvalue1 != CREATURE_TYPE_CRITTER)
+                            continue;
+                        break;
+                    }
+                    case 1197:              // Total kills
+                    {
+                        break;
+                    }
+                    case 1198:              // Total kills that grant experience or honor
+                    {
+                        if(miscvalue2 < 1)
+                            continue;
+                        break;
+                    }
+                    default:
+                    {
+                        continue;
+                    }
+                }
+
+                change = 1;
+                progressType = PROGRESS_ACCUMULATE;
+                break;
+            }
             case ACHIEVEMENT_CRITERIA_TYPE_GAIN_REVERED_REPUTATION:
                 change = GetPlayer()->GetReputationMgr().GetReveredFactionCount();
                 progressType = PROGRESS_HIGHEST;
@@ -1990,7 +2041,6 @@ void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, ui
             case ACHIEVEMENT_CRITERIA_TYPE_COMPLETE_RAID:
             case ACHIEVEMENT_CRITERIA_TYPE_PLAY_ARENA:
             case ACHIEVEMENT_CRITERIA_TYPE_OWN_RANK:
-            case ACHIEVEMENT_CRITERIA_TYPE_KILL_CREATURE_TYPE:
             case ACHIEVEMENT_CRITERIA_TYPE_EARN_ACHIEVEMENT_POINTS:
                 break;                                   // Not implemented yet :(
         }
