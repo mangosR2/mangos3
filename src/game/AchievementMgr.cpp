@@ -1904,6 +1904,113 @@ void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, ui
                 progressType = PROGRESS_HIGHEST;
                 break;
             case ACHIEVEMENT_CRITERIA_TYPE_HONORABLE_KILL:
+            {
+                if(!miscvalue1)
+                    continue;
+                BattleGround* bg=GetPlayer()->GetBattleGround();
+
+                // those requirements couldn't be found in the dbc
+                switch(achievementCriteria->referredAchievement)
+                {
+                    case 252:                   // With a Little Helper from My Friends (Event: Feast of Winter Veil)
+                    {
+                        Player* plr = GetPlayer();
+                        if (!((plr->GetAura(26274,EFFECT_INDEX_0)) && (achievementCriteria->ID == 3829)) ||
+                            !((plr->GetAura(26157,EFFECT_INDEX_0)) && (achievementCriteria->ID == 3826)) ||
+                            !((plr->GetAura(26272,EFFECT_INDEX_0)) && (achievementCriteria->ID == 3827)) ||
+                            !((plr->GetAura(26273,EFFECT_INDEX_0)) && (achievementCriteria->ID == 3828)) )
+                            continue;
+                        break;
+                    }
+                    case 381:                   // World Honorable Kills
+                    {
+                        // if at battleground
+                        if(bg)
+                            continue;
+                        if( (achievementCriteria->ID == 5492 && GetPlayer()->GetMapId() == 0) ||    // Eastern Kingdoms
+                            (achievementCriteria->ID == 5493 && GetPlayer()->GetMapId() == 1) ||    // Kalimdor
+                            (achievementCriteria->ID == 5494 && GetPlayer()->GetMapId() == 530) ||  // Outland
+                            (achievementCriteria->ID == 5495 && GetPlayer()->GetMapId() == 571) )   // Northrend
+                            break;
+                        continue;
+                    }
+                    case 382:                   // BattleGround Honorable Kills
+                    {
+                        if(!bg)
+                            continue;
+                        if( (achievementCriteria->ID == 5499 && GetPlayer()->GetMapId() == 529) ||  // AB
+                            (achievementCriteria->ID == 5500 && GetPlayer()->GetMapId() == 30) ||   // AV
+                            (achievementCriteria->ID == 5501 && GetPlayer()->GetMapId() == 489) ||  // WS
+                            (achievementCriteria->ID == 5502 && GetPlayer()->GetMapId() == 566) ||  // EY
+                            (achievementCriteria->ID == 5503 && GetPlayer()->GetMapId() == 607) ||  // SA
+                            (achievementCriteria->ID == 13260 && GetPlayer()->GetMapId() == 628) )  // IC
+                            break;
+                        continue;
+                    }
+                    case 1112:                  // Eye of the Storm Honorable Kills
+                        if(!bg || (bg->GetTypeID(true) != BATTLEGROUND_EY))
+                            continue;
+                        break;
+                    case 1113:                  // Alterac Valley Honorable Kills
+                        if(!bg || (bg->GetTypeID(true) != BATTLEGROUND_AV))
+                            continue;
+                        break;
+                    case 1114:                  // Arathi Basin Honorable Kills
+                        if(!bg || (bg->GetTypeID(true) != BATTLEGROUND_AB))
+                            continue;
+                        break;
+                    case 1115:                  // Warsong Gulch Honorable Kills
+                        if(!bg || (bg->GetTypeID(true) != BATTLEGROUND_WS))
+                            continue;
+                        break;
+                    case 1261:                  // G.N.E.R.D. Rage
+                        if(!GetPlayer()->HasAura(48890))
+                            continue;
+                        break;
+                    case 1486:                  // Strand of the Ancients Honorable Kills
+                        if(!bg || (bg->GetTypeID(true) != BATTLEGROUND_SA))
+                            continue;
+                        break;
+                    case 3850:                  // Mowed Down (IoC)
+                    {
+                        //if not at bg
+                        BattleGround* bg = GetPlayer()->GetBattleGround();
+                        if (!bg)
+                            continue;
+                        if (bg->GetTypeID(true) != BATTLEGROUND_IC)
+                            continue;
+                        if(!((GetPlayer()->GetVehicle()) && (GetPlayer()->GetVehicle()->GetBase()->GetEntry() == 34944)))
+                            continue;
+                        break;
+                    }
+                    case 3855:                  // Glaive Grave (IoC)
+                    {
+                        // if not at bg
+                        BattleGround* bg = GetPlayer()->GetBattleGround();
+                        if (!bg)
+                            continue;
+                        if (bg->GetTypeID(true) != BATTLEGROUND_IC)
+                           continue;
+                        // without deaths
+                        if(bg->GetPlayerScore(GetPlayer(),SCORE_DEATHS)!=0)
+                            continue;
+                        // if not on vehicle
+                        if(!GetPlayer()->GetVehicle())
+                            continue;
+                        // if vehicle is Glaive Thrower
+                        if(GetPlayer()->GetVehicle()->GetBase()->GetEntry() != 34802)
+                            continue;
+                        break;
+                    }
+                    case 4779:                  // Isle of Conquests Honorable Kills
+                        if(!bg || (bg->GetTypeID(true) != BATTLEGROUND_IC))
+                            continue;
+                        break;
+                }
+                change = 1;
+                progressType = PROGRESS_ACCUMULATE;
+                break;
+            }
             case ACHIEVEMENT_CRITERIA_TYPE_GET_KILLING_BLOWS:
             {
                 if (!miscvalue1)
