@@ -1062,7 +1062,74 @@ void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, ui
                 if(!data || !data->Meets(GetPlayer(),unit))
                     continue;
 
-                change = miscvalue2;
+                // For custom cases
+                uint32 changeValue = miscvalue2;
+
+                // some hardcoded criterias
+                switch(achievementCriteria->referredAchievement)
+                {
+                    case 2189:                  // Artillery Expert (SotA)
+                    case 1763:                  // Artillery Veteran (SotA)
+                    {
+                        //if not at bg
+                        BattleGround* bg = GetPlayer()->GetBattleGround();
+                        if (!bg)
+                            continue;
+                        if (bg->GetTypeID(true) != BATTLEGROUND_SA)
+                            continue;
+                        //if not on vehicle
+                        if(!GetPlayer()->hasUnitState(UNIT_STAT_ON_VEHICLE))
+                            continue;
+                        break;
+                    }
+                    case 1871:                  // Experienced Drake Rider (The Oculus)
+                    {
+                        VehicleKit* vehicleKit = GetPlayer()->GetVehicle();
+                        if(!vehicleKit)
+                            continue;
+                        uint32 DragonEntry = vehicleKit->GetBase()->GetEntry();
+
+                        if (!(achievementCriteria->ID == 7177 && DragonEntry == 27756) &&   // Ruby Dragon
+                            !(achievementCriteria->ID == 7178 && DragonEntry == 27692) &&   // Emerald Dragon
+                            !(achievementCriteria->ID == 7179 && DragonEntry == 27755))     // Amber Dragon
+                            continue;
+                        break;
+                    }
+                    case 4539:                  // Once Bitten, Twice Shy(10) (ICC Lana'thel)
+                    {
+                        if (changeValue)
+                            continue;
+
+                        if (GetPlayer()->GetMap()->GetDifficulty() != RAID_DIFFICULTY_10MAN_HEROIC &&
+                            GetPlayer()->GetMap()->GetDifficulty() != RAID_DIFFICULTY_10MAN_NORMAL)
+                            continue;
+
+                        if (!(achievementCriteria->ID == 12780 && !GetPlayer()->HasAura(70871)) &&
+                            !(achievementCriteria->ID == 13011 && GetPlayer()->HasAura(70871)))
+                            continue;
+
+                        changeValue = 1;
+                        break;
+                    }
+                    case 4618:                  // Once Bitten, Twice Shy(25) (ICC Lana'thel)
+                    {
+                        if (changeValue)
+                            continue;
+
+                        if (GetPlayer()->GetMap()->GetDifficulty() != RAID_DIFFICULTY_25MAN_HEROIC &&
+                            GetPlayer()->GetMap()->GetDifficulty() != RAID_DIFFICULTY_25MAN_NORMAL)
+                            continue;
+
+                        if (!(achievementCriteria->ID == 13012 && !GetPlayer()->HasAura(70871)) &&
+                            !(achievementCriteria->ID == 13013 && GetPlayer()->HasAura(70871)))
+                            continue;
+
+                        changeValue = 1;
+                        break;
+                    }
+                }
+
+                change = changeValue;
                 progressType = PROGRESS_ACCUMULATE;
                 break;
             }
