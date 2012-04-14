@@ -1426,15 +1426,63 @@ void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, ui
                 progressType = PROGRESS_HIGHEST;
                 break;
             case ACHIEVEMENT_CRITERIA_TYPE_WIN_ARENA:
+            {
+                //miscvalue1 = mapID
+                //miscvalue2 = ArenaType
                 if(!miscvalue1)
                     continue;
-
-                if(achievementCriteria->win_arena.mapID != GetPlayer()->GetMapId())
+                if(achievementCriteria->win_arena.mapID != miscvalue1)
                     continue;
+
+                // Victories statistic for ArenaType
+                switch(achievementCriteria->referredAchievement)
+                {
+                    case 362:
+                        if(miscvalue2 != ARENA_TYPE_5v5)
+                            continue;
+                        break;
+                    case 364:
+                        if(miscvalue2 != ARENA_TYPE_3v3)
+                            continue;
+                        break;
+                    case 366:
+                        if(miscvalue2 != ARENA_TYPE_2v2)
+                            continue;
+                        break;
+                }
 
                 change = 1;
                 progressType = PROGRESS_ACCUMULATE;
                 break;
+            }
+            case ACHIEVEMENT_CRITERIA_TYPE_PLAY_ARENA:
+            {
+                //miscvalue1 = mapID
+                //miscvalue2 = ArenaType
+                if(!miscvalue1 || achievementCriteria->play_arena.mapID != miscvalue1)
+                    continue;
+
+                // Matches statistic for ArenaType
+                switch(achievementCriteria->referredAchievement)
+                {
+                    case 363:
+                        if(miscvalue2!=ARENA_TYPE_5v5)
+                            continue;
+                        break;
+                    case 365:
+                        if(miscvalue2!=ARENA_TYPE_3v3)
+                            continue;
+                        break;
+                    case 367:
+                        if(miscvalue2!=ARENA_TYPE_2v2)
+                            continue;
+                        break;
+                }
+
+                change = 1;
+                progressType = PROGRESS_ACCUMULATE;
+                break;
+            }
             case ACHIEVEMENT_CRITERIA_TYPE_WIN_RATED_ARENA:
                 // miscvalue1 contains the personal rating
                 if (!miscvalue1)                            // no update at login
@@ -2039,7 +2087,6 @@ void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, ui
             // FIXME: not triggered in code as result, need to implement
             case ACHIEVEMENT_CRITERIA_TYPE_COMPLETE_DAILY_QUEST_DAILY:
             case ACHIEVEMENT_CRITERIA_TYPE_COMPLETE_RAID:
-            case ACHIEVEMENT_CRITERIA_TYPE_PLAY_ARENA:
             case ACHIEVEMENT_CRITERIA_TYPE_OWN_RANK:
             case ACHIEVEMENT_CRITERIA_TYPE_EARN_ACHIEVEMENT_POINTS:
                 break;                                   // Not implemented yet :(

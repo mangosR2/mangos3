@@ -533,6 +533,7 @@ void BattleGround::Update(uint32 diff)
                         plr->GetSession()->SendPacket(&status);
 
                         plr->RemoveAurasDueToSpell(SPELL_ARENA_PREPARATION);
+                        plr->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_PLAY_ARENA, plr->GetMapId(), GetArenaType());
                     }
 
                 //Announce Arena starting
@@ -919,7 +920,7 @@ void BattleGround::EndBattleGround(Team winner)
                 if (member)
                 {
                     plr->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_WIN_RATED_ARENA, member->personal_rating);
-                    plr->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_WIN_ARENA, 1);
+                    plr->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_WIN_ARENA, plr->GetMapId(), GetArenaType());
                 }
 
                 winner_arena_team->MemberWon(plr,loser_rating);
