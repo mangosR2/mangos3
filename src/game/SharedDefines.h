@@ -374,7 +374,7 @@ const uint32 ItemQualityColors[MAX_ITEM_QUALITY] = {
 #define SPELL_ATTR_EX3_DONT_DISPLAY_RANGE         0x40000000            // 30 client doesn't display range in tooltip for those spells
 #define SPELL_ATTR_EX3_UNK31                      0x80000000            // 31
 
-#define SPELL_ATTR_EX4_UNK0                       0x00000001            // 0
+#define SPELL_ATTR_EX4_IGNORE_RESISTANCES         0x00000001            // 0 not may be resisted (in magic case) and have binary resistance method (in melee case).
 #define SPELL_ATTR_EX4_UNK1                       0x00000002            // 1 proc on finishing move?
 #define SPELL_ATTR_EX4_UNK2                       0x00000004            // 2
 #define SPELL_ATTR_EX4_UNK3                       0x00000008            // 3
