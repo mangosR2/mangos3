@@ -7799,8 +7799,8 @@ bool Spell::CheckTarget( Unit* target, SpellEffectIndex eff )
     }
 
     // Check Sated & Exhaustion debuffs
-    if (((m_spellInfo->Id == 2825) && (target->HasAura(57724))) ||
-        ((m_spellInfo->Id == 32182) && (target->HasAura(57723))))
+    if (((m_spellInfo->Id == 2825) && (target->HasAura(57724) || target->HasAura(57723))) ||
+        ((m_spellInfo->Id == 32182) && (target->HasAura(57724)|| target->HasAura(57723))))
         return false;
 
     // Check vampiric bite
