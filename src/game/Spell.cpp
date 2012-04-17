@@ -7759,6 +7759,9 @@ bool Spell::CheckTarget( Unit* target, SpellEffectIndex eff )
         return false;
     if (m_spellInfo->TargetAuraStateNot && target->HasAura(m_spellInfo->TargetAuraStateNot))
         return false;
+    // check right target                                                                                       // should activ for spells 72034, 72096
+    if (m_spellInfo->AttributesEx3 & SPELL_ATTR_EX3_TARGET_ONLY_PLAYER && target->GetTypeId() != TYPEID_PLAYER /*&& m_spellInfo->EffectImplicitTargetA[eff] != TARGET_SCRIPT*/)
+        return false;
 
     // Check targets for not_selectable unit flag and remove
     // A player can cast spells on his pet (or other controlled unit) though in any state

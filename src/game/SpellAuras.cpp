@@ -820,6 +820,9 @@ void Aura::AreaAuraUpdate(uint32 diff)
                 if (i_target->GetTypeId() == TYPEID_PLAYER && ((Player*)i_target)->IsBeingTeleportedFar())
                     continue;
 
+                if (GetSpellProto()->AttributesEx3 & SPELL_ATTR_EX3_TARGET_ONLY_PLAYER && i_target->GetTypeId() != TYPEID_PLAYER)
+                    continue;
+
                 if (i_target->IsImmuneToSpell(GetSpellProto()))
                     continue;
                 else
