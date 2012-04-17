@@ -29,7 +29,7 @@
 #include "HostileRefManager.h"
 #include "FollowerReference.h"
 #include "FollowerRefManager.h"
-#include "EventProcessor.h"
+#include "Utilities/EventProcessor.h"
 #include "MapManager.h"
 #include "MotionMaster.h"
 #include "DBCStructure.h"
