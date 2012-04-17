@@ -21,7 +21,7 @@
 
 #include "Common.h"
 #include "Policies/Singleton.h"
-#include "Utilities/EventProcessor.h"
+#include "EventProcessor.h"
 #include "SharedDefines.h"
 #include "DBCEnums.h"
 #include "BattleGround.h"
