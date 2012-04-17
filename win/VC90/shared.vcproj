@@ -644,6 +644,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\shared\EventProcessor.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\shared\EventProcessor.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\dep\include\mersennetwister\MersenneTwister.h"
 				>
 			</File>
