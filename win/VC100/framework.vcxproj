@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug_NoPCH|Win32">
@@ -312,6 +312,7 @@
     <ClInclude Include="..\..\src\framework\Policies\ThreadingModel.h" />
     <ClInclude Include="..\..\src\framework\Utilities\ByteConverter.h" />
     <ClInclude Include="..\..\src\framework\Utilities\Callback.h" />
+    <ClInclude Include="..\..\src\framework\Utilities\EventProcessor.h" />
     <ClInclude Include="..\..\src\framework\Utilities\LinkedList.h" />
     <ClInclude Include="..\..\src\framework\Utilities\LinkedReference\Reference.h" />
     <ClInclude Include="..\..\src\framework\Utilities\LinkedReference\RefManager.h" />
@@ -321,6 +322,7 @@
   <ItemGroup>
     <ClCompile Include="..\..\src\framework\Policies\MemoryManagement.cpp" />
     <ClCompile Include="..\..\src\framework\Policies\ObjectLifeTime.cpp" />
+    <ClCompile Include="..\..\src\framework\Utilities\EventProcessor.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Library Include="..\..\dep\fastmm\FastMMx64.lib">

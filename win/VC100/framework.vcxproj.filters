@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <Filter Include="GameSystem">
@@ -72,6 +72,9 @@
     <ClInclude Include="..\..\src\framework\Utilities\Callback.h">
       <Filter>Utilities</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\framework\Utilities\EventProcessor.h">
+      <Filter>Utilities</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\src\framework\Utilities\LinkedList.h">
       <Filter>Utilities</Filter>
     </ClInclude>
@@ -100,6 +103,9 @@
     </ClCompile>
     <ClCompile Include="..\..\src\framework\Policies\ObjectLifeTime.cpp">
       <Filter>Policies</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\framework\Utilities\EventProcessor.cpp">
+      <Filter>Utilities</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

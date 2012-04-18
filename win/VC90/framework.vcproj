@@ -564,6 +564,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\framework\Utilities\EventProcessor.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\framework\Utilities\EventProcessor.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\framework\Utilities\LinkedList.h"
 				>
 			</File>
