@@ -4930,7 +4930,7 @@ bool ChatHandler::HandlePoolInfoCommand(char* args)
 
     if (pool_id > sPoolMgr.GetMaxPoolId())
     {
-        PSendSysMessage("Pool %u not found", pool_id);
+        PSendSysMessage(LANG_POOL_ENTRY_LOWER_MAX_POOL, pool_id, sPoolMgr.GetMaxPoolId());
         return true;
     }
 
