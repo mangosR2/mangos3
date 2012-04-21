@@ -7752,15 +7752,15 @@ bool Spell::CheckTarget( Unit* target, SpellEffectIndex eff )
             return false;
     }
 
+     // check right target                                                                                       // should activ for spells 72034, 72096
+    if (m_spellInfo->AttributesEx3 & SPELL_ATTR_EX3_TARGET_ONLY_PLAYER && target->GetTypeId() != TYPEID_PLAYER /*&& m_spellInfo->EffectImplicitTargetA[eff] != TARGET_SCRIPT*/)
+        return false;
     // Check Aura spell req (need for AoE spells)
     if (m_spellInfo->targetAuraSpell && !target->HasAura(m_spellInfo->targetAuraSpell))
         return false;
     if (m_spellInfo->excludeTargetAuraSpell && target->HasAura(m_spellInfo->excludeTargetAuraSpell))
         return false;
     if (m_spellInfo->TargetAuraStateNot && target->HasAura(m_spellInfo->TargetAuraStateNot))
-        return false;
-    // check right target                                                                                       // should activ for spells 72034, 72096
-    if (m_spellInfo->AttributesEx3 & SPELL_ATTR_EX3_TARGET_ONLY_PLAYER && target->GetTypeId() != TYPEID_PLAYER /*&& m_spellInfo->EffectImplicitTargetA[eff] != TARGET_SCRIPT*/)
         return false;
 
     // Check targets for not_selectable unit flag and remove
