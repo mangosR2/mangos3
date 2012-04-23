@@ -489,7 +489,7 @@ void Spell::FillTargetMap()
     {
         // not call for empty effect.
         // Also some spells use not used effect targets for store targets for dummy effect in triggered spells
-        if (m_spellInfo->Effect[i] == 0)
+        if (m_spellInfo->Effect[i] == SPELL_EFFECT_NONE)
             continue;
 
         // targets for TARGET_SCRIPT_COORDINATES (A) and TARGET_SCRIPT
@@ -512,6 +512,7 @@ void Spell::FillTargetMap()
         {
             // Check if same target, but handle i.e. AreaAuras different
             if (m_spellInfo->EffectImplicitTargetA[i] == m_spellInfo->EffectImplicitTargetA[j] && m_spellInfo->EffectImplicitTargetB[i] == m_spellInfo->EffectImplicitTargetB[j]
+                && m_spellInfo->Effect[j] != SPELL_EFFECT_NONE
                 && !IsAreaAuraEffect(m_spellInfo->Effect[i]) && !IsAreaAuraEffect(m_spellInfo->Effect[j])
                 && m_spellInfo->Effect[j] != 0)
                 // Add further conditions here if required
@@ -628,7 +629,7 @@ void Spell::FillTargetMap()
                                 SetTargetMap(SpellEffectIndex(i), m_spellInfo->EffectImplicitTargetB[i], tmpUnitLists[i /*==effToIndex[i]*/]);
                             }
                             break;
-                        case 0:
+                        case TARGET_NONE:
                             SetTargetMap(SpellEffectIndex(i), m_spellInfo->EffectImplicitTargetA[i], tmpUnitLists[i /*==effToIndex[i]*/]);
                             tmpUnitLists[i /*==effToIndex[i]*/].push_back(m_caster);
                             break;
@@ -652,7 +653,7 @@ void Spell::FillTargetMap()
                         default:
                             SetTargetMap(SpellEffectIndex(i), m_spellInfo->EffectImplicitTargetA[i], tmpUnitLists[i /*==effToIndex[i]*/]);
                             SetTargetMap(SpellEffectIndex(i), m_spellInfo->EffectImplicitTargetB[i], tmpUnitLists[i /*==effToIndex[i]*/]);
-                        break;
+                            break;
                     }
                     break;
                 case TARGET_SELF2:
@@ -691,7 +692,7 @@ void Spell::FillTargetMap()
                 default:
                     switch(m_spellInfo->EffectImplicitTargetB[i])
                     {
-                        case 0:
+                        case TARGET_NONE:
                         case TARGET_EFFECT_SELECT:
                             SetTargetMap(SpellEffectIndex(i), m_spellInfo->EffectImplicitTargetA[i], tmpUnitLists[i /*==effToIndex[i]*/]);
                             break;
@@ -879,7 +880,7 @@ void Spell::AddUnitTarget(Unit* pVictim, SpellEffectIndex effIndex)
         if (targetGUID == ihit->targetGUID)                 // Found in list
         {
             if (!immuned)
-                ihit->effectMask |= (1 << effIndex);        // Add only effect mask if not immuned
+                ihit->effectMask |= 1 << effIndex;          // Add only effect mask if not immuned
             return;
         }
     }
@@ -2287,6 +2288,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
                     MaNGOS::UnitListSearcher<MaNGOS::AnyAoEVisibleTargetUnitInObjectRangeCheck> searcher(tempTargetUnitMap, u_check);
                     Cell::VisitAllObjects(m_caster, searcher, max_range);
                 }
+
                 if (tempTargetUnitMap.empty())
                     break;
 
@@ -2302,22 +2304,24 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
 
                 while (t && next != tempTargetUnitMap.end())
                 {
-                    if (!prev->IsWithinDist (*next,CHAIN_SPELL_JUMP_RADIUS))
+                    if (!prev->IsWithinDist(*next,CHAIN_SPELL_JUMP_RADIUS))
                         break;
 
                     if (prev == (Unit*)m_caster)
                         break;
 
-                    if ((!(m_spellInfo->AttributesEx2 & SPELL_ATTR_EX2_IGNORE_LOS) && !prev->IsWithinLOSInMap (*next)) || ((m_spellInfo->AttributesEx6 & SPELL_ATTR_EX6_IGNORE_CCED_TARGETS) && !(*next)->CanFreeMove()))
+                    if ((!(m_spellInfo->AttributesEx2 & SPELL_ATTR_EX2_IGNORE_LOS) && !prev->IsWithinLOSInMap(*next)) || ((m_spellInfo->AttributesEx6 & SPELL_ATTR_EX6_IGNORE_CCED_TARGETS) && !(*next)->CanFreeMove()))
                     {
                         ++next;
                         continue;
                     }
+
                     prev = *next;
                     targetUnitMap.push_back(prev);
                     tempTargetUnitMap.erase(next);
                     tempTargetUnitMap.sort(TargetDistanceOrderNear(prev));
                     next = tempTargetUnitMap.begin();
+
                     --t;
                 }
             }
@@ -5143,7 +5147,7 @@ void Spell::TakeReagents()
         return;
 
     Player* p_caster = (Player*)m_caster;
-    if (p_caster->CanNoReagentCast(m_spellInfo) )
+    if (p_caster->CanNoReagentCast(m_spellInfo))
         return;
 
     for(uint32 x = 0; x < MAX_SPELL_REAGENTS; ++x)
@@ -5653,7 +5657,7 @@ SpellCastResult Spell::CheckCast(bool strict)
         //Must be behind the target.
         if (m_spellInfo->AttributesEx2 == SPELL_ATTR_EX2_UNK20 && m_spellInfo->HasAttribute(SPELL_ATTR_EX_UNK9) && target->HasInArc(M_PI_F, m_caster))
         {
-            // Exclusion for Pounce:  Facing Limitation was removed in 2.0.1, but it still uses the same, old Ex-Flags
+            // Exclusion for Pounce: Facing Limitation was removed in 2.0.1, but it still uses the same, old Ex-Flags
             // Exclusion for Mutilate:Facing Limitation was removed in 2.0.1 and 3.0.3, but they still use the same, old Ex-Flags
             // Exclusion for Throw: Facing limitation was added in 3.2.x, but that shouldn't be
             if (!m_spellInfo->IsFitToFamily<SPELLFAMILY_DRUID, CF_DRUID_POUNCE>() &&
@@ -5912,7 +5916,7 @@ SpellCastResult Spell::CheckCast(bool strict)
             return castResult;
     }
 
-    if(!m_IsTriggeredSpell)                             // triggered spell not affected by stun/etc
+    if(!m_IsTriggeredSpell)                                 // triggered spell not affected by stun/etc
     {
         SpellCastResult castResult = CheckCasterAuras();
         if (castResult != SPELL_CAST_OK)
@@ -7107,6 +7111,7 @@ SpellCastResult Spell::CheckPower()
             return SPELL_FAILED_CASTER_AURASTATE;
         return SPELL_CAST_OK;
     }
+
     // Check valid power type
     if (m_spellInfo->powerType >= MAX_POWERS)
     {

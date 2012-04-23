@@ -1707,8 +1707,8 @@ void Unit::CalculateMeleeDamage(Unit *pVictim, uint32 damage, DamageInfo* damage
     // Add melee damage bonus
     damage = MeleeDamageBonusDone(damageInfo->target, damage, damageInfo->attackType);
     damage = damageInfo->target->MeleeDamageBonusTaken(this, damage, damageInfo->attackType);
-    // Calculate armor reduction
 
+    // Calculate armor reduction
     uint32 armor_affected_damage = CalcNotIgnoreDamageReduction(damage, damageInfo->SchoolMask());
     damageInfo->damage = damage - armor_affected_damage + CalcArmorReducedDamage(damageInfo->target, armor_affected_damage);
     damageInfo->cleanDamage += damage - damageInfo->damage;
@@ -2295,8 +2295,8 @@ void Unit::CalculateDamageAbsorbAndResist(Unit *pCaster, DamageInfo* damageInfo,
                     reflectTriggeredBy->SetInUse(true);     // lock aura from final deletion until processing
                     break;
                 }
-                if (spellProto->Id == 39228 || // Argussian Compass
-                    spellProto->Id == 60218)   // Essence of Gossamer
+                if (spellProto->Id == 39228 ||              // Argussian Compass
+                    spellProto->Id == 60218)                // Essence of Gossamer
                 {
                     // Max absorb stored in 1 dummy effect
                     int32 max_absorb = spellProto->CalculateSimpleValue(EFFECT_INDEX_1);
@@ -2332,9 +2332,9 @@ void Unit::CalculateDamageAbsorbAndResist(Unit *pCaster, DamageInfo* damageInfo,
                 if (spellProto->SpellIconID == 2109)
                 {
                     if (!preventDeathSpell &&
-                        GetTypeId()==TYPEID_PLAYER &&           // Only players
+                        GetTypeId()==TYPEID_PLAYER &&       // Only players
                         !((Player*)this)->HasSpellCooldown(31231) &&
-                                                                // Only if no cooldown
+                                                            // Only if no cooldown
                         roll_chance_i((*i)->GetModifier()->m_amount))
                                                                 // Only if roll
                     {
@@ -2543,10 +2543,9 @@ void Unit::CalculateDamageAbsorbAndResist(Unit *pCaster, DamageInfo* damageInfo,
     // Cast back reflect damage spell
     if (canReflect && reflectSpell)
     {
-        CastCustomSpell(pCaster,  reflectSpell, &reflectDamage, NULL, NULL, true, NULL, reflectTriggeredBy);
+        CastCustomSpell(pCaster, reflectSpell, &reflectDamage, NULL, NULL, true, NULL, reflectTriggeredBy);
         reflectTriggeredBy->SetInUse(false);                // free lock from deletion
     }
-
 
     // absorb by mana cost
     AuraList const& vManaShield = GetAurasByType(SPELL_AURA_MANA_SHIELD);
@@ -4994,7 +4993,7 @@ void Unit::RemoveAuraHolderDueToSpellByDispel(uint32 spellId, uint32 stackAmount
 {
     SpellEntry const* spellEntry = sSpellStore.LookupEntry(spellId);
 
-    // Custom dispel cases
+    // Custom dispel case
     // Unstable Affliction
     if (spellEntry->SpellFamilyName == SPELLFAMILY_WARLOCK && spellEntry->SpellFamilyFlags.test<CF_WARLOCK_UNSTABLE_AFFLICTION>())
     {
@@ -7338,7 +7337,7 @@ uint32 Unit::SpellDamageBonusDone(Unit *pVictim, SpellEntry const *spellProto, u
 
         if (holder->GetSpellProto()->EquippedItemClass != -1 ||
                                                             // -1 == any item class (not wand then)
-            holder->GetSpellProto()->EquippedItemInventoryTypeMask != 0 )
+            holder->GetSpellProto()->EquippedItemInventoryTypeMask != 0)
                                                             // 0 == any inventory type (not wand then)
             continue;
 
@@ -8174,7 +8173,7 @@ uint32 Unit::SpellCriticalHealingBonus(SpellEntry const *spellProto, uint32 dama
  */
 uint32 Unit::SpellHealingBonusDone(Unit *pVictim, SpellEntry const *spellProto, int32 healamount, DamageEffectType damagetype, uint32 stack)
 {
-     // For totems get healing bonus from owner (statue isn't totem in fact)
+    // For totems get healing bonus from owner (statue isn't totem in fact)
     if ( GetTypeId()==TYPEID_UNIT && ((Creature*)this)->IsTotem() && ((Totem*)this)->GetTotemType()!=TOTEM_STATUE)
         if (Unit* owner = GetOwner())
             return owner->SpellHealingBonusDone(pVictim, spellProto, healamount, damagetype, stack);
@@ -8385,7 +8384,7 @@ bool Unit::IsImmunedToDamage(SpellSchoolMask schoolMask) const
     if (IsImmunedToSchool(schoolMask))
         return true;
 
-    //If m_immuneToDamage type contain magic, IMMUNE damage.
+    // If m_immuneToDamage type contain magic, IMMUNE damage.
     MAPLOCK_READ(const_cast<Unit*>(this), MAP_LOCK_TYPE_AURAS);
     SpellImmuneList const& damageList = m_spellImmune[IMMUNITY_DAMAGE];
     if (!damageList.empty())
@@ -8398,7 +8397,7 @@ bool Unit::IsImmunedToDamage(SpellSchoolMask schoolMask) const
 
 bool Unit::IsImmunedToSchool(SpellSchoolMask schoolMask) const
 {
-    //If m_immuneToSchool type contain this school type, IMMUNE damage.
+    // If m_immuneToSchool type contain this school type, IMMUNE damage.
     MAPLOCK_READ(const_cast<Unit*>(this), MAP_LOCK_TYPE_AURAS);
     SpellImmuneList const& schoolList = m_spellImmune[IMMUNITY_SCHOOL];
     if (!schoolList.empty())
@@ -10152,6 +10151,7 @@ int32 Unit::CalculateSpellDamage(Unit const* target, SpellEntry const* spellProt
         case 0:                                             // not used
         case 1: basePoints += 1; break;                     // range 1..1
         default:
+        {
             // range can have positive (1..rand) and negative (rand..1) values, so order its for irand
             int32 randvalue = (randomPoints >= 1)
                 ? irand(1, randomPoints)
@@ -10159,6 +10159,7 @@ int32 Unit::CalculateSpellDamage(Unit const* target, SpellEntry const* spellProt
 
             basePoints += randvalue;
             break;
+        }
     }
 
     int32 value = basePoints;
@@ -10490,14 +10491,14 @@ bool Unit::HandleStatModifier(UnitMods unitMod, UnitModifierType modifierType, f
         case UNIT_MOD_ENERGY:
         case UNIT_MOD_HAPPINESS:
         case UNIT_MOD_RUNE:
-        case UNIT_MOD_RUNIC_POWER:          UpdateMaxPower(GetPowerTypeByAuraGroup(unitMod));          break;
+        case UNIT_MOD_RUNIC_POWER:         UpdateMaxPower(GetPowerTypeByAuraGroup(unitMod)); break;
 
         case UNIT_MOD_RESISTANCE_HOLY:
         case UNIT_MOD_RESISTANCE_FIRE:
         case UNIT_MOD_RESISTANCE_NATURE:
         case UNIT_MOD_RESISTANCE_FROST:
         case UNIT_MOD_RESISTANCE_SHADOW:
-        case UNIT_MOD_RESISTANCE_ARCANE:   UpdateResistances(GetSpellSchoolByAuraGroup(unitMod));      break;
+        case UNIT_MOD_RESISTANCE_ARCANE:   UpdateResistances(GetSpellSchoolByAuraGroup(unitMod)); break;
 
         case UNIT_MOD_ATTACK_POWER:        UpdateAttackPowerAndDamage();         break;
         case UNIT_MOD_ATTACK_POWER_RANGED: UpdateAttackPowerAndDamage(true);     break;
@@ -12103,6 +12104,7 @@ void Unit::ClearAllReactives()
         ModifyAuraState(AURA_STATE_DEFENSE, false);
     if (getClass() == CLASS_HUNTER && HasAuraState( AURA_STATE_HUNTER_PARRY))
         ModifyAuraState(AURA_STATE_HUNTER_PARRY, false);
+
     if (getClass() == CLASS_WARRIOR && GetTypeId() == TYPEID_PLAYER)
         ClearComboPoints();
 }
@@ -12191,6 +12193,7 @@ Unit* Unit::SelectRandomFriendlyTarget(Unit* except /*= NULL*/, float radius /*=
     MaNGOS::UnitListSearcher<MaNGOS::AnyFriendlyUnitInObjectRangeCheck> searcher(targets, u_check);
 
     Cell::VisitAllObjects(this, searcher, radius);
+
     // remove current target
     if (except)
         targets.remove(except);

@@ -463,6 +463,7 @@ Player::Player (WorldSession *session): Unit(), m_mover(this), m_camera(this), m
 
     m_MirrorTimerFlags = UNDERWATER_NONE;
     m_MirrorTimerFlagsLast = UNDERWATER_NONE;
+
     m_isInWater = false;
     m_drunkTimer = 0;
     m_drunk = 0;
@@ -1069,7 +1070,7 @@ void Player::HandleDrowning(uint32 time_diff)
             m_MirrorTimer[BREATH_TIMER] = getMaxTimer(BREATH_TIMER);
             SendMirrorTimer(BREATH_TIMER, m_MirrorTimer[BREATH_TIMER], m_MirrorTimer[BREATH_TIMER], -1);
         }
-        else                                                              // If activated - do tick
+        else
         {
             m_MirrorTimer[BREATH_TIMER]-=time_diff;
             // Timer limit - need deal damage
@@ -10535,7 +10536,7 @@ InventoryResult Player::_CanStoreItem_InInventorySlots( uint8 slot_begin, uint8 
             if (res != EQUIP_ERR_OK)
                 continue;
 
-            // descrease at current stacksize
+            // decrease at current stacksize
             need_space -= pItem2->GetCount();
         }
 
@@ -11849,6 +11850,7 @@ Item* Player::StoreItem( ItemPosCountVec const& dest, Item* pItem, bool update )
 
     Item* lastItem = pItem;
     uint32 entry = pItem->GetEntry();
+
     for(ItemPosCountVec::const_iterator itr = dest.begin(); itr != dest.end(); )
     {
         uint16 pos = itr->pos;
@@ -11864,6 +11866,7 @@ Item* Player::StoreItem( ItemPosCountVec const& dest, Item* pItem, bool update )
 
         lastItem = _StoreItem(pos,pItem,count,true,update);
     }
+
     return lastItem;
 }
 
@@ -13436,6 +13439,7 @@ void Player::ApplyEnchantment(Item *item, EnchantmentSlot slot, bool apply, bool
                         HandleStatModifier(UNIT_MOD_DAMAGE_RANGED, TOTAL_VALUE, float(enchant_amount), apply);
                     break;
                 case ITEM_ENCHANTMENT_TYPE_EQUIP_SPELL:
+                {
                     if (enchant_spell_id)
                     {
                         if (apply)
@@ -13468,6 +13472,7 @@ void Player::ApplyEnchantment(Item *item, EnchantmentSlot slot, bool apply, bool
                             RemoveAurasDueToItemSpell(item, enchant_spell_id);
                     }
                     break;
+                }
                 case ITEM_ENCHANTMENT_TYPE_RESISTANCE:
                     if (!enchant_amount)
                     {
@@ -14089,6 +14094,7 @@ void Player::OnGossipSelect(WorldObject* pSource, uint32 gossipListId, uint32 me
                 PlayerTalkClass->CloseGossip();
                 TalkedToCreature(pSource->GetEntry(), pSource->GetObjectGuid());
             }
+
             break;
         }
         case GOSSIP_OPTION_SPIRITHEALER:
@@ -15704,6 +15710,7 @@ void Player::KilledMonsterCredit( uint32 entry, ObjectGuid guid )
 {
     uint32 addkillcount = 1;
     GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_KILL_CREATURE, entry, addkillcount);
+
     for( int i = 0; i < MAX_QUEST_LOG_SIZE; ++i )
     {
         uint32 questid = GetQuestSlotQuestId(i);
@@ -20721,7 +20728,7 @@ void Player::AddSpellAndCategoryCooldowns(SpellEntry const* spellInfo, uint32 it
     {
         if (ItemPrototype const* proto = ObjectMgr::GetItemPrototype(itemId))
         {
-            for(int idx = 0; idx < 5; ++idx)
+            for(int idx = 0; idx < MAX_ITEM_PROTO_SPELLS; ++idx)
             {
                 if (proto->Spells[idx].SpellId == spellInfo->Id)
                 {
@@ -21482,7 +21489,7 @@ void Player::SendTransferAborted(uint32 mapid, uint8 reason, uint8 arg)
 {
     WorldPacket data(SMSG_TRANSFER_ABORTED, 4+2);
     data << uint32(mapid);
-    data << uint8(reason);                                 // transfer abort reason
+    data << uint8(reason);                                  // transfer abort reason
     switch(reason)
     {
         case TRANSFER_ABORT_INSUF_EXPAN_LVL:
