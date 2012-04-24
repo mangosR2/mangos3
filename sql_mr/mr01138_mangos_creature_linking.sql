@@ -18,7 +18,7 @@
  *   FLAG_CANT_SPAWN_IF_BOSS_ALIVE  = 0x0800, 2048
  */
 
-INSERT IGNORE INTO creature_linking_template VALUES
+INSERT IGNORE INTO creature_linking_template (entry, map, master_entry, flag) VALUES
 (12119, 409, 12118, 521), -- Lucifron
 (11661, 409, 12259, 7), -- Gehennas
 (11673, 409, 11982, 1024), -- Magmadar, testing, prevent respawning of his dogs
