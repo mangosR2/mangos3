@@ -4101,6 +4101,9 @@ bool Unit::isInAccessablePlaceFor(Unit const* unit) const
 
     if (unit->GetObjectGuid().IsAnyTypeCreature())
     {
+        if (((Creature*)unit)->IsInEvadeMode())
+            return false;
+
         float targetReach = ((Creature*)unit)->GetReachDistance(this);
         if (IsWithinDistInMap(unit, targetReach, true))
             return true;
