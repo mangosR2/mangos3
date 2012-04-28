@@ -6602,7 +6602,7 @@ bool Unit::Attack(Unit *victim, bool meleeAttack)
     else
     {
         // set position before any AI calls/assistance
-        if (GetTypeId()==TYPEID_UNIT)
+        if (GetTypeId() == TYPEID_UNIT && !((Creature*)this)->IsInEvadeMode())
             ((Creature*)this)->SetCombatStartPosition(GetPositionX(), GetPositionY(), GetPositionZ());
     }
 
