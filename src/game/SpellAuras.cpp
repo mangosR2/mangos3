@@ -11214,6 +11214,23 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
                         return;
                     break;
                 }
+                case 62056:                                 // Stone Grip (Kologarn encounter)
+                case 63985:                                 // Stone Grip (Kologarn encounter) heroic
+                {
+                    if (!apply)
+                    {
+                        spellId1 = GetId() == 62056 ? 64290 : 64292;
+                    }
+                }
+                case 62546:                                 // Scorch (Ignis encounter)
+                case 63474:                                 // Scorch (Ignis encounter) heroic
+                {
+                    if (apply)
+                    {
+                        spellId1 = 62551;
+                    }
+                    break;
+                }
                 case 62619:                                 // Potent Pheromones (Freya encounter)
                 case 64321:                                 // Potent Pheromones (Freya encounter) heroic
                 {
