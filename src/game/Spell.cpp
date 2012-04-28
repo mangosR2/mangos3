@@ -3347,7 +3347,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
         // cleanup list for a right solution (without this spells with unMaxTargets = 1 hit possible nothing, if target is not valid with CheckTarget())
         for (UnitList::iterator itr = targetUnitMap.begin(); itr != targetUnitMap.end();++itr)
         {
-            if (!CheckTargetBeforLimitation (*itr))
+            if (!CheckTargetBeforeLimitation(*itr))
             {
                 itr = targetUnitMap.erase(itr);
                 continue;
@@ -7773,7 +7773,7 @@ CurrentSpellTypes Spell::GetCurrentContainer()
         return(CURRENT_GENERIC_SPELL);
 }
 
-bool Spell::CheckTargetBeforLimitation(Unit* target)
+bool Spell::CheckTargetBeforeLimitation(Unit* target)
 {
     // check right target                                                                                       // should activ for spells 72034, 72096
     if (m_spellInfo->AttributesEx3 & SPELL_ATTR_EX3_TARGET_ONLY_PLAYER && target->GetTypeId() != TYPEID_PLAYER /*&& m_spellInfo->EffectImplicitTargetA[eff] != TARGET_SCRIPT*/)
