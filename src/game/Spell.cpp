@@ -3345,7 +3345,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
     if (unMaxTargets && targetUnitMap.size() > unMaxTargets)
     {
         // cleanup list for a right solution (without this spells with unMaxTargets = 1 hit possible nothing, if target is not valid with CheckTarget())
-        for (UnitList::iterator itr = targetUnitMap.begin(); itr != targetUnitMap.end();++itr)
+        for (UnitList::iterator itr = targetUnitMap.begin(); itr != targetUnitMap.end();)
         {
             if (!CheckTargetBeforeLimitation(*itr))
             {
