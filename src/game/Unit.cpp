@@ -9881,10 +9881,6 @@ bool Unit::CanHaveThreatList() const
     if (creature->IsTotem())
         return false;
 
-    // Civilian creatures can not have a threat list
-    if (creature->IsCivilian())
-        return false;
-
     // pets can not have a threat list, unless they are controlled by a creature
     if (creature->IsPet() && creature->GetOwnerGuid().IsPlayer())
         return false;
