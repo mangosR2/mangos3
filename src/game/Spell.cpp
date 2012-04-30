@@ -3345,17 +3345,23 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
     if (unMaxTargets && targetUnitMap.size() > unMaxTargets)
     {
         // cleanup list for a right solution (without this spells with unMaxTargets = 1 hit possible nothing, if target is not valid with CheckTarget())
-        for (UnitList::iterator itr = targetUnitMap.begin(); itr != targetUnitMap.end();)
+        for (UnitList::iterator itr = targetUnitMap.begin(), next; itr != targetUnitMap.end();)
         {
-            if (!CheckTargetBeforeLimitation(*itr))
+            if (!*itr)
             {
-                itr = targetUnitMap.erase(itr);
+                ++itr;
                 continue;
             }
+
+            if (!CheckTargetBeforeLimitation(*itr))
+                itr = targetUnitMap.erase(itr);
             else
                 ++itr;
         }
+    }
 
+    if (unMaxTargets && targetUnitMap.size() > unMaxTargets)
+    {
         // make sure one unit is always removed per iteration
         uint32 removed_utarget = 0;
         for (UnitList::iterator itr = targetUnitMap.begin(), next; itr != targetUnitMap.end(); itr = next)
@@ -7775,7 +7781,11 @@ CurrentSpellTypes Spell::GetCurrentContainer()
 
 bool Spell::CheckTargetBeforeLimitation(Unit* target)
 {
+    if (!target)
+        return false;
     // check right target                                                                                       // should activ for spells 72034, 72096
+    if (!target->isAlive() && !IsSpellAllowDeadTarget(m_spellInfo))
+        return false;
     if (m_spellInfo->AttributesEx3 & SPELL_ATTR_EX3_TARGET_ONLY_PLAYER && target->GetTypeId() != TYPEID_PLAYER /*&& m_spellInfo->EffectImplicitTargetA[eff] != TARGET_SCRIPT*/)
         return false;
     // Check Aura spell req (need for AoE spells)
