@@ -1169,6 +1169,9 @@ bool WorldObject::IsWithinLOSInMap(const WorldObject* obj, bool strict) const
     float ox,oy,oz;
     obj->GetPosition(ox,oy,oz);
 
+    if (obj->GetObjectGuid().IsUnit() && ((Unit*)obj)->IsLevitating())
+        strict = false;
+
     return(IsWithinLOS(ox, oy, oz, strict ));
 }
 
