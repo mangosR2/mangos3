@@ -3144,20 +3144,20 @@ void Unit::SendMeleeAttackStart(Unit* pVictim)
     data << pVictim->GetObjectGuid();
 
     SendMessageToSet(&data, true);
-    DEBUG_LOG( "WORLD: Sent SMSG_ATTACKSTART" );
+    DETAIL_FILTER_LOG(LOG_FILTER_COMBAT, "Unit::SendMeleeAttackStart %s start attacking %s", GetObjectGuid().GetString().c_str(), pVictim ? pVictim->GetObjectGuid().GetString().c_str() : "<none>");
 }
 
 void Unit::SendMeleeAttackStop(Unit* victim)
 {
-    WorldPacket data( SMSG_ATTACKSTOP, (8+8+4) );                                      // we guess size
+    WorldPacket data(SMSG_ATTACKSTOP, (8+8+4));                                        // we guess size
     data << GetPackGUID();
-    data << (victim ? victim->GetPackGUID() : ObjectGuid().WriteAsPacked());           // can be 0x00...
+    data << (victim ? victim->GetPackGUID() : PackedGuid());                           // can be 0x00...
     data << uint32(0);                                                                 // can be 0x1
     SendMessageToSet(&data, true);
-    DETAIL_FILTER_LOG(LOG_FILTER_COMBAT, "%s stopped attacking %s", GetObjectGuid().GetString().c_str(), victim ? victim->GetObjectGuid().GetString().c_str() : "");
+    DETAIL_FILTER_LOG(LOG_FILTER_COMBAT, "Unit::SendMeleeAttackStop %s stopped attacking %s", GetObjectGuid().GetString().c_str(), victim ? victim->GetObjectGuid().GetString().c_str() : "<none>");
 
     /*if (victim->GetTypeId() == TYPEID_UNIT)
-    ((Creature*)victim)->AI().EnterEvadeMode(this);*/
+        ((Creature*)victim)->AI().EnterEvadeMode(this);*/
 }
 
 bool Unit::IsSpellBlocked(Unit *pCaster, SpellEntry const *spellEntry, WeaponAttackType attackType)
@@ -3987,6 +3987,12 @@ void Unit::InterruptSpell(CurrentSpellTypes spellType, bool withDelayed, bool se
 
     if (m_currentSpells[spellType] && (withDelayed || m_currentSpells[spellType]->getState() != SPELL_STATE_DELAYED) )
     {
+        DEBUG_FILTER_LOG(LOG_FILTER_SPELL_CAST,"Unit::InterruptSpell %s try interrupt spell %u, type %u, state %u",
+                GetObjectGuid().GetString().c_str(),
+                m_currentSpells[spellType]->m_spellInfo->Id,
+                spellType,
+                m_currentSpells[spellType]->getState());
+
         // send autorepeat cancel message for autorepeat spells
         if (spellType == CURRENT_AUTOREPEAT_SPELL && sendAutoRepeatCancelToClient)
         {
@@ -6610,7 +6616,10 @@ bool Unit::Attack(Unit *victim, bool meleeAttack)
     SetTargetGuid(victim->GetObjectGuid());
 
     if (meleeAttack)
+    {
         addUnitState(UNIT_STAT_MELEE_ATTACKING);
+        SendMeleeAttackStart(victim);
+    }
 
     m_attackingGuid = victim->GetObjectGuid();
 
@@ -6625,9 +6634,6 @@ bool Unit::Attack(Unit *victim, bool meleeAttack)
     // delay offhand weapon attack to next attack time
     if (haveOffhandWeapon())
         resetAttackTimer(OFF_ATTACK);
-
-    if (meleeAttack)
-        SendMeleeAttackStart(victim);
 
     return true;
 }
@@ -6679,7 +6685,11 @@ void Unit::AttackedBy(Unit *attacker)
 bool Unit::AttackStop(bool targetSwitch /*=false*/)
 {
     if (!m_attackingGuid || !GetMap())
+    {
+        clearUnitState(UNIT_STAT_MELEE_ATTACKING);
+        SendMeleeAttackStop(NULL);
         return false;
+    }
 
     Unit* victim = GetMap()->GetUnit(m_attackingGuid);
     GetMap()->RemoveAttackerFor(m_attackingGuid,GetObjectGuid());
@@ -6705,7 +6715,6 @@ bool Unit::AttackStop(bool targetSwitch /*=false*/)
     }
 
     SendMeleeAttackStop(victim);
-
     return true;
 }
 
@@ -11382,10 +11391,6 @@ void Unit::DoPetCastSpell(Player *owner, uint8 cast_count, SpellCastTargets* tar
 
     Creature* pet = dynamic_cast<Creature*>(this);
 
-    // auto target selection for some pet spells
-    if (spellInfo->IsFitToFamily<SPELLFAMILY_WARLOCK, CF_WARLOCK_VOIDWALKER_SPELLS>() && spellInfo->SpellIconID == 693)
-        targets->setUnitTarget((Unit*)owner);
-
     Unit* unit_target = targets ? targets->getUnitTarget() : NULL;
     if (!unit_target && !(targets->m_targetMask & TARGET_FLAG_DEST_LOCATION))
     {
@@ -11973,11 +11978,11 @@ bool Unit::IsPolymorphed() const
 
 bool Unit::IsCrowdControlled() const
 {
-    return  HasNegativeAuraType(SPELL_AURA_MOD_CONFUSE) ||
-            HasNegativeAuraType(SPELL_AURA_MOD_FEAR) ||
-            HasNegativeAuraType(SPELL_AURA_MOD_STUN) ||
-            HasNegativeAuraType(SPELL_AURA_MOD_ROOT) ||
-            HasNegativeAuraType(SPELL_AURA_TRANSFORM);
+    return  HasAuraType(SPELL_AURA_MOD_CONFUSE) ||
+            HasAuraType(SPELL_AURA_MOD_FEAR) ||
+            HasAuraType(SPELL_AURA_MOD_STUN) ||
+            HasAuraType(SPELL_AURA_MOD_ROOT) ||
+            HasAuraType(SPELL_AURA_TRANSFORM);
 }
 
 void Unit::SetDisplayId(uint32 modelId)
