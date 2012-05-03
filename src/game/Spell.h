@@ -446,12 +446,17 @@ class Spell
         void SendSpellStart();
         void SendSpellGo();
         void SendSpellCooldown();
+
         void SendLogExecute();
+        void SendEffectLogExecute(SpellEffectIndex eff, ObjectGuid targetGuid, uint32 data1 = 0, uint32 data2 = 0, float data3 = 0.0f);
+        ByteBuffer m_effectExecuteData[MAX_EFFECT_INDEX];
+
         void SendInterrupted(uint8 result);
         void SendChannelUpdate(uint32 time);
         void SendChannelStart(uint32 duration);
         void SendResurrectRequest(Player* target);
         void SendPlaySpellVisual(uint32 SpellID);
+
 
         void HandleEffects(Unit *pUnitTarget, Item *pItemTarget, GameObject *pGOTarget, SpellEffectIndex i);
         void HandleThreatSpells();
@@ -567,7 +572,6 @@ class Spell
         // These vars are used in both delayed spell system and modified immediate spell system
         bool m_referencedFromCurrentSpell;                  // mark as references to prevent deleted and access by dead pointers
         bool m_executedCurrently;                           // mark as executed to prevent deleted and access by dead pointers
-        bool m_needSpellLog;                                // need to send spell log?
         uint8 m_applyMultiplierMask;                        // by effect: damage multiplier needed?
         float m_damageMultipliers[MAX_EFFECT_INDEX];        // by effect: damage multiplier
 

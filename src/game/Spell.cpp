@@ -383,8 +383,15 @@ Spell::Spell( Unit* caster, SpellEntry const *info, bool triggered, ObjectGuid o
 
     UpdateOriginalCasterPointer();
 
-    for(int i = 0; i < MAX_EFFECT_INDEX; ++i)
-        m_currentBasePoints[i] = m_spellInfo->CalculateSimpleValue(SpellEffectIndex(i));
+    for (int i = 0; i < MAX_EFFECT_INDEX; ++i)
+    {
+        if (m_spellInfo->Effect[i] != SPELL_EFFECT_NONE)
+            m_currentBasePoints[i] = m_spellInfo->CalculateSimpleValue(SpellEffectIndex(i));
+        else
+            m_currentBasePoints[i] = 0;
+
+        m_effectExecuteData[i].clear();
+    }
 
     m_spellState = SPELL_STATE_PREPARING;
 
@@ -429,7 +436,7 @@ Spell::Spell( Unit* caster, SpellEntry const *info, bool triggered, ObjectGuid o
     {
         for(int j = 0; j < MAX_EFFECT_INDEX; ++j)
         {
-            if (m_spellInfo->Effect[j] == 0)
+            if (m_spellInfo->Effect[j] == SPELL_EFFECT_NONE)
                 continue;
 
             if (IsPositiveTarget(m_spellInfo->EffectImplicitTargetA[j], m_spellInfo->EffectImplicitTargetB[j]) && !(m_spellInfo->AttributesEx & SPELL_ATTR_EX_NEGATIVE))
@@ -4015,10 +4022,9 @@ void Spell::_handle_immediate_phase()
     // handle some immediate features of the spell here
     HandleThreatSpells();
 
-    m_needSpellLog = IsNeedSendToClient();
     for(int j = 0; j < MAX_EFFECT_INDEX; ++j)
     {
-        if (m_spellInfo->Effect[j] == 0)
+        if (m_spellInfo->Effect[j] == SPELL_EFFECT_NONE)
             continue;
 
         // apply Send Event effect to ground in case empty target lists
@@ -4027,10 +4033,6 @@ void Spell::_handle_immediate_phase()
             HandleEffects(NULL, NULL, NULL, SpellEffectIndex(j));
             continue;
         }
-
-        // Don't do spell log, if is school damage spell
-        if (m_spellInfo->Effect[j] == SPELL_EFFECT_SCHOOL_DAMAGE || m_spellInfo->Effect[j] == 0)
-            m_needSpellLog = false;
     }
 
     // initialize Diminishing Returns Data
@@ -4056,7 +4058,7 @@ void Spell::_handle_immediate_phase()
 void Spell::_handle_finish_phase()
 {
     // spell log
-    if (m_needSpellLog)
+    if (IsNeedSendToClient())
         SendLogExecute();
 }
 
@@ -4716,6 +4718,16 @@ void Spell::WriteSpellGoTargets(WorldPacket* data)
 
 void Spell::SendLogExecute()
 {
+    uint32 count1 = 0;
+    for (int i = 0; i < MAX_EFFECT_INDEX; ++i)
+    {
+        if (!m_effectExecuteData[i].empty())
+            ++count1;
+    }
+
+    if (!count1)
+        return;
+
     Unit *target = m_targets.getUnitTarget() ? m_targets.getUnitTarget() : m_caster;
 
     WorldPacket data(SMSG_SPELLLOGEXECUTE, (8+4+4+4+4+8));
@@ -4726,100 +4738,109 @@ void Spell::SendLogExecute()
         data << target->GetPackGUID();
 
     data << uint32(m_spellInfo->Id);
-    uint32 count1 = 1;
-    data << uint32(count1);                                 // count1 (effect count?)
-    for(uint32 i = 0; i < count1; ++i)
+    data << uint32(count1);                                 // count1 (effects count)
+
+    DEBUG_FILTER_LOG(LOG_FILTER_SPELL_CAST, "Spell::SendLogExecute() sended spelllog to %s (spell %u, effects count %u)", m_caster->GetObjectGuid().GetString().c_str(), m_spellInfo->Id, count1);
+
+    for (int i = 0; i < count1; ++i)
     {
-        data << uint32(m_spellInfo->Effect[EFFECT_INDEX_0]);// spell effect
-        uint32 count2 = 1;
-        data << uint32(count2);                             // count2 (target count?)
-        for(uint32 j = 0; j < count2; ++j)
+        if (m_effectExecuteData[i].empty())
+            continue;
+
+        data << uint32(m_spellInfo->Effect[i]);             // spell effect
+        data.append(m_effectExecuteData[i]);
+
+        m_effectExecuteData[i].clear();
+    }
+    m_caster->SendMessageToSet(&data, true);
+}
+
+void Spell::SendEffectLogExecute(SpellEffectIndex eff, ObjectGuid targetGuid, uint32 data1, uint32 data2, float data3)
+{
+    if (eff >= MAX_EFFECT_INDEX || m_spellInfo->Effect[eff] == SPELL_EFFECT_NONE)
+        return;
+
+    ByteBuffer& data = m_effectExecuteData[eff];
+    bool isFirst = data.empty();
+
+    switch(m_spellInfo->Effect[eff])
+    {
+        // target guid and some data logged
+        case SPELL_EFFECT_POWER_DRAIN:
         {
-            switch(m_spellInfo->Effect[EFFECT_INDEX_0])
-            {
-                case SPELL_EFFECT_POWER_DRAIN:
-                    if (Unit *unit = m_targets.getUnitTarget())
-                        data << unit->GetPackGUID();
-                    else
-                        data << uint8(0);
-                    data << uint32(0);
-                    data << uint32(0);
-                    data << float(0);
-                    break;
-                case SPELL_EFFECT_ADD_EXTRA_ATTACKS:
-                    if (Unit *unit = m_targets.getUnitTarget())
-                        data << unit->GetPackGUID();
-                    else
-                        data << uint8(0);
-                    data << uint32(0);                      // count?
-                    break;
-                case SPELL_EFFECT_INTERRUPT_CAST:
-                    if (Unit *unit = m_targets.getUnitTarget())
-                        data << unit->GetPackGUID();
-                    else
-                        data << uint8(0);
-                    data << uint32(0);                      // spellid
-                    break;
-                case SPELL_EFFECT_DURABILITY_DAMAGE:
-                    if (Unit *unit = m_targets.getUnitTarget())
-                        data << unit->GetPackGUID();
-                    else
-                        data << uint8(0);
-                    data << uint32(0);
-                    data << uint32(0);
-                    break;
-                case SPELL_EFFECT_OPEN_LOCK:
-                    if (Item *item = m_targets.getItemTarget())
-                        data << item->GetPackGUID();
-                    else
-                        data << uint8(0);
-                    break;
-                case SPELL_EFFECT_CREATE_ITEM:
-                case SPELL_EFFECT_CREATE_ITEM_2:
-                    data << uint32(m_spellInfo->EffectItemType[EFFECT_INDEX_0]);
-                    break;
-                case SPELL_EFFECT_SUMMON:
-                case SPELL_EFFECT_TRANS_DOOR:
-                case SPELL_EFFECT_SUMMON_PET:
-                case SPELL_EFFECT_SUMMON_OBJECT_WILD:
-                case SPELL_EFFECT_CREATE_HOUSE:
-                case SPELL_EFFECT_DUEL:
-                case SPELL_EFFECT_SUMMON_OBJECT_SLOT1:
-                case SPELL_EFFECT_SUMMON_OBJECT_SLOT2:
-                case SPELL_EFFECT_SUMMON_OBJECT_SLOT3:
-                case SPELL_EFFECT_SUMMON_OBJECT_SLOT4:
-                    if (Unit *unit = m_targets.getUnitTarget())
-                        data << unit->GetPackGUID();
-                    else if (m_targets.getItemTargetGuid())
-                        data << m_targets.getItemTargetGuid().WriteAsPacked();
-                    else if (GameObject *go = m_targets.getGOTarget())
-                        data << go->GetPackGUID();
-                    else
-                        data << uint8(0);                   // guid
-                    break;
-                case SPELL_EFFECT_FEED_PET:
-                    data << uint32(m_targets.getItemTargetEntry());
-                    break;
-                case SPELL_EFFECT_DISMISS_PET:
-                    if (Unit *unit = m_targets.getUnitTarget())
-                        data << unit->GetPackGUID();
-                    else
-                        data << uint8(0);
-                    break;
-                case SPELL_EFFECT_RESURRECT:
-                case SPELL_EFFECT_RESURRECT_NEW:
-                    if (Unit *unit = m_targets.getUnitTarget())
-                        data << unit->GetPackGUID();
-                    else
-                        data << uint8(0);
-                    break;
-                default:
-                    return;
-            }
+            // reserve one uint32 for counter, if need
+            if (isFirst)
+                data << uint32(0);
+            data << targetGuid.WriteAsPacked();
+            data << data1;
+            data << data2;
+            data << data3;
+            break;
+        }
+        // target guid and some data logged
+        case SPELL_EFFECT_DURABILITY_DAMAGE:
+        {
+            // reserve one uint32 for counter, if need
+            if (isFirst)
+                data << uint32(0);
+            data << targetGuid.WriteAsPacked();
+            data << data1;
+            data << data2;
+            break;
+        }
+        // target guid and some data logged
+        case SPELL_EFFECT_ADD_EXTRA_ATTACKS:
+        case SPELL_EFFECT_INTERRUPT_CAST:
+        {
+            // reserve one uint32 for counter, if need
+            if (isFirst)
+                data << uint32(0);
+            data << targetGuid.WriteAsPacked();
+            data << data1;
+            break;
+        }
+        // only entry of item used/created
+        case SPELL_EFFECT_CREATE_ITEM:
+        case SPELL_EFFECT_CREATE_ITEM_2:
+        case SPELL_EFFECT_FEED_PET:
+        {
+            // reserve one uint32 for counter, if need
+            if (isFirst)
+                data << uint32(0);
+            data <<    data1;
+            break;
+        }
+        // only ObjectGuid of target logged
+        case SPELL_EFFECT_OPEN_LOCK:
+        case SPELL_EFFECT_SUMMON:
+        case SPELL_EFFECT_TRANS_DOOR:
+        case SPELL_EFFECT_SUMMON_PET:
+        case SPELL_EFFECT_SUMMON_OBJECT_WILD:
+        case SPELL_EFFECT_CREATE_HOUSE:
+        case SPELL_EFFECT_DUEL:
+        case SPELL_EFFECT_SUMMON_OBJECT_SLOT1:
+        case SPELL_EFFECT_SUMMON_OBJECT_SLOT2:
+        case SPELL_EFFECT_SUMMON_OBJECT_SLOT3:
+        case SPELL_EFFECT_SUMMON_OBJECT_SLOT4:
+        case SPELL_EFFECT_DISMISS_PET:
+        case SPELL_EFFECT_RESURRECT:
+        case SPELL_EFFECT_RESURRECT_NEW:
+        {
+            // reserve one uint32 for counter, if need
+            if (isFirst)
+                data << uint32(0);
+            data << targetGuid.WriteAsPacked();
+            break;
+        }
+        // nothing logged, no log data for effect
+        default:
+        {
+            // nothing need
+            return;
         }
     }
-
-    m_caster->SendMessageToSet(&data, true);
+    uint32 count = m_effectExecuteData[eff].read<uint32>(0);
+    m_effectExecuteData[eff].put<uint32>(0, ++count);
 }
 
 void Spell::SendInterrupted(uint8 result)
