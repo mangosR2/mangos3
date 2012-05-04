@@ -192,7 +192,10 @@ void Creature::AddToWorld()
 {
     ///- Register the creature for guid lookup
     if (!IsInWorld() && GetObjectGuid().IsCreatureOrVehicle())
+    {
+        MAPLOCK_WRITE(this, MAP_LOCK_TYPE_DEFAULT);
         GetMap()->GetObjectsStore().insert<Creature>(GetObjectGuid(), (Creature*)this);
+    }
 
     if (IsInWorld() && GetObjectGuid().IsPet())
     {
@@ -210,7 +213,10 @@ void Creature::RemoveFromWorld()
 {
     ///- Remove the creature from the accessor
     if (IsInWorld() && GetObjectGuid().IsCreatureOrVehicle())
+    {
+        MAPLOCK_WRITE(this, MAP_LOCK_TYPE_DEFAULT);
         GetMap()->GetObjectsStore().erase<Creature>(GetObjectGuid(), (Creature*)NULL);
+    }
 
     if (IsInWorld() && GetObjectGuid().IsPet())
     {
