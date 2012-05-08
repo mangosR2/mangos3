@@ -4023,6 +4023,9 @@ void Unit::FinishSpell(CurrentSpellTypes spellType, bool ok /*= true*/)
 
 bool Unit::IsNonMeleeSpellCasted(bool withDelayed, bool skipChanneled, bool skipAutorepeat) const
 {
+    if (!IsInWorld())
+        return false;
+
     // We don't do loop here to explicitly show that melee spell is excluded.
     // Maybe later some special spells will be excluded too.
 
