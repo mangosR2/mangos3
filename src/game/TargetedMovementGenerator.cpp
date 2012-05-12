@@ -53,7 +53,7 @@ void TargetedMovementGeneratorMedium<T,D>::_setTargetLocation(T &owner)
         owner.GetPosition(x, y, z);
     }
     else if (sWorld.getConfig(CONFIG_BOOL_PET_ADVANCED_AI) && (fabs(i_offset) > M_NULL_F) && 
-        fabs((i_target->GetDistance(&owner)  + owner.GetObjectBoundingRadius() + i_target->GetObjectBoundingRadius() - i_offset) < 2 * PET_FOLLOW_DIST))
+        (fabs(i_target->GetDistance(&owner)  + owner.GetObjectBoundingRadius() + i_target->GetObjectBoundingRadius() - i_offset) < 2 * PET_FOLLOW_DIST))
     {
         if (!owner.movespline->Finalized())
             return;
