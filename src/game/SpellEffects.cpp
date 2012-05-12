@@ -2397,6 +2397,16 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
 
                     return;
                 }
+                case 47670:                             // Awaken Gortok
+                {
+                    if (unitTarget && unitTarget->GetTypeId() == TYPEID_UNIT)
+                    {
+                        unitTarget->RemoveAurasDueToSpell(16245);
+                        unitTarget->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                        ((Creature*)unitTarget)->SetInCombatWithZone();
+                    }
+                    break;
+                }
                 case 48046:                                 // Use Camera
                 {
                     if (!unitTarget)
