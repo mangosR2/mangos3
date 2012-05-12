@@ -10259,15 +10259,16 @@ int32 Unit::CalculateAuraDuration(SpellEntry const* spellProto, uint32 effectMas
 
     if (isAffectedByModifier)
     {
+        // This aura modifiers possible stacks. need more research (/dev/rsa)
         dispelMod   = GetTotalAuraModifierByMiscValue(SPELL_AURA_MOD_DURATION_OF_EFFECTS_BY_DISPEL, spellProto->Dispel);
-        dmgClassMod = GetTotalAuraModifierByMiscValue(SPELL_AURA_MOD_DURATION_OF_MAGIC_EFFECTS, spellProto->DmgClass);
+        dmgClassMod = GetTotalAuraModifierByMiscValue(SPELL_AURA_MOD_DURATION_OF_MAGIC_EFFECTS,     spellProto->Dispel);
     }
 
     int32 durationMod = std::min(mechanicMod, std::min(dispelMod, dmgClassMod));
 
     if (durationMod != 0)
     {
-        duration = int32(int64(duration) * (100+durationMod) / 100);
+        duration = int32(floor((float)duration * ((100.0f + (float)durationMod) / 100.0f)));
 
         if (duration < 0)
             duration = 0;
