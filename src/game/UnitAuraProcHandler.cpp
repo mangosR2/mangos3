@@ -1683,6 +1683,9 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, DamageInfo* damageI
                 // Rapture
                 case 2894:
                 {
+                    if (!procSpell)
+                        return SPELL_AURA_PROC_FAILED;
+
                     // Proc only on first effect
                     if (triggeredByAura->GetEffIndex() != EFFECT_INDEX_1)
                         return SPELL_AURA_PROC_CANT_TRIGGER;
@@ -1691,10 +1694,14 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, DamageInfo* damageI
                     if (!pCaster || !pCaster->IsInWorld())
                         return SPELL_AURA_PROC_FAILED;
 
-                    // energize caster
-                    int32 manapct1000 = 5 * (sSpellMgr.GetSpellRank(triggeredByAura->GetId()) + 2);
-                    int32 bp0 = pCaster->GetMaxPower(POWER_MANA) * manapct1000 / 1000;
-                    pCaster->CastCustomSpell(pCaster, 47755, &bp0, NULL, NULL, true);
+                    // only Power Word: Shield returns Mana to Priest
+                    if (procSpell->Id  != 47753)
+                    {
+                        // energize caster
+                        int32 manapct1000 = 5 * (sSpellMgr.GetSpellRank(triggeredByAura->GetId()) + 2);
+                        int32 bp0 = pCaster->GetMaxPower(POWER_MANA) * manapct1000 / 1000;
+                        pCaster->CastCustomSpell(pCaster, 47755, &bp0, NULL, NULL, true);
+                    }
 
                     if (!roll_chance_i(triggeredByAura->GetModifier()->m_amount) || pCaster->HasAura(63853))
                         return SPELL_AURA_PROC_FAILED;
