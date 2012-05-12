@@ -62,6 +62,7 @@ CREATE TABLE `pet_scaling_data` (
 ) DEFAULT CHARSET=utf8 PACK_KEYS=0 COMMENT='Stores pet scaling data (in percent from owner value).';
 
 -- Spell DBC
+DROP TABLE IF EXISTS `spell_dbc`;
 CREATE TABLE IF NOT EXISTS `spell_dbc` (
   `Id` int(10) unsigned NOT NULL,
   `Category` int(10) unsigned NOT NULL DEFAULT '0',
@@ -81,8 +82,8 @@ CREATE TABLE IF NOT EXISTS `spell_dbc` (
   `RequiresSpellFocus` int(10) unsigned NOT NULL DEFAULT '0',
   `CasterAuraState` int(10) unsigned NOT NULL DEFAULT '0',
   `TargetAuraState` int(10) NOT NULL DEFAULT '0',
-  `ExcludeCasterAuraState` int(10) unsigned NOT NULL DEFAULT '0',
-  `ExcludeTargetAuraState` int(10) NOT NULL DEFAULT '0',
+  `CasterAuraStateNot` int(10) unsigned NOT NULL DEFAULT '0',
+  `TargetAuraStateNot` int(10) NOT NULL DEFAULT '0',
   `CasterAuraSpell` int(10) unsigned NOT NULL DEFAULT '0',
   `TargetAuraSpell` int(10) unsigned NOT NULL DEFAULT '0',
   `ExcludeCasterAuraSpell` int(10) unsigned NOT NULL DEFAULT '0',
@@ -164,7 +165,7 @@ CREATE TABLE IF NOT EXISTS `spell_dbc` (
   `EffectSpellClassMaskC2` int(10) unsigned NOT NULL DEFAULT '0',
   `EffectSpellClassMaskC3` int(10) unsigned NOT NULL DEFAULT '0',
   `SpellIconID` int(10) unsigned NOT NULL DEFAULT '0',
-  `ManaCostPct` int(10) NOT NULL DEFAULT '0',
+  `ManaCostPercentage` int(10) NOT NULL DEFAULT '0',
   `StartRecoveryCategory` int(10) NOT NULL DEFAULT '0',
   `StartRecoveryTime` int(10) NOT NULL DEFAULT '0',
   `MaxTargetLevel` tinyint(3) unsigned NOT NULL DEFAULT '0',
