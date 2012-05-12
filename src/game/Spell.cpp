@@ -388,7 +388,10 @@ Spell::Spell( Unit* caster, SpellEntry const *info, bool triggered, ObjectGuid o
         if (m_spellInfo->Effect[i] != SPELL_EFFECT_NONE)
             m_currentBasePoints[i] = m_spellInfo->CalculateSimpleValue(SpellEffectIndex(i));
         else
-            m_currentBasePoints[i] = 0;
+        {
+            // We must make check for use NONE effects in spell.dbc instead of this hack (this - from clean mangos).
+            m_currentBasePoints[i] = m_spellInfo->CalculateSimpleValue(SpellEffectIndex(i));
+        }
 
         m_effectExecuteData[i].clear();
     }
