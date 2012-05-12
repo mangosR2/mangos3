@@ -360,9 +360,8 @@ bool IsNoStackAuraDueToAura(uint32 spellId_1, uint32 spellId_2)
 bool IsSpellAffectedBySpellMods(SpellEntry const* spellInfo)
 {
     return !(IsPassiveSpell(spellInfo) &&
-            !(spellInfo->Attributes & SPELL_ATTR_ABILITY) &&
-            spellInfo->AttributesEx3 & SPELL_ATTR_EX3_CAN_PROC_WITH_TRIGGERED
-            );
+        !spellInfo->HasAttribute(SPELL_ATTR_ABILITY) &&
+        spellInfo->HasAttribute(SPELL_ATTR_EX3_CAN_PROC_WITH_TRIGGERED));
 }
 
 
@@ -509,7 +508,7 @@ SpellSpecific GetSpellSpecific(uint32 spellId)
 
             // skip Heart of the Crusader and Judgements of the Just that have also same spell family mask
             if (spellInfo->SpellFamilyFlags.test<CF_PALADIN_JUDGEMENT_OF_RIGHT, CF_PALADIN_JUDGEMENT_OF_WISDOM_LIGHT, CF_PALADIN_JUDGEMENT_OF_JUSTICE, CF_PALADIN_HEART_OF_THE_CRUSADER, CF_PALADIN_JUDGEMENT_OF_BLOOD_MARTYR>() &&
-                (spellInfo->AttributesEx3 & SPELL_ATTR_EX3_UNK9) && !spellInfo->SpellFamilyFlags.test<CF_PALADIN_HEART_OF_THE_CRUSADER,CF_PALADIN_JUDGEMENT_OF_JUST>())
+                (spellInfo->HasAttribute(SPELL_ATTR_EX3_UNK9) && !spellInfo->SpellFamilyFlags.test<CF_PALADIN_HEART_OF_THE_CRUSADER,CF_PALADIN_JUDGEMENT_OF_JUST>())
                 return SPELL_JUDGEMENT;
 
             // only paladin auras have this (for palaldin class family)
@@ -539,7 +538,7 @@ SpellSpecific GetSpellSpecific(uint32 spellId)
     if ((IsSpellHaveAura(spellInfo, SPELL_AURA_TRACK_CREATURES) ||
         IsSpellHaveAura(spellInfo, SPELL_AURA_TRACK_RESOURCES)  ||
         IsSpellHaveAura(spellInfo, SPELL_AURA_TRACK_STEALTHED)) &&
-        ((spellInfo->AttributesEx & SPELL_ATTR_EX_UNK17) || (spellInfo->AttributesEx6 & SPELL_ATTR_EX6_CASTABLE_ON_VEHICLE)))
+        (spellInfo->HasAttributes(SPELL_ATTR_EX_UNK17) || spellInfo->HasAttribute(SPELL_ATTR_EX6_CASTABLE_ON_VEHICLE)))
         return SPELL_TRACKER;
 
     // elixirs can have different families, but potion most ofc.
@@ -1054,7 +1053,7 @@ bool IsNonPositiveSpell(SpellEntry const* spellProto)
     if (!spellProto)
         return false;
 
-    if (spellProto->AttributesEx6 & SPELL_ATTR_EX6_NO_STACK_DEBUFF_MAJOR)
+    if (spellProto->HasAttribute(SPELL_ATTR_EX6_NO_STACK_DEBUFF_MAJOR))
         return true;
 
     if (IsPositiveSpell(spellProto))
@@ -1142,7 +1141,7 @@ SpellCastResult GetErrorAtShapeshiftedCast (SpellEntry const *spellInfo, uint32 
 
     if (actAsShifted)
     {
-        if (spellInfo->Attributes & SPELL_ATTR_NOT_SHAPESHIFT) // not while shapeshifted
+        if (spellInfo->HasAttribute(SPELL_ATTR_NOT_SHAPESHIFT) // not while shapeshifted
         {
             //but we must allow cast of Berserk+modifier from any form... where for the hell should we do it?
             if (!(spellInfo->SpellIconID == 1680 && (spellInfo->AttributesEx & 0x8000)))
@@ -2465,7 +2464,7 @@ bool SpellMgr::IsGroupBuff(SpellEntry const *spellInfo)
 // is holder stackable from different casters
 bool SpellMgr::IsStackableSpellAuraHolder(SpellEntry const* spellInfo)
 {
-    if (spellInfo->AttributesEx3 & SPELL_ATTR_EX3_STACK_FOR_DIFF_CASTERS)
+    if (spellInfo->HasAttribute(SPELL_ATTR_EX3_STACK_FOR_DIFF_CASTERS))
         return true;
 
     if (GetSpellSpecific(spellInfo->Id) == SPELL_JUDGEMENT)

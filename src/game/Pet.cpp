@@ -816,7 +816,7 @@ void Pet::Unsummon(PetSaveMode mode, Unit* owner /*= NULL*/)
                     p_owner->SetGroupUpdateFlag(GROUP_UPDATE_PET);
 
                 // Special way for remove cooldown if SPELL_ATTR_DISABLED_WHILE_ACTIVE
-                if (spellInfo && spellInfo->Attributes & SPELL_ATTR_DISABLED_WHILE_ACTIVE)
+                if (spellInfo && spellInfo->HasAttribute(SPELL_ATTR_DISABLED_WHILE_ACTIVE))
                     if (p_owner->GetTemporaryUnsummonedPetNumber(GetPetCounter()) != m_charmInfo->GetPetNumber())
                         p_owner->SendCooldownEvent(spellInfo);
             }
@@ -3308,7 +3308,7 @@ Unit* Pet::SelectPreferredTargetForSpell(SpellEntry const* spellInfo)
     SpellRangeEntry const* srange = sSpellRangeStore.LookupEntry(spellInfo->rangeIndex);
 
     float max_range_friendly = GetSpellMaxRange(srange,true);
-    float max_range_unfriendly = (spellInfo->rangeIndex == SPELL_RANGE_IDX_COMBAT) ? 
+    float max_range_unfriendly = (spellInfo->rangeIndex == SPELL_RANGE_IDX_COMBAT) ?
                                     GetObjectBoundingRadius() + 1.0f :
                                     GetSpellMaxRange(srange,false);
 
@@ -3454,7 +3454,7 @@ Unit* Pet::SelectPreferredTargetForSpell(SpellEntry const* spellInfo)
                     if (!itr->second->IsPositive())
                         positive = false;
                     else
-                        positive = (itr->second->GetSpellProto()->AttributesEx & SPELL_ATTR_EX_NEGATIVE) == 0;
+                        positive = !itr->second->GetSpellProto()->HasAttribute(SPELL_ATTR_EX_NEGATIVE);
 
                     if (positive == IsFriendlyTo(target))
                         continue;

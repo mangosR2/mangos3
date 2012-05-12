@@ -3998,7 +3998,7 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(Unit *pVictim, DamageIn
                 if (!procSpell)
                     return SPELL_AURA_PROC_FAILED;
                 // only allow melee finishing move to proc
-                if (!(procSpell->AttributesEx & SPELL_ATTR_EX_REQ_TARGET_COMBO_POINTS) || procSpell->Id == 26679)
+                if (!procSpell->HasAttribute(SPELL_ATTR_EX_REQ_TARGET_COMBO_POINTS) || procSpell->Id == 26679)
                     return SPELL_AURA_PROC_FAILED;
                 trigger_spell_id = 70802;
                 target = this;
@@ -5288,8 +5288,8 @@ SpellAuraProcResult Unit::IsTriggeredAtCustomProcEvent(Unit *pVictim, SpellAuraH
                     if (EventProcFlag || spellProcEvent)
                         return SPELL_AURA_PROC_FAILED;
                     else if (procFlag & PROC_FLAG_TAKEN_ANY_DAMAGE &&
-                        (spellProto->AuraInterruptFlags & AURA_INTERRUPT_FLAG_DAMAGE ||
-                        spellProto->Attributes & SPELL_ATTR_BREAKABLE_BY_DAMAGE))
+                        ((spellProto->AuraInterruptFlags & AURA_INTERRUPT_FLAG_DAMAGE) ||
+                        spellProto->HasAttribute(SPELL_ATTR_BREAKABLE_BY_DAMAGE)))
                         return SPELL_AURA_PROC_OK;
                     break;
                 }
@@ -5320,7 +5320,7 @@ SpellAuraProcResult Unit::HandleDamageShieldAuraProc(Unit* pVictim, DamageInfo* 
     procDamageInfo.CleanDamage(0, 0, BASE_ATTACK, MELEE_HIT_NORMAL);
 
 
-    pVictim->CalculateDamageAbsorbAndResist(this, &procDamageInfo, !(spellProto->AttributesEx & SPELL_ATTR_EX_CANT_REFLECTED));
+    pVictim->CalculateDamageAbsorbAndResist(this, &procDamageInfo, !spellProto->HasAttribute(SPELL_ATTR_EX_CANT_REFLECTED));
 
     DealDamageMods(pVictim, procDamageInfo.damage, &procDamageInfo.absorb);
 

@@ -191,8 +191,8 @@ void GlobalCooldownMgr::CancelGlobalCooldown(SpellEntry const* spellInfo)
 // Methods of class Unit
 
 Unit::Unit() :
-    i_motionMaster(this), 
-    m_ThreatManager(this), 
+    i_motionMaster(this),
+    m_ThreatManager(this),
     m_HostileRefManager(this),
     m_charmInfo(NULL),
     m_vehicleInfo(NULL),
@@ -596,7 +596,7 @@ float Unit::GetMeleeAttackDistance(Unit* pVictim /* NULL */) const
 {
     // The measured values show BASE_MELEE_OFFSET in (1.3224, 1.342)
     float sizefactor = GetObjectBoundingRadius() + pVictim->GetObjectBoundingRadius();
-    float dist = GetFloatValue(UNIT_FIELD_COMBATREACH) + 
+    float dist = GetFloatValue(UNIT_FIELD_COMBATREACH) +
         (pVictim ? pVictim->GetFloatValue(UNIT_FIELD_COMBATREACH) : 0.0f) +
         sizefactor +
         BASE_MELEERANGE_OFFSET;
@@ -833,7 +833,7 @@ uint32 Unit::DealDamage(Unit *pVictim, DamageInfo* damageInfo, bool durabilityLo
     //Get in CombatState
     if (pVictim != this && damageInfo->damageType != DOT)
     {
-        if (!spellProto || !(spellProto->AttributesEx & SPELL_ATTR_EX_NO_THREAT))
+        if (!spellProto || !spellProto->HasAttribute(SPELL_ATTR_EX_NO_THREAT))
         {
             SetInCombatWith(pVictim);
             pVictim->SetInCombatWith(this);
@@ -2126,7 +2126,7 @@ void Unit::CalculateDamageAbsorbAndResist(Unit *pCaster, DamageInfo* damageInfo,
     // Magic damage, check for resists
     if (!(damageInfo->SchoolMask() & SPELL_SCHOOL_MASK_NORMAL) &&
         !damageInfo->IsMeleeDamage() &&
-        !(damageInfo->m_spellInfo->AttributesEx4 & SPELL_ATTR_EX4_IGNORE_RESISTANCES))
+        !damageInfo->m_spellInfo->HasAttribute(SPELL_ATTR_EX4_IGNORE_RESISTANCES))
     {
         // Get base resistance for schoolmask
         float tmpvalue2 = (float)GetResistance(damageInfo->SchoolMask());
@@ -2757,7 +2757,7 @@ void Unit::CalculateAbsorbResistBlock(Unit *pCaster, DamageInfo *damageInfo, Spe
         damageInfo->damage-=damageInfo->blocked;
     }
 
-    CalculateDamageAbsorbAndResist(pCaster, damageInfo, !(spellProto->AttributesEx & SPELL_ATTR_EX_CANT_REFLECTED));
+    CalculateDamageAbsorbAndResist(pCaster, damageInfo, !spellProto->HasAttribute(SPELL_ATTR_EX_CANT_REFLECTED));
 }
 
 void Unit::CalculateHealAbsorb(const uint32 heal, uint32 *absorb)
@@ -3502,7 +3502,7 @@ SpellMissInfo Unit::SpellHitResult(Unit *pVictim, SpellEntry const *spell, bool 
 
     if (IsPositiveSpell(spell) && IsFriendlyTo(pVictim))
         return SPELL_MISS_NONE;
-    else if (!(spell->Attributes & SPELL_ATTR_UNAFFECTED_BY_INVULNERABILITY))
+    else if (!spell->HasAttribute(SPELL_ATTR_UNAFFECTED_BY_INVULNERABILITY))
     {
         // Check for immune
         if (IsSpellCauseDamage(spell) && pVictim->IsImmunedToDamage(GetSpellSchoolMask(spell)))
@@ -4034,7 +4034,7 @@ bool Unit::IsNonMeleeSpellCasted(bool withDelayed, bool skipChanneled, bool skip
         (m_currentSpells[CURRENT_GENERIC_SPELL]->getState() != SPELL_STATE_FINISHED) &&
         (withDelayed || m_currentSpells[CURRENT_GENERIC_SPELL]->getState() != SPELL_STATE_DELAYED))
     {
-        if (!(m_currentSpells[CURRENT_GENERIC_SPELL]->m_spellInfo->AttributesEx2 & SPELL_ATTR_EX2_NOT_RESET_AUTOSHOT))
+        if (!m_currentSpells[CURRENT_GENERIC_SPELL]->m_spellInfo->HasAttribute(SPELL_ATTR_EX2_NOT_RESET_AUTOSHOT))
             return true;
     }
 
@@ -5143,7 +5143,7 @@ void Unit::RemoveAurasDueToSpellBySteal(uint32 spellId, ObjectGuid casterGuid, U
         new_aur->GetModifier()->periodictime = periodic < new_max_dur ? periodic : new_max_dur;
     }
 
-    if (holder->GetSpellProto()->AttributesEx7 & SPELL_ATTR_EX7_DISPEL_CHARGES)
+    if (holder->GetSpellProto()->HasAttribute(SPELL_ATTR_EX7_DISPEL_CHARGES))
     {
         if (holder->DropAuraCharge())
             RemoveSpellAuraHolder(holder, AURA_REMOVE_BY_DISPEL);
@@ -5568,14 +5568,14 @@ void Unit::HandleArenaPreparation(bool apply)
 
         // Remove all buffs with duration < 25 sec (actually depends on config value)
         // and auras, which have SPELL_ATTR_EX5_REMOVE_AT_ENTER_ARENA (former SPELL_ATTR_EX5_UNK2 = 0x00000004).
-        for(SpellAuraHolderMap::iterator iter = m_spellAuraHolders.begin(); iter != m_spellAuraHolders.end();)
+        for (SpellAuraHolderMap::iterator iter = m_spellAuraHolders.begin(); iter != m_spellAuraHolders.end();)
         {
-            if ((!(iter->second->GetSpellProto()->AttributesEx4 & SPELL_ATTR_EX4_UNK21) &&
-                                                            // don't remove stances, shadowform, pally/hunter auras
-            !iter->second->IsPassive() &&                   // don't remove passive auras
-            ((iter->second->GetAuraMaxDuration() > 0 &&
-            iter->second->GetAuraDuration() <= sWorld.getConfig(CONFIG_UINT32_ARENA_AURAS_DURATION)*IN_MILLISECONDS)) ||
-            iter->second->GetSpellProto()->AttributesEx5 & SPELL_ATTR_EX5_REMOVE_AT_ENTER_ARENA))
+            if (!iter->second->GetSpellProto()->HasAttribute(SPELL_ATTR_EX4_UNK21) &&
+                                                                // don't remove stances, shadowform, pally/hunter auras
+                !iter->second->IsPassive() &&                   // don't remove passive auras
+                (iter->second->GetAuraMaxDuration() > 0 &&
+                iter->second->GetAuraDuration() <= sWorld.getConfig(CONFIG_UINT32_ARENA_AURAS_DURATION) * IN_MILLISECONDS) ||
+                iter->second->GetSpellProto()->HasAttribute(SPELL_ATTR_EX5_REMOVE_AT_ENTER_ARENA))
             {
                 RemoveSpellAuraHolder(iter->second, AURA_REMOVE_BY_CANCEL);
                 iter = m_spellAuraHolders.begin();
@@ -5780,7 +5780,7 @@ Aura* Unit::GetScalingAura(AuraType type, uint32 stat)
         if (!holder || holder->IsDeleted() || holder->IsEmptyHolder() || holder->GetCasterGuid() != GetObjectGuid())
             continue;
 
-        if (holder->GetSpellProto()->AttributesEx4 & SPELL_ATTR_EX4_PET_SCALING_AURA)
+        if (holder->GetSpellProto()->HasAttribute(SPELL_ATTR_EX4_PET_SCALING_AURA))
         {
             switch(type)
             {
@@ -7030,7 +7030,7 @@ void Unit::RemoveGuardian( Pet* pet )
     {
         uint32 SpellID = pet->GetCreateSpellID();
         SpellEntry const *spellInfo = sSpellStore.LookupEntry(SpellID);
-        if (spellInfo && spellInfo->Attributes & SPELL_ATTR_DISABLED_WHILE_ACTIVE)
+        if (spellInfo && spellInfo->HasAttribute(SPELL_ATTR_DISABLED_WHILE_ACTIVE))
         {
             ((Player*)this)->SendCooldownEvent(spellInfo);
         }
@@ -7251,7 +7251,7 @@ int32 Unit::SpellBonusWithCoeffs(SpellEntry const *spellProto, int32 total, int3
 {
 
     // Not apply this to spells with SPELL_ATTR_EX3_DISABLE_MODS attribute
-    if (spellProto->AttributesEx3 & SPELL_ATTR_EX3_DISABLE_MODS)
+    if (spellProto->HasAttribute(SPELL_ATTR_EX3_DISABLE_MODS))
         return total;
 
     // Distribute Damage over multiple effects, reduce by AoE
@@ -7594,8 +7594,8 @@ uint32 Unit::SpellDamageBonusDone(Unit *pVictim, SpellEntry const *spellProto, u
                     Unit::SpellAuraHolderMap const& holderMap = pVictim->GetSpellAuraHolderMap();
                     for (Unit::SpellAuraHolderMap::const_iterator itr = holderMap.begin(); itr != holderMap.end(); ++itr)
                     {
-                        if (itr->second && 
-                            !itr->second->IsDeleted() && 
+                        if (itr->second &&
+                            !itr->second->IsDeleted() &&
                             itr->second->HasMechanic(ttwAura->GetModifier()->m_miscvalue))
                         {
                             DoneTotalMod *= ((float)ttwAura->GetModifier()->m_amount + 100.0f) / 100.0f;
@@ -8446,9 +8446,9 @@ bool Unit::IsImmuneToSpell(SpellEntry const* spellInfo) const
         if (itr->type == spellInfo->Dispel)
             return true;
 
-    if (!(spellInfo->Attributes & SPELL_ATTR_UNAFFECTED_BY_INVULNERABILITY) &&
-        !(spellInfo->AttributesEx & SPELL_ATTR_EX_UNAFFECTED_BY_SCHOOL_IMMUNE) &&         // unaffected by school immunity
-        !(spellInfo->AttributesEx & SPELL_ATTR_EX_DISPEL_AURAS_ON_IMMUNITY))              // can remove immune (by dispell or immune it)
+    if (!spellInfo->HasAttribute(SPELL_ATTR_UNAFFECTED_BY_INVULNERABILITY) &&
+        !spellInfo->HasAttribute(SPELL_ATTR_EX_UNAFFECTED_BY_SCHOOL_IMMUNE) &&         // unaffected by school immunity
+        !spellInfo->HasAttribute(SPELL_ATTR_EX_DISPEL_AURAS_ON_IMMUNITY))              // can remove immune (by dispell or immune it)
     {
         SpellImmuneList const& schoolList = m_spellImmune[IMMUNITY_SCHOOL];
         for(SpellImmuneList::const_iterator itr = schoolList.begin(); itr != schoolList.end(); ++itr)
@@ -8480,14 +8480,14 @@ bool Unit::IsImmuneToSpellEffect(SpellEntry const* spellInfo, SpellEffectIndex i
     if (!spellInfo)
         return false;
 
-    if (spellInfo->Attributes & SPELL_ATTR_UNAFFECTED_BY_INVULNERABILITY)
+    if (spellInfo->HasAttribute(SPELL_ATTR_UNAFFECTED_BY_INVULNERABILITY))
         return false;
 
     if (spellInfo->Effect[index] == SPELL_EFFECT_NONE)
         return true;
 
     MAPLOCK_READ(const_cast<Unit*>(this), MAP_LOCK_TYPE_AURAS);
-    if (!(spellInfo->Attributes & SPELL_ATTR_UNAFFECTED_BY_INVULNERABILITY))
+    if (!spellInfo->HasAttribute(SPELL_ATTR_UNAFFECTED_BY_INVULNERABILITY))
     {
         //If m_immuneToEffect type contain this effect type, IMMUNE effect.
         uint32 effect = spellInfo->Effect[index];
@@ -8577,11 +8577,11 @@ uint32 Unit::MeleeDamageBonusDone(Unit *pVictim, uint32 pdamage,WeaponAttackType
             if (!holder || holder->IsDeleted())
                 continue;
 
-            if ((aura->GetModifier()->m_miscvalue & schoolMask ||                        // schoolmask has to fit with the intrinsic spell school
-                aura->GetSpellProto()->AttributesEx4 & SPELL_ATTR_EX4_PET_SCALING_AURA) &&  // completely schoolmask-independend: pet scaling auras
-                                                                                            // Those auras have SPELL_SCHOOL_MASK_MAGIC, but anyway should also affect
-                                                                                            // physical damage from non-weapon-damage-based spells (claw, swipe etc.)
-                aura->GetModifier()->m_miscvalue & GetMeleeDamageSchoolMask() &&         // AND schoolmask has to fit with weapon damage school (essential for non-physical spells)
+            if ((aura->GetModifier()->m_miscvalue & schoolMask ||                          // schoolmask has to fit with the intrinsic spell school
+                aura->GetSpellProto()->HasAttribute(SPELL_ATTR_EX4_PET_SCALING_AURA)) &&   // completely schoolmask-independend: pet scaling auras
+                                                                                           // Those auras have SPELL_SCHOOL_MASK_MAGIC, but anyway should also affect
+                                                                                           // physical damage from non-weapon-damage-based spells (claw, swipe etc.)
+                aura->GetModifier()->m_miscvalue & GetMeleeDamageSchoolMask() &&           // AND schoolmask has to fit with weapon damage school (essential for non-physical spells)
                 ((holder->GetSpellProto()->EquippedItemClass == -1) ||                     // general, weapon independent
                 (pWeapon && pWeapon->IsFitToSpellRequirements(holder->GetSpellProto()))))  // OR used weapon fits aura requirements
             {
@@ -12468,7 +12468,7 @@ void Unit::RemoveAurasAtMechanicImmunity(uint32 mechMask, uint32 exceptSpellId, 
                 iter->second->IsDeleted() ||
                 iter->second->IsEmptyHolder() ||
                 iter->second->GetId() == exceptSpellId ||
-                iter->second->GetSpellProto()->Attributes & SPELL_ATTR_UNAFFECTED_BY_INVULNERABILITY ||
+                iter->second->GetSpellProto()->HasAttribute(SPELL_ATTR_UNAFFECTED_BY_INVULNERABILITY) ||
                 non_positive && iter->second->IsPositive())
                 continue;
 
@@ -13320,7 +13320,7 @@ uint32 Unit::CalculateAuraPeriodicTimeWithHaste(SpellEntry const* spellProto, ui
     if (!spellProto || oldPeriodicTime == 0)
         return 0;
 
-    bool applyHaste = spellProto->AttributesEx5 & SPELL_ATTR_EX5_AFFECTED_BY_HASTE;
+    bool applyHaste = spellProto->HasAttribute(SPELL_ATTR_EX5_AFFECTED_BY_HASTE);
 
     if (!applyHaste)
     {
@@ -13348,7 +13348,7 @@ uint32 Unit::CalculateSpellDurationWithHaste(SpellEntry const* spellProto, uint3
     if (!spellProto || oldduration == 0)
         return 0;
 
-    bool applyHaste = spellProto->AttributesEx5 & SPELL_ATTR_EX5_AFFECTED_BY_HASTE;
+    bool applyHaste = spellProto->HasAttribute(SPELL_ATTR_EX5_AFFECTED_BY_HASTE);
 
     if (!applyHaste)
     {
@@ -13394,7 +13394,7 @@ bool Unit::IsVisibleTargetForAoEDamage(WorldObject const* caster, SpellEntry con
         return isVisibleForOrDetect(static_cast<Unit const*>(caster), caster, false);
     // spell can hit stealth/invisible targets, just check for LoS
     else
-        return spellInfo->AttributesEx2 & SPELL_ATTR_EX2_IGNORE_LOS ? true : caster->IsWithinLOSInMap(this);
+        return spellInfo->HasAttribute(SPELL_ATTR_EX2_IGNORE_LOS) ? true : caster->IsWithinLOSInMap(this);
 }
 
 uint32 Unit::GetModelForForm(SpellShapeshiftFormEntry const* ssEntry) const
@@ -13421,7 +13421,7 @@ bool Unit::HasMorePoweredBuff(uint32 spellId)
 {
     SpellEntry const* spellInfo = sSpellStore.LookupEntry(spellId);
 
-    if (!spellInfo || !(spellInfo->AttributesEx7 & SPELL_ATTR_EX7_REPLACEABLE_AURA))
+    if (!spellInfo || !spellInfo->HasAttribute(SPELL_ATTR_EX7_REPLACEABLE_AURA))
         return false;
 
     for (uint8 i = 0; i < MAX_EFFECT_INDEX; ++i)
@@ -13455,7 +13455,7 @@ bool Unit::HasMorePoweredBuff(uint32 spellId)
             if (!foundSpellInfo)
                 continue;
 
-            if (!(foundSpellInfo->AttributesEx7 & SPELL_ATTR_EX7_REPLACEABLE_AURA))
+            if (!foundSpellInfo->HasAttribute(SPELL_ATTR_EX7_REPLACEABLE_AURA))
                 continue;
 
             for (uint8 j = 0; j < MAX_EFFECT_INDEX; ++j)
