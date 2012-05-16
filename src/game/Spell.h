@@ -782,7 +782,7 @@ namespace MaNGOS
                     break;
                 case PUSH_INHERITED_CENTER:
                 {
-                    if (i_spell.m_targets.m_targetMask & TARGET_FLAG_DEST_LOCATION || i_spell.m_targets.m_targetMask & TARGET_FLAG_UNIT)
+                    if ((i_spell.m_targets.m_targetMask & TARGET_FLAG_DEST_LOCATION) || (i_spell.m_targets.m_targetMask & TARGET_FLAG_UNIT))
                     {
                         i_centerX = i_spell.m_targets.m_destX;
                         i_centerY = i_spell.m_targets.m_destY;
@@ -803,6 +803,7 @@ namespace MaNGOS
                     break;
                 default:
                     sLog.outError("SpellNotifierCreatureAndPlayer: unsupported PUSH_* case %u.", i_push_type);
+                    break;
             }
         }
 
@@ -898,7 +899,7 @@ namespace MaNGOS
                         break;
                     case PUSH_INHERITED_CENTER:
                     {
-                        if (i_spell.m_targets.m_targetMask & TARGET_FLAG_DEST_LOCATION || i_spell.m_targets.m_targetMask & TARGET_FLAG_UNIT)
+                        if ((i_spell.m_targets.m_targetMask & TARGET_FLAG_DEST_LOCATION) || (i_spell.m_targets.m_targetMask & TARGET_FLAG_UNIT))
                         {
                             if (itr->getSource()->IsWithinDist3d(i_spell.m_targets.m_destX, i_spell.m_targets.m_destY, i_spell.m_targets.m_destZ,i_radius))
                                 i_data->push_back(itr->getSource());

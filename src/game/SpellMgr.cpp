@@ -433,7 +433,7 @@ SpellSpecific GetSpellSpecific(uint32 spellId)
                 if (spellInfo->HasAttribute(SPELL_ATTR_EX2_FOOD_BUFF) || spellInfo->SpellIconID == 2560)
                     return SPELL_WELL_FED;
                 else if (spellInfo->EffectApplyAuraName[EFFECT_INDEX_0] == SPELL_AURA_MOD_STAT && spellInfo->SpellFamilyName == SPELLFAMILY_GENERIC &&
-                     spellInfo->SchoolMask & SPELL_SCHOOL_MASK_NATURE && spellInfo->PreventionType == SPELL_PREVENTION_TYPE_SILENCE)
+                     (spellInfo->SchoolMask & SPELL_SCHOOL_MASK_NATURE) && spellInfo->PreventionType == SPELL_PREVENTION_TYPE_SILENCE)
                      return SPELL_SCROLL;
             }
             break;
@@ -1586,6 +1586,7 @@ bool IsCastEndProcModifierAura(SpellEntry const *spellInfo, SpellEffectIndex eff
                 default:
                     break;
             }
+            break;
         }
         case SPELL_AURA_MOD_DAMAGE_PERCENT_DONE:
         {
@@ -1593,11 +1594,12 @@ bool IsCastEndProcModifierAura(SpellEntry const *spellInfo, SpellEffectIndex eff
                 if (IsEffectHandledOnDelayedSpellLaunch(procSpell, SpellEffectIndex(i)))
                     return true;
 
-            return false;
+            break;
         }
         default:
-            return false;
+            break;
     }
+    return false;
 }
 
 struct DoSpellBonuses
@@ -1969,7 +1971,7 @@ bool SpellMgr::IsSpellProcEventCanTriggeredBy(SpellProcEventEntry const * spellP
     if (procEvent_procEx == PROC_EX_NONE)
     {
         // Don't allow proc from periodic heal if no extra requirement is defined
-        if (EventProcFlag & (PROC_FLAG_ON_DO_PERIODIC | PROC_FLAG_ON_TAKE_PERIODIC) && (procExtra & PROC_EX_PERIODIC_POSITIVE))
+        if ((EventProcFlag & (PROC_FLAG_ON_DO_PERIODIC | PROC_FLAG_ON_TAKE_PERIODIC)) && (procExtra & PROC_EX_PERIODIC_POSITIVE))
             return false;
 
         // No extra req, so can trigger for (damage/healing present) and cast end/hit/crit
@@ -2444,6 +2446,7 @@ bool SpellMgr::IsGroupBuff(SpellEntry const *spellInfo)
                 {
                     return true;
                 }
+                break;
             default:
                 break;
         }
@@ -4847,7 +4850,7 @@ bool SpellArea::IsFitToRequirements(Player const* player, uint32 newZone, uint32
     if (questStart)
     {
         // not in expected required quest state
-        if(!player || (!questStartCanActive || !player->IsActiveQuest(questStart)) && !player->GetQuestRewardStatus(questStart))
+        if(!player || ((!questStartCanActive || !player->IsActiveQuest(questStart)) && !player->GetQuestRewardStatus(questStart)))
             return false;
     }
 

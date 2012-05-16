@@ -2083,6 +2083,7 @@ bool Pet::IsPermanentPetFor(Player* owner)
                 default:
                     return false;
             }
+            break;
         case HUNTER_PET:
             return true;
         default:
@@ -2343,8 +2344,8 @@ void Pet::ApplyAttackPowerScalingBonus(bool apply)
                 newAPBonus = owner->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_NATURE);
                 break;
             }
-                             // No break another case!
         }
+        /* no break another case!*/
         case SUMMON_PET:
         {
             switch(owner->getClass())
@@ -2492,8 +2493,8 @@ void Pet::ApplySpellDamageScalingBonus(bool apply)
                 newDamageBonus = owner->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_NATURE);
                 break;
             }
-                             // No break another case!
         }
+        /* no break another case!*/
         case SUMMON_PET:
         {
             switch(owner->getClass())
