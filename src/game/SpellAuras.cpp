@@ -9819,6 +9819,7 @@ void Aura::PeriodicDummyTick()
             switch (spell->Id)
             {
                 case 48018:
+                {
                     GameObject* obj = target->GetGameObject(spell->Id);
                     if (!obj)
                     {
@@ -9833,6 +9834,7 @@ void Aura::PeriodicDummyTick()
                     else
                         target->RemoveAurasDueToSpell(62388);
                     break;
+                }
                 default:
                     break;
             }
