@@ -11530,25 +11530,6 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
                 else
                     return;
             }
-
-            switch(GetId())
-            {
-                case 54037:                                 // Improved Felhunter (Rank 1)
-                case 54038:                                 // Improved Felhunter (Rank 2)
-                {
-                    if (Pet* pet = m_target->GetPet())
-                    {
-                        spellId1 = 56249;                   // 56249 (broken description!)
-                        if (apply)
-                            pet->CastSpell(pet, spellId1, true, NULL);
-                        else
-                            pet->RemoveAurasDueToSpell(spellId1);
-                    }
-                    return;
-                }
-                default:
-                    return;
-            }
             break;
         }
         case SPELLFAMILY_PRIEST:
