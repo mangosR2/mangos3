@@ -5199,31 +5199,13 @@ void Spell::EffectPowerBurn(SpellEffectIndex eff_idx)
     new_damage = int32(new_damage * multiplier);
     m_damage += new_damage;
 
-    // "Mana Burn now causes Fear, Hex and Psychic Scream to break early when used."
-    if (m_spellInfo->SpellFamilyName == SPELLFAMILY_PRIEST)
-    {
-        // Hex
-        if (SpellAuraHolderPtr holder = unitTarget->GetSpellAuraHolder(51514))
-            unitTarget->RemoveSpellAuraHolder(holder, AURA_REMOVE_BY_CANCEL);
-
-        Unit::AuraList const& fearAuras = unitTarget->GetAurasByType(SPELL_AURA_MOD_FEAR);
-        for (Unit::AuraList::const_iterator itr = fearAuras.begin(); itr != fearAuras.end();)
-        {
-            if (*itr)
-            {
-                SpellEntry const *spellInfo = (*itr)->GetSpellProto();
-                if ((spellInfo->SpellFamilyName == SPELLFAMILY_WARLOCK && spellInfo->SpellIconID == 98) || // Fear
-                    (spellInfo->SpellFamilyName == SPELLFAMILY_PRIEST &&                                   // Psychic Scream
-                    spellInfo->SpellFamilyFlags.test<CF_PRIEST_PSYCHIC_SCREAM>()))
-                {
-                    ++itr;
-                    unitTarget->RemoveAurasDueToSpell(spellInfo->Id, SpellAuraHolderPtr(NULL), AURA_REMOVE_BY_CANCEL);
-                    continue;
-                }
-            }
-            ++itr;
-        }
-    }
+    DamageInfo damageInfo(m_caster, unitTarget, m_spellInfo);
+    damageInfo.damage = new_damage;
+    // Set trigger flag
+    damageInfo.procAttacker = PROC_FLAG_NONE;
+    damageInfo.procVictim   = PROC_FLAG_TAKEN_ANY_DAMAGE;
+    damageInfo.procEx       = PROC_EX_DIRECT_DAMAGE;
+    unitTarget->ProcDamageAndSpellFor(true,&damageInfo);
 }
 
 void Spell::EffectHeal(SpellEffectIndex eff_idx)
