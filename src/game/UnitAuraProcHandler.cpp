@@ -1624,7 +1624,7 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, DamageInfo* damageI
                     target = this;
                     triggered_spell_id = 54425;
                     // mana gain amount (normal for aura 54037 and doubled for 54038)
-                    if (HasAura(54038))
+                    if (GetOwner() && GetOwner()->HasAura(54038))
                         basepoints[0] = 8;
                     break;
                 }
