@@ -1421,8 +1421,8 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
 
         bool IsAllowedDamageInArea(Unit * pVictim) const;
 
-        void CalculateSpellDamage(DamageInfo *damageInfo, int32 damage, SpellEntry const *spellInfo, WeaponAttackType attackType = BASE_ATTACK, float DamageMultiplier = 1.0f);
-        void DealSpellDamage(DamageInfo *damageInfo, bool durabilityLoss);
+        void CalculateSpellDamage(DamageInfo* damageInfo, float DamageMultiplier = 1.0f);
+        void DealSpellDamage(DamageInfo* damageInfo, bool durabilityLoss);
 
         // player or player's pet resilience (-1%)
         float GetMeleeCritChanceReduction() const { return GetCombatRatingReduction(CR_CRIT_TAKEN_MELEE); }
