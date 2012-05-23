@@ -923,6 +923,10 @@ LexicsCutterNoActionOnGM = 1
 #        min:     0.0  (default mangos method)
 #        max:     1.0  (full CrowdControl, auras like Fear not breaked by damage anyway)
 #
+#    ResilenceAlternativeCalculation
+#        enable/disable alternative resilence damage reduction calculation (for Avenger/Sanctified wrath mostly)
+#        Default: 0     (disable, default mangos style)
+#
 #    AllowTransferToCustomMap
 #        Allowing moving to maps, enter for which absent in AraeTrigger.dbc (by custom areatrigger_teleport entryes)
 #        Attention! Changing this option "on-the-fly" required reload areatrigger_teleport table!
@@ -1010,6 +1014,7 @@ Raid.MinLevel = 10
 CheckGOInPath = 0
 CrowdControlHPBase = 0.1
 AllowTransferToCustomMap = 0
+ResilenceAlternativeCalculation = 0
 
 ###################################################################################################################
 # PLAYER INTERACTION

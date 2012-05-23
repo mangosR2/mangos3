@@ -4596,7 +4596,8 @@ SpellAuraProcResult Unit::HandleProcTriggerDamageAuraProc(Unit *pVictim, DamageI
         triggeredByAura->GetModifier()->m_amount, spellInfo->Id, triggeredByAura->GetModifier()->m_auraname, triggeredByAura->GetId());
 
     DamageInfo procDamageInfo(this, pVictim, spellInfo);
-    CalculateSpellDamage(&procDamageInfo, triggeredByAura->GetModifier()->m_amount, spellInfo);
+    procDamageInfo.damage = triggeredByAura->GetModifier()->m_amount;
+    CalculateSpellDamage(&procDamageInfo);
     procDamageInfo.target->CalculateAbsorbResistBlock(this, &procDamageInfo, spellInfo);
     DealDamageMods(procDamageInfo.target,procDamageInfo.damage,&procDamageInfo.absorb);
     SendSpellNonMeleeDamageLog(&procDamageInfo);

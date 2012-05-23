@@ -983,8 +983,7 @@ uint32 Player::EnvironmentalDamage(EnviromentalDamage type, uint32 damage)
         default:
             break;
     }
-    DamageInfo damageInfo = DamageInfo(this,this,spellID);
-    damageInfo.damage     = damage;
+    DamageInfo damageInfo = DamageInfo(this,this,spellID, damage);
     damageInfo.damageType = SELF_DAMAGE;
 
     CalculateDamageAbsorbAndResist(this, &damageInfo);

@@ -9138,10 +9138,10 @@ void Aura::PeriodicTick()
 
             damageInfo.cleanDamage = uint32(-target->ModifyPower(powerType, -damageInfo.damage));
 
-            damageInfo.cleanDamage = uint32(damageInfo.cleanDamage * spellProto->EffectMultipleValue[GetEffIndex()]);
+            damageInfo.damage = uint32(damageInfo.cleanDamage * spellProto->EffectMultipleValue[GetEffIndex()]);
 
             // maybe has to be sent different to client, but not by SMSG_PERIODICAURALOG
-            pCaster->CalculateSpellDamage(&damageInfo, damageInfo.cleanDamage, spellProto);
+            pCaster->CalculateSpellDamage(&damageInfo);
 
             damageInfo.target->CalculateAbsorbResistBlock(pCaster, &damageInfo, spellProto);
 
