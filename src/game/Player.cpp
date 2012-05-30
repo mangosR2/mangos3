@@ -4553,6 +4553,8 @@ void Player::DeleteFromDB(ObjectGuid playerguid, uint32 accountId, bool updateRe
             break;
     }
 
+    sAccountMgr.ClearPlayerDataCache(playerguid);
+
     if (updateRealmChars)
         sAccountMgr.UpdateCharactersCount(accountId, realmID);
 }
