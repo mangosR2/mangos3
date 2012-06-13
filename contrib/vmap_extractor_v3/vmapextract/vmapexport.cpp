@@ -23,11 +23,16 @@
 #include <list>
 #include <errno.h>
 
-#ifdef WIN32
-    #include <Windows.h>
-    #include <sys/stat.h>
-    #include <direct.h>
-    #define mkdir _mkdir
+#if defined (WIN32)
+    #if defined (__MINGW32__)
+        #include <windows.h>
+        #include <sys/stat.h>
+    #else
+        #include <Windows.h>
+        #include <sys/stat.h>
+        #include <direct.h>
+        #define mkdir _mkdir
+    #endif
 #else
     #include <sys/stat.h>
 #endif

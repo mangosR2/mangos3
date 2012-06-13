@@ -18,13 +18,15 @@
 #include "loadlib/wdt.h"
 #include <fcntl.h>
 
-#if defined( __GNUC__ )
-    #define _open   open
-    #define _close close
+#if defined( __GNUC__ ) && !defined(WIN32)
+    #define _open   fopen
+    #define _close  fclose
     #ifndef O_BINARY
         #define O_BINARY 0
     #endif
+    #define _FILE FILE*
 #else
+    #define _FILE int
     #include <io.h>
 #endif
 
@@ -98,8 +100,12 @@ void CreateDir( const std::string& Path )
 
 bool FileExists( const char* FileName )
 {
-    int fp = _open(FileName, OPEN_FLAGS);
-    if(fp != -1)
+    _FILE fp = _open(FileName, OPEN_FLAGS);
+#if !defined(WIN32)
+    if (fp)
+#else
+    if (fp != -1)
+#endif
     {
         _close(fp);
         return true;
