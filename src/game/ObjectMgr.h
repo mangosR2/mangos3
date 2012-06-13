@@ -815,6 +815,7 @@ class ObjectMgr
         void LoadQuestPOI();
 
         void LoadNPCSpellClickSpells();
+        void LoadSpellTemplate();
 
         void LoadWeatherZoneChances();
         void LoadGameTele();

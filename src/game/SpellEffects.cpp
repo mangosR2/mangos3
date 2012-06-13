@@ -8743,12 +8743,12 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     unitTarget->RemoveAurasDueToSpell(47636);
                     return;
                 }
-                case 47703:                                 // Unholy Union for Quest In Service of the Unholy
+                case 47703:                                 // Unholy Union
                 {
                     m_caster->CastSpell(m_caster, 50254, true);
                     return;
                 }
-                case 47724:                                 // Frost Draw for Quest In Service of Frost
+                case 47724:                                 // Frost Draw
                 {
                     m_caster->CastSpell(m_caster, 50239, true);
                     return;
@@ -8768,6 +8768,31 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     m_caster->CastSpell(m_caster, 47955, true);
                     m_caster->CastSpell(m_caster, 47956, true);
                     m_caster->CastSpell(m_caster, 47957, true);
+                    return;
+                }
+/*                case 48590:                                 // Avenging Spirits
+                {
+                    if (!unitTarget)
+                        return;
+
+                    // Summon 4 spirits at near point positions
+                    float x, y, z;
+                    for (uint8 i = 0; i < 4; ++i)
+                    {
+                        unitTarget->GetNearPoint(unitTarget, x, y, z, 0, 3.0f, M_PI_F/2*i+M_PI_F/4);
+                        unitTarget->CastSpell(x, y, z, 48592, true);
+                    }
+                    return;
+                }*/
+                case 48590:                                 // Avenging Spirits (summon Avenging Spirit Summoners)
+                {
+                    if (!unitTarget)
+                        return;
+
+                    unitTarget->CastSpell(unitTarget, 48586, true);
+                    unitTarget->CastSpell(unitTarget, 48587, true);
+                    unitTarget->CastSpell(unitTarget, 48588, true);
+                    unitTarget->CastSpell(unitTarget, 48589, true);
                     return;
                 }
                 case 48603:                                 // High Executor's Branding Iron
@@ -8883,17 +8908,6 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     unitTarget->CastSpell(m_caster, m_spellInfo->CalculateSimpleValue(eff_idx), true);
                     return;
                 }
-                case 48590:                                 // Avenging Spirits (summon Avenging Spirit Summoners)
-                {
-                    if (!unitTarget)
-                        return;
-
-                    unitTarget->CastSpell(unitTarget, 48586, true);
-                    unitTarget->CastSpell(unitTarget, 48587, true);
-                    unitTarget->CastSpell(unitTarget, 48588, true);
-                    unitTarget->CastSpell(unitTarget, 48589, true);
-                    return;
-                }
                 case 50217:                                 // The Cleansing: Script Effect Player Cast Mirror Image
                 {
                     // Summon Your Inner Turmoil
@@ -8949,7 +8963,7 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
 
                     return;
                 }
-                case 50252:                                 // Blood Draw for Quest In Service of Blood
+                case 50252:                                 // Blood Draw
                 {
                     m_caster->CastSpell(m_caster, 50250, true);
                     return;
@@ -9342,13 +9356,13 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
 
                     m_caster->CastSpell(unitTarget, 58919, true);
                     return;
-                }
+                }                                           // random spell learn instead placeholder
                 case 59789:                                 // Oracle Ablutions
                 {
                     if (!unitTarget)
                         return;
 
-                    switch(unitTarget->getPowerType())
+                    switch (unitTarget->getPowerType())
                     {
                         case POWER_RUNIC_POWER:
                         {
@@ -9358,7 +9372,7 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                         case POWER_MANA:
                         {
                             int32 manapool = unitTarget->GetMaxPower(POWER_MANA) * 0.05;
-                            unitTarget->CastCustomSpell(unitTarget, 59813, &manapool, 0, 0, true);
+                            unitTarget->CastCustomSpell(unitTarget, 59813, &manapool, NULL, NULL, true);
                             break;
                         }
                         case POWER_RAGE:
