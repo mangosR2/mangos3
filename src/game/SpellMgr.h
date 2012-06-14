@@ -776,6 +776,7 @@ enum ProcFlagsEx
     PROC_EX_SHIELD_BREAK        = 0x0200000,                // proc at remove aura by shield break
     PROC_EX_DISPEL              = 0x0400000,                // proc at remove aura by dispel
     PROC_EX_EXPIRE              = 0x0800000,                // proc at remove aura by expire
+    PROC_EX_IGNORE_CC           = 0x1000000,                // proc result ignore possible CC limitations
 };
 
 struct SpellProcEventEntry

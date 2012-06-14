@@ -5199,7 +5199,7 @@ void Spell::EffectPowerBurn(SpellEffectIndex eff_idx)
     // Set trigger flag
     damageInfo.procAttacker = PROC_FLAG_NONE;
     damageInfo.procVictim   = PROC_FLAG_TAKEN_ANY_DAMAGE;
-    damageInfo.procEx       = PROC_EX_DIRECT_DAMAGE;
+    damageInfo.procEx       = PROC_EX_DIRECT_DAMAGE | PROC_EX_IGNORE_CC;
     unitTarget->ProcDamageAndSpellFor(true,&damageInfo);
 }
 

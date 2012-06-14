@@ -5380,7 +5380,7 @@ SpellAuraProcResult Unit::HandleRemoveByDamageChanceProc(Unit* pVictim, DamageIn
     if (!spellProto)
         return SPELL_AURA_PROC_FAILED;
 
-    if (spellProto->AuraInterruptFlags & AURA_INTERRUPT_FLAG_DAMAGE)
+    if (spellProto->AuraInterruptFlags & AURA_INTERRUPT_FLAG_DAMAGE || procEx & PROC_EX_IGNORE_CC)
         return HandleRemoveByDamageProc(pVictim, damageInfo, triggeredByAura, procSpell, procFlag, procEx, cooldown);
 
     if (triggeredByAura->IsAffectedByCrowdControlEffect(damageInfo->damage + damageInfo->absorb))
