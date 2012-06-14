@@ -644,8 +644,6 @@ void World::LoadConfigSettings(bool reload)
     setConfig(CONFIG_BOOL_LFG_ONLYLASTENCOUNTER, "LFG.OnlyLastEncounterForCompleteDungeon", false);
     setConfigMinMax(CONFIG_UINT32_LFG_MAXKICKS, "LFG.MaxKicks", 5, 1, 10);
 
-    setConfig(CONFIG_BOOL_CHECK_GO_IN_PATH, "CheckGOInPath", false);
-
     setConfig(CONFIG_BOOL_ALLOW_CUSTOM_MAPS, "AllowTransferToCustomMap", false);
 
     setConfigMinMax(CONFIG_UINT32_GEAR_CALC_BASE, "Player.GSCalculationBase", 190, 1, 384);
@@ -1049,7 +1047,7 @@ void World::LoadConfigSettings(bool reload)
     // initialize chat logs (and lexics cutter)
     sChatLog.Initialize();
 }
-
+extern void LoadGameObjectModelList();
 /// Initialize the World
 void World::SetInitialWorldSettings()
 {
@@ -1106,6 +1104,9 @@ void World::SetInitialWorldSettings()
     LoadDBCStores(m_dataPath);
     DetectDBCLang();
     sObjectMgr.SetDBCLocaleIndex(GetDefaultDbcLocale());    // Get once for all the locale index of DBC language (console/broadcasts)
+
+    sLog.outString("Loading GameObject models...");
+    LoadGameObjectModelList();
 
     sLog.outString( "Loading SpellTemplate..." );
     sObjectMgr.LoadSpellTemplate();

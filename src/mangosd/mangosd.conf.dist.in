@@ -912,11 +912,6 @@ LexicsCutterNoActionOnGM = 1
 #        You can bypass this setting by typing "/script SetAllowLowLevelRaid(true/false)" command in chat
 #        Default: 10
 #
-#    CheckGOInPath
-#        Very simple check for gameobjects' presence on unit path (for example to avoid problems with teleport through closed doors).
-#        May use many CPU resources!
-#        Default: 0
-#
 #    CrowdControlHPBase
 #        Base HP part for calculation CrowdControl effects (from MAX HP!).
 #        Default: 0.1  (10% max HP)
@@ -1011,7 +1006,6 @@ ShowProgressBars = 1
 WaitAtStartupError = 0
 Motd = "Welcome to the Massive Network Game Object Server."
 Raid.MinLevel = 10
-CheckGOInPath = 0
 CrowdControlHPBase = 0.1
 AllowTransferToCustomMap = 0
 ResilenceAlternativeCalculation = 0
