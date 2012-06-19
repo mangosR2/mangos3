@@ -9018,6 +9018,34 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
 
                     return;
                 }
+                case 51519:                                 // Death Knight Initiate Visual
+                {
+                    if (!unitTarget)
+                        return;
+
+                    uint8 gender = unitTarget->getGender();
+                    uint8 race = unitTarget->getRace();
+                    uint32 spellId = 0;
+                    switch (race)
+                    {
+                        case RACE_HUMAN:            spellId = (gender == GENDER_MALE ? 51520 : 51534); break;
+                        case RACE_DWARF:            spellId = (gender == GENDER_MALE ? 51538 : 51537); break;
+                        case RACE_NIGHTELF:         spellId = (gender == GENDER_MALE ? 51535 : 51536); break;
+                        case RACE_GNOME:            spellId = (gender == GENDER_MALE ? 51539 : 51540); break;
+                        case RACE_DRAENEI:          spellId = (gender == GENDER_MALE ? 51541 : 51542); break;
+                        case RACE_ORC:              spellId = (gender == GENDER_MALE ? 51543 : 51544); break;
+                        case RACE_UNDEAD:           spellId = (gender == GENDER_MALE ? 51549 : 51550); break;
+                        case RACE_TAUREN:           spellId = (gender == GENDER_MALE ? 51547 : 51548); break;
+                        case RACE_TROLL:            spellId = (gender == GENDER_MALE ? 51546 : 51545); break;
+                        case RACE_BLOODELF:         spellId = (gender == GENDER_MALE ? 51551 : 51552); break;
+                        default:
+                            return;
+                    }
+                    if (spellId)
+                        unitTarget->CastSpell(unitTarget, spellId, true);
+
+                    return;
+                }
                 case 51770:                                 // Emblazon Runeblade
                 {
                     Unit* caster = GetAffectiveCaster();
