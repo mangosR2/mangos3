@@ -12706,8 +12706,8 @@ void Unit::EnterVehicle(Unit* vehicleBase, int8 seatId)
 
     if (seatId == -1)
     {
-        if (vehicleBase->GetVehicleKit()->HasEmptySeat(-1))
-            seatId = vehicleBase->GetVehicleKit()->GetNextEmptySeat(0,true);
+        if (vehicleBase->GetVehicleKit()->HasEmptySeat(seatId))
+            seatId = vehicleBase->GetVehicleKit()->GetNextEmptySeatWithFlag(0);
         else
         {
             sLog.outError("Unit::EnterVehicle: unit %s try seat to  vehicle %s but no seats!", GetObjectGuid().GetString().c_str(), vehicleBase->GetObjectGuid().GetString().c_str());
@@ -12815,7 +12815,7 @@ void Unit::ChangeSeat(int8 seatId, bool next)
 
     if (seatId < 0)
     {
-        seatId = m_pVehicle->GetNextEmptySeat(m_movementInfo.GetTransportSeat(), next);
+        seatId = m_pVehicle->GetNextEmptySeatWithFlag(m_movementInfo.GetTransportSeat(), next);
         if (seatId < 0)
             return;
     }
