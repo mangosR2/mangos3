@@ -5660,7 +5660,7 @@ SpellCastResult Spell::CheckCast(bool strict)
         //ignore self casts (including area casts when caster selected as target)
         if (non_caster_target)
         {
-            if(!sSpellMgr.IsTargetMatchedWithCreatureType(m_spellInfo, target))
+            if(!SpellMgr::IsTargetMatchedWithCreatureType(m_spellInfo, target))
             {
                 if (target->GetTypeId() == TYPEID_PLAYER)
                     return SPELL_FAILED_TARGET_IS_PLAYER;
@@ -7842,7 +7842,7 @@ bool Spell::CheckTarget( Unit* target, SpellEffectIndex eff )
     // Check targets for creature type mask and remove not appropriate (skip explicit self target case, maybe need other explicit targets)
     if (m_spellInfo->EffectImplicitTargetA[eff] != TARGET_SELF )
     {
-        if (!sSpellMgr.IsTargetMatchedWithCreatureType(m_spellInfo, target))
+        if (!SpellMgr::IsTargetMatchedWithCreatureType(m_spellInfo, target))
             return false;
     }
 

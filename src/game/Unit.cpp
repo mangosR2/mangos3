@@ -4679,7 +4679,7 @@ bool Unit::AddSpellAuraHolder(SpellAuraHolderPtr holder)
 
             // stacking of holders from different casters
             // some holders stack, but their auras dont (i.e. only strongest aura effect works)
-            if (!sSpellMgr.IsStackableSpellAuraHolder(aurSpellInfo))
+            if (!SpellMgr::IsStackableSpellAuraHolder(aurSpellInfo))
                 if (holdersToRemove.find(iter->second) == holdersToRemove.end())
                     holdersToRemove.insert(iter->second);
         }
@@ -4931,7 +4931,7 @@ bool Unit::RemoveNoStackAurasDueToAuraHolder(SpellAuraHolderPtr holder)
             }
 
             // different ranks spells with different casters should also stack
-            if (holder->GetCasterGuid() != itr->second->GetCasterGuid() && sSpellMgr.IsStackableSpellAuraHolder(spellProto))
+            if (holder->GetCasterGuid() != itr->second->GetCasterGuid() && SpellMgr::IsStackableSpellAuraHolder(spellProto))
                 continue;
 
             if (!itr->second->IsDeleted())
