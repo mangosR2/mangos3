@@ -3368,7 +3368,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
                 continue;
             }
 
-            if (!CheckTargetBeforeLimitation(*itr))
+            if (!CheckTargetBeforeLimitation(*itr, effIndex))
                 itr = targetUnitMap.erase(itr);
             else
                 ++itr;
@@ -7818,15 +7818,18 @@ CurrentSpellTypes Spell::GetCurrentContainer()
         return(CURRENT_GENERIC_SPELL);
 }
 
-bool Spell::CheckTargetBeforeLimitation(Unit* target)
+bool Spell::CheckTargetBeforeLimitation(Unit* target, SpellEffectIndex eff)
 {
     if (!target)
         return false;
     // check right target                                                                                       // should activ for spells 72034, 72096
     if (!target->isAlive() && !IsSpellAllowDeadTarget(m_spellInfo))
         return false;
-    if (m_spellInfo->HasAttribute(SPELL_ATTR_EX3_TARGET_ONLY_PLAYER) && target->GetTypeId() != TYPEID_PLAYER /*&& m_spellInfo->EffectImplicitTargetA[eff] != TARGET_SCRIPT*/)
+    if (m_spellInfo->HasAttribute(SPELL_ATTR_EX3_TARGET_ONLY_PLAYER) && target->GetTypeId() != TYPEID_PLAYER &&
+        m_spellInfo->EffectImplicitTargetA[eff] != TARGET_SCRIPT && m_spellInfo->EffectImplicitTargetA[eff] != TARGET_SELF/* && m_spellInfo->EffectImplicitTargetA[eff] != TARGET_EFFECT_SELECT*/)
+    {
         return false;
+    }
     // Check Aura spell req (need for AoE spells)
     if (m_spellInfo->targetAuraSpell && !target->HasAura(m_spellInfo->targetAuraSpell))
         return false;
@@ -7847,8 +7850,11 @@ bool Spell::CheckTarget( Unit* target, SpellEffectIndex eff )
     }
 
      // check right target                                                                                       // should activ for spells 72034, 72096
-    if (m_spellInfo->HasAttribute(SPELL_ATTR_EX3_TARGET_ONLY_PLAYER) && target->GetTypeId() != TYPEID_PLAYER /*&& m_spellInfo->EffectImplicitTargetA[eff] != TARGET_SCRIPT*/)
+    if (m_spellInfo->HasAttribute(SPELL_ATTR_EX3_TARGET_ONLY_PLAYER) && target->GetTypeId() != TYPEID_PLAYER &&
+        m_spellInfo->EffectImplicitTargetA[eff] != TARGET_SCRIPT && m_spellInfo->EffectImplicitTargetA[eff] != TARGET_SELF/* && m_spellInfo->EffectImplicitTargetA[eff] != TARGET_EFFECT_SELECT*/)
+    {
         return false;
+    }
     // Check Aura spell req (need for AoE spells)
     if (m_spellInfo->targetAuraSpell && !target->HasAura(m_spellInfo->targetAuraSpell))
         return false;
