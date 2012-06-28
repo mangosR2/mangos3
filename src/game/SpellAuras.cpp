@@ -11367,6 +11367,7 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
                     break;
                 }
                 case 70877:                                 // Frenzied Bloodthirst (Queen Lana'thel)
+                case 71474:
                 {
                     if (!apply && m_removeMode == AURA_REMOVE_BY_EXPIRE)
                     {
