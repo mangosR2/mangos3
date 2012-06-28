@@ -4426,10 +4426,8 @@ void Aura::HandleAuraTransform(bool apply, bool Real)
                 case 65528:                                 // Gossip NPC Appearance - Pirates' Day
                 {
                     // expecting npc's using this spell to have models with race info.
-                    uint32 race = GetCreatureModelRace(target->GetNativeDisplayId());
-
                     // random gender, regardless of current gender
-                    switch(race)
+                    switch (target->getRace())
                     {
                         case RACE_HUMAN:
                             target->SetDisplayId(roll_chance_i(50) ? 25037 : 25048);

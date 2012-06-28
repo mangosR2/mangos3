@@ -10074,7 +10074,7 @@ void Unit::TauntFadeOut(Unit *taunter)
 
 //======================================================================
 
-bool Unit::IsSecondChoiceTarget(Unit* pTarget, bool checkThreatArea)
+bool Unit::IsSecondChoiceTarget(Unit* pTarget, bool checkThreatArea) const
 {
     MANGOS_ASSERT(pTarget && GetTypeId() == TYPEID_UNIT);
 
@@ -10703,8 +10703,6 @@ Powers Unit::GetPowerTypeByAuraGroup(UnitMods unitMod) const
         case UNIT_MOD_RUNIC_POWER:return POWER_RUNIC_POWER;
         default:                  return POWER_MANA;
     }
-
-    return POWER_MANA;
 }
 
 float Unit::GetTotalAttackPowerValue(WeaponAttackType attType) const
@@ -10746,8 +10744,8 @@ void Unit::SetLevel(uint32 lvl)
 uint8 Unit::getRace() const 
 {
     return GetTypeId() == TYPEID_UNIT ?
-        GetCreatureModelRace(((Creature*)this)->GetDisplayId()) :
-        GetByteValue(UNIT_FIELD_BYTES_0, 0); 
+        ((Creature*)this)->getRace() :
+        GetByteValue(UNIT_FIELD_BYTES_0, 0);
 }
 
 
