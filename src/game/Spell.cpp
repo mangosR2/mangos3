@@ -1822,8 +1822,6 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
                 case 69055:                                 // Bone Slice (ICC, Lord Marrowgar)
                 case 69278:                                 // Gas spore (ICC, Festergut)
                 case 70341:                                 // Slime Puddle (ICC, Putricide)
-                case 71336:                                 // Pact of the Darkfallen
-                case 71390:                                 // Pact of the Darkfallen
                     unMaxTargets = 2;
                     break;
                 case 28796:                                 // Poison Bolt Volley
@@ -9640,8 +9638,13 @@ bool Spell::FillCustomTargetMap(SpellEffectIndex i, UnitList &targetUnitMap)
             {
                 for (UnitList::const_iterator iter = tempTargetUnitMap.begin(); iter != tempTargetUnitMap.end(); ++iter)
                 {
-                    if (!(*iter)->GetObjectGuid().IsPlayer())
+                    if (!(*iter)->GetObjectGuid().IsPlayer() ||
+                        m_caster->getVictim() == (*iter) ||         // don't target the tank
+                        (*iter)->HasAuraOfDifficulty(70451))        // don't target offtank linked with Blood Mirror
+                    {
                         continue;
+                    }
+
                     targetUnitMap.push_back((*iter));
                 }
             }
@@ -9687,15 +9690,43 @@ bool Spell::FillCustomTargetMap(SpellEffectIndex i, UnitList &targetUnitMap)
             {
                 for (UnitList::const_iterator iter = tempTargetUnitMap.begin(); iter != tempTargetUnitMap.end(); ++iter)
                 {
-                    if (!(*iter)->GetObjectGuid().IsPlayer())
-                        continue;
-
-                    if (!(*iter)->HasAura(71340))
-                        continue;
-
-                    targetUnitMap.push_back((*iter));
+                    if ((*iter)->HasAura(71340))
+                        targetUnitMap.push_back((*iter));
                 }
             }
+            break;
+        }
+        case 71445:                                 // Twilight Bloodbolt (Lana'thel)
+        case 71471:
+        {
+            radius = DEFAULT_VISIBILITY_INSTANCE;
+            UnitList tempTargetUnitMap;
+            FillAreaTargets(tempTargetUnitMap, radius, PUSH_SELF_CENTER, SPELL_TARGETS_ALL);
+            for (UnitList::iterator itr = tempTargetUnitMap.begin(); itr != tempTargetUnitMap.end();++itr)
+            {
+                if ((*itr) && (*itr)->GetTypeId() == TYPEID_PLAYER &&
+                    !(*itr)->HasAuraOfDifficulty(70445) && !(*itr)->HasAuraOfDifficulty(70451)) // Blood Mirror
+                {
+                    targetUnitMap.push_back(*itr);
+                }
+            }
+
+            // remove random units from the map
+            while (targetUnitMap.size() > 2)
+            {
+                uint32 poz = urand(0, targetUnitMap.size()-1);
+                for (UnitList::iterator itr = targetUnitMap.begin(); itr != targetUnitMap.end(); ++itr, --poz)
+                {
+                    if (!*itr) continue;
+
+                    if (!poz)
+                    {
+                        targetUnitMap.erase(itr);
+                        break;
+                    }
+                }
+            }
+
             break;
         }
         case 71447:                                 // Bloodbolt Splash 10N
@@ -9703,7 +9734,7 @@ bool Spell::FillCustomTargetMap(SpellEffectIndex i, UnitList &targetUnitMap)
         case 71482:                                 // Bloodbolt Splash 10H
         case 71483:                                 // Bloodbolt Splash 25H
         {
-            FillAreaTargets(targetUnitMap, radius, PUSH_SELF_CENTER, SPELL_TARGETS_AOE_DAMAGE, GetAffectiveCaster());
+            FillAreaTargets(targetUnitMap, radius, PUSH_SELF_CENTER, SPELL_TARGETS_FRIENDLY);
             targetUnitMap.remove(m_caster);
             break;
         }

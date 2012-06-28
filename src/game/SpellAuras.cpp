@@ -230,7 +230,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleModSpellDamagePercentFromStat,             //174 SPELL_AURA_MOD_SPELL_DAMAGE_OF_STAT_PERCENT  implemented in Unit::SpellBaseDamageBonusDone
     &Aura::HandleModSpellHealingPercentFromStat,            //175 SPELL_AURA_MOD_SPELL_HEALING_OF_STAT_PERCENT implemented in Unit::SpellBaseHealingBonusDone
     &Aura::HandleSpiritOfRedemption,                        //176 SPELL_AURA_SPIRIT_OF_REDEMPTION   only for Spirit of Redemption spell, die at aura end
-    &Aura::HandleNULL,                                      //177 SPELL_AURA_AOE_CHARM (22 spells)
+    &Aura::HandleAuraAoECharm,                              //177 SPELL_AURA_AOE_CHARM (22 spells)
     &Aura::HandleNoImmediateEffect,                         //178 SPELL_AURA_MOD_DEBUFF_RESISTANCE          implemented in Unit::MagicSpellHitResult
     &Aura::HandleNoImmediateEffect,                         //179 SPELL_AURA_MOD_ATTACKER_SPELL_CRIT_CHANCE implemented in Unit::SpellCriticalBonus
     &Aura::HandleNoImmediateEffect,                         //180 SPELL_AURA_MOD_FLAT_SPELL_DAMAGE_VERSUS   implemented in Unit::SpellDamageBonusDone
@@ -11366,6 +11366,15 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
                     }
                     break;
                 }
+                case 70877:                                 // Frenzied Bloodthirst (Queen Lana'thel)
+                {
+                    if (!apply && m_removeMode == AURA_REMOVE_BY_EXPIRE)
+                    {
+                        cast_at_remove = true;
+                        spellId1 = 70923; // Uncontrollable Frenzy
+                    }
+                    break;
+                }
                 case 73034:                                 // Blighted Spores
                 case 73033:
                 case 71222:
@@ -12558,6 +12567,49 @@ void Aura::HandleAuraFactionChange(bool apply, bool real)
     if (newFaction && newFaction != target->getFaction())
         target->setFaction(newFaction);
 
+}
+
+// FIXME: this is only temp. fix for not allowing charmed player to deal damage/heal
+void Aura::HandleAuraAoECharm(bool apply, bool real)
+{
+    if (!real)
+        return;
+
+    Unit *pTarget = GetTarget();
+
+    if (!pTarget || !pTarget->IsInWorld() || pTarget->GetTypeId() != TYPEID_PLAYER)
+        return;
+
+    Player *pPlayerTarget = (Player*)pTarget;
+
+    switch(GetId())
+    {
+        case 70923:                                     // Uncontrollable Frenzy (Queen Lana'thel)
+        {
+            if (apply)
+                pPlayerTarget->setFaction(16);
+            else
+                pPlayerTarget->setFactionForRace(pPlayerTarget->getRace());
+
+            break;
+        }
+        default:
+        {
+            if (apply)
+            {
+                Unit *pCaster = GetCaster();
+
+                if (pCaster && pCaster != pTarget)
+                    pPlayerTarget->setFaction(pCaster->getFaction());
+                else
+                    pPlayerTarget->setFaction(16);
+            }
+            else
+                pPlayerTarget->setFactionForRace(pPlayerTarget->getRace());
+
+            break;
+        }
+    }
 }
 
 uint32 Aura::CalculateCrowdControlBreakDamage()

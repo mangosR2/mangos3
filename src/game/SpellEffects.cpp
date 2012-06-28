@@ -3518,6 +3518,13 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                         unitTarget->RemoveAurasDueToSpell(71340);
                     break;
                 }
+                case 71445:                                 // Twilight Bloodbolt (Lana'thel)
+                case 71471:
+                {
+                    if (unitTarget)
+                        m_caster->CastSpell(unitTarget, 71818, true);
+                    break;
+                }
                 case 71718:                                 // Conjure Flame
                 case 72040:                                 // Conjure Empowered Flame
                 {
@@ -10190,6 +10197,7 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     return;
                 }
                 case 71446:                                 // Twilight Bloodbolt 10N
+                case 71818:
                 {
                     if (!unitTarget)
                         return;
@@ -10198,6 +10206,7 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     return;
                 }
                 case 71478:                                 // Twilight Bloodbolt 25N
+                case 71819:
                 {
                     if (!unitTarget)
                         return;
@@ -10206,6 +10215,7 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     return;
                 }
                 case 71479:                                 // Twilight Bloodbolt 10H
+                case 71820:
                 {
                     if (!unitTarget)
                         return;
@@ -10214,6 +10224,7 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     return;
                 }
                 case 71480:                                 // Twilight Bloodbolt 25H
+                case 71821:
                 {
                     if (!unitTarget)
                         return;
