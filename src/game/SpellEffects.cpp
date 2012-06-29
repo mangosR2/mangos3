@@ -799,7 +799,7 @@ void Spell::EffectSchoolDMG(SpellEffectIndex effect_idx)
                     // Pact of the Darkfallen
                     case 71341:
                     {
-                        if (m_caster->GetObjectGuid() != unitTarget->GetObjectGuid() && unitTarget->HasAura(71340))
+                        if (m_caster != unitTarget && unitTarget->HasAura(71340))
                             damage = 0;
                         break;
                     }
@@ -3506,7 +3506,7 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     bool needRemove = true;
                     for(TargetList::const_iterator ihit = m_UniqueTargetInfo.begin(); ihit != m_UniqueTargetInfo.end(); ++ihit)
                     {
-                        Unit *unit = m_caster->GetObjectGuid() == ihit->targetGUID ? m_caster : ObjectAccessor::GetUnit(*unitTarget, ihit->targetGUID);
+                        Unit *unit = ObjectAccessor::GetUnit(*unitTarget, ihit->targetGUID);
                         if (unit && unitTarget->GetDistance(unit) > 5.0f)
                         {
                             needRemove = false;
@@ -3516,6 +3516,7 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
 
                     if (needRemove)
                         unitTarget->RemoveAurasDueToSpell(71340);
+
                     break;
                 }
                 case 71445:                                 // Twilight Bloodbolt (Lana'thel)

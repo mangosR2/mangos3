@@ -2352,7 +2352,7 @@ void Aura::TriggerSpell()
                 int32 multiplier = GetModifier()->m_miscvalue += 1;
                 int32 bp0 = triggerTarget->GetMap()->GetDifficulty() >= RAID_DIFFICULTY_10MAN_HEROIC ? 4600 : 1610;
                 bp0 = int32(bp0 + (floor(multiplier / 10.0f)) * 1000);
-                triggerTarget->CastCustomSpell(triggerTarget, 71341, &bp0, 0, 0, true, NULL, this, GetCasterGuid(), GetSpellProto());
+                triggerTarget->CastCustomSpell(triggerTarget, 71341, &bp0, 0, 0, true);
                 break;
             }
         }

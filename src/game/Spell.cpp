@@ -9633,20 +9633,18 @@ bool Spell::FillCustomTargetMap(SpellEffectIndex i, UnitList &targetUnitMap)
         case 71336:                                     // Pact of the Darkfallen
         {
             UnitList tempTargetUnitMap;
+            radius = 100.0f;
             FillAreaTargets(tempTargetUnitMap, radius, PUSH_SELF_CENTER, SPELL_TARGETS_AOE_DAMAGE);
-            if (!tempTargetUnitMap.empty())
+            for (UnitList::const_iterator iter = tempTargetUnitMap.begin(); iter != tempTargetUnitMap.end(); ++iter)
             {
-                for (UnitList::const_iterator iter = tempTargetUnitMap.begin(); iter != tempTargetUnitMap.end(); ++iter)
+                if (!(*iter)->GetObjectGuid().IsPlayer() ||
+                    m_caster->getVictim() == (*iter) ||         // don't target the tank
+                    (*iter)->HasAuraOfDifficulty(70451))        // don't target offtank linked with Blood Mirror
                 {
-                    if (!(*iter)->GetObjectGuid().IsPlayer() ||
-                        m_caster->getVictim() == (*iter) ||         // don't target the tank
-                        (*iter)->HasAuraOfDifficulty(70451))        // don't target offtank linked with Blood Mirror
-                    {
-                        continue;
-                    }
-
-                    targetUnitMap.push_back((*iter));
+                    continue;
                 }
+
+                targetUnitMap.push_back((*iter));
             }
 
             if (!targetUnitMap.empty())
@@ -9676,23 +9674,15 @@ bool Spell::FillCustomTargetMap(SpellEffectIndex i, UnitList &targetUnitMap)
             }
             break;
         }
-        case 71341:
-        {
-            if (i != EFFECT_INDEX_1)
-                return false;
-        }
-        /* no break */
-        case 71390:                                     // Pact of the Darkfallen
+        case 71341:                                     // Pact of the Darkfallen (dmg part)
+        case 71390:                                     // Pact of the Darkfallen (visual link part)
         {
             UnitList tempTargetUnitMap;
-            FillAreaTargets(tempTargetUnitMap, radius, PUSH_SELF_CENTER, SPELL_TARGETS_FRIENDLY);
-            if (!tempTargetUnitMap.empty())
+            FillAreaTargets(tempTargetUnitMap, 100.0f, PUSH_SELF_CENTER, SPELL_TARGETS_FRIENDLY);
+            for (UnitList::const_iterator iter = tempTargetUnitMap.begin(); iter != tempTargetUnitMap.end(); ++iter)
             {
-                for (UnitList::const_iterator iter = tempTargetUnitMap.begin(); iter != tempTargetUnitMap.end(); ++iter)
-                {
-                    if ((*iter)->HasAura(71340))
-                        targetUnitMap.push_back((*iter));
-                }
+                if ((*iter)->HasAura(71340))
+                    targetUnitMap.push_back((*iter));
             }
             break;
         }
