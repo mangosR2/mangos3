@@ -7821,6 +7821,33 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
     {
         case SPELLFAMILY_GENERIC:
         {
+            switch (m_spellInfo->SpellDifficultyId)
+            {
+                case 581:                                           // Powering Up (Twin Val'kyrs) - Spells 67590 , 67602 , 67603 , 67604
+                {
+                    if (!unitTarget)
+                        return;
+
+                    if (SpellAuraHolderPtr pHolder = unitTarget->GetSpellAuraHolder(m_spellInfo->Id))
+                    {
+                        if (pHolder->GetStackAmount() + 1 == m_spellInfo->StackAmount)
+                        {
+                            if (unitTarget->HasAuraOfDifficulty(65686)) // Light Essence
+                            {
+                                unitTarget->CastSpell(unitTarget, 65748, true); // Empowered Light
+                            }
+                            if (unitTarget->HasAuraOfDifficulty(65684)) // Dark Essence
+                            {
+                                unitTarget->CastSpell(unitTarget, 67215, true); // Empowered Darkness
+                            }
+                            pHolder->SetStackAmount(0);
+                        }
+                    }
+                    return;
+                }
+                default:
+                    break;
+            }
             switch(m_spellInfo->Id)
             {
                 case 6962:                                  // Called pet
