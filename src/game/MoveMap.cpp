@@ -212,17 +212,21 @@ namespace MMAP
         }
 
         // memory allocated for data is now managed by detour, and will be deallocated when the tile is removed
-        if (mmap->navMesh->addTile(data, fileHeader.size, DT_TILE_FREE_DATA, 0, &tileRef) != DT_SUCCESS)
+        if ( stat == DT_SUCCESS )
+        {
+            mmap->mmapLoadedTiles.insert(std::pair<uint32, dtTileRef>(packedGridPos, tileRef));
+            ++loadedTiles;
+            sLog.outDetail("MMAP:loadMap: Loaded mmtile %03i[%02i,%02i] into %03i[%02i,%02i]", mapId, x, y, mapId, header->x, header->y);
+            return true;
+        }
+        else
         {
             sLog.outError("MMAP:loadMap: Could not load %03u%02i%02i.mmtile into navmesh", mapId, x, y);
             dtFree(data);
             return false;
         }
 
-        mmap->mmapLoadedTiles.insert(std::pair<uint32, dtTileRef>(packedGridPos, tileRef));
-        ++loadedTiles;
-        sLog.outDetail("MMAP:loadMap: Loaded mmtile %03i[%02i,%02i] into %03i[%02i,%02i]", mapId, x, y, mapId, header->x, header->y);
-        return true;
+        return false;
     }
 
     bool MMapManager::unloadMap(uint32 mapId, int32 x, int32 y)
