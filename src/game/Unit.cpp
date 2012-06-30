@@ -9259,18 +9259,18 @@ void Unit::ClearInCombat()
     m_CombatTimer = 0;
     RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IN_COMBAT);
 
-    if (isCharmed() || (GetTypeId()!=TYPEID_PLAYER && ((Creature*)this)->IsPet()))
-        RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PET_IN_COMBAT);
-
     // Player's state will be cleared in Player::UpdateContestedPvP
-    if (GetTypeId() != TYPEID_PLAYER)
+    if (GetTypeId() == TYPEID_UNIT)
     {
+        if (isCharmed() || ((Creature*)this)->IsPet())
+            RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PET_IN_COMBAT);
+
         if (((Creature*)this)->GetCreatureInfo()->unit_flags & UNIT_FLAG_OOC_NOT_ATTACKABLE)
             SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE);
 
         clearUnitState(UNIT_STAT_ATTACK_PLAYER);
     }
-    else
+    else if (GetTypeId() == TYPEID_PLAYER)
         ((Player*)this)->UpdatePotionCooldown();
 }
 
