@@ -129,17 +129,27 @@ SpellCastTargets::~SpellCastTargets()
 {
 }
 
-void SpellCastTargets::setUnitTarget(Unit *target)
+void SpellCastTargets::setUnitTarget(Unit* target)
 {
-    if (!target)
-        return;
+    if (target && !(m_targetMask & TARGET_FLAG_DEST_LOCATION))
+    {
+        m_destX = target->GetPositionX();
+        m_destY = target->GetPositionY();
+        m_destZ = target->GetPositionZ();
+    }
 
-    m_destX = target->GetPositionX();
-    m_destY = target->GetPositionY();
-    m_destZ = target->GetPositionZ();
     m_unitTarget = target;
-    m_unitTargetGUID = target->GetObjectGuid();
-    m_targetMask |= TARGET_FLAG_UNIT;
+
+    if (target)
+    {
+        m_unitTargetGUID = target->GetObjectGuid();
+        m_targetMask |= TARGET_FLAG_UNIT;
+    }
+    else
+    {
+        m_unitTargetGUID = ObjectGuid();
+        m_targetMask &= ~TARGET_FLAG_UNIT;
+    }
 }
 
 void SpellCastTargets::setDestination(float x, float y, float z)
