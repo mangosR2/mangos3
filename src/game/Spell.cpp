@@ -9122,32 +9122,6 @@ bool Spell::FillCustomTargetMap(SpellEffectIndex i, UnitList &targetUnitMap)
             FillAreaTargets(targetUnitMap, radius, PUSH_SELF_CENTER, SPELL_TARGETS_AOE_DAMAGE);
             break;
         }
-        case 70360: // Eat Ooze (Mutated Abomination, Putricide)
-        case 72527:
-        {
-            radius = 50.0f;
-
-            UnitList tempTargetUnitMap;
-            FillAreaTargets(tempTargetUnitMap, radius, PUSH_SELF_CENTER, SPELL_TARGETS_ALL);
-            for (UnitList::const_iterator iter = tempTargetUnitMap.begin(); iter != tempTargetUnitMap.end(); ++iter)
-            {
-                Unit* unit = *iter;
-
-                if (unit->GetEntry() == 37690) // Growing Ooze Puddle
-                {
-                    radius = 5.0f;
-                    if (Aura* aura = unit->GetAura(70347, EFFECT_INDEX_0))
-                        radius += aura->GetStackAmount();
-
-                    if (m_caster->IsWithinDist(unit, radius))
-                    {
-                        targetUnitMap.push_back(unit);
-                        break;
-                    }
-                }
-            }
-            break;
-        }
         case 70127: // Mystic Buffet (Sindragosa)
         case 72528:
         case 72529:
@@ -9345,7 +9319,7 @@ bool Spell::FillCustomTargetMap(SpellEffectIndex i, UnitList &targetUnitMap)
         case 72548:
         {
             UnitList tempTargetUnitMap;
-            FillAreaTargets(tempTargetUnitMap, radius, PUSH_SELF_CENTER, SPELL_TARGETS_ALL);
+            FillAreaTargets(tempTargetUnitMap, radius, PUSH_DEST_CENTER, SPELL_TARGETS_ALL);
             for (UnitList::iterator itr = tempTargetUnitMap.begin(); itr != tempTargetUnitMap.end(); ++itr)
             {
                 if ((*itr) && !(*itr)->GetObjectGuid().IsVehicle())
