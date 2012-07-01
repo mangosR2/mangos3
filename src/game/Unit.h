@@ -1563,12 +1563,13 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         void SendMonsterMoveTransport(WorldObject *transport, SplineType type, SplineFlags flags, uint32 moveTime, ...);
         virtual bool SetPosition(float x, float y, float z, float orientation, bool teleport = false);
 
-        void MonsterMoveWithSpeed(float x, float y, float z, float speed, bool generatePath = false, bool forceDestination = false);
+        void MonsterMoveWithSpeed(float x, float y, float z, float speed, bool generatePath = true, bool forceDestination = false);
         // recommend use MonsterMove/MonsterMoveWithSpeed for most case that correctly work with movegens
         // if used additional args in ... part then floats must explicitly casted to double
         void SendHeartBeat();
         bool IsLevitating() const { return m_movementInfo.HasMovementFlag(MOVEFLAG_LEVITATING);}
         bool IsWalking() const { return m_movementInfo.HasMovementFlag(MOVEFLAG_WALK_MODE);}
+        bool IsFalling() { return m_movementInfo.HasMovementFlag(MovementFlags(MOVEFLAG_FALLING | MOVEFLAG_FALLINGFAR));};
 
         void SetInFront(Unit const* target);
         void SetFacingTo(float ori);

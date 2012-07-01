@@ -12654,10 +12654,10 @@ void Unit::NearTeleportTo( float x, float y, float z, float orientation, bool ca
 
 void Unit::MonsterMoveWithSpeed(float x, float y, float z, float speed, bool generatePath, bool forceDestination)
 {
-    Movement::MoveSplineInit init(*this);
-    init.MoveTo(x,y,z, generatePath, forceDestination);
-    init.SetVelocity(speed);
-    init.Launch();
+    MaNGOS::NormalizeMapCoord(x);
+    MaNGOS::NormalizeMapCoord(y);
+
+    GetMotionMaster()->MoveWithSpeed(x, y, z, speed, generatePath, forceDestination);
 }
 
 void Unit::MonsterMoveToDestination(float x, float y, float z, float o, float speed, float height, bool isKnockBack, Unit* target)
