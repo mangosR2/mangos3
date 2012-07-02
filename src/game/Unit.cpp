@@ -1913,21 +1913,11 @@ void Unit::CalculateMeleeDamage(DamageInfo* damageInfo)
     if (int32(damageInfo->damage) > 0)
     {
         damageInfo->procVictim |= PROC_FLAG_TAKEN_ANY_DAMAGE;
-        damageInfo->procEx |= PROC_EX_DIRECT_DAMAGE;
+        damageInfo->procEx     |= PROC_EX_DIRECT_DAMAGE;
 
         // Calculate absorb & resists
         damageInfo->target->CalculateDamageAbsorbAndResist(this, damageInfo, true);
 
-        if (damageInfo->absorb)
-        {
-            damageInfo->HitInfo|=HITINFO_ABSORB;
-            damageInfo->procEx|=PROC_EX_ABSORB;
-        }
-        if (damageInfo->resist)
-            damageInfo->HitInfo|=HITINFO_RESIST;
-
-        if (damageInfo->damage <= 0)
-            damageInfo->procEx &= ~PROC_EX_DIRECT_DAMAGE;
     }
     else // Umpossible get negative result but....
         damageInfo->damage = 0;
@@ -2767,10 +2757,16 @@ void Unit::CalculateDamageAbsorbAndResist(Unit *pCaster, DamageInfo* damageInfo,
     damageInfo->absorb = damageInfo->damage - damageInfo->resist - RemainingDamage - absorb_unaffected_damage;
 
     if (damageInfo->absorb)
-        damageInfo->procEx |= PROC_EX_ABSORB;
+    {
+        damageInfo->procEx  |= PROC_EX_ABSORB;
+        damageInfo->HitInfo |= (damageInfo->damage <= damageInfo->absorb) ? HITINFO_ABSORB : HITINFO_PARTIAL_ABSORB;
+    }
 
     if (damageInfo->resist)
-        damageInfo->procEx |= PROC_EX_RESIST;
+    {
+        damageInfo->procEx  |= PROC_EX_RESIST;
+        damageInfo->HitInfo |= (damageInfo->damage <= damageInfo->resist) ? HITINFO_RESIST : HITINFO_PARTIAL_RESIST;
+    }
 
     if (damageInfo->damage <= (damageInfo->absorb + damageInfo->resist))
     {
@@ -13670,6 +13666,7 @@ void DamageInfo::Reset(uint32 _damage)
     reduction     = 0;
     bonusDone     = 0;
     bonusTaken    = 0;
+    rage          = 0;
     unused        = false;
     HitInfo       = HITINFO_NORMALSWING;
     TargetState   = VICTIMSTATE_UNAFFECTED;
