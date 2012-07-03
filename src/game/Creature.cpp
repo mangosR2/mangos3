@@ -2503,7 +2503,7 @@ void Creature::ApplyGameEventSpells(GameEventCreatureData const* eventData, bool
         CastSpell(this, cast_spell, true);
 }
 
-void Creature::FillGuidsListFromThreatList( std::vector<ObjectGuid>& guids, uint32 maxamount /*= 0*/ )
+void Creature::FillGuidsListFromThreatList(GuidVector& guids, uint32 maxamount /*= 0*/)
 {
     if (!CanHaveThreatList())
         return;

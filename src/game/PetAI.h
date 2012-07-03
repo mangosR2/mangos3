@@ -91,6 +91,7 @@ class MANGOS_DLL_DECL PetAI : public CreatureAI
         bool inCombat;
 
         ObjectGuidSet m_AllySet;
+
         uint32 m_updateAlliesTimer;
 
         PetAIType       m_AIType;

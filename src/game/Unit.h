@@ -1212,8 +1212,8 @@ enum IgnoreUnitState
     IGNORE_UNIT_TARGET_NON_FROZEN = 126,                    // ignore absent of frozen state
 };
 
-typedef std::set<ObjectGuid> GuardianPetList;
-typedef std::set<ObjectGuid> GroupPetList;
+typedef ObjectGuidSet GuardianPetList;
+typedef ObjectGuidSet GroupPetList;
 
 // delay time next attack to prevent client attack animation problems
 #define ATTACK_DISPLAY_DELAY 200
@@ -2177,8 +2177,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
 
         SingleCastSpellTargetMap m_singleCastSpellTargets;  // casted by unit single per-caster auras
 
-        typedef std::list<ObjectGuid> DynObjectGUIDs;
-        DynObjectGUIDs m_dynObjGUIDs;
+        GuidList m_dynObjGUIDs;
 
         typedef std::list<GameObject*> GameObjectList;
         GameObjectList m_gameObj;
@@ -2262,7 +2261,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
 
         EventProcessor m_Events;
 
-        GuardianPetList m_guardianPets;
+        GuidSet m_guardianPets;
 
         ObjectGuid m_TotemSlot[MAX_TOTEM_SLOT];
         UnitStateMgr m_stateMgr;
@@ -2306,7 +2305,7 @@ void Unit::CallForAllControlledUnits(Func const& func, uint32 controlledMask)
 
     if (controlledMask & CONTROLLED_GUARDIANS)
     {
-        for(GuardianPetList::const_iterator itr = m_guardianPets.begin(); itr != m_guardianPets.end();)
+        for (GuidSet::const_iterator itr = m_guardianPets.begin(); itr != m_guardianPets.end();)
             if (Pet* guardian = _GetPet(*(itr++)))
                 func(guardian);
     }
@@ -2340,7 +2339,7 @@ bool Unit::CheckAllControlledUnits(Func const& func, uint32 controlledMask) cons
 
     if (controlledMask & CONTROLLED_GUARDIANS)
     {
-        for(GuardianPetList::const_iterator itr = m_guardianPets.begin(); itr != m_guardianPets.end();)
+        for (GuidSet::const_iterator itr = m_guardianPets.begin(); itr != m_guardianPets.end();)
             if (Pet const* guardian = _GetPet(*(itr++)))
                 if (func(guardian))
                     return true;
