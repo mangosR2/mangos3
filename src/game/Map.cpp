@@ -1035,19 +1035,8 @@ void Map::RemoveAllObjectsInRemoveList()
         switch(obj->GetTypeId())
         {
             case TYPEID_CORPSE:
-            {
-                // ??? WTF
-                ObjectGuid guid = obj->GetObjectGuid();
-                if (guid && guid.IsUnit())
-                {
-                    Corpse* corpse = GetCorpse(guid);
-                    if (!corpse)
-                        sLog.outError("Try delete corpse/bones, but corpse of %s not exists!", guid.GetString().c_str());
-                    else
-                        Remove(corpse,true);
-                }
+                Remove((Corpse*)obj,true);
                 break;
-            }
             case TYPEID_DYNAMICOBJECT:
                 Remove((DynamicObject*)obj,true);
                 break;
