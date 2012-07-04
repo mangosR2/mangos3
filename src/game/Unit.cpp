@@ -13453,7 +13453,7 @@ bool Unit::IsVisibleTargetForSpell(WorldObject const* caster, SpellEntry const* 
     }
 
     // spell can hit all targets in two cases:
-    if (VMAP::VMapFactory::checkSpellForLoS(spellInfo->Id))
+    if (!VMAP::VMapFactory::checkSpellForLoS(spellInfo->Id))
         return true;
 
     if (spellInfo->HasAttribute(SPELL_ATTR_EX6_IGNORE_DETECTION))
