@@ -202,12 +202,11 @@ class MANGOS_DLL_SPEC ObjectGuid
             }
         }
 
-        bool HasEntry() const { return HasEntry(GetHigh()); }
-
     private:                                                // fields
         uint64 m_guid;
 
     public:
+        bool HasEntry() const { return HasEntry(GetHigh()); }
         // predefined empty object for safe return by reference
         static ObjectGuid const Null;
 };

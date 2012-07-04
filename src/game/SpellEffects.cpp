@@ -6772,7 +6772,7 @@ void Spell::DoSummonVehicle(SpellEffectIndex eff_idx, uint32 forceFaction)
     else
         m_caster->GetClosePoint(px, py, pz,m_caster->GetObjectBoundingRadius());
 
-    TempSummonType summonType = (GetSpellDuration(m_spellInfo) == 0) ? TEMPSUMMON_DEAD_DESPAWN : TEMPSUMMON_TIMED_OR_DEAD_DESPAWN;
+    TempSummonType summonType = (GetSpellDuration(m_spellInfo) == 0) ? TEMPSUMMON_DEAD_OR_LOST_OWNER_DESPAWN : TEMPSUMMON_TIMED_OR_DEAD_OR_LOST_OWNER_DESPAWN;
 
     Creature* vehicle = m_caster->SummonCreature(vehicle_entry,px,py,pz,m_caster->GetOrientation(),summonType,GetSpellDuration(m_spellInfo),true);
 
