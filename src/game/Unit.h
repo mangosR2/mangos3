@@ -1212,8 +1212,8 @@ enum IgnoreUnitState
     IGNORE_UNIT_TARGET_NON_FROZEN = 126,                    // ignore absent of frozen state
 };
 
-typedef ObjectGuidSet GuardianPetList;
-typedef ObjectGuidSet GroupPetList;
+typedef GuidSet GuardianPetList;
+typedef GuidSet GroupPetList;
 
 // delay time next attack to prevent client attack animation problems
 #define ATTACK_DISPLAY_DELAY 200

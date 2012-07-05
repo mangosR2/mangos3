@@ -807,7 +807,7 @@ class MANGOS_DLL_SPEC GameObject : public WorldObject
 
         typedef std::set<Player*> PlayersSet;
 
-        ObjectGuidSet m_capturePlayers[PVP_TEAM_COUNT];     // player sets for each faction
+        GuidSet m_capturePlayers[PVP_TEAM_COUNT];           // player sets for each faction
 
         GuidSet m_SkillupSet;                               // players that already have skill-up at GO use
 

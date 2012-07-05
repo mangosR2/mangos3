@@ -419,9 +419,9 @@ void WorldSession::LogoutPlayer(bool Save)
 
             // build set of player who attack _player or who have pet attacking of _player
             std::set<Player*> aset;
-            ObjectGuidSet attackers = GetPlayer()->GetMap()->GetAttackersFor(GetPlayer()->GetObjectGuid());
+            GuidSet attackers = GetPlayer()->GetMap()->GetAttackersFor(GetPlayer()->GetObjectGuid());
 
-            for (ObjectGuidSet::const_iterator itr = attackers.begin(); itr != attackers.end();)
+            for (GuidSet::const_iterator itr = attackers.begin(); itr != attackers.end();)
             {
                 Unit* attacker = GetPlayer()->GetMap()->GetUnit(*itr++);
                 if (!attacker)

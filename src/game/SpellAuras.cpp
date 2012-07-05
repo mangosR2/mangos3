@@ -670,7 +670,7 @@ void Aura::AreaAuraUpdate(uint32 diff)
             if (!owner)
                 owner = caster;
 
-            ObjectGuidSet targets;
+            GuidSet targets;
             Spell::UnitList _targets;
 
             switch(m_areaAuraType)
@@ -806,7 +806,7 @@ void Aura::AreaAuraUpdate(uint32 diff)
                     if (*itr)
                         targets.insert((*itr)->GetObjectGuid());
 
-            for (ObjectGuidSet::const_iterator tIter = targets.begin(); tIter != targets.end(); tIter++)
+            for (GuidSet::const_iterator tIter = targets.begin(); tIter != targets.end(); tIter++)
             {
                 // flag for selection is need apply aura to current iteration target
                 bool apply = true;

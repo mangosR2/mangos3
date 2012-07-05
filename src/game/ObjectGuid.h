@@ -214,13 +214,8 @@ class MANGOS_DLL_SPEC ObjectGuid
 
 // Some Shared defines
 typedef std::set<ObjectGuid> GuidSet;
-typedef std::list<ObjectGuid> GuidList;
-typedef std::vector<ObjectGuid> GuidVector;
-
-// Shared locked typedefs (currently or in future)
-typedef std::set<ObjectGuid>                ObjectGuidSet;
-typedef std::list<ObjectGuid>               ObjectGuidList;
-typedef ACE_Based::LockedVector<ObjectGuid> ObjectGuidVector;
+typedef ACE_Based::LockedVector<ObjectGuid> GuidList;
+typedef ACE_Based::LockedVector<ObjectGuid> GuidVector;
 
 //minimum buffer size for packed guid is 9 bytes
 #define PACKED_GUID_MIN_BUFFER_SIZE 9

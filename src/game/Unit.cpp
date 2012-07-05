@@ -5901,12 +5901,12 @@ void Unit::RemoveDynObject(uint32 spellid)
         DynamicObject* dynObj = GetMap()->GetDynamicObject(*i);
         if(!dynObj)
         {
-            i = m_dynObjGUIDs.erase(i);
+            m_dynObjGUIDs.erase(i);
         }
         else if (spellid == 0 || dynObj->GetSpellId() == spellid)
         {
             dynObj->Delete();
-            i = m_dynObjGUIDs.erase(i);
+            m_dynObjGUIDs.erase(i);
         }
         else
             ++i;
@@ -5930,7 +5930,7 @@ DynamicObject * Unit::GetDynObject(uint32 spellId, SpellEffectIndex effIndex)
         DynamicObject* dynObj = GetMap()->GetDynamicObject(*i);
         if(!dynObj)
         {
-            i = m_dynObjGUIDs.erase(i);
+            m_dynObjGUIDs.erase(i);
             continue;
         }
 
@@ -5948,7 +5948,7 @@ DynamicObject * Unit::GetDynObject(uint32 spellId)
         DynamicObject* dynObj = GetMap()->GetDynamicObject(*i);
         if(!dynObj)
         {
-            i = m_dynObjGUIDs.erase(i);
+            m_dynObjGUIDs.erase(i);
             continue;
         }
 
@@ -6585,10 +6585,10 @@ Unit* Unit::getAttackerForHelper()
     if (!IsInCombat())
         return NULL;
 
-    ObjectGuidSet attackers = GetMap()->GetAttackersFor(GetObjectGuid());
+    GuidSet attackers = GetMap()->GetAttackersFor(GetObjectGuid());
     if (!attackers.empty())
     {
-        for(ObjectGuidSet::const_iterator itr = attackers.begin(); itr != attackers.end();)
+        for(GuidSet::const_iterator itr = attackers.begin(); itr != attackers.end();)
         {
             ObjectGuid guid = *itr++;
             Unit* attacker = GetMap()->GetUnit(guid);
@@ -6822,9 +6822,9 @@ void Unit::RemoveAllAttackers()
     if (!GetMap())
         return;
 
-    ObjectGuidSet attackers = GetMap()->GetAttackersFor(GetObjectGuid());
+    GuidSet attackers = GetMap()->GetAttackersFor(GetObjectGuid());
 
-    for (ObjectGuidSet::const_iterator itr = attackers.begin(); itr != attackers.end(); ++itr)
+    for (GuidSet::const_iterator itr = attackers.begin(); itr != attackers.end(); ++itr)
     {
         Unit* attacker = GetMap()->GetUnit(*itr);
         if(!attacker || !attacker->AttackStop())
@@ -10175,9 +10175,9 @@ bool Unit::SelectHostileTarget()
     // Note: creature not have targeted movement generator but have attacker in this case
     if (GetMotionMaster()->GetCurrentMovementGeneratorType() != CHASE_MOTION_TYPE)
     {
-        ObjectGuidSet attackers = GetMap()->GetAttackersFor(GetObjectGuid());
+        GuidSet attackers = GetMap()->GetAttackersFor(GetObjectGuid());
 
-        for (ObjectGuidSet::const_iterator itr = attackers.begin(); itr != attackers.end(); ++itr)
+        for (GuidSet::const_iterator itr = attackers.begin(); itr != attackers.end(); ++itr)
         {
             Unit* attacker = GetMap()->GetUnit(*itr);
             if (attacker && attacker->IsInMap(this) && attacker->isTargetableForAttack() && attacker->isInAccessablePlaceFor(this))
@@ -13084,9 +13084,9 @@ void Unit::StopAttackFaction(uint32 faction_id)
         }
     }
 
-    ObjectGuidSet attackers = GetMap()->GetAttackersFor(GetObjectGuid());
+    GuidSet attackers = GetMap()->GetAttackersFor(GetObjectGuid());
 
-    for (ObjectGuidSet::iterator itr = attackers.begin(); itr != attackers.end(); ++itr)
+    for (GuidSet::iterator itr = attackers.begin(); itr != attackers.end(); ++itr)
     {
         Unit* attacker = GetMap()->GetUnit(*itr);
 
