@@ -716,9 +716,9 @@ bool Player::Create( uint32 guidlow, const std::string& name, uint8 race, uint8 
     LoadAccountLinkedState();
 
     if (GetAccountLinkedState() != STATE_NOT_LINKED)
-        SetByteValue(PLAYER_BYTES_2, 3, 0x06);              // rest state = refer-a-friend
+        SetByteValue(PLAYER_BYTES_2, 3, REST_STATE_NORMAL | REST_STATE_RAF_LINKED);
     else
-        SetByteValue(PLAYER_BYTES_2, 3, 0x02);              // rest state = normal
+        SetByteValue(PLAYER_BYTES_2, 3, REST_STATE_NORMAL);
 
     SetUInt16Value(PLAYER_BYTES_3, 0, gender);              // only GENDER_MALE/GENDER_FEMALE (1 bit) allowed, drunk state = 0
     SetByteValue(PLAYER_BYTES_3, 3, 0);                     // BattlefieldArenaFaction (0 or 1)
@@ -20027,13 +20027,13 @@ void Player::SetRestBonus (float rest_bonus_new)
 
     // update data for client
     if (GetAccountLinkedState() != STATE_NOT_LINKED)
-        SetByteValue(PLAYER_BYTES_2, 3, 0x06);                  // Set Reststate = Refer-A-Friend
+        SetByteValue(PLAYER_BYTES_2, 3, REST_STATE_RAF_LINKED);
     else
     {
-        if (m_rest_bonus>10)
-            SetByteValue(PLAYER_BYTES_2, 3, 0x01);              // Set Reststate = Rested
-        else if (m_rest_bonus<=1)
-            SetByteValue(PLAYER_BYTES_2, 3, 0x02);              // Set Reststate = Normal
+        if (m_rest_bonus > 10)
+            SetByteValue(PLAYER_BYTES_2, 3, REST_STATE_RESTED);
+        else if (m_rest_bonus <= 1)
+            SetByteValue(PLAYER_BYTES_2, 3, REST_STATE_NORMAL);
     }
 
     //RestTickUpdate
