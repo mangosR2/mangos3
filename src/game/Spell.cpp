@@ -9524,7 +9524,7 @@ bool Spell::FillCustomTargetMap(SpellEffectIndex i, UnitList &targetUnitMap)
                 radius += holder->GetStackAmount() * 1.0f;
             // 25man heroic - 5% growth
             else if (SpellAuraHolderPtr holder = m_caster->GetSpellAuraHolder(74164))
-                radius += holder->GetStackAmount() * 2.0f;
+                radius += holder->GetStackAmount() * 0.5f;
 
             FillAreaTargets(targetUnitMap, radius, PUSH_SELF_CENTER, SPELL_TARGETS_AOE_DAMAGE);
             break;
