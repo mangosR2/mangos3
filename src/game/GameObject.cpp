@@ -88,8 +88,8 @@ void GameObject::AddToWorld()
 
     if (m_model)
         GetMap()->InsertGameObjectModel(*m_model);
-    bool startOpen = (GetGoType() == GAMEOBJECT_TYPE_DOOR || GetGoType() == GAMEOBJECT_TYPE_BUTTON ? GetGOInfo()->door.startOpen : false);
-    EnableCollision(!startOpen);
+
+    EnableCollision(CalculateCurrentCollisionState());
 
     Object::AddToWorld();
 }
@@ -117,6 +117,8 @@ void GameObject::RemoveFromWorld()
 
         MAPLOCK_WRITE(this, MAP_LOCK_TYPE_DEFAULT);
         GetMap()->GetObjectsStore().erase<GameObject>(GetObjectGuid(), (GameObject*)NULL);
+
+        EnableCollision(false);
     }
 
     Object::RemoveFromWorld();
@@ -2257,15 +2259,7 @@ void GameObject::SetLootState(LootState state)
 {
     m_lootState = state;
     if (m_model)
-    {
-        // startOpen determines whether we are going to add or remove the LoS on activation
-        bool startOpen = (GetGoType() == GAMEOBJECT_TYPE_DOOR || GetGoType() == GAMEOBJECT_TYPE_BUTTON ? GetGOInfo()->door.startOpen : false);
-
-        if (state == GO_ACTIVATED || state == GO_JUST_DEACTIVATED)
-            EnableCollision(startOpen);
-        else if (state == GO_READY)
-            EnableCollision(!startOpen);
-    }
+        EnableCollision(CalculateCurrentCollisionState());
 }
 
 void GameObject::SetGoState(GOState state)
@@ -2275,14 +2269,7 @@ void GameObject::SetGoState(GOState state)
     {
         if (!IsInWorld())
             return;
-
-        // startOpen determines whether we are going to add or remove the LoS on activation
-        bool startOpen = (GetGoType() == GAMEOBJECT_TYPE_DOOR || GetGoType() == GAMEOBJECT_TYPE_BUTTON ? GetGOInfo()->door.startOpen : false);
-
-        if (state == GO_STATE_ACTIVE || state == GO_STATE_ACTIVE_ALTERNATIVE)
-            EnableCollision(startOpen);
-        else if (state == GO_STATE_READY)
-            EnableCollision(!startOpen);
+        EnableCollision(CalculateCurrentCollisionState());
     }
 }
 
@@ -2296,7 +2283,7 @@ void GameObject::SetDisplayId(uint32 modelId)
 void GameObject::SetPhaseMask(uint32 newPhaseMask, bool update)
 {
     WorldObject::SetPhaseMask(newPhaseMask, update);
-    EnableCollision(true);
+    EnableCollision(CalculateCurrentCollisionState());
 }
 
 void GameObject::EnableCollision(bool enable)
@@ -2310,6 +2297,37 @@ void GameObject::EnableCollision(bool enable)
     m_model->enable(enable ? GetPhaseMask() : 0);
 }
 
+bool GameObject::CalculateCurrentCollisionState() const
+{
+    if (!m_model || !isSpawned())
+        return false;
+
+    bool startOpen;
+    bool result;
+
+    switch (GetGoType())
+    {
+        case GAMEOBJECT_TYPE_DOOR:
+        case GAMEOBJECT_TYPE_BUTTON:
+            startOpen = GetGOInfo()->door.startOpen;
+            break;
+            // place custom collision rules here
+        default:
+            startOpen = false;
+            break;
+    }
+
+    if ((GetGoState() == GO_STATE_ACTIVE || GetGoState() == GO_STATE_ACTIVE_ALTERNATIVE) ||
+        (getLootState()  == GO_ACTIVATED || getLootState()  == GO_JUST_DEACTIVATED))
+        result = startOpen;
+    else if (GetGoState() == GO_STATE_READY ||
+            getLootState()  == GO_READY)
+        result = !startOpen;
+
+    return result;
+}
+
+
 void GameObject::UpdateModel()
 {
     if (!IsInWorld())
@@ -2321,6 +2339,8 @@ void GameObject::UpdateModel()
     m_model = GameObjectModel::construct(this);
     if (m_model)
         GetMap()->InsertGameObjectModel(*m_model);
+
+    EnableCollision(CalculateCurrentCollisionState());
 }
 
 void GameObject::StartGroupLoot(Group* group, uint32 timer)
