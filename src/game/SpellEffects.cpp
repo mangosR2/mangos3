@@ -10209,6 +10209,7 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     return;
                 }
                 case 70360:                                 // Eat Ooze (Putricide)
+                case 72527:
                 {
                     if (!unitTarget)
                         return;
