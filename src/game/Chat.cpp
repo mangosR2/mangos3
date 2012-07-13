@@ -2155,8 +2155,9 @@ void ChatHandler::FillMessageData( WorldPacket *data, WorldSession* session, uin
     *data << ObjectGuid(targetGuid);
     *data << uint32(messageLength);
     *data << message;
+
     if (session && session->GetPlayer() && type != CHAT_MSG_WHISPER_INFORM && type != CHAT_MSG_DND && type != CHAT_MSG_AFK)
-        *data << uint8(session->GetPlayer()->chatTag());
+        *data << uint8(session->GetPlayer()->GetChatTag());
     else
         *data << uint8(0);
 }
