@@ -42,6 +42,7 @@ class MANGOS_DLL_SPEC MotionMaster
         void MovementExpired(bool reset = true) { Clear(); }
 
         void MoveIdle();
+        void MoveRandom(float radius = 5.0f);
         void MoveRandomAroundPoint(float x, float y, float z, float radius, float verticalZ = 0.0f);
         void MoveTargetedHome();
         void MoveFollow(Unit* target, float dist, float angle);

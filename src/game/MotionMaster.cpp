@@ -62,6 +62,14 @@ void MotionMaster::MoveIdle()
     impl()->DropAllStates();
 }
 
+void MotionMaster::MoveRandom(float radius)
+{
+    // Wrapper for MoveRandomAroundPoint for move around current point.
+    float x,y,z;
+    m_owner->GetPosition(x,y,z);
+    MoveRandomAroundPoint(x, y, z, radius);
+}
+
 void MotionMaster::MoveRandomAroundPoint(float x, float y, float z, float radius, float verticalZ)
 {
     if (m_owner->GetTypeId() == TYPEID_PLAYER)
