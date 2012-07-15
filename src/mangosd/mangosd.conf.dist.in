@@ -1357,6 +1357,11 @@ Channel.SilentlyGMJoin = 0
 #        Default: 0 (disable)
 #                 1 (enable)
 #
+#    GM.InvisibleAura
+#        A spell that will be cast when a gm uses ".gm visible off" (Must be aura spell)
+#        Default: 37800 (50% Transparency)
+#                 0 (Disabled)
+#
 ###################################################################################################################
 
 GM.LoginState            = 2
@@ -1371,6 +1376,7 @@ GM.StartLevel            = 1
 GM.LowerSecurity         = 0
 GM.AllowAchievementGain  = 1
 GM.AnnounceBan           = 0
+GM.InvisibleAura         = 37800
 
 ###################################################################################################################
 # VISIBILITY AND RADIUSES
