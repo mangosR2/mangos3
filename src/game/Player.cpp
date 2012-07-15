@@ -20026,7 +20026,7 @@ void Player::SetRestBonus (float rest_bonus_new)
 
     // update data for client
     if (GetAccountLinkedState() != STATE_NOT_LINKED)
-        SetByteValue(PLAYER_BYTES_2, 3, REST_STATE_RAF_LINKED);
+        SetByteValue(PLAYER_BYTES_2, 3, REST_STATE_NORMAL | REST_STATE_RAF_LINKED);
     else
     {
         if (m_rest_bonus > 10)
