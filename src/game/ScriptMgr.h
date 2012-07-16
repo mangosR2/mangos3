@@ -40,7 +40,6 @@ class Quest;
 class SpellCastTargets;
 class Unit;
 class WorldObject;
-struct SpellEntry;
 
 enum ScriptCommand                                          // resSource, resTarget are the resulting Source/ Target after buddy search is done
 {
