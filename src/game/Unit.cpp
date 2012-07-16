@@ -745,11 +745,17 @@ uint32 Unit::DealDamage(Unit *pVictim, DamageInfo* damageInfo, bool durabilityLo
     // Blessed Life talent of Paladin
     if ( pVictim->GetTypeId() == TYPEID_PLAYER )
     {
-        Unit::AuraList const& BlessedLife = pVictim->GetAurasByType(SPELL_AURA_PROC_TRIGGER_SPELL);
-        for(Unit::AuraList::const_iterator i = BlessedLife.begin(); i != BlessedLife.end(); ++i)
-            if((*i)->GetSpellProto()->SpellFamilyName == SPELLFAMILY_PALADIN && (*i)->GetSpellProto()->SpellIconID == 2137)
-                if ( urand(0,100) < (*i)->GetSpellProto()->procChance )
-                    damageInfo->damage *= 0.5;
+        AuraList const& BlessedLife = pVictim->GetAurasByType(SPELL_AURA_PROC_TRIGGER_SPELL);
+        for (AuraList::const_iterator i = BlessedLife.begin(); i != BlessedLife.end(); ++i)
+        {
+            Aura* aura = *i;
+            if (!aura || !aura->GetHolder() || aura->GetHolder()->IsDeleted())
+                continue;
+
+            if (aura->GetSpellProto()->SpellFamilyName == SPELLFAMILY_PALADIN && aura->GetSpellProto()->SpellIconID == 2137)
+                if ( urand(0,100) < aura->GetSpellProto()->procChance )
+                    damageInfo->damage *= 0.5f;
+        }
     }
 
     if(!damageInfo->damage)
@@ -805,12 +811,16 @@ uint32 Unit::DealDamage(Unit *pVictim, DamageInfo* damageInfo, bool durabilityLo
     AuraList const& vShareDamageAuras = pVictim->GetAurasByType(SPELL_AURA_SHARE_DAMAGE_PCT);
     for (AuraList::const_iterator itr = vShareDamageAuras.begin(); itr != vShareDamageAuras.end(); ++itr)
     {
-        if (Unit* shareTarget = (*itr)->GetCaster())
+        Aura* aura = *itr;
+        if (!aura || !aura->GetHolder() || aura->GetHolder()->IsDeleted())
+            continue;
+
+        if (Unit* shareTarget = aura->GetCaster())
         {
-            if (shareTarget != pVictim && ((*itr)->GetMiscValue() & damageInfo->SchoolMask()))
+            if (shareTarget != pVictim && (aura->GetMiscValue() & damageInfo->SchoolMask()))
             {
-                SpellEntry const * shareSpell = (*itr)->GetSpellProto();
-                uint32 shareDamage = uint32(damageInfo->damage * (*itr)->GetModifier()->m_amount / 100.0f);
+                SpellEntry const* shareSpell = aura->GetSpellProto();
+                uint32 shareDamage = uint32(damageInfo->damage * aura->GetModifier()->m_amount / 100.0f);
                 DealDamageMods(shareTarget, shareDamage, NULL);
                 DealDamage(shareTarget, shareDamage, 0, damageInfo->damageType, GetSpellSchoolMask(shareSpell), spellProto, false);
             }
