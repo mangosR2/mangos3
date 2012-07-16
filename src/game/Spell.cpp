@@ -1817,6 +1817,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
                 case 67296:                                 // Touch of Light (Mode 1)
                 case 67297:                                 // Touch of Light (Mode 2)
                 case 67298:                                 // Touch of Light (Mode 3)
+                case 67470:                                 // Pursuing Spikes
                 case 68950:                                 // Fear (FoS)
                 case 68912:                                 // Wailing Souls (FoS)
                 case 69048:                                 // Mirrored Soul (FoS)
