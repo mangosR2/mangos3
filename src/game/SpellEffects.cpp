@@ -7893,6 +7893,15 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     }
                     return;
                 }
+                case 606:                                           // Burning Bile - Spells 66870 , 67621 , 67622 , 67623
+                {
+                    if (!unitTarget)
+                        return;
+
+                    if (unitTarget->HasAuraOfDifficulty(66823))
+                        unitTarget->RemoveAurasDueToSpell(66823);
+                    return;
+                }
                 case 1822:                                          // Bone Spike Graveyard (Lord Marrowgar) - Spells 69057 , 70826 , 72088 , 72089
                 case 2270:                                          // Spells 73142 , 73143 , 73144 , 73145
                 {
