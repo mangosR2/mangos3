@@ -224,7 +224,13 @@ void ThreatContainer::clearReferences()
 HostileReference* ThreatContainer::getReferenceByTarget(Unit* pVictim)
 {
     HostileReference* result = NULL;
+    if (!pVictim)
+        return result;
+
     ObjectGuid guid = pVictim->GetObjectGuid();
+    if (guid.IsEmpty())
+        return result;
+
     for(ThreatList::const_iterator i = iThreatList.begin(); i != iThreatList.end(); ++i)
     {
         if ((*i)->getUnitGuid() == guid)
