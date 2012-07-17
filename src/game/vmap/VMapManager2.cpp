@@ -174,18 +174,8 @@ namespace VMAP
                 Vector3 pos1 = convertPositionToInternalRep(x1, y1, z1);
                 Vector3 pos2 = convertPositionToInternalRep(x2, y2, z2);
                 Vector3 resultPos;
-                float maxDist = (pos2 - pos1).magnitude();
-                // prevent NaN values which can cause BIH intersection to enter infinite loop
-                if (maxDist < 1e-10f)
-                {
-                    resultPos = pos2;
-                    result = false;
-                }
-                else
-                {
-                    result = instanceTree->second->getObjectHitPos(pos1, pos2, resultPos, pModifyDist);
-                    resultPos = convertPositionToInternalRep(resultPos.x,resultPos.y,resultPos.z);
-                }
+                result = instanceTree->second->getObjectHitPos(pos1, pos2, resultPos, pModifyDist);
+                resultPos = convertPositionToInternalRep(resultPos.x,resultPos.y,resultPos.z);
                 rx = resultPos.x;
                 ry = resultPos.y;
                 rz = resultPos.z;
