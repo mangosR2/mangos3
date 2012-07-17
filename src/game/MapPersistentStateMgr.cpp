@@ -343,6 +343,72 @@ void DungeonPersistentState::UpdateEncounterState(EncounterCreditType type, uint
     }
 }
 
+void DungeonPersistentState::UpdateSpecialEncounterState(EncounterFrameCommand command, ObjectGuid linkedGuid, uint8 param1 /*= 0*/, uint8 param2 /*= 0*/)
+{
+    if (linkedGuid.IsEmpty())
+        return;
+
+    SpecialEncountersMap::iterator itr = m_specialEncountersMap.find(linkedGuid);
+
+    if (itr == m_specialEncountersMap.end())
+        m_specialEncountersMap.insert(SpecialEncountersMap::value_type(linkedGuid,SpecialEncounterState(linkedGuid, command, param1, param2)));
+    else
+    {
+        itr->second.SetCommand(command);
+        itr->second.data1 = param1;
+        itr->second.data2 = param2;
+    }
+
+    SendSpecialEncounterState(linkedGuid);
+}
+
+void DungeonPersistentState::SendSpecialEncounterState(ObjectGuid guid)
+{
+    // Possible need move this method to DungeonMap class
+    DungeonMap* dungeon = (DungeonMap*)GetMap();
+    if (!dungeon || guid.IsEmpty())
+        return;
+
+    SpecialEncountersMap::iterator itr = m_specialEncountersMap.find(guid);
+
+    if (itr == m_specialEncountersMap.end())
+        return;
+
+    SpecialEncounterState* state = &itr->second;
+
+    if (!state || state->lastCommand >= ENCOUNTER_FRAME_MAX)
+        return;
+
+    // size of this packet is at most 15 (usually less)
+    WorldPacket data(SMSG_INSTANCE_ENCOUNTER, 15);
+
+    data << uint32(state->lastCommand);
+
+    switch (state->lastCommand)
+    {
+        case ENCOUNTER_FRAME_ENGAGE:
+        case ENCOUNTER_FRAME_DISENGAGE:
+        case ENCOUNTER_FRAME_UPDATE_PRIORITY:
+            data << state->guid.WriteAsPacked();
+            data << uint8(state->data1);
+            break;
+        case ENCOUNTER_FRAME_ADD_TIMER:
+        case ENCOUNTER_FRAME_ENABLE_OBJECTIVE:
+        case ENCOUNTER_FRAME_DISABLE_OBJECTIVE:
+            data << uint8(state->data1);
+            break;
+        case ENCOUNTER_FRAME_UPDATE_OBJECTIVE:
+            data << uint8(state->data1);
+            data << uint8(state->data2);
+            break;
+        case ENCOUNTER_FRAME_UNK7:
+        default:
+            break;
+    }
+
+    dungeon->SendToPlayers(&data);
+}
+
 time_t DungeonPersistentState::GetResetTimeForDB() const
 {
     // only state the reset time for normal instances
