@@ -1217,15 +1217,15 @@ void Player::SetDrunkValue(uint16 newDrunkenValue, uint32 itemId)
     SendMessageToSet(&data, true);
 }
 
-void Player::Update( uint32 update_diff, uint32 p_time )
+void Player::Update(uint32 update_diff, uint32 p_time)
 {
-    if(!IsInWorld())
+    if (!IsInWorld())
         return;
 
-    // remove failed timed Achievements
+    // Remove failed timed Achievements
     GetAchievementMgr().DoFailedTimedAchievementCriterias();
 
-    // undelivered mail
+    // Undelivered mail
     if (m_nextMailDelivereTime && m_nextMailDelivereTime <= time(NULL))
     {
         SendNewMail();
@@ -1235,18 +1235,16 @@ void Player::Update( uint32 update_diff, uint32 p_time )
         m_nextMailDelivereTime = 0;
     }
 
-    //used to implement delayed far teleports
+    // Used to implement delayed far teleports
     SetCanDelayTeleport(true);
-    Unit::Update( update_diff, p_time );
+    Unit::Update(update_diff, p_time);
     SetCanDelayTeleport(false);
 
-    // update player only attacks
+    // Update player only attacks
     if (uint32 ranged_att = getAttackTimer(RANGED_ATTACK))
-    {
-        setAttackTimer(RANGED_ATTACK, (update_diff >= ranged_att ? 0 : ranged_att - update_diff) );
-    }
+        setAttackTimer(RANGED_ATTACK, (update_diff >= ranged_att ? 0 : ranged_att - update_diff));
 
-    time_t now = time (NULL);
+    time_t now = time(NULL);
 
     UpdatePvPFlag(now);
 
@@ -1259,8 +1257,8 @@ void Player::Update( uint32 update_diff, uint32 p_time )
     UpdateAfkReport(now);
 
     // Update items that have just a limited lifetime
-    if (now>m_Last_tick)
-        UpdateItemDuration(uint32(now- m_Last_tick));
+    if (now > m_Last_tick)
+        UpdateItemDuration(uint32(now - m_Last_tick));
 
     if (now > m_Last_tick + IN_MILLISECONDS)
         UpdateSoulboundTradeItems();
@@ -1271,10 +1269,10 @@ void Player::Update( uint32 update_diff, uint32 p_time )
         while (iter != m_timedquests.end())
         {
             QuestStatusData& q_status = mQuestStatus[*iter];
-            if ( q_status.m_timer <= update_diff )
+            if (q_status.m_timer <= update_diff)
             {
                 uint32 quest_id  = *iter;
-                ++iter;                                     // current iter will be removed in FailQuest
+                ++iter;                                     // Current iter will be removed in FailQuest
                 FailQuest(quest_id);
             }
             else
@@ -1290,10 +1288,10 @@ void Player::Update( uint32 update_diff, uint32 p_time )
     {
         UpdateMeleeAttackingState();
 
-        Unit *pVictim = getVictim();
+        Unit* pVictim = getVictim();
         if (pVictim && !IsNonMeleeSpellCasted(false))
         {
-            Player *vOwner = pVictim->GetCharmerOrOwnerPlayerOrPlayerItself();
+            Player* vOwner = pVictim->GetCharmerOrOwnerPlayerOrPlayerItself();
             if (vOwner && vOwner->IsPvP() && !IsInDuelWith(vOwner))
             {
                 UpdatePvP(true);
@@ -1304,14 +1302,14 @@ void Player::Update( uint32 update_diff, uint32 p_time )
 
     if (HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING))
     {
-        if (roll_chance_i(3) && GetTimeInnEnter() > 0)      //freeze update
+        if (roll_chance_i(3) && GetTimeInnEnter() > 0)      // Freeze update
         {
-            time_t time_inn = time(NULL)-GetTimeInnEnter();
-            if (time_inn >= 10)                             //freeze update
+            time_t time_inn = time(NULL) - GetTimeInnEnter();
+            if (time_inn >= 10)                             // Freeze update
             {
-                float bubble = 0.125f*sWorld.getConfig(CONFIG_FLOAT_RATE_REST_INGAME);
-                //speed collect rest bonus (section/in hour)
-                SetRestBonus( float(GetRestBonus()+ time_inn*(GetUInt32Value(PLAYER_NEXT_LEVEL_XP)/72000)*bubble ));
+                float bubble = 0.125f * sWorld.getConfig(CONFIG_FLOAT_RATE_REST_INGAME);
+                // Speed collect rest bonus (section/in hour)
+                SetRestBonus(float(GetRestBonus() + time_inn * (GetUInt32Value(PLAYER_NEXT_LEVEL_XP) / 72000) * bubble));
                 UpdateInnerTime(time(NULL));
             }
         }
@@ -1338,15 +1336,15 @@ void Player::Update( uint32 update_diff, uint32 p_time )
         if (update_diff >= m_zoneUpdateTimer)
         {
             uint32 newzone, newarea;
-            GetZoneAndAreaId(newzone,newarea);
+            GetZoneAndAreaId(newzone, newarea);
 
-            if ( m_zoneUpdateId != newzone )
-                UpdateZone(newzone,newarea);                // also update area
+            if (m_zoneUpdateId != newzone)
+                UpdateZone(newzone, newarea);               // Also update area
             else
             {
-                // use area updates as well
-                // needed for free far all arenas for example
-                if ( m_areaUpdateId != newarea )
+                // Use area updates as well
+                // Needed for free for all arenas for example
+                if (m_areaUpdateId != newarea)
                     UpdateArea(newarea);
 
                 m_zoneUpdateTimer = ZONE_UPDATE_INTERVAL;
@@ -1392,10 +1390,10 @@ void Player::Update( uint32 update_diff, uint32 p_time )
             m_nextSave -= update_diff;
     }
 
-    //Handle Water/drowning
+    // Handle Water/drowning
     HandleDrowning(update_diff);
 
-    //Handle detect stealth players
+    // Handle detect stealth players
     if (m_DetectInvTimer > 0)
     {
         if (update_diff >= m_DetectInvTimer)
@@ -1435,7 +1433,7 @@ void Player::Update( uint32 update_diff, uint32 p_time )
             _pendingBindTimer -= p_time;
     }
 
-    // not auto-free ghost from body in instances
+    // Not auto-free ghost from body in instances
     if (m_deathTimer > 0  && !GetMap()->Instanceable() && getDeathState() != GHOULED)
     {
         if (p_time >= m_deathTimer)
@@ -1451,7 +1449,7 @@ void Player::Update( uint32 update_diff, uint32 p_time )
     UpdateEnchantTime(update_diff);
     UpdateHomebindTime(update_diff);
 
-    // group update
+    // Group update
     SendUpdateToOutOfRangeGroupMembers();
 
     Pet* pet = GetPet();
