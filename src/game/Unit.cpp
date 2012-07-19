@@ -12955,6 +12955,7 @@ void Unit::_ExitVehicle()
     GetVehicle()->RemovePassenger(this, true);
 
     m_pVehicle = NULL;
+    clearUnitState(UNIT_STAT_ON_VEHICLE);
 
     SendHeartBeat();
 

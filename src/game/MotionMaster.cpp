@@ -340,14 +340,14 @@ void MotionMaster::MoveToDestination(float x, float y, float z, float o, Unit* t
 void MotionMaster::MoveSkyDiving(float x, float y, float z, float o, float horizontalSpeed, float max_height, bool eject)
 {
     Movement::MoveSplineInit init(*m_owner);
-    init.MoveTo(x,y,z,false);
+    init.MoveTo(x,y,z,false, true);
     init.SetParabolic(max_height, 0);
     init.SetVelocity(horizontalSpeed);
     init.SetFacing(o);
     if (!eject)
         init.SetTransportExit();
     init.Launch();
-    Mutate(new EffectMovementGenerator(0), UNIT_ACTION_EFFECT);
+    Mutate(new EjectMovementGenerator(0), UNIT_ACTION_EFFECT);
 }
 
 void MotionMaster::MoveWithSpeed(float x, float y, float z, float speed, bool generatePath, bool forceDestination)
