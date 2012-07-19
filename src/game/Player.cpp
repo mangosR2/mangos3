@@ -62,6 +62,8 @@
 #include "AchievementMgr.h"
 #include "Mail.h"
 #include "SpellAuras.h"
+#include "DBCStores.h"
+#include "SQLStorages.h"
 
 #include <cmath>
 

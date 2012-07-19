@@ -20,6 +20,7 @@
 
 #include "SpellAuraDefines.h"
 #include "DBCEnums.h"
+#include "DBCStores.h"
 #include "ObjectGuid.h"
 #include "ObjectHandler.h"
 
