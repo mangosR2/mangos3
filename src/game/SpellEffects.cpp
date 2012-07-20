@@ -3138,6 +3138,15 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     m_caster->CastSpell(m_caster, 59512, true);
                     return;
                 }
+                case 56430:                                 // Arcane Bomb
+                {
+                    if (!unitTarget)
+                        return;
+
+                    unitTarget->CastSpell(unitTarget, 56431, true, NULL, NULL, m_caster->GetObjectGuid());
+                    unitTarget->CastSpell(unitTarget, 56432, true, NULL, NULL, m_caster->GetObjectGuid());
+                    return;
+                }
                 case 57496:                                 // Volazj - Insanity
                 {
                     m_caster->CastSpell(m_caster, 57561, true);
