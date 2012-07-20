@@ -4844,7 +4844,7 @@ bool ChatHandler::HandleLookupPoolCommand(char * args)
     return true;
 }
 
-bool ChatHandler::HandlePoolListCommand(char* args)
+bool ChatHandler::HandlePoolListCommand(char* /*args*/)
 {
     Player* player = m_session->GetPlayer();
 
