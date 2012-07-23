@@ -130,7 +130,7 @@ bool ForcedDespawnDelayEvent::Execute(uint64 /*e_time*/, uint32 /*p_time*/)
     return true;
 }
 
-void CreatureCreatePos::SelectFinalPoint(Creature* cr)
+void CreatureCreatePos::SelectFinalPoint(Creature* cr, bool checkLOS)
 {
     // if object provided then selected point at specific dist/angle from object forward look
     if (m_closeObject)
@@ -140,6 +140,14 @@ void CreatureCreatePos::SelectFinalPoint(Creature* cr)
             m_pos.x = m_closeObject->GetPositionX();
             m_pos.y = m_closeObject->GetPositionY();
             m_pos.z = m_closeObject->GetPositionZ();
+        }
+        else if (checkLOS)
+        {
+            m_closeObject->GetClosePoint(m_pos.x, m_pos.y, m_pos.z, 0.0f, m_dist + m_closeObject->GetObjectBoundingRadius(), m_angle);
+            float ox, oy, oz;
+            m_closeObject->GetPosition(ox, oy, oz);
+            m_map->GetHitPosition(ox, oy, oz, m_pos.x, m_pos.y, m_pos.z, GetPhaseMask(), -0.5f);
+            m_closeObject->UpdateAllowedPositionZ(m_pos.x, m_pos.y, m_pos.z);
         }
         else
             m_closeObject->GetClosePoint(m_pos.x, m_pos.y, m_pos.z, cr->GetObjectBoundingRadius(), m_dist, m_angle);
