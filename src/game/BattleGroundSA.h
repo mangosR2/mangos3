@@ -208,12 +208,12 @@ class BattleGroundSA : public BattleGround
         void Update(uint32 diff);
 
         /* inherited from BattlegroundClass */
-        virtual void AddPlayer(Player *plr);
+        virtual void AddPlayer(Player* plr);
         virtual void StartingEventCloseDoors();
         virtual void StartingEventOpenDoors();
-        virtual void EventPlayerDamageGO(Player *player, GameObject* target_obj, uint32 eventId, uint32 doneBy = 0);
+        virtual void EventPlayerDamageGO(Player* player, GameObject* target_obj, uint32 eventId, uint32 doneBy = 0);
         virtual void FillInitialWorldStates(WorldPacket& data, uint32& count);
-        virtual void EventPlayerClickedOnFlag(Player *source, GameObject* target_obj);
+        virtual void EventPlayerClickedOnFlag(Player* source, GameObject* target_obj);
         virtual void HandleKillUnit(Creature* unit, Player* killer);
         virtual void HandleKillPlayer(Player* player, Player* killer);
         virtual WorldSafeLocsEntry const* GetClosestGraveYard(Player* player);
@@ -240,7 +240,7 @@ class BattleGroundSA : public BattleGround
         uint32 shipsTimer;
         uint32 pillarOpenTimer;
         /* Scorekeeping */
-        void UpdatePlayerScore(Player *Source, uint32 type, uint32 value);
+        void UpdatePlayerScore(Player* source, uint32 type, uint32 value);
         /* For boats */
         bool SetupShips();
         void StartShips();

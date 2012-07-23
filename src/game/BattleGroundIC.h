@@ -316,7 +316,7 @@ class BattleGroundIC : public BattleGround
         virtual WorldSafeLocsEntry const* GetClosestGraveYard(Player* player);
 
         void RemovePlayer(Player* plr);
-        void HandleAreaTrigger(Player *Source, uint32 Trigger);
+        void HandleAreaTrigger(Player* source, uint32 trigger);
         bool SetupBattleGround();
         void EndBattleGround(Team winner);
         void EventPlayerClickedOnFlag(Player *Source, GameObject* target_obj);
@@ -324,7 +324,7 @@ class BattleGroundIC : public BattleGround
         void SpawnGates();
 
         /* Scorekeeping */
-        void UpdatePlayerScore(Player *Source, uint32 type, uint32 value, bool doAddHonor = true);
+        void UpdatePlayerScore(Player* source, uint32 type, uint32 value, bool doAddHonor = true);
 
         uint32 GetVehicleFaction(uint8 vehicleType) const { return GetCorrectFactionIC(vehicleType); }
         uint32 GetCorrectFactionIC(uint8 vehicleType) const;

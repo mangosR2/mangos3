@@ -51,7 +51,7 @@ void BattleGroundAB::Update(uint32 diff)
     {
         int team_points[PVP_TEAM_COUNT] = { 0, 0 };
 
-        for (int node = 0; node < BG_AB_NODES_MAX; ++node)
+        for (uint8 node = 0; node < BG_AB_NODES_MAX; ++node)
         {
             // 3 sec delay to spawn new banner instead previous despawned one
             if (m_BannerTimers[node].timer)
@@ -96,13 +96,13 @@ void BattleGroundAB::Update(uint32 diff)
                 }
             }
 
-            for (int team = 0; team < PVP_TEAM_COUNT; ++team)
+            for (uint8 team = 0; team < PVP_TEAM_COUNT; ++team)
                 if (m_Nodes[node] == team + BG_AB_NODE_TYPE_OCCUPIED)
                     ++team_points[team];
         }
 
         // Accumulate points
-        for (int team = 0; team < PVP_TEAM_COUNT; ++team)
+        for (uint8 team = 0; team < PVP_TEAM_COUNT; ++team)
         {
             int points = team_points[team];
             if (!points)
@@ -161,13 +161,13 @@ void BattleGroundAB::Update(uint32 diff)
 void BattleGroundAB::StartingEventCloseDoors()
 {
     // despawn buffs
-    for (int i = 0; i < BG_AB_NODES_MAX * 3; ++i)
+    for (uint8 i = 0; i < BG_AB_NODES_MAX * 3; ++i)
         SpawnBGObject(m_BgObjects[BG_AB_OBJECT_SPEEDBUFF_STABLES + i], RESPAWN_ONE_DAY);
 }
 
 void BattleGroundAB::StartingEventOpenDoors()
 {
-    for (int i = 0; i < BG_AB_NODES_MAX; ++i)
+    for (uint8 i = 0; i < BG_AB_NODES_MAX; ++i)
     {
         //randomly select buff to spawn
         uint8 buff = urand(0, 2);
@@ -193,21 +193,21 @@ void BattleGroundAB::RemovePlayer(Player * /*plr*/, ObjectGuid /*guid*/)
 
 }
 
-void BattleGroundAB::HandleAreaTrigger(Player *Source, uint32 Trigger)
+void BattleGroundAB::HandleAreaTrigger(Player* source, uint32 trigger)
 {
-    switch(Trigger)
+    switch (trigger)
     {
         case 3948:                                          // Arathi Basin Alliance Exit.
-            if (Source->GetTeam() != ALLIANCE)
-                Source->GetSession()->SendNotification(LANG_BATTLEGROUND_ONLY_ALLIANCE_USE);
+            if (source->GetTeam() != ALLIANCE)
+                source->GetSession()->SendNotification(LANG_BATTLEGROUND_ONLY_ALLIANCE_USE);
             else
-                Source->LeaveBattleground();
+                source->LeaveBattleground();
             break;
         case 3949:                                          // Arathi Basin Horde Exit.
-            if (Source->GetTeam() != HORDE)
-                Source->GetSession()->SendNotification(LANG_BATTLEGROUND_ONLY_HORDE_USE);
+            if (source->GetTeam() != HORDE)
+                source->GetSession()->SendNotification(LANG_BATTLEGROUND_ONLY_HORDE_USE);
             else
-                Source->LeaveBattleground();
+                source->LeaveBattleground();
             break;
         case 3866:                                          // Stables
         case 3869:                                          // Gold Mine
@@ -218,8 +218,8 @@ void BattleGroundAB::HandleAreaTrigger(Player *Source, uint32 Trigger)
         case 4021:                                          // Unk2
             //break;
         default:
-            //sLog.outError("WARNING: Unhandled AreaTrigger in Battleground: %u", Trigger);
-            //Source->GetSession()->SendAreaTriggerMessage("Warning: Unhandled AreaTrigger in Battleground: %u", Trigger);
+            //sLog.outError("WARNING: Unhandled AreaTrigger in Battleground: %u", trigger);
+            //source->GetSession()->SendAreaTriggerMessage("Warning: Unhandled AreaTrigger in Battleground: %u", trigger);
             break;
     }
 }
@@ -301,11 +301,11 @@ void BattleGroundAB::_SendNodeUpdate(uint8 node)
     const uint8 plusArray[] = {0, 2, 3, 0, 1};
 
     if (m_prevNodes[node])
-        UpdateWorldState(BG_AB_OP_NODESTATES[node] + plusArray[m_prevNodes[node]], 0);
+        UpdateWorldState(BG_AB_OP_NODESTATES[node] + plusArray[m_prevNodes[node]], WORLD_STATE_REMOVE);
     else
-        UpdateWorldState(BG_AB_OP_NODEICONS[node], 0);
+        UpdateWorldState(BG_AB_OP_NODEICONS[node], WORLD_STATE_REMOVE);
 
-    UpdateWorldState(BG_AB_OP_NODESTATES[node] + plusArray[m_Nodes[node]], 1);
+    UpdateWorldState(BG_AB_OP_NODESTATES[node] + plusArray[m_Nodes[node]], WORLD_STATE_ADD);
 
     // How many bases each team owns
     uint8 ally = 0, horde = 0;
@@ -444,7 +444,7 @@ void BattleGroundAB::EventPlayerClickedOnFlag(Player *source, GameObject* target
 bool BattleGroundAB::SetupBattleGround()
 {
     //buffs
-    for (int i = 0; i < BG_AB_NODES_MAX; ++i)
+    for (uint8 i = 0; i < BG_AB_NODES_MAX; ++i)
     {
         if (!AddObject(BG_AB_OBJECT_SPEEDBUFF_STABLES + 3 * i, Buff_Entries[0], BG_AB_BuffPositions[i][0], BG_AB_BuffPositions[i][1], BG_AB_BuffPositions[i][2], BG_AB_BuffPositions[i][3], 0, 0, sin(BG_AB_BuffPositions[i][3]/2), cos(BG_AB_BuffPositions[i][3]/2), RESPAWN_ONE_DAY)
             || !AddObject(BG_AB_OBJECT_SPEEDBUFF_STABLES + 3 * i + 1, Buff_Entries[1], BG_AB_BuffPositions[i][0], BG_AB_BuffPositions[i][1], BG_AB_BuffPositions[i][2], BG_AB_BuffPositions[i][3], 0, 0, sin(BG_AB_BuffPositions[i][3]/2), cos(BG_AB_BuffPositions[i][3]/2), RESPAWN_ONE_DAY)
@@ -541,10 +541,10 @@ WorldSafeLocsEntry const* BattleGroundAB::GetClosestGraveYard(Player* player)
     return good_entry;
 }
 
-void BattleGroundAB::UpdatePlayerScore(Player* Source, uint32 type, uint32 value)
+void BattleGroundAB::UpdatePlayerScore(Player* source, uint32 type, uint32 value)
 {
-    BattleGroundScoreMap::iterator itr = m_PlayerScores.find(Source->GetObjectGuid());
-    if (itr == m_PlayerScores.end())                         // player not found...
+    BattleGroundScoreMap::iterator itr = m_PlayerScores.find(source->GetObjectGuid());
+    if (itr == m_PlayerScores.end())                          // player not found...
         return;
 
     uint32 achCriId;
@@ -560,17 +560,17 @@ void BattleGroundAB::UpdatePlayerScore(Player* Source, uint32 type, uint32 value
             achCriId = AB_OBJECTIVE_DEFEND_BASE;
             break;
         default:
-            BattleGround::UpdatePlayerScore(Source,type,value);
+            BattleGround::UpdatePlayerScore(source, type, value);
             return;
     }
 
-    Source->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_BG_OBJECTIVE_CAPTURE, 1, achCriId);
+    source->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_BG_OBJECTIVE_CAPTURE, 1, achCriId);
 }
 
-bool BattleGroundAB::IsAllNodesConrolledByTeam(Team team) const
+bool BattleGroundAB::IsAllNodesControlledByTeam(Team team) const
 {
-    uint32 count = 0;
-    for (int i = 0; i < BG_AB_NODES_MAX; ++i)
+    uint8 count = 0;
+    for (uint8 i = 0; i < BG_AB_NODES_MAX; ++i)
         if ((team == ALLIANCE && m_Nodes[i] == BG_AB_NODE_STATUS_ALLY_OCCUPIED) ||
             (team == HORDE    && m_Nodes[i] == BG_AB_NODE_STATUS_HORDE_OCCUPIED))
             ++count;

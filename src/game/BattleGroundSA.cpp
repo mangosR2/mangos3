@@ -611,7 +611,7 @@ void BattleGroundSA::EventPlayerClickedOnFlag(Player *source, GameObject* target
     }
 }
 
-void BattleGroundSA::SendMessageSA(Player *player, uint32 type, uint32 name)
+void BattleGroundSA::SendMessageSA(Player* player, uint32 type, uint32 name)
 {
     uint32 entryMSG = 0;
     TeamIndex teamIndex = GetTeamIndex(player->GetTeam());
