@@ -21,12 +21,25 @@
 #include "SpellAuraDefines.h"
 #include "ProgressBar.h"
 #include "DBCStores.h"
+#include "SQLStorages.h"
 #include "World.h"
 #include "Chat.h"
 #include "Spell.h"
 #include "BattleGroundMgr.h"
 #include "MapManager.h"
 #include "Unit.h"
+
+bool IsPrimaryProfessionSkill(uint32 skill)
+{
+    SkillLineEntry const *pSkill = sSkillLineStore.LookupEntry(skill);
+    if(!pSkill)
+        return false;
+
+    if(pSkill->categoryId != SKILL_CATEGORY_PROFESSION)
+        return false;
+
+    return true;
+}
 
 SpellMgr::SpellMgr()
 {

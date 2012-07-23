@@ -24,10 +24,11 @@
 #include "Corpse.h"
 #include "Player.h"
 #include "UpdateData.h"
+#include "World.h"
 #include "CreatureAI.h"
 #include "SpellAuras.h"
 #include "DBCEnums.h"
-#include "World.h"
+#include "DBCStores.h"
 
 template<class T>
 inline void MaNGOS::VisibleNotifier::Visit(GridRefManager<T> &m)

@@ -1048,18 +1048,7 @@ struct PetDefaultSpellsEntry
 // < 0 for petspelldata id, > 0 for creature_id
 typedef std::map<int32, PetDefaultSpellsEntry> PetDefaultSpellsMap;
 
-
-inline bool IsPrimaryProfessionSkill(uint32 skill)
-{
-    SkillLineEntry const *pSkill = sSkillLineStore.LookupEntry(skill);
-    if(!pSkill)
-        return false;
-
-    if (pSkill->categoryId != SKILL_CATEGORY_PROFESSION)
-        return false;
-
-    return true;
-}
+bool IsPrimaryProfessionSkill(uint32 skill);
 
 inline bool IsProfessionSkill(uint32 skill)
 {

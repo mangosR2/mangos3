@@ -25,6 +25,7 @@
 #include "StateMgr.h"
 #include "Player.h"
 #include "Creature.h"
+#include "DBCStores.h"
 
 static const class staticActionInfo
 {

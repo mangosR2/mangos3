@@ -36,7 +36,6 @@
 #include "AchievementMgr.h"
 #include "ReputationMgr.h"
 #include "BattleGround.h"
-#include "DBCStores.h"
 #include "SharedDefines.h"
 #include "LFG.h"
 #include "AntiCheat.h"
@@ -2211,14 +2210,18 @@ class MANGOS_DLL_SPEC Player : public Unit
         bool GetBGAccessByLevel(BattleGroundTypeId bgTypeId) const;
         bool CanUseBattleGroundObject();
         bool isTotalImmune();
-        bool CanCaptureTowerPoint();
 
         bool GetRandomWinner() { return m_IsBGRandomWinner; }
         void SetRandomWinner(bool isWinner);
 
+        bool CanUseCapturePoint();
+
         /*********************************************************/
         /***                 WORLD PVP SYSTEM                  ***/
         /*********************************************************/
+
+        // returns true if the player is in active state for outdoor pvp objective capturing
+        bool CanUseOutdoorCapturePoint();
 
         WorldPvP* GetWorldPvP() const;
         // returns true if the player is in active state for outdoor pvp objective capturing

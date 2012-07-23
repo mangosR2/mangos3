@@ -306,7 +306,7 @@ void DungeonPersistentState::UpdateEncounterState(EncounterCreditType type, uint
     {
         DungeonEncounterEntry const* dbcEntry = itr->second->dbcEntry;
 
-        if (itr->second->creditType == type && dbcEntry->Difficulty == GetDifficulty() && dbcEntry->mapId == GetMapId())
+        if (itr->second->creditType == type && Difficulty(dbcEntry->Difficulty) == GetDifficulty() && dbcEntry->mapId == GetMapId())
         {
             uint32 oldMask = m_completedEncountersMask;
             m_completedEncountersMask |= 1 << dbcEntry->encounterIndex;
@@ -625,8 +625,8 @@ void DungeonResetScheduler::LoadResetTimes()
 
         // schedule the global reset/warning
         ResetEventType type = RESET_EVENT_INFORM_1;
-        for(; type < RESET_EVENT_INFORM_LAST; type = ResetEventType(type+1))
-            if(t - resetEventTypeDelay[type] > now)
+        for (; type < RESET_EVENT_INFORM_LAST; type = ResetEventType(type + 1))
+            if (t > time_t(now + resetEventTypeDelay[type]))
                 break;
 
         ScheduleReset(true, t - resetEventTypeDelay[type], DungeonResetEvent(type, mapid, difficulty, 0));
@@ -707,8 +707,8 @@ void DungeonResetScheduler::Update()
                 SetResetTimeFor(event.mapid, event.difficulty, next_reset);
 
                 ResetEventType type = RESET_EVENT_INFORM_1;
-                for (; type < RESET_EVENT_INFORM_LAST; type = ResetEventType(type+1))
-                    if (next_reset - resetEventTypeDelay[type] > now)
+                for (; type < RESET_EVENT_INFORM_LAST; type = ResetEventType(type + 1))
+                    if (next_reset > time_t(now + resetEventTypeDelay[type]))
                         break;
 
                 // add new scheduler event to the queue
@@ -763,7 +763,7 @@ MapPersistentState* MapPersistentStateManager::AddPersistentState(MapEntry const
         }
     }
 
-    DEBUG_LOG("MapPersistentStateManager::AddPersistentState: mapid = %d, instanceid = %d, reset time = %ld, canReset = %u", mapEntry->MapID, instanceId, resetTime, canReset ? 1 : 0);
+    DEBUG_LOG("MapPersistentStateManager::AddPersistentState: mapid = %d, instanceid = %d, reset time = '" UI64FMTD "', canRset = %u", mapEntry->MapID, instanceId, uint64(resetTime), canReset ? 1 : 0);
 
     MapPersistentState *state;
     if (mapEntry->IsDungeon() && instanceId)
