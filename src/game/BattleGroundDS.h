@@ -43,9 +43,8 @@ class BattleGroundDS : public BattleGround
         virtual void StartingEventCloseDoors();
         virtual void StartingEventOpenDoors();
 
-        void RemovePlayer(Player* plr, ObjectGuid guid);
-        void HandleAreaTrigger(Player* source, uint32 trigger);
-
+        void RemovePlayer(Player *plr, ObjectGuid guid);
+        void HandleAreaTrigger(Player *Source, uint32 Trigger);
         bool SetupBattleGround();
         virtual void Reset();
         virtual void FillInitialWorldStates(WorldPacket &d, uint32& count);

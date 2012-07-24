@@ -135,14 +135,13 @@ class BattleGroundWS : public BattleGround
         uint8 GetFlagState(Team team)             { return m_FlagState[GetTeamIndex(team)]; }
 
         /* Battleground Events */
-        virtual void EventPlayerDroppedFlag(Player* source);
-        virtual void EventPlayerClickedOnFlag(Player* source, GameObject* target_obj);
-        virtual void EventPlayerCapturedFlag(Player* source);
+        virtual void EventPlayerDroppedFlag(Player *Source);
+        virtual void EventPlayerClickedOnFlag(Player *Source, GameObject* target_obj);
+        virtual void EventPlayerCapturedFlag(Player *Source);
 
-        void RemovePlayer(Player* plr, ObjectGuid guid);
-        void HandleAreaTrigger(Player* source, uint32 Trigger);
-        void HandleKillPlayer(Player* player, Player* killer);
-
+        void RemovePlayer(Player *plr, ObjectGuid guid);
+        void HandleAreaTrigger(Player *Source, uint32 Trigger);
+        void HandleKillPlayer(Player *player, Player *killer);
         bool SetupBattleGround();
         virtual void Reset();
         void EndBattleGround(Team winner);
@@ -151,7 +150,7 @@ class BattleGroundWS : public BattleGround
 
         void UpdateFlagState(Team team, uint32 value);
         void UpdateTeamScore(Team team);
-        void UpdatePlayerScore(Player* source, uint32 type, uint32 value);
+        void UpdatePlayerScore(Player *Source, uint32 type, uint32 value);
         void SetDroppedFlagGuid(ObjectGuid guid, Team team)  { m_DroppedFlagGuid[GetTeamIndex(team)] = guid;}
         void ClearDroppedFlagGuid(Team team)  { m_DroppedFlagGuid[GetTeamIndex(team)].Clear();}
         ObjectGuid const& GetDroppedFlagGuid(Team team) const { return m_DroppedFlagGuid[GetTeamIndex(team)];}

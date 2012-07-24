@@ -62,20 +62,20 @@ void BattleGroundRB::RemovePlayer(Player* /*plr*/, ObjectGuid /*guid*/)
 
 }
 
-void BattleGroundRB::HandleAreaTrigger(Player* /*source*/, uint32 /*trigger*/)
+void BattleGroundRB::HandleAreaTrigger(Player * /*Source*/, uint32 /*Trigger*/)
 {
     // this is wrong way to implement these things. On official it done by gameobject spell cast.
     if (GetStatus() != STATUS_IN_PROGRESS)
         return;
 }
 
-void BattleGroundRB::UpdatePlayerScore(Player* source, uint32 type, uint32 value)
+void BattleGroundRB::UpdatePlayerScore(Player* Source, uint32 type, uint32 value)
 {
 
-    BattleGroundScoreMap::iterator itr = m_PlayerScores.find(source->GetObjectGuid());
+    BattleGroundScoreMap::iterator itr = m_PlayerScores.find(Source->GetObjectGuid());
 
     if(itr == m_PlayerScores.end())                         // player not found...
         return;
 
-    BattleGround::UpdatePlayerScore(source, type, value);
+    BattleGround::UpdatePlayerScore(Source,type,value);
 }

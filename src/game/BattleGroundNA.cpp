@@ -109,26 +109,26 @@ bool BattleGroundNA::HandlePlayerUnderMap(Player *player)
     return true;
 }
 
-void BattleGroundNA::HandleAreaTrigger(Player* source, uint32 trigger)
+void BattleGroundNA::HandleAreaTrigger(Player *Source, uint32 Trigger)
 {
     if (GetStatus() != STATUS_IN_PROGRESS)
         return;
 
-    //uint32 spellId = 0;
+    //uint32 SpellId = 0;
     //uint64 buff_guid = 0;
-    switch (trigger)
+    switch(Trigger)
     {
         case 4536:                                          // buff trigger?
         case 4537:                                          // buff trigger?
             break;
         default:
-            sLog.outError("WARNING: Unhandled AreaTrigger in Battleground: %u", trigger);
-            source->GetSession()->SendAreaTriggerMessage("Warning: Unhandled AreaTrigger in Battleground: %u", trigger);
+            sLog.outError("WARNING: Unhandled AreaTrigger in Battleground: %u", Trigger);
+            Source->GetSession()->SendAreaTriggerMessage("Warning: Unhandled AreaTrigger in Battleground: %u", Trigger);
             break;
     }
 
     //if (buff_guid)
-    //    HandleTriggerBuff(buff_guid, source);
+    //    HandleTriggerBuff(buff_guid,Source);
 }
 
 void BattleGroundNA::FillInitialWorldStates(WorldPacket &data, uint32& count)

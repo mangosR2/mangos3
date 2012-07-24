@@ -3094,12 +3094,6 @@ enum AreaLockStatus
 #define DEFAULT_VISIBILITY_INSTANCE 120.0f      // default visible distance in instances, 120 yards
 #define DEFAULT_VISIBILITY_BGARENAS 180.0f      // default visible distance in BG/Arenas, 180 yards
 
-enum WorldStateType
-{
-    WORLD_STATE_REMOVE              = 0,
-    WORLD_STATE_ADD                 = 1
-};
-
 // we need to stick to 1 version or half of the stuff will work for someone
 // others will not and opposite
 // will only support WoW, WoW:TBC and WoW:WotLK 3.3.5a client build 12340...
