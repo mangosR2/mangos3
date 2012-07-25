@@ -318,6 +318,11 @@ bool VehicleKit::AddPassenger(Unit* passenger, int8 seatId)
         if (((Creature*)m_pBase)->AI())
             ((Creature*)m_pBase)->AI()->PassengerBoarded(passenger, seat->first, true);
     }
+    if (passenger->GetTypeId() == TYPEID_UNIT)
+    {
+        if (((Creature*)passenger)->AI())
+            ((Creature*)passenger)->AI()->EnteredVehicle(m_pBase, seat->first, true);
+    }
 
     if (b_dstSet && (seatInfo->m_flagsB & VEHICLE_SEAT_FLAG_B_EJECTABLE_FORCED))
     {
@@ -402,6 +407,11 @@ void VehicleKit::RemovePassenger(Unit* passenger, bool dismount)
     {
         if (((Creature*)m_pBase)->AI())
             ((Creature*)m_pBase)->AI()->PassengerBoarded(passenger, seat->first, false);
+    }
+    if (passenger->GetTypeId() == TYPEID_UNIT)
+    {
+        if (((Creature*)passenger)->AI())
+            ((Creature*)passenger)->AI()->EnteredVehicle(m_pBase, seat->first, false);
     }
     if (dismount)
     {
