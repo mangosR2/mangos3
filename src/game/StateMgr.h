@@ -21,7 +21,7 @@
 #define _STATEMGR_H
 
 #include "ObjectHandler.h"
-#include "LockedVector.h"
+#include "LockedMap.h"
 #include "Common.h"
 #include "MotionMaster.h"
 #include "StateMgrImpl.h"
@@ -49,6 +49,7 @@ struct ActionInfo
     bool operator != (UnitActionPtr _action);
 
     void Delete();
+    void Reset(UnitStateMgr* mgr);
     void Initialize(UnitStateMgr* mgr);
     void Finalize(UnitStateMgr* mgr);
     void Interrupt(UnitStateMgr* mgr);
@@ -70,8 +71,7 @@ struct ActionInfo
     bool               restoreable;
 };
 
-//typedef std::map<UnitActionPriority, ActionInfo> UnitActionStorage;
-typedef ACE_Based::LockedVector<ActionInfo> UnitActionStorage;
+typedef ACE_Based::LockedMap<UnitActionPriority, ActionInfo> UnitActionStorage;
 
 class UnitStateMgr
 {
