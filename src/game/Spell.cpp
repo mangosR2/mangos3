@@ -3385,14 +3385,9 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
     if (unMaxTargets && targetUnitMap.size() > unMaxTargets)
     {
         // cleanup list for a right solution (without this spells with unMaxTargets = 1 hit possible nothing, if target is not valid with CheckTarget())
-        for (UnitList::iterator itr = targetUnitMap.begin(), next; itr != targetUnitMap.end();)
+        UnitList::iterator itr = targetUnitMap.begin();
+        while (itr != targetUnitMap.end())
         {
-            if (!*itr)
-            {
-                ++itr;
-                continue;
-            }
-
             if (!CheckTargetBeforeLimitation(*itr, effIndex))
                 itr = targetUnitMap.erase(itr);
             else
@@ -3404,32 +3399,23 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
     {
         // make sure one unit is always removed per iteration
         uint32 removed_utarget = 0;
-        for (UnitList::iterator itr = targetUnitMap.begin(), next; itr != targetUnitMap.end(); itr = next)
+        UnitList::iterator itr = targetUnitMap.begin();
+        while (itr != targetUnitMap.end())
         {
-            next = itr;
-            ++next;
-            if (!*itr) continue;
             if ((*itr) == m_targets.getUnitTarget())
             {
-                targetUnitMap.erase(itr);
+                itr = targetUnitMap.erase(itr);
                 removed_utarget = 1;
-                //        break;
             }
+            else
+                ++itr;
         }
         // remove random units from the map
         while (targetUnitMap.size() > unMaxTargets - removed_utarget)
         {
-            uint32 poz = urand(0, targetUnitMap.size()-1);
-            for (UnitList::iterator itr = targetUnitMap.begin(); itr != targetUnitMap.end(); ++itr, --poz)
-            {
-                if (!*itr) continue;
-
-                if (!poz)
-                {
-                    targetUnitMap.erase(itr);
-                    break;
-                }
-            }
+            UnitList::iterator iter = targetUnitMap.begin();
+            advance(iter, urand(0, targetUnitMap.size()-1));
+            targetUnitMap.erase(iter);
         }
         // the player's target will always be added to the map
         if (removed_utarget && m_targets.getUnitTarget())

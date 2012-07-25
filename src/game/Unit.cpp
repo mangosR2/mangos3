@@ -5986,12 +5986,12 @@ void Unit::RemoveDynObject(uint32 spellid)
         DynamicObject* dynObj = GetMap()->GetDynamicObject(*i);
         if(!dynObj)
         {
-            m_dynObjGUIDs.erase(i);
+            i = m_dynObjGUIDs.erase(i);
         }
         else if (spellid == 0 || dynObj->GetSpellId() == spellid)
         {
             dynObj->Delete();
-            m_dynObjGUIDs.erase(i);
+            i = m_dynObjGUIDs.erase(i);
         }
         else
             ++i;
@@ -6015,7 +6015,7 @@ DynamicObject * Unit::GetDynObject(uint32 spellId, SpellEffectIndex effIndex)
         DynamicObject* dynObj = GetMap()->GetDynamicObject(*i);
         if(!dynObj)
         {
-            m_dynObjGUIDs.erase(i);
+            i = m_dynObjGUIDs.erase(i);
             continue;
         }
 
@@ -6033,7 +6033,7 @@ DynamicObject * Unit::GetDynObject(uint32 spellId)
         DynamicObject* dynObj = GetMap()->GetDynamicObject(*i);
         if(!dynObj)
         {
-            m_dynObjGUIDs.erase(i);
+            i = m_dynObjGUIDs.erase(i);
             continue;
         }
 
