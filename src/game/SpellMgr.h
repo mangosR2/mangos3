@@ -1239,6 +1239,9 @@ class SpellMgr
         static bool IsGroupBuff(SpellEntry const *spellInfo);
         static bool IsStackableSpellAuraHolder(SpellEntry const *spellInfo);
         static bool IsTargetMatchedWithCreatureType(SpellEntry const* spellInfo, Unit* pTarget);
+        static uint32 GetSpellMaxTargetsWithCustom(SpellEntry const* spellInfo, Unit const* caster);
+        static float GetSpellRadiusWithCustom(SpellEntry const* spellInfo, Unit const* caster, SpellEffectIndex effIndex);
+        static uint32 GetSpellTargetsForChainWithCustom(SpellEntry const* spellInfo, Unit const* caster, SpellEffectIndex effIndex);
 
         SpellEntry const* SelectAuraRankForLevel(SpellEntry const* spellInfo, uint32 Level) const;
 
