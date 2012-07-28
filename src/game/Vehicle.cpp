@@ -507,9 +507,13 @@ void VehicleKit::RelocatePassengers(float x, float y, float z, float ang)
 
 VehicleSeatEntry const* VehicleKit::GetSeatInfo(Unit* passenger)
 {
-    for (SeatMap::iterator itr = m_Seats.begin(); itr != m_Seats.end(); ++itr)
+    if (m_Seats.empty())
+        return NULL;
+
+    for (SeatMap::const_iterator itr = m_Seats.begin(); itr != m_Seats.end(); ++itr)
     {
-        if (Unit* _passenger = GetBase()->GetMap()->GetUnit(itr->second.passenger))
+        ObjectGuid guid = itr->second.passenger;
+        if (Unit* _passenger = GetBase()->GetMap()->GetUnit(guid))
             if (_passenger == passenger)
                 return itr->second.seatInfo;
     }
