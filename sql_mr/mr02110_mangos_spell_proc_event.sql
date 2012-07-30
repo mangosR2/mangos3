@@ -770,17 +770,11 @@ INSERT INTO `spell_proc_event` VALUES (16164, 0x1C, 0x0B, 0x00000000, 0x00000000
 DELETE FROM spell_proc_event WHERE entry IN (53178, 53179);
 INSERT INTO spell_proc_event (entry, SchoolMask, SpellFamilyName, SpellFamilyMaskB0, SpellFamilyMaskB1, SpellFamilyMaskB2, procFlags, procEx, ppmRate, CustomChance, Cooldown) VALUES
 (53178, 0x00, 9, 0x00000000, 0x10000000, 0x00000000, 0x00010000, 0x00000000, 0, 100, 0);
-DELETE FROM `spell_chain` WHERE `first_spell` IN (53178);
-INSERT INTO `spell_chain` (`spell_id`, `prev_spell`, `first_spell`, `rank`, `req_spell`) VALUES
-(53178, 0, 53178, 1, 0),
-(53179, 53178, 53178, 2, 0);
+DELETE FROM `spell_chain` WHERE `first_spell` IN (53178); -- delete this!
 
 -- Pet
 -- (62764) Silverback
 DELETE FROM spell_proc_event WHERE entry IN (62764, 62765);
 INSERT INTO spell_proc_event (entry, SchoolMask, SpellFamilyName, SpellFamilyMaskB0, SpellFamilyMaskB1, SpellFamilyMaskB2, procFlags, procEx, ppmRate, CustomChance, Cooldown) VALUES
 (62764, 0x00, 9, 0x00000000, 0x10000000, 0x00000000, 0x00010000, 0x00000000, 0, 100, 0);
-DELETE FROM `spell_chain` WHERE `first_spell` IN (62764);
-INSERT INTO `spell_chain` (`spell_id`, `prev_spell`, `first_spell`, `rank`, `req_spell`) VALUES
-(62764, 0, 62764, 1, 0),
-(62765, 62764, 62764, 2, 0);
+DELETE FROM `spell_chain` WHERE `first_spell` IN (62764); -- delete this!
