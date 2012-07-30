@@ -2280,17 +2280,8 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, DamageInfo* damageI
                 triggered_spell_id = 37482;                 // Exploited Weakness
                 break;
             }
-            // Guard Dog
-            else if (dummySpell->SpellIconID == 201 && procSpell->SpellIconID == 201)
-            {
-                triggered_spell_id = 54445;
-                target = this;
-                if (pVictim)
-                    pVictim->AddThreat(this,procSpell->EffectBasePoints[0] * triggerAmount / 100.0f);
-                break;
             }
             break;
-
         }
         case SPELLFAMILY_PALADIN:
         {
@@ -3439,19 +3430,22 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, DamageInfo* damageI
         }
         case SPELLFAMILY_PET:
         {
-            // Improved Cower
-            if (dummySpell->SpellIconID == 958 && procSpell->SpellIconID == 958)
+            switch (dummySpell->SpellIconID)
             {
-                triggered_spell_id = dummySpell->Id == 53180 ? 54200 : 54201;
-                target = this;
-                break;
-            }
-            // Silverback
-            if (dummySpell->SpellIconID == 1582 && procSpell->SpellIconID == 201)
-            {
-                triggered_spell_id = dummySpell->Id == 62764 ? 62800 : 62801;
-                target = this;
-                break;
+                // Guard Dog
+                case 201:
+                {
+                    triggered_spell_id = 54445;
+                    target = this;
+                    if (pVictim)
+                        pVictim->AddThreat(this,procSpell->EffectBasePoints[0] * triggerAmount / 100.0f);
+                    break;
+                }
+                // Silverback
+                case 1582:
+                    triggered_spell_id = dummySpell->Id == 62765 ? 62801 : 62800;
+                    target = this;
+                    break;
             }
             break;
         }
