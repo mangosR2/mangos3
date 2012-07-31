@@ -22,6 +22,7 @@
 #include "Common.h"
 #include "Log.h"
 #include "Utilities/ByteConverter.h"
+#include "ace/Stack_Trace.h"
 
 class ByteBufferException
 {
