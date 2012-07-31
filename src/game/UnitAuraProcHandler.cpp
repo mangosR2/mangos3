@@ -2280,7 +2280,6 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, DamageInfo* damageI
                 triggered_spell_id = 37482;                 // Exploited Weakness
                 break;
             }
-            }
             break;
         }
         case SPELLFAMILY_PALADIN:
