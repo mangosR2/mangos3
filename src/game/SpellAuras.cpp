@@ -7201,19 +7201,6 @@ void Aura::HandleAuraModIncreaseEnergy(bool apply, bool Real)
 
     UnitMods unitMod = UnitMods(UNIT_MOD_POWER_START + powerType);
 
-    // Special case with temporary increase max/current power (percent)
-    if (GetId()==64904)                                     // Hymn of Hope
-    {
-        if (Real)
-        {
-            uint32 val = target->GetPower(powerType);
-            target->HandleStatModifier(unitMod, TOTAL_PCT, float(m_modifier.m_amount), apply);
-            target->SetPower(powerType, apply ? val*(100+m_modifier.m_amount)/100 : val*100/(100+m_modifier.m_amount));
-        }
-        return;
-    }
-
-    // generic flat case
     target->HandleStatModifier(unitMod, TOTAL_VALUE, float(m_modifier.m_amount), apply);
 }
 
