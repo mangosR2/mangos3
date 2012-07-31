@@ -4961,6 +4961,12 @@ SpellAuraProcResult Unit::HandleAddPctModifierAuraProc(Unit* /*pVictim*/, Damage
             }
             break;
         }
+        case SPELLFAMILY_ROGUE:
+        {
+            if (spellInfo->Id == 70805)           // Item - Rogue T10 2P Bonus (Rank 3)
+                return SPELL_AURA_PROC_CANT_TRIGGER;
+            break;
+        }
         case SPELLFAMILY_HUNTER:
         {
             // Lock and load triggered

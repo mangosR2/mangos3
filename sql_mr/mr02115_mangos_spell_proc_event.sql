@@ -778,3 +778,7 @@ DELETE FROM spell_proc_event WHERE entry IN (62764, 62765);
 INSERT INTO spell_proc_event (entry, SchoolMask, SpellFamilyName, SpellFamilyMaskB0, SpellFamilyMaskB1, SpellFamilyMaskB2, procFlags, procEx, ppmRate, CustomChance, Cooldown) VALUES
 (62764, 0x00, 9, 0x00000000, 0x10000000, 0x00000000, 0x00010000, 0x00000000, 0, 100, 0);
 DELETE FROM `spell_chain` WHERE `first_spell` IN (62764); -- delete this!
+
+-- (70805) Item - Rogue T10 2P Bonus (Rank 3)
+DELETE FROM `spell_proc_event` WHERE `entry` IN (70805);
+INSERT INTO `spell_proc_event` VALUES (70805, 0x00, 0x08, 0x00000000, 0x00000000, 0x00000000, 0x00020000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00004400, 0x00000000, 0, 100, 0);
