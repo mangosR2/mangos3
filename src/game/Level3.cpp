@@ -7164,6 +7164,7 @@ bool ChatHandler::HandleAccountFriendAddCommand(char* args)
     {
         case AOR_OK:
             SendSysMessage(LANG_COMMAND_FRIEND);
+            PSendSysMessage("Added RAF link from referral account %u (%s) to referred %u (%s)",targetAccountId, account_name.c_str(), friendAccountId, account_friend_name.c_str());
             break;
         default:
             SendSysMessage(LANG_COMMAND_FRIEND_ERROR);
@@ -7196,6 +7197,7 @@ bool ChatHandler::HandleAccountFriendDeleteCommand(char* args)
     {
         case AOR_OK:
             SendSysMessage(LANG_COMMAND_FRIEND);
+            PSendSysMessage("Deleted RAF link from referral account %u (%s) to referred %u (%s)",targetAccountId, account_name.c_str(), friendAccountId, account_friend_name.c_str());
             break;
         default:
             SendSysMessage(LANG_COMMAND_FRIEND_ERROR);
@@ -7209,7 +7211,45 @@ bool ChatHandler::HandleAccountFriendDeleteCommand(char* args)
 // List friends for account
 bool ChatHandler::HandleAccountFriendListCommand(char* args)
 {
-    return false;
+    ///- Get the command line arguments
+    std::string account_name;
+    uint32 targetAccountId = ExtractAccountId(&args, &account_name);
+
+    if (!targetAccountId)
+        return false;
+
+    RafLinkedList const* referredAccounts = sAccountMgr.GetRAFAccounts(targetAccountId, true);
+    RafLinkedList const* referalAccounts  = sAccountMgr.GetRAFAccounts(targetAccountId, false);
+
+    if (!referredAccounts || !referalAccounts)
+    {
+        PSendSysMessage("Account %u (%s) not has RAF links!",targetAccountId, account_name.c_str());
+        return true;
+    }
+
+    if (!referredAccounts->empty())
+    {
+        PSendSysMessage("Account %u (%s) has %u referred accounts:",targetAccountId, account_name.c_str(), referredAccounts->size());
+        for (RafLinkedList::const_iterator itr = referredAccounts->begin(); itr != referredAccounts->end(); ++itr)
+        {
+            uint32 accId = *itr;
+            std::string acc_name;
+            sAccountMgr.GetName(accId, acc_name);
+            PSendSysMessage("        Referred account %u (%s)",accId, acc_name.c_str());
+        }
+    }
+    if (!referalAccounts->empty())
+    {
+        PSendSysMessage("Account %u (%s) has %u referral accounts:",targetAccountId, account_name.c_str(), referalAccounts->size());
+        for (RafLinkedList::const_iterator itr = referalAccounts->begin(); itr != referalAccounts->end(); ++itr)
+        {
+            uint32 accId = *itr;
+            std::string acc_name;
+            sAccountMgr.GetName(accId, acc_name);
+            PSendSysMessage("        Referal account %u (%s)",accId, acc_name.c_str());
+        }
+    }
+    return true;
 }
 
 bool ChatHandler::HandleShowGearScoreCommand(char *args)
