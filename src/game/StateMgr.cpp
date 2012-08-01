@@ -558,7 +558,7 @@ void UnitStateMgr::PushAction(UnitActionId actionId, UnitActionPtr state, UnitAc
         UnitActionStorage::iterator itr = m_actions.find(priority);
         if (itr != m_actions.end())
         {
-            if (itr->second.Id = actionId)
+            if (itr->second.Id == actionId)
             {
                 itr->second.Reset(this);
                 needInsert = false;
