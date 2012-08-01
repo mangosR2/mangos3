@@ -1886,6 +1886,16 @@ void Aura::TriggerSpell()
 //                    case 46981: break;
 //                    // Dragonblight Ram
 //                    case 47015: break;
+                    case 51121:                             // Time Bomb
+                    case 59376:
+                    {
+                        if (target)
+                        {
+                            int32 healthMissing = target->GetMaxHealth() - target->GetHealth();
+                            target->CastCustomSpell(target, 51132, &healthMissing, NULL, NULL, true);
+                        }
+                        return;
+                    }
 //                    // Party G.R.E.N.A.D.E.
 //                    case 51510: break;
 //                    // Horseman Abilities
