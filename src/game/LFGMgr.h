@@ -24,6 +24,7 @@
 #include "Policies/Singleton.h"
 #include <ace/RW_Thread_Mutex.h>
 #include "LFG.h"
+#include "Timer.h"
 
 enum LFGenum
 {
@@ -126,47 +127,6 @@ struct LFGQueueStatus
     uint32                 healers;                          // Healers
     uint32                 dps;                              // Dps
     uint32                 playersWaited;                    // players summ
-};
-
-/// Stores group data related to proposal to join
-struct LFGProposal
-{
-    LFGProposal(LFGDungeonEntry const* _dungeon);
-    public:
-    uint32 ID;                                               // Proposal id
-
-    // helpers
-    Group* GetGroup();
-    void SetGroup(Group* group);
-    void AddMember(ObjectGuid guid);
-    void RemoveMember(ObjectGuid guid);
-    bool IsMember(ObjectGuid guid);
-    LFGQueueSet const GetMembers();
-
-    void RemoveDecliner(ObjectGuid guid);
-    bool IsDecliner(ObjectGuid guid);
-
-    LFGProposalState GetState() {return m_state;};
-    void SetState(LFGProposalState _state ) { m_state = _state;};
-
-    LFGDungeonEntry const* GetDungeon() { return m_dungeon;};
-    LFGType GetType();
-
-    void Start();
-
-    void SetDeleted() { m_deleted = true; };
-    bool const IsDeleted() const { return m_deleted; };
-
-    bool IsExpired() { return ( m_cancelTime > 0 && m_cancelTime < time_t(time(NULL)));};
-
-    private:
-    LFGDungeonEntry const* m_dungeon;                        // Dungeon
-    LFGProposalState m_state;                                // State of the proposal
-    ObjectGuid m_groupGuid;                                  // Proposal group (empty if not created)
-    time_t m_cancelTime;                                     // Time when we will cancel this proposal
-    LFGQueueSet playerGuids;                                 // Players in this proposal
-    LFGQueueSet declinerGuids;                               // Decliners in this proposal
-    bool m_deleted;                                          // avoid double-deleting proposal
 };
 
 // Event manager
