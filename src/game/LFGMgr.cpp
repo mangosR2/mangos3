@@ -42,9 +42,12 @@ LFGMgr::LFGMgr()
     }
 
     m_proposalID   = 1;
-    m_updateTimer  = LFG_UPDATE_INTERVAL;
-    m_updateTimer2 = LFR_UPDATE_INTERVAL;
-    m_updateTimer3 = LFG_QUEUEUPDATE_INTERVAL;
+    m_LFGupdateTimer.SetInterval(LFG_UPDATE_INTERVAL);
+    m_LFGupdateTimer.Reset();
+    m_LFRupdateTimer.SetInterval(LFR_UPDATE_INTERVAL);
+    m_LFRupdateTimer.Reset();
+    m_LFGQueueUpdateTimer.SetInterval(LFG_QUEUEUPDATE_INTERVAL);
+    m_LFGQueueUpdateTimer.Reset();
 }
 
 LFGMgr::~LFGMgr()
@@ -62,7 +65,7 @@ LFGMgr::~LFGMgr()
     m_eventList.clear();
 }
 
-void LFGMgr::Update(uint32 diff)
+void LFGMgr::Update(uint32 uiDiff)
 {
 
     SheduleEvent();
@@ -74,29 +77,27 @@ void LFGMgr::Update(uint32 diff)
     bool isLFRUpdate  = false;
     bool isStatUpdate = false;
 
-    if (m_updateTimer < diff)
+    m_LFGupdateTimer.Update(uiDiff);
+    m_LFRupdateTimer.Update(uiDiff);
+    m_LFGQueueUpdateTimer.Update(uiDiff);
+
+    if (m_LFGupdateTimer.Passed())
     {
         isFullUpdate = true;
-        m_updateTimer = LFG_UPDATE_INTERVAL;
+        m_LFGupdateTimer.Reset();
     }
-    else
-        m_updateTimer -= diff;
 
-    if (m_updateTimer2 < diff)
+    if (m_LFRupdateTimer.Passed())
     {
         isLFRUpdate = true;
-        m_updateTimer2 = LFR_UPDATE_INTERVAL;
+        m_LFRupdateTimer.Reset();
     }
-    else
-        m_updateTimer2 -= diff;
 
-    if (m_updateTimer3 < diff)
+    if (m_LFGQueueUpdateTimer.Passed())
     {
         isStatUpdate = true;
-        m_updateTimer3 = LFG_QUEUEUPDATE_INTERVAL;
+        m_LFGQueueUpdateTimer.Reset();
     }
-    else
-        m_updateTimer3 -= diff;
 
     if (isFullUpdate)
     {

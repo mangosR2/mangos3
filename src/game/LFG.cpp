@@ -38,7 +38,7 @@ void LFGStateStructure::SetDungeons(LFGDungeonSet* dungeons)
         else
             m_type = LFG_TYPE_NONE;
     }
-};
+}
 
 void LFGStateStructure::RemoveDungeon(LFGDungeonEntry const* dungeon)
 {
@@ -53,13 +53,13 @@ void LFGStateStructure::RemoveDungeon(LFGDungeonEntry const* dungeon)
         else
             m_type = LFG_TYPE_NONE;
     }
-};
+}
 
 void LFGStateStructure::AddDungeon(LFGDungeonEntry const* dungeon)
 {
     LFGMgr::WriteGuard Guard(sLFGMgr.GetLock());
     m_DungeonsList.insert(dungeon);
-};
+}
 
 
 void LFGPlayerState::Clear()
@@ -96,7 +96,7 @@ LFGLockStatusMap const* LFGPlayerState::GetLockMap()
         update = false;
     }
     return &m_LockMap;
-};
+}
 
 void LFGPlayerState::SetRoles(uint8 roles)
 {
@@ -114,7 +114,7 @@ void LFGPlayerState::SetRoles(uint8 roles)
 
     rolesMask != LFG_ROLE_MASK_NONE ? AddFlags(LFG_MEMBER_FLAG_ROLES) : RemoveFlags(LFG_MEMBER_FLAG_ROLES);
 
-};
+}
 
 LFGRoleMask LFGPlayerState::GetRoles()
 {
@@ -125,7 +125,7 @@ void LFGPlayerState::SetJoined()
 {
     m_jointime = time_t(time(NULL));
     m_teleported = false;
-};
+}
 
 bool LFGPlayerState::IsSingleRole()
 {
@@ -207,8 +207,8 @@ bool LFGGroupState::IsBootActive()
 {
     if (GetState() != LFG_STATE_BOOT)
         return false;
-    return (time_t(time(NULL)) < m_bootCancelTime);
-};
+    return (time(NULL) < m_bootCancelTime);
+}
 
 void LFGGroupState::StartBoot(ObjectGuid kicker, ObjectGuid victim, std::string reason)
 {
@@ -220,12 +220,12 @@ void LFGGroupState::StartBoot(ObjectGuid kicker, ObjectGuid victim, std::string 
     m_bootCancelTime = time_t(time(NULL) + LFG_TIME_BOOT);
     for (GroupReference* itr = m_group->GetFirstMember(); itr != NULL; itr = itr->next())
     {
-        Player* player = itr->getSource();
+        Player* pGroupMember = itr->getSource();
 
-        if (!player)
+        if (!pGroupMember)
             continue;
 
-        ObjectGuid guid = player->GetObjectGuid();
+        ObjectGuid guid = pGroupMember->GetObjectGuid();
 
         LFGAnswer vote = LFG_ANSWER_PENDING;
 
@@ -237,7 +237,7 @@ void LFGGroupState::StartBoot(ObjectGuid kicker, ObjectGuid victim, std::string 
         m_bootVotes.insert(std::make_pair(guid, vote));
     }
     SetState(LFG_STATE_BOOT);
-};
+}
 
 void LFGGroupState::UpdateBoot(ObjectGuid kicker, LFGAnswer answer)
 {
@@ -245,7 +245,7 @@ void LFGGroupState::UpdateBoot(ObjectGuid kicker, LFGAnswer answer)
 
     if ((*itr).second == LFG_ANSWER_PENDING)
         (*itr).second = answer;
-};
+}
 
 void LFGGroupState::StopBoot()
 {
@@ -295,7 +295,7 @@ void  LFGGroupState::DecreaseKicksLeft()
     LFGMgr::WriteGuard Guard(sLFGMgr.GetLock());
     if (m_kicksLeft > 0)
         --m_kicksLeft;
-};
+}
 
 LFGQueueInfo::LFGQueueInfo(ObjectGuid _guid, LFGType type)
 {
@@ -308,7 +308,7 @@ LFGQueueInfo::LFGQueueInfo(ObjectGuid _guid, LFGType type)
     dps = LFG_DPS_NEEDED;
     joinTime = time_t(time(NULL));
 
-};
+}
 
 LFGProposal::LFGProposal(LFGDungeonEntry const* _dungeon)
 {
@@ -322,8 +322,8 @@ LFGProposal::LFGProposal(LFGDungeonEntry const* _dungeon)
 
 void LFGProposal::Start()
 {
-    m_cancelTime = time_t(time(NULL)) + LFG_TIME_PROPOSAL;
-};
+    m_cancelTime = time_t(time(NULL) + LFG_TIME_PROPOSAL);
+}
 
 void LFGProposal::RemoveDecliner(ObjectGuid guid)
 {
@@ -334,7 +334,7 @@ void LFGProposal::RemoveDecliner(ObjectGuid guid)
 
     LFGMgr::WriteGuard Guard(sLFGMgr.GetLock());
     declinerGuids.insert(guid);
-};
+}
 
 void LFGProposal::RemoveMember(ObjectGuid guid)
 {
@@ -345,13 +345,13 @@ void LFGProposal::RemoveMember(ObjectGuid guid)
     LFGQueueSet::iterator itr = playerGuids.find(guid);
     if (itr != playerGuids.end())
         playerGuids.erase(itr);
-};
+}
 
 void LFGProposal::AddMember(ObjectGuid guid)
 {
     LFGMgr::WriteGuard Guard(sLFGMgr.GetLock());
     playerGuids.insert(guid);
-};
+}
 
 bool LFGProposal::IsMember(ObjectGuid guid)
 {
@@ -361,14 +361,14 @@ bool LFGProposal::IsMember(ObjectGuid guid)
         return false;
     else
         return true;
-};
+}
 
 LFGQueueSet const LFGProposal::GetMembers()
 {
     LFGMgr::ReadGuard Guard(sLFGMgr.GetLock());
     LFGQueueSet tmpGuids = playerGuids;
     return tmpGuids;
-};
+}
 
 bool LFGProposal::IsDecliner(ObjectGuid guid)
 {
@@ -381,12 +381,12 @@ bool LFGProposal::IsDecliner(ObjectGuid guid)
         return true;
 
     return false;
-};
+}
 
 LFGType LFGProposal::GetType()
 {
     return (m_dungeon ? LFGType(m_dungeon->type) : LFG_TYPE_NONE);
-};
+}
 
 Group* LFGProposal::GetGroup()
 {
@@ -394,7 +394,7 @@ Group* LFGProposal::GetGroup()
         return NULL;
 
     return sObjectMgr.GetGroup(m_groupGuid);
-};
+}
 
 void LFGProposal::SetGroup(Group* group)
 {
@@ -404,4 +404,4 @@ void LFGProposal::SetGroup(Group* group)
         return;
     }
     m_groupGuid = group->GetObjectGuid();
-};
+}

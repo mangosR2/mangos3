@@ -333,11 +333,11 @@ class LFGMgr
         LFGSearchMap    m_searchMatrix;                     // Search matrix
         LFGEventList    m_eventList;                        // events storage
 
-        uint32          m_updateTimer;                      // update timer for cleanup/statistic
-        uint32          m_updateTimer2;                     // update timer for LFR extend system
-        uint32          m_updateTimer3;                     // update timer for statistic send
+        IntervalTimer   m_LFGupdateTimer;                   // update timer for cleanup/statistic
+        IntervalTimer   m_LFRupdateTimer;                   // update timer for LFR extend system
+        IntervalTimer   m_LFGQueueUpdateTimer;              // update timer for statistic send
 
-        LockType            i_lock;
+        LockType        i_lock;
 
 };
 
