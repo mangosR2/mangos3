@@ -578,13 +578,13 @@ void WorldSession::SendLfgUpdateList(uint32 dungeonID)
 
     Team team = sWorld.getConfig(CONFIG_BOOL_ALLOW_TWO_SIDE_INTERACTION_GROUP) ? TEAM_NONE : GetPlayer()->GetTeam();
 
-    LFGQueueSet   groups = sLFGMgr.GetDungeonGroupQueue(dungeon, team);
-    LFGQueueSet   players = sLFGMgr.GetDungeonPlayerQueue(dungeon, team);
+    GuidSet   groups = sLFGMgr.GetDungeonGroupQueue(dungeon, team);
+    GuidSet   players = sLFGMgr.GetDungeonPlayerQueue(dungeon, team);
 
     uint32 groupCount = groups.size();
     uint32 groupSize = 4+4;
 
-    for (LFGQueueSet::const_iterator itr = groups.begin(); itr != groups.end(); ++itr)
+    for (GuidSet::const_iterator itr = groups.begin(); itr != groups.end(); ++itr)
     {
         Group* group   = sObjectMgr.GetGroup(*itr);
         if (!group)
@@ -639,10 +639,10 @@ void WorldSession::SendLfgUpdateList(uint32 dungeonID)
     uint32 playerSize = 4+4;
 
     uint32 guidsSize = 0;
-    LFGQueueSet playersUpdated;
+    GuidSet playersUpdated;
     playersUpdated.clear();
 
-    for(LFGQueueSet::const_iterator itr = players.begin(); itr != players.end(); ++itr)
+    for(GuidSet::const_iterator itr = players.begin(); itr != players.end(); ++itr)
     {
         Player* player   = sObjectMgr.GetPlayer(*itr);
 
@@ -694,7 +694,7 @@ void WorldSession::SendLfgUpdateList(uint32 dungeonID)
     if (!playersUpdated.empty())
     {
         data << uint8(playersUpdated.size());
-        for (LFGQueueSet::const_iterator itr = playersUpdated.begin(); itr != playersUpdated.end(); ++itr)
+        for (GuidSet::const_iterator itr = playersUpdated.begin(); itr != playersUpdated.end(); ++itr)
         {
             data << *itr;                                 // player guid
         }
@@ -708,7 +708,7 @@ void WorldSession::SendLfgUpdateList(uint32 dungeonID)
         data << uint32(groupCount);                          // groups count
         data << uint32(groupCount);                          // groups count2
 
-        for (LFGQueueSet::const_iterator itr = groups.begin(); itr != groups.end(); ++itr)
+        for (GuidSet::const_iterator itr = groups.begin(); itr != groups.end(); ++itr)
         {
             Group* group   = sObjectMgr.GetGroup(*itr);
             if (!group)
@@ -765,7 +765,7 @@ void WorldSession::SendLfgUpdateList(uint32 dungeonID)
         data << uint32(playerCount);                           // players count
         data << uint32(playerCount);                           // players count 2
 
-        for(LFGQueueSet::const_iterator itr = players.begin(); itr != players.end(); ++itr)
+        for(GuidSet::const_iterator itr = players.begin(); itr != players.end(); ++itr)
         {
             Player* player   = sObjectMgr.GetPlayer(*itr);
 
@@ -1097,10 +1097,10 @@ void WorldSession::SendLfgUpdateProposal(LFGProposal* pProposal)
         isSameGroup   =  GetPlayer()->GetGroup() == group;
     }
 
-    LFGQueueSet const proposalGuids = pProposal->GetMembers();
+    GuidSet const proposalGuids = pProposal->GetMembers();
     if (!proposalGuids.empty())
     {
-        for (LFGQueueSet::const_iterator itr = proposalGuids.begin(); itr != proposalGuids.end(); ++itr)
+        for (GuidSet::const_iterator itr = proposalGuids.begin(); itr != proposalGuids.end(); ++itr)
         {
             Player* player = sObjectMgr.GetPlayer(*itr);
             if (player)
