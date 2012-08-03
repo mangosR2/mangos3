@@ -509,7 +509,10 @@ void WorldStateMgr::CreateLinkedWorldStatesIfNeed(WorldObject* object)
                         else
                             _state = CreateWorldState(goInfo->destructibleBuilding.linkedWorldState, instanceId);
 
-                        const_cast<WorldState*>(_state)->SetLinkedGuid(guid);
+                        if (_state)
+                            const_cast<WorldState*>(_state)->SetLinkedGuid(guid);
+                        else
+                            sLog.outDetail("WorldStateMgr::CreateLinkedWorldStatesIfNeed unsupported state id %u for %s found",goInfo->destructibleBuilding.linkedWorldState, guid.GetString().c_str());
                     }
                     else
                         return;

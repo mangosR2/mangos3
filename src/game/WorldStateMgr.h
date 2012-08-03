@@ -25,6 +25,8 @@
 
 class Player;
 
+#define WORLDSTATES_BEGIN 999
+
 enum WorldStateType
 {
     WORLD_STATE_TYPE_CUSTOM                     = 0,
