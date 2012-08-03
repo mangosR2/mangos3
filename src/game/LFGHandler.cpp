@@ -78,7 +78,7 @@ void WorldSession::HandleLfgJoinOpcode( WorldPacket & recv_data )
         if (GetPlayer()->GetObjectGuid() == GetPlayer()->GetGroup()->GetLeaderGuid())
             GetPlayer()->GetGroup()->GetLFGState()->SetDungeons(&newDungeons);
 
-    GetPlayer()->GetLFGState()->SetRoles(roles);
+    GetPlayer()->GetLFGState()->SetRoles(LFGRoleMask(roles));
     GetPlayer()->GetLFGState()->SetComment(comment);
     DEBUG_LOG("CMSG_LFG_JOIN %u as group: %u  Dungeons: %u", GetPlayer()->GetObjectGuid().GetCounter(), GetPlayer()->GetGroup() ? 1 : 0, uint8(newDungeons.size()));
     sLFGMgr.Join(GetPlayer());
@@ -172,13 +172,13 @@ void WorldSession::HandleLfgSetRolesOpcode(WorldPacket &recv_data)
     Group* group = GetPlayer()->GetGroup();
     if (group)
     {
-        bool isChanged = sLFGMgr.RoleChanged(GetPlayer(), roles);
+        bool isChanged = sLFGMgr.RoleChanged(GetPlayer(), LFGRoleMask(roles));
         DEBUG_LOG("CMSG_LFG_SET_ROLES: Group %u, Player %u, Roles: %u %s", group->GetObjectGuid().GetCounter(), GetPlayer()->GetObjectGuid().GetCounter(), roles, isChanged ? "changed" : "not changed");
         sLFGMgr.UpdateRoleCheck(group);
     }
     else
     {
-        GetPlayer()->GetLFGState()->SetRoles(roles);
+        GetPlayer()->GetLFGState()->SetRoles(LFGRoleMask(roles));
         DEBUG_LOG("CMSG_LFG_SET_ROLES (not in group) Player %u roles %u", GetPlayer()->GetObjectGuid().GetCounter(), roles);
     }
 }

@@ -305,7 +305,7 @@ public:
     void           SetComment(std::string comment);
 
     LFGRoleMask    GetRoles();
-    void           SetRoles(uint8 roles);
+    void           SetRoles(LFGRoleMask roles);
     void           AddRole(LFGRoles role) { rolesMask = LFGRoleMask( rolesMask | (1 << role)); };
     void           RemoveRole(LFGRoles role) { rolesMask = LFGRoleMask( rolesMask & ~(1 << role)); };
     bool           IsSingleRole();

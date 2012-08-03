@@ -222,7 +222,7 @@ class LFGMgr
         void UpdateRoleCheck(Group* pGroup);
         bool CheckRoles(Group* pGroup, Player* pPlayer = NULL);
         bool CheckRoles(LFGRolesMap* roleMap);
-        bool RoleChanged(Player* pPlayer, uint8 roles);
+        bool RoleChanged(Player* pPlayer, LFGRoleMask roles);
         void SetGroupRoles(Group* pGroup, GuidSet* = NULL);
         void SetRoles(LFGRolesMap* roleMap);
 

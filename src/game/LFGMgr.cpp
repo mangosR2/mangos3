@@ -2121,7 +2121,7 @@ bool LFGMgr::CheckRoles(LFGRolesMap* rolesMap)
     return true;
 }
 
-bool LFGMgr::RoleChanged(Player* player, uint8 roles)
+bool LFGMgr::RoleChanged(Player* player, LFGRoleMask roles)
 {
     uint8 oldRoles = player->GetLFGState()->GetRoles();
     player->GetLFGState()->SetRoles(roles);

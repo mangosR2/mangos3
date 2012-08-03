@@ -3812,7 +3812,7 @@ void ObjectMgr::LoadGroups()
                 }
             }
 
-            if (!group->LoadMemberFromDB(memberGuidlow, subgroup, GroupFlagMask(flags), roles))
+            if (!group->LoadMemberFromDB(memberGuidlow, subgroup, GroupFlagMask(flags), LFGRoleMask(roles)))
             {
                 sLog.outErrorDb("Incorrect entry in group_member table : member %s cannot be added to group (Id: %u)!",
                     memberGuid.GetString().c_str(), groupId);

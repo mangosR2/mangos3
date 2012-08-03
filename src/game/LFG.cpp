@@ -98,21 +98,21 @@ LFGLockStatusMap const* LFGPlayerState::GetLockMap()
     return &m_LockMap;
 }
 
-void LFGPlayerState::SetRoles(uint8 roles)
+void LFGPlayerState::SetRoles(LFGRoleMask roles)
 {
-    rolesMask = LFGRoleMask(roles);
+    rolesMask = roles;
 
     if (Group* group = m_player->GetGroup())
     {
         if (group->GetLeaderGuid() == m_player->GetObjectGuid())
-            rolesMask = LFGRoleMask(rolesMask | LFG_ROLE_MASK_LEADER);
+            AddRole(ROLE_LEADER);
         else
-            rolesMask = LFGRoleMask(rolesMask & ~LFG_ROLE_MASK_LEADER);
+            RemoveRole(ROLE_LEADER);
     }
     else
-        rolesMask = LFGRoleMask(rolesMask & ~LFG_ROLE_MASK_LEADER);
+        RemoveRole(ROLE_LEADER);
 
-    rolesMask != LFG_ROLE_MASK_NONE ? AddFlags(LFG_MEMBER_FLAG_ROLES) : RemoveFlags(LFG_MEMBER_FLAG_ROLES);
+    GetRoles() != LFG_ROLE_MASK_NONE ? AddFlags(LFG_MEMBER_FLAG_ROLES) : RemoveFlags(LFG_MEMBER_FLAG_ROLES);
 
 }
 
