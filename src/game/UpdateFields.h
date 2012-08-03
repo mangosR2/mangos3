@@ -176,45 +176,6 @@ enum EItemFields
 
 enum EPlayerFields
 {
-    // ----------------------------------------------------------------------------------------------
-
-    MANGOSR2_AP_MELEE_1                        = 0x007B, // TYPE: INT
-    MANGOSR2_AP_MELEE_2                        = 0x007C, // TYPE: INT
-    MANGOSR2_AP_RANGED_1                       = 0x007E, // TYPE: INT
-    MANGOSR2_AP_RANGED_2                       = 0x007F, // TYPE: INT
-
-    MANGOSR2_BLOCKRATING                       = 0x04D3, // TYPE: INT
-    MANGOSR2_DEFRATING                         = 0x04D0, // TYPE: INT
-    MANGOSR2_DODGERATING                       = 0x04D1, // TYPE: INT
-    MANGOSR2_PARRYRATING                       = 0x04D2, // TYPE: INT
-    MANGOSR2_RESILIENCE                        = 0x04DE, // TYPE: INT
-
-    MANGOSR2_MANAREGEN                         = 0x0028, // TYPE: FLOAT
-
-    MANGOSR2_MELEE_HITRATING                   = 0x04D4, // TYPE: INT
-    MANGOSR2_MELEE_CRITRATING                  = 0x04D7, // TYPE: INT
-    MANGOSR2_MELEE_HASTERATING                 = 0x04E0, // TYPE: INT
-    MANGOSR2_MELEE_MAINMINDMG                  = 0x0046, // TYPE: FLOAT
-    MANGOSR2_MELEE_MAINMAXDMG                  = 0x0047, // TYPE: FLOAT
-    MANGOSR2_MELEE_OFFMINDMG                   = 0x0046, // TYPE: FLOAT
-    MANGOSR2_MELEE_OFFMAXDMG                   = 0x0047, // TYPE: FLOAT
-    MANGOSR2_MELLE_OFFTIME                     = 0x003E, // TYPE: FLOAT
-    MANGOSR2_MELLE_MAINTIME                    = 0x003E, // TYPE: FLOAT
-
-    MANGOSR2_RANGED_CRITRATING                 = 0x04D8, // TYPE: INT
-    MANGOSR2_RANGED_HASTERATING                = 0x04E1, // TYPE: INT
-    MANGOSR2_RANGED_HITRATING                  = 0x04D5, // TYPE: INT
-    MANGOSR2_RANGED_MINDMG                     = 0x0081, // TYPE: FLOAT
-    MANGOSR2_RANGED_MAXDMG                     = 0x0082, // TYPE: FLOAT
-    MANGOSR2_RANGED_ATTACKTIME                 = 0x003F, // TYPE: FLOAT
-
-    MANGOSR2_SPELL_HITRATING                   = 0x04D6, // TYPE: INT
-    MANGOSR2_SPELL_CRITRATING                  = 0x04D9, // TYPE: INT
-    MANGOSR2_SPELL_HASTERATING                 = 0x04E2, // TYPE: INT
-    MANGOSR2_SPELL_BONUSDMG                    = 0x0496, // TYPE: INT
-    MANGOSR2_SPELL_BONUSHEAL                   = 0x04A8, // TYPE: INT
-    MANGOSR2_SPELL_CRITPROC                    = 0x040B, // TYPE: FLOAT
-
     PLAYER_DUEL_ARBITER                              = UNIT_END + 0x0,
     PLAYER_FLAGS                                     = UNIT_END + 0x2,
     PLAYER_GUILDRANK                                 = UNIT_END + 0x3,
@@ -546,6 +507,47 @@ enum EPlayerFields
     PLAYER_END                                       = UNIT_END + 0x4D6
 };
 
+enum ER2Fields
+{
+    MANGOSR2_AP_MELEE_1                        = 0x007B, // TYPE: INT
+    MANGOSR2_AP_MELEE_2                        = 0x007C, // TYPE: INT
+    MANGOSR2_AP_RANGED_1                       = 0x007E, // TYPE: INT
+    MANGOSR2_AP_RANGED_2                       = 0x007F, // TYPE: INT
+
+    MANGOSR2_BLOCKRATING                       = 0x04D3, // TYPE: INT
+    MANGOSR2_DEFRATING                         = 0x04D0, // TYPE: INT
+    MANGOSR2_DODGERATING                       = 0x04D1, // TYPE: INT
+    MANGOSR2_PARRYRATING                       = 0x04D2, // TYPE: INT
+    MANGOSR2_RESILIENCE                        = 0x04DE, // TYPE: INT
+
+    MANGOSR2_MANAREGEN                         = 0x0028, // TYPE: FLOAT
+
+    MANGOSR2_MELEE_HITRATING                   = 0x04D4, // TYPE: INT
+    MANGOSR2_MELEE_CRITRATING                  = 0x04D7, // TYPE: INT
+    MANGOSR2_MELEE_HASTERATING                 = 0x04E0, // TYPE: INT
+    MANGOSR2_MELEE_MAINMINDMG                  = 0x0046, // TYPE: FLOAT
+    MANGOSR2_MELEE_MAINMAXDMG                  = 0x0047, // TYPE: FLOAT
+    MANGOSR2_MELEE_OFFMINDMG                   = 0x0046, // TYPE: FLOAT
+    MANGOSR2_MELEE_OFFMAXDMG                   = 0x0047, // TYPE: FLOAT
+    MANGOSR2_MELLE_OFFTIME                     = 0x003E, // TYPE: FLOAT
+    MANGOSR2_MELLE_MAINTIME                    = 0x003E, // TYPE: FLOAT
+
+    MANGOSR2_RANGED_CRITRATING                 = 0x04D8, // TYPE: INT
+    MANGOSR2_RANGED_HASTERATING                = 0x04E1, // TYPE: INT
+    MANGOSR2_RANGED_HITRATING                  = 0x04D5, // TYPE: INT
+    MANGOSR2_RANGED_MINDMG                     = 0x0081, // TYPE: FLOAT
+    MANGOSR2_RANGED_MAXDMG                     = 0x0082, // TYPE: FLOAT
+    MANGOSR2_RANGED_ATTACKTIME                 = 0x003F, // TYPE: FLOAT
+
+    MANGOSR2_SPELL_HITRATING                   = 0x04D6, // TYPE: INT
+    MANGOSR2_SPELL_CRITRATING                  = 0x04D9, // TYPE: INT
+    MANGOSR2_SPELL_HASTERATING                 = 0x04E2, // TYPE: INT
+    MANGOSR2_SPELL_BONUSDMG                    = 0x0496, // TYPE: INT
+    MANGOSR2_SPELL_BONUSHEAL                   = 0x04A8, // TYPE: INT
+    MANGOSR2_SPELL_CRITPROC                    = 0x040B, // TYPE: FLOAT
+
+};
+
 enum EContainerFields
 {
     CONTAINER_FIELD_NUM_SLOTS                        = ITEM_END + 0x0,
@@ -579,15 +581,15 @@ enum EDynamicObjectFields
 
 enum ECorpseFields
 {
-    CORPSE_FIELD_OWNER                        = OBJECT_END + 0x0000, // Size: 2, Type: LONG, Flags: PUBLIC
-    CORPSE_FIELD_PARTY                        = OBJECT_END + 0x0002, // Size: 2, Type: LONG, Flags: PUBLIC
-    CORPSE_FIELD_DISPLAY_ID                   = OBJECT_END + 0x0004, // Size: 1, Type: INT, Flags: PUBLIC
-    CORPSE_FIELD_ITEM                         = OBJECT_END + 0x0005, // Size: 19, Type: INT, Flags: PUBLIC
-    CORPSE_FIELD_BYTES_1                      = OBJECT_END + 0x0018, // Size: 1, Type: BYTES, Flags: PUBLIC
-    CORPSE_FIELD_BYTES_2                      = OBJECT_END + 0x0019, // Size: 1, Type: BYTES, Flags: PUBLIC
-    CORPSE_FIELD_FLAGS                        = OBJECT_END + 0x001A, // Size: 1, Type: INT, Flags: PUBLIC
-    CORPSE_FIELD_DYNAMIC_FLAGS                = OBJECT_END + 0x001B, // Size: 1, Type: INT, Flags: DYNAMIC
-    CORPSE_END                                = OBJECT_END + 0x001C,
+    CORPSE_FIELD_OWNER                               = OBJECT_END + 0x0,
+    CORPSE_FIELD_PARTY                               = OBJECT_END + 0x2,
+    CORPSE_FIELD_DISPLAY_ID                          = OBJECT_END + 0x4,
+    CORPSE_FIELD_ITEM                                = OBJECT_END + 0x5,
+    CORPSE_FIELD_BYTES_1                             = OBJECT_END + 0x18,
+    CORPSE_FIELD_BYTES_2                             = OBJECT_END + 0x19,
+    CORPSE_FIELD_FLAGS                               = OBJECT_END + 0x1A,
+    CORPSE_FIELD_DYNAMIC_FLAGS                       = OBJECT_END + 0x1B,
+    CORPSE_END                                       = OBJECT_END + 0x1C
 };
 
 enum EAreaTriggerFields
@@ -598,7 +600,6 @@ enum EAreaTriggerFields
     AREATRIGGER_FINAL_POS                            = OBJECT_END + 0x3,
     AREATRIGGER_END                                  = OBJECT_END + 0x6
 };
-
 
 #define PLAYER_END_NOT_SELF PLAYER_FIELD_INV_SLOT_HEAD
 #endif

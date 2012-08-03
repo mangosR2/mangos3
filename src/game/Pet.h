@@ -47,13 +47,6 @@ enum PetSaveMode
     PET_SAVE_REAGENTS          =  101                       // PET_SAVE_NOT_IN_SLOT with reagents return
 };
 
-enum HappinessState
-{
-    UNHAPPY = 1,
-    CONTENT = 2,
-    HAPPY   = 3
-};
-
 enum PetSpellState
 {
     PETSPELL_UNCHANGED = 0,

@@ -896,13 +896,11 @@ bool Object::LoadValues(const char* data)
 
 void Object::_SetUpdateBits(UpdateMask* updateMask, Player* target) const
 {
-    UpdateFieldData ufd(this, target);
-
     uint32 valuesCount = m_valuesCount;
     if(GetTypeId() == TYPEID_PLAYER && target != this)
         valuesCount = PLAYER_END_NOT_SELF;
 
-    for (uint16 index = 0; index < valuesCount; ++index )
+    for( uint16 index = 0; index < valuesCount; ++index )
     {
         if (ufd.IsUpdateNeeded(index, m_fieldNotifyFlags) ||
             ((m_uint32Values_mirror[index] != m_uint32Values[index]) && ufd.IsUpdateFieldVisible(index)))
@@ -912,8 +910,6 @@ void Object::_SetUpdateBits(UpdateMask* updateMask, Player* target) const
 
 void Object::_SetCreateBits(UpdateMask* updateMask, Player* target) const
 {
-    UpdateFieldData ufd(this, target);
-
     uint32 valuesCount = m_valuesCount;
     if(GetTypeId() == TYPEID_PLAYER && target != this)
         valuesCount = PLAYER_END_NOT_SELF;

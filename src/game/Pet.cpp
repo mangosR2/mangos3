@@ -129,7 +129,20 @@ bool Pet::LoadPetFromDB(Player* owner, uint32 petentry, uint32 petnumber, bool c
 
     setPetType(PetType(fields[16].GetUInt8()));
 
-    if (getPetType() == HUNTER_PET)
+    uint32 summon_spell_id = fields[16].GetUInt32();
+    SpellEntry const* spellInfo = sSpellStore.LookupEntry(summon_spell_id);
+
+    bool is_temporary_summoned = spellInfo && GetSpellDuration(spellInfo) > 0;
+
+    // check temporary summoned pets like mage water elemental
+    if (current && is_temporary_summoned)
+    {
+        delete result;
+        return false;
+    }
+
+    PetType pet_type = PetType(fields[17].GetUInt8());
+    if (pet_type == HUNTER_PET)
     {
         if (!creatureInfo->isTameable(owner->CanTameExoticPets()))
         {
@@ -262,9 +275,11 @@ bool Pet::LoadPetFromDB(Player* owner, uint32 petentry, uint32 petnumber, bool c
     // load action bar, if data broken will fill later by default spells.
     m_charmInfo->LoadPetActionBar(fields[13].GetCppString());
 
+    // since last save (in seconds)
+    uint32 timediff = uint32(time(NULL) - fields[13].GetUInt64());
+
     // Finished use DB data
     delete result;
-
 
     //load spells/cooldowns/auras
     _LoadAuras(timediff);
@@ -423,8 +438,8 @@ void Pet::SavePetToDB(PetSaveMode mode)
 
         // save pet
         SqlStatement savePet = CharacterDatabase.CreateStatement(insPet, "INSERT INTO character_pet ( id, entry,  owner, modelid, level, exp, Reactstate, slot, name, renamed, curhealth, "
-            "curmana, curhappiness, abdata, savetime, CreatedBySpell, PetType) "
-             "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+            "curmana, abdata, savetime, resettalents_cost, resettalents_time, CreatedBySpell, PetType) "
+             "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
 
         savePet.addUInt32(m_charmInfo->GetPetNumber());
         savePet.addUInt32(GetEntry());
@@ -893,7 +908,18 @@ bool Pet::CreateBaseAtCreature(Creature* creature, Unit* owner)
         return false;
     }
 
-    CreatureCreatePos pos(creature, creature->GetOrientation());
+    if (cinfo->type == CREATURE_TYPE_CRITTER)
+    {
+        setPetType(MINI_PET);
+        return true;
+    }
+    SetDisplayId(creature->GetDisplayId());
+    SetNativeDisplayId(creature->GetNativeDisplayId());
+    setPowerType(POWER_FOCUS);
+    SetUInt32Value(UNIT_FIELD_PET_NAME_TIMESTAMP, 0);
+    SetUInt32Value(UNIT_FIELD_PETEXPERIENCE, 0);
+    SetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP, sObjectMgr.GetXPForPetLevel(creature->getLevel()));
+    SetUInt32Value(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_NONE);
 
     BASIC_LOG("Create new pet from creature %d ", creature->GetEntry());
 

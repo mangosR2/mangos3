@@ -11785,12 +11785,12 @@ void Unit::SetPowerByIndex(uint32 powerIndex, int32 val)
         Powers power = getPowerType(powerIndex);
         MANGOS_ASSERT(power != INVALID_POWER);
 
-    WorldPacket data(SMSG_POWER_UPDATE);
-    data << GetPackGUID();
+        WorldPacket data(SMSG_POWER_UPDATE);
+        data << GetPackGUID();
         data << uint32(1); // iteration count
-    data << uint8(power);
-    data << uint32(val);
-    SendMessageToSet(&data, true);
+        data << uint8(power);
+        data << uint32(val);
+        SendMessageToSet(&data, true);
     }
 
     // group update
@@ -11808,8 +11808,8 @@ void Unit::SetPowerByIndex(uint32 powerIndex, int32 val)
             if (owner && (owner->GetTypeId() == TYPEID_PLAYER) && ((Player*)owner)->GetGroup())
                 ((Player*)owner)->SetGroupUpdateFlag(GROUP_UPDATE_FLAG_PET_CUR_POWER);
         }
-        }
     }
+}
 
 void Unit::SetMaxPower(Powers power, int32 val)
 {

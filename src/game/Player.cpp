@@ -74,6 +74,19 @@
 
 #define ZONE_UPDATE_INTERVAL (1*IN_MILLISECONDS)
 
+// FIXME
+#define PLAYER_SKILL_INDEX(x)       (PLAYER_SKILL_LINEID_0 + ((x)*3))
+#define PLAYER_SKILL_VALUE_INDEX(x) (PLAYER_SKILL_INDEX(x)+1)
+#define PLAYER_SKILL_BONUS_INDEX(x) (PLAYER_SKILL_INDEX(x)+2)
+
+#define SKILL_VALUE(x)         PAIR32_LOPART(x)
+#define SKILL_MAX(x)           PAIR32_HIPART(x)
+#define MAKE_SKILL_VALUE(v, m) MAKE_PAIR32(v,m)
+
+#define SKILL_TEMP_BONUS(x)    int16(PAIR32_LOPART(x))
+#define SKILL_PERM_BONUS(x)    int16(PAIR32_HIPART(x))
+#define MAKE_SKILL_BONUS(t, p) MAKE_PAIR32(t,p)
+
 enum CharacterFlags
 {
     CHARACTER_FLAG_NONE                 = 0x00000000,
@@ -2342,7 +2355,6 @@ void Player::Regenerate(Powers power, uint32 diff)
             }
             break;
         }
-        case POWER_HAPPINESS:
         case POWER_HEALTH:
         default:
             break;
@@ -2820,8 +2832,6 @@ void Player::GiveLevel(uint32 level)
     data << uint32(int32(basehp) - int32(GetCreateHealth()));
     // for(int i = 0; i < MAX_POWERS; ++i)                  // Powers loop (0-4)
     data << uint32(int32(basemana)   - int32(GetCreateMana()));
-    data << uint32(0);
-    data << uint32(0);
     data << uint32(0);
     data << uint32(0);
     // end for
@@ -15507,12 +15517,12 @@ bool Player::LoadFromDB(ObjectGuid guid, SqlQueryHolder *holder)
     // SELECT guid, account, name, race, class, gender, level, xp, money, playerBytes, playerBytes2, playerFlags,"
     // 12          13          14          15   16           17        18         19         20         21          22           23                 24
     //"position_x, position_y, position_z, map, orientation, taximask, cinematic, totaltime, leveltime, rest_bonus, logout_time, is_logout_resting, resettalents_cost,"
-    // 25                 26             27       28       29       30       31         32           33            34        35    36      37                 38         39
-    //"resettalents_time, primary_trees, trans_x, trans_y, trans_z, trans_o, transguid, extra_flags, stable_slots, at_login, zone, online, death_expire_time, taxi_path, dungeon_difficulty,"
-    // 40          41          42              43           44              45
-    //"totalKills, todayKills, yesterdayKills, chosenTitle, watchedFaction, drunk,"
-    // 46      47      48      49      50      51      52         53          54             55              56           57          58
-    //"health, power1, power2, power3, power4, power5, specCount, activeSpec, exploredZones, equipmentCache, knownTitles, actionBars, slot FROM characters WHERE guid = '%u'", GUID_LOPART(m_guid));
+    // 25                 26       27       28       29       30         31           32            33        34    35      36                 37         38
+    //"resettalents_time, trans_x, trans_y, trans_z, trans_o, transguid, extra_flags, stable_slots, at_login, zone, online, death_expire_time, taxi_path, dungeon_difficulty,"
+    // 39           40                41                42                    43          44          45              46           47               48              49
+    //"arenaPoints, totalHonorPoints, todayHonorPoints, yesterdayHonorPoints, totalKills, todayKills, yesterdayKills, chosenTitle, knownCurrencies, watchedFaction, drunk,"
+    // 50      51      52      53      54      55      56         57          58             59              60           61
+    //"health, power1, power2, power3, power4, power5, specCount, activeSpec, exploredZones, equipmentCache, knownTitles, actionBars FROM characters WHERE guid = '%u'", GUID_LOPART(m_guid));
     QueryResult *result = holder->GetResult(PLAYER_LOGIN_QUERY_LOADFROM);
 
     if (!result)
@@ -15562,8 +15572,8 @@ bool Player::LoadFromDB(ObjectGuid guid, SqlQueryHolder *holder)
     SetUInt32Value(UNIT_FIELD_LEVEL, fields[6].GetUInt8());
     SetUInt32Value(PLAYER_XP, fields[7].GetUInt32());
 
-    _LoadIntoDataField(fields[54].GetString(), PLAYER_EXPLORED_ZONES_1, PLAYER_EXPLORED_ZONES_SIZE);
-    _LoadIntoDataField(fields[56].GetString(), PLAYER__FIELD_KNOWN_TITLES, KNOWN_TITLES_SIZE*2);
+    _LoadIntoDataField(fields[58].GetString(), PLAYER_EXPLORED_ZONES_1, PLAYER_EXPLORED_ZONES_SIZE);
+    _LoadIntoDataField(fields[60].GetString(), PLAYER__FIELD_KNOWN_TITLES, KNOWN_TITLES_SIZE*2);
 
     InitDisplayIds();                                       // model, scale and model data
 
@@ -15592,7 +15602,7 @@ bool Player::LoadFromDB(ObjectGuid guid, SqlQueryHolder *holder)
     //SetUInt64Value(PLAYER_FIELD_KNOWN_CURRENCIES, fields[47].GetUInt64());
 
     // Action bars state
-    SetByteValue(PLAYER_FIELD_BYTES, 2, fields[66].GetUInt8());
+    SetByteValue(PLAYER_FIELD_BYTES, 2, fields[61].GetUInt8());
 
     // cleanup inventory related item value fields (its will be filled correctly in _LoadInventory)
     for (uint8 slot = EQUIPMENT_SLOT_START; slot < EQUIPMENT_SLOT_END; ++slot)
@@ -15983,12 +15993,8 @@ bool Player::LoadFromDB(ObjectGuid guid, SqlQueryHolder *holder)
     _LoadMailedItems(holder->GetResult(PLAYER_LOGIN_QUERY_LOADMAILEDITEMS));
     UpdateNextMailTimeAndUnreads();
 
-/*
-    m_specsCount = fields[61].GetUInt8();
-    m_activeSpec = fields[62].GetUInt8();
-*/
-    m_specsCount = fields[52].GetUInt8();
-    m_activeSpec = fields[53].GetUInt8();
+    m_specsCount = fields[56].GetUInt8();
+    m_activeSpec = fields[57].GetUInt8();
 
     m_GrantableLevelsCount = fields[65].GetUInt32();
 
@@ -17578,9 +17584,9 @@ void Player::SaveToDB()
         "taximask, online, cinematic, "
         "totaltime, leveltime, rest_bonus, logout_time, is_logout_resting, resettalents_cost, resettalents_time, primary_trees, "
         "trans_x, trans_y, trans_z, trans_o, transguid, extra_flags, stable_slots, at_login, zone, "
-        "death_expire_time, taxi_path, totalKills, "
-        "todayKills, yesterdayKills, chosenTitle, watchedFaction, drunk, health, power1, power2, power3, "
-        "power4, power5, specCount, activeSpec, exploredZones, equipmentCache, knownTitles, actionBars, slot) "
+        "death_expire_time, taxi_path, arenaPoints, totalHonorPoints, todayHonorPoints, yesterdayHonorPoints, totalKills, "
+        "todayKills, yesterdayKills, chosenTitle, knownCurrencies, watchedFaction, drunk, health, power1, power2, power3, "
+        "power4, power5, specCount, activeSpec, exploredZones, equipmentCache, knownTitles, actionBars) "
         "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, "
         "?, ?, ?, ?, ?, ?, "
         "?, ?, ?, "
@@ -17588,7 +17594,9 @@ void Player::SaveToDB()
         "?, ?, ?, ?, ?, ?, ?, ?, ?, "
         "?, ?, ?, "
         "?, ?, ?, ?, ?, ?, ?, ?, ?, "
-        "?, ?, ?, ?, ?, ?, ?, ?, ?) ");
+        "?, ?, ?, ?, ?, ?, ?, "
+        "?, ?, ?, ?, ?, ?, ?, ?, ?, ?, "
+        "?, ?, ?, ?, ?, ?, ?, ?) ");
 
     uberInsert.addUInt32(GetGUIDLow());
     uberInsert.addUInt32(GetSession()->GetAccountId());
@@ -18381,21 +18389,11 @@ void Player::_SaveStats()
     SqlStatement stmt = CharacterDatabase.CreateStatement(delStats, "DELETE FROM character_stats WHERE guid = ?");
     stmt.PExecute(GetGUIDLow());
 
-    stmt = CharacterDatabase.CreateStatement(insertStats, "INSERT INTO character_stats (guid, maxhealth, maxpower1, maxpower2, maxpower3, maxpower4, maxpower5, maxpower6, maxpower7, maxpower8, maxpower9, maxpower10"
-        "strength, agility, stamina, intellect, spirit, armor, resHoly, resFire, resNature, resFrost, resShadow, resArcane, "
-        "blockPct, dodgePct, parryPct, critPct, rangedCritPct, spellCritPct, attackPower, rangedAttackPower, spellPower) "
-        "VALUES ( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-/*
     stmt = CharacterDatabase.CreateStatement(insertStats, "INSERT INTO character_stats (guid, maxhealth, maxpower1, maxpower2, maxpower3, maxpower4, maxpower5"
         "strength, agility, stamina, intellect, spirit, armor, resHoly, resFire, resNature, resFrost, resShadow, resArcane, "
-        "blockPct, dodgePct, parryPct, critPct, rangedCritPct, spellCritPct, attackPower, rangedAttackPower, spellPower, "
-        "apmelee, ranged, blockrating, defrating, dodgerating, parryrating, resilience, manaregen, "
-        "melee_hitrating, melee_critrating, melee_hasterating, melee_mainmindmg, melee_mainmaxdmg, "
-        "melee_offmindmg, melee_offmaxdmg, melee_maintime, melee_offtime, ranged_critrating, ranged_hasterating, "
-        "ranged_hitrating, ranged_mindmg, ranged_maxdmg, ranged_attacktime, "
-        "spell_hitrating, spell_critrating, spell_hasterating, spell_bonusdmg, spell_bonusheal, spell_critproc, account, name, race, class, gender, level, map, money, totaltime, online, arenaPoints, totalHonorPoints, totalKills, equipmentCache, specCount, activeSpec, data) "
-        "VALUES ( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-*/
+        "blockPct, dodgePct, parryPct, critPct, rangedCritPct, spellCritPct, attackPower, rangedAttackPower, spellPower) "
+        "VALUES ( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+
     stmt.addUInt32(GetGUIDLow());
     stmt.addUInt32(GetMaxHealth());
     static_assert(MAX_STORED_POWERS == 5, "Query not updated.");

@@ -333,7 +333,6 @@ enum UnitMods
     UNIT_MOD_RAGE,
     UNIT_MOD_FOCUS,
     UNIT_MOD_ENERGY,
-    UNIT_MOD_HAPPINESS,                                     // REQUIRED for fast indexing to work.
     UNIT_MOD_RUNE,
     UNIT_MOD_RUNIC_POWER,
     UNIT_MOD_SOUL_SHARDS,
