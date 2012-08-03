@@ -189,20 +189,20 @@ class LFGMgr
         bool SendProposal(uint32 uiID, ObjectGuid guid);
         LFGProposal* GetProposal(uint32 uiID);
         void RemoveProposal(Player* pDecliner, uint32 uiID);
-        void RemoveProposal(uint32 uiID, bool success = false);
-        void UpdateProposal(uint32 uiID, ObjectGuid guid, bool accept);
+        void RemoveProposal(uint32 uiID, bool bSuccess = false);
+        void UpdateProposal(uint32 uiID, ObjectGuid guid, bool bAccept);
         void CleanupProposals(LFGType type);
         Player* LeaderElection(GuidSet* playerGuids);
 
         // boot vote system
         void OfferContinue(Group* pGroup);
         void InitBoot(Player* pKicker, ObjectGuid victimGuid, std::string reason);
-        void UpdateBoot(Player* pPlayer, bool accept);
+        void UpdateBoot(Player* pPlayer, LFGAnswer answer);
         void CleanupBoots(LFGType type);
 
         // teleport system
-        void Teleport(Group* pGroup, bool out = false);
-        void Teleport(Player* pPlayer, bool out = false, bool fromOpcode = false);
+        void Teleport(Group* pGroup, bool bOut = false);
+        void Teleport(Player* pPlayer, bool bOut = false, bool bFromOpcode = false);
 
         // LFR ebschaxtend system
         void UpdateLFRGroups();

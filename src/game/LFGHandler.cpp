@@ -73,10 +73,10 @@ void WorldSession::HandleLfgJoinOpcode( WorldPacket & recv_data )
         recv_data >> Unused<uint8>();                       // unk (unused?)
     recv_data >> comment;                                   // lfg comment
 
-    GetPlayer()->GetLFGState()->SetDungeons(&newDungeons);
+    GetPlayer()->GetLFGState()->SetDungeons(newDungeons);
     if (GetPlayer()->GetGroup())
         if (GetPlayer()->GetObjectGuid() == GetPlayer()->GetGroup()->GetLeaderGuid())
-            GetPlayer()->GetGroup()->GetLFGState()->SetDungeons(&newDungeons);
+            GetPlayer()->GetGroup()->GetLFGState()->SetDungeons(newDungeons);
 
     GetPlayer()->GetLFGState()->SetRoles(LFGRoleMask(roles));
     GetPlayer()->GetLFGState()->SetComment(comment);
@@ -189,7 +189,7 @@ void WorldSession::HandleLfgSetBootVoteOpcode(WorldPacket &recv_data)
     recv_data >> agree;
 
     DEBUG_LOG("CMSG_LFG_SET_BOOT_VOTE %u agree: %u", GetPlayer()->GetObjectGuid().GetCounter(), agree ? 1 : 0);
-    sLFGMgr.UpdateBoot(GetPlayer(), agree);
+    sLFGMgr.UpdateBoot(GetPlayer(), LFGAnswer(agree));
 }
 
 void WorldSession::HandleLfgTeleportOpcode(WorldPacket &recv_data)
@@ -1065,7 +1065,7 @@ void WorldSession::SendLfgUpdateProposal(LFGProposal* pProposal)
     LFGDungeonEntry const* dungeon = pProposal->GetDungeon();
     if (!dungeon)
     {
-        DEBUG_LOG("SMSG_LFG_PROPOSAL_UPDATE: no dungeon in proposal %u, returning.", pProposal->ID);
+        DEBUG_LOG("SMSG_LFG_PROPOSAL_UPDATE: no dungeon in proposal %u, returning.", pProposal->m_uiID);
         return;
     }
 
@@ -1111,14 +1111,14 @@ void WorldSession::SendLfgUpdateProposal(LFGProposal* pProposal)
 
     uint32 size = rolesMap.size();
 
-    DEBUG_LOG("SMSG_LFG_PROPOSAL_UPDATE proposal %u, player %u, state: %u", pProposal->ID, GetPlayer()->GetObjectGuid().GetCounter(), pProposal->GetState());
+    DEBUG_LOG("SMSG_LFG_PROPOSAL_UPDATE proposal %u, player %u, state: %u", pProposal->m_uiID, GetPlayer()->GetObjectGuid().GetCounter(), pProposal->GetState());
 
 
     WorldPacket data(SMSG_LFG_PROPOSAL_UPDATE, 4 + 1 + 4 + 4 + 1 + 1 + size * (4 + 1 + 1 + 1 + 1 +1));
 
     data << uint32(dungeon->Entry());                          // Dungeon
     data << uint8(pProposal->GetState());                      // Result state
-    data << uint32(pProposal->ID);                             // Internal Proposal ID
+    data << uint32(pProposal->m_uiID);                         // Internal Proposal ID
     data << uint32(completedEncounters);                       // Bosses killed
     data << uint8(isSameDungeon);                              // Silent (show client window)
     data << uint8(size);                                       // Group size
