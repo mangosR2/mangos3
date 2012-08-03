@@ -546,7 +546,7 @@ void LFGMgr::AddToQueue(ObjectGuid guid, LFGType type, bool inBegin)
             Player* pPlayer = sObjectMgr.GetPlayer(guid);
             MANGOS_ASSERT(pPlayer);
 
-            LFGRolesMap roles = pPlayer->GetLFGPlayerState()->GetRoles();
+            LFGRoleMask roles = pPlayer->GetLFGPlayerState()->GetRoles();
             if ((roles & LFG_ROLE_MASK_TANK) && pqInfo->tanks > 0)
                 pqInfo->tanks -= 1;
             else if ((roles & LFG_ROLE_MASK_HEALER) && pqInfo->healers > 0)
