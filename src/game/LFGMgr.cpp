@@ -2218,7 +2218,7 @@ void LFGMgr::SetRoles(LFGRolesMap* rolesMap)
     if (tmpMap.size() == 1)
     {
         tankGuid = tmpMap.begin()->first;
-        newRole    = LFGRoleMask(tmpMap.begin()->second & ~LFG_ROLE_MASK_HD);
+        newRole    = LFGRoleMask(tmpMap.begin()->second & ~LFG_ROLE_MASK_HEALER_DAMAGE);
     }
     else
     {
@@ -2227,7 +2227,7 @@ void LFGMgr::SetRoles(LFGRolesMap* rolesMap)
             tankGuid = itr->first;
             LFGRolesMap::iterator itr2 = rolesMap->find(tankGuid);
             oldRoles = itr2->second;
-            newRole    = LFGRoleMask(itr->second & ~LFG_ROLE_MASK_HD);
+            newRole    = LFGRoleMask(itr->second & ~LFG_ROLE_MASK_HEALER_DAMAGE);
 
             itr2->second = LFGRoleMask(newRole);
 
@@ -2249,7 +2249,7 @@ void LFGMgr::SetRoles(LFGRolesMap* rolesMap)
     if (tmpMap.size() == 1)
     {
         healGuid = tmpMap.begin()->first;
-        newRole    = LFGRoleMask(tmpMap.begin()->second & ~LFG_ROLE_MASK_TD);
+        newRole    = LFGRoleMask(tmpMap.begin()->second & ~LFG_ROLE_MASK_TANK_DAMAGE);
     }
     else
     {
@@ -2258,7 +2258,7 @@ void LFGMgr::SetRoles(LFGRolesMap* rolesMap)
             healGuid = itr->first;
             LFGRolesMap::iterator itr2 = rolesMap->find(healGuid);
             oldRoles = itr2->second;
-            newRole    = LFGRoleMask(itr->second & ~LFG_ROLE_MASK_TD);
+            newRole    = LFGRoleMask(itr->second & ~LFG_ROLE_MASK_TANK_DAMAGE);
 
             itr2->second = LFGRoleMask(newRole);
 
@@ -2275,7 +2275,7 @@ void LFGMgr::SetRoles(LFGRolesMap* rolesMap)
     {
         if (itr->first != tankGuid && itr->first != healGuid)
         {
-            newRole      = LFGRoleMask(itr->second & ~LFG_ROLE_MASK_TH);
+            newRole      = LFGRoleMask(itr->second & ~LFG_ROLE_MASK_TANK_HEALER);
             itr->second  = LFGRoleMask(newRole);
         }
     }
