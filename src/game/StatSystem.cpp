@@ -253,13 +253,13 @@ void Player::UpdateAttackPowerAndDamage(bool ranged )
     UnitMods unitMod = ranged ? UNIT_MOD_ATTACK_POWER_RANGED : UNIT_MOD_ATTACK_POWER;
 
     uint16 index = UNIT_FIELD_ATTACK_POWER;
-    uint16 index_mod = UNIT_FIELD_ATTACK_POWER_MODS;
+    uint16 index_mod = UNIT_FIELD_ATTACK_POWER_MOD_POS;
     uint16 index_mult = UNIT_FIELD_ATTACK_POWER_MULTIPLIER;
 
     if(ranged)
     {
         index = UNIT_FIELD_RANGED_ATTACK_POWER;
-        index_mod = UNIT_FIELD_RANGED_ATTACK_POWER_MODS;
+        index_mod = UNIT_FIELD_RANGED_ATTACK_POWER_MOD_POS;
         index_mult = UNIT_FIELD_RANGED_ATTACK_POWER_MULTIPLIER;
 
         switch(getClass())
@@ -714,7 +714,7 @@ void Player::UpdateExpertise(WeaponAttackType attack)
     for(AuraList::const_iterator itr = expAuras.begin(); itr != expAuras.end(); ++itr)
     {
         // item neutral spell
-        if((*itr)->GetSpellProto()->EquippedItemClass == -1)
+        if ((*itr)->GetSpellProto()->GetEquippedItemClass() == -1)
             expertise += (*itr)->GetModifier()->m_amount;
         // item dependent spell
         else if(weapon && weapon->IsFitToSpellRequirements((*itr)->GetSpellProto()))
@@ -743,7 +743,7 @@ void Player::UpdateArmorPenetration()
     for(AuraList::const_iterator itr = armorAuras.begin(); itr != armorAuras.end(); ++itr)
     {
         // affects all weapons
-        if((*itr)->GetSpellProto()->EquippedItemClass == -1)
+        if ((*itr)->GetSpellProto()->GetEquippedItemClass() == -1)
         {
             m_armorPenetrationPct += (*itr)->GetModifier()->m_amount;
             continue;
@@ -889,13 +889,13 @@ void Creature::UpdateAttackPowerAndDamage(bool ranged)
     UnitMods unitMod = ranged ? UNIT_MOD_ATTACK_POWER_RANGED : UNIT_MOD_ATTACK_POWER;
 
     uint16 index = UNIT_FIELD_ATTACK_POWER;
-    uint16 index_mod = UNIT_FIELD_ATTACK_POWER_MODS;
+    uint16 index_mod = UNIT_FIELD_ATTACK_POWER_MOD_POS;
     uint16 index_mult = UNIT_FIELD_ATTACK_POWER_MULTIPLIER;
 
     if (ranged)
     {
         index = UNIT_FIELD_RANGED_ATTACK_POWER;
-        index_mod = UNIT_FIELD_RANGED_ATTACK_POWER_MODS;
+        index_mod = UNIT_FIELD_RANGED_ATTACK_POWER_MOD_POS;
         index_mult = UNIT_FIELD_RANGED_ATTACK_POWER_MULTIPLIER;
     }
 
@@ -1079,20 +1079,15 @@ void Pet::UpdateAttackPowerAndDamage(bool ranged)
     float attPowerMod        = GetModifierValue(unitMod, TOTAL_VALUE);
     float attPowerMultiplier = GetModifierValue(unitMod, TOTAL_PCT) - 1.0f;
 
-    if (!ranged)
-    {
-        SetInt32Value(UNIT_FIELD_ATTACK_POWER, (int32)base_attPower);
-        SetInt32Value(UNIT_FIELD_ATTACK_POWER_MODS, (int32)attPowerMod);
-        SetFloatValue(UNIT_FIELD_ATTACK_POWER_MULTIPLIER, attPowerMultiplier);
-        UpdateDamagePhysical(BASE_ATTACK);
-    }
-    else
-    {
-        SetInt32Value(UNIT_FIELD_RANGED_ATTACK_POWER, (int32)base_attPower);
-        SetInt32Value(UNIT_FIELD_RANGED_ATTACK_POWER_MODS, (int32)attPowerMod);
-        SetFloatValue(UNIT_FIELD_RANGED_ATTACK_POWER_MULTIPLIER, attPowerMultiplier);
-        UpdateDamagePhysical(RANGED_ATTACK);
-    }
+    // UNIT_FIELD_(RANGED)_ATTACK_POWER field
+    SetInt32Value(UNIT_FIELD_ATTACK_POWER, (int32)base_attPower);
+    //UNIT_FIELD_(RANGED)_ATTACK_POWER_MODS field
+    SetInt32Value(UNIT_FIELD_ATTACK_POWER_MOD_POS, (int32)attPowerMod);
+    //UNIT_FIELD_(RANGED)_ATTACK_POWER_MULTIPLIER field
+    SetFloatValue(UNIT_FIELD_ATTACK_POWER_MULTIPLIER, attPowerMultiplier);
+
+    // automatically update weapon damage after attack power modification
+    UpdateDamagePhysical(BASE_ATTACK);
 }
 
 void Pet::UpdateDamagePhysical(WeaponAttackType attType)

@@ -429,15 +429,16 @@ class MANGOS_DLL_SPEC Aura
         void SetModifier(AuraType t, int32 a, uint32 pt, int32 miscValue);
         Modifier*       GetModifier()       { return &m_modifier; }
         Modifier const* GetModifier() const { return &m_modifier; }
-        int32 GetMiscValue() const { return m_spellAuraHolder->GetSpellProto()->EffectMiscValue[m_effIndex]; }
-        int32 GetMiscBValue() const { return m_spellAuraHolder->GetSpellProto()->EffectMiscValueB[m_effIndex]; }
-
-        SpellEntry const* GetSpellProto() const { return ( GetHolder() ? GetHolder()->GetSpellProto() : NULL); }
-        uint32 GetId() const { return ( (GetHolder() && GetHolder()->GetSpellProto()) ? GetHolder()->GetSpellProto()->Id : 0 ); }
-        ObjectGuid const& GetCastItemGuid() const;
-        ObjectGuid const& GetCasterGuid() const;
-        Unit* GetCaster() const { return ( GetHolder() ? GetHolder()->GetCaster() : NULL); }
-        Unit* GetTarget() const { return ( GetHolder() ? GetHolder()->GetTarget() : NULL); }
+        int32 GetMiscValue() const { return m_spellEffect ? m_spellEffect->EffectMiscValue : 0; }
+        int32 GetMiscBValue() const { return m_spellEffect ? m_spellEffect->EffectMiscValueB : 0; }
+        
+        SpellEntry const* GetSpellProto() const { return GetHolder()->GetSpellProto(); }
+        SpellEffectEntry const* GetSpellEffect() const { return m_spellEffect; }
+        uint32 GetId() const{ return GetHolder()->GetSpellProto()->Id; }
+        ObjectGuid const& GetCastItemGuid() const { return GetHolder()->GetCastItemGuid(); }
+        ObjectGuid const& GetCasterGuid() const { return GetHolder()->GetCasterGuid(); }
+        Unit* GetCaster() const { return GetHolder()->GetCaster(); }
+        Unit* GetTarget() const { return GetHolder()->GetTarget(); }
 
         ObjectGuid const& GetAffectiveCasterGuid() const;
         Unit* GetAffectiveCaster() const { return ( GetHolder() ? GetHolder()->GetAffectiveCaster() : NULL); }
@@ -525,7 +526,9 @@ class MANGOS_DLL_SPEC Aura
         void ReapplyAffectedPassiveAuras();
 
         Modifier m_modifier;
+        //SpellModifier* m_spellmod;
 
+        SpellEffectEntry const* m_spellEffect;
         time_t m_applyTime;
 
         int32 m_currentBasePoints;                          // cache SpellEntry::CalculateSimpleValue and use for set custom base points

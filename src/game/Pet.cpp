@@ -762,21 +762,24 @@ void Pet::Unsummon(PetSaveMode mode, Unit* owner /*= NULL*/)
 
             if (mode == PET_SAVE_REAGENTS)
             {
-                //returning of reagents only for players, so best done here
+                // returning of reagents only for players, so best done here
+                uint32 spellId = GetUInt32Value(UNIT_CREATED_BY_SPELL);
+                SpellEntry const *spellInfo = sSpellStore.LookupEntry(spellId);
+                SpellReagentsEntry const* spellReagents = spellInfo ? spellInfo->GetSpellReagents() : NULL;
 
-                if (spellInfo)
+                if (spellReagents)
                 {
                     for(uint32 i = 0; i < MAX_SPELL_REAGENTS; ++i)
                     {
-                        if (spellInfo->Reagent[i] > 0)
+                        if (spellReagents->Reagent[i] > 0)
                         {
                             ItemPosCountVec dest;           //for succubus, voidwalker, felhunter and felguard credit soulshard when despawn reason other than death (out of range, logout)
-                            uint8 msg = p_owner->CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, spellInfo->Reagent[i], spellInfo->ReagentCount[i]);
+                            uint8 msg = p_owner->CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, spellReagents->Reagent[i], spellReagents->ReagentCount[i]);
                             if (msg == EQUIP_ERR_OK)
                             {
-                                Item* item = p_owner->StoreNewItem(dest, spellInfo->Reagent[i], true);
+                                Item* item = p_owner->StoreNewItem(dest, spellReagents->Reagent[i], true);
                                 if (p_owner->IsInWorld())
-                                    p_owner->SendNewItem(item, spellInfo->ReagentCount[i], true, false);
+                                    p_owner->SendNewItem(item, spellReagents->ReagentCount[i], true, false);
                             }
                         }
                     }
@@ -1367,13 +1370,20 @@ void Pet::_LoadAuras(uint32 timediff)
             }
 
             // prevent wrong values of remaincharges
-            if (spellproto->procCharges == 0)
+            uint32 procCharges = spellproto->GetProcCharges();
+            if (procCharges)
+            {
+                if (remaincharges <= 0 || remaincharges > procCharges)
+                    remaincharges = procCharges;
+            }
+            else
                 remaincharges = 0;
 
-            if (!spellproto->StackAmount)
+            uint32 defstackamount = spellproto->GetStackAmount();
+            if (!defstackamount)
                 stackcount = 1;
-            else if (spellproto->StackAmount < stackcount)
-                stackcount = spellproto->StackAmount;
+            else if (defstackamount < stackcount)
+                stackcount = defstackamount;
             else if (!stackcount)
                 stackcount = 1;
 
@@ -1428,9 +1438,13 @@ void Pet::_SaveAuras()
         for (int32 j = 0; j < MAX_EFFECT_INDEX; ++j)
         {
             SpellEntry const* spellInfo = itr->second->GetSpellProto();
-            if (spellInfo->EffectApplyAuraName[j] == SPELL_AURA_MOD_STEALTH ||
-                        spellInfo->Effect[j] == SPELL_EFFECT_APPLY_AREA_AURA_OWNER ||
-                        spellInfo->Effect[j] == SPELL_EFFECT_APPLY_AREA_AURA_PET )
+            SpellEffectEntry const* effectEntry = spellInfo->GetSpellEffect(SpellEffectIndex(j));
+            if(!effectEntry)
+                continue;
+
+            if (effectEntry->EffectApplyAuraName == SPELL_AURA_MOD_STEALTH ||
+                effectEntry->Effect == SPELL_EFFECT_APPLY_AREA_AURA_OWNER ||
+                effectEntry->Effect == SPELL_EFFECT_APPLY_AREA_AURA_PET )
             {
                 save = false;
                 break;
@@ -1676,7 +1690,7 @@ void Pet::InitLevelupSpellsForLevel()
                 continue;
 
             // will called first if level down
-            if(spellEntry->spellLevel > level)
+            if(spellEntry->GetSpellLevel() > level)
                 unlearnSpell(spellEntry->Id,true);
             // will called if level up
             else
