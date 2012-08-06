@@ -16,8 +16,8 @@ INSERT INTO `worldstate_template` (`state_id`, `type`, `condition`, `flags`, `de
 (3695, 1, 0, 65538, 0, 0, '', ''),
 (4273, 1, 0, 65538, 0, 0, '', ''),
 -- Arena season ID
-(3191, 1, 0, 65538, 1, 0, '', 'Current arena season'),
-(3901, 1, 0, 65538, 0, 0, '', 'Previous arena season'),
+(3191, 1, 0, 65538, 8, 0, '', 'Current arena season'),
+(3901, 1, 0, 65538, 7, 0, '', 'Previous arena season'),
 -- Wintergrasp
 (3710, 1, 0, 65538, 0, 0, '', 'Battle for Wintergrasp active 1'),
 (3801, 1, 0, 65538, 1, 0, '', 'Battle for Wintergrasp active 2 (negative)'),
