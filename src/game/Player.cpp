@@ -8931,6 +8931,12 @@ void Player::SendInitWorldStates(uint32 zoneid, uint32 areaid)
 
     data << uint16(count);
 
+    for (WorldStateSet::const_iterator itr = wsSet.begin(); itr != wsSet.end(); ++itr)
+    {
+        data << (*itr)->GetId();
+        data << (*itr)->GetValue();
+    }
+
     GetSession()->SendPacket(&data);
 }
 
