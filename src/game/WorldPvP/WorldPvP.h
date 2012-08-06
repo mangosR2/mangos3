@@ -66,7 +66,7 @@ class WorldPvP : public ZoneScript
         virtual ~WorldPvP() {}
 
         // called when the zone is initialized
-        virtual void FillInitialWorldStates(WorldPacket& /*data*/, uint32& /*count*/) {}
+        virtual void FillInitialWorldStates(uint32 zoneId) {}
 
         // called when a player triggers an areatrigger
         virtual bool HandleAreaTrigger(Player* /*pPlayer*/, uint32 /*uiTriggerId*/) { return false; }
@@ -103,14 +103,15 @@ class WorldPvP : public ZoneScript
 
         // Get a Player from the zone
         Player* GetPlayerInZone(bool bOnlyAlive = false, bool bCanBeGamemaster = true);
+
+        // Wrapper for initial (per-script) WorldState filling, once per zone
+        void FillInitialWorldState(uint32 zoneId, uint32 stateId, uint32& value);
+
     protected:
         // Player related stuff
         virtual void HandlePlayerEnterZone(Player* pPlayer);
         virtual void HandlePlayerLeaveZone(Player* pPlayer);
         virtual void HandlePlayerKill(Player* pKiller, Unit* pVictim);
-
-        // remove world states
-        virtual void SendRemoveWorldStates(Player* pPlayer) {}
 
         void RegisterZone(uint32 zoneId);
         bool HasPlayer(Player* pPlayer) const;

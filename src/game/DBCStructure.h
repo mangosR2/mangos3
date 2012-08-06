@@ -2536,7 +2536,7 @@ struct WorldStateEntry
     uint32    m_zone;                                       // 2        WorldState bind zone (0 - on battlegrounds)
     uint32    m_flags;                                      // 3
 //    char*     m_uiIcon;                                   // 4
-//    char*     m_uiMessage1[16]                            // 5-20
+    char*     m_uiMessage1[16];                             // 5-20
 //    uint32    m_flags1;                                   // 21       string flags
 //    char*     m_uiMessage2[16]                            // 22-37
 //    uint32    m_flags2;                                   // 38       string flags
@@ -2545,9 +2545,9 @@ struct WorldStateEntry
 //    char*     m_uiIcon2;                                  // 41
 //    char*     m_uiMessage3[16]                            // 42-57
 //    uint32    m_flags3;                                   // 58       string flags
-//    char*     m_uiType;                                   // 59       only CAPTUREPOINT type, or NULL
-//    uint32    m_unk60;                                    // 60
-//    uint32    m_unk61;                                    // 61
+    char*     m_uiType;                                     // 59       only CAPTUREPOINT type, or NULL
+    uint32    m_linked1;                                    // 60
+    uint32    m_linked2;                                    // 61
 //    uint32    m_unk62;                                    // 62       only 0
 };
 

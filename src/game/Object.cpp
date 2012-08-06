@@ -2211,3 +2211,9 @@ void WorldObject::SetActiveObjectState(bool active)
     }
     m_isActiveObject = active;
 }
+
+void WorldObject::UpdateWorldState(uint32 state, uint32 value)
+{
+    if (GetMap())
+        sWorldStateMgr.SetWorldStateValueFor(GetMap(), state, value);
+}

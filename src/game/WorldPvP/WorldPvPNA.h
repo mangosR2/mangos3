@@ -158,7 +158,7 @@ class WorldPvPNA : public WorldPvP
 
         bool InitWorldPvPArea();
 
-        void FillInitialWorldStates(WorldPacket& data, uint32& count);
+        void FillInitialWorldStates(uint32 zoneId);
         void SendRemoveWorldStates(Player* pPlayer);
 
         void HandlePlayerEnterZone(Player* pPlayer);

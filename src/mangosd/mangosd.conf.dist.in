@@ -194,6 +194,10 @@ BindIP = "0.0.0.0"
 #        Default: 1 (Enable)
 #                 0 (Disabled)
 #
+#    WorldState.ExpireTime
+#        Expire time for cleanup WorldStates in seconds.
+#        Default: 604800 (1 week)
+#
 #    ACE mtmaps
 #    MapUpdate.Threads
 #        Number of threads to run if the binary was compiled with mtmaps support.
@@ -243,6 +247,7 @@ UpdateUptimeInterval = 10
 MaxCoreStuckTime = 0
 AddonChannel = 1
 CleanCharacterDB = 1
+WorldState.ExpireTime = 604800
 MapUpdate.Threads = 1
 MapUpdate.DynamicThreadsCount = 0
 MapUpdate.LoadBalanceHighValue = 0.8

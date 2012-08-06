@@ -641,6 +641,9 @@ class MANGOS_DLL_SPEC WorldObject : public Object
         // ASSERT print helper
         bool PrintCoordinatesError(float x, float y, float z, char const* descr) const;
 
+        // WorldState operations
+        void UpdateWorldState(uint32 state, uint32 value);
+
     protected:
         explicit WorldObject();
 

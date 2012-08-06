@@ -157,8 +157,7 @@ class WorldPvPHP : public WorldPvP
         void HandleObjectiveComplete(GuidSet m_sPlayersSet, uint32 uiEventId);
         void HandlePlayerKillInsideArea(Player* pPlayer, Unit* pVictim);
 
-        void FillInitialWorldStates(WorldPacket& data, uint32& count);
-        void SendRemoveWorldStates(Player* pPlayer);
+        void FillInitialWorldStates(uint32 zoneId);
 
     private:
         // world state update

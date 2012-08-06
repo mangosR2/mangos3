@@ -37,29 +37,12 @@ bool WorldPvPNA::InitWorldPvPArea()
     return true;
 }
 
-void WorldPvPNA::FillInitialWorldStates(WorldPacket& data, uint32& count)
+void WorldPvPNA::FillInitialWorldStates(uint32 zoneId)
 {
     if (m_uiZoneController != NEUTRAL)
     {
-        FillInitialWorldState(data, count, m_uiControllerWorldState, 1);
-        FillInitialWorldState(data, count, WORLD_STATE_NA_GUARDS_LEFT, m_uiGuardsLeft);
-        FillInitialWorldState(data, count, WORLD_STATE_NA_GUARDS_MAX, MAX_NA_GUARDS);
-
-        // map states
-        for (uint8 i = 0; i < MAX_NA_ROOSTS; ++i)
-            FillInitialWorldState(data, count, m_uiRoostWorldState[i], 1);
+        FillInitialWorldState(zoneId, WORLD_STATE_NA_GUARDS_LEFT, m_uiGuardsLeft);
     }
-
-    FillInitialWorldState(data, count, m_uiControllerMapState, 1);
-}
-
-void WorldPvPNA::SendRemoveWorldStates(Player* pPlayer)
-{
-    pPlayer->SendUpdateWorldState(m_uiControllerWorldState, 0);
-    pPlayer->SendUpdateWorldState(m_uiControllerMapState, 0);
-
-    for (uint8 i = 0; i < MAX_NA_ROOSTS; ++i)
-        pPlayer->SendUpdateWorldState(m_uiRoostWorldState[i], 0);
 }
 
 void WorldPvPNA::HandlePlayerEnterZone(Player* pPlayer)
@@ -314,6 +297,8 @@ void WorldPvPNA::ProcessEvent(GameObject* pGo, uint32 uiEventId, uint32 uiFactio
         case EVENT_HALAA_BANNER_WIN_ALLIANCE:
         case EVENT_HALAA_BANNER_WIN_HORDE:
             ProcessCaptureEvent(WIN, uiFaction);
+            break;
+        default:
             break;
     }
 }

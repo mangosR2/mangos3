@@ -172,8 +172,7 @@ class WorldPvPTF : public WorldPvP
 
         void Update(uint32 diff);
 
-        void FillInitialWorldStates(WorldPacket& data, uint32& count);
-        void SendRemoveWorldStates(Player* pPlayer);
+        void FillInitialWorldStates(uint32 zoneId);
 
     private:
         void UpdateWorldState(uint8 uiValue);
@@ -192,8 +191,8 @@ class WorldPvPTF : public WorldPvP
         uint32 m_uiZoneLockTimer;
         uint32 m_uiZoneUpdateTimer;
 
-        uint8 m_uiTowersAlly;
-        uint8 m_uiTowersHorde;
+        uint32 m_uiTowersAlly;
+        uint32 m_uiTowersHorde;
 
         ObjectGuid m_TowerBannerGUID[MAX_TF_TOWERS];
 };

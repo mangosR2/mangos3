@@ -36,6 +36,7 @@
 #include "InstanceData.h"
 #include "ProgressBar.h"
 #include "LFGMgr.h"
+#include "WorldStateMgr.h"
 
 INSTANTIATE_SINGLETON_1( MapPersistentStateManager );
 
@@ -792,6 +793,9 @@ MapPersistentState* MapPersistentStateManager::AddPersistentState(MapEntry const
     if (state && initPools)
         state->InitPools();
 
+    if (state)
+        sWorldStateMgr.CreateInstanceState(mapEntry->MapID, instanceId);
+
     return state;
 }
 
@@ -828,6 +832,7 @@ void MapPersistentStateManager::RemovePersistentState(uint32 mapId, uint32 insta
     if (lock_instLists)
         return;
 
+    sWorldStateMgr.DeleteInstanceState(mapId, instanceId);
     if (instanceId)
     {
         PersistentStateMap::iterator itr = m_instanceSaveByInstanceId.find(instanceId);
@@ -842,6 +847,7 @@ void MapPersistentStateManager::RemovePersistentState(uint32 mapId, uint32 insta
                 }
 
             _ResetSave(m_instanceSaveByInstanceId, itr);
+            sWorldStateMgr.DeleteInstanceState(mapId, instanceId);
         }
     }
     else

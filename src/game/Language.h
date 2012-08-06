@@ -965,7 +965,19 @@ enum MangosStrings
     LANG_NPC_EVENTAI_PHASE              = 1506,
     LANG_NPC_EVENTAI_MOVE               = 1507,
     LANG_NPC_EVENTAI_COMBAT             = 1508,
-    // Room for more Level 2              1509-1599 not used
+    // Room for more Level 2              1509-1549 not used
+
+    // Level 2 (worldstate operations)
+    LANG_WORLDSTATE_LIST                = 1550,
+    LANG_WORLDSTATE_LIST_FULL           = 1551,
+    LANG_WORLDSTATE_SET                 = 1552,
+    LANG_WORLDSTATE_UPDATE              = 1553,
+    LANG_WORLDSTATE_UPDATE_FULL         = 1554,
+    LANG_WORLDSTATE_RELOAD              = 1555,
+    LANG_WORLDSTATE_ERROR               = 1556,
+    LANG_WORLDSTATE_SETTINGS            = 1557,
+    // Room for more Level 2              1559-1599 not used
+
 
     // FREE IDS                           1600-9999
 

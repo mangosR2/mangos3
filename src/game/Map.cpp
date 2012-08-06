@@ -472,6 +472,8 @@ void Map::Update(const uint32 &t_diff)
             MapSessionFilter updater(pSession);
 
             pSession->Update(updater);
+            // sending WorldState updates
+            plr->SendUpdatedWorldStates(false);
         }
     }
 
@@ -568,6 +570,9 @@ void Map::Update(const uint32 &t_diff)
 
     // Send world objects and item update field changes
     SendObjectUpdates();
+
+    // Calculate and send map-related WorldState updates
+    sWorldStateMgr.MapUpdate(this);
 
     // Don't unload grids if it's battleground, since we may have manually added GOs,creatures, those doesn't load from DB at grid re-load !
     // This isn't really bother us, since as soon as we have instanced BG-s, the whole map unloads as the BG gets ended
@@ -2032,6 +2037,11 @@ bool Map::SetZoneWeather(uint32 zoneId, WeatherType type, float grade)
     weather->SetWeather(type, grade);
 
     return true;
+}
+
+void Map::UpdateWorldState(uint32 state, uint32 value)
+{
+    sWorldStateMgr.SetWorldStateValueFor(this, state, value);
 }
 
 /**

@@ -2120,3 +2120,8 @@ uint32 BattleGround::GetPlayerScore(Player *Source, uint32 type)
             return 0;
     }
 }
+
+void BattleGround::FillInitialWorldState(uint32 stateId, uint32 value)
+{
+    sWorldStateMgr.FillInitialWorldState(stateId, value, WORLD_STATE_TYPE_BATTLEGROUND);
+}

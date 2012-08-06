@@ -258,14 +258,13 @@ ChatCommand * ChatHandler::getCommandTable()
         { "moditemvalue",   SEC_ADMINISTRATOR,  false, &ChatHandler::HandleDebugModItemValueCommand,        "", NULL },
         { "modvalue",       SEC_ADMINISTRATOR,  false, &ChatHandler::HandleDebugModValueCommand,            "", NULL },
         { "play",           SEC_MODERATOR,      false, NULL,                                                "", debugPlayCommandTable },
-        { "send",           SEC_ADMINISTRATOR,  false, NULL,                                                "", debugSendCommandTable },
+        { "send",           SEC_ADMINISTRATOR,  false, NULL,                                                "",  },
         { "setaurastate",   SEC_ADMINISTRATOR,  false, &ChatHandler::HandleDebugSetAuraStateCommand,        "", NULL },
         { "setitemvalue",   SEC_ADMINISTRATOR,  false, &ChatHandler::HandleDebugSetItemValueCommand,        "", NULL },
         { "setvalue",       SEC_ADMINISTRATOR,  false, &ChatHandler::HandleDebugSetValueCommand,            "", NULL },
         { "spellmods",      SEC_ADMINISTRATOR,  false, &ChatHandler::HandleDebugSpellModsCommand,           "", NULL },
         { "spellcheck",     SEC_CONSOLE,        true,  &ChatHandler::HandleDebugSpellCheckCommand,          "", NULL },
         { "spellcoefs",     SEC_ADMINISTRATOR,  true,  &ChatHandler::HandleDebugSpellCoefsCommand,          "", NULL },
-        { "uws",            SEC_ADMINISTRATOR,  false, &ChatHandler::HandleDebugUpdateWorldStateCommand,    "", NULL },
         { "entervehicle",   SEC_GAMEMASTER,     false, &ChatHandler::HandleDebugEnterVehicleCommand,        "", NULL },
         { NULL,             0,                  false, NULL,                                                "", NULL }
     };
@@ -417,6 +416,17 @@ ChatCommand * ChatHandler::getCommandTable()
         { "stats",          SEC_GAMEMASTER,     false, &ChatHandler::HandleMmapStatsCommand,           "", NULL },
         { "testarea",       SEC_GAMEMASTER,     false, &ChatHandler::HandleMmapTestArea,               "", NULL },
         { "",               SEC_ADMINISTRATOR,  false, &ChatHandler::HandleMmap,                       "", NULL },
+        { NULL,             0,                  false, NULL,                                           "", NULL }
+    };
+
+    static ChatCommand WSCommandTable[] =
+    {
+        { "list",           SEC_GAMEMASTER,     false, &ChatHandler::HandleWorldStateListCommand,      "", NULL },
+        { "global",         SEC_GAMEMASTER,     false, &ChatHandler::HandleWorldStateListAllCommand,   "", NULL },
+        { "add",            SEC_ADMINISTRATOR,  false, &ChatHandler::HandleWorldStateAddCommand,       "", NULL },
+        { "update",         SEC_ADMINISTRATOR,  false, &ChatHandler::HandleWorldStateUpdateCommand,    "", NULL },
+        { "reload",         SEC_ADMINISTRATOR,  false, &ChatHandler::HandleWorldStateReloadCommand,    "", NULL },
+        { "",               SEC_GAMEMASTER,     false, &ChatHandler::HandleWorldStateCommand,          "", NULL },
         { NULL,             0,                  false, NULL,                                           "", NULL }
     };
 
@@ -609,6 +619,7 @@ ChatCommand * ChatHandler::getCommandTable()
         { "spell_disabled",              SEC_ADMINISTRATOR, true,  &ChatHandler::HandleReloadSpellDisabledCommand,           "", NULL },
         { "spell_linked",                SEC_ADMINISTRATOR, true,  &ChatHandler::HandleReloadSpellLinkedCommand,             "", NULL },
         { "anticheat",                   SEC_ADMINISTRATOR, true,  &ChatHandler::HandleReloadAntiCheatCommand,               "", NULL },
+        { "worldstate",                  SEC_ADMINISTRATOR, true,  &ChatHandler::HandleWorldStateReloadCommand,              "", NULL },
 
         { NULL,                          0,                 false, NULL,                                                     "", NULL }
     };
@@ -839,11 +850,11 @@ ChatCommand * ChatHandler::getCommandTable()
         { "repairitems",    SEC_GAMEMASTER,     true,  &ChatHandler::HandleRepairitemsCommand,         "", NULL },
         { "stable",         SEC_ADMINISTRATOR,  false, &ChatHandler::HandleStableCommand,              "", NULL },
         { "waterwalk",      SEC_GAMEMASTER,     false, &ChatHandler::HandleWaterwalkCommand,           "", NULL },
-        //Playerbot mod
         { "bot",            SEC_PLAYER,         false, &ChatHandler::HandlePlayerbotCommand,           "", NULL },
         { "quit",           SEC_CONSOLE,        true,  &ChatHandler::HandleQuitCommand,                "", NULL },
         { "gearscore",      SEC_ADMINISTRATOR,  false, &ChatHandler::HandleShowGearScoreCommand,       "", NULL },
         { "mmap",           SEC_GAMEMASTER,     false, NULL,                                           "", mmapCommandTable },
+        { "ws",             SEC_GAMEMASTER,     false, NULL,                                           "", WSCommandTable },
 
         { NULL,             0,                  false, NULL,                                           "", NULL }
     };

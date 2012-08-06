@@ -271,6 +271,9 @@ class MANGOS_DLL_SPEC Map : public GridRefManager<NGridType>
         void SetMapWeather(WeatherState state, float grade);
         bool SetZoneWeather(uint32 zoneId, WeatherType type, float grade);
 
+        // WorldState operations
+        void UpdateWorldState(uint32 state, uint32 value);
+
         // Attacker per-map storage operations
         void AddAttackerFor(ObjectGuid targetGuid, ObjectGuid attackerGuid);
         void RemoveAttackerFor(ObjectGuid targetGuid, ObjectGuid attackerGuid);
