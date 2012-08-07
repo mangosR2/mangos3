@@ -490,27 +490,24 @@ LFGQueueInfo* LFGMgr::GetQueueInfo(ObjectGuid guid)
 
 void LFGMgr::AddToQueue(ObjectGuid guid, LFGType type, bool inBegin)
 {
+    // we need a guid (group or player)
     if (guid.IsEmpty())
         return;
 
+    // we doesn't add something without a valid type
+    if (type == LFG_TYPE_NONE)
+        return;
+
+    // Delete old LFGQueueInfo
+    RemoveFromQueue(guid);
+
     // Joining process
-
-    LFGQueueInfo qInfo = LFGQueueInfo(guid, type);
-
-    LFGQueueInfoMap::iterator queue = m_queueInfoMap.find(guid);
-
-    if (queue == m_queueInfoMap.end())
+    LFGQueueInfo newLFGQueueInfo = LFGQueueInfo(guid, type);
     {
         WriteGuard Guard(GetLock());
-        m_queueInfoMap.insert(std::make_pair(guid, qInfo));
+        m_queueInfoMap.insert(std::make_pair(guid, newLFGQueueInfo));
     }
-    else
-    {
-        WriteGuard Guard(GetLock());
-        m_queueInfoMap.erase(guid);
-        m_queueInfoMap.insert(std::make_pair(guid, qInfo));
-    }
-
+    // we must be save, that we add this info in Queue
     LFGQueueInfo* pqInfo = GetQueueInfo(guid);
     MANGOS_ASSERT(pqInfo);
 
@@ -518,71 +515,63 @@ void LFGMgr::AddToQueue(ObjectGuid guid, LFGType type, bool inBegin)
     pqInfo->healers = LFG_HEALERS_NEEDED ;
     pqInfo->dps     = LFG_DPS_NEEDED ;
 
-    if (type !=  LFG_TYPE_NONE)
+    if (guid.IsGroup())
     {
-        if (guid.IsGroup())
+        Group* pGroup = sObjectMgr.GetGroup(guid);
+        MANGOS_ASSERT(pGroup);
+        for (GroupReference* itr = pGroup->GetFirstMember(); itr != NULL; itr = itr->next())
         {
-            Group* group = sObjectMgr.GetGroup(guid);
-            MANGOS_ASSERT(group);
-            for (GroupReference* itr = group->GetFirstMember(); itr != NULL; itr = itr->next())
+            Player* pGroupMember = itr->getSource();
+            if (pGroupMember && pGroupMember->IsInWorld())
             {
-                Player* pGroupMember = itr->getSource();
-                if (pGroupMember && pGroupMember->IsInWorld())
-                {
-                    uint8 roles = pGroupMember->GetLFGPlayerState()->GetRoles();
-                    if ((roles & LFG_ROLE_MASK_TANK) && pqInfo->tanks > 0)
-                        pqInfo->tanks -= 1;
-                    else if ((roles & LFG_ROLE_MASK_HEALER) && pqInfo->healers > 0)
-                        pqInfo->healers -= 1;
-                    else if ((roles & LFG_ROLE_MASK_DAMAGE) && pqInfo->dps > 0)
-                        pqInfo->dps -= 1;
-                }
+                LFGPlayerState* pGroupMemberState = pGroupMember->GetLFGPlayerState();
+                if (pGroupMemberState->HasRole(ROLE_TANK) && pqInfo->tanks > 0)
+                    pqInfo->tanks -= 1;
+                else if (pGroupMemberState->HasRole(ROLE_HEALER) && pqInfo->healers > 0)
+                    pqInfo->healers -= 1;
+                else if (pGroupMemberState->HasRole(ROLE_DAMAGE) && pqInfo->dps > 0)
+                    pqInfo->dps -= 1;
             }
-            WriteGuard Guard(GetLock());
-            m_groupQueue[type].insert((inBegin ? m_groupQueue[type].begin() : m_groupQueue[type].end()), pqInfo);
         }
-        else
-        {
-            Player* pPlayer = sObjectMgr.GetPlayer(guid);
-            MANGOS_ASSERT(pPlayer);
+        WriteGuard Guard(GetLock());
+        m_groupQueue[type].insert((inBegin ? m_groupQueue[type].begin() : m_groupQueue[type].end()), pqInfo);
+    }
+    else
+    {
+        Player* pPlayer = sObjectMgr.GetPlayer(guid);
+        MANGOS_ASSERT(pPlayer);
+        LFGPlayerState* pPlayerState = pPlayer->GetLFGPlayerState();
+        if (pPlayerState->HasRole(ROLE_TANK) && pqInfo->tanks > 0)
+            pqInfo->tanks -= 1;
+        else if (pPlayerState->HasRole(ROLE_HEALER) && pqInfo->healers > 0)
+            pqInfo->healers -= 1;
+        else if (pPlayerState->HasRole(ROLE_DAMAGE) && pqInfo->dps > 0)
+            pqInfo->dps -= 1;
 
-            LFGRoleMask roles = pPlayer->GetLFGPlayerState()->GetRoles();
-            if ((roles & LFG_ROLE_MASK_TANK) && pqInfo->tanks > 0)
-                pqInfo->tanks -= 1;
-            else if ((roles & LFG_ROLE_MASK_HEALER) && pqInfo->healers > 0)
-                pqInfo->healers -= 1;
-            else if ((roles & LFG_ROLE_MASK_DAMAGE) && pqInfo->dps > 0)
-                pqInfo->dps -= 1;
-
-            WriteGuard Guard(GetLock());
-            m_playerQueue[type].insert((inBegin ? m_playerQueue[type].begin() : m_playerQueue[type].end()), pqInfo);
-        }
+        WriteGuard Guard(GetLock());
+        m_playerQueue[type].insert((inBegin ? m_playerQueue[type].begin() : m_playerQueue[type].end()), pqInfo);
     }
     DEBUG_LOG("LFGMgr::AddToQueue: %s %u joined, type %u",(guid.IsGroup() ? "group" : "player"), guid.GetCounter(), type);
 }
 
 void LFGMgr::RemoveFromQueue(ObjectGuid guid)
 {
-    LFGQueueInfoMap::iterator queue = m_queueInfoMap.find(guid);
-    if (queue != m_queueInfoMap.end())
+    if (LFGQueueInfo* pqInfo = GetQueueInfo(guid))
     {
-        LFGType type = queue->second.GetDungeonType();
+        LFGType type = pqInfo->GetDungeonType();
 
         DEBUG_LOG("LFGMgr::RemoveFromQueue: %s %u removed, type %u",(guid.IsGroup() ? "group" : "player"), guid.GetCounter(), type);
 
         WriteGuard Guard(GetLock());
-        if (type != LFG_TYPE_NONE)
+        if (guid.IsGroup())
         {
-            if (guid.IsGroup())
-            {
-                if (m_groupQueue[type].find(&queue->second) != m_groupQueue[type].end())
-                    m_groupQueue[type].erase(&queue->second);
-            }
-            else
-            {
-                if (m_playerQueue[type].find(&queue->second) != m_playerQueue[type].end())
-                    m_playerQueue[type].erase(&queue->second);
-            }
+            if (m_groupQueue[type].find(pqInfo) != m_groupQueue[type].end())
+                m_groupQueue[type].erase(pqInfo);
+        }
+        else
+        {
+            if (m_playerQueue[type].find(pqInfo) != m_playerQueue[type].end())
+                m_playerQueue[type].erase(pqInfo);
         }
         m_queueInfoMap.erase(guid);
     }
