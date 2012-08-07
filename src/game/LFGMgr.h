@@ -57,17 +57,7 @@ class Group;
 class Player;
 class Map;
 struct LFGDungeonExpansionEntry;
-
-// forward struct declarations
-struct LFGReward;
-struct LFGQueueInfo;
 struct LFGProposal;
-
-typedef std::multimap<uint32, LFGReward> LFGRewardMap;
-typedef std::pair<LFGRewardMap::const_iterator, LFGRewardMap::const_iterator> LFGRewardMapBounds;
-typedef std::map<ObjectGuid, LFGQueueInfo> LFGQueueInfoMap;
-typedef std::map<uint32/*ID*/, LFGDungeonEntry const*> LFGDungeonMap;
-typedef std::map<uint32/*ID*/, LFGProposal> LFGProposalMap;
 
 // Reward info
 struct LFGReward
@@ -101,10 +91,6 @@ struct LFGQueueInfo
     uint8      tanks;                                       // Tanks needed
     uint8      healers;                                     // Healers needed
     uint8      dps;                                         // Dps needed
-
-    uint8      tryTanks;                                    // Tanks needed - best search result
-    uint8      tryHealers;                                  // Healers needed - best search result
-    uint8      tryDps;                                      // Dps needed - best search result
 
     // helpers
     LFGType    GetDungeonType() {return m_type;};
@@ -141,6 +127,12 @@ struct LFGEvent
     void          Start(uint32 delay) { executeTime = time_t(time(NULL) + delay); };
     bool          IsActive() { return ((executeTime > 0) && (time_t(time(NULL)) >= executeTime)); };
 };
+
+typedef std::multimap<uint32 /*dungeonId*/, LFGReward /*reward*/> LFGRewardMap;
+typedef std::pair<LFGRewardMap::const_iterator, LFGRewardMap::const_iterator> LFGRewardMapBounds;
+typedef std::map<ObjectGuid /*group or player guid*/, LFGQueueInfo> LFGQueueInfoMap;
+typedef std::map<uint32/*dungeonID*/, LFGDungeonEntry const*> LFGDungeonMap;
+typedef std::map<uint32/*ID*/, LFGProposal> LFGProposalMap;
 
 typedef std::map<LFGDungeonEntry const*, LFGQueueStatus> LFGQueueStatusMap;
 typedef std::map<ObjectGuid, LFGRoleMask>  LFGRolesMap;
@@ -259,7 +251,7 @@ class LFGMgr
         // Search matrix
         void AddToSearchMatrix(ObjectGuid guid, bool inBegin = false);
         void RemoveFromSearchMatrix(ObjectGuid guid);
-        GuidSet* GetSearchVector(LFGDungeonEntry const* pDungeon);
+        GuidSet* GetPlayersForDungeon(LFGDungeonEntry const* pDungeon);
         bool IsInSearchFor(LFGDungeonEntry const* pDungeon, ObjectGuid guid);
         void CleanupSearchMatrix();
 

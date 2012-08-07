@@ -595,7 +595,7 @@ LFGJoinResult LFGMgr::GetPlayerJoinResult(Player* pPlayer)
 
     if (pPlayer->GetPlayerbotMgr() || pPlayer->GetPlayerbotAI())
     {
-        DEBUG_LOG("LFGMgr::Join: %u trying to join to dungeon finder, but has playerbots (or playerbot itself). Aborting.", pPlayer->GetObjectGuid().GetCounter());
+        DEBUG_LOG("LFGMgr::GetPlayerJoinResult: %u trying to join to dungeon finder, but has playerbots (or playerbot itself). Aborting.", pPlayer->GetObjectGuid().GetCounter());
         return ERR_LFG_NO_SLOTS_PLAYER;
     }
 
@@ -618,7 +618,7 @@ LFGJoinResult LFGMgr::GetGroupJoinResult(Group* group)
 
     if (group->isRaidGroup() && group->GetLFGGroupState()->GetType() != LFG_TYPE_RAID)
     {
-        DEBUG_LOG("LFGMgr::Join: Group %u trying to join as raid, but not to raid finder. Aborting.", group->GetObjectGuid().GetCounter());
+        DEBUG_LOG("LFGMgr::GetGroupJoinResult: Group %u trying to join as raid, but not to raid finder. Aborting.", group->GetObjectGuid().GetCounter());
         return ERR_LFG_MISMATCHED_SLOTS;
     }
 
@@ -896,7 +896,7 @@ GuidSet LFGMgr::GetDungeonPlayerQueue(LFGDungeonEntry const* dungeon, Team team)
     if (!dungeon)
         return tmpSet;
 
-    GuidSet* players = GetSearchVector(dungeon);
+    GuidSet* players = GetPlayersForDungeon(dungeon);
     if (!players || players->empty())
         return tmpSet;
 
@@ -1230,22 +1230,22 @@ void LFGMgr::UpdateProposal(uint32 ID, ObjectGuid guid, bool accept)
     if (!pProposal)
         return;
 
-    Player* _player = sObjectMgr.GetPlayer(guid);
-    if (!_player)
+    Player* pPlayer = sObjectMgr.GetPlayer(guid);
+    if (!pPlayer)
         return;
 
     // check player in proposal
-    if (!pProposal->IsMember(guid) && pProposal->GetGroup() && (pProposal->GetGroup() != _player->GetGroup()) )
+    if (!pProposal->IsMember(guid) && pProposal->GetGroup() && (pProposal->GetGroup() != pPlayer->GetGroup()) )
         return;
 
-    _player->GetLFGPlayerState()->SetAnswer(LFGAnswer(accept));
+    pPlayer->GetLFGPlayerState()->SetAnswer(LFGAnswer(accept));
 
     // Remove member that didn't accept
     if (accept == LFG_ANSWER_DENY)
     {
         if (!sWorld.getConfig(CONFIG_BOOL_LFG_DEBUG_ENABLE))
-            _player->CastSpell(_player,LFG_SPELL_DUNGEON_COOLDOWN,true);
-        RemoveProposal(_player, ID);
+            pPlayer->CastSpell(pPlayer,LFG_SPELL_DUNGEON_COOLDOWN,true);
+        RemoveProposal(pPlayer, ID);
         return;
     }
 
@@ -1930,7 +1930,6 @@ void LFGMgr::StartRoleCheck(Group* pGroup)
     for (GroupReference* itr = pGroup->GetFirstMember(); itr != NULL; itr = itr->next())
     {
         Player* pGroupMember = itr->getSource();
-
         if (pGroupMember && pGroupMember->IsInWorld())
         {
             if (pGroupMember->GetObjectGuid() != pGroup->GetLeaderGuid())
@@ -2336,7 +2335,7 @@ void LFGMgr::TryCompleteGroups(LFGType type)
 
     for (LFGQueue::iterator itr = m_groupQueue[type].begin(); itr != m_groupQueue[type].end(); ++itr )
     {
-        Group* pGroup   = sObjectMgr.GetGroup((*itr)->guid);
+        Group* pGroup = sObjectMgr.GetGroup((*itr)->guid);
         if (!pGroup)
             continue;
 
@@ -2407,7 +2406,7 @@ bool LFGMgr::TryAddMembersToGroup(Group* pGroup, GuidSet* players)
 
     LFGRolesMap rolesMap;
     LFGDungeonSet const* groupDungeons = pGroup->GetLFGGroupState()->GetDungeons();
-    LFGDungeonSet  intersection  = *groupDungeons;
+    LFGDungeonSet intersection  = *groupDungeons;
 
     for (GuidSet::const_iterator itr = players->begin(); itr != players->end(); ++itr)
     {
@@ -2727,7 +2726,7 @@ void LFGMgr::AddToSearchMatrix(ObjectGuid guid, bool inBegin)
         if (!dungeon)
             continue;
 
-        GuidSet* players = GetSearchVector(dungeon);
+        GuidSet* players = GetPlayersForDungeon(dungeon);
         if (!players || players->empty())
         {
             GuidSet _players;
@@ -2767,7 +2766,7 @@ void LFGMgr::RemoveFromSearchMatrix(ObjectGuid guid)
         if (!dungeon)
             continue;
 
-        GuidSet* players = GetSearchVector(dungeon);
+        GuidSet* players = GetPlayersForDungeon(dungeon);
         if (players && !players->empty())
         {
             WriteGuard Guard(GetLock());
@@ -2779,7 +2778,7 @@ void LFGMgr::RemoveFromSearchMatrix(ObjectGuid guid)
     }
 }
 
-GuidSet* LFGMgr::GetSearchVector(LFGDungeonEntry const* dungeon)
+GuidSet* LFGMgr::GetPlayersForDungeon(LFGDungeonEntry const* dungeon)
 {
     ReadGuard Guard(GetLock());
     LFGSearchMap::iterator itr = m_searchMatrix.find(dungeon);
@@ -2788,7 +2787,7 @@ GuidSet* LFGMgr::GetSearchVector(LFGDungeonEntry const* dungeon)
 
 bool LFGMgr::IsInSearchFor(LFGDungeonEntry const* dungeon, ObjectGuid guid)
 {
-    GuidSet* players = GetSearchVector(dungeon);
+    GuidSet* players = GetPlayersForDungeon(dungeon);
     if (!dungeon)
         return false;
 
@@ -2853,16 +2852,16 @@ bool LFGMgr::CheckTeam(ObjectGuid guid1, ObjectGuid guid2)
     if (guid1.IsEmpty() || guid2.IsEmpty())
         return true;
 
-    Player* player1 = sObjectMgr.GetPlayer(guid1);
-    Player* player2 = sObjectMgr.GetPlayer(guid2);
+    Player* pPlayer1 = sObjectMgr.GetPlayer(guid1);
+    Player* pPlayer2 = sObjectMgr.GetPlayer(guid2);
 
-    if (!player1 || !player2)
+    if (!pPlayer1 || !pPlayer2)
         return true;
 
     if (sWorld.getConfig(CONFIG_BOOL_ALLOW_TWO_SIDE_INTERACTION_GROUP))
         return true;
 
-    if (player1->GetTeam() == player2->GetTeam())
+    if (pPlayer1->GetTeam() == pPlayer2->GetTeam())
         return true;
 
     return false;
@@ -2968,19 +2967,19 @@ void LFGMgr::UpdateLFRGroups()
     }
 }
 
-bool LFGMgr::IsGroupCompleted(Group* pGroup, uint8 addMembers)
+bool LFGMgr::IsGroupCompleted(Group* pGroup, uint8 uiAddMembers)
 {
     if (!pGroup)
     {
-        if (sWorld.getConfig(CONFIG_BOOL_LFG_DEBUG_ENABLE) && addMembers > 2)
+        if (sWorld.getConfig(CONFIG_BOOL_LFG_DEBUG_ENABLE) && uiAddMembers > 2)
             return true;
-        else if ( addMembers >= MAX_GROUP_SIZE)
+        else if ( uiAddMembers >= MAX_GROUP_SIZE)
             return true;
         else
             return false;
     }
 
-    if (sWorld.getConfig(CONFIG_BOOL_LFG_DEBUG_ENABLE) && (pGroup->GetMembersCount() + addMembers > 2))
+    if (sWorld.getConfig(CONFIG_BOOL_LFG_DEBUG_ENABLE) && (pGroup->GetMembersCount() + uiAddMembers > 2))
         return true;
 
     if (pGroup->isRaidGroup())
@@ -2989,12 +2988,12 @@ bool LFGMgr::IsGroupCompleted(Group* pGroup, uint8 addMembers)
         {
             case RAID_DIFFICULTY_10MAN_NORMAL:
             case RAID_DIFFICULTY_10MAN_HEROIC:
-                if (pGroup->GetMembersCount() + addMembers >= 10)
+                if (pGroup->GetMembersCount() + uiAddMembers >= 10)
                     return true;
                 break;
             case RAID_DIFFICULTY_25MAN_NORMAL:
             case RAID_DIFFICULTY_25MAN_HEROIC:
-                if (pGroup->GetMembersCount() + addMembers >= 25)
+                if (pGroup->GetMembersCount() + uiAddMembers >= 25)
                     return true;
                 break;
             default:
@@ -3002,7 +3001,7 @@ bool LFGMgr::IsGroupCompleted(Group* pGroup, uint8 addMembers)
                 break;
         }
     }
-    else if (pGroup->GetMembersCount() + addMembers >= MAX_GROUP_SIZE)
+    else if (pGroup->GetMembersCount() + uiAddMembers >= MAX_GROUP_SIZE)
         return true;
 
     return false;
@@ -3085,7 +3084,7 @@ void LFGMgr::SheduleEvent()
 
     for (LFGEventList::iterator itr = m_eventList.begin(); itr != m_eventList.end(); ++itr)
     {
-    // we run only one event for tick!!!
+        // we run only one event for tick!!!
         if (!itr->IsActive())
             continue;
         else
