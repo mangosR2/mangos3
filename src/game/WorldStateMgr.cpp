@@ -224,7 +224,8 @@ void WorldStateMgr::LoadTemplatesFromDBC()
                         m_worldStateTemplates.insert(WorldStateTemplateMap::value_type(stateId,
                             WorldStateTemplate(linkedstateId, type, condition, (1 << WORLD_STATE_FLAG_INITIAL_STATE), 0, stateId)));
                         ++count;
-                        const_cast<WorldStateTemplate*>(tmpl)->m_linkedList.push_back(linkedstateId);
+                        if (WorldStateTemplate const* tmpl1 = FindTemplate(linkedstateId))
+                            const_cast<WorldStateTemplate*>(tmpl1)->m_linkedList.push_back(linkedstateId);
                     }
                 }
             }
