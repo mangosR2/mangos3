@@ -91,6 +91,8 @@ enum GameObjectWorldState
     OBJECT_STATE_LAST_INDEX          = OBJECT_STATE_ALLIANCE_DESTROY,
 };
 
+typedef std::set<uint32> WorldStatesLinkedSet;
+
 struct WorldStateTemplate
 {
     // Constructor for use with DB templates data
@@ -116,14 +118,13 @@ struct WorldStateTemplate
     uint32             const m_defaultValue;    // Default value from DB (0 for DBC states)
     uint32             const m_linkedId;        // Linked (uplink) state Id
 
-    std::vector<uint32>   m_linkedList;         // Linked (downlink) states
+    WorldStatesLinkedSet   m_linkedList;        // Linked (downlink) states
 
     bool               HasFlag(WorldStateFlags flag) const { return (m_flags & (1 << flag)); };
 };
 
 typedef std::multimap<uint32 /* state id */, WorldStateTemplate>  WorldStateTemplateMap;
 typedef std::pair<WorldStateTemplateMap::const_iterator,WorldStateTemplateMap::const_iterator> WorldStateTemplateBounds;
-typedef std::multimap<uint32 /* uplink state id */, uint32 /* downlink state id */> WorldStatesLinkHash;
 
 struct WorldState
 {
@@ -211,13 +212,19 @@ struct WorldState
 
     GuidSet const& GetClients()                  { return m_clientGuids; };
 
-    // Linked operations
+    // Linked Guid operations
     ObjectGuid const& GetLinkedGuid()            { return m_linkedGuid;};
     void              SetLinkedGuid(ObjectGuid const& guid)    { m_linkedGuid = guid;};
 
     bool IsExpired() const;
 
-    WorldStateTemplate const* GetTemplate() { return m_pState; }
+    WorldStateTemplate const* GetTemplate() const { return m_pState; }
+
+    // Linked state wrappers
+    bool HasUpLink()   const { return GetTemplate() ? GetTemplate()->m_linkedId != 0 : false; };
+    bool HasDownLink() const { return GetTemplate() ? !GetTemplate()->m_linkedList.empty() : false; };
+    bool HasDownLink(uint32 stateId) const { return GetTemplate() ? (GetTemplate()->m_linkedList.find(stateId) != GetTemplate()->m_linkedList.end()) : false; };
+    WorldStatesLinkedSet const* GetLinkedSet() const { return GetTemplate() ? &GetTemplate()->m_linkedList : NULL; };
 
     void AddFlag(WorldStateFlags flag)    { m_flags |= (1 << flag); };
     void RemoveFlag(WorldStateFlags flag) { m_flags &= ~(1 << flag); };
@@ -332,9 +339,6 @@ class MANGOS_DLL_DECL WorldStateMgr
         WorldStateSet GetInstanceStates(uint32 mapId, uint32 instanceId, uint32 flags = 0, bool full = false);
         WorldStateSet GetInitWorldStates(uint32 mapId, uint32 instanceId, uint32 zoneId, uint32 areaId);
 
-        bool HasDownLinkedWorldStates(uint32 stateId) const { return m_worldStateLink.find(stateId) != m_worldStateLink.end(); };
-        WorldStateSet GetDownLinkedWorldStates(WorldState const* state);
-
         bool          IsFitToCondition(Player* player, WorldState const* state);
         bool          IsFitToCondition(Map* map, WorldState const* state);
         bool          IsFitToCondition(uint32 mapId, uint32 instanceId, uint32 zoneId, uint32 areaId, WorldState const* state);
@@ -346,6 +350,9 @@ class MANGOS_DLL_DECL WorldStateMgr
         void RemovePendingWorldStateFor(Player* player, uint32 mapId, uint32 instanceId, uint32 zoneId, uint32 areaId);
         void SendPendingWorldStateFor(Player* player, uint32 mapId, uint32 instanceId, uint32 zoneId, uint32 areaId);
 
+        WorldStateSet GetDownLinkedWorldStates(WorldState const* state);
+        WorldState const* GetUpLinkWorldState(WorldState const* state);
+
     private:
         // multithread locking
         typedef   ACE_RW_Thread_Mutex          LockType;
@@ -355,7 +362,6 @@ class MANGOS_DLL_DECL WorldStateMgr
 
         WorldStateTemplateMap   m_worldStateTemplates;    // templates storage
         WorldStateMap           m_worldState;             // data storage
-        WorldStatesLinkHash     m_worldStateLink;         // Links map for speedup linked states search
         LockType                i_lock;
 };
 
