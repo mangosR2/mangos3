@@ -1998,10 +1998,16 @@ void ObjectMgr::LoadItemPrototypes()
         for (int j = 0; j < MAX_ITEM_PROTO_STATS; ++j)
         {
             // for ItemStatValue != 0
-            if(proto->ItemStat[j].ItemStatValue && proto->ItemStat[j].ItemStatType >= MAX_ITEM_MOD)
+            if (proto->ItemStat[j].ItemStatValue && proto->ItemStat[j].ItemStatType >= MAX_ITEM_MOD)
             {
                 sLog.outErrorDb("Item (Entry: %u) has wrong stat_type%d (%u)",i,j+1,proto->ItemStat[j].ItemStatType);
                 const_cast<ItemPrototype*>(proto)->ItemStat[j].ItemStatType = 0;
+            }
+
+            if (abs(proto->ItemStat[j].ItemStatValue) >= MAX_CLIENT_STAT_VALUE)
+            {
+                sLog.outErrorDb("Item (Entry: %u) has wrong stat_value%d (%u)",i,j+1,proto->ItemStat[j].ItemStatValue);
+                const_cast<ItemPrototype*>(proto)->ItemStat[j].ItemStatValue = 0;
             }
 
             switch(proto->ItemStat[j].ItemStatType)
@@ -2021,6 +2027,20 @@ void ObjectMgr::LoadItemPrototypes()
             {
                 sLog.outErrorDb("Item (Entry: %u) has wrong dmg_type%d (%u)",i,j+1,proto->Damage[j].DamageType);
                 const_cast<ItemPrototype*>(proto)->Damage[j].DamageType = 0;
+            }
+
+            if (proto->Damage[j].DamageMax >= (float)MAX_CLIENT_STAT_VALUE ||
+                proto->Damage[j].DamageMax < 0.0f ||
+                proto->Damage[j].DamageMax < proto->Damage[j].DamageMin)
+            {
+                sLog.outErrorDb("Item (Entry: %u) has wrong dmg_max%d (%f)",i,j+1,proto->Damage[j].DamageMax);
+                const_cast<ItemPrototype*>(proto)->Damage[j].DamageMax = 0;
+            }
+
+            if (proto->Damage[j].DamageMin < 0.0f || proto->Damage[j].DamageMin > proto->Damage[j].DamageMax)
+            {
+                sLog.outErrorDb("Item (Entry: %u) has wrong dmg_min%d (%f)",i,j+1,proto->Damage[j].DamageMin);
+                const_cast<ItemPrototype*>(proto)->Damage[j].DamageMin = 0;
             }
         }
 

@@ -1391,8 +1391,9 @@ struct DoSpellProcEvent
 
         if (spe.procFlags == 0)
         {
-            if (spell->procFlags==0)
-                sLog.outErrorDb("Spell %u listed in `spell_proc_event` probally not triggered spell (no proc flags)", spell->Id);
+            if (spell->procFlags == 0)
+                DEBUG_LOG("Spell %u listed in `spell_proc_event` probally not triggered spell (no proc flags)", spell->Id);
+            isCustom = true;
         }
         else
         {
