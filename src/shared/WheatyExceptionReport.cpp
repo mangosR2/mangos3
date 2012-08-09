@@ -198,18 +198,6 @@ BOOL WheatyExceptionReport::_GetWindowsVersion(TCHAR* szVersion, DWORD cntMax)
                     _tcsncat(szVersion, _T("Windows 2000 "), cntMax);
                     break;
             }
-            ::RegCloseKey(hKey);
-        }
-        else                                                // Windows NT 3.51 and earlier or Windows 2000 and later
-        {
-            if (!_tcslen(osvi.szCSDVersion))
-                _stprintf(wszTmp, _T("(Version %d.%d, Build %d)"),
-                    osvi.dwMajorVersion, osvi.dwMinorVersion, osvi.dwBuildNumber & 0xFFFF);
-            else
-                _stprintf(wszTmp, _T("%s (Version %d.%d, Build %d)"),
-                    osvi.szCSDVersion, osvi.dwMajorVersion, osvi.dwMinorVersion, osvi.dwBuildNumber & 0xFFFF);
-            _tcsncat(szVersion, wszTmp, cntMax);
-        }
         break;
         default:
             _tcsncat(szVersion, _T("Windows NT or lower "), cntMax);
@@ -280,16 +268,18 @@ void WheatyExceptionReport::printTracesForAllThreads()
   // Now walk the thread list of the system,
   // and display information about each thread
   // associated with the specified process
-  do
-  {
-    if( te32.th32OwnerProcessID == dwOwnerPID )
+    do
     {
-        CONTEXT context;
-        context.ContextFlags = 0xffffffff;
-        HANDLE threadHandle = OpenThread(THREAD_GET_CONTEXT | THREAD_QUERY_INFORMATION,false, te32.th32ThreadID);
-        if(threadHandle && GetThreadContext(threadHandle, &context))
+        if (te32.th32OwnerProcessID == dwOwnerPID)
         {
-            WriteStackDetails( &context, false, threadHandle );
+            CONTEXT context;
+            context.ContextFlags = 0xffffffff;
+            HANDLE threadHandle = OpenThread(THREAD_GET_CONTEXT | THREAD_QUERY_INFORMATION, false, te32.th32ThreadID);
+            if (threadHandle && GetThreadContext(threadHandle, &context))
+            {
+                WriteStackDetails(&context, false, threadHandle);
+            }
+            CloseHandle(threadHandle);
         }
     } while (Thread32Next(hThreadSnap, &te32));
 
@@ -484,9 +474,9 @@ PVOID addr, PTSTR szModule, DWORD len, DWORD& section, DWORD_PTR& offset )
 
     // Iterate through the section table, looking for the one that encompasses
     // the linear address.
-    for (   unsigned i = 0;
+    for (unsigned i = 0;
         i < pNtHdr->FileHeader.NumberOfSections;
-        i++, pSection++ )
+        ++i, ++pSection)
     {
         DWORD_PTR sectionStart = pSection->VirtualAddress;
         DWORD_PTR sectionEnd = sectionStart
@@ -693,7 +683,8 @@ unsigned cbBuffer )
     if ( pSym->Flags & IMAGEHLP_SYMBOL_INFO_REGRELATIVE )
     {
         // if ( pSym->Register == 8 )   // EBP is the value 8 (in DBGHELP 5.1)
-        {                                                   //  This may change!!!
+        {
+             //  This may change!!!
             pVariable = sf->AddrFrame.Offset;
             pVariable += (DWORD_PTR)pSym->Address;
         }
@@ -790,10 +781,10 @@ char* Name)
     pszCurrBuffer += sprintf( pszCurrBuffer, "\r\n" );
 
     // Iterate through each of the children
-    for ( unsigned i = 0; i < dwChildrenCount; i++ )
+    for (unsigned i = 0; i < dwChildrenCount; ++i)
     {
         // Add appropriate indentation level (since this routine is recursive)
-        for ( unsigned j = 0; j <= nestingLevel+1; j++ )
+        for (unsigned j = 0; j <= nestingLevel+1; ++j)
             pszCurrBuffer += sprintf( pszCurrBuffer, "\t" );
 
         // Recurse for each of the child types
