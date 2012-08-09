@@ -193,7 +193,7 @@ void GlobalCooldownMgr::CancelGlobalCooldown(SpellEntry const* spellInfo)
 Unit::Unit() :
     i_motionMaster(this),
     m_ThreatManager(this),
-    m_HostileRefManager(this),
+    m_HostileRefManager(new HostileRefManager(this)),
     m_charmInfo(NULL),
     m_vehicleInfo(NULL),
     m_stateMgr(this),
@@ -306,10 +306,11 @@ Unit::Unit() :
 
 Unit::~Unit()
 {
-#ifndef NOTSAFE_SEMAPHORE_OVERHANDLING
-    MAPLOCK_WRITE(this, MAP_LOCK_TYPE_DEFAULT);
-    MAPLOCK_WRITE1(this, MAP_LOCK_TYPE_AURAS);
-#endif
+    if (IsInWorld())
+        Object::RemoveFromWorld();
+
+    ResetMap();
+
     // set current spells as deletable
     for (uint32 i = 0; i < CURRENT_MAX_SPELL; ++i)
     {
@@ -320,11 +321,18 @@ Unit::~Unit()
         }
     }
 
-    CleanupDeletedHolders(true);
+    {
+#ifndef NOTSAFE_SEMAPHORE_OVERHANDLING
+        MAPLOCK_WRITE(this, MAP_LOCK_TYPE_DEFAULT);
+        MAPLOCK_WRITE1(this, MAP_LOCK_TYPE_AURAS);
+#endif
+        CleanupDeletedHolders(true);
 
-    delete m_charmInfo;
-    delete m_vehicleInfo;
-    delete movespline;
+        delete m_charmInfo;
+        delete m_vehicleInfo;
+        delete movespline;
+    }
+    delete m_HostileRefManager;
 
     // those should be already removed at "RemoveFromWorld()" call
     MANGOS_ASSERT(m_gameObj.size() == 0);
@@ -372,7 +380,7 @@ void Unit::Update( uint32 update_diff, uint32 p_time )
         // Check UNIT_STAT_MELEE_ATTACKING or UNIT_STAT_CHASE (without UNIT_STAT_FOLLOW in this case) so pets can reach far away
         // targets without stopping half way there and running off.
         // These flags are reset after target dies or another command is given.
-        if (m_HostileRefManager.isEmpty())
+        if (m_HostileRefManager->isEmpty())
         {
             // m_CombatTimer set at aura start and it will be freeze until aura removing
             if (m_CombatTimer <= update_diff)
@@ -10228,7 +10236,7 @@ bool Unit::SelectHostileTarget(bool withEvade)
                 {
                     // remove unreachable target from our threat list
                     // next iteration we will select next possible target
-                    m_HostileRefManager.deleteReference(target);
+                    m_HostileRefManager->deleteReference(target);
                     m_ThreatManager.modifyThreatPercent(target, -101);
 
                     GetMap()->RemoveAttackerFor(GetObjectGuid(),target->GetObjectGuid());
@@ -11064,7 +11072,7 @@ void Unit::CleanupsBeforeDelete()
         DeleteThreatList();
         if (GetTypeId()==TYPEID_PLAYER)
             getHostileRefManager().setOnlineOfflineState(false);
-        else if (CanHaveThreatList())
+        else
             getHostileRefManager().deleteReferences();
         RemoveAllAuras(AURA_REMOVE_BY_DELETE);
         GetUnitStateMgr().InitDefaults(false);

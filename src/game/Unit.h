@@ -1894,9 +1894,9 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         void TauntFadeOut(Unit *taunter);
         ThreatManager& getThreatManager() { return m_ThreatManager; }
         ThreatManager const& getThreatManager() const { return m_ThreatManager; }
-        void addHatedBy(HostileReference* pHostileReference) { m_HostileRefManager.insertFirst(pHostileReference); };
+        void addHatedBy(HostileReference* pHostileReference) { m_HostileRefManager->insertFirst(pHostileReference); };
         void removeHatedBy(HostileReference* /*pHostileReference*/ ) { /* nothing to do yet */ }
-        HostileRefManager& getHostileRefManager() { return m_HostileRefManager; }
+        HostileRefManager& getHostileRefManager() { return *m_HostileRefManager; }
         void RemoveUnitFromHostileRefManager(Unit* pUnit);
 
         uint32 GetVisibleAura(uint8 slot) const
@@ -2275,7 +2275,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         // Manage all Units threatening us
         ThreatManager m_ThreatManager;
         // Manage all Units that are threatened by us
-        HostileRefManager m_HostileRefManager;
+        HostileRefManager* m_HostileRefManager;
 
         FollowerRefManager m_FollowingRefManager;
 
