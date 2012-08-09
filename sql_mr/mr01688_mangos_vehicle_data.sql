@@ -655,7 +655,16 @@ REPLACE INTO creature_template_addon (entry,auras) VALUES (29414,'57403');
 DELETE FROM gossip_scripts WHERE id=9568;
 REPLACE INTO gossip_scripts (id,command,datalong,datalong2,comments) VALUES (9568,15,49256,3,'');
 REPLACE INTO `gossip_menu_option` (`menu_id`, `id`, `option_icon`, `option_text`, `option_id`, `npc_option_npcflag`, `action_menu_id`, `action_poi_id`, `action_script_id`, `box_coded`, `box_money`, `box_text`, `cond_1`, `cond_1_val_1`, `cond_1_val_2`, `cond_2`, `cond_2_val_1`, `cond_2_val_2`, `cond_3`, `cond_3_val_1`, `cond_3_val_2`, `condition_id`) values('9568','0','0','We need to get into the fight. Are you ready?','1','1','-1','0','9568','0','0',NULL,'9','12372','0','0','0','0','0','0','0','0');
-UPDATE creature_template SET spell1=49161,spell2=49243,spell3=49263,spell4=49264,spell5=49367,unit_flags=0,InhabitType=3 WHERE entry=27629;
+
+UPDATE `creature_template` SET `unit_flags` = 0,`InhabitType` = 3 WHERE `entry` = 27629;
+DELETE FROM `creature_spell` WHERE `guid` = 27629;
+INSERT INTO `creature_spell` (`guid`, `spell`, `index`, `active`, `disabled`, `flags`) VALUES
+(27629, 49161, 0, 0, 0, 0),
+(27629, 49243, 1, 0, 0, 0),
+(27629, 49263, 2, 0, 0, 0),
+(27629, 49264, 3, 0, 0, 0),
+(27629, 49367, 4, 0, 0, 0);
+
 REPLACE INTO creature_template_addon (entry,bytes1,b2_0_sheath,auras) VALUES (27629,33554432,1,'50069');
 REPLACE INTO creature_ai_scripts VALUES (2769801,27698,8,0,100,0,49367,-1,0,0,33,27698,6,0,0,0,0,0,0,0,0,0,'q12372');
 UPDATE creature_template SET AIName='EventAI' WHERE entry=27698;
@@ -697,8 +706,98 @@ INSERT INTO creature_template_addon (entry, mount, bytes1, b2_0_sheath, b2_1_pvp
 
 -- from lanc
 -- All Support Vehicles for mount The Argent Tournament
-UPDATE `creature_template` SET spell1 = 62544, spell2 = 64342, spell3 = 63010, spell4 = 62552, spell5 = 64077, spell6 = 62863, 
-spell7 = 63034, vehicle_id = 349 WHERE entry IN (33324, 33323, 33322, 33321, 33320, 33319, 33318, 33317, 33316);
+UPDATE `creature_template` SET `vehicle_id` = 349 WHERE `entry` IN (33324, 33323, 33322, 33321, 33320, 33319, 33318, 33317, 33316);
+DELETE FROM `creature_spell` WHERE `guid` IN (33324, 33323, 33322, 33321, 33320, 33319, 33318, 33317, 33316);
+
+SET @GUID := 33324;
+INSERT INTO `creature_spell` (`guid`, `spell`, `index`, `active`, `disabled`, `flags`) VALUES
+(@GUID, 62544, 0, 0, 0, 0),
+(@GUID, 64342, 1, 0, 0, 0),
+(@GUID, 63010, 2, 0, 0, 0),
+(@GUID, 62552, 3, 0, 0, 0),
+(@GUID, 64077, 4, 0, 0, 0),
+(@GUID, 62863, 5, 0, 0, 0),
+(@GUID, 63034, 6, 0, 0, 0);
+
+SET @GUID := 33323;
+INSERT INTO `creature_spell` (`guid`, `spell`, `index`, `active`, `disabled`, `flags`) VALUES
+(@GUID, 62544, 0, 0, 0, 0),
+(@GUID, 64342, 1, 0, 0, 0),
+(@GUID, 63010, 2, 0, 0, 0),
+(@GUID, 62552, 3, 0, 0, 0),
+(@GUID, 64077, 4, 0, 0, 0),
+(@GUID, 62863, 5, 0, 0, 0),
+(@GUID, 63034, 6, 0, 0, 0);
+
+SET @GUID := 33322;
+INSERT INTO `creature_spell` (`guid`, `spell`, `index`, `active`, `disabled`, `flags`) VALUES
+(@GUID, 62544, 0, 0, 0, 0),
+(@GUID, 64342, 1, 0, 0, 0),
+(@GUID, 63010, 2, 0, 0, 0),
+(@GUID, 62552, 3, 0, 0, 0),
+(@GUID, 64077, 4, 0, 0, 0),
+(@GUID, 62863, 5, 0, 0, 0),
+(@GUID, 63034, 6, 0, 0, 0);
+
+SET @GUID := 33321;
+INSERT INTO `creature_spell` (`guid`, `spell`, `index`, `active`, `disabled`, `flags`) VALUES
+(@GUID, 62544, 0, 0, 0, 0),
+(@GUID, 64342, 1, 0, 0, 0),
+(@GUID, 63010, 2, 0, 0, 0),
+(@GUID, 62552, 3, 0, 0, 0),
+(@GUID, 64077, 4, 0, 0, 0),
+(@GUID, 62863, 5, 0, 0, 0),
+(@GUID, 63034, 6, 0, 0, 0);
+
+SET @GUID := 33320;
+INSERT INTO `creature_spell` (`guid`, `spell`, `index`, `active`, `disabled`, `flags`) VALUES
+(@GUID, 62544, 0, 0, 0, 0),
+(@GUID, 64342, 1, 0, 0, 0),
+(@GUID, 63010, 2, 0, 0, 0),
+(@GUID, 62552, 3, 0, 0, 0),
+(@GUID, 64077, 4, 0, 0, 0),
+(@GUID, 62863, 5, 0, 0, 0),
+(@GUID, 63034, 6, 0, 0, 0);
+
+SET @GUID := 33319;
+INSERT INTO `creature_spell` (`guid`, `spell`, `index`, `active`, `disabled`, `flags`) VALUES
+(@GUID, 62544, 0, 0, 0, 0),
+(@GUID, 64342, 1, 0, 0, 0),
+(@GUID, 63010, 2, 0, 0, 0),
+(@GUID, 62552, 3, 0, 0, 0),
+(@GUID, 64077, 4, 0, 0, 0),
+(@GUID, 62863, 5, 0, 0, 0),
+(@GUID, 63034, 6, 0, 0, 0);
+
+SET @GUID := 33318;
+INSERT INTO `creature_spell` (`guid`, `spell`, `index`, `active`, `disabled`, `flags`) VALUES
+(@GUID, 62544, 0, 0, 0, 0),
+(@GUID, 64342, 1, 0, 0, 0),
+(@GUID, 63010, 2, 0, 0, 0),
+(@GUID, 62552, 3, 0, 0, 0),
+(@GUID, 64077, 4, 0, 0, 0),
+(@GUID, 62863, 5, 0, 0, 0),
+(@GUID, 63034, 6, 0, 0, 0);
+
+SET @GUID := 33317;
+INSERT INTO `creature_spell` (`guid`, `spell`, `index`, `active`, `disabled`, `flags`) VALUES
+(@GUID, 62544, 0, 0, 0, 0),
+(@GUID, 64342, 1, 0, 0, 0),
+(@GUID, 63010, 2, 0, 0, 0),
+(@GUID, 62552, 3, 0, 0, 0),
+(@GUID, 64077, 4, 0, 0, 0),
+(@GUID, 62863, 5, 0, 0, 0),
+(@GUID, 63034, 6, 0, 0, 0);
+
+SET @GUID := 33316;
+INSERT INTO `creature_spell` (`guid`, `spell`, `index`, `active`, `disabled`, `flags`) VALUES
+(@GUID, 62544, 0, 0, 0, 0),
+(@GUID, 64342, 1, 0, 0, 0),
+(@GUID, 63010, 2, 0, 0, 0),
+(@GUID, 62552, 3, 0, 0, 0),
+(@GUID, 64077, 4, 0, 0, 0),
+(@GUID, 62863, 5, 0, 0, 0),
+(@GUID, 63034, 6, 0, 0, 0);
 
 DELETE FROM `npc_spellclick_spells` WHERE npc_entry = 33870;
 INSERT INTO `npc_spellclick_spells` VALUES
