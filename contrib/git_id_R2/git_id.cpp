@@ -53,8 +53,8 @@
 #define NUM_DATABASES 3
 
 char remotes[NUM_REMOTES][MAX_REMOTE] = {
-    "git@github.com:mangosR2/mangos.git",
-    "git://github.com/mangosR2/mangos.git"        // used for fetch if present
+    "git@github.com:mangosR2/mangos3.git",
+    "git://github.com/mangosR2/mangos3.git"        // used for fetch if present
 };
 
 char remote_branch[MAX_REMOTE] = "master";
@@ -199,7 +199,7 @@ int get_rev(char *from_msg)
 {
     // accept only the rev number format, not the sql update format
     char * pch;
-    pch = strstr(from_msg,"[mr");
+    pch = strstr(from_msg,"[mt");
     if (!pch) return 0;
     strncpy (pch,"[00",3);
     char nr_str[256];
@@ -326,7 +326,7 @@ bool amend_commit()
     if( (cmd_pipe = popen( cmd, "w" )) == NULL )
         return false;
 
-    fprintf(cmd_pipe, "[mr%d] %s", rev, head_message);
+    fprintf(cmd_pipe, "[mt%d] %s", rev, head_message);
     pclose(cmd_pipe);
     if(use_new_index && putenv(old_index_cmd) != 0) return false;
 
