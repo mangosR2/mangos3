@@ -33,6 +33,30 @@ if [ ! -d ./$BINARY_PATH/$PLATFORM ]; then
     mkdir $BINARY_PATH/$PLATFORM
 fi;
 ################################################################################################
+# Make StormLib
+cd dep/StormLib
+make clean
+if [ ! -d ./$PLATFORM ]; then
+    mkdir $PLATFORM
+fi;
+
+cd $PLATFORM
+
+if [ "$PLATFORM" != "build" ]; then
+    mingw32-cmake -DCMAKE_TOOLCHAIN_FILE=../../../cmake/mingw32-$PLATFORM.cmake ..
+else
+    cmake ..
+fi
+
+make
+make install
+
+if [ "$PLATFORM" != "build" ]; then
+    cp /usr/$PLATFORM-w64-mingw32/sys-root/mingw/lib/libStormLib.dll ../../../$BINARY_PATH/$PLATFORM/
+fi
+
+cd ../../..
+################################################################################################
 # Make extractor
 cd contrib/extractor
 make clean
@@ -57,23 +81,6 @@ else
     cp ./ad ../../../$BINARY_PATH/$PLATFORM
 fi
 cd ../../..
-################################################################################################
-# Make libmpq
-cd dep/libmpq
-make clean
-. ./autogen.sh
-if [ "$PLATFORM" != "build" ]; then
-    if [ "$PLATFORM" == "i686" ]; then
-        mingw32-configure --host=$PLATFORM-w64-mingw32
-    else
-        mingw64-configure --host=$PLATFORM-w64-mingw32
-    fi
-else
-    ./configure
-fi
-make
-make install
-cd ../..
 ################################################################################################
 # Make extractor
 cd contrib/vmap_extractor_v3
