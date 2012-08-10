@@ -196,7 +196,7 @@ class LFGMgr
         void Teleport(Group* pGroup, bool bOut = false);
         void Teleport(Player* pPlayer, bool bOut = false, bool bFromOpcode = false);
 
-        // LFR ebschaxtend system
+        // LFR extend system
         void UpdateLFRGroups();
         bool IsGroupCompleted(Group* pGroup, uint8 uiAddMembers = 0);
 
