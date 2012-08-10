@@ -2581,52 +2581,50 @@ void LFGMgr::UpdateQueueStatus(LFGType type)
 
     uint32 fullCount = 0;
 
-    for (LFGQueueInfoMap::iterator itr = m_queueInfoMap.begin(); itr != m_queueInfoMap.end(); ++itr)
+    for (LFGQueueInfoMap::const_iterator itr = m_queueInfoMap.begin(); itr != m_queueInfoMap.end(); ++itr)
     {
-        LFGQueueInfo* pqInfo = &itr->second;
-        if (!pqInfo)
+        LFGQueueInfo pqInfo = itr->second;
+        ObjectGuid guid = itr->first;       // Player or Group guid
+
+        if (pqInfo.GetDungeonType() != type)
             continue;
 
-        if (pqInfo->GetDungeonType() != type)
-            continue;
-
-        tanks    += (LFG_TANKS_NEEDED - pqInfo->tanks);
-        if (LFG_TANKS_NEEDED - pqInfo->tanks)
-            tanksTime += uint64( time(NULL) - pqInfo->joinTime);
-        healers  += (LFG_HEALERS_NEEDED - pqInfo->healers);
-        if (LFG_HEALERS_NEEDED - pqInfo->healers)
-            healersTime += uint64( time(NULL) - pqInfo->joinTime);
-        damagers += (LFG_DPS_NEEDED - pqInfo->dps);
-        if (LFG_DPS_NEEDED - pqInfo->dps)
-            damagersTime += uint64( time(NULL) - pqInfo->joinTime);
-        if (itr->first.IsGroup())
+        tanks += (LFG_TANKS_NEEDED - pqInfo.tanks);
+        if (LFG_TANKS_NEEDED - pqInfo.tanks)
+            tanksTime += uint64( time(NULL) - pqInfo.joinTime);
+        healers  += (LFG_HEALERS_NEEDED - pqInfo.healers);
+        if (LFG_HEALERS_NEEDED - pqInfo.healers)
+            healersTime += uint64( time(NULL) - pqInfo.joinTime);
+        damagers += (LFG_DPS_NEEDED - pqInfo.dps);
+        if (LFG_DPS_NEEDED - pqInfo.dps)
+            damagersTime += uint64( time(NULL) - pqInfo.joinTime);
+        if (guid.IsGroup())
         {
             Group* pGroup = sObjectMgr.GetGroup(itr->first);
             if (pGroup)
             {
-                fullTime  += uint64( time(NULL) - pqInfo->joinTime)*pGroup->GetMembersCount();
+                fullTime  += uint64( time(NULL) - pqInfo.joinTime) * pGroup->GetMembersCount();
                 fullCount += pGroup->GetMembersCount();
             }
         }
         else
         {
-            fullTime  += uint64( time(NULL) - pqInfo->joinTime);
+            fullTime  += uint64( time(NULL) - pqInfo.joinTime);
             fullCount +=1;
         }
     }
 
-    LFGQueueStatus* status = &m_queueStatus[type];
-    MANGOS_ASSERT(status);
+    LFGQueueStatus status = m_queueStatus[type];
 
-    status->dps     = damagers;
-    status->tanks   = tanks;
-    status->healers = healers;
+    status.dps     = damagers;
+    status.tanks   = tanks;
+    status.healers = healers;
 
-    status->waitTimeTanks  = tanks     ? time_t(tanksTime/tanks)       : 0;
-    status->waitTimeHealer = healers   ? time_t(healersTime/healers)   : 0;
-    status->waitTimeDps    = damagers  ? time_t(damagersTime/damagers) : 0;
+    status.waitTimeTanks  = tanks     ? time_t(tanksTime/tanks)       : 0;
+    status.waitTimeHealer = healers   ? time_t(healersTime/healers)   : 0;
+    status.waitTimeDps    = damagers  ? time_t(damagersTime/damagers) : 0;
 
-    status->avgWaitTime    = fullCount ? time_t(fullTime/fullCount)    : 0;
+    status.avgWaitTime    = fullCount ? time_t(fullTime/fullCount)    : 0;
 
 }
 

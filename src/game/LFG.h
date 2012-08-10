@@ -263,8 +263,8 @@ public:
     void RemoveDungeon(LFGDungeonEntry const* dungeon);
     void AddDungeon(LFGDungeonEntry const* dungeon);
 
-
-    LFGType const& GetType() const { return m_type;};
+    void SetType(LFGType type) { m_type = type; };
+    LFGType GetType() { return m_type;};
 
     void SetState(LFGState state) { m_state = state; };
     LFGState GetState() { return m_state; };

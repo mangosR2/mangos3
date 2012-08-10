@@ -489,7 +489,7 @@ void WorldSession::SendLfgUpdateParty(LFGUpdateType updateType, LFGType type)
             if (!dungeon)
                 data << uint32(0);
             else
-                data << uint32((*itr)->Entry());
+                data << uint32(dungeon->Entry());
         }
 
         data << comment.c_str();
@@ -552,7 +552,7 @@ void WorldSession::SendLfgUpdatePlayer(LFGUpdateType updateType, LFGType type)
             if (!dungeon)
                 data << uint32(0);
             else
-                data << uint32((*itr)->Entry());
+                data << uint32(dungeon->Entry());
         }
 
         data << comment.c_str();
