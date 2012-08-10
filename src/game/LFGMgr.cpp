@@ -1025,39 +1025,31 @@ void LFGMgr::SendLFGRewards(Group* pGroup)
     pGroup->GetLFGGroupState()->SetState(LFG_STATE_FINISHED_DUNGEON);
     pGroup->GetLFGGroupState()->SetStatus(LFG_STATUS_SAVED);
 
-    LFGDungeonEntry const* dungeon = *pGroup->GetLFGGroupState()->GetDungeons()->begin();
-    LFGDungeonEntry const* realdungeon = pGroup->GetLFGGroupState()->GetDungeon();
+    LFGDungeonEntry const* pRealdungeon = pGroup->GetLFGGroupState()->GetDungeon();
 
-    if (!dungeon)
+    if (!pRealdungeon)
     {
-        DEBUG_LOG("LFGMgr::SendLFGReward: group %u - no dungeon in list", pGroup->GetObjectGuid().GetCounter());
+        DEBUG_LOG("LFGMgr::SendLFGReward: group %u - but no realdungeon", pGroup->GetObjectGuid().GetCounter());
         return;
     }
-    else  if (dungeon->type != LFG_TYPE_RANDOM_DUNGEON)
+    else  if (pRealdungeon->type != LFG_TYPE_RANDOM_DUNGEON)
     {
-        DEBUG_LOG("LFGMgr::SendLFGReward: group %u dungeon %u is not random (%u)", pGroup->GetObjectGuid().GetCounter(), dungeon->ID, dungeon->type);
+        DEBUG_LOG("LFGMgr::SendLFGReward: group %u dungeon %u is not random (%u)", pGroup->GetObjectGuid().GetCounter(), pRealdungeon->ID, pRealdungeon->type);
         return;
     }
 
     for (GroupReference* itr = pGroup->GetFirstMember(); itr != NULL; itr = itr->next())
     {
-        if (Player* pGroupMember = itr->getSource())
-            if (pGroupMember->IsInWorld())
-            {
-                LFGDungeonSet dungeons;
-                dungeons.clear();
-                dungeons.insert(realdungeon);
-                pGroupMember->GetLFGPlayerState()->SetDungeons(dungeons);
-                SendLFGReward(pGroupMember, dungeon);
-            }
+        Player* pGroupMember = itr->getSource();
+        if (pGroupMember && pGroupMember->IsInWorld())
+            SendLFGReward(pGroupMember, pRealdungeon);
     }
 }
 
-void LFGMgr::SendLFGReward(Player* pPlayer, LFGDungeonEntry const* dungeon)
+void LFGMgr::SendLFGReward(Player* pPlayer, LFGDungeonEntry const* pRandomDungeon)
 {
-    if (!pPlayer || !dungeon)
+    if (!pPlayer || !pRandomDungeon)
         return;
-
 
     if (pPlayer->GetLFGPlayerState()->GetState() == LFG_STATE_FINISHED_DUNGEON)
     {
@@ -1066,7 +1058,7 @@ void LFGMgr::SendLFGReward(Player* pPlayer, LFGDungeonEntry const* dungeon)
     }
 
     // Update achievements
-    if (dungeon->difficulty == DUNGEON_DIFFICULTY_HEROIC)
+    if (pRandomDungeon->difficulty == DUNGEON_DIFFICULTY_HEROIC)
     {
         if (Group* pGroup = pPlayer->GetGroup())
         {
@@ -1077,7 +1069,7 @@ void LFGMgr::SendLFGReward(Player* pPlayer, LFGDungeonEntry const* dungeon)
 
     pPlayer->GetLFGPlayerState()->SetState(LFG_STATE_FINISHED_DUNGEON);
 
-    LFGReward const* reward = GetRandomDungeonReward(dungeon, pPlayer);
+    LFGReward const* reward = GetRandomDungeonReward(pRandomDungeon, pPlayer);
 
     if (!reward)
         return;
@@ -1102,8 +1094,8 @@ void LFGMgr::SendLFGReward(Player* pPlayer, LFGDungeonEntry const* dungeon)
     pPlayer->RewardQuest(qReward,0,NULL,false);
 
     // Give rewards
-    DEBUG_LOG("LFGMgr::RewardDungeonDoneFor: %u done dungeon %u, %s previously done.", pPlayer->GetObjectGuid().GetCounter(), dungeon->ID, index > 0 ? " " : " not");
-    pPlayer->GetSession()->SendLfgPlayerReward(dungeon, reward, qReward, index != 0);
+    DEBUG_LOG("LFGMgr::RewardDungeonDoneFor: %u done dungeon %u, %s previously done.", pPlayer->GetObjectGuid().GetCounter(), pRandomDungeon->ID, index > 0 ? " " : " not");
+    pPlayer->GetSession()->SendLfgPlayerReward(pRandomDungeon, reward, qReward, index != 0);
 }
 
 uint32 LFGMgr::CreateProposal(LFGDungeonEntry const* dungeon, Group* pGroup, GuidSet* guids)

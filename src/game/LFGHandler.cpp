@@ -1080,17 +1080,19 @@ void WorldSession::SendLfgUpdateProposal(LFGProposal* pProposal)
     if (Group* group = pProposal->GetGroup())
     {
         for (GroupReference* itr = group->GetFirstMember(); itr != NULL; itr = itr->next())
-            if (Player* member = itr->getSource())
-                if (member->IsInWorld())
-                {
-                    rolesMap.insert(std::make_pair(member->GetObjectGuid(), member->GetLFGPlayerState()->GetRoles()));
+        {
+            Player* pGroupMember = itr->getSource();
+            if (pGroupMember && pGroupMember->IsInWorld())
+            {
+                rolesMap.insert(std::make_pair(pGroupMember->GetObjectGuid(), pGroupMember->GetLFGPlayerState()->GetRoles()));
 
-                    if (InstancePlayerBind* bind = member->GetBoundInstance(dungeon->map, Difficulty(dungeon->difficulty)))
-                    {
-                        if (DungeonPersistentState* state = bind->state)
-                            completedEncounters |= state->GetCompletedEncountersMask();
-                    }
+                if (InstancePlayerBind* bind = pGroupMember->GetBoundInstance(dungeon->map, Difficulty(dungeon->difficulty)))
+                {
+                    if (DungeonPersistentState* state = bind->state)
+                        completedEncounters |= state->GetCompletedEncountersMask();
                 }
+            }
+        }
 
         // isContinue = group->isLFGGroup() && sLFGMgr->GetState(gguid) != LFG_STATE_FINISHED_DUNGEON;
         isSameDungeon =  dungeon->map == GetPlayer()->GetMapId();
@@ -1103,9 +1105,8 @@ void WorldSession::SendLfgUpdateProposal(LFGProposal* pProposal)
         for (GuidSet::const_iterator itr = proposalGuids.begin(); itr != proposalGuids.end(); ++itr)
         {
             Player* player = sObjectMgr.GetPlayer(*itr);
-            if (player)
-                if (player->IsInWorld())
-                    rolesMap.insert(std::make_pair(player->GetObjectGuid(), player->GetLFGPlayerState()->GetRoles()));
+            if (player && player->IsInWorld())
+                rolesMap.insert(std::make_pair(player->GetObjectGuid(), player->GetLFGPlayerState()->GetRoles()));
         }
     }
 
