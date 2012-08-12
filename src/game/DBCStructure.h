@@ -1931,6 +1931,46 @@ private:
     };
 };
 
+struct SpellEntry;
+
+struct SpellEffectEntry
+{
+    SpellEffectEntry(SpellEntry const* spellEntry, SpellEffectIndex const& i);
+
+    //uint32        Id;                                         // 0        m_ID
+    uint32        Effect;                                       // 73-75    m_effect
+    float         EffectMultipleValue;                          // 106-108  m_effectAmplitude
+    uint32        EffectApplyAuraName;                          // 100-102  m_effectAura
+    uint32        EffectAmplitude;                              // 103-105  m_effectAuraPeriod
+    int32         EffectBasePoints;                             // 82-84    m_effectBasePoints (don't must be used in spell/auras explicitly, must be used cached Spell::m_currentBasePoints)
+    //float         unk_320_4;                                  // 169-171  3.2.0
+    float         DmgMultiplier;                                // 156-158  m_effectChainAmplitude
+    uint32        EffectChainTarget;                            // 109-111  m_effectChainTargets
+    int32         EffectDieSides;                               // 76-78    m_effectDieSides
+    uint32        EffectItemType;                               // 112-114  m_effectItemType
+    uint32        EffectMechanic;                               // 85-87    m_effectMechanic
+    int32         EffectMiscValue;                              // 115-117  m_effectMiscValue
+    int32         EffectMiscValueB;                             // 118-120  m_effectMiscValueB
+    float         EffectPointsPerComboPoint;                    // 124-126  m_effectPointsPerCombo
+    uint32        EffectRadiusIndex;                            // 94-96    m_effectRadiusIndex - spellradius.dbc
+    //uint32        EffectRadiusMaxIndex;                       // 97-99    4.0.0
+    float         EffectRealPointsPerLevel;                     // 79-81    m_effectRealPointsPerLevel
+    ClassFamilyMask EffectSpellClassMask;                       // 127-129  m_effectSpellClassMask
+    uint32        EffectTriggerSpell;                           // 121-123  m_effectTriggerSpell
+    uint32        EffectImplicitTargetA;                        // 88-90    m_implicitTargetA
+    uint32        EffectImplicitTargetB;                        // 91-93    m_implicitTargetB
+    uint32        EffectSpellId;                                // new 4.0.0
+    uint32        EffectIndex;                                  // new 4.0.0
+    //uint32        unk;                                        // 24 - 4.2.0
+    // helpers
+
+    int32 CalculateSimpleValue() const { return EffectBasePoints; };
+
+    private:
+        SpellEffectEntry() {};
+        SpellEffectEntry(SpellEffectEntry const&) {};
+};
+
 #define MAX_SPELL_REAGENTS 8
 #define MAX_SPELL_TOTEMS 2
 #define MAX_SPELL_TOTEM_CATEGORIES 2
@@ -2144,14 +2184,25 @@ struct SpellEntry
     inline bool HasAttribute(SpellAttributesEx6 attribute) const { return AttributesEx6 & attribute; }
     inline bool HasAttribute(SpellAttributesEx7 attribute) const { return AttributesEx7 & attribute; }
 
+    inline uint32 GetMechanic() const { return Mechanic; };
+    inline uint32 GetManaCost() const { return manaCost; };
+    uint32 GetEffectImplicitTargetAByIndex(SpellEffectIndex j) const;
+    uint32 GetEffectImplicitTargetBByIndex(SpellEffectIndex j) const;
+    uint32 GetEffectApplyAuraNameByIndex(SpellEffectIndex j) const;
+    uint32 GetEffectMiscValue(SpellEffectIndex j) const;
+
+    SpellEffectEntry const* GetSpellEffect(SpellEffectIndex j) const;
+
     private:
         // prevent creating custom entries (copy data from original in fact)
         SpellEntry(SpellEntry const&);                      // DON'T must have implementation
+        SpellEffectEntry const* m_SpellEffect[MAX_EFFECT_INDEX];   // Wrapper for 4.x compartibility
 
         // catch wrong uses
         template<typename T>
         bool IsFitToFamilyMask(SpellFamily family, T t) const;
 };
+
 
 // A few fields which are required for automated convertion
 // NOTE that these fields are count by _skipping_ the fields that are unused!
