@@ -1662,6 +1662,14 @@
 				RelativePath="..\..\src\game\WorldSocketMgr.h"
 				>
 			</File>
+			<File
+				RelativePath="..\..\src\game\WorldStateMgr.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game\WorldStateMgr.h"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Chat Commands"

@@ -539,6 +539,7 @@
     <ClCompile Include="..\..\src\game\WorldSession.cpp" />
     <ClCompile Include="..\..\src\game\WorldSocket.cpp" />
     <ClCompile Include="..\..\src\game\WorldSocketMgr.cpp" />
+    <ClCompile Include="..\..\src\game\WorldStateMgr.cpp" />
     <ClCompile Include="..\..\src\game\vmap\BIH.cpp" />
     <ClCompile Include="..\..\src\game\vmap\MapTree.cpp" />
     <ClCompile Include="..\..\src\game\vmap\ModelInstance.cpp" />
@@ -732,6 +733,7 @@
     <ClInclude Include="..\..\src\game\WorldSession.h" />
     <ClInclude Include="..\..\src\game\WorldSocket.h" />
     <ClInclude Include="..\..\src\game\WorldSocketMgr.h" />
+    <ClInclude Include="..\..\src\game\WorldStateMgr.h" />
     <ClInclude Include="..\..\src\game\vmap\BIH.h" />
     <ClInclude Include="..\..\src\game\vmap\IVMapManager.h" />
     <ClInclude Include="..\..\src\game\vmap\MapTree.h" />

@@ -664,7 +664,7 @@ void WorldStateMgr::MapUpdate(Map* map)
             case WORLD_STATE_TYPE_ZONE:
             case WORLD_STATE_TYPE_AREA:
             {
-                for (GuidSet::iterator itr = state->GetClients().begin(); itr != state->GetClients().end();)
+                for (GuidSet::const_iterator itr = state->GetClients().begin(); itr != state->GetClients().end();)
                 {
                     Player* player = map->GetPlayer(*itr);
                     if (!player || !player->IsInWorld())
