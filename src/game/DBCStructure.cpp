@@ -18,9 +18,10 @@
 
 #include "Common.h"
 #include "DBCStructure.h"
+#include "DBCStores.h"
 #include "SharedDefines.h"
 
-SpellEffectEntry::SpellEffectEntry(const SpellEntry* spellEntry, SpellEffectIndex const& i)
+SpellEffectEntry::SpellEffectEntry(const SpellEntry* spellEntry, SpellEffectIndex i)
 {
     Effect                      = spellEntry->Effect[i];
     EffectMultipleValue         = spellEntry->EffectMultipleValue[i];
@@ -45,33 +46,7 @@ SpellEffectEntry::SpellEffectEntry(const SpellEntry* spellEntry, SpellEffectInde
     EffectIndex                 = i;
 };
 
-uint32 SpellEntry::GetEffectImplicitTargetAByIndex(SpellEffectIndex j) const
+SpellEffectEntry const* SpellEntry::GetSpellEffect(SpellEffectIndex eff) const
 {
-    return GetSpellEffect(j)->EffectImplicitTargetA;
-};
-
-uint32 SpellEntry::GetEffectImplicitTargetBByIndex(SpellEffectIndex j) const
-{
-    return GetSpellEffect(j)->EffectImplicitTargetB;
-};
-
-uint32 SpellEntry::GetEffectApplyAuraNameByIndex(SpellEffectIndex j) const
-{
-    return GetSpellEffect(j)->EffectApplyAuraName;
-};
-
-uint32 SpellEntry::GetEffectMiscValue(SpellEffectIndex j) const 
-{
-    return GetSpellEffect(j)->EffectMiscValue;
-};
-
-SpellEffectEntry const* SpellEntry::GetSpellEffect(SpellEffectIndex j) const
-{
-    if (m_SpellEffect[j])
-        return m_SpellEffect[j];
-    else
-    {
-        const_cast<SpellEntry*>(this)->m_SpellEffect[j] = new SpellEffectEntry(this, j);
-        return m_SpellEffect[j];
-    }
+    return GetSpellEffectEntry(Id, eff);
 }

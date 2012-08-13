@@ -1935,7 +1935,7 @@ struct SpellEntry;
 
 struct SpellEffectEntry
 {
-    SpellEffectEntry(SpellEntry const* spellEntry, SpellEffectIndex const& i);
+    SpellEffectEntry(SpellEntry const* spellEntry, SpellEffectIndex i);
 
     //uint32        Id;                                         // 0        m_ID
     uint32        Effect;                                       // 73-75    m_effect
@@ -1965,6 +1965,8 @@ struct SpellEffectEntry
     // helpers
 
     int32 CalculateSimpleValue() const { return EffectBasePoints; };
+
+    void Initialize(const SpellEntry* spellEntry, SpellEffectIndex i);
 
     private:
         SpellEffectEntry() {};
@@ -2186,17 +2188,19 @@ struct SpellEntry
 
     inline uint32 GetMechanic() const { return Mechanic; };
     inline uint32 GetManaCost() const { return manaCost; };
-    uint32 GetEffectImplicitTargetAByIndex(SpellEffectIndex j) const;
-    uint32 GetEffectImplicitTargetBByIndex(SpellEffectIndex j) const;
-    uint32 GetEffectApplyAuraNameByIndex(SpellEffectIndex j) const;
-    uint32 GetEffectMiscValue(SpellEffectIndex j) const;
+    inline uint32 GetSpellFamilyName() const { return SpellFamilyName; };
+    inline uint32 GetAuraInterruptFlags() const { return AuraInterruptFlags; };
+    inline uint32 GetStackAmount() const { return StackAmount; };
+    uint32 GetEffectImplicitTargetAByIndex(SpellEffectIndex j) const { return GetSpellEffect(j)->EffectImplicitTargetA;};
+    uint32 GetEffectImplicitTargetBByIndex(SpellEffectIndex j) const { return GetSpellEffect(j)->EffectImplicitTargetB;};
+    uint32 GetEffectApplyAuraNameByIndex(SpellEffectIndex j) const   { return GetSpellEffect(j)->EffectApplyAuraName;};
+    uint32 GetEffectMiscValue(SpellEffectIndex j) const              { return GetSpellEffect(j)->EffectMiscValue;};
 
     SpellEffectEntry const* GetSpellEffect(SpellEffectIndex j) const;
 
     private:
         // prevent creating custom entries (copy data from original in fact)
         SpellEntry(SpellEntry const&);                      // DON'T must have implementation
-        SpellEffectEntry const* m_SpellEffect[MAX_EFFECT_INDEX];   // Wrapper for 4.x compartibility
 
         // catch wrong uses
         template<typename T>
@@ -2634,6 +2638,25 @@ struct TalentSpellPos
 };
 
 typedef std::map<uint32,TalentSpellPos> TalentSpellPosMap;
+
+struct SpellEffect
+{
+    SpellEffectEntry const* effects[MAX_EFFECT_INDEX];
+
+    SpellEffect()
+    {
+        for (uint8 i = 0; i < MAX_EFFECT_INDEX; ++i)
+            effects[SpellEffectIndex(i)] = NULL;
+    }
+
+    ~SpellEffect()
+    {
+        for (uint8 i = 0; i < MAX_EFFECT_INDEX; ++i)
+            delete effects[SpellEffectIndex(i)];
+    }
+};
+
+typedef std::map<uint32, SpellEffect> SpellEffectMap;
 
 struct TaxiPathBySourceAndDestination
 {
