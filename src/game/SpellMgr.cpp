@@ -1932,6 +1932,8 @@ SpellLinkedSet SpellMgr::GetSpellLinked(uint32 spell_id, SpellLinkedType type) c
 {
     SpellLinkedSet result;
 
+    result.clear();
+
     SpellLinkedMapBounds const& bounds = GetSpellLinkedMapBounds(spell_id);
 
     if (type < SPELL_LINKED_TYPE_MAX && bounds.first != bounds.second)
