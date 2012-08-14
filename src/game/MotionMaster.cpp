@@ -245,7 +245,7 @@ void MotionMaster::Mutate(MovementGenerator* mgen, UnitActionId stateId)
 
 void MotionMaster::propagateSpeedChange()
 {
-//    impl()->UnitSpeedChanged();
+    top()->UnitSpeedChanged();
 }
 
 MovementGeneratorType MotionMaster::GetCurrentMovementGeneratorType() const
