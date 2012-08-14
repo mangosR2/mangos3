@@ -6647,8 +6647,10 @@ bool ChatHandler::HandleInstanceSaveDataCommand(char* /*args*/)
 bool ChatHandler::HandleGMListFullCommand(char* /*args*/)
 {
     ///- Get the accounts with GM Level >0
-    QueryResult *result = LoginDatabase.Query( "SELECT username,gmlevel FROM account WHERE gmlevel > 0" );
-    if(result)
+    QueryResult* result = LoginDatabase.PQuery("SELECT ac.username, ac.gmlevel, af.Security FROM account ac LEFT JOIN "
+                                               "account_forcepermission af ON ac.id = af.AccountID WHERE (af.Security > 0 AND realmID = '%u') "
+                                               "OR ac.gmlevel > 0", sConfig.GetIntDefault("RealmID", 0));
+    if (result)
     {
         SendSysMessage(LANG_GMLIST);
         SendSysMessage("========================");
@@ -6658,9 +6660,9 @@ bool ChatHandler::HandleGMListFullCommand(char* /*args*/)
         ///- Circle through them. Display username and GM level
         do
         {
-            Field *fields = result->Fetch();
-            PSendSysMessage("|%15s|%6s|", fields[0].GetString(),fields[1].GetString());
-        }while( result->NextRow() );
+            Field* fields = result->Fetch();
+            PSendSysMessage("|%15s|%6u|", fields[0].GetString(), (fields[1].GetUInt8() > fields[2].GetUInt8()) ? fields[1].GetUInt8() : fields[2].GetUInt8());
+        } while(result->NextRow());
 
         PSendSysMessage("========================");
         delete result;
