@@ -25,6 +25,7 @@
 #include "Creature.h"
 #include "Unit.h"
 #include "SharedDefines.h"
+#include "LockedMap.h"
 
 #define SPELL_RIDE_VEHICLE_HARDCODED 46598
 
@@ -48,7 +49,7 @@ struct VehicleSeat
     bool IsProtectPassenger() const;
 };
 
-typedef std::map<int8, VehicleSeat> SeatMap;
+typedef ACE_Based::LockedMap<int8, VehicleSeat> SeatMap;
 
 struct VehicleAccessory
 {
