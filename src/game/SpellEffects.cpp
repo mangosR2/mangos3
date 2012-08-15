@@ -6104,8 +6104,7 @@ void Spell::EffectSummonType(SpellEffectIndex eff_idx)
                     DoSummonWild(eff_idx, summon_prop->FactionId);
                     break;
                 case UNITNAME_SUMMON_TITLE_VEHICLE:
-                    // TODO
-                    // EffectSummonVehicle(i);
+                    DoSummonVehicle(eff_idx, summon_prop->FactionId);
                     break;
                 default:
                     sLog.outError("EffectSummonType: Unhandled summon title %u", summon_prop->Title);
@@ -6138,9 +6137,7 @@ void Spell::EffectSummonType(SpellEffectIndex eff_idx)
         case SUMMON_PROP_GROUP_VEHICLE:
         case SUMMON_PROP_GROUP_UNCONTROLLABLE_VEHICLE:
         {
-            // TODO
-            // EffectSummonVehicle(i);
-               DoSummonVehicle(eff_idx, summon_prop->FactionId);
+            DoSummonVehicle(eff_idx, summon_prop->FactionId);
 //            sLog.outDebug("EffectSummonType: Unhandled summon group type SUMMON_PROP_GROUP_VEHICLE(%u)", summon_prop->Group);
 //            Mangos developers thinking - this summon is not supported. But in this his worked fine :)
             break;
@@ -9472,6 +9469,17 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                         return;
 
                     unitTarget->RemoveAurasDueToSpell(m_spellInfo->CalculateSimpleValue(eff_idx));
+                    break;
+                }
+                case 56659:                                 //  Build Demolisher (Force)
+                case 56662:                                 //  Build Siege Vehicle (Force) - alliance
+                case 56664:                                 //  Build Catapult (Force)
+                case 61409:                                 //  Build Siege Vehicle (Force) - horde
+                {
+                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
+                        return;
+
+                    unitTarget->CastSpell(unitTarget, m_spellInfo->CalculateSimpleValue(eff_idx), true);
                     break;
                 }
                 case 57337:                                 // Great Feast

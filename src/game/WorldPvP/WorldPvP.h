@@ -104,6 +104,9 @@ class WorldPvP : public ZoneScript
         // Get a Player from the zone
         Player* GetPlayerInZone(bool bOnlyAlive = false, bool bCanBeGamemaster = true);
 
+        // Damage GO - for WG mostly
+        virtual void EventPlayerDamageGO(Player* /*player*/, GameObject* /*target_obj*/, uint32 /*eventId*/, uint32 /*bySpellId*/) {}
+
         // Wrapper for initial (per-script) WorldState filling, once per zone
         void FillInitialWorldState(uint32 zoneId, uint32 stateId, uint32& value);
 

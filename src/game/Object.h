@@ -643,6 +643,7 @@ class MANGOS_DLL_SPEC WorldObject : public Object
 
         // WorldState operations
         void UpdateWorldState(uint32 state, uint32 value);
+        uint32 GetWorldState(uint32 state);
 
     protected:
         explicit WorldObject();

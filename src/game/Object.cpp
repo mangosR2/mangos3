@@ -2217,3 +2217,8 @@ void WorldObject::UpdateWorldState(uint32 state, uint32 value)
     if (GetMap())
         sWorldStateMgr.SetWorldStateValueFor(GetMap(), state, value);
 }
+
+uint32 WorldObject::GetWorldState(uint32 stateId)
+{
+    return sWorldStateMgr.GetWorldStateValueFor(this, stateId);
+}
