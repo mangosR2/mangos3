@@ -2191,10 +2191,10 @@ struct SpellEntry
     inline uint32 GetSpellFamilyName() const { return SpellFamilyName; };
     inline uint32 GetAuraInterruptFlags() const { return AuraInterruptFlags; };
     inline uint32 GetStackAmount() const { return StackAmount; };
-    uint32 GetEffectImplicitTargetAByIndex(SpellEffectIndex j) const { return GetSpellEffect(j)->EffectImplicitTargetA;};
-    uint32 GetEffectImplicitTargetBByIndex(SpellEffectIndex j) const { return GetSpellEffect(j)->EffectImplicitTargetB;};
-    uint32 GetEffectApplyAuraNameByIndex(SpellEffectIndex j) const   { return GetSpellEffect(j)->EffectApplyAuraName;};
-    uint32 GetEffectMiscValue(SpellEffectIndex j) const              { return GetSpellEffect(j)->EffectMiscValue;};
+    inline uint32 GetEffectImplicitTargetAByIndex(SpellEffectIndex j) const { return EffectImplicitTargetA[j];};
+    inline uint32 GetEffectImplicitTargetBByIndex(SpellEffectIndex j) const { return EffectImplicitTargetB[j];};
+    inline uint32 GetEffectApplyAuraNameByIndex(SpellEffectIndex j) const   { return EffectApplyAuraName[j];};
+    inline uint32 GetEffectMiscValue(SpellEffectIndex j) const              { return EffectMiscValue[j];};
 
     SpellEffectEntry const* GetSpellEffect(SpellEffectIndex j) const;
 
