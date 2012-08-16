@@ -121,8 +121,8 @@ SpellCastTargets::SpellCastTargets()
     m_srcX = m_srcY = m_srcZ = m_destX = m_destY = m_destZ = 0.0f;
     m_strTarget = "";
     m_targetMask = 0;
-    m_elevation = 0.0f;
-    m_speed = 0.0f;
+    SetElevation(0.0f);
+    SetSpeed(0.0f);
 }
 
 SpellCastTargets::~SpellCastTargets()
@@ -143,7 +143,8 @@ void SpellCastTargets::setUnitTarget(Unit* target)
     if (target)
     {
         m_unitTargetGUID = target->GetObjectGuid();
-        m_targetMask |= TARGET_FLAG_UNIT;
+        if (!(m_targetMask & TARGET_FLAG_DEST_LOCATION))
+            m_targetMask |= TARGET_FLAG_UNIT;
     }
     else
     {
@@ -4307,7 +4308,7 @@ void Spell::SendSpellGo()
         castFlags |= CAST_FLAG_PREDICTED_RUNES;             // rune cooldowns list
     }
 
-    if ((m_targets.m_targetMask & TARGET_FLAG_DEST_LOCATION) && m_targets.GetSpeed() > 0.0f)
+    if ((m_targets.m_targetMask & TARGET_FLAG_DEST_LOCATION) && (m_targets.GetSpeed() > M_NULL_F || m_targets.GetElevation() > M_NULL_F))
         castFlags |= CAST_FLAG_ADJUST_MISSILE;             // spell has trajectory (guess parameters)
 
     Unit *caster = m_triggeredByAuraSpell && IsChanneledSpell(m_triggeredByAuraSpell) ? GetAffectiveCaster() : m_caster;
