@@ -16,475 +16,388 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
-#include "OutdoorPvP.h"
 #include "OutdoorPvPZM.h"
+#include "WorldPacket.h"
+#include "../World.h"
+#include "../ObjectMgr.h"
+#include "../Object.h"
+#include "../Creature.h"
 #include "../GameObject.h"
-
+#include "../Player.h"
 
 OutdoorPvPZM::OutdoorPvPZM() : OutdoorPvP(),
-    m_uiGraveyardWorldState(WORLD_STATE_GRAVEYARD_NEUTRAL),
-    m_uiAllianceScoutWorldState(WORLD_STATE_ALY_FLAG_NOT_READY),
-    m_uiHordeScoutWorldState(WORLD_STATE_HORDE_FLAG_NOT_READY),
-
-    m_uiGraveyardController(NEUTRAL),
-    m_uiTowersAlly(0),
-    m_uiTowersHorde(0)
+    m_graveyardOwner(TEAM_NONE),
+    m_graveyardWorldState(WORLD_STATE_ZM_GRAVEYARD_NEUTRAL),
+    m_scoutWorldStateAlliance(WORLD_STATE_ZM_FLAG_NOT_READY_ALLIANCE),
+    m_scoutWorldStateHorde(WORLD_STATE_ZM_FLAG_NOT_READY_HORDE),
+    m_towersAlliance(0),
+    m_towersHorde(0)
 {
-    m_uiTypeId = WORLD_PVP_TYPE_ZM;
-
     // init world states
-    m_uiBeaconWorldState[0] = WORLD_STATE_TOWER_EAST_NEUTRAL;
-    m_uiBeaconWorldState[1] = WORLD_STATE_TOWER_WEST_NEUTRAL;
-    m_uiBeaconMapState[0] = WORLD_STATE_BEACON_EAST_NEUTRAL;
-    m_uiBeaconMapState[1] = WORLD_STATE_BEACON_WEST_NEUTRAL;
+    m_towerWorldState[0] = WORLD_STATE_ZM_BEACON_EAST_UI_NEUTRAL;
+    m_towerWorldState[1] = WORLD_STATE_ZM_BEACON_WEST_UI_NEUTRAL;
+    m_towerMapState[0] = WORLD_STATE_ZM_BEACON_EAST_NEUTRAL;
+    m_towerMapState[1] = WORLD_STATE_ZM_BEACON_WEST_NEUTRAL;
 
     for (uint8 i = 0; i < MAX_ZM_TOWERS; ++i)
-        m_uiBeaconController[i] = NEUTRAL;
+        m_towerOwner[i] = TEAM_NONE;
+
+    // initially set graveyard owner to neither faction
+    sObjectMgr.SetGraveYardLinkTeam(GRAVEYARD_ID_TWIN_SPIRE, GRAVEYARD_ZONE_TWIN_SPIRE, TEAM_INVALID);
 }
 
-bool OutdoorPvPZM::InitOutdoorPvPArea()
+void OutdoorPvPZM::FillInitialWorldStates(WorldPacket& data, uint32& count)
 {
-    RegisterZone(ZONE_ID_ZANGARMARSH);
-    RegisterZone(ZONE_ID_SERPENTSHRINE_CAVERN);
-    RegisterZone(ZONE_ID_STREAMVAULT);
-    RegisterZone(ZONE_ID_UNDERBOG);
-    RegisterZone(ZONE_ID_SLAVE_PENS);
+    FillInitialWorldState(data, count, m_scoutWorldStateAlliance, WORLD_STATE_ADD);
+    FillInitialWorldState(data, count, m_scoutWorldStateHorde, WORLD_STATE_ADD);
+    FillInitialWorldState(data, count, m_graveyardWorldState, WORLD_STATE_ADD);
 
-    return true;
+    for (uint8 i = 0; i < MAX_ZM_TOWERS; ++i)
+    {
+        FillInitialWorldState(data, count, m_towerWorldState[i], WORLD_STATE_ADD);
+        FillInitialWorldState(data, count, m_towerMapState[i], WORLD_STATE_ADD);
+    }
 }
 
-void OutdoorPvPZM::FillInitialWorldStates(uint32 zoneId)
+void OutdoorPvPZM::SendRemoveWorldStates(Player* player)
 {
+    player->SendUpdateWorldState(m_scoutWorldStateAlliance, WORLD_STATE_REMOVE);
+    player->SendUpdateWorldState(m_scoutWorldStateHorde, WORLD_STATE_REMOVE);
+    player->SendUpdateWorldState(m_graveyardWorldState, WORLD_STATE_REMOVE);
+
+    for (uint8 i = 0; i < MAX_ZM_TOWERS; ++i)
+    {
+        player->SendUpdateWorldState(m_towerWorldState[i], WORLD_STATE_REMOVE);
+        player->SendUpdateWorldState(m_towerMapState[i], WORLD_STATE_REMOVE);
+    }
 }
 
-void OutdoorPvPZM::HandlePlayerEnterZone(Player* pPlayer)
+void OutdoorPvPZM::HandlePlayerEnterZone(Player* player, bool isMainZone)
 {
+    OutdoorPvP::HandlePlayerEnterZone(player, isMainZone);
+
     // remove the buff from the player first; Sometimes on relog players still have the aura
-    pPlayer->RemoveAurasDueToSpell(SPELL_TWIN_SPIRE_BLESSING);
+    player->RemoveAurasDueToSpell(SPELL_TWIN_SPIRE_BLESSING);
 
     // cast buff the the player which enters the zone
-    if ((pPlayer->GetTeam() == ALLIANCE ? m_uiTowersAlly : m_uiTowersHorde) == MAX_ZM_TOWERS)
-        pPlayer->CastSpell(pPlayer, SPELL_TWIN_SPIRE_BLESSING, true);
-
-    OutdoorPvP::HandlePlayerEnterZone(pPlayer);
+    if (player->GetTeam() == m_graveyardOwner)
+        player->CastSpell(player, SPELL_TWIN_SPIRE_BLESSING, true);
 }
 
-void OutdoorPvPZM::HandlePlayerLeaveZone(Player* pPlayer)
+void OutdoorPvPZM::HandlePlayerLeaveZone(Player* player, bool isMainZone)
 {
     // remove the buff from the player
-    pPlayer->RemoveAurasDueToSpell(SPELL_TWIN_SPIRE_BLESSING);
+    player->RemoveAurasDueToSpell(SPELL_TWIN_SPIRE_BLESSING);
 
-    OutdoorPvP::HandlePlayerLeaveZone(pPlayer);
+    OutdoorPvP::HandlePlayerLeaveZone(player, isMainZone);
 }
 
-void OutdoorPvPZM::OnCreatureCreate(Creature* pCreature)
+void OutdoorPvPZM::HandleCreatureCreate(Creature* creature)
 {
-    switch (pCreature->GetEntry())
+    switch (creature->GetEntry())
     {
-        case NPC_ALLIANCE_FIELD_SCOUT:
-            m_AllianceScoutGUID = pCreature->GetObjectGuid();
-            break;
-        case NPC_HORDE_FIELD_SCOUT:
-            m_HorderScoutGUID = pCreature->GetObjectGuid();
-            break;
         case NPC_PVP_BEAM_RED:
-            // East Beam
-            if (pCreature->GetPositionY() < 7000.0f)
-            {
-                m_BeamRedGUID[0] = pCreature->GetObjectGuid();
-                if (m_uiBeaconController[0] == HORDE)
-                    return;
-            }
-            // Center Beam
-            else if (pCreature ->GetPositionY() < 7300.0f)
-            {
-                m_BeamCenterRedGUID = pCreature->GetObjectGuid();
-                if (m_uiGraveyardController == HORDE)
-                    return;
-            }
-            // West Beam
-            else
-            {
-                m_BeamRedGUID[1] = pCreature->GetObjectGuid();
-                if (m_uiBeaconController[1] == HORDE)
-                    return;
-            }
-
-            pCreature->SetRespawnDelay(7*DAY);
-            pCreature->ForcedDespawn();
+            if (creature->GetPositionY() < 7000.0f)                 // East Beam
+                m_beamTowerRed[0] = creature->GetObjectGuid();
+            else if (creature->GetPositionY() < 7300.0f)            // Center Beam
+                m_beamGraveyardRed = creature->GetObjectGuid();
+            else                                                    // West Beam
+                m_beamTowerRed[1] = creature->GetObjectGuid();
             break;
         case NPC_PVP_BEAM_BLUE:
-            // East Beam
-            if (pCreature->GetPositionY() < 7000.0f)
-            {
-                m_BeamBlueGUID[0] = pCreature->GetObjectGuid();
-                if (m_uiBeaconController[0] == ALLIANCE)
-                    return;
-            }
-            // Center Beam
-            else if (pCreature ->GetPositionY() < 7300.0f)
-            {
-                m_BeamCenterBlueGUID = pCreature->GetObjectGuid();
-                if (m_uiGraveyardController == ALLIANCE)
-                    return;
-            }
-            // West Beam
-            else
-            {
-                m_BeamBlueGUID[1] = pCreature->GetObjectGuid();
-                if (m_uiBeaconController[1] == ALLIANCE)
-                    return;
-            }
-
-            pCreature->SetRespawnDelay(7*DAY);
-            pCreature->ForcedDespawn();
+            if (creature->GetPositionY() < 7000.0f)                 // East Beam
+                m_beamTowerBlue[0] = creature->GetObjectGuid();
+            else if (creature->GetPositionY() < 7300.0f)            // Center Beam
+                m_beamGraveyardBlue = creature->GetObjectGuid();
+            else                                                    // West Beam
+                m_beamTowerBlue[1] = creature->GetObjectGuid();
             break;
     }
 }
 
-void OutdoorPvPZM::OnGameObjectCreate(GameObject* pGo)
+void OutdoorPvPZM::HandleGameObjectCreate(GameObject* go)
 {
-    switch (pGo->GetEntry())
+    switch (go->GetEntry())
     {
-        case GO_ZANGA_BANNER_WEST:
-            m_TowerBannerGUID[1] = pGo->GetObjectGuid();
-            break;
         case GO_ZANGA_BANNER_EAST:
-            m_TowerBannerGUID[0] = pGo->GetObjectGuid();
+            m_towerBanners[0] = go->GetObjectGuid();
             break;
-        case GO_ZANGA_BANNER_CENTER_ALY:
-            m_TowerBannerCenterAlyGUID = pGo->GetObjectGuid();
+        case GO_ZANGA_BANNER_WEST:
+            m_towerBanners[1] = go->GetObjectGuid();
+            break;
+        case GO_ZANGA_BANNER_CENTER_ALLIANCE:
+            m_graveyardBannerAlliance = go->GetObjectGuid();
             break;
         case GO_ZANGA_BANNER_CENTER_HORDE:
-            m_TowerBannerCenterHordeGUID = pGo->GetObjectGuid();
+            m_graveyardBannerHorde = go->GetObjectGuid();
             break;
         case GO_ZANGA_BANNER_CENTER_NEUTRAL:
-            m_TowerBannerCenterNeutralGUID = pGo->GetObjectGuid();
+            m_graveyardBannerNeutral = go->GetObjectGuid();
             break;
     }
 }
 
-// Cast player spell on oponent kill
-void OutdoorPvPZM::HandlePlayerKillInsideArea(Player* pPlayer, Unit* pVictim)
+// Cast player spell on opponent kill
+void OutdoorPvPZM::HandlePlayerKillInsideArea(Player* player, Unit* /*victim*/)
 {
     for (uint8 i = 0; i < MAX_ZM_TOWERS; ++i)
     {
-        if (GameObject* pBanner = pPlayer->GetMap()->GetGameObject(m_TowerBannerGUID[i]))
+        if (GameObject* capturePoint = player->GetMap()->GetGameObject(m_towerBanners[i]))
         {
-            GameObjectInfo const* info = pBanner->GetGOInfo();
-            if (!info)
-                continue;
+            // check capture point range
+            GameObjectInfo const* info = capturePoint->GetGOInfo();
+            if (info && player->IsWithinDistInMap(capturePoint, info->capturePoint.radius))
+            {
+                // check capture point team
+                if (player->GetTeam() == m_towerOwner[i])
+                    player->CastSpell(player, player->GetTeam() == ALLIANCE ? SPELL_ZANGA_TOWER_TOKEN_ALLIANCE : SPELL_ZANGA_TOWER_TOKEN_HORDE, true);
 
-            if (!pPlayer->IsWithinDistInMap(pBanner, info->capturePoint.radius))
-                continue;
-
-            // check banner faction
-            if (pBanner->GetCapturePointTicks() > CAPTURE_SLIDER_NEUTRAL + info->capturePoint.neutralPercent * 0.5f && pPlayer->GetTeam() == ALLIANCE)
-                pPlayer->CastSpell(pPlayer, SPELL_ZANGA_TOWER_TOKEN_ALY, true);
-            else if (pBanner->GetCapturePointTicks() < CAPTURE_SLIDER_NEUTRAL - info->capturePoint.neutralPercent * 0.5f && pPlayer->GetTeam() == HORDE)
-                pPlayer->CastSpell(pPlayer, SPELL_ZANGA_TOWER_TOKEN_HORDE, true);
+                return;
+            }
         }
     }
 }
 
 // process the capture events
-void OutdoorPvPZM::ProcessEvent(GameObject* pGo, uint32 uiEventId, uint32 uiFaction)
+bool OutdoorPvPZM::HandleEvent(uint32 eventId, GameObject* go)
 {
     for (uint8 i = 0; i < MAX_ZM_TOWERS; ++i)
     {
-        if (pGo->GetEntry() == aZangaTowers[i])
+        if (zangarmarshTowers[i] == go->GetEntry())
         {
             for (uint8 j = 0; j < 4; ++j)
             {
-                if (uiEventId == aZangaTowerEvents[i][j].uiEventEntry)
+                if (zangarmarshTowerEvents[i][j].eventEntry == eventId)
                 {
-                    ProcessCaptureEvent(aZangaTowerEvents[i][j].uiEventType, uiFaction, aZangaTowerEvents[i][j].uiWorldState, aZangaTowerEvents[i][j].uiMapState, i);
-                    sWorld.SendZoneText(ZONE_ID_ZANGARMARSH, sObjectMgr.GetMangosStringForDBCLocale(aZangaTowerEvents[i][j].uiZoneText));
-                    break;
+                    // prevent processing if the owner did not change (happens if progress event is called after contest event)
+                    if (zangarmarshTowerEvents[i][j].team != m_towerOwner[i])
+                    {
+                        if (zangarmarshTowerEvents[i][j].defenseMessage)
+                            sWorld.SendDefenseMessage(ZONE_ID_ZANGARMARSH, zangarmarshTowerEvents[i][j].defenseMessage);
+
+                        return ProcessCaptureEvent(go, i, zangarmarshTowerEvents[i][j].team, zangarmarshTowerEvents[i][j].worldState, zangarmarshTowerEvents[i][j].mapState);
+                    }
+                    // no need to iterate other events or towers
+                    return false;
                 }
             }
+            // no need to iterate other towers
+            return false;
         }
-    }
-}
-
-void OutdoorPvPZM::ProcessCaptureEvent(uint32 uiCaptureType, uint32 uiTeam, uint32 uiNewWorldState, uint32 uiNewMapState, uint32 uiTower)
-{
-    for (uint8 i = 0; i < MAX_ZM_TOWERS; ++i)
-    {
-        if (uiTower == i)
-        {
-            // remove old tower state
-            SendUpdateWorldState(m_uiBeaconWorldState[i], 0);
-            SendUpdateWorldState(m_uiBeaconMapState[i], 0);
-
-            if (uiCaptureType == PROGRESS)
-            {
-                if (uiTeam == ALLIANCE)
-                {
-                    DoSetBeaconArtkit(m_BeamBlueGUID[i], true);
-                    ++m_uiTowersAlly;
-                }
-                else
-                {
-                    DoSetBeaconArtkit(m_BeamRedGUID[i], true);
-                    ++m_uiTowersHorde;
-                }
-
-                m_uiBeaconController[i] = uiTeam;
-            }
-            else if (uiCaptureType == NEUTRAL)
-            {
-                if (uiTeam == ALLIANCE)
-                {
-                    DoSetBeaconArtkit(m_BeamRedGUID[i], false);
-                    --m_uiTowersHorde;
-                }
-                else
-                {
-                    DoSetBeaconArtkit(m_BeamBlueGUID[i], false);
-                    --m_uiTowersAlly;
-                }
-
-                m_uiBeaconController[i] = NEUTRAL;
-            }
-
-            // send new tower state
-            m_uiBeaconWorldState[i] = uiNewWorldState;
-            m_uiBeaconMapState[i] = uiNewMapState;
-            SendUpdateWorldState(m_uiBeaconMapState[i], 1);
-            SendUpdateWorldState(m_uiBeaconWorldState[i], 1);
-        }
-    }
-
-    // buff players
-    if (m_uiTowersAlly == MAX_ZM_TOWERS)
-        DoPrepareFactionScouts(ALLIANCE);
-    else if (m_uiTowersHorde == MAX_ZM_TOWERS)
-        DoPrepareFactionScouts(HORDE);
-
-    // debuff players if towers == 0; spell to remove will be always the first
-    if (m_uiTowersHorde < MAX_ZM_TOWERS)
-        DoResetScouts(HORDE);
-    if (m_uiTowersAlly < MAX_ZM_TOWERS)
-        DoResetScouts(ALLIANCE);
-}
-
-void OutdoorPvPZM::DoPrepareFactionScouts(uint32 uiFaction)
-{
-    Player* pPlayer = GetPlayerInZone();
-    if (!pPlayer)
-        return;
-
-    if (uiFaction == ALLIANCE)
-    {
-        if (Creature* pScout = pPlayer->GetMap()->GetCreature(m_AllianceScoutGUID))
-            pScout->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
-
-        SendUpdateWorldState(m_uiAllianceScoutWorldState, 0);
-        m_uiAllianceScoutWorldState = WORLD_STATE_ALY_FLAG_READY;
-        SendUpdateWorldState(m_uiAllianceScoutWorldState, 1);
-    }
-    else if (uiFaction == HORDE)
-    {
-        if (Creature* pScout = pPlayer->GetMap()->GetCreature(m_HorderScoutGUID))
-            pScout->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
-
-        SendUpdateWorldState(m_uiHordeScoutWorldState, 0);
-        m_uiHordeScoutWorldState = WORLD_STATE_HORDE_FLAG_READY;
-        SendUpdateWorldState(m_uiHordeScoutWorldState, 1);
-    }
-}
-
-void OutdoorPvPZM::DoResetScouts(uint32 uiFaction, bool bIncludeWorldStates)
-{
-    Player* pPlayer = GetPlayerInZone();
-    if (!pPlayer)
-        return;
-
-    if (uiFaction == ALLIANCE)
-    {
-        if (Creature* pScout = pPlayer->GetMap()->GetCreature(m_AllianceScoutGUID))
-            pScout->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
-
-        // reset world states only if requested
-        if (bIncludeWorldStates)
-        {
-            SendUpdateWorldState(m_uiAllianceScoutWorldState, 0);
-            m_uiAllianceScoutWorldState = WORLD_STATE_ALY_FLAG_NOT_READY;
-            SendUpdateWorldState(m_uiAllianceScoutWorldState, 1);
-        }
-    }
-    else if (uiFaction == HORDE)
-    {
-        if (Creature* pScout = pPlayer->GetMap()->GetCreature(m_HorderScoutGUID))
-            pScout->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
-
-        // reset world states only if requested
-        if (bIncludeWorldStates)
-        {
-            SendUpdateWorldState(m_uiHordeScoutWorldState, 0);
-            m_uiHordeScoutWorldState = WORLD_STATE_HORDE_FLAG_NOT_READY;
-            SendUpdateWorldState(m_uiHordeScoutWorldState, 1);
-        }
-    }
-}
-
-bool OutdoorPvPZM::HandleObjectUse(Player* pPlayer, GameObject* pGo)
-{
-    if (!pPlayer->HasAura(pPlayer->GetTeam() == ALLIANCE ? SPELL_BATTLE_STANDARD_ALY : SPELL_BATTLE_STANDARD_HORDE))
-        return false;
-
-    switch (pGo->GetEntry())
-    {
-        case GO_ZANGA_BANNER_CENTER_ALY:
-            // clicked only by the horde
-            if (pPlayer->GetTeam() == ALLIANCE)
-                return false;
-
-            // change banners
-            SendUpdateWorldState(m_uiGraveyardWorldState, 0);
-            DoHandleBanners(m_TowerBannerCenterAlyGUID, false);
-            DoHandleBanners(m_TowerBannerCenterHordeGUID, true);
-            DoSetBeaconArtkit(m_BeamCenterBlueGUID, false);
-            sWorld.SendZoneText(ZONE_ID_ZANGARMARSH, sObjectMgr.GetMangosStringForDBCLocale(LANG_OPVP_ZM_LOOSE_GY_A));
-
-            // remove buff and graveyard from ally
-            DoProcessTeamBuff(ALLIANCE, SPELL_TWIN_SPIRE_BLESSING, true);
-            DoSetGraveyard(ALLIANCE, true);
-
-            // add the buff and the graveyard to horde
-            m_uiGraveyardWorldState = WORLD_STATE_GRAVEYARD_HORDE;
-            SendUpdateWorldState(m_uiGraveyardWorldState, 1);
-            DoProcessTeamBuff(HORDE, SPELL_TWIN_SPIRE_BLESSING);
-            DoSetGraveyard(HORDE);
-
-            // reset scout and remove player aura
-            DoResetScouts(HORDE);
-            m_uiGraveyardController = HORDE;
-            pPlayer->RemoveAurasDueToSpell(SPELL_BATTLE_STANDARD_HORDE);
-            DoSetBeaconArtkit(m_BeamCenterRedGUID, true);
-            sWorld.SendZoneText(ZONE_ID_ZANGARMARSH, sObjectMgr.GetMangosStringForDBCLocale(LANG_OPVP_ZM_CAPTURE_GY_H));
-
-            return true;
-        case GO_ZANGA_BANNER_CENTER_HORDE:
-            // clicked only by the alliance
-            if (pPlayer->GetTeam() == HORDE)
-                return false;
-
-            // change banners
-            SendUpdateWorldState(m_uiGraveyardWorldState, 0);
-            DoHandleBanners(m_TowerBannerCenterHordeGUID, false);
-            DoHandleBanners(m_TowerBannerCenterAlyGUID, true);
-            DoSetBeaconArtkit(m_BeamCenterRedGUID, false);
-            sWorld.SendZoneText(ZONE_ID_ZANGARMARSH, sObjectMgr.GetMangosStringForDBCLocale(LANG_OPVP_ZM_LOOSE_GY_H));
-
-            // remove buff and graveyard from ally
-            DoProcessTeamBuff(HORDE, SPELL_TWIN_SPIRE_BLESSING, true);
-            DoSetGraveyard(HORDE, true);
-
-            // add the buff and the graveyard to horde
-            m_uiGraveyardWorldState = WORLD_STATE_GRAVEYARD_ALY;
-            SendUpdateWorldState(m_uiGraveyardWorldState, 1);
-            DoProcessTeamBuff(ALLIANCE, SPELL_TWIN_SPIRE_BLESSING);
-            DoSetGraveyard(ALLIANCE);
-
-            // reset scout and remove player aura
-            DoResetScouts(ALLIANCE);
-            m_uiGraveyardController = ALLIANCE;
-            pPlayer->RemoveAurasDueToSpell(SPELL_BATTLE_STANDARD_ALY);
-            DoSetBeaconArtkit(m_BeamCenterBlueGUID, true);
-            sWorld.SendZoneText(ZONE_ID_ZANGARMARSH, sObjectMgr.GetMangosStringForDBCLocale(LANG_OPVP_ZM_CAPTURE_GY_A));
-
-            return true;
-        case GO_ZANGA_BANNER_CENTER_NEUTRAL:
-
-            // remove old world state
-            SendUpdateWorldState(m_uiGraveyardWorldState, 0);
-
-            if (pPlayer->GetTeam() == ALLIANCE)
-            {
-                // change banners
-                DoHandleBanners(m_TowerBannerCenterNeutralGUID, false);
-                DoHandleBanners(m_TowerBannerCenterAlyGUID, true);
-
-                // add the buff and the graveyard to horde
-                m_uiGraveyardWorldState= WORLD_STATE_GRAVEYARD_ALY;
-                DoProcessTeamBuff(ALLIANCE, SPELL_TWIN_SPIRE_BLESSING);
-                DoSetGraveyard(ALLIANCE);
-
-                // reset scout and remove player aura
-                DoResetScouts(ALLIANCE);
-                m_uiGraveyardController = ALLIANCE;
-                pPlayer->RemoveAurasDueToSpell(SPELL_BATTLE_STANDARD_ALY);
-                DoSetBeaconArtkit(m_BeamCenterBlueGUID, true);
-                sWorld.SendZoneText(ZONE_ID_ZANGARMARSH, sObjectMgr.GetMangosStringForDBCLocale(LANG_OPVP_ZM_CAPTURE_GY_H));
-            }
-            else if (pPlayer->GetTeam() == HORDE)
-            {
-                // change banners
-                DoHandleBanners(m_TowerBannerCenterNeutralGUID, false);
-                DoHandleBanners(m_TowerBannerCenterHordeGUID, true);
-
-                // add the buff and the graveyard to horde
-                m_uiGraveyardWorldState = WORLD_STATE_GRAVEYARD_HORDE;
-                DoProcessTeamBuff(HORDE, SPELL_TWIN_SPIRE_BLESSING);
-                DoSetGraveyard(HORDE);
-
-                // reset scout and remove player aura
-                DoResetScouts(HORDE);
-                m_uiGraveyardController = HORDE;
-                pPlayer->RemoveAurasDueToSpell(SPELL_BATTLE_STANDARD_HORDE);
-                DoSetBeaconArtkit(m_BeamCenterRedGUID, true);
-                sWorld.SendZoneText(ZONE_ID_ZANGARMARSH, sObjectMgr.GetMangosStringForDBCLocale(LANG_OPVP_ZM_CAPTURE_GY_H));
-            }
-
-            // add new world state
-            SendUpdateWorldState(m_uiGraveyardWorldState, 1);
-
-            return true;
     }
 
     return false;
 }
 
-void OutdoorPvPZM::DoSetGraveyard(uint32 uiFaction, bool bRemove)
+bool OutdoorPvPZM::ProcessCaptureEvent(GameObject* go, uint32 towerId, Team team, uint32 newWorldState, uint32 newMapState)
 {
-    if (bRemove)
-        sObjectMgr.RemoveGraveYardLink(GRAVEYARD_ID_TWIN_SPIRE, GRAVEYARD_ZONE_TWIN_SPIRE, (Team)uiFaction, false);
+    if (team == ALLIANCE)
+    {
+        // update counter
+        SetBeaconArtKit(go, m_beamTowerBlue[towerId], SPELL_BEAM_BLUE);
+        ++m_towersAlliance;
+
+        if (m_towersAlliance == MAX_ZM_TOWERS)
+        {
+            // Send this defense message before updating scout state as this sends another
+            sWorld.SendDefenseMessage(ZONE_ID_ZANGARMARSH, LANG_OPVP_ZM_CAPTURE_BOTH_BEACONS_A);
+
+            // only add flag to scouts if team does not have captured graveyard already
+            if (m_graveyardOwner != ALLIANCE)
+                UpdateScoutState(ALLIANCE, true);
+        }
+    }
+    else if (team == HORDE)
+    {
+        // update counter
+        SetBeaconArtKit(go, m_beamTowerRed[towerId], SPELL_BEAM_RED);
+        ++m_towersHorde;
+
+        if (m_towersHorde == MAX_ZM_TOWERS)
+        {
+            // Send this defense message before updating scout state as this sends another
+            sWorld.SendDefenseMessage(ZONE_ID_ZANGARMARSH, LANG_OPVP_ZM_CAPTURE_BOTH_BEACONS_H);
+
+            // only add flag to scouts if team does not already have captured graveyard
+            if (m_graveyardOwner != HORDE)
+                UpdateScoutState(HORDE, true);
+        }
+    }
     else
-        sObjectMgr.AddGraveYardLink(GRAVEYARD_ID_TWIN_SPIRE, GRAVEYARD_ZONE_TWIN_SPIRE, (Team)uiFaction, false);
+    {
+        if (m_towerOwner[towerId] == ALLIANCE)
+        {
+            SetBeaconArtKit(go, m_beamTowerBlue[towerId], 0);
+
+            // only remove flag from scouts if team does not already have captured graveyard
+            if (m_towersAlliance == MAX_ZM_TOWERS && m_graveyardOwner != ALLIANCE)
+                UpdateScoutState(ALLIANCE, false);
+
+            // update counter
+            --m_towersAlliance;
+        }
+        else
+        {
+            SetBeaconArtKit(go, m_beamTowerRed[towerId], 0);
+
+            // only remove flag from scouts if team does not already have captured graveyard
+            if (m_towersHorde == MAX_ZM_TOWERS && m_graveyardOwner != HORDE)
+                UpdateScoutState(HORDE, false);
+
+            // update counter
+            --m_towersHorde;
+        }
+    }
+
+    // update tower state
+    SendUpdateWorldState(m_towerWorldState[towerId], WORLD_STATE_REMOVE);
+    m_towerWorldState[towerId] = newWorldState;
+    SendUpdateWorldState(m_towerWorldState[towerId], WORLD_STATE_ADD);
+
+    SendUpdateWorldState(m_towerMapState[towerId], WORLD_STATE_REMOVE);
+    m_towerMapState[towerId] = newMapState;
+    SendUpdateWorldState(m_towerMapState[towerId], WORLD_STATE_ADD);;
+
+    // update capture point owner
+    m_towerOwner[towerId] = team;
+
+    // the are no DB exceptions in this case
+    return true;
 }
 
-void OutdoorPvPZM::DoHandleBanners(ObjectGuid BannerGuid, bool bRespawn)
+// Handle scout activation, when both beacons are captured
+void OutdoorPvPZM::UpdateScoutState(Team team, bool spawned)
 {
-    // neet to use a player as anchor for the map
-    Player* pPlayer = GetPlayerInZone();
-    if (!pPlayer)
-        return;
-
-    if (GameObject* pBanner = pPlayer->GetMap()->GetGameObject(BannerGuid))
+    if (team == ALLIANCE)
     {
-        if (bRespawn)
-        {
-            pBanner->SetRespawnTime(7*DAY);
-            pBanner->Refresh();
-        }
-        else if (pBanner->isSpawned())
-            pBanner->Delete();
+        SendUpdateWorldState(m_scoutWorldStateAlliance, WORLD_STATE_REMOVE);
+        m_scoutWorldStateAlliance = spawned ? WORLD_STATE_ZM_FLAG_READY_ALLIANCE : WORLD_STATE_ZM_FLAG_NOT_READY_ALLIANCE;
+        SendUpdateWorldState(m_scoutWorldStateAlliance, WORLD_STATE_ADD);
+
+        if (spawned)
+            sWorld.SendDefenseMessage(ZONE_ID_ZANGARMARSH, LANG_OPVP_ZM_SPAWN_FIELD_SCOUT_A);
+    }
+    else
+    {
+        SendUpdateWorldState(m_scoutWorldStateHorde, WORLD_STATE_REMOVE);
+        m_scoutWorldStateHorde = spawned ? WORLD_STATE_ZM_FLAG_READY_HORDE : WORLD_STATE_ZM_FLAG_NOT_READY_HORDE;
+        SendUpdateWorldState(m_scoutWorldStateHorde, WORLD_STATE_ADD);
+
+        if (spawned)
+            sWorld.SendDefenseMessage(ZONE_ID_ZANGARMARSH, LANG_OPVP_ZM_SPAWN_FIELD_SCOUT_H);
     }
 }
 
-void OutdoorPvPZM::DoSetBeaconArtkit(ObjectGuid BeaconGuid, bool bRespawn)
+// Handle the graveyard banner use
+bool OutdoorPvPZM::HandleGameObjectUse(Player* player, GameObject* go)
 {
-    Player* pPlayer = GetPlayerInZone();
-    if (!pPlayer)
-        return;
+    Team team = player->GetTeam();
 
-    if (Creature* pBeam = pPlayer->GetMap()->GetCreature(BeaconGuid))
+    switch (go->GetEntry())
     {
-        if (bRespawn)
-            pBeam->Respawn();
+        case GO_ZANGA_BANNER_CENTER_NEUTRAL:
+            break;
+        case GO_ZANGA_BANNER_CENTER_ALLIANCE:
+            if (team == ALLIANCE || !player->HasAura(SPELL_BATTLE_STANDARD_HORDE))
+                return false;
+            break;
+        case GO_ZANGA_BANNER_CENTER_HORDE:
+            if (team == HORDE || !player->HasAura(SPELL_BATTLE_STANDARD_ALLIANCE))
+                return false;
+            break;
+        default:
+            return false;
+    }
+
+    // disable old banners - note the alliance and horde banners can despawn by self
+    if (m_graveyardOwner == ALLIANCE)
+    {
+        //RespawnGO(go, m_graveyardBannerAlliance, false);
+        SetBeaconArtKit(go, m_beamGraveyardBlue, 0);
+    }
+    else if (m_graveyardOwner == HORDE)
+    {
+        //RespawnGO(go, m_graveyardBannerHorde, false);
+        SetBeaconArtKit(go, m_beamGraveyardRed, 0);
+    }
+    else
+        RespawnGO(go, m_graveyardBannerNeutral, false);
+
+    if (team == ALLIANCE)
+    {
+        // change banners
+        RespawnGO(go, m_graveyardBannerAlliance, true);
+        SetBeaconArtKit(go, m_beamGraveyardBlue, SPELL_BEAM_BLUE);
+
+        // update world state
+        SendUpdateWorldState(m_graveyardWorldState, WORLD_STATE_REMOVE);
+        m_graveyardWorldState = WORLD_STATE_ZM_GRAVEYARD_ALLIANCE;
+        SendUpdateWorldState(m_graveyardWorldState, WORLD_STATE_ADD);
+
+        // remove player flag aura
+        player->RemoveAurasDueToSpell(SPELL_BATTLE_STANDARD_ALLIANCE);
+
+        // send defense message
+        sWorld.SendDefenseMessage(ZONE_ID_ZANGARMARSH, LANG_OPVP_ZM_CAPTURE_GRAVEYARD_A);
+    }
+    else
+    {
+        // change banners
+        RespawnGO(go, m_graveyardBannerHorde, true);
+        SetBeaconArtKit(go, m_beamGraveyardRed, SPELL_BEAM_RED);
+
+        // update world state
+        SendUpdateWorldState(m_graveyardWorldState, WORLD_STATE_REMOVE);
+        m_graveyardWorldState = WORLD_STATE_ZM_GRAVEYARD_HORDE;
+        SendUpdateWorldState(m_graveyardWorldState, WORLD_STATE_ADD);
+
+        // remove player flag aura
+        player->RemoveAurasDueToSpell(SPELL_BATTLE_STANDARD_HORDE);
+
+        // send defense message
+        sWorld.SendDefenseMessage(ZONE_ID_ZANGARMARSH, LANG_OPVP_ZM_CAPTURE_GRAVEYARD_H);
+    }
+
+    // change the graveyard link
+    sObjectMgr.SetGraveYardLinkTeam(GRAVEYARD_ID_TWIN_SPIRE, GRAVEYARD_ZONE_TWIN_SPIRE, team);
+
+    // apply zone buff
+    if (m_graveyardOwner != TEAM_NONE)
+        BuffTeam(m_graveyardOwner, SPELL_TWIN_SPIRE_BLESSING, true);
+    BuffTeam(team, SPELL_TWIN_SPIRE_BLESSING);
+
+    // reset scout so that team cannot take flag
+    UpdateScoutState(team, false);
+
+    // update graveyard owner
+    m_graveyardOwner = team;
+
+    return false;
+}
+
+// ToDo: Handle the case when the player drops the flag
+//bool OutdoorPvPZM::HandleDropFlag(Player* player, uint32 spellId)
+//{
+//    if (spellId == SPELL_BATTLE_STANDARD_HORDE || spellId == SPELL_BATTLE_STANDARD_ALLIANCE)
+//    {
+//        // ToDo: implement this when the scout DB conditions are implemented
+//        // The scouts gossip options should check a DB condition if the gossip is pvp available
+//        // The idea is to set the Outdoor PvP condition to false on flag take - this will allow only one player to use the flag
+//        // on flag drop the condition can be set back to true if necessary, so the players can retake the flag
+//        return true;
+//    }
+//
+//    return false;
+//}
+
+// Handle the ZM beacons - this is done by npcs which have certain auras
+void OutdoorPvPZM::SetBeaconArtKit(const WorldObject* objRef, ObjectGuid creatureGuid, uint32 auraId)
+{
+    if (Creature* beam = objRef->GetMap()->GetCreature(creatureGuid))
+    {
+        if (auraId)
+            beam->CastSpell(beam, auraId, true);
         else
-            pBeam->ForcedDespawn();
+            beam->RemoveAllAuras();
     }
 }

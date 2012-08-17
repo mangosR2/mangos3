@@ -20,20 +20,17 @@
 #ifndef WORLD_PVP_ZM
 #define WORLD_PVP_ZM
 
+#include "Common.h"
+#include "OutdoorPvP.h"
+#include "../Language.h"
+
 enum
 {
     MAX_ZM_TOWERS                           = 2,
 
-    // zone ids
-    ZONE_ID_ZANGARMARSH                     = 3521,
-    ZONE_ID_SERPENTSHRINE_CAVERN            = 3607,
-    ZONE_ID_STREAMVAULT                     = 3715,
-    ZONE_ID_UNDERBOG                        = 3716,
-    ZONE_ID_SLAVE_PENS                      = 3717,
-
     // npcs
-    NPC_ALLIANCE_FIELD_SCOUT                = 18581,
-    NPC_HORDE_FIELD_SCOUT                   = 18564,
+    //NPC_ALLIANCE_FIELD_SCOUT              = 18581,
+    //NPC_HORDE_FIELD_SCOUT                 = 18564,
 
     // these 2 npcs act as an artkit
     NPC_PVP_BEAM_RED                        = 18757,
@@ -42,17 +39,20 @@ enum
     // gameobjects
     GO_ZANGA_BANNER_WEST                    = 182522,
     GO_ZANGA_BANNER_EAST                    = 182523,
-    GO_ZANGA_BANNER_CENTER_ALY              = 182527,
+    GO_ZANGA_BANNER_CENTER_ALLIANCE         = 182527,
     GO_ZANGA_BANNER_CENTER_HORDE            = 182528,
     GO_ZANGA_BANNER_CENTER_NEUTRAL          = 182529,
 
     // spells
     SPELL_TWIN_SPIRE_BLESSING               = 33779,
-    SPELL_BATTLE_STANDARD_ALY               = 32430,
+    SPELL_BATTLE_STANDARD_ALLIANCE          = 32430,
     SPELL_BATTLE_STANDARD_HORDE             = 32431,
 
-    SPELL_ZANGA_TOWER_TOKEN_ALY             = 32155,
+    SPELL_ZANGA_TOWER_TOKEN_ALLIANCE        = 32155,
     SPELL_ZANGA_TOWER_TOKEN_HORDE           = 32158,
+
+    SPELL_BEAM_RED                          = 32839,
+    SPELL_BEAM_BLUE                         = 32840,
 
     // misc
     GRAVEYARD_ID_TWIN_SPIRE                 = 969,
@@ -74,118 +74,111 @@ enum
     EVENT_WEST_BEACON_NEUTRAL_HORDE         = 11809,
 
     // world states
-    WORLD_STATE_BEACON_EAST_ALY             = 2558,
-    WORLD_STATE_BEACON_EAST_HORDE           = 2559,
-    WORLD_STATE_BEACON_EAST_NEUTRAL         = 2560,
+    WORLD_STATE_ZM_BEACON_EAST_UI_ALLIANCE  = 2558,
+    WORLD_STATE_ZM_BEACON_EAST_UI_HORDE     = 2559,
+    WORLD_STATE_ZM_BEACON_EAST_UI_NEUTRAL   = 2560,
 
-    WORLD_STATE_BEACON_WEST_ALY             = 2555,
-    WORLD_STATE_BEACON_WEST_HORDE           = 2556,
-    WORLD_STATE_BEACON_WEST_NEUTRAL         = 2557,
+    WORLD_STATE_ZM_BEACON_WEST_UI_ALLIANCE  = 2555,
+    WORLD_STATE_ZM_BEACON_WEST_UI_HORDE     = 2556,
+    WORLD_STATE_ZM_BEACON_WEST_UI_NEUTRAL   = 2557,
 
-    // map world states
-    WORLD_STATE_TOWER_EAST_ALY              = 2650,
-    WORLD_STATE_TOWER_EAST_HORDE            = 2651,
-    WORLD_STATE_TOWER_EAST_NEUTRAL          = 2652,
+    WORLD_STATE_ZM_BEACON_EAST_ALLIANCE     = 2650,
+    WORLD_STATE_ZM_BEACON_EAST_HORDE        = 2651,
+    WORLD_STATE_ZM_BEACON_EAST_NEUTRAL      = 2652,
 
-    WORLD_STATE_TOWER_WEST_ALY              = 2644,
-    WORLD_STATE_TOWER_WEST_HORDE            = 2645,
-    WORLD_STATE_TOWER_WEST_NEUTRAL          = 2646,
+    WORLD_STATE_ZM_BEACON_WEST_ALLIANCE     = 2644,
+    WORLD_STATE_ZM_BEACON_WEST_HORDE        = 2645,
+    WORLD_STATE_ZM_BEACON_WEST_NEUTRAL      = 2646,
 
-    WORLD_STATE_GRAVEYARD_ALY               = 2648,
-    WORLD_STATE_GRAVEYARD_HORDE             = 2649,
-    WORLD_STATE_GRAVEYARD_NEUTRAL           = 2647,
+    WORLD_STATE_ZM_GRAVEYARD_ALLIANCE       = 2648,
+    WORLD_STATE_ZM_GRAVEYARD_HORDE          = 2649,
+    WORLD_STATE_ZM_GRAVEYARD_NEUTRAL        = 2647,
 
-    WORLD_STATE_HORDE_FLAG_READY            = 2658,
-    WORLD_STATE_HORDE_FLAG_NOT_READY        = 2657,
-    WORLD_STATE_ALY_FLAG_READY              = 2655,
-    WORLD_STATE_ALY_FLAG_NOT_READY          = 2656,
+    WORLD_STATE_ZM_FLAG_READY_HORDE         = 2658,
+    WORLD_STATE_ZM_FLAG_NOT_READY_HORDE     = 2657,
+    WORLD_STATE_ZM_FLAG_READY_ALLIANCE      = 2655,
+    WORLD_STATE_ZM_FLAG_NOT_READY_ALLIANCE  = 2656
 
-    //WORLD_STATE_UNK                       = 2653,
+    //WORLD_STATE_ZM_UNK                    = 2653
 };
 
-struct ZangaTowersEvents
+struct ZangarmarshTowerEvent
 {
-    uint32 uiEventEntry, uiEventType, uiZoneText, uiWorldState, uiMapState;
+    uint32  eventEntry;
+    Team    team;
+    uint32  defenseMessage;
+    uint32  worldState;
+    uint32  mapState;
 };
 
-static const ZangaTowersEvents aZangaTowerEvents[MAX_ZM_TOWERS][4] =
+static const ZangarmarshTowerEvent zangarmarshTowerEvents[MAX_ZM_TOWERS][4] =
 {
     {
-        {EVENT_EAST_BEACON_PROGRESS_ALLIANCE,   PROGRESS,   LANG_OPVP_ZM_CAPTURE_EAST_A,    WORLD_STATE_TOWER_EAST_ALY,     WORLD_STATE_BEACON_EAST_ALY},
-        {EVENT_EAST_BEACON_PROGRESS_HORDE,      PROGRESS,   LANG_OPVP_ZM_CAPTURE_EAST_H,    WORLD_STATE_TOWER_EAST_HORDE,   WORLD_STATE_BEACON_EAST_HORDE},
-        {EVENT_EAST_BEACON_NEUTRAL_HORDE,       NEUTRAL,    LANG_OPVP_ZM_LOOSE_EAST_A,      WORLD_STATE_TOWER_EAST_NEUTRAL, WORLD_STATE_BEACON_EAST_NEUTRAL},
-        {EVENT_EAST_BEACON_NEUTRAL_ALLIANCE,    NEUTRAL,    LANG_OPVP_ZM_LOOSE_EAST_H,      WORLD_STATE_TOWER_EAST_NEUTRAL, WORLD_STATE_BEACON_EAST_NEUTRAL},
+        {EVENT_EAST_BEACON_PROGRESS_ALLIANCE,   ALLIANCE,   LANG_OPVP_ZM_CAPTURE_EAST_BEACON_A, WORLD_STATE_ZM_BEACON_EAST_UI_ALLIANCE, WORLD_STATE_ZM_BEACON_EAST_ALLIANCE},
+        {EVENT_EAST_BEACON_PROGRESS_HORDE,      HORDE,      LANG_OPVP_ZM_CAPTURE_EAST_BEACON_H, WORLD_STATE_ZM_BEACON_EAST_UI_HORDE,    WORLD_STATE_ZM_BEACON_EAST_HORDE},
+        {EVENT_EAST_BEACON_NEUTRAL_HORDE,       TEAM_NONE,  0,                                  WORLD_STATE_ZM_BEACON_EAST_UI_NEUTRAL,  WORLD_STATE_ZM_BEACON_EAST_NEUTRAL},
+        {EVENT_EAST_BEACON_NEUTRAL_ALLIANCE,    TEAM_NONE,  0,                                  WORLD_STATE_ZM_BEACON_EAST_UI_NEUTRAL,  WORLD_STATE_ZM_BEACON_EAST_NEUTRAL},
     },
     {
-        {EVENT_WEST_BEACON_PROGRESS_ALLIANCE,   PROGRESS,   LANG_OPVP_ZM_CAPTURE_WEST_A,    WORLD_STATE_TOWER_WEST_ALY,     WORLD_STATE_BEACON_WEST_ALY},
-        {EVENT_WEST_BEACON_PROGRESS_HORDE,      PROGRESS,   LANG_OPVP_ZM_CAPTURE_WEST_H,    WORLD_STATE_TOWER_WEST_HORDE,   WORLD_STATE_BEACON_WEST_HORDE},
-        {EVENT_WEST_BEACON_NEUTRAL_HORDE,       NEUTRAL,    LANG_OPVP_ZM_LOOSE_WEST_A,      WORLD_STATE_TOWER_WEST_NEUTRAL, WORLD_STATE_BEACON_WEST_NEUTRAL},
-        {EVENT_WEST_BEACON_NEUTRAL_ALLIANCE,    NEUTRAL,    LANG_OPVP_ZM_LOOSE_WEST_H,      WORLD_STATE_TOWER_WEST_NEUTRAL, WORLD_STATE_BEACON_WEST_NEUTRAL},
+        {EVENT_WEST_BEACON_PROGRESS_ALLIANCE,   ALLIANCE,   LANG_OPVP_ZM_CAPTURE_WEST_BEACON_A, WORLD_STATE_ZM_BEACON_WEST_UI_ALLIANCE, WORLD_STATE_ZM_BEACON_WEST_ALLIANCE},
+        {EVENT_WEST_BEACON_PROGRESS_HORDE,      HORDE,      LANG_OPVP_ZM_CAPTURE_WEST_BEACON_H, WORLD_STATE_ZM_BEACON_WEST_UI_HORDE,    WORLD_STATE_ZM_BEACON_WEST_HORDE},
+        {EVENT_WEST_BEACON_NEUTRAL_HORDE,       TEAM_NONE,  0,                                  WORLD_STATE_ZM_BEACON_WEST_UI_NEUTRAL,  WORLD_STATE_ZM_BEACON_WEST_NEUTRAL},
+        {EVENT_WEST_BEACON_NEUTRAL_ALLIANCE,    TEAM_NONE,  0,                                  WORLD_STATE_ZM_BEACON_WEST_UI_NEUTRAL,  WORLD_STATE_ZM_BEACON_WEST_NEUTRAL},
     },
 };
 
-static const uint32 aZangaTowers[MAX_ZM_TOWERS] = {GO_ZANGA_BANNER_EAST, GO_ZANGA_BANNER_WEST};
-
+static const uint32 zangarmarshTowers[MAX_ZM_TOWERS] = {GO_ZANGA_BANNER_EAST, GO_ZANGA_BANNER_WEST};
 
 class OutdoorPvPZM : public OutdoorPvP
 {
     public:
         OutdoorPvPZM();
 
-        bool InitOutdoorPvPArea();
+        void HandlePlayerEnterZone(Player* player, bool isMainZone) override;
+        void HandlePlayerLeaveZone(Player* player, bool isMainZone) override;
+        void FillInitialWorldStates(WorldPacket& data, uint32& count) override;
+        void SendRemoveWorldStates(Player* player) override;
 
-        void OnCreatureCreate(Creature* pCreature);
-        void OnGameObjectCreate(GameObject* pGo);
-        void ProcessEvent(GameObject* pGo, uint32 uiEventId, uint32 uiFaction);
+        bool HandleEvent(uint32 eventId, GameObject* go) override;
 
-        void HandlePlayerEnterZone(Player* pPlayer);
-        void HandlePlayerLeaveZone(Player* pPlayer);
-        void HandlePlayerKillInsideArea(Player* pPlayer, Unit* pVictim);
+        void HandleCreatureCreate(Creature* creature) override;
+        void HandleGameObjectCreate(GameObject* go) override;
 
-        void FillInitialWorldStates(uint32 zoneId);
-
-        bool HandleObjectUse(Player* pPlayer, GameObject* pGo);
+        void HandlePlayerKillInsideArea(Player* player, Unit* victim) override;
+        bool HandleGameObjectUse(Player* player, GameObject* go) override;
+        //bool HandleDropFlag(Player* player, uint32 spellId) override;
 
     private:
         // process capture events
-        void ProcessCaptureEvent(uint32 uiCaptureType, uint32 uiTeam, uint32 uiNewWorldState, uint32 uiNewMapState, uint32 uiTower);
+        bool ProcessCaptureEvent(GameObject* go, uint32 towerId, Team team, uint32 newWorldState, uint32 newMapState);
 
-        // handle graveyard faction banners
-        void DoHandleBanners(ObjectGuid BannerGuid, bool bRespawn);
+        // handles scout world states
+        void UpdateScoutState(Team team, bool spawned);
 
-        // Handles scouts world states and gossip - ToDo: implement gossip based on condition
-        void DoPrepareFactionScouts(uint32 uiFaction);
-        void DoResetScouts(uint32 uiFaction, bool bIncludeWorldStates = true);
+        // respawn npcs which act as an artkit visual
+        void SetBeaconArtKit(const WorldObject* objRef, ObjectGuid creatureGuid, uint32 auraId);
 
-        // Link graveyard on central node capture
-        void DoSetGraveyard(uint32 uiFaction, bool bRemove = false);
+        uint32 m_towerWorldState[MAX_ZM_TOWERS];
+        uint32 m_towerMapState[MAX_ZM_TOWERS];
 
-        // Respawn npcs which act as an artkit visual
-        void DoSetBeaconArtkit(ObjectGuid BeaconGuid, bool bRespawn);
+        Team m_towerOwner[MAX_ZM_TOWERS];
+        Team m_graveyardOwner;
 
-        uint32 m_uiBeaconWorldState[MAX_ZM_TOWERS];
-        uint32 m_uiBeaconMapState[MAX_ZM_TOWERS];
+        uint32 m_graveyardWorldState;
+        uint32 m_scoutWorldStateAlliance;
+        uint32 m_scoutWorldStateHorde;
+        uint8 m_towersAlliance;
+        uint8 m_towersHorde;
 
-        uint32 m_uiBeaconController[MAX_ZM_TOWERS];
-        uint32 m_uiGraveyardController;
+        ObjectGuid m_towerBanners[MAX_ZM_TOWERS];
+        ObjectGuid m_graveyardBannerAlliance;
+        ObjectGuid m_graveyardBannerHorde;
+        ObjectGuid m_graveyardBannerNeutral;
 
-        uint32 m_uiGraveyardWorldState;
-        uint32 m_uiAllianceScoutWorldState;
-        uint32 m_uiHordeScoutWorldState;
-        uint8 m_uiTowersAlly;
-        uint8 m_uiTowersHorde;
-
-        ObjectGuid m_TowerBannerGUID[MAX_ZM_TOWERS];
-        ObjectGuid m_TowerBannerCenterAlyGUID;
-        ObjectGuid m_TowerBannerCenterHordeGUID;
-        ObjectGuid m_TowerBannerCenterNeutralGUID;
-
-        ObjectGuid m_AllianceScoutGUID;
-        ObjectGuid m_HorderScoutGUID;
-        ObjectGuid m_BeamRedGUID[MAX_ZM_TOWERS];
-        ObjectGuid m_BeamBlueGUID[MAX_ZM_TOWERS];
-        ObjectGuid m_BeamCenterBlueGUID;
-        ObjectGuid m_BeamCenterRedGUID;
+        ObjectGuid m_beamTowerBlue[MAX_ZM_TOWERS];
+        ObjectGuid m_beamTowerRed[MAX_ZM_TOWERS];
+        ObjectGuid m_beamGraveyardBlue;
+        ObjectGuid m_beamGraveyardRed;
 };
 
 #endif
