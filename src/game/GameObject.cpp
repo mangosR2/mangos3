@@ -37,6 +37,7 @@
 #include "BattleGround.h"
 #include "OutdoorPvP/OutdoorPvPMgr.h"
 #include "BattleGroundAV.h"
+#include "OutdoorPvP/OutdoorPvP.h"
 #include "Util.h"
 #include "ScriptMgr.h"
 #include "vmap/GameObjectModel.h"
@@ -73,6 +74,11 @@ GameObject::GameObject() : WorldObject(),
 
 GameObject::~GameObject()
 {
+    // store the capture point slider value (for non visual, non locked capture points)
+    // this - wrong, maked over WorldStateMgr
+    // GameObjectInfo const* goInfo = GetGOInfo();
+    // if (goInfo && goInfo->type == GAMEOBJECT_TYPE_CAPTURE_POINT && goInfo->capturePoint.radius && m_lootState == GO_ACTIVATED)
+        // sOutdoorPvPMgr.SetCapturePointSlider(GetEntry(), m_captureSlider);
     delete m_model;
 }
 
@@ -175,9 +181,9 @@ bool GameObject::Create(uint32 guidlow, uint32 name_id, Map *map, uint32 phaseMa
     SetGoArtKit(0);                                         // unknown what this is
     SetGoAnimProgress(animprogress);
 
-    //Notify the map's instance data.
-    //Only works if you create the object in it, not if it is moves to that map.
-    //Normally non-players do not teleport to other maps.
+    // Notify the map's instance data.
+    // Only works if you create the object in it, not if it is moves to that map.
+    // Normally non-players do not teleport to other maps.
     if (InstanceData* iData = map->GetInstanceData())
         iData->OnObjectCreate(this);
 
@@ -211,6 +217,9 @@ bool GameObject::Create(uint32 guidlow, uint32 name_id, Map *map, uint32 phaseMa
             {
                 sWorldStateMgr.CreateLinkedWorldStatesIfNeed(this);
                 SetCapturePointSlider(CAPTURE_SLIDER_GET_VALUE);
+                // set initial data and activate non visual-only capture points (wrong way)
+                //if (goinfo->type == GAMEOBJECT_TYPE_CAPTURE_POINT && goinfo->capturePoint.radius)
+                //    SetCapturePointSlider(sOutdoorPvPMgr.GetCapturePointSliderValue(goinfo->id));
             }
             break;
         }
