@@ -730,7 +730,10 @@
     <ClInclude Include="..\..\src\game\OutdoorPvP\OutdoorPvPSI.h" />
     <ClInclude Include="..\..\src\game\OutdoorPvP\OutdoorPvPTF.h" />
     <ClInclude Include="..\..\src\game\OutdoorPvP\OutdoorPvPZM.h" />
+<<<<<<< HEAD
     <ClInclude Include="..\..\src\game\ZoneScript.h" />
+=======
+>>>>>>> 269d295... [12097] Add Outdoor PvP placeholders and string texts
     <ClInclude Include="..\..\src\game\WorldSession.h" />
     <ClInclude Include="..\..\src\game\WorldSocket.h" />
     <ClInclude Include="..\..\src\game\WorldSocketMgr.h" />

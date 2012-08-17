@@ -831,9 +831,12 @@
     <ClInclude Include="..\..\src\game\OutdoorPvP\OutdoorPvPZM.h">
       <Filter>OutdoorPvP</Filter>
     </ClInclude>
+<<<<<<< HEAD
     <ClInclude Include="..\..\src\game\ZoneScript.h">
       <Filter>World/Handlers</Filter>
     </ClInclude>
+=======
+>>>>>>> 269d295... [12097] Add Outdoor PvP placeholders and string texts
     <ClInclude Include="..\..\src\game\ConfusedMovementGenerator.h">
       <Filter>Motion generators</Filter>
     </ClInclude>
