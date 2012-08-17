@@ -50,7 +50,7 @@
 #include "Policies/SingletonImp.h"
 #include "BattleGroundMgr.h"
 #include "Language.h"
-#include "OutdoorPvP/OutdoorPvPMgr.h"
+#include "OutdoorPvP/OutdoorPvP.h"
 #include "TemporarySummon.h"
 #include "VMapFactory.h"
 #include "MoveMap.h"
@@ -1555,12 +1555,12 @@ void World::SetInitialWorldSettings()
     sBattleGroundMgr.CreateInitialBattleGrounds();
     sBattleGroundMgr.InitAutomaticArenaPointDistribution();
 
-    ///- Initialize World PvP
-    sLog.outString( "Starting World PvP System" );
+    ///- Initialize Outdoor PvP
+    sLog.outString("Starting Outdoor PvP System");
     sOutdoorPvPMgr.InitOutdoorPvP();
 
-    //Not sure if this can be moved up in the sequence (with static data loading) as it uses MapManager
-    sLog.outString( "Loading Transports..." );
+    // Not sure if this can be moved up in the sequence (with static data loading) as it uses MapManager
+    sLog.outString("Loading Transports...");
     sMapMgr.LoadTransports();
 
     sLog.outString("Deleting expired bans..." );
