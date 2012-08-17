@@ -745,9 +745,9 @@ void WorldSession::HandleAreaTriggerOpcode(WorldPacket & recv_data)
         return;
     }
 
-    if(OutdoorPvP* pOutdoorBg = GetPlayer()->GetOutdoorPvP())
+    if (OutdoorPvP* outdoorPvP = sOutdoorPvPMgr.GetScript(pl->GetCachedZoneId()))
     {
-        if (pOutdoorBg->HandleAreaTrigger(pl, Trigger_ID))
+        if (outdoorPvP->HandleAreaTrigger(pl, Trigger_ID))
             return;
     }
 

@@ -52,7 +52,6 @@
 #include "BattleGroundAV.h"
 #include "BattleGroundMgr.h"
 #include "OutdoorPvP/OutdoorPvP.h"
-#include "OutdoorPvP/OutdoorPvPMgr.h"
 #include "ArenaTeam.h"
 #include "Chat.h"
 #include "Database/DatabaseImpl.h"
@@ -7193,12 +7192,11 @@ void Player::UpdateZone(uint32 newZone, uint32 newArea)
         if (InstanceData* mapInstance = GetInstanceData())
             mapInstance->OnPlayerLeaveZone(this, m_zoneUpdateId);
 
-        // handle world pvp zones
+        // handle outdoor pvp zones
         sOutdoorPvPMgr.HandlePlayerLeaveZone(this, m_zoneUpdateId);
+        sOutdoorPvPMgr.HandlePlayerEnterZone(this, newZone);
 
         SendInitWorldStates(newZone, newArea);              // only if really enters to new zone, not just area change, works strange...
-
-        sOutdoorPvPMgr.HandlePlayerEnterZone(this, newZone);
 
         // call this method in order to handle some scripted zones
         if (InstanceData* mapInstance = GetInstanceData())

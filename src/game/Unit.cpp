@@ -1106,10 +1106,10 @@ uint32 Unit::DealDamage(DamageInfo* damageInfo)
         }
 
         // handle player kill in outdoor pvp
-        if (player_tap && this != pVictim)
+        if (player_tap && pVictim != this)
         {
-            if (OutdoorPvP* pWorldBg = player_tap->GetOutdoorPvP())
-                pWorldBg->HandlePlayerKillInsideArea(player_tap, pVictim);
+            if (OutdoorPvP* outdoorPvP = sOutdoorPvPMgr.GetScript(player_tap->GetCachedZoneId()))
+                outdoorPvP->HandlePlayerKill(player_tap, pVictim);
         }
 
         // battleground things (do this at the end, so the death state flag will be properly set to handle in the bg->handlekill)
@@ -1340,9 +1340,9 @@ void Unit::JustKilledCreature(Creature* victim)
     if (InstanceData* mapInstance = victim->GetInstanceData())
         mapInstance->OnCreatureDeath(victim);
 
-    m_zoneScript = sOutdoorPvPMgr.GetZoneScript(GetZoneId());
-    if (m_zoneScript)
-        m_zoneScript->OnCreatureDeath(victim);
+    // Notify the outdoor pvp script
+    if (OutdoorPvP* outdoorPvP = sOutdoorPvPMgr.GetScript(GetZoneId()))
+        outdoorPvP->HandleCreatureDeath(victim);
 
     if (victim->IsLinkingEventTrigger())
         victim->GetMap()->GetCreatureLinkingHolder()->DoCreatureLinkingEvent(LINKING_EVENT_DIE, victim);
