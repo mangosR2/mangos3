@@ -16,182 +16,138 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
-#include "OutdoorPvP.h"
 #include "OutdoorPvPGH.h"
-
+#include "../Map.h"
+#include "../Object.h"
+#include "../Creature.h"
+#include "../GameObject.h"
 
 OutdoorPvPGH::OutdoorPvPGH() : OutdoorPvP(),
-    m_uiZoneController(NEUTRAL)
+    m_zoneOwner(TEAM_NONE)
 {
-    m_uiTypeId = WORLD_PVP_TYPE_GH;
 }
 
-bool OutdoorPvPGH::InitOutdoorPvPArea()
+void OutdoorPvPGH::HandleCreatureCreate(Creature* creature)
 {
-    RegisterZone(ZONE_ID_GRIZZLY_HILLS);
+    // only handle summoned creatures
+    if (!creature->IsTemporarySummon())
+        return;
 
-    return true;
-}
-
-void OutdoorPvPGH::OnCreatureCreate(Creature* pCreature)
-{
-    switch (pCreature->GetEntry())
+    switch (creature->GetEntry())
     {
-        case NPC_WESTFALL_BRIGADE_DEFENDER:
-        case NPC_COMMANDER_HOWSER:
-            lAllianceSoldiers.push_back(pCreature->GetObjectGuid());
-            if (m_uiZoneController == ALLIANCE)
-                return;
-            break;
+        case NPC_HORSE:
         case NPC_BLACKSMITH_JASON_RIGGINS:
         case NPC_STABLE_MASTER_TIM:
         case NPC_VENDOR_ADAMS:
-        case NPC_HORSE:
-            // check the zone id because the horses can be found in other areas too
-            if (pCreature->GetZoneId() == ZONE_ID_GRIZZLY_HILLS)
-                lAllianceVendors.push_back(pCreature->GetObjectGuid());
-            if (m_uiZoneController == ALLIANCE)
-                return;
-            break;
-        case NPC_CONQUEST_HOLD_DEFENDER:
-        case NPC_GENERAL_GORLOK:
-            lHordeSoldiers.push_back(pCreature->GetObjectGuid());
-            if (m_uiZoneController == HORDE)
-                return;
-            break;
         case NPC_BLACKSMITH_KOLOTH:
         case NPC_STABLE_MASTER_KOR:
         case NPC_VENDOR_PURKOM:
         case NPC_RIDING_WOLF:
-            // check the zone id because the wolfs can be found in other areas too
-            if (pCreature->GetZoneId() == ZONE_ID_GRIZZLY_HILLS)
-                lHordeVendors.push_back(pCreature->GetObjectGuid());
-            if (m_uiZoneController == HORDE)
-                return;
+            m_teamVendors.push_back(creature->GetObjectGuid());
             break;
-
-        default:
-            return;
     }
-
-    // Despawn creatures on create - will be spawned later in script
-    pCreature->SetRespawnDelay(7 * DAY);
-    pCreature->ForcedDespawn();
 }
 
-void OutdoorPvPGH::OnGameObjectCreate(GameObject* pGo)
+void OutdoorPvPGH::HandleCreatureDeath(Creature* creature)
 {
-    if (pGo->GetEntry() == GO_VENTURE_BAY_LIGHTHOUSE)
+    switch (creature->GetEntry())
     {
-        m_TowerBannerLighthouseGuid = pGo->GetObjectGuid();
-        pGo->SetGoArtKit(GO_ARTKIT_BANNER_NEUTRAL);
+        // Note: even if some soldiers or vendors are killed, they don't respawn on timer.
+        // The only way to respawn them is to capture the zone from the other faction.
+        case NPC_COMMANDER_HOWSER:
+        case NPC_GENERAL_GORLOK:
+            UnlockLighthouse(creature);
+            break;
+    }
+}
+
+void OutdoorPvPGH::HandleGameObjectCreate(GameObject* go)
+{
+    if (go->GetEntry() == GO_VENTURE_BAY_LIGHTHOUSE)
+    {
+        m_capturePoint = go->GetObjectGuid();
+        go->SetGoArtKit(GetBannerArtKit(m_zoneOwner));
     }
 }
 
 // process the capture events
-void OutdoorPvPGH::ProcessEvent(GameObject* pGo, uint32 uiEventId, uint32 uiFaction)
+bool OutdoorPvPGH::HandleEvent(uint32 eventId, GameObject* go)
 {
     // If we are not using the lighthouse return
-    if (pGo->GetEntry() != GO_VENTURE_BAY_LIGHTHOUSE)
-        return;
+    if (go->GetEntry() != GO_VENTURE_BAY_LIGHTHOUSE)
+        return false;
 
-    switch (uiEventId)
+    bool eventHandled = true;
+
+    switch (eventId)
     {
+        case EVENT_LIGHTHOUSE_WIN_ALLIANCE:
+            // Ignore the event if the zone is already in alliance control
+            if (m_zoneOwner == ALLIANCE)
+                return true;
+
+            // Spawn the npcs only when the tower is fully controlled. Also allow the event to handle summons in DB.
+            m_zoneOwner = ALLIANCE;
+            LockLighthouse(go);
+            DespawnVendors(go);
+            eventHandled = false;
+            break;
+        case EVENT_LIGHTHOUSE_WIN_HORDE:
+            // Ignore the event if the zone is already in horde control
+            if (m_zoneOwner == HORDE)
+                return true;
+
+            // Spawn the npcs only when the tower is fully controlled. Also allow the event to handle summons in DB.
+            m_zoneOwner = HORDE;
+            LockLighthouse(go);
+            DespawnVendors(go);
+            eventHandled = false;
+            break;
         case EVENT_LIGHTHOUSE_PROGRESS_ALLIANCE:
+            SetBannerVisual(go, CAPTURE_ARTKIT_ALLIANCE, CAPTURE_ANIM_ALLIANCE);
+            break;
         case EVENT_LIGHTHOUSE_PROGRESS_HORDE:
-            ProcessCaptureEvent(PROGRESS, uiFaction);
+            SetBannerVisual(go, CAPTURE_ARTKIT_HORDE, CAPTURE_ANIM_HORDE);
             break;
         case EVENT_LIGHTHOUSE_NEUTRAL_ALLIANCE:
         case EVENT_LIGHTHOUSE_NEUTRAL_HORDE:
-            ProcessCaptureEvent(NEUTRAL, uiFaction);
-            break;
-        case EVENT_LIGHTHOUSE_WIN_ALLIANCE:
-        case EVENT_LIGHTHOUSE_WIN_HORDE:
-            ProcessCaptureEvent(WIN, uiFaction);
+            m_zoneOwner = TEAM_NONE;
+            SetBannerVisual(go, CAPTURE_ARTKIT_NEUTRAL, CAPTURE_ANIM_NEUTRAL);
             break;
     }
+
+    // there are some events which required further DB script
+    return eventHandled;
 }
 
-void OutdoorPvPGH::ProcessCaptureEvent(uint32 uiCaptureType, uint32 uiTeam)
+// Despawn the vendors when the lighthouse is won by the opposite faction
+void OutdoorPvPGH::DespawnVendors(const WorldObject* objRef)
 {
-    switch (uiCaptureType)
+    // despawn all team vendors
+    for (GuidList::const_iterator itr = m_teamVendors.begin(); itr != m_teamVendors.end(); ++itr)
     {
-        case NEUTRAL:
-            SetBannerArtKit(GO_ARTKIT_BANNER_NEUTRAL);
-            m_uiZoneController = NEUTRAL;
-            break;
-        case WIN:
-            // Spawn the npcs only when the tower is fully controlled
-            DoRespawnSoldiers(uiTeam);
-            m_uiZoneController = uiTeam;
-            break;
-        case PROGRESS:
-            SetBannerArtKit(uiTeam == ALLIANCE ? GO_ARTKIT_BANNER_ALLIANCE : GO_ARTKIT_BANNER_HORDE);
-            break;
+        if (Creature* vendor = objRef->GetMap()->GetCreature(*itr))
+            vendor->ForcedDespawn();
     }
+    m_teamVendors.clear();
 }
 
-void OutdoorPvPGH::DoRespawnSoldiers(uint32 uiFaction)
+// Handle Lighthouse lock when all the soldiers and the commander are spawned
+void OutdoorPvPGH::LockLighthouse(const WorldObject* objRef)
 {
-    // neet to use a player as anchor for the map
-    Player* pPlayer = GetPlayerInZone();
-    if (!pPlayer)
-        return;
+    if (GameObject* go = objRef->GetMap()->GetGameObject(m_capturePoint))
+        go->SetLootState(GO_JUST_DEACTIVATED);
 
-    if (uiFaction == ALLIANCE)
-    {
-        // despawn all horde vendors
-        for (std::list<ObjectGuid>::const_iterator itr = lHordeVendors.begin(); itr != lHordeVendors.end(); ++itr)
-        {
-            if (Creature* pSoldier = pPlayer->GetMap()->GetCreature(*itr))
-                pSoldier->ForcedDespawn();
-        }
-
-        // spawn all alliance soldiers and vendors
-        for (std::list<ObjectGuid>::const_iterator itr = lAllianceSoldiers.begin(); itr != lAllianceSoldiers.end(); ++itr)
-        {
-            if (Creature* pSoldier = pPlayer->GetMap()->GetCreature(*itr))
-                pSoldier->Respawn();
-        }
-        for (std::list<ObjectGuid>::const_iterator itr = lAllianceVendors.begin(); itr != lAllianceVendors.end(); ++itr)
-        {
-            if (Creature* pSoldier = pPlayer->GetMap()->GetCreature(*itr))
-                pSoldier->Respawn();
-        }
-    }
-    else if (uiFaction == HORDE)
-    {
-        // despawn all alliance vendors
-        for (std::list<ObjectGuid>::const_iterator itr = lAllianceVendors.begin(); itr != lAllianceVendors.end(); ++itr)
-        {
-            if (Creature* pSoldier = pPlayer->GetMap()->GetCreature(*itr))
-                pSoldier->ForcedDespawn();
-        }
-
-        // spawn all horde soldiers and vendors
-        for (std::list<ObjectGuid>::const_iterator itr = lHordeSoldiers.begin(); itr != lHordeSoldiers.end(); ++itr)
-        {
-            if (Creature* pSoldier = pPlayer->GetMap()->GetCreature(*itr))
-                pSoldier->Respawn();
-        }
-        for (std::list<ObjectGuid>::const_iterator itr = lHordeVendors.begin(); itr != lHordeVendors.end(); ++itr)
-        {
-            if (Creature* pSoldier = pPlayer->GetMap()->GetCreature(*itr))
-                pSoldier->Respawn();
-        }
-    }
+    sOutdoorPvPMgr.SetCapturePointSlider(m_capturePoint, m_zoneOwner == ALLIANCE ? CAPTURE_SLIDER_ALLIANCE_LOCKED : CAPTURE_SLIDER_HORDE_LOCKED);
 }
 
-void OutdoorPvPGH::SetBannerArtKit(uint32 uiArtkit)
+// Handle Lighthouse unlock when the commander is killed
+void OutdoorPvPGH::UnlockLighthouse(const WorldObject* objRef)
 {
-    // neet to use a player as anchor for the map
-    Player* pPlayer = GetPlayerInZone();
-    if (!pPlayer)
-        return;
-
-    if (GameObject* pBanner = pPlayer->GetMap()->GetGameObject(m_TowerBannerLighthouseGuid))
-    {
-        pBanner->SetGoArtKit(uiArtkit);
-        pBanner->Refresh();
-    }
+    if (GameObject* go = objRef->GetMap()->GetGameObject(m_capturePoint))
+        go->SetCapturePointSlider(m_zoneOwner == ALLIANCE ? CAPTURE_SLIDER_ALLIANCE : CAPTURE_SLIDER_HORDE);
+        // no banner visual update needed because it already has the correct one
+    else
+        // if grid is unloaded, resetting the slider value is enough
+        sOutdoorPvPMgr.SetCapturePointSlider(m_capturePoint, m_zoneOwner == ALLIANCE ? CAPTURE_SLIDER_ALLIANCE : CAPTURE_SLIDER_HORDE);
 }
