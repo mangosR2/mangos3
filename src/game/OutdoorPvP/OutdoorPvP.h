@@ -19,112 +19,103 @@
 #ifndef OUTDOOR_PVP_H
 #define OUTDOOR_PVP_H
 
-#include "OutdoorPvPMgr.h"
-#include "../Language.h"
-#include "../World.h"
-#include "../ZoneScript.h"
-#include "../Player.h"
 #include "Common.h"
-#include "Policies/Singleton.h"
+#include "../ObjectGuid.h"
 #include "../SharedDefines.h"
-#include "../GameObject.h"
-#include "../ObjectMgr.h"
+#include "OutdoorPvPMgr.h"
 
+class WorldPacket;
+class WorldObject;
+class Player;
+class GameObject;
+class Unit;
+class Creature;
 
-enum OutdoorPvPTypes
+enum CapturePointArtKits
 {
-    WORLD_PVP_TYPE_SI = 1,
-    WORLD_PVP_TYPE_EP,
-    WORLD_PVP_TYPE_HP,
-    WORLD_PVP_TYPE_ZM,
-    WORLD_PVP_TYPE_TF,
-    WORLD_PVP_TYPE_NA,
-    WORLD_PVP_TYPE_GH,
+    CAPTURE_ARTKIT_ALLIANCE = 2,
+    CAPTURE_ARTKIT_HORDE    = 1,
+    CAPTURE_ARTKIT_NEUTRAL  = 21
 };
 
-enum GameObjectArtKits
+enum CapturePointAnimations
 {
-    GO_ARTKIT_BANNER_ALLIANCE               = 2,
-    GO_ARTKIT_BANNER_HORDE                  = 1,
-    GO_ARTKIT_BANNER_NEUTRAL                = 21,
+    CAPTURE_ANIM_ALLIANCE   = 1,
+    CAPTURE_ANIM_HORDE      = 0,
+    CAPTURE_ANIM_NEUTRAL    = 2
 };
 
-enum CaptureState
-{
-    NEUTRAL     = 0,
-    PROGRESS    = 1,
-    CONTESTED   = 2,
-    WIN         = 3
-};
+typedef std::map<ObjectGuid /*playerGuid*/, bool /*isMainZone*/> GuidZoneMap;
 
-class OutdoorPvP : public ZoneScript
+class OutdoorPvP
 {
     friend class OutdoorPvPMgr;
 
     public:
         OutdoorPvP() {}
-        virtual ~OutdoorPvP() {}
+        ~OutdoorPvP() {}
 
         // called when the zone is initialized
-        virtual void FillInitialWorldStates(uint32 zoneId) {}
+        virtual void FillInitialWorldStates(WorldPacket& /*data*/, uint32& /*count*/) {}
 
-        // called when a player triggers an areatrigger
-        virtual bool HandleAreaTrigger(Player* /*pPlayer*/, uint32 /*uiTriggerId*/) { return false; }
-
-        // called when a playerd drops a flag
-        virtual bool HandleDropFlag(Player* /*pPlayer*/, uint32 /*uiSpellId*/) { return false; }
-
-        // called when a playerd uses a gameobject related to world pvp events
-        virtual bool HandleObjectUse(Player* /*pPlayer*/, GameObject* /*pGo*/) { return false; }
-
-        // handle npc/player kill
-        virtual void HandlePlayerKillInsideArea(Player* /*pKiller*/, Unit* /*pVictim*/) {}
+        // Process Capture event
+        virtual bool HandleEvent(uint32 /*eventId*/, GameObject* /*go*/) { return false; }
 
         // handle capture objective complete
-        virtual void HandleObjectiveComplete(GuidSet /*m_sObjectivePlayers*/, uint32 /*uiEventId*/) {}
+        virtual void HandleObjectiveComplete(uint32 /*eventId*/, std::list<Player*> /*players*/, Team /*team*/) {}
 
-        // init all the outdoor pvp area relates stuff
-        virtual bool InitOutdoorPvPArea() { return false; }
+        // Called when a creature or gameobject is created
+        virtual void HandleCreatureCreate(Creature* /*creature*/) {}
+        virtual void HandleGameObjectCreate(GameObject* /*go*/) {}
+
+        // Called on creature death
+        virtual void HandleCreatureDeath(Creature* /*creature*/) {}
+
+        // called when a player uses a gameobject related to outdoor pvp events
+        virtual bool HandleGameObjectUse(Player* /*player*/, GameObject* /*go*/) { return false; }
+
+        // called when a player triggers an areatrigger
+        virtual bool HandleAreaTrigger(Player* /*player*/, uint32 /*triggerId*/) { return false; }
+
+        // called when a player drops a flag
+        virtual bool HandleDropFlag(Player* /*player*/, uint32 /*spellId*/) { return false; }
+
+        // update - called by the OutdoorPvPMgr
+        virtual void Update(uint32 /*diff*/) {}
+
+        // handle npc/player kill
+        void HandlePlayerKill(Player* killer, Unit* victim);
+
+    protected:
+
+        // Player related stuff
+        virtual void HandlePlayerEnterZone(Player* /*player*/, bool /*isMainZone*/);
+        virtual void HandlePlayerLeaveZone(Player* /*player*/, bool /*isMainZone*/);
+
+        // remove world states
+        virtual void SendRemoveWorldStates(Player* /*player*/) {}
+
+        // handle npc/player kill
+        virtual void HandlePlayerKillInsideArea(Player* /*killer*/, Unit* /*victim*/) {}
 
         // send world state update to all players present
         void SendUpdateWorldState(uint32 field, uint32 value);
 
-        // awards rewards for player kill
-        virtual void AwardKillBonus(Player* /*pPlayer*/) {}
-
-        // update - called by the OutdoorPvPMgr
-        virtual void Update(uint32 diff) {}
-
         // applies buff to a team inside the specific zone
-        void DoProcessTeamBuff(Team uiTeam, uint32 spellId, bool bRemove = false);
+        void BuffTeam(Team team, uint32 spellId, bool remove = false);
 
-        // return outdoor pvp type
-        uint32 GetTypeId() { return m_uiTypeId; }
+        // get banner artkit based on controlling team
+        uint32 GetBannerArtKit(Team team, uint32 artKitAlliance = CAPTURE_ARTKIT_ALLIANCE, uint32 artKitHorde = CAPTURE_ARTKIT_HORDE, uint32 artKitNeutral = CAPTURE_ARTKIT_NEUTRAL);
 
-        // Get a Player from the zone
-        Player* GetPlayerInZone(bool bOnlyAlive = false, bool bCanBeGamemaster = true);
+        // set banner visual
+        void SetBannerVisual(const WorldObject* objRef, ObjectGuid goGuid, uint32 artKit, uint32 animId);
+        void SetBannerVisual(GameObject* go, uint32 artKit, uint32 animId);
 
-        // Damage GO - for WG mostly
-        virtual void EventPlayerDamageGO(Player* /*player*/, GameObject* /*target_obj*/, uint32 /*eventId*/, uint32 /*bySpellId*/) {}
+        // Handle gameobject spawn / despawn
+        void RespawnGO(const WorldObject* objRef, ObjectGuid goGuid, bool respawn);
 
-        // Wrapper for initial (per-script) WorldState filling, once per zone
-        void FillInitialWorldState(uint32 zoneId, uint32 stateId, uint32& value);
-
-    protected:
-        // Player related stuff
-        virtual void HandlePlayerEnterZone(Player* pPlayer);
-        virtual void HandlePlayerLeaveZone(Player* pPlayer);
-        virtual void HandlePlayerKill(Player* pKiller, Unit* pVictim);
-
-        void RegisterZone(uint32 zoneId);
-        bool HasPlayer(Player* pPlayer) const;
-        void LockCapturePoint(uint32 pointEntry, bool isLocked);
-        void ResetCapturePoint(uint32 pointEntry, float fValue);
-
-        // store the players inside the area depending on the faction
-        GuidSet m_sZonePlayers;
-
-        uint32 m_uiTypeId;
+        // store the players inside the area
+        GuidZoneMap m_zonePlayers;
 };
 
 #endif
