@@ -245,7 +245,7 @@ void MotionMaster::Mutate(MovementGenerator* mgen, UnitActionId stateId)
 
 void MotionMaster::propagateSpeedChange()
 {
-    top()->UnitSpeedChanged();
+    impl()->CurrentAction()->UnitSpeedChanged();
 }
 
 MovementGeneratorType MotionMaster::GetCurrentMovementGeneratorType() const
@@ -289,7 +289,7 @@ MovementGenerator* MotionMaster::top()
     UnitActionPtr mgen = impl()->CurrentAction();
     if (!mgen)
     {
-        sLog.outError("MotionMaster::top() %s has empty states list!", m_owner->GetGuidStr().c_str());
+        sLog.outError("MotionMaster::top() %s has empty states list! Possible no one update cycle?", m_owner->GetGuidStr().c_str());
         return &si_idleMovement;
     }
     return ((MovementGenerator*)&*mgen);

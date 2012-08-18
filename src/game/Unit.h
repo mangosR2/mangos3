@@ -2088,6 +2088,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
 
         MotionMaster* GetMotionMaster() { return &i_motionMaster; }
         UnitStateMgr& GetUnitStateMgr() { return m_stateMgr; }
+        bool IsInUnitState(UnitActionId state) const { return m_stateMgr.GetCurrentState() == state; }
 
         bool IsStopped() const { return !(hasUnitState(UNIT_STAT_MOVING)); }
         void StopMoving();

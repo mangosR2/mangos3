@@ -755,7 +755,7 @@ class World
         std::string m_CreatureEventAIVersion;
 
         // World locking for global (not-in-map) objects.
-        ObjectLockType   i_lock[MAP_LOCK_TYPE_MAX];
+        mutable ObjectLockType   i_lock[MAP_LOCK_TYPE_MAX];
 
         // reset duel system
         std::set<uint32> areaEnabledIds; //set of areaIds where is enabled the Duel reset system

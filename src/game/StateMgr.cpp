@@ -351,6 +351,9 @@ UnitActionPtr UnitStateMgr::CreateStandartState(UnitActionId stateId, ...)
     UnitActionPtr state = UnitActionPtr(NULL);
     switch (stateId)
     {
+        case UNIT_ACTION_IDLE:
+            state = UnitActionPtr(new IdleMovementGenerator());
+            break;
         case UNIT_ACTION_CONFUSED:
         case UNIT_ACTION_FEARED:
         case UNIT_ACTION_CHASE:
@@ -385,19 +388,22 @@ UnitActionPtr UnitStateMgr::CreateStandartState(UnitActionId stateId, ...)
             break;
         }
         default:
+            sLog.outError("UnitStateMgr: attempt to create unknown standart state %u, creating IDLE state instead", stateId);
+            state = UnitActionPtr(new IdleMovementGenerator());
             break;
     }
 
     va_end(vargs);
 
-    if (!state)
-        state = UnitActionPtr(new IdleMovementGenerator());
+    MANGOS_ASSERT(state);
 
     return state;
 }
 
 UnitStateMgr::UnitStateMgr(Unit* owner) : m_owner(owner), m_needReinit(false)
 {
+    m_actions.clear();
+
     for (int32 i = UNIT_ACTION_IDLE; i != UNIT_ACTION_END; ++i)
         m_stateCounter[i] = 0;
 
@@ -617,13 +623,6 @@ void UnitStateMgr::DropAllStates()
 std::string const UnitStateMgr::GetOwnerStr() 
 {
     return GetOwner()->IsInWorld() ? GetOwner()->GetGuidStr() : "<Uninitialized>"; 
-};
-
-bool ActionInfo::operator < (const ActionInfo& val) const
-{
-    if (priority > val.priority)
-        return true;
-    return false;
 };
 
 bool ActionInfo::operator == (ActionInfo& val)

@@ -394,7 +394,7 @@ class MANGOS_DLL_SPEC Map : public GridRefManager<NGridType>
         // Holder for information about linked mobs
         CreatureLinkingHolder m_creatureLinkingHolder;
 
-        ObjectLockType      i_lock[MAP_LOCK_TYPE_MAX];
+        mutable ObjectLockType  i_lock[MAP_LOCK_TYPE_MAX];
         AttackersMap        m_attackersMap;
         bool                m_broken;
 
