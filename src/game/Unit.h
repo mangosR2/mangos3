@@ -1238,6 +1238,10 @@ typedef GuidSet GroupPetList;
 #define REGEN_TIME_FULL     2000                            // For this time difference is computed regen value
 #define REGEN_TIME_PRECISE  500                             // Used in Spell::CheckPower for precise regeneration in spell cast time
 
+// delay time for evading
+#define EVADE_TIME_DELAY     500
+#define EVADE_TIME_DELAY_MIN 100
+
 struct SpellProcEventEntry;                                 // used only privately
 class  VehicleKit;
 
@@ -1311,6 +1315,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         void RemoveAllAttackers();
         bool isAttackingPlayer() const;
         Unit* getVictim() const { return IsInWorld() ? GetMap()->GetUnit(m_attackingGuid) : NULL; }
+        virtual bool IsInEvadeMode() const { return false; };
         void CombatStop(bool includingCast = false);
         void CombatStopWithPets(bool includingCast = false);
         void StopAttackFaction(uint32 faction_id);
@@ -1880,7 +1885,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         float ApplyTotalThreatModifier(float threat, SpellSchoolMask schoolMask = SPELL_SCHOOL_MASK_NORMAL);
         void DeleteThreatList();
         bool IsSecondChoiceTarget(Unit* pTarget, bool checkThreatArea) const;
-        bool SelectHostileTarget();
+        bool SelectHostileTarget(bool withEvade = true);
         void TauntApply(Unit* pVictim);
         void TauntFadeOut(Unit *taunter);
         ThreatManager& getThreatManager() { return m_ThreatManager; }

@@ -10113,11 +10113,7 @@ void Unit::TauntFadeOut(Unit *taunter)
 
     if (m_ThreatManager.isThreatListEmpty())
     {
-        if (((Creature*)this)->AI())
-            ((Creature*)this)->AI()->EnterEvadeMode();
-
-        if (InstanceData* mapInstance = GetInstanceData())
-            mapInstance->OnCreatureEvade((Creature*)this);
+        AddEvent(new EvadeDelayEvent(*this), EVADE_TIME_DELAY_MIN);
 
         if (m_isCreatureLinkingTrigger)
             GetMap()->GetCreatureLinkingHolder()->DoCreatureLinkingEvent(LINKING_EVENT_EVADE, (Creature*)this);
@@ -10151,7 +10147,7 @@ bool Unit::IsSecondChoiceTarget(Unit* pTarget, bool checkThreatArea) const
 
 //======================================================================
 
-bool Unit::SelectHostileTarget()
+bool Unit::SelectHostileTarget(bool withEvade)
 {
     //function provides main threat functionality
     //next-victim-selection algorithm and evade mode are called
@@ -10200,13 +10196,10 @@ bool Unit::SelectHostileTarget()
     {
         if (!hasUnitState(UNIT_STAT_STUNNED | UNIT_STAT_DIED))
         {
-            SetInFront(target);
-            if (oldTarget != target)
-                ((Creature*)this)->AI()->AttackStart(target);
 
             // check if currently selected target is reachable
             // NOTE: path alrteady generated from AttackStart()
-           if (!target->isInAccessablePlaceFor(this))
+            if (!target->isInAccessablePlaceFor(this))
             {
                 // remove all taunts
                 RemoveSpellsCausingAura(SPELL_AURA_MOD_TAUNT);
@@ -10214,8 +10207,8 @@ bool Unit::SelectHostileTarget()
                 if(m_ThreatManager.getThreatList().size() < 2)
                 {
                     // only one target in list, we have to evade after timer
-                    // TODO: make timer - inside Creature class
-                    ((Creature*)this)->AI()->EnterEvadeMode();
+                    if (withEvade)
+                        AddEvent(new EvadeDelayEvent(*this), EVADE_TIME_DELAY);
                 }
                 else
                 {
@@ -10226,8 +10219,13 @@ bool Unit::SelectHostileTarget()
 
                     GetMap()->RemoveAttackerFor(GetObjectGuid(),target->GetObjectGuid());
                 }
-
                 return false;
+            }
+            else
+            {
+                SetInFront(target);
+                if (oldTarget != target)
+                    ((Creature*)this)->AI()->AttackStart(target);
             }
         }
         return true;
@@ -10241,7 +10239,7 @@ bool Unit::SelectHostileTarget()
     // it in combat but attacker not make any damage and not enter to aggro radius to have record in threat list
     // for example at owner command to pet attack some far away creature
     // Note: creature not have targeted movement generator but have attacker in this case
-    if (GetMotionMaster()->GetCurrentMovementGeneratorType() != CHASE_MOTION_TYPE)
+    if (!IsInUnitState(UNIT_ACTION_CHASE))
     {
         GuidSet attackers = GetMap()->GetAttackersFor(GetObjectGuid());
 
@@ -10252,12 +10250,11 @@ bool Unit::SelectHostileTarget()
                 return false;
         }
     }
+    if (!withEvade)
+        return false;
 
     // enter in evade mode in other case
-    ((Creature*)this)->AI()->EnterEvadeMode();
-
-    if (InstanceData* mapInstance = GetInstanceData())
-        mapInstance->OnCreatureEvade((Creature*)this);
+    AddEvent(new EvadeDelayEvent(*this), EVADE_TIME_DELAY_MIN);
 
     if (m_isCreatureLinkingTrigger)
         GetMap()->GetCreatureLinkingHolder()->DoCreatureLinkingEvent(LINKING_EVENT_EVADE, (Creature*)this);
