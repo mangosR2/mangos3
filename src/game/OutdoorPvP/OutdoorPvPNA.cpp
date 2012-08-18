@@ -37,29 +37,13 @@ OutdoorPvPNA::OutdoorPvPNA() : OutdoorPvP(),
     sObjectMgr.SetGraveYardLinkTeam(GRAVEYARD_ID_HALAA, GRAVEYARD_ZONE_ID_HALAA, TEAM_INVALID);
 }
 
-void OutdoorPvPNA::FillInitialWorldStates(WorldPacket& data, uint32& count)
+void OutdoorPvPNA::FillInitialWorldStates(uint32 zoneId)
 {
-    if (m_zoneOwner != TEAM_NONE)
-    {
-        FillInitialWorldState(data, count, m_zoneWorldState, WORLD_STATE_ADD);
-
-        // map states
-        for (uint8 i = 0; i < MAX_NA_ROOSTS; ++i)
-            FillInitialWorldState(data, count, m_roostWorldState[i], WORLD_STATE_ADD);
-    }
-
-    FillInitialWorldState(data, count, m_zoneMapState, WORLD_STATE_ADD);
-    FillInitialWorldState(data, count, WORLD_STATE_NA_GUARDS_MAX, MAX_NA_GUARDS);
-    FillInitialWorldState(data, count, WORLD_STATE_NA_GUARDS_LEFT, m_guardsLeft);
+    FillInitialWorldState(zoneId, WORLD_STATE_NA_GUARDS_LEFT, m_guardsLeft);
 }
 
 void OutdoorPvPNA::SendRemoveWorldStates(Player* player)
 {
-    player->SendUpdateWorldState(m_zoneWorldState, WORLD_STATE_REMOVE);
-    player->SendUpdateWorldState(m_zoneMapState, WORLD_STATE_REMOVE);
-
-    for (uint8 i = 0; i < MAX_NA_ROOSTS; ++i)
-        player->SendUpdateWorldState(m_roostWorldState[i], WORLD_STATE_REMOVE);
 }
 
 void OutdoorPvPNA::HandlePlayerEnterZone(Player* player, bool isMainZone)

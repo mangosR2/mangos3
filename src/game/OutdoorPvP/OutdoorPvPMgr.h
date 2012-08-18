@@ -102,6 +102,7 @@ class OutdoorPvPMgr
         void Update(uint32 diff);
 
         // Handle capture point stuff
+        // fully wrong and not needed, see Get/SetLinkedWorldState() FIXME - rewrite need
         int8 GetCapturePointSliderValue(uint32 entry);
         void SetCapturePointSlider(uint32 entry, int8 value) { m_capturePointSlider[entry] = value; }
 

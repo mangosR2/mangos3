@@ -152,7 +152,7 @@ class OutdoorPvPHP : public OutdoorPvP
 
         void HandlePlayerEnterZone(Player* player, bool isMainZone) override;
         void HandlePlayerLeaveZone(Player* player, bool isMainZone) override;
-        void FillInitialWorldStates(WorldPacket& data, uint32& count) override;
+        void FillInitialWorldStates(uint32 zoneId) override;
         void SendRemoveWorldStates(Player* player) override;
 
         bool HandleEvent(uint32 eventId, GameObject* go) override;
@@ -167,8 +167,8 @@ class OutdoorPvPHP : public OutdoorPvP
 
         Team m_towerOwner[MAX_HP_TOWERS];
         uint32 m_towerWorldState[MAX_HP_TOWERS];
-        uint8 m_towersAlliance;
-        uint8 m_towersHorde;
+        uint32 m_towersAlliance;
+        uint32 m_towersHorde;
 
         ObjectGuid m_towers[MAX_HP_TOWERS];
         ObjectGuid m_banners[MAX_HP_TOWERS];

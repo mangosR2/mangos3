@@ -162,7 +162,7 @@ void OutdoorPvPMgr::Update(uint32 diff)
    Function that gets the capture point slider value
 
    @param   capture point entry
- */
+*/
 int8 OutdoorPvPMgr::GetCapturePointSliderValue(uint32 entry)
 {
     std::map<uint32, int8>::iterator itr = m_capturePointSlider.find(entry);

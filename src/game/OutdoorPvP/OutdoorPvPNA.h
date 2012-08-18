@@ -161,7 +161,7 @@ class OutdoorPvPNA : public OutdoorPvP
 
         void HandlePlayerEnterZone(Player* player, bool isMainZone) override;
         void HandlePlayerLeaveZone(Player* player, bool isMainZone) override;
-        void FillInitialWorldStates(WorldPacket& data, uint32& count) override;
+        void FillInitialWorldStates(uint32 zoneId) override;
         void SendRemoveWorldStates(Player* player) override;
 
         bool HandleEvent(uint32 eventId, GameObject* go) override;
@@ -199,7 +199,7 @@ class OutdoorPvPNA : public OutdoorPvP
         uint32 m_zoneWorldState;
         uint32 m_zoneMapState;
         uint32 m_roostWorldState[MAX_NA_ROOSTS];
-        uint8 m_guardsLeft;
+        uint32 m_guardsLeft;
 
         bool m_isUnderSiege;
 

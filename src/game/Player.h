@@ -2202,17 +2202,14 @@ class MANGOS_DLL_SPEC Player : public Unit
         bool GetRandomWinner() { return m_IsBGRandomWinner; }
         void SetRandomWinner(bool isWinner);
 
+        /*********************************************************/
+        /***                 OUTDOOR PVP SYSTEM                ***/
+        /*********************************************************/
+
         bool CanUseCapturePoint();
-
-        /*********************************************************/
-        /***                 WORLD PVP SYSTEM                  ***/
-        /*********************************************************/
-
         // returns true if the player is in active state for outdoor pvp objective capturing
         bool CanUseOutdoorCapturePoint();
 
-        OutdoorPvP* GetOutdoorPvP() const;
-        // returns true if the player is in active state for outdoor pvp objective capturing
         bool IsOutdoorPvPActive();
         virtual void HandleObjectiveComplete(Player* /*pPlayer*/) {};
 

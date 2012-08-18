@@ -34,6 +34,7 @@ OutdoorPvPZM::OutdoorPvPZM() : OutdoorPvP(),
     m_towersHorde(0)
 {
     // init world states
+    // FIXME- wrong, need read data from WorldStates
     m_towerWorldState[0] = WORLD_STATE_ZM_BEACON_EAST_UI_NEUTRAL;
     m_towerWorldState[1] = WORLD_STATE_ZM_BEACON_WEST_UI_NEUTRAL;
     m_towerMapState[0] = WORLD_STATE_ZM_BEACON_EAST_NEUTRAL;
@@ -46,30 +47,8 @@ OutdoorPvPZM::OutdoorPvPZM() : OutdoorPvP(),
     sObjectMgr.SetGraveYardLinkTeam(GRAVEYARD_ID_TWIN_SPIRE, GRAVEYARD_ZONE_TWIN_SPIRE, TEAM_INVALID);
 }
 
-void OutdoorPvPZM::FillInitialWorldStates(WorldPacket& data, uint32& count)
-{
-    FillInitialWorldState(data, count, m_scoutWorldStateAlliance, WORLD_STATE_ADD);
-    FillInitialWorldState(data, count, m_scoutWorldStateHorde, WORLD_STATE_ADD);
-    FillInitialWorldState(data, count, m_graveyardWorldState, WORLD_STATE_ADD);
-
-    for (uint8 i = 0; i < MAX_ZM_TOWERS; ++i)
-    {
-        FillInitialWorldState(data, count, m_towerWorldState[i], WORLD_STATE_ADD);
-        FillInitialWorldState(data, count, m_towerMapState[i], WORLD_STATE_ADD);
-    }
-}
-
 void OutdoorPvPZM::SendRemoveWorldStates(Player* player)
 {
-    player->SendUpdateWorldState(m_scoutWorldStateAlliance, WORLD_STATE_REMOVE);
-    player->SendUpdateWorldState(m_scoutWorldStateHorde, WORLD_STATE_REMOVE);
-    player->SendUpdateWorldState(m_graveyardWorldState, WORLD_STATE_REMOVE);
-
-    for (uint8 i = 0; i < MAX_ZM_TOWERS; ++i)
-    {
-        player->SendUpdateWorldState(m_towerWorldState[i], WORLD_STATE_REMOVE);
-        player->SendUpdateWorldState(m_towerMapState[i], WORLD_STATE_REMOVE);
-    }
 }
 
 void OutdoorPvPZM::HandlePlayerEnterZone(Player* player, bool isMainZone)

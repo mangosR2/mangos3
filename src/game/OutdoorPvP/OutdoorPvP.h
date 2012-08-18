@@ -56,7 +56,7 @@ class OutdoorPvP
         ~OutdoorPvP() {}
 
         // called when the zone is initialized
-        virtual void FillInitialWorldStates(WorldPacket& /*data*/, uint32& /*count*/) {}
+        virtual void FillInitialWorldStates(uint32 zoneId) {}
 
         // Process Capture event
         virtual bool HandleEvent(uint32 /*eventId*/, GameObject* /*go*/) { return false; }
@@ -70,6 +70,9 @@ class OutdoorPvP
 
         // Called on creature death
         virtual void HandleCreatureDeath(Creature* /*creature*/) {}
+
+        // Called on creature respawn
+        virtual void HandleCreatureRespawn(Creature* /*creature*/) {}
 
         // called when a player uses a gameobject related to outdoor pvp events
         virtual bool HandleGameObjectUse(Player* /*player*/, GameObject* /*go*/) { return false; }
@@ -85,6 +88,12 @@ class OutdoorPvP
 
         // handle npc/player kill
         void HandlePlayerKill(Player* killer, Unit* victim);
+
+        // Wrapper for initial (per-script) WorldState filling, once per zone
+        void FillInitialWorldState(uint32 zoneId, uint32 stateId, uint32& value);
+
+        // Damage GO - for WG mostly
+        virtual void EventPlayerDamageGO(Player* /*player*/, GameObject* /*target_obj*/, uint32 /*eventId*/, uint32 /*bySpellId*/) {}
 
     protected:
 

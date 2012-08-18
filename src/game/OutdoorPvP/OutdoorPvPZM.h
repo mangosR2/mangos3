@@ -136,7 +136,6 @@ class OutdoorPvPZM : public OutdoorPvP
 
         void HandlePlayerEnterZone(Player* player, bool isMainZone) override;
         void HandlePlayerLeaveZone(Player* player, bool isMainZone) override;
-        void FillInitialWorldStates(WorldPacket& data, uint32& count) override;
         void SendRemoveWorldStates(Player* player) override;
 
         bool HandleEvent(uint32 eventId, GameObject* go) override;
@@ -167,8 +166,8 @@ class OutdoorPvPZM : public OutdoorPvP
         uint32 m_graveyardWorldState;
         uint32 m_scoutWorldStateAlliance;
         uint32 m_scoutWorldStateHorde;
-        uint8 m_towersAlliance;
-        uint8 m_towersHorde;
+        uint32 m_towersAlliance;
+        uint32 m_towersHorde;
 
         ObjectGuid m_towerBanners[MAX_ZM_TOWERS];
         ObjectGuid m_graveyardBannerAlliance;

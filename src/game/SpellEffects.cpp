@@ -46,7 +46,7 @@
 #include "BattleGroundEY.h"
 #include "BattleGroundWS.h"
 #include "BattleGroundSA.h"
-#include "OutdoorPvP/OutdoorPvPMgr.h"
+#include "OutdoorPvP/OutdoorPvP.h"
 #include "Language.h"
 #include "SocialMgr.h"
 #include "VMapFactory.h"
@@ -5856,13 +5856,13 @@ void Spell::EffectOpenLock(SpellEffectIndex eff_idx)
         return;
     }
 
-    Player* player = (Player*)m_caster;
+    Player* player = m_caster->GetCharmerOrOwnerPlayerOrPlayerItself();
 
     uint32 lockId = 0;
     ObjectGuid guid;
 
     // Get lockId
-    if (gameObjTarget)
+    if (player && gameObjTarget)
     {
         GameObjectInfo const* goInfo = gameObjTarget->GetGOInfo();
         // Arathi Basin banner opening !
@@ -5894,7 +5894,8 @@ void Spell::EffectOpenLock(SpellEffectIndex eff_idx)
         {
             // Check if object is handled by outdoor pvp
             // GameObject is handling some events related to world battleground events
-            if (sOutdoorPvPMgr.HandleObjectUse(player, gameObjTarget))
+            if (OutdoorPvP* outdoorPvP = sOutdoorPvPMgr.GetScript(player->GetZoneId()))
+                outdoorPvP->HandleGameObjectUse(player, gameObjTarget);
                 return;
         }
 

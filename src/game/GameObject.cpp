@@ -75,10 +75,11 @@ GameObject::GameObject() : WorldObject(),
 GameObject::~GameObject()
 {
     // store the capture point slider value (for non visual, non locked capture points)
-    // this - wrong, maked over WorldStateMgr
-    // GameObjectInfo const* goInfo = GetGOInfo();
-    // if (goInfo && goInfo->type == GAMEOBJECT_TYPE_CAPTURE_POINT && goInfo->capturePoint.radius && m_lootState == GO_ACTIVATED)
-        // sOutdoorPvPMgr.SetCapturePointSlider(GetEntry(), m_captureSlider);
+    // FIXME: this - wrong, need make over WorldStateMgr
+    GameObjectInfo const* goInfo = GetGOInfo();
+    if (goInfo && goInfo->type == GAMEOBJECT_TYPE_CAPTURE_POINT && goInfo->capturePoint.radius && m_lootState == GO_ACTIVATED)
+        sOutdoorPvPMgr.SetCapturePointSlider(GetEntry(), m_captureSlider);
+
     delete m_model;
 }
 
@@ -216,9 +217,10 @@ bool GameObject::Create(uint32 guidlow, uint32 name_id, Map *map, uint32 phaseMa
             {
                 sWorldStateMgr.CreateLinkedWorldStatesIfNeed(this);
                 SetCapturePointSlider(CAPTURE_SLIDER_GET_VALUE);
-                // set initial data and activate non visual-only capture points (wrong way)
-                //if (goinfo->type == GAMEOBJECT_TYPE_CAPTURE_POINT && goinfo->capturePoint.radius)
-                //    SetCapturePointSlider(sOutdoorPvPMgr.GetCapturePointSliderValue(goinfo->id));
+
+                // set initial data and activate non visual-only capture points
+                // FIXME - need make over WorldStateMgr
+                SetCapturePointSlider(sOutdoorPvPMgr.GetCapturePointSliderValue(goinfo->id));
             }
             break;
         }
@@ -1793,10 +1795,10 @@ void GameObject::DamageTaken(Unit* pDoneBy, uint32 damage, uint32 spellId)
         m_health -= damage;
         if (pWho)
         {
-            if (BattleGround *bg = pWho->GetBattleGround())
+            if (BattleGround* bg = pWho->GetBattleGround())
                 bg->EventPlayerDamageGO(pWho, this, GetGOInfo()->destructibleBuilding.damageEvent, spellId);
-            else if(OutdoorPvP* pWPvP = sOutdoorPvPMgr.GetOutdoorPvPToZoneId(GetZoneId()))
-                pWPvP->EventPlayerDamageGO(pWho,this,GetGOInfo()->destructibleBuilding.damageEvent, spellId);
+            else if (OutdoorPvP* outdoorPvP = sOutdoorPvPMgr.GetScript(pWho->GetCachedZoneId()))
+                outdoorPvP->EventPlayerDamageGO(pWho,this,GetGOInfo()->destructibleBuilding.damageEvent, spellId);
         }
     }
 
@@ -1816,8 +1818,8 @@ void GameObject::DamageTaken(Unit* pDoneBy, uint32 damage, uint32 spellId)
             {
                 if (BattleGround* bg = pWho->GetBattleGround())
                     bg->EventPlayerDamageGO(pWho, this, GetGOInfo()->destructibleBuilding.destroyedEvent, spellId);
-                else if(OutdoorPvP* pWPvP = sOutdoorPvPMgr.GetOutdoorPvPToZoneId(GetZoneId()))
-                    pWPvP->EventPlayerDamageGO(pWho,this,GetGOInfo()->destructibleBuilding.destroyedEvent, spellId);
+                else if (OutdoorPvP* outdoorPvP = sOutdoorPvPMgr.GetScript(pWho->GetCachedZoneId()))
+                    outdoorPvP->EventPlayerDamageGO(pWho,this,GetGOInfo()->destructibleBuilding.destroyedEvent, spellId);
             }
             SetLinkedWorldState(OBJECT_STATE_LAST_INDEX - (GetTeamIndex(GetTeam()) + 1)*OBJECT_STATE_PERIOD + OBJECT_STATE_DESTROY);
             DEBUG_FILTER_LOG(LOG_FILTER_DAMAGE, "GameObject::DamageTaken %s gain DESTROY state, team %u", GetObjectGuid().GetString().c_str(),GetTeam());
@@ -1845,8 +1847,8 @@ void GameObject::DamageTaken(Unit* pDoneBy, uint32 damage, uint32 spellId)
             {
                 if (BattleGround* bg = pWho->GetBattleGround())
                     bg->EventPlayerDamageGO(pWho, this, GetGOInfo()->destructibleBuilding.damagedEvent, spellId);
-                else if(OutdoorPvP* pWPvP = sOutdoorPvPMgr.GetOutdoorPvPToZoneId(GetZoneId()))
-                    pWPvP->EventPlayerDamageGO(pWho,this,GetGOInfo()->destructibleBuilding.damagedEvent, spellId);
+                else if (OutdoorPvP* outdoorPvP = sOutdoorPvPMgr.GetScript(pWho->GetCachedZoneId()))
+                    outdoorPvP->EventPlayerDamageGO(pWho,this,GetGOInfo()->destructibleBuilding.damagedEvent, spellId);
             }
             SetLinkedWorldState(OBJECT_STATE_LAST_INDEX - (GetTeamIndex(GetTeam()) + 1)*OBJECT_STATE_PERIOD + OBJECT_STATE_DAMAGE);
             DEBUG_FILTER_LOG(LOG_FILTER_DAMAGE, "GameObject::DamageTaken %s gain DAMAGED state, team %u", GetObjectGuid().GetString().c_str(),GetTeam());
@@ -1870,8 +1872,8 @@ void GameObject::Rebuild(Unit* pWho)
         {
             if (BattleGround* bg = ppWho->GetBattleGround())
                 bg->EventPlayerDamageGO(ppWho, this, GetGOInfo()->destructibleBuilding.rebuildingEvent, 0);
-            else if (OutdoorPvP* pWPvP = sOutdoorPvPMgr.GetOutdoorPvPToZoneId(GetZoneId()))
-                pWPvP->EventPlayerDamageGO(ppWho,this,GetGOInfo()->destructibleBuilding.rebuildingEvent,0);
+            else if (OutdoorPvP* outdoorPvP = sOutdoorPvPMgr.GetScript(GetZoneId()))
+                outdoorPvP->EventPlayerDamageGO(ppWho,this,GetGOInfo()->destructibleBuilding.rebuildingEvent,0);
         }
     }
     SetLinkedWorldState(OBJECT_STATE_LAST_INDEX - (GetTeamIndex(GetTeam()) + 1)*OBJECT_STATE_PERIOD + OBJECT_STATE_INTACT);

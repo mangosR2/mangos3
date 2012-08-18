@@ -1046,10 +1046,6 @@ uint32 Unit::DealDamage(DamageInfo* damageInfo)
         if (GetTypeId() == TYPEID_UNIT && ((Creature*)this)->AI())
             ((Creature*)this)->AI()->KilledUnit(pVictim);
 
-        // Call World pvp scripts for player kill
-        if (pVictim->GetTypeId() == TYPEID_PLAYER && GetTypeId() == TYPEID_PLAYER)
-            sOutdoorPvPMgr.HandlePlayerKill((Player*)this, pVictim);
-
         // Call AI OwnerKilledUnit (for any current summoned minipet/guardian/protector)
         PetOwnerKilledUnit(pVictim);
 

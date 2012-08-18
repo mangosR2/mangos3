@@ -67,15 +67,15 @@ class OutdoorPvPSI : public OutdoorPvP
 
         void HandlePlayerEnterZone(Player* player, bool isMainZone) override;
         void HandlePlayerLeaveZone(Player* player, bool isMainZone) override;
-        void FillInitialWorldStates(uint32 zoneId);
+        void FillInitialWorldStates(uint32 zoneId) override;
 
         bool HandleAreaTrigger(Player* player, uint32 triggerId) override;
         bool HandleGameObjectUse(Player* player, GameObject* go) override;
         bool HandleDropFlag(Player* player, uint32 spellId) override;
 
     private:
-        uint8 m_resourcesAlliance;
-        uint8 m_resourcesHorde;
+        uint32 m_resourcesAlliance;
+        uint32 m_resourcesHorde;
         Team m_zoneOwner;
 };
 

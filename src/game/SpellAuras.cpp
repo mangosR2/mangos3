@@ -5897,8 +5897,8 @@ void Aura::HandleAuraModEffectImmunity(bool apply, bool /*Real*/)
             bg->EventPlayerDroppedFlag(player);
         else if (OutdoorPvP* outdoorPvP = sOutdoorPvPMgr.GetScript(player->GetCachedZoneId()))
             outdoorPvP->HandleDropFlag(player, GetSpellProto()->Id);
-        else if (InstanceData* mapInstance = (player->GetInstanceData())
-            mapInstance->OnPlayerDroppedFlag((Player*)target, GetSpellProto()->Id);
+        else if (InstanceData* mapInstance = player->GetInstanceData())
+            mapInstance->OnPlayerDroppedFlag(player, GetId());
     }
 
     target->ApplySpellImmune(GetId(), IMMUNITY_EFFECT, m_modifier.m_miscvalue, apply);

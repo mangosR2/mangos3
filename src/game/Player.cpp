@@ -7159,11 +7159,6 @@ void Player::UpdateArea(uint32 newArea)
     UpdateAreaDependentAuras();
 }
 
-OutdoorPvP* Player::GetOutdoorPvP() const
-{
-    return sOutdoorPvPMgr.GetOutdoorPvPToZoneId(GetZoneId());
-}
-
 bool Player::IsOutdoorPvPActive()
 {
     return CanUseOutdoorCapturePoint();

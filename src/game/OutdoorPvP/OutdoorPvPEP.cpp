@@ -29,6 +29,7 @@ OutdoorPvPEP::OutdoorPvPEP() : OutdoorPvP(),
     m_towersAlliance(0),
     m_towersHorde(0)
 {
+    // FIXME - need read data from worlstates
     m_towerWorldState[0] = WORLD_STATE_EP_NORTHPASS_NEUTRAL;
     m_towerWorldState[1] = WORLD_STATE_EP_CROWNGUARD_NEUTRAL;
     m_towerWorldState[2] = WORLD_STATE_EP_EASTWALL_NEUTRAL;
@@ -41,13 +42,10 @@ OutdoorPvPEP::OutdoorPvPEP() : OutdoorPvP(),
     sObjectMgr.SetGraveYardLinkTeam(GRAVEYARD_ID_EASTERN_PLAGUE, GRAVEYARD_ZONE_EASTERN_PLAGUE, TEAM_INVALID);
 }
 
-void OutdoorPvPEP::FillInitialWorldStates(WorldPacket& data, uint32& count)
+void OutdoorPvPEP::FillInitialWorldStates(uint32 zoneId)
 {
-    FillInitialWorldState(data, count, WORLD_STATE_EP_TOWER_COUNT_ALLIANCE, m_towersAlliance);
-    FillInitialWorldState(data, count, WORLD_STATE_EP_TOWER_COUNT_HORDE, m_towersHorde);
-
-    for (uint8 i = 0; i < MAX_EP_TOWERS; ++i)
-        FillInitialWorldState(data, count, m_towerWorldState[i], WORLD_STATE_ADD);
+    FillInitialWorldState(zoneId, WORLD_STATE_EP_TOWER_COUNT_ALLIANCE, m_towersAlliance);
+    FillInitialWorldState(zoneId, WORLD_STATE_EP_TOWER_COUNT_HORDE, m_towersHorde);
 }
 
 void OutdoorPvPEP::SendRemoveWorldStates(Player* player)
