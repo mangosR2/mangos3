@@ -2155,15 +2155,15 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
 
         // Vehicle system (over-aura operation)
         void EnterVehicle(Unit* base, int8 seatId = -1);
-        void EnterVehicle(VehicleKit* vehicle, int8 seatId = -1);
+        void EnterVehicle(VehicleKitPtr vehicle, int8 seatId = -1);
         void ExitVehicle();
         // Vehicle system (direct operation)
-        void _EnterVehicle(VehicleKit *vehicle, int8 seatId = -1);
+        void _EnterVehicle(VehicleKitPtr vehicle, int8 seatId = -1);
         void _ExitVehicle();
 
         void ChangeSeat(int8 seatId, bool next = true);
-        VehicleKit* GetVehicle() const { return m_pVehicle; }
-        VehicleKit* GetVehicleKit() const { return m_pVehicleKit; }
+        VehicleKitPtr GetVehicle()    const { return m_pVehicle; }
+        VehicleKitPtr GetVehicleKit() const { return m_pVehicleKit; }
         void RemoveVehicleKit();
 
         void ScheduleAINotify(uint32 delay);
@@ -2229,8 +2229,8 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         Transport* m_transport;
 
         VehicleInfo* m_vehicleInfo;
-        VehicleKit*  m_pVehicleKit;
-        VehicleKit*  m_pVehicle;
+        VehicleKitPtr  m_pVehicleKit;
+        VehicleKitPtr  m_pVehicle;
 
         void DisableSpline();
         bool m_isCreatureLinkingTrigger;

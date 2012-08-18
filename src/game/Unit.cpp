@@ -291,8 +291,8 @@ Unit::Unit() :
 
     m_transport = NULL;
 
-    m_pVehicleKit = NULL;
-    m_pVehicle    = NULL;
+    m_pVehicleKit = VehicleKitPtr(NULL);
+    m_pVehicle    = VehicleKitPtr(NULL);
 
     m_comboPoints = 0;
 
@@ -12774,15 +12774,14 @@ void Unit::RemoveVehicleKit()
 
     m_pVehicleKit->RemoveAllPassengers();
 
-    delete m_pVehicleKit;
-    m_pVehicleKit = NULL;
+    m_pVehicleKit = VehicleKitPtr(NULL);
 
     m_updateFlag &= ~UPDATEFLAG_VEHICLE;
     RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPELLCLICK);
     RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_PLAYER_VEHICLE);
 }
 
-void Unit::EnterVehicle(VehicleKit* vehicle, int8 seatId)
+void Unit::EnterVehicle(VehicleKitPtr vehicle, int8 seatId)
 {
     if (vehicle)
         EnterVehicle(vehicle->GetBase(), seatId);
@@ -12920,7 +12919,7 @@ void Unit::ChangeSeat(int8 seatId, bool next)
     GetVehicle()->AddPassenger(this, seatId);
 }
 
-void Unit::_EnterVehicle(VehicleKit* vehicle, int8 seatId)
+void Unit::_EnterVehicle(VehicleKitPtr vehicle, int8 seatId)
 {
     if (!isAlive() || !vehicle || GetVehicleKit() == vehicle)
         return;
@@ -12987,7 +12986,7 @@ void Unit::_ExitVehicle()
 
     GetVehicle()->RemovePassenger(this, true);
 
-    m_pVehicle = NULL;
+    m_pVehicle = VehicleKitPtr(NULL);
     clearUnitState(UNIT_STAT_ON_VEHICLE);
 
     SendHeartBeat();
@@ -13452,7 +13451,7 @@ void Unit::SetVehicleId(uint32 entry)
         m_updateFlag |= UPDATEFLAG_VEHICLE;
 
         if (!m_pVehicleKit)
-            m_pVehicleKit = new VehicleKit(this);
+            m_pVehicleKit = VehicleKitPtr(new VehicleKit(this));
     }
     else
     {

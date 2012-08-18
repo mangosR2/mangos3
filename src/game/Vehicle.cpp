@@ -612,7 +612,7 @@ bool PassengerEjectEvent::Execute(uint64 /*e_time*/, uint32 /*p_time*/)
     if (!m_vehicle.GetVehicleInfo())
         return true;
 
-    VehicleKit* pVehicle = m_vehicle.GetVehicleKit();
+    VehicleKitPtr pVehicle = m_vehicle.GetVehicleKit();
 
     if (!pVehicle)
         return true;

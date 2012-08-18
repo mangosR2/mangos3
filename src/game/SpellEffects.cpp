@@ -3323,7 +3323,7 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     if (!unitTarget || unitTarget->GetTypeId() != TYPEID_UNIT)
                         return;
 
-                    if (VehicleKit* vehicleKit = unitTarget->GetVehicleKit())
+                    if (VehicleKitPtr vehicleKit = unitTarget->GetVehicleKit())
                     {
                         vehicleKit->SetDestination(m_targets.m_destX, m_targets.m_destY, m_targets.m_destZ, unitTarget->GetOrientation(),  m_targets.GetSpeed(), m_targets.GetElevation());
                     }
