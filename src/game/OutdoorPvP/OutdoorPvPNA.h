@@ -151,12 +151,12 @@ static const uint32 aHordeRoostStates[MAX_NA_ROOSTS]        = {WORLD_STATE_NA_WY
 static const uint32 aAllianceNeutralStates[MAX_NA_ROOSTS]   = {WORLD_STATE_NA_WYVERN_SOUTH_NEU_A,   WORLD_STATE_NA_WYVERN_NORTH_NEU_A,  WORLD_STATE_NA_WYVERN_EAST_NEU_A,   WORLD_STATE_NA_WYVERN_WEST_NEU_A};
 static const uint32 aHordeNeutralStates[MAX_NA_ROOSTS]      = {WORLD_STATE_NA_WYVERN_SOUTH_NEU_H,   WORLD_STATE_NA_WYVERN_NORTH_NEU_H,  WORLD_STATE_NA_WYVERN_EAST_NEU_H,   WORLD_STATE_NA_WYVERN_WEST_NEU_H};
 
-class WorldPvPNA : public WorldPvP
+class OutdoorPvPNA : public OutdoorPvP
 {
     public:
-        WorldPvPNA();
+        OutdoorPvPNA();
 
-        bool InitWorldPvPArea();
+        bool InitOutdoorPvPArea();
 
         void FillInitialWorldStates(uint32 zoneId);
         void SendRemoveWorldStates(Player* pPlayer);

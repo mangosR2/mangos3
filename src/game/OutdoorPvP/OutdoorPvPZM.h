@@ -127,12 +127,12 @@ static const ZangaTowersEvents aZangaTowerEvents[MAX_ZM_TOWERS][4] =
 static const uint32 aZangaTowers[MAX_ZM_TOWERS] = {GO_ZANGA_BANNER_EAST, GO_ZANGA_BANNER_WEST};
 
 
-class WorldPvPZM : public WorldPvP
+class OutdoorPvPZM : public OutdoorPvP
 {
     public:
-        WorldPvPZM();
+        OutdoorPvPZM();
 
-        bool InitWorldPvPArea();
+        bool InitOutdoorPvPArea();
 
         void OnCreatureCreate(Creature* pCreature);
         void OnGameObjectCreate(GameObject* pGo);

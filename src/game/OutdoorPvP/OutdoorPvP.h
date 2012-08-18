@@ -19,7 +19,7 @@
 #ifndef OUTDOOR_PVP_H
 #define OUTDOOR_PVP_H
 
-#include "WorldPvPMgr.h"
+#include "OutdoorPvPMgr.h"
 #include "../Language.h"
 #include "../World.h"
 #include "../ZoneScript.h"
@@ -31,7 +31,7 @@
 #include "../ObjectMgr.h"
 
 
-enum WorldPvPTypes
+enum OutdoorPvPTypes
 {
     WORLD_PVP_TYPE_SI = 1,
     WORLD_PVP_TYPE_EP,
@@ -57,13 +57,13 @@ enum CaptureState
     WIN         = 3
 };
 
-class WorldPvP : public ZoneScript
+class OutdoorPvP : public ZoneScript
 {
-    friend class WorldPvPMgr;
+    friend class OutdoorPvPMgr;
 
     public:
-        WorldPvP() {}
-        virtual ~WorldPvP() {}
+        OutdoorPvP() {}
+        virtual ~OutdoorPvP() {}
 
         // called when the zone is initialized
         virtual void FillInitialWorldStates(uint32 zoneId) {}
@@ -84,7 +84,7 @@ class WorldPvP : public ZoneScript
         virtual void HandleObjectiveComplete(GuidSet /*m_sObjectivePlayers*/, uint32 /*uiEventId*/) {}
 
         // init all the outdoor pvp area relates stuff
-        virtual bool InitWorldPvPArea() { return false; }
+        virtual bool InitOutdoorPvPArea() { return false; }
 
         // send world state update to all players present
         void SendUpdateWorldState(uint32 field, uint32 value);
@@ -92,7 +92,7 @@ class WorldPvP : public ZoneScript
         // awards rewards for player kill
         virtual void AwardKillBonus(Player* /*pPlayer*/) {}
 
-        // update - called by the WorldPvPMgr
+        // update - called by the OutdoorPvPMgr
         virtual void Update(uint32 diff) {}
 
         // applies buff to a team inside the specific zone

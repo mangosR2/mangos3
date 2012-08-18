@@ -20,7 +20,7 @@
 #define WORLD_PVP_MGR_H
 
 
-#include "WorldPvP.h"
+#include "OutdoorPvP.h"
 #include "Common.h"
 #include "Policies/Singleton.h"
 #include "../SharedDefines.h"
@@ -31,16 +31,16 @@ class Player;
 class GameObject;
 class Creature;
 class ZoneScript;
-class WorldPvP;
+class OutdoorPvP;
 
-class WorldPvPMgr
+class OutdoorPvPMgr
 {
     public:
-        WorldPvPMgr();
-        ~WorldPvPMgr();
+        OutdoorPvPMgr();
+        ~OutdoorPvPMgr();
 
         // create world pvp events
-        void InitWorldPvP();
+        void InitOutdoorPvP();
 
         // called when a player enters an world pvp area
         void HandlePlayerEnterZone(Player* pPlayer, uint32 uiZoneId);
@@ -49,16 +49,16 @@ class WorldPvPMgr
         void HandlePlayerLeaveZone(Player* pPlayer, uint32 uiZoneId);
 
         // return assigned world pvp
-        WorldPvP* GetWorldPvPToZoneId(uint32 uiZoneId);
+        OutdoorPvP* GetOutdoorPvPToZoneId(uint32 uiZoneId);
 
         // return assigned zone script
         ZoneScript* GetZoneScript(uint32 uiZoneId);
 
         // add zone id to world pvp handler
-        void AddZone(uint32 uiZoneId, WorldPvP* pScriptHandler);
+        void AddZone(uint32 uiZoneId, OutdoorPvP* pScriptHandler);
 
         // add capture poit id to pvp handler
-        void AddCapturePoint(uint32 uiPointId, WorldPvP* pScriptHandler);
+        void AddCapturePoint(uint32 uiPointId, OutdoorPvP* pScriptHandler);
 
         void Update(uint32);
 
@@ -81,17 +81,17 @@ class WorldPvPMgr
         bool GetCapturePointLockState(uint32 uiEntry);
         void SetCapturePointLockState(uint32 uiEntry, bool bLockState) { m_CapturePointState[uiEntry] = bLockState; }
 
-        typedef std::vector<WorldPvP*> WorldPvPSet;
-        typedef std::map<uint32 /* zoneid */, WorldPvP*> WorldPvPMap;
+        typedef std::vector<OutdoorPvP*> OutdoorPvPSet;
+        typedef std::map<uint32 /* zoneid */, OutdoorPvP*> OutdoorPvPMap;
 
     private:
         // contains all initiated world pvp events
         // used when initing / cleaning up
-        WorldPvPSet m_WorldPvPSet;
+        OutdoorPvPSet m_OutdoorPvPSet;
 
         // maps the zone ids to an world pvp event
         // used in player event handling
-        WorldPvPMap m_WorldPvPMap;
+        OutdoorPvPMap m_OutdoorPvPMap;
 
         std::map<uint32 /*capture point entry*/, float /*capture ticks*/> m_CapturePointSlider;
         std::map<uint32 /*capture point entry*/, bool /*is active*/> m_CapturePointState;
@@ -100,6 +100,6 @@ class WorldPvPMgr
         IntervalTimer m_UpdateTimer;
 };
 
-#define sWorldPvPMgr MaNGOS::Singleton<WorldPvPMgr>::Instance()
+#define sOutdoorPvPMgr MaNGOS::Singleton<OutdoorPvPMgr>::Instance()
 
 #endif

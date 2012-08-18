@@ -42,7 +42,7 @@
 #include "Vehicle.h"
 #include "BattleGround.h"
 #include "InstanceData.h"
-#include "WorldPvP/WorldPvP.h"
+#include "OutdoorPvP/OutdoorPvP.h"
 #include "MapPersistentStateMgr.h"
 #include "GridNotifiersImpl.h"
 #include "CellImpl.h"
@@ -1048,7 +1048,7 @@ uint32 Unit::DealDamage(DamageInfo* damageInfo)
 
         // Call World pvp scripts for player kill
         if (pVictim->GetTypeId() == TYPEID_PLAYER && GetTypeId() == TYPEID_PLAYER)
-            sWorldPvPMgr.HandlePlayerKill((Player*)this, pVictim);
+            sOutdoorPvPMgr.HandlePlayerKill((Player*)this, pVictim);
 
         // Call AI OwnerKilledUnit (for any current summoned minipet/guardian/protector)
         PetOwnerKilledUnit(pVictim);
@@ -1108,7 +1108,7 @@ uint32 Unit::DealDamage(DamageInfo* damageInfo)
         // handle player kill in outdoor pvp
         if (player_tap && this != pVictim)
         {
-            if (WorldPvP* pWorldBg = player_tap->GetWorldPvP())
+            if (OutdoorPvP* pWorldBg = player_tap->GetOutdoorPvP())
                 pWorldBg->HandlePlayerKillInsideArea(player_tap, pVictim);
         }
 
@@ -1340,7 +1340,7 @@ void Unit::JustKilledCreature(Creature* victim)
     if (InstanceData* mapInstance = victim->GetInstanceData())
         mapInstance->OnCreatureDeath(victim);
 
-    m_zoneScript = sWorldPvPMgr.GetZoneScript(GetZoneId());
+    m_zoneScript = sOutdoorPvPMgr.GetZoneScript(GetZoneId());
     if (m_zoneScript)
         m_zoneScript->OnCreatureDeath(victim);
 

@@ -142,12 +142,12 @@ static const HellfireTowersEvents aHellfireTowerEvents[MAX_HP_TOWERS][4] =
 
 static const uint32 aHellfireBanners[MAX_HP_TOWERS] = {GO_HELLFIRE_BANNER_OVERLOOK, GO_HELLFIRE_BANNER_STADIUM, GO_HELLFIRE_BANNER_BROKEN_HILL};
 
-class WorldPvPHP : public WorldPvP
+class OutdoorPvPHP : public OutdoorPvP
 {
     public:
-        WorldPvPHP();
+        OutdoorPvPHP();
 
-        bool InitWorldPvPArea();
+        bool InitOutdoorPvPArea();
 
         void OnGameObjectCreate(GameObject* pGo);
         void ProcessEvent(GameObject* pGo, uint32 uiEventId, uint32 uiFaction);

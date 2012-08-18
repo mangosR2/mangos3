@@ -236,12 +236,12 @@ static const PlaguelandsTowersEvents aPlaguelandsTowerEvents[MAX_EP_TOWERS][4] =
 // Order: Northpass, Crownguard, Eastwall, Plaguewood
 static const uint32 aPlaguelandsBanners[MAX_EP_TOWERS] = {GO_BATTLEFIELD_BANNER_PLAGUELANDS_1, GO_BATTLEFIELD_BANNER_PLAGUELANDS_2, GO_BATTLEFIELD_BANNER_PLAGUELANDS_3, GO_BATTLEFIELD_BANNER_PLAGUELANDS_4};
 
-class WorldPvPEP : public WorldPvP
+class OutdoorPvPEP : public OutdoorPvP
 {
     public:
-        WorldPvPEP();
+        OutdoorPvPEP();
 
-        bool InitWorldPvPArea();
+        bool InitOutdoorPvPArea();
 
         void OnGameObjectCreate(GameObject* pGo);
         void ProcessEvent(GameObject* pGo, uint32 uiEventId, uint32 uiFaction);

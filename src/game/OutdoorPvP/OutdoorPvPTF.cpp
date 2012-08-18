@@ -16,11 +16,11 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
  
-#include "WorldPvP.h"
-#include "WorldPvPTF.h"
+#include "OutdoorPvP.h"
+#include "OutdoorPvPTF.h"
 
 
-WorldPvPTF::WorldPvPTF() : WorldPvP(),
+OutdoorPvPTF::OutdoorPvPTF() : OutdoorPvP(),
     m_uiControllerWorldState(WORLD_STATE_TF_TOWERS_CONTROLLED),
     m_uiZoneController(NEUTRAL),
     m_uiZoneUpdateTimer(TIMER_TF_UPDATE_TIME),
@@ -37,7 +37,7 @@ WorldPvPTF::WorldPvPTF() : WorldPvP(),
     m_uiTowerWorldState[4] = WORLD_STATE_TOWER_5_NEUTRAL;
 }
 
-bool WorldPvPTF::InitWorldPvPArea()
+bool OutdoorPvPTF::InitOutdoorPvPArea()
 {
     RegisterZone(ZONE_ID_TEROKKAR);
     RegisterZone(ZONE_ID_SHADOW_LABYRINTH);
@@ -48,7 +48,7 @@ bool WorldPvPTF::InitWorldPvPArea()
     return true;
 }
 
-void WorldPvPTF::FillInitialWorldStates(uint32 zoneId)
+void OutdoorPvPTF::FillInitialWorldStates(uint32 zoneId)
 {
     if (m_uiControllerWorldState == WORLD_STATE_TF_TOWERS_CONTROLLED)
     {
@@ -60,7 +60,7 @@ void WorldPvPTF::FillInitialWorldStates(uint32 zoneId)
 
 }
 
-void WorldPvPTF::UpdateWorldState(uint8 uiValue)
+void OutdoorPvPTF::UpdateWorldState(uint8 uiValue)
 {
     // update only tower count; tower states is updated in the process event
     SendUpdateWorldState(m_uiControllerWorldState, uiValue);
@@ -68,9 +68,9 @@ void WorldPvPTF::UpdateWorldState(uint8 uiValue)
         SendUpdateWorldState(m_uiTowerWorldState[i], uiValue);
 }
 
-void WorldPvPTF::HandlePlayerEnterZone(Player* pPlayer)
+void OutdoorPvPTF::HandlePlayerEnterZone(Player* pPlayer)
 {
-    WorldPvP::HandlePlayerEnterZone(pPlayer);
+    OutdoorPvP::HandlePlayerEnterZone(pPlayer);
 
     // remove the buff from the player first because there are some issues at relog
     pPlayer->RemoveAurasDueToSpell(SPELL_AUCHINDOUN_BLESSING);
@@ -80,15 +80,15 @@ void WorldPvPTF::HandlePlayerEnterZone(Player* pPlayer)
         pPlayer->CastSpell(pPlayer, SPELL_AUCHINDOUN_BLESSING, true);
 }
 
-void WorldPvPTF::HandlePlayerLeaveZone(Player* pPlayer)
+void OutdoorPvPTF::HandlePlayerLeaveZone(Player* pPlayer)
 {
     // remove the buff from the player
     pPlayer->RemoveAurasDueToSpell(SPELL_AUCHINDOUN_BLESSING);
 
-    WorldPvP::HandlePlayerLeaveZone(pPlayer);
+    OutdoorPvP::HandlePlayerLeaveZone(pPlayer);
 }
 
-void WorldPvPTF::OnGameObjectCreate(GameObject* pGo)
+void OutdoorPvPTF::OnGameObjectCreate(GameObject* pGo)
 {
     switch (pGo->GetEntry())
     {
@@ -114,7 +114,7 @@ void WorldPvPTF::OnGameObjectCreate(GameObject* pGo)
     pGo->SetGoArtKit(GO_ARTKIT_BANNER_NEUTRAL);
 }
 
-void WorldPvPTF::HandleObjectiveComplete(GuidSet m_sPlayersSet, uint32 uiEventId)
+void OutdoorPvPTF::HandleObjectiveComplete(GuidSet m_sPlayersSet, uint32 uiEventId)
 {
     for (uint8 i = 0; i < MAX_TF_TOWERS; ++i)
     {
@@ -139,7 +139,7 @@ void WorldPvPTF::HandleObjectiveComplete(GuidSet m_sPlayersSet, uint32 uiEventId
 }
 
 // process the capture events
-void WorldPvPTF::ProcessEvent(GameObject* pGo, uint32 uiEventId, uint32 uiFaction)
+void OutdoorPvPTF::ProcessEvent(GameObject* pGo, uint32 uiEventId, uint32 uiFaction)
 {
     // No events during the lock timer
     if (m_uiZoneLockTimer)
@@ -162,7 +162,7 @@ void WorldPvPTF::ProcessEvent(GameObject* pGo, uint32 uiEventId, uint32 uiFactio
     }
 }
 
-void WorldPvPTF::ProcessCaptureEvent(uint32 uiCaptureType, uint32 uiTeam, uint32 uiNewWorldState, uint32 uiTower)
+void OutdoorPvPTF::ProcessCaptureEvent(uint32 uiCaptureType, uint32 uiTeam, uint32 uiNewWorldState, uint32 uiTower)
 {
     for (uint8 i = 0; i < MAX_TF_TOWERS; ++i)
     {
@@ -233,7 +233,7 @@ void WorldPvPTF::ProcessCaptureEvent(uint32 uiCaptureType, uint32 uiTeam, uint32
     }
 }
 
-void WorldPvPTF::Update(uint32 diff)
+void OutdoorPvPTF::Update(uint32 diff)
 {
     if (m_uiZoneLockTimer)
     {
@@ -289,7 +289,7 @@ void WorldPvPTF::Update(uint32 diff)
     }
 }
 
-void WorldPvPTF::UpdateTimerWorldState()
+void OutdoorPvPTF::UpdateTimerWorldState()
 {
     // Calculate time
     uint32 minutesLeft = m_uiZoneLockTimer / 60000;
@@ -302,7 +302,7 @@ void WorldPvPTF::UpdateTimerWorldState()
     SendUpdateWorldState(WORLD_STATE_TF_TIME_HOURS, hoursLeft);
 }
 
-void WorldPvPTF::SetBannerArtKit(ObjectGuid BannerGuid, uint32 uiArtkit)
+void OutdoorPvPTF::SetBannerArtKit(ObjectGuid BannerGuid, uint32 uiArtkit)
 {
     // neet to use a player as anchor for the map
     Player* pPlayer = GetPlayerInZone();
@@ -316,7 +316,7 @@ void WorldPvPTF::SetBannerArtKit(ObjectGuid BannerGuid, uint32 uiArtkit)
     }
 }
 
-void WorldPvPTF::DoResetCapturePoints(ObjectGuid BannerGuid)
+void OutdoorPvPTF::DoResetCapturePoints(ObjectGuid BannerGuid)
 {
     // neet to use a player as anchor for the map
     Player* pPlayer = GetPlayerInZone();

@@ -41,7 +41,7 @@
 #include "InstanceData.h"
 #include "MapPersistentStateMgr.h"
 #include "BattleGroundMgr.h"
-#include "WorldPvP/WorldPvPMgr.h"
+#include "OutdoorPvP/OutdoorPvPMgr.h"
 #include "Spell.h"
 #include "Util.h"
 #include "GridNotifiers.h"

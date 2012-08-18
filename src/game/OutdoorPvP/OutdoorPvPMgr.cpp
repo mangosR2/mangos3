@@ -16,117 +16,117 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
-#include "WorldPvPMgr.h"
-#include "WorldPvPEP.h"
-#include "WorldPvPGH.h"
-#include "WorldPvPHP.h"
-#include "WorldPvPNA.h"
-#include "WorldPvPSI.h"
-#include "WorldPvPTF.h"
-#include "WorldPvPZM.h"
+#include "OutdoorPvPMgr.h"
+#include "OutdoorPvPEP.h"
+#include "OutdoorPvPGH.h"
+#include "OutdoorPvPHP.h"
+#include "OutdoorPvPNA.h"
+#include "OutdoorPvPSI.h"
+#include "OutdoorPvPTF.h"
+#include "OutdoorPvPZM.h"
 #include "Policies/SingletonImp.h"
 
-INSTANTIATE_SINGLETON_1( WorldPvPMgr );
+INSTANTIATE_SINGLETON_1( OutdoorPvPMgr );
 
-WorldPvPMgr::WorldPvPMgr()
+OutdoorPvPMgr::OutdoorPvPMgr()
 {
     m_UpdateTimer.SetInterval(sWorld.getConfig(CONFIG_UINT32_INTERVAL_MAPUPDATE));
 }
 
-WorldPvPMgr::~WorldPvPMgr()
+OutdoorPvPMgr::~OutdoorPvPMgr()
 {
-    for (WorldPvPSet::iterator itr = m_WorldPvPSet.begin(); itr != m_WorldPvPSet.end(); ++itr)
+    for (OutdoorPvPSet::iterator itr = m_OutdoorPvPSet.begin(); itr != m_OutdoorPvPSet.end(); ++itr)
         delete *itr;
 }
 
 /**
    Function which loads the world pvp scripts
  */
-void WorldPvPMgr::InitWorldPvP()
+void OutdoorPvPMgr::InitOutdoorPvP()
 {
     uint8 uiPvPZonesInitialized = 0;
 
-    WorldPvP* pWorldPvP = new WorldPvPEP;
-    if (!pWorldPvP->InitWorldPvPArea())
+    OutdoorPvP* pOutdoorPvP = new OutdoorPvPEP;
+    if (!pOutdoorPvP->InitOutdoorPvPArea())
     {
-        sLog.outDebug("WorldPvP : EASTER PLAGUELANDS init failed.");
-        delete pWorldPvP;
+        sLog.outDebug("OutdoorPvP : EASTER PLAGUELANDS init failed.");
+        delete pOutdoorPvP;
     }
     else
     {
-        m_WorldPvPSet.push_back(pWorldPvP);
+        m_OutdoorPvPSet.push_back(pOutdoorPvP);
         ++uiPvPZonesInitialized;
     }
 
-    pWorldPvP = new WorldPvPHP;
-    if (!pWorldPvP->InitWorldPvPArea())
+    pOutdoorPvP = new OutdoorPvPHP;
+    if (!pOutdoorPvP->InitOutdoorPvPArea())
     {
-        sLog.outDebug("WorldPvP : HELLFIRE PENINSULA init failed.");
-        delete pWorldPvP;
+        sLog.outDebug("OutdoorPvP : HELLFIRE PENINSULA init failed.");
+        delete pOutdoorPvP;
     }
     else
     {
-        m_WorldPvPSet.push_back(pWorldPvP);
+        m_OutdoorPvPSet.push_back(pOutdoorPvP);
         ++uiPvPZonesInitialized;
     }
 
-    pWorldPvP = new WorldPvPGH;
-    if (!pWorldPvP->InitWorldPvPArea())
+    pOutdoorPvP = new OutdoorPvPGH;
+    if (!pOutdoorPvP->InitOutdoorPvPArea())
     {
-        sLog.outDebug("WorldPvP : GRIZZLY HILLS init failed.");
-        delete pWorldPvP;
+        sLog.outDebug("OutdoorPvP : GRIZZLY HILLS init failed.");
+        delete pOutdoorPvP;
     }
     else
     {
-        m_WorldPvPSet.push_back(pWorldPvP);
+        m_OutdoorPvPSet.push_back(pOutdoorPvP);
         ++uiPvPZonesInitialized;
     }
 
-    pWorldPvP = new WorldPvPNA;
-    if (!pWorldPvP->InitWorldPvPArea())
+    pOutdoorPvP = new OutdoorPvPNA;
+    if (!pOutdoorPvP->InitOutdoorPvPArea())
     {
-        sLog.outDebug("WorldPvP : NAGRAND init failed.");
-        delete pWorldPvP;
+        sLog.outDebug("OutdoorPvP : NAGRAND init failed.");
+        delete pOutdoorPvP;
     }
     else
     {
-        m_WorldPvPSet.push_back(pWorldPvP);
+        m_OutdoorPvPSet.push_back(pOutdoorPvP);
         ++uiPvPZonesInitialized;
     }
 
-    pWorldPvP = new WorldPvPSI;
-    if (!pWorldPvP->InitWorldPvPArea())
+    pOutdoorPvP = new OutdoorPvPSI;
+    if (!pOutdoorPvP->InitOutdoorPvPArea())
     {
-        sLog.outDebug("WorldPvP : SILITHUS init failed.");
-        delete pWorldPvP;
+        sLog.outDebug("OutdoorPvP : SILITHUS init failed.");
+        delete pOutdoorPvP;
     }
     else
     {
-        m_WorldPvPSet.push_back(pWorldPvP);
+        m_OutdoorPvPSet.push_back(pOutdoorPvP);
         ++uiPvPZonesInitialized;
     }
 
-    pWorldPvP = new WorldPvPTF;
-    if (!pWorldPvP->InitWorldPvPArea())
+    pOutdoorPvP = new OutdoorPvPTF;
+    if (!pOutdoorPvP->InitOutdoorPvPArea())
     {
-        sLog.outDebug("WorldPvP : TEROKKAR FOREST init failed.");
-        delete pWorldPvP;
+        sLog.outDebug("OutdoorPvP : TEROKKAR FOREST init failed.");
+        delete pOutdoorPvP;
     }
     else
     {
-        m_WorldPvPSet.push_back(pWorldPvP);
+        m_OutdoorPvPSet.push_back(pOutdoorPvP);
         ++uiPvPZonesInitialized;
     }
 
-    pWorldPvP = new WorldPvPZM;
-    if (!pWorldPvP->InitWorldPvPArea())
+    pOutdoorPvP = new OutdoorPvPZM;
+    if (!pOutdoorPvP->InitOutdoorPvPArea())
     {
-        sLog.outDebug("WorldPvP : ZANGAMARSH init failed.");
-        delete pWorldPvP;
+        sLog.outDebug("OutdoorPvP : ZANGAMARSH init failed.");
+        delete pOutdoorPvP;
     }
     else
     {
-        m_WorldPvPSet.push_back(pWorldPvP);
+        m_OutdoorPvPSet.push_back(pOutdoorPvP);
         ++uiPvPZonesInitialized;
     }
 
@@ -140,9 +140,9 @@ void WorldPvPMgr::InitWorldPvP()
    @param   zone id used for the current outdoor pvp script
    @param   outdoor pvp script object
  */
-void WorldPvPMgr::AddZone(uint32 uiZoneId, WorldPvP* pScriptHandler)
+void OutdoorPvPMgr::AddZone(uint32 uiZoneId, OutdoorPvP* pScriptHandler)
 {
-    m_WorldPvPMap[uiZoneId] = pScriptHandler;
+    m_OutdoorPvPMap[uiZoneId] = pScriptHandler;
 }
 
 /**
@@ -151,17 +151,17 @@ void WorldPvPMgr::AddZone(uint32 uiZoneId, WorldPvP* pScriptHandler)
    @param   player to be handled in the event
    @param   zone id used for the current world pvp script
  */
-void WorldPvPMgr::HandlePlayerEnterZone(Player* pPlayer, uint32 uiZoneId)
+void OutdoorPvPMgr::HandlePlayerEnterZone(Player* pPlayer, uint32 uiZoneId)
 {
-    WorldPvPMap::iterator itr = m_WorldPvPMap.find(uiZoneId);
-    if (itr == m_WorldPvPMap.end())
+    OutdoorPvPMap::iterator itr = m_OutdoorPvPMap.find(uiZoneId);
+    if (itr == m_OutdoorPvPMap.end())
         return;
 
     if (itr->second->HasPlayer(pPlayer))
         return;
 
     itr->second->HandlePlayerEnterZone(pPlayer);
-    sLog.outDebug("Player %u entered worldpvp id %u", pPlayer->GetGUIDLow(), itr->second->GetTypeId());
+    sLog.outDebug("Player %u entered OutdoorPvP id %u", pPlayer->GetGUIDLow(), itr->second->GetTypeId());
 }
 
 /**
@@ -170,10 +170,10 @@ void WorldPvPMgr::HandlePlayerEnterZone(Player* pPlayer, uint32 uiZoneId)
    @param   player to be handled in the event
    @param   zone id used for the current outdoor pvp script
  */
-void WorldPvPMgr::HandlePlayerLeaveZone(Player* pPlayer, uint32 uiZoneId)
+void OutdoorPvPMgr::HandlePlayerLeaveZone(Player* pPlayer, uint32 uiZoneId)
 {
-    WorldPvPMap::iterator itr = m_WorldPvPMap.find(uiZoneId);
-    if (itr == m_WorldPvPMap.end())
+    OutdoorPvPMap::iterator itr = m_OutdoorPvPMap.find(uiZoneId);
+    if (itr == m_OutdoorPvPMap.end())
         return;
 
     // teleport: remove once in removefromworld, once in updatezone
@@ -181,7 +181,7 @@ void WorldPvPMgr::HandlePlayerLeaveZone(Player* pPlayer, uint32 uiZoneId)
         return;
 
     itr->second->HandlePlayerLeaveZone(pPlayer);
-    sLog.outDebug("Player %u left worldpvp id %u", pPlayer->GetGUIDLow(), itr->second->GetTypeId());
+    sLog.outDebug("Player %u left OutdoorPvP id %u", pPlayer->GetGUIDLow(), itr->second->GetTypeId());
 }
 
 /**
@@ -190,9 +190,9 @@ void WorldPvPMgr::HandlePlayerLeaveZone(Player* pPlayer, uint32 uiZoneId)
    @param   player which executes the event
    @param   spell id which acts as the flag
  */
-void WorldPvPMgr::HandleDropFlag(Player* pPlayer, uint32 uiSpellId)
+void OutdoorPvPMgr::HandleDropFlag(Player* pPlayer, uint32 uiSpellId)
 {
-    for (WorldPvPSet::iterator itr = m_WorldPvPSet.begin(); itr != m_WorldPvPSet.end(); ++itr)
+    for (OutdoorPvPSet::iterator itr = m_OutdoorPvPSet.begin(); itr != m_OutdoorPvPSet.end(); ++itr)
     {
         if ((*itr)->HandleDropFlag(pPlayer, uiSpellId))
             return;
@@ -205,9 +205,9 @@ void WorldPvPMgr::HandleDropFlag(Player* pPlayer, uint32 uiSpellId)
    @param   player set to which to send the credit
    @param   capture evetn id
  */
-void WorldPvPMgr::HandleObjectiveComplete(GuidSet m_sObjectivePlayers, uint32 uiEventId)
+void OutdoorPvPMgr::HandleObjectiveComplete(GuidSet m_sObjectivePlayers, uint32 uiEventId)
 {
-    for (WorldPvPSet::iterator itr = m_WorldPvPSet.begin(); itr != m_WorldPvPSet.end(); ++itr)
+    for (OutdoorPvPSet::iterator itr = m_OutdoorPvPSet.begin(); itr != m_OutdoorPvPSet.end(); ++itr)
         (*itr)->HandleObjectiveComplete(m_sObjectivePlayers, uiEventId);
 }
 
@@ -217,9 +217,9 @@ void WorldPvPMgr::HandleObjectiveComplete(GuidSet m_sObjectivePlayers, uint32 ui
    @param   player
    @param   victim
  */
-void WorldPvPMgr::HandlePlayerKill(Player* pPlayer, Unit* pVictim)
+void OutdoorPvPMgr::HandlePlayerKill(Player* pPlayer, Unit* pVictim)
 {
-    for (WorldPvPSet::iterator itr = m_WorldPvPSet.begin(); itr != m_WorldPvPSet.end(); ++itr)
+    for (OutdoorPvPSet::iterator itr = m_OutdoorPvPSet.begin(); itr != m_OutdoorPvPSet.end(); ++itr)
         (*itr)->HandlePlayerKill(pPlayer, pVictim);
 }
 
@@ -229,9 +229,9 @@ void WorldPvPMgr::HandlePlayerKill(Player* pPlayer, Unit* pVictim)
    @param   player which executes the event
    @param   gameobject used
  */
-bool WorldPvPMgr::HandleObjectUse(Player* pPlayer, GameObject* pGo)
+bool OutdoorPvPMgr::HandleObjectUse(Player* pPlayer, GameObject* pGo)
 {
-    for (WorldPvPSet::iterator itr = m_WorldPvPSet.begin(); itr != m_WorldPvPSet.end(); ++itr)
+    for (OutdoorPvPSet::iterator itr = m_OutdoorPvPSet.begin(); itr != m_OutdoorPvPSet.end(); ++itr)
     {
         if ((*itr)->HandleObjectUse(pPlayer, pGo))
             return true;
@@ -244,12 +244,12 @@ bool WorldPvPMgr::HandleObjectUse(Player* pPlayer, GameObject* pGo)
 
    @param   zone id used for the current world pvp script
  */
-WorldPvP* WorldPvPMgr::GetWorldPvPToZoneId(uint32 uiZoneId)
+OutdoorPvP* OutdoorPvPMgr::GetOutdoorPvPToZoneId(uint32 uiZoneId)
 {
-    WorldPvPMap::iterator itr = m_WorldPvPMap.find(uiZoneId);
+    OutdoorPvPMap::iterator itr = m_OutdoorPvPMap.find(uiZoneId);
 
     // no handle for this zone, return
-    if (itr == m_WorldPvPMap.end())
+    if (itr == m_OutdoorPvPMap.end())
         return NULL;
 
     return itr->second;
@@ -260,23 +260,23 @@ WorldPvP* WorldPvPMgr::GetWorldPvPToZoneId(uint32 uiZoneId)
 
    @param   zone id used for the current world pvp script
  */
-ZoneScript* WorldPvPMgr::GetZoneScript(uint32 uiZoneId)
+ZoneScript* OutdoorPvPMgr::GetZoneScript(uint32 uiZoneId)
 {
-    WorldPvPMap::iterator itr = m_WorldPvPMap.find(uiZoneId);
+    OutdoorPvPMap::iterator itr = m_OutdoorPvPMap.find(uiZoneId);
 
-    if (itr != m_WorldPvPMap.end())
+    if (itr != m_OutdoorPvPMap.end())
         return itr->second;
     else
         return NULL;
 }
 
-void WorldPvPMgr::Update(uint32 diff)
+void OutdoorPvPMgr::Update(uint32 diff)
 {
     m_UpdateTimer.Update(diff);
     if (!m_UpdateTimer.Passed())
         return;
 
-    for (WorldPvPSet::iterator itr = m_WorldPvPSet.begin(); itr != m_WorldPvPSet.end(); ++itr)
+    for (OutdoorPvPSet::iterator itr = m_OutdoorPvPSet.begin(); itr != m_OutdoorPvPSet.end(); ++itr)
         (*itr)->Update((uint32)m_UpdateTimer.GetCurrent());
 
     m_UpdateTimer.SetCurrent(0);
@@ -287,7 +287,7 @@ void WorldPvPMgr::Update(uint32 diff)
 
    @param   capture point entry
  */
-float WorldPvPMgr::GetCapturePointSlider(uint32 uiEntry)
+float OutdoorPvPMgr::GetCapturePointSlider(uint32 uiEntry)
 {
     std::map<uint32, float>::iterator find = m_CapturePointSlider.find(uiEntry);
     if (find != m_CapturePointSlider.end())
@@ -302,7 +302,7 @@ float WorldPvPMgr::GetCapturePointSlider(uint32 uiEntry)
 
    @param   capture point entry
  */
-bool WorldPvPMgr::GetCapturePointLockState(uint32 uiEntry)
+bool OutdoorPvPMgr::GetCapturePointLockState(uint32 uiEntry)
 {
     std::map<uint32, bool>::iterator find = m_CapturePointState.find(uiEntry);
     if (find != m_CapturePointState.end())

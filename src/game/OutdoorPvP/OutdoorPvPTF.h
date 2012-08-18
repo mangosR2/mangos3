@@ -154,14 +154,14 @@ static const TerokkarTowersEvents aTerokkarTowerEvents[MAX_TF_TOWERS][4] =
 
 static const uint32 aTerokkarTowers[MAX_TF_TOWERS] = {GO_TEROKKAR_BANNER_1, GO_TEROKKAR_BANNER_2, GO_TEROKKAR_BANNER_3, GO_TEROKKAR_BANNER_4, GO_TEROKKAR_BANNER_5};
 
-class WorldPvPTF : public WorldPvP
+class OutdoorPvPTF : public OutdoorPvP
 {
-    friend class WorldPvPMgr;
+    friend class OutdoorPvPMgr;
 
     public:
-        WorldPvPTF();
+        OutdoorPvPTF();
 
-        bool InitWorldPvPArea();
+        bool InitOutdoorPvPArea();
 
         void OnGameObjectCreate(GameObject* pGo);
         void ProcessEvent(GameObject* pGo, uint32 uiEventId, uint32 uiFaction);

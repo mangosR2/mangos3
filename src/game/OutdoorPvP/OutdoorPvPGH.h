@@ -55,12 +55,12 @@ enum
     EVENT_LIGHTHOUSE_NEUTRAL_HORDE          = 18042,
 };
 
-class WorldPvPGH : public WorldPvP
+class OutdoorPvPGH : public OutdoorPvP
 {
     public:
-        WorldPvPGH();
+        OutdoorPvPGH();
 
-        bool InitWorldPvPArea();
+        bool InitOutdoorPvPArea();
 
         void OnCreatureCreate(Creature* pCreature);
         void OnGameObjectCreate(GameObject* pGo);

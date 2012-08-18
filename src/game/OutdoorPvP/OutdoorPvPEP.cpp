@@ -16,12 +16,12 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
-#include "WorldPvP.h"
-#include "WorldPvPEP.h"
+#include "OutdoorPvP.h"
+#include "OutdoorPvPEP.h"
 #include "../GameObject.h"
 
 
-WorldPvPEP::WorldPvPEP() : WorldPvP(),
+OutdoorPvPEP::OutdoorPvPEP() : OutdoorPvP(),
     m_uiTowersAlly(0),
     m_uiTowersHorde(0)
 {
@@ -36,7 +36,7 @@ WorldPvPEP::WorldPvPEP() : WorldPvP(),
         m_uiTowerController[i] = NEUTRAL;
 }
 
-bool WorldPvPEP::InitWorldPvPArea()
+bool OutdoorPvPEP::InitOutdoorPvPArea()
 {
     RegisterZone(ZONE_ID_EASTERN_PLAGUELANDS);
     RegisterZone(ZONE_ID_STRATHOLME);
@@ -45,21 +45,21 @@ bool WorldPvPEP::InitWorldPvPArea()
     return true;
 }
 
-void WorldPvPEP::FillInitialWorldStates(uint32 zoneId)
+void OutdoorPvPEP::FillInitialWorldStates(uint32 zoneId)
 {
     FillInitialWorldState(zoneId, WORLD_STATE_TOWER_COUNT_ALY, m_uiTowersAlly);
     FillInitialWorldState(zoneId, WORLD_STATE_TOWER_COUNT_HORDE, m_uiTowersHorde);
 
 }
 
-void WorldPvPEP::UpdateWorldState()
+void OutdoorPvPEP::UpdateWorldState()
 {
     // update only tower count; tower states is updated in the process event
     SendUpdateWorldState(WORLD_STATE_TOWER_COUNT_ALY, m_uiTowersAlly);
     SendUpdateWorldState(WORLD_STATE_TOWER_COUNT_HORDE, m_uiTowersHorde);
 }
 
-void WorldPvPEP::HandlePlayerEnterZone(Player* pPlayer)
+void OutdoorPvPEP::HandlePlayerEnterZone(Player* pPlayer)
 {
     // remove the buff from the player first; Sometimes on relog players still have the aura
     for (uint8 i = 0; i < MAX_EP_TOWERS; i++)
@@ -87,10 +87,10 @@ void WorldPvPEP::HandlePlayerEnterZone(Player* pPlayer)
             break;
     }
 
-    WorldPvP::HandlePlayerEnterZone(pPlayer);
+    OutdoorPvP::HandlePlayerEnterZone(pPlayer);
 }
 
-void WorldPvPEP::HandlePlayerLeaveZone(Player* pPlayer)
+void OutdoorPvPEP::HandlePlayerLeaveZone(Player* pPlayer)
 {
     // remove the buff from the player
     for (uint8 i = 0; i < MAX_EP_TOWERS; i++)
@@ -99,10 +99,10 @@ void WorldPvPEP::HandlePlayerLeaveZone(Player* pPlayer)
             pPlayer->RemoveAurasDueToSpell(pPlayer->GetTeam() == ALLIANCE ? m_aPlaguelandsTowerBuffs[i].uiSpellIdAlly : m_aPlaguelandsTowerBuffs[i].uiSpellIdHorde);
     }
 
-    WorldPvP::HandlePlayerLeaveZone(pPlayer);
+    OutdoorPvP::HandlePlayerLeaveZone(pPlayer);
 }
 
-void WorldPvPEP::OnGameObjectCreate(GameObject* pGo)
+void OutdoorPvPEP::OnGameObjectCreate(GameObject* pGo)
 {
     switch (pGo->GetEntry())
     {
@@ -154,7 +154,7 @@ void WorldPvPEP::OnGameObjectCreate(GameObject* pGo)
     }
 }
 
-void WorldPvPEP::HandleObjectiveComplete(GuidSet m_sPlayersSet, uint32 uiEventId)
+void OutdoorPvPEP::HandleObjectiveComplete(GuidSet m_sPlayersSet, uint32 uiEventId)
 {
     uint32 uiCredit = 0;
 
@@ -197,7 +197,7 @@ void WorldPvPEP::HandleObjectiveComplete(GuidSet m_sPlayersSet, uint32 uiEventId
 }
 
 // process the capture events
-void WorldPvPEP::ProcessEvent(GameObject* pGo, uint32 uiEventId, uint32 uiFaction)
+void OutdoorPvPEP::ProcessEvent(GameObject* pGo, uint32 uiEventId, uint32 uiFaction)
 {
     for (uint8 i = 0; i < MAX_EP_TOWERS; ++i)
     {
@@ -216,7 +216,7 @@ void WorldPvPEP::ProcessEvent(GameObject* pGo, uint32 uiEventId, uint32 uiFactio
     }
 }
 
-void WorldPvPEP::ProcessCaptureEvent(uint32 uiCaptureType, uint32 uiTeam, uint32 uiNewWorldState, uint32 uiTower)
+void OutdoorPvPEP::ProcessCaptureEvent(uint32 uiCaptureType, uint32 uiTeam, uint32 uiNewWorldState, uint32 uiTower)
 {
     for (uint8 i = 0; i < MAX_EP_TOWERS; ++i)
     {
@@ -308,7 +308,7 @@ void WorldPvPEP::ProcessCaptureEvent(uint32 uiCaptureType, uint32 uiTeam, uint32
     UpdateWorldState();
 }
 
-void WorldPvPEP::DoSummonFlightMasterIfCan(uint32 uiFaction)
+void OutdoorPvPEP::DoSummonFlightMasterIfCan(uint32 uiFaction)
 {
     Player* pPlayer = GetPlayerInZone();
     if (!pPlayer)
@@ -319,7 +319,7 @@ void WorldPvPEP::DoSummonFlightMasterIfCan(uint32 uiFaction)
         m_uiFlightMasterGUID = pFlightMaster->GetObjectGuid();
 }
 
-void WorldPvPEP::DoUnsummonFlightMaster()
+void OutdoorPvPEP::DoUnsummonFlightMaster()
 {
     // neet to use a player as anchor for the map
     Player* pPlayer = GetPlayerInZone();
@@ -330,7 +330,7 @@ void WorldPvPEP::DoUnsummonFlightMaster()
         pFlightMaster->ForcedDespawn();
 }
 
-void WorldPvPEP::DoSummonSoldiersIfCan(uint32 uiFaction)
+void OutdoorPvPEP::DoSummonSoldiersIfCan(uint32 uiFaction)
 {
     Player* pPlayer = GetPlayerInZone();
     if (!pPlayer)
@@ -350,7 +350,7 @@ void WorldPvPEP::DoSummonSoldiersIfCan(uint32 uiFaction)
     }
 }
 
-void WorldPvPEP::DoUnsummonSoldiers()
+void OutdoorPvPEP::DoUnsummonSoldiers()
 {
     // neet to use a player as anchor for the map
     Player* pPlayer = GetPlayerInZone();
@@ -364,7 +364,7 @@ void WorldPvPEP::DoUnsummonSoldiers()
     }
 }
 
-void WorldPvPEP::DoSetGraveyard(uint32 uiFaction, bool bRemove)
+void OutdoorPvPEP::DoSetGraveyard(uint32 uiFaction, bool bRemove)
 {
     if (bRemove)
         sObjectMgr.RemoveGraveYardLink(GRAVEYARD_ID_EASTERN_PLAGUE, GRAVEYARD_ZONE_EASTERN_PLAGUE,  (Team)uiFaction,      false);
@@ -372,7 +372,7 @@ void WorldPvPEP::DoSetGraveyard(uint32 uiFaction, bool bRemove)
         sObjectMgr.AddGraveYardLink(GRAVEYARD_ID_EASTERN_PLAGUE,    GRAVEYARD_ZONE_EASTERN_PLAGUE,  (Team)uiFaction, false);
 }
 
-void WorldPvPEP::DoUpdateShrine(ObjectGuid uiShrineGuid, bool bRemove)
+void OutdoorPvPEP::DoUpdateShrine(ObjectGuid uiShrineGuid, bool bRemove)
 {
     // neet to use a player as anchor for the map
     Player* pPlayer = GetPlayerInZone();
@@ -392,7 +392,7 @@ void WorldPvPEP::DoUpdateShrine(ObjectGuid uiShrineGuid, bool bRemove)
     }
 }
 
-void WorldPvPEP::SetBannersArtKit(std::list<ObjectGuid> lBannersGuids, uint32 uiArtkit)
+void OutdoorPvPEP::SetBannersArtKit(std::list<ObjectGuid> lBannersGuids, uint32 uiArtkit)
 {
     // neet to use a player as anchor for the map
     Player* pPlayer = GetPlayerInZone();

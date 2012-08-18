@@ -38,7 +38,7 @@
 #include "Creature.h"
 #include "Formulas.h"
 #include "BattleGround.h"
-#include "WorldPvP/WorldPvPMgr.h"
+#include "OutdoorPvP/OutdoorPvPMgr.h"
 #include "CreatureAI.h"
 #include "ScriptMgr.h"
 #include "Util.h"
@@ -5896,7 +5896,7 @@ void Aura::HandleAuraModEffectImmunity(bool apply, bool /*Real*/)
             bg->EventPlayerDroppedFlag(((Player*)target));
         else
         {
-            sWorldPvPMgr.HandleDropFlag((Player*)target, GetSpellProto()->Id);
+            sOutdoorPvPMgr.HandleDropFlag((Player*)target, GetSpellProto()->Id);
             if (InstanceData* mapInstance = ((Player*)target)->GetInstanceData())
                 mapInstance->OnPlayerDroppedFlag((Player*)target, GetSpellProto()->Id);
         }

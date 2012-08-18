@@ -16,14 +16,14 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
-#include "WorldPvP.h"
+#include "OutdoorPvP.h"
 
 /**
    Function that a players to a players set
 
    @param   player to be added to set
  */
-void WorldPvP::HandlePlayerEnterZone(Player* pPlayer)
+void OutdoorPvP::HandlePlayerEnterZone(Player* pPlayer)
 {
     if (!pPlayer)
         return;
@@ -36,7 +36,7 @@ void WorldPvP::HandlePlayerEnterZone(Player* pPlayer)
 
    @param   player to be removed
  */
-void WorldPvP::HandlePlayerLeaveZone(Player* pPlayer)
+void OutdoorPvP::HandlePlayerLeaveZone(Player* pPlayer)
 {
     if (!pPlayer)
         return;
@@ -52,7 +52,7 @@ void WorldPvP::HandlePlayerLeaveZone(Player* pPlayer)
    @param   world state it to update
    @param   value which should update the world state
  */
-void WorldPvP::SendUpdateWorldState(uint32 uiField, uint32 uiValue)
+void OutdoorPvP::SendUpdateWorldState(uint32 uiField, uint32 uiValue)
 {
     for (GuidSet::iterator itr = m_sZonePlayers.begin(); itr != m_sZonePlayers.end(); ++itr)
     {
@@ -68,7 +68,7 @@ void WorldPvP::SendUpdateWorldState(uint32 uiField, uint32 uiValue)
    @param   player which kills another player
    @param   player or unit (pet) which is victim
  */
-void WorldPvP::HandlePlayerKill(Player* pKiller, Unit* pVictim)
+void OutdoorPvP::HandlePlayerKill(Player* pKiller, Unit* pVictim)
 {
     if (Group* pGroup = pKiller->GetGroup())
     {
@@ -85,27 +85,27 @@ void WorldPvP::HandlePlayerKill(Player* pKiller, Unit* pVictim)
 
             // creature kills must be notified, even if not inside objective / not outdoor pvp active
             // player kills only count if active and inside objective
-            if (pGroupGuy->IsWorldPvPActive())
+            if (pGroupGuy->IsOutdoorPvPActive())
                 HandlePlayerKillInsideArea(pGroupGuy, pVictim);
         }
     }
     else
     {
         // creature kills must be notified, even if not inside objective / not outdoor pvp active
-        if (pKiller && (pKiller->IsWorldPvPActive()))
+        if (pKiller && (pKiller->IsOutdoorPvPActive()))
             HandlePlayerKillInsideArea(pKiller, pVictim);
     }
 }
 
 // register this zone as an outdoor pvp script
-void WorldPvP::RegisterZone(uint32 uiZoneId)
+void OutdoorPvP::RegisterZone(uint32 uiZoneId)
 {
-    sWorldPvPMgr.AddZone(uiZoneId, this);
+    sOutdoorPvPMgr.AddZone(uiZoneId, this);
     FillInitialWorldStates(uiZoneId);
 }
 
 // return if has player inside the zone
-bool WorldPvP::HasPlayer(Player* pPlayer) const
+bool OutdoorPvP::HasPlayer(Player* pPlayer) const
 {
     if (!pPlayer)
         return false;
@@ -114,19 +114,19 @@ bool WorldPvP::HasPlayer(Player* pPlayer) const
 }
 
 // lock a capture point
-void WorldPvP::LockCapturePoint(uint32 pointEntry, bool isLocked)
+void OutdoorPvP::LockCapturePoint(uint32 pointEntry, bool isLocked)
 {
-     sWorldPvPMgr.SetCapturePointLockState(pointEntry, isLocked);
+     sOutdoorPvPMgr.SetCapturePointLockState(pointEntry, isLocked);
 }
 
 // reset a capture point slider
-void WorldPvP::ResetCapturePoint(uint32 pointEntry, float fValue)
+void OutdoorPvP::ResetCapturePoint(uint32 pointEntry, float fValue)
 {
-    sWorldPvPMgr.SetCapturePointSlider(pointEntry, fValue);
+    sOutdoorPvPMgr.SetCapturePointSlider(pointEntry, fValue);
 }
 
 // apply a team buff for the specific zone
-void WorldPvP::DoProcessTeamBuff(Team uiTeam, uint32 uiSpellId, bool bRemove)
+void OutdoorPvP::DoProcessTeamBuff(Team uiTeam, uint32 uiSpellId, bool bRemove)
 {
     for (GuidSet::iterator itr = m_sZonePlayers.begin(); itr != m_sZonePlayers.end(); ++itr)
     {
@@ -152,7 +152,7 @@ void WorldPvP::DoProcessTeamBuff(Team uiTeam, uint32 uiSpellId, bool bRemove)
 }
 
 /// Get the first found Player* (with requested properties) in the zone. Can return NULL.
-Player* WorldPvP::GetPlayerInZone(bool bOnlyAlive /*=false*/, bool bCanBeGamemaster /*=true*/)
+Player* OutdoorPvP::GetPlayerInZone(bool bOnlyAlive /*=false*/, bool bCanBeGamemaster /*=true*/)
 {
     for (GuidSet::iterator itr = m_sZonePlayers.begin(); itr != m_sZonePlayers.end(); ++itr)
     {
@@ -171,7 +171,7 @@ Player* WorldPvP::GetPlayerInZone(bool bOnlyAlive /*=false*/, bool bCanBeGamemas
     return NULL;
 }
 
-void WorldPvP::FillInitialWorldState(uint32 zoneId, uint32 stateId, uint32& value)
+void OutdoorPvP::FillInitialWorldState(uint32 zoneId, uint32 stateId, uint32& value)
 {
     uint32 stateValue = sWorldStateMgr.GetWorldStateValueFor(UINT32_MAX, UINT32_MAX, zoneId, UINT32_MAX, stateId);
 

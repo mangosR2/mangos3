@@ -60,7 +60,7 @@ class DungeonPersistentState;
 class Spell;
 class Item;
 struct AreaTrigger;
-class WorldPvP;
+class OutdoorPvP;
 
 typedef std::deque<Mail*> PlayerMails;
 
@@ -2211,9 +2211,9 @@ class MANGOS_DLL_SPEC Player : public Unit
         // returns true if the player is in active state for outdoor pvp objective capturing
         bool CanUseOutdoorCapturePoint();
 
-        WorldPvP* GetWorldPvP() const;
+        OutdoorPvP* GetOutdoorPvP() const;
         // returns true if the player is in active state for outdoor pvp objective capturing
-        bool IsWorldPvPActive();
+        bool IsOutdoorPvPActive();
         virtual void HandleObjectiveComplete(Player* /*pPlayer*/) {};
 
         /*********************************************************/

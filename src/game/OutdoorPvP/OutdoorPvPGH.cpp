@@ -16,24 +16,24 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
-#include "WorldPvP.h"
-#include "WorldPvPGH.h"
+#include "OutdoorPvP.h"
+#include "OutdoorPvPGH.h"
 
 
-WorldPvPGH::WorldPvPGH() : WorldPvP(),
+OutdoorPvPGH::OutdoorPvPGH() : OutdoorPvP(),
     m_uiZoneController(NEUTRAL)
 {
     m_uiTypeId = WORLD_PVP_TYPE_GH;
 }
 
-bool WorldPvPGH::InitWorldPvPArea()
+bool OutdoorPvPGH::InitOutdoorPvPArea()
 {
     RegisterZone(ZONE_ID_GRIZZLY_HILLS);
 
     return true;
 }
 
-void WorldPvPGH::OnCreatureCreate(Creature* pCreature)
+void OutdoorPvPGH::OnCreatureCreate(Creature* pCreature)
 {
     switch (pCreature->GetEntry())
     {
@@ -79,7 +79,7 @@ void WorldPvPGH::OnCreatureCreate(Creature* pCreature)
     pCreature->ForcedDespawn();
 }
 
-void WorldPvPGH::OnGameObjectCreate(GameObject* pGo)
+void OutdoorPvPGH::OnGameObjectCreate(GameObject* pGo)
 {
     if (pGo->GetEntry() == GO_VENTURE_BAY_LIGHTHOUSE)
     {
@@ -89,7 +89,7 @@ void WorldPvPGH::OnGameObjectCreate(GameObject* pGo)
 }
 
 // process the capture events
-void WorldPvPGH::ProcessEvent(GameObject* pGo, uint32 uiEventId, uint32 uiFaction)
+void OutdoorPvPGH::ProcessEvent(GameObject* pGo, uint32 uiEventId, uint32 uiFaction)
 {
     // If we are not using the lighthouse return
     if (pGo->GetEntry() != GO_VENTURE_BAY_LIGHTHOUSE)
@@ -112,7 +112,7 @@ void WorldPvPGH::ProcessEvent(GameObject* pGo, uint32 uiEventId, uint32 uiFactio
     }
 }
 
-void WorldPvPGH::ProcessCaptureEvent(uint32 uiCaptureType, uint32 uiTeam)
+void OutdoorPvPGH::ProcessCaptureEvent(uint32 uiCaptureType, uint32 uiTeam)
 {
     switch (uiCaptureType)
     {
@@ -131,7 +131,7 @@ void WorldPvPGH::ProcessCaptureEvent(uint32 uiCaptureType, uint32 uiTeam)
     }
 }
 
-void WorldPvPGH::DoRespawnSoldiers(uint32 uiFaction)
+void OutdoorPvPGH::DoRespawnSoldiers(uint32 uiFaction)
 {
     // neet to use a player as anchor for the map
     Player* pPlayer = GetPlayerInZone();
@@ -182,7 +182,7 @@ void WorldPvPGH::DoRespawnSoldiers(uint32 uiFaction)
     }
 }
 
-void WorldPvPGH::SetBannerArtKit(uint32 uiArtkit)
+void OutdoorPvPGH::SetBannerArtKit(uint32 uiArtkit)
 {
     // neet to use a player as anchor for the map
     Player* pPlayer = GetPlayerInZone();

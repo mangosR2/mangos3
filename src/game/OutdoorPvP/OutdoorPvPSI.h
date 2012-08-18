@@ -73,12 +73,12 @@ static SilithusLocations aSilithusLocs[2] =
     {-7588.48f, 756.806f, -16.425f}     // horde
 };
 
-class WorldPvPSI : public WorldPvP
+class OutdoorPvPSI : public OutdoorPvP
 {
     public:
-        WorldPvPSI();
+        OutdoorPvPSI();
 
-        bool InitWorldPvPArea();
+        bool InitOutdoorPvPArea();
 
         void HandlePlayerEnterZone(Player* pPlayer);
         void HandlePlayerLeaveZone(Player* pPlayer);

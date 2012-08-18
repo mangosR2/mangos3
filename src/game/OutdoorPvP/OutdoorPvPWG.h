@@ -20,16 +20,16 @@
 #ifndef WORLD_PVP_WG
 #define WORLD_PVP_WG
 
-#include "WorldPvP.h"
+#include "OutdoorPvP.h"
 
-struct WorldPvPWGGameObjectBuilding;
-typedef std::set<WorldPvPWGGameObjectBuilding*> GameObjectBuilding;
+struct OutdoorPvPWGGameObjectBuilding;
+typedef std::set<OutdoorPvPWGGameObjectBuilding*> GameObjectBuilding;
 
-struct WorldPvPWGWorkShopData;
-typedef std::set<WorldPvPWGWorkShopData*> WorkShop;
+struct OutdoorPvPWGWorkShopData;
+typedef std::set<OutdoorPvPWGWorkShopData*> WorkShop;
 
-struct WorldPvPGraveYardWG;
-typedef std::set<WorldPvPGraveYardWG*> GraveYard;
+struct OutdoorPvPGraveYardWG;
+typedef std::set<OutdoorPvPGraveYardWG*> GraveYard;
 
 enum
 {
@@ -169,7 +169,7 @@ enum eWGNpc
     NPC_SIEGE_ENGINE_H               = 32627,
 };
 
-struct WorldPvPWGBuildingSpawnData
+struct OutdoorPvPWGBuildingSpawnData
 {
     uint32 entry;
     uint32 WorldState;
@@ -178,7 +178,7 @@ struct WorldPvPWGBuildingSpawnData
 };
 
 #define WG_MAX_OBJ 32
-const WorldPvPWGBuildingSpawnData WGGameObjectBuillding[WG_MAX_OBJ] = {
+const OutdoorPvPWGBuildingSpawnData WGGameObjectBuillding[WG_MAX_OBJ] = {
     // Wall
     // Entry WS       type                        NameID
     { 190219, 3749, WORLD_PVP_WG_OBJECTTYPE_WALL, 0 },
@@ -220,7 +220,7 @@ const WorldPvPWGBuildingSpawnData WGGameObjectBuillding[WG_MAX_OBJ] = {
     { 191810, 3773, WORLD_PVP_WG_OBJECTTYPE_DOOR_LAST, 0 },
 };
 
-struct WorldPvPWGWorkShopDataBase
+struct OutdoorPvPWGWorkShopDataBase
 {
     uint32 entry;
     uint32 worldstate;
@@ -231,7 +231,7 @@ struct WorldPvPWGWorkShopDataBase
 
 #define WG_MAX_WORKSHOP  6
 
-const WorldPvPWGWorkShopDataBase WGWorkShopDataBase[WG_MAX_WORKSHOP] = {
+const OutdoorPvPWGWorkShopDataBase WGWorkShopDataBase[WG_MAX_WORKSHOP] = {
     { 192031,3701,WORLD_PVP_WG_WORKSHOP_NE,0,1329 },
     { 192030,3700,WORLD_PVP_WG_WORKSHOP_NW,0,1330 },
     { 192033,3703,WORLD_PVP_WG_WORKSHOP_SE,0,1333 },

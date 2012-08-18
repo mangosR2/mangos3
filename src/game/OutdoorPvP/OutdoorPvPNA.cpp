@@ -17,11 +17,11 @@
  */
 
 
-#include "WorldPvP.h"
-#include "WorldPvPNA.h"
+#include "OutdoorPvP.h"
+#include "OutdoorPvPNA.h"
 
 
-WorldPvPNA::WorldPvPNA() : WorldPvP(),
+OutdoorPvPNA::OutdoorPvPNA() : OutdoorPvP(),
     m_uiControllerMapState(WORLD_STATE_NA_HALAA_NEUTRAL),
     m_uiControllerWorldState(0),
     m_uiZoneController(NEUTRAL),
@@ -30,14 +30,14 @@ WorldPvPNA::WorldPvPNA() : WorldPvP(),
     m_uiTypeId = WORLD_PVP_TYPE_NA;
 }
 
-bool WorldPvPNA::InitWorldPvPArea()
+bool OutdoorPvPNA::InitOutdoorPvPArea()
 {
     RegisterZone(ZONE_ID_NAGRAND);
 
     return true;
 }
 
-void WorldPvPNA::FillInitialWorldStates(uint32 zoneId)
+void OutdoorPvPNA::FillInitialWorldStates(uint32 zoneId)
 {
     if (m_uiZoneController != NEUTRAL)
     {
@@ -45,9 +45,9 @@ void WorldPvPNA::FillInitialWorldStates(uint32 zoneId)
     }
 }
 
-void WorldPvPNA::HandlePlayerEnterZone(Player* pPlayer)
+void OutdoorPvPNA::HandlePlayerEnterZone(Player* pPlayer)
 {
-    WorldPvP::HandlePlayerEnterZone(pPlayer);
+    OutdoorPvP::HandlePlayerEnterZone(pPlayer);
 
     // remove the buff from the player first because there are some issues at relog
     pPlayer->RemoveAurasDueToSpell(SPELL_STRENGTH_HALAANI);
@@ -57,15 +57,15 @@ void WorldPvPNA::HandlePlayerEnterZone(Player* pPlayer)
         pPlayer->CastSpell(pPlayer, SPELL_STRENGTH_HALAANI, true);
 }
 
-void WorldPvPNA::HandlePlayerLeaveZone(Player* pPlayer)
+void OutdoorPvPNA::HandlePlayerLeaveZone(Player* pPlayer)
 {
     // remove the buff from the player
     pPlayer->RemoveAurasDueToSpell(SPELL_STRENGTH_HALAANI);
 
-    WorldPvP::HandlePlayerLeaveZone(pPlayer);
+    OutdoorPvP::HandlePlayerLeaveZone(pPlayer);
 }
 
-void WorldPvPNA::HandleObjectiveComplete(GuidSet m_sPlayersSet, uint32 uiEventId)
+void OutdoorPvPNA::HandleObjectiveComplete(GuidSet m_sPlayersSet, uint32 uiEventId)
 {
     if (uiEventId == EVENT_HALAA_BANNER_WIN_ALLIANCE || uiEventId == EVENT_HALAA_BANNER_WIN_HORDE)
     {
@@ -85,7 +85,7 @@ void WorldPvPNA::HandleObjectiveComplete(GuidSet m_sPlayersSet, uint32 uiEventId
 }
 
 // Cast player spell on oponent kill
-void WorldPvPNA::HandlePlayerKillInsideArea(Player* pPlayer, Unit* pVictim)
+void OutdoorPvPNA::HandlePlayerKillInsideArea(Player* pPlayer, Unit* pVictim)
 {
     if (GameObject* pBanner = pPlayer->GetMap()->GetGameObject(m_HalaaBanerGuid))
     {
@@ -104,7 +104,7 @@ void WorldPvPNA::HandlePlayerKillInsideArea(Player* pPlayer, Unit* pVictim)
     }
 }
 
-void WorldPvPNA::OnCreatureCreate(Creature* pCreature)
+void OutdoorPvPNA::OnCreatureCreate(Creature* pCreature)
 {
     switch (pCreature->GetEntry())
     {
@@ -138,7 +138,7 @@ void WorldPvPNA::OnCreatureCreate(Creature* pCreature)
     pCreature->ForcedDespawn();
 }
 
-void WorldPvPNA::OnCreatureDeath(Creature* pCreature)
+void OutdoorPvPNA::OnCreatureDeath(Creature* pCreature)
 {
     if (pCreature->GetEntry() != NPC_HORDE_HALAANI_GUARD && pCreature->GetEntry() != NPC_ALLIANCE_HANAANI_GUARD)
         return;
@@ -156,7 +156,7 @@ void WorldPvPNA::OnCreatureDeath(Creature* pCreature)
     }
 }
 
-void WorldPvPNA::OnCreatureRespawn(Creature* pCreature)
+void OutdoorPvPNA::OnCreatureRespawn(Creature* pCreature)
 {
     if (pCreature->GetEntry() != NPC_HORDE_HALAANI_GUARD && pCreature->GetEntry() != NPC_ALLIANCE_HANAANI_GUARD)
         return;
@@ -175,7 +175,7 @@ void WorldPvPNA::OnCreatureRespawn(Creature* pCreature)
     }
 }
 
-void WorldPvPNA::OnGameObjectCreate(GameObject* pGo)
+void OutdoorPvPNA::OnGameObjectCreate(GameObject* pGo)
 {
     switch (pGo->GetEntry())
     {
@@ -264,7 +264,7 @@ void WorldPvPNA::OnGameObjectCreate(GameObject* pGo)
     }
 }
 
-void WorldPvPNA::UpdateWorldState(uint8 uiValue)
+void OutdoorPvPNA::UpdateWorldState(uint8 uiValue)
 {
     SendUpdateWorldState(m_uiControllerWorldState, uiValue);
     SendUpdateWorldState(m_uiControllerMapState, uiValue);
@@ -279,14 +279,14 @@ void WorldPvPNA::UpdateWorldState(uint8 uiValue)
     UpdateWyvernsWorldState(uiValue);
 }
 
-void WorldPvPNA::UpdateWyvernsWorldState(uint8 uiValue)
+void OutdoorPvPNA::UpdateWyvernsWorldState(uint8 uiValue)
 {
     for (uint8 i = 0; i < MAX_NA_ROOSTS; ++i)
         SendUpdateWorldState(m_uiRoostWorldState[i], uiValue);
 }
 
 // process the capture events
-void WorldPvPNA::ProcessEvent(GameObject* pGo, uint32 uiEventId, uint32 uiFaction)
+void OutdoorPvPNA::ProcessEvent(GameObject* pGo, uint32 uiEventId, uint32 uiFaction)
 {
     // If we are not using the Halaa banner return
     if (pGo->GetEntry() != GO_HALAA_BANNER)
@@ -303,7 +303,7 @@ void WorldPvPNA::ProcessEvent(GameObject* pGo, uint32 uiEventId, uint32 uiFactio
     }
 }
 
-void WorldPvPNA::ProcessCaptureEvent(uint32 uiCaptureType, uint32 uiTeam)
+void OutdoorPvPNA::ProcessCaptureEvent(uint32 uiCaptureType, uint32 uiTeam)
 {
     if (uiCaptureType == WIN)
     {
@@ -330,7 +330,7 @@ void WorldPvPNA::ProcessCaptureEvent(uint32 uiCaptureType, uint32 uiTeam)
     }
 }
 
-void WorldPvPNA::DoSetGraveyard(uint32 uiFaction, bool bRemove)
+void OutdoorPvPNA::DoSetGraveyard(uint32 uiFaction, bool bRemove)
 {
     if (bRemove)
         sObjectMgr.RemoveGraveYardLink(GRAVEYARD_ID_HALAA, GRAVEYARD_ZONE_ID_HALAA, (Team)uiFaction, false);
@@ -338,7 +338,7 @@ void WorldPvPNA::DoSetGraveyard(uint32 uiFaction, bool bRemove)
         sObjectMgr.AddGraveYardLink(GRAVEYARD_ID_HALAA, GRAVEYARD_ZONE_ID_HALAA, (Team)uiFaction, false);
 }
 
-void WorldPvPNA::DoHandleFactionObjects(uint32 uiFaction)
+void OutdoorPvPNA::DoHandleFactionObjects(uint32 uiFaction)
 {
     if (uiFaction == ALLIANCE)
     {
@@ -370,7 +370,7 @@ void WorldPvPNA::DoHandleFactionObjects(uint32 uiFaction)
     }
 }
 
-void WorldPvPNA::DoRespawnSoldiers(uint32 uiFaction)
+void OutdoorPvPNA::DoRespawnSoldiers(uint32 uiFaction)
 {
     // neet to use a player as anchor for the map
     Player* pPlayer = GetPlayerInZone();
@@ -427,7 +427,7 @@ void WorldPvPNA::DoRespawnSoldiers(uint32 uiFaction)
     }
 }
 
-bool WorldPvPNA::HandleObjectUse(Player* pPlayer, GameObject* pGo)
+bool OutdoorPvPNA::HandleObjectUse(Player* pPlayer, GameObject* pGo)
 {
     bool bReturnStatus = false;
     UpdateWyvernsWorldState(0);
@@ -507,7 +507,7 @@ bool WorldPvPNA::HandleObjectUse(Player* pPlayer, GameObject* pGo)
 }
 
 // Handle Taxi for Halaa bombing run
-bool WorldPvPNA::HandlePlayerTaxiDrive(Player* pPlayer, uint8 uiPos)
+bool OutdoorPvPNA::HandlePlayerTaxiDrive(Player* pPlayer, uint8 uiPos)
 {
     std::vector<uint32> vTaxiNodes;
     vTaxiNodes.reserve(2);
@@ -523,7 +523,7 @@ bool WorldPvPNA::HandlePlayerTaxiDrive(Player* pPlayer, uint8 uiPos)
 }
 
 // Add fire bombs to player inventory
-bool WorldPvPNA::AddBombsToInventory(Player* pPlayer)
+bool OutdoorPvPNA::AddBombsToInventory(Player* pPlayer)
 {
     uint32 uiSpaceForItems = 0;
     ItemPosCountVec m_Destination;
@@ -545,7 +545,7 @@ bool WorldPvPNA::AddBombsToInventory(Player* pPlayer)
     return true;
 }
 
-void WorldPvPNA::SetBannerArtKit(uint32 uiArtkit)
+void OutdoorPvPNA::SetBannerArtKit(uint32 uiArtkit)
 {
     // neet to use a player as anchor for the map
     Player* pPlayer = GetPlayerInZone();
@@ -559,7 +559,7 @@ void WorldPvPNA::SetBannerArtKit(uint32 uiArtkit)
     }
 }
 
-void WorldPvPNA::DoRespawnObjects(ObjectGuid GameObjectGuid, bool bRespawn)
+void OutdoorPvPNA::DoRespawnObjects(ObjectGuid GameObjectGuid, bool bRespawn)
 {
     // neet to use a player as anchor for the map
     Player* pPlayer = GetPlayerInZone();
