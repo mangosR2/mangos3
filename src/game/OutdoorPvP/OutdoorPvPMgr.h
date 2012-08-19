@@ -37,6 +37,7 @@ enum OutdoorPvPTypes
     OPVP_ID_TF,
     OPVP_ID_NA,
     OPVP_ID_GH,
+    OPVP_ID_WG,
 
     MAX_OPVP_ID
 };
@@ -73,7 +74,11 @@ enum OutdoorPvPZones
 
     ZONE_ID_NAGRAND                 = 3518,
 
-    ZONE_ID_GRIZZLY_HILLS           = 394
+    ZONE_ID_GRIZZLY_HILLS           = 394,
+
+    ZONE_ID_WINTERGRASP             = 4197,
+
+    ZONE_ID_ERROR                   = 0,
 };
 
 class Player;
@@ -105,6 +110,8 @@ class OutdoorPvPMgr
         // fully wrong and not needed, see Get/SetLinkedWorldState() FIXME - rewrite need
         int8 GetCapturePointSliderValue(uint32 entry);
         void SetCapturePointSlider(uint32 entry, int8 value) { m_capturePointSlider[entry] = value; }
+
+        uint32 GetZoneOfAffectedScript(OutdoorPvP const* script) const;
 
     private:
         // return assigned outdoor pvp script

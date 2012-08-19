@@ -34,7 +34,6 @@ typedef std::set<OutdoorPvPGraveYardWG*> GraveYard;
 enum
 {
     MAPID_ID_WINTERGRASP                = 571,
-    ZONE_ID_WINTERGRASP                 = 4197,
     // Go factions
     GO_FACTION_A                        = 1732,
     GO_FACTION_H                        = 1735,
