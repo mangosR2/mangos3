@@ -5343,18 +5343,13 @@ SpellAuraProcResult Unit::HandleDamageShieldAuraProc(Unit* pVictim, DamageInfo* 
     if (!spellProto)
         return SPELL_AURA_PROC_FAILED;
 
-    DamageInfo procDamageInfo =  DamageInfo(this, pVictim, spellProto);
-
-    procDamageInfo.damage = triggeredByAura->GetModifier()->m_amount;
-
-    procDamageInfo.damage = SpellDamageBonusDone(pVictim, spellProto, procDamageInfo.damage, SPELL_DIRECT_DAMAGE);
-    procDamageInfo.damage = pVictim->SpellDamageBonusTaken(this, spellProto, procDamageInfo.damage, SPELL_DIRECT_DAMAGE);
-
+    DamageInfo procDamageInfo =  DamageInfo(this, pVictim, spellProto, triggeredByAura->GetModifier()->m_amount);
     procDamageInfo.CleanDamage(0, 0, BASE_ATTACK, MELEE_HIT_NORMAL);
+    procDamageInfo.damageType = SPELL_DIRECT_DAMAGE;
 
-
+    SpellDamageBonusDone(&procDamageInfo);
+    pVictim->SpellDamageBonusTaken(&procDamageInfo);
     pVictim->CalculateDamageAbsorbAndResist(this, &procDamageInfo, !spellProto->HasAttribute(SPELL_ATTR_EX_CANT_REFLECTED));
-
     DealDamageMods(&procDamageInfo);
 
     uint32 targetHealth = pVictim->GetHealth();
