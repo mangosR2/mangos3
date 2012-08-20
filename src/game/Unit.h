@@ -940,7 +940,7 @@ struct DamageInfo
     // Spell parameters
     uint32            GetSpellId()    const { return SpellID; }
     SpellEntry const* GetSpellProto() const { return m_spellInfo; }
-    SpellSchoolMask   SchoolMask()    const { return GetSpellProto() ? SpellSchoolMask(GetSpellProto()->SchoolMask) : SPELL_SCHOOL_MASK_NORMAL; };
+    SpellSchoolMask   SchoolMask()    const;
 
     // Damage types
     uint32 damage;
@@ -2017,8 +2017,10 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         uint32 SpellHealingBonusDone(Unit *pVictim, SpellEntry const *spellProto, int32 healamount, DamageEffectType damagetype, uint32 stack = 1);
         uint32 SpellHealingBonusTaken(Unit *pCaster, SpellEntry const *spellProto, int32 healamount, DamageEffectType damagetype, uint32 stack = 1);
 
-        uint32 MeleeDamageBonusDone(Unit *pVictim, uint32 damage, WeaponAttackType attType, SpellEntry const *spellProto = NULL, DamageEffectType damagetype = DIRECT_DAMAGE, uint32 stack = 1);
-        uint32 MeleeDamageBonusTaken(Unit *pCaster, uint32 pdamage,WeaponAttackType attType, SpellEntry const *spellProto = NULL, DamageEffectType damagetype = DIRECT_DAMAGE, uint32 stack = 1);
+        void MeleeDamageBonusDone(DamageInfo* damageInfo, uint32 stack = 1);
+        void MeleeDamageBonusTaken(DamageInfo* damageInfo, uint32 stack = 1);
+
+        virtual SpellSchoolMask GetMeleeDamageSchoolMask() const;
 
         bool   IsSpellBlocked(Unit *pCaster, SpellEntry const *spellProto, WeaponAttackType attackType = BASE_ATTACK);
         bool   IsSpellCrit(Unit *pVictim, SpellEntry const *spellProto, SpellSchoolMask schoolMask, WeaponAttackType attackType = BASE_ATTACK);
@@ -2237,7 +2239,6 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
 
         CharmInfo *m_charmInfo;
 
-        virtual SpellSchoolMask GetMeleeDamageSchoolMask() const;
 
         MotionMaster i_motionMaster;
 

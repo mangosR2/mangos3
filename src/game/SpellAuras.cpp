@@ -6687,20 +6687,19 @@ void Aura::HandlePeriodicDamage(bool apply, bool Real)
 
         if (m_modifier.m_auraname == SPELL_AURA_PERIODIC_DAMAGE)
         {
+            DamageInfo damageInfo =  DamageInfo(caster, target, GetSpellProto(), m_modifier.m_amount);
+            damageInfo.damageType = DOT;
             // SpellDamageBonusDone for magic spells
             if (spellProto->DmgClass == SPELL_DAMAGE_CLASS_NONE || spellProto->DmgClass == SPELL_DAMAGE_CLASS_MAGIC)
             {
-                DamageInfo damageInfo =  DamageInfo(caster, target, GetSpellProto(), m_modifier.m_amount);
-                damageInfo.damageType = DOT;
                 caster->SpellDamageBonusDone(&damageInfo, GetStackAmount());
-                m_modifier.m_amount = damageInfo.damage;
             }
             // MeleeDamagebonusDone for weapon based spells
             else
             {
-                WeaponAttackType attackType = GetWeaponAttackType(GetSpellProto());
-                m_modifier.m_amount = caster->MeleeDamageBonusDone(target, m_modifier.m_amount, attackType, GetSpellProto(), DOT, GetStackAmount());
+                caster->MeleeDamageBonusDone(&damageInfo, GetStackAmount());
             }
+            m_modifier.m_amount = damageInfo.damage;
         }
     }
     // remove time effects
@@ -8664,7 +8663,7 @@ void Aura::PeriodicTick()
             else
             {
                 damageInfo.attackType = GetWeaponAttackType(spellProto);
-                damageInfo.damage = target->MeleeDamageBonusTaken(pCaster, damageInfo.damage, damageInfo.attackType, spellProto, DOT, GetStackAmount());
+                target->MeleeDamageBonusTaken(&damageInfo, GetStackAmount());
             }
 
             // Calculate armor mitigation if it is a physical spell
