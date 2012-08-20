@@ -11928,11 +11928,11 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
                         // convert player to ghoul
                         m_player->SetDeathState(GHOULED);
                         m_player->SetHealth(1);
-                        m_player->SetMovement(MOVE_ROOT);
+                        m_player->SetRoot(true);
                     }
                     else
                     {
-                        m_player->SetMovement(MOVE_UNROOT);
+                        m_player->SetRoot(false);
                         m_player->SetHealth(0);
                         m_player->SetDeathState(JUST_DIED);
                     }

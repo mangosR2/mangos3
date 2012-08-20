@@ -2631,6 +2631,7 @@ void Creature::SetLevitate(bool enable)
         m_movementInfo.AddMovementFlag(MOVEFLAG_LEVITATING);
     else
         m_movementInfo.RemoveMovementFlag(MOVEFLAG_LEVITATING);
+
     WorldPacket data(enable ? SMSG_SPLINE_MOVE_GRAVITY_DISABLE : SMSG_SPLINE_MOVE_GRAVITY_ENABLE, 9);
     data << GetPackGUID();
     SendMessageToSet(&data, true);
@@ -2823,4 +2824,28 @@ bool EvadeDelayEvent::Execute(uint64 /*e_time*/, uint32 /*p_time*/)
         break;
     }
     return true;
+}
+
+void Creature::SetRoot(bool enable)
+{
+    if (enable)
+        m_movementInfo.AddMovementFlag(MOVEFLAG_ROOT);
+    else
+        m_movementInfo.RemoveMovementFlag(MOVEFLAG_ROOT);
+
+    WorldPacket data(enable ? SMSG_SPLINE_MOVE_ROOT : SMSG_SPLINE_MOVE_UNROOT, 9);
+    data << GetPackGUID();
+    SendMessageToSet(&data, true);
+}
+
+void Creature::SetWaterWalk(bool enable)
+{
+    if (enable)
+        m_movementInfo.AddMovementFlag(MOVEFLAG_WATERWALKING);
+    else
+        m_movementInfo.RemoveMovementFlag(MOVEFLAG_WATERWALKING);
+
+    WorldPacket data(enable ? SMSG_SPLINE_MOVE_WATER_WALK : SMSG_SPLINE_MOVE_LAND_WALK, 9);
+    data << GetPackGUID();
+    SendMessageToSet(&data, true);
 }
