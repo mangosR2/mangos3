@@ -903,60 +903,64 @@ struct DamageInfo
     // Constructors for use with spell and melee damage
     DamageInfo(Unit *_attacker, Unit *_target, uint32 _SpellID, uint32 _damage)
         :  attacker(_attacker), target(_target), SpellID(_SpellID), m_spellInfo(NULL)
-        { Reset(_damage); };
+    { Reset(_damage); };
 
     DamageInfo(Unit *_attacker, Unit *_target, SpellEntry const* spellInfo, uint32 _damage = 0)
         :  attacker(_attacker), target(_target), m_spellInfo(spellInfo), SpellID(0)
-        { Reset(_damage); };
+    { Reset(_damage); };
 
     // Constructors for use on temporary operation
     DamageInfo(uint32 _damage)
         : attacker(NULL), target(NULL), SpellID(0), m_spellInfo(NULL)
-        { Reset(_damage); };
+    { Reset(_damage); };
 
     DamageInfo(uint32 _damage, uint32 _SpellID)
         : attacker(NULL), target(NULL), SpellID(_SpellID), m_spellInfo(NULL)
-        { Reset(_damage); };
+    { Reset(_damage); };
 
     DamageInfo(uint32 _damage, SpellEntry const* spellInfo)
         : attacker(NULL), target(NULL), m_spellInfo(spellInfo), SpellID(0)
-        { Reset(_damage); };
+    { Reset(_damage); };
 
     // main operations
     void Reset(uint32 _damage = 0);
 
     // compartibility methods
-    void CleanDamage(int32 _damage, uint32 _absorb, WeaponAttackType _attackType, MeleeHitOutcome _hitOutCome)
-        {
-            cleanDamage = _damage;
-            absorb      = _absorb;
-            attackType  = _attackType;
-            hitOutCome  = _hitOutCome;
-        }
+    void CleanDamage(int32 _signedDamage, uint32 _absorb, WeaponAttackType _attackType, MeleeHitOutcome _hitOutCome)
+    {
+        cleanDamage = _signedDamage;
+        absorb      = _absorb;
+        attackType  = _attackType;
+        hitOutCome  = _hitOutCome;
+    }
 
     Unit*  attacker;             // Attacker
     Unit*  target;               // Target for damage
 
     // Spell parameters
-    uint32            SpellID;
-    SpellEntry const* m_spellInfo;
+    uint32            GetSpellId()    const { return SpellID; }
     SpellEntry const* GetSpellProto() const { return m_spellInfo; }
-    SpellSchoolMask   SchoolMask();
+    SpellSchoolMask   SchoolMask()    const { return GetSpellProto() ? SpellSchoolMask(GetSpellProto()->SchoolMask) : SPELL_SCHOOL_MASK_NORMAL; };
 
-    // Damage divide
+    // Damage types
     uint32 damage;
-    uint32 absorb;
-    uint32 resist;
-    uint32 blocked;
-    int32  cleanDamage;          // Used only for rage calculation
-    uint32 reduction;
+    int32  cleanDamage;          // Used for rage and healing calculation
 
     // Damage calculation
     uint32 baseDamage;
+    uint32 bonusCrit;
     uint32 bonusDone;
     uint32 bonusTaken;
-    uint32 Damage() { return (baseDamage + bonusDone + bonusTaken
-                           - reduction - absorb - resist - blocked);};
+    uint32 reduction;
+    uint32 absorb;
+    uint32 resist;
+    uint32 blocked;
+    uint32 Damage() const
+    {
+        return IsHeal() ?
+            (baseDamage + bonusCrit + bonusDone + bonusTaken + reduction + absorb /*+ resist + blocked*/) :
+            (baseDamage + bonusCrit + bonusDone + bonusTaken - reduction - absorb - resist - blocked);
+    };
 
     // Various types
     WeaponAttackType attackType;
@@ -976,13 +980,19 @@ struct DamageInfo
     bool   durabilityLoss;
     bool   physicalLog;
     bool   unused;
-    bool   IsMeleeDamage() { return !m_spellInfo; };
+    bool   IsMeleeDamage() const { return !m_spellInfo; };
+    bool   IsHeal()        const { return cleanDamage < 0; };
 
-    uint32         m_flags;
     uint32 const&  GetFlags();
     void           AddFlag(DamageFlags flag)       { m_flags |= (1 << flag); };
     void           RemoveFlag(DamageFlags flag)    { m_flags &= ~(1 << flag); };
     bool           HasFlag(DamageFlags flag) const { return (m_flags & (1 << flag)); };
+
+    private:
+    DamageInfo();     // Don't allow plain initialization!
+    uint32            m_flags;
+    SpellEntry const* m_spellInfo;
+    uint32            SpellID;
 };
 
 
@@ -1422,7 +1432,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         void SetVehicleId(uint32 entry);
 
         uint16 GetMaxSkillValueForLevel(Unit const* target = NULL) const { return (target ? GetLevelForTarget(target) : getLevel()) * 5; }
-        void DealDamageMods(Unit *pVictim, uint32 &damage, uint32* absorb);
+        void DealDamageMods(DamageInfo* damageInfo);
         uint32 DealDamage(Unit *pVictim, uint32 damage, DamageInfo* cleanDamage, DamageEffectType damagetype, SpellSchoolMask damageSchoolMask, SpellEntry const *spellProto, bool durabilityLoss);
         uint32 DealDamage(Unit* pVictim, DamageInfo* damageInfo, bool durabilityLoss);
         uint32 DealDamage(DamageInfo* damageInfo);

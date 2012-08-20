@@ -997,7 +997,7 @@ uint32 Player::EnvironmentalDamage(EnviromentalDamage type, uint32 damage)
 
     CalculateDamageAbsorbAndResist(this, &damageInfo);
 
-    DealDamageMods(this,damage,&absorb);
+    DealDamageMods(&damageInfo);
 
     WorldPacket data(SMSG_ENVIRONMENTALDAMAGELOG, (21));
     data << GetObjectGuid();
