@@ -4645,6 +4645,69 @@ float Unit::CheckAuraStackingAndApply(Aura* aura, UnitMods unitMod, UnitModifier
     return amount;
 }
 
+float Unit::GetTotalAuraScriptedMultiplierForDamageTaken(SpellEntry const* spellProto) const
+{
+    // spellProto may be NULL for melee damage
+    float multiplier = 1.0f;
+
+    AuraList const& dummyAuras = GetAurasByType(SPELL_AURA_DUMMY);
+    if (!dummyAuras.empty())
+    {
+        for(AuraList::const_iterator itr = dummyAuras.begin(); itr != dummyAuras.end(); ++itr)
+        {
+            switch ((*itr)->GetId())
+            {
+                case 20911:                                     // Blessing of Sanctuary
+                case 25899:                                     // Greater Blessing of Sanctuary
+                {
+                                                                // don't stack with Vigilance dmg reduction effect
+                    if (!HasAura(68066))
+                        multiplier *= ((float)(*itr)->GetModifier()->m_amount + 100.0f) / 100.0f;
+                    break;
+                }
+                case 45182:                                     // Cheating Death
+                {
+                    if ((*itr)->GetModifier()->m_miscvalue & GetSpellSchoolMask(spellProto))
+                    {
+                        if (GetTypeId() != TYPEID_PLAYER)
+                            continue;
+
+                        float mod = std::min((((Player const*)this)->GetRatingBonusValue(CR_CRIT_TAKEN_MELEE)*(-8.0f)), (float)(*itr)->GetModifier()->m_amount);
+                        multiplier *= (mod + 100.0f) / 100.0f;
+                    }
+                    break;
+                }
+                case 47580:                                     // Pain and Suffering (Rank 1)      TODO: can be pct modifier aura
+                case 47581:                                     // Pain and Suffering (Rank 2)
+                case 47582:                                     // Pain and Suffering (Rank 3)
+                {
+                    // Shadow Word: Death
+                    if (spellProto && spellProto->IsFitToFamily<SPELLFAMILY_PRIEST, CF_PRIEST_SHADOW_WORD_DEATH_TARGET>())
+                        multiplier *= ((float)(*itr)->GetModifier()->m_amount + 100.0f) / 100.0f;
+                    break;
+                }
+                case 63944:                                     // Renewed Hope
+                {
+                    multiplier *= ((float)(*itr)->GetModifier()->m_amount + 100.0f) / 100.0f;
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
+    }
+
+    // possible need implement stacking rule in this case.
+    return multiplier;
+}
+
+float Unit::GetTotalAuraScriptedMultiplierForDamageDone(SpellEntry const* spellProto) const
+{
+    // spellProto may be NULL for melee damage
+    float multiplier = 1.0f;
+    return multiplier;
+}
+
 bool Unit::AddSpellAuraHolder(SpellAuraHolderPtr holder)
 {
     if (!holder || holder->IsDeleted())
@@ -7930,44 +7993,7 @@ void Unit::SpellDamageBonusTaken(DamageInfo* damageInfo, uint32 stack)
     TakenTotalMod *= GetTotalAuraMultiplierByMiscMask(SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN, damageInfo->SchoolMask());
 
     // .. taken pct: dummy auras
-    AuraList const& m_dummyAuras = GetAurasByType(SPELL_AURA_DUMMY);
-    for(AuraList::const_iterator itr = m_dummyAuras.begin(); itr != m_dummyAuras.end(); ++itr)
-    {
-        switch((*itr)->GetSpellProto()->SpellIconID)
-        {
-            // Cheat Death
-            case 2109:
-            {
-                if (GetTypeId() != TYPEID_PLAYER)
-                    continue;
-
-                float mod = -((Player*)this)->GetRatingBonusValue(CR_CRIT_TAKEN_SPELL)*2*4;
-                if (mod < float((*itr)->GetModifier()->m_amount))
-                    mod = float((*itr)->GetModifier()->m_amount);
-                TakenTotalMod *= (mod+100.0f)/100.0f;
-                break;
-            }
-            default:
-                break;
-        }
-
-        switch((*itr)->GetId())
-        {
-            case 20911:                                     // Blessing of Sanctuary
-            case 25899:                                     // Greater Blessing of Sanctuary
-                // don't stack with Vigilance dmg reduction effect (calculated above)
-                if (!HasAura(68066))
-                    TakenTotalMod *= ((*itr)->GetModifier()->m_amount + 100.0f) / 100.0f;
-                break;
-            case 47580:                                     // Pain and Suffering (Rank 1)      TODO: can be pct modifier aura
-            case 47581:                                     // Pain and Suffering (Rank 2)
-            case 47582:                                     // Pain and Suffering (Rank 3)
-                // Shadow Word: Death
-                if (damageInfo->GetSpellProto()->IsFitToFamily<SPELLFAMILY_PRIEST, CF_PRIEST_SHADOW_WORD_DEATH_TARGET>())
-                    TakenTotalMod *= ((*itr)->GetModifier()->m_amount + 100.0f) / 100.0f;
-                break;
-        }
-    }
+    TakenTotalMod *= GetTotalAuraScriptedMultiplierForDamageTaken(damageInfo->GetSpellProto());
 
     // From caster spells
     AuraList const& mOwnerTaken = GetAurasByType(SPELL_AURA_MOD_DAMAGE_FROM_CASTER);
@@ -9094,33 +9120,7 @@ void Unit::MeleeDamageBonusTaken(DamageInfo* damageInfo, uint32 stack)
     // =============================================
 
     // .. taken (dummy auras)
-    AuraList const& mDummyAuras = GetAurasByType(SPELL_AURA_DUMMY);
-    if (!mDummyAuras.empty())
-    for(AuraList::const_iterator i = mDummyAuras.begin(); i != mDummyAuras.end(); ++i)
-    {
-        switch((*i)->GetId())
-        {
-            case 45182:                                     // Cheating Death
-                if((*i)->GetModifier()->m_miscvalue & SPELL_SCHOOL_MASK_NORMAL)
-                {
-                    if (GetTypeId() != TYPEID_PLAYER)
-                        continue;
-
-                    float mod = ((Player*)this)->GetRatingBonusValue(CR_CRIT_TAKEN_MELEE)*(-8.0f);
-                    if (mod < float((*i)->GetModifier()->m_amount))
-                        mod = float((*i)->GetModifier()->m_amount);
-
-                    TakenPercent *= (mod + 100.0f) / 100.0f;
-                }
-                break;
-            case 20911:                                     // Blessing of Sanctuary
-            case 25899:                                     // Greater Blessing of Sanctuary
-                // don't stack with Vigilance dmg reduction effect (calculated above)
-                if (!HasAura(68066))
-                    TakenPercent *= ((*i)->GetModifier()->m_amount + 100.0f) / 100.0f;
-                break;
-        }
-    }
+    TakenPercent *= GetTotalAuraScriptedMultiplierForDamageTaken(damageInfo->GetSpellProto());
 
     // final calculation
     // =================

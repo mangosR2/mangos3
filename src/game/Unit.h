@@ -1969,6 +1969,10 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         // misc have plain value but we check it fit to provided values mask (mask & (1 << (misc-1)))
         float GetTotalAuraMultiplierByMiscValueForMask(AuraType auratype, uint32 mask) const;
 
+        // Calculating custom multipliers (dummy && class script)
+        float GetTotalAuraScriptedMultiplierForDamageTaken(SpellEntry const* spellInfo) const;
+        float GetTotalAuraScriptedMultiplierForDamageDone(SpellEntry const* spellInfo) const;
+
         Aura const* GetDummyAura(uint32 spell_id) const;
 
         uint32 m_AuraFlags;
