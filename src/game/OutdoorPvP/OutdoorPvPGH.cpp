@@ -66,6 +66,7 @@ void OutdoorPvPGH::HandleGameObjectCreate(GameObject* go)
     if (go->GetEntry() == GO_VENTURE_BAY_LIGHTHOUSE)
     {
         m_capturePoint = go->GetObjectGuid();
+        m_zoneOwner    = go->GetTeam();
         go->SetGoArtKit(GetBannerArtKit(m_zoneOwner));
     }
 }

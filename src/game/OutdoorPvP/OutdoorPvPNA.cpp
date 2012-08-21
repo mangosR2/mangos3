@@ -35,6 +35,9 @@ OutdoorPvPNA::OutdoorPvPNA() : OutdoorPvP(),
 {
     // initially set graveyard owner to neither faction
     sObjectMgr.SetGraveYardLinkTeam(GRAVEYARD_ID_HALAA, GRAVEYARD_ZONE_ID_HALAA, TEAM_INVALID);
+
+    uint32 zoneId = sOutdoorPvPMgr.GetZoneOfAffectedScript(this);
+    FillInitialWorldStates(zoneId);
 }
 
 void OutdoorPvPNA::FillInitialWorldStates(uint32 zoneId)

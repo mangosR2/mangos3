@@ -46,8 +46,8 @@ void OutdoorPvP::HandlePlayerLeaveZone(Player* player, bool isMainZone)
     if (m_zonePlayers.erase(player->GetObjectGuid()))
     {
         // remove the world state information from the player
-        if (isMainZone && !player->GetSession()->PlayerLogout())
-            SendRemoveWorldStates(player);
+        // if (isMainZone && !player->GetSession()->PlayerLogout())
+        //    SendRemoveWorldStates(player);
 
         sLog.outDebug("Player %s left an Outdoor PvP zone", player->GetName());
     }
@@ -61,15 +61,8 @@ void OutdoorPvP::HandlePlayerLeaveZone(Player* player, bool isMainZone)
  */
 void OutdoorPvP::SendUpdateWorldState(uint32 field, uint32 value)
 {
-    for (GuidZoneMap::iterator itr = m_zonePlayers.begin(); itr != m_zonePlayers.end(); ++itr)
-    {
-        // only send world state update to main zone
-        if (!itr->second)
-            continue;
-
-        if (Player* player = sObjectMgr.GetPlayer(itr->first))
-            player->SendUpdateWorldState(field, value);
-    }
+    uint32 zoneId = sOutdoorPvPMgr.GetZoneOfAffectedScript(this);
+    sWorldStateMgr.SetWorldStateValueFor(zoneId, field, value);
 }
 
 /**
