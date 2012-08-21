@@ -199,7 +199,7 @@ bool GameObject::Create(uint32 guidlow, uint32 name_id, Map *map, uint32 phaseMa
             m_health = GetMaxHealth();
             // destructible GO's show their "HP" as their animprogress
             SetGoAnimProgress(255);
-            if (goinfo->destructibleBuilding.linkedWorldState > WORLDSTATES_BEGIN)
+            if (WorldStateMgr::CheckWorldState(goinfo->destructibleBuilding.linkedWorldState))
                 sWorldStateMgr.CreateLinkedWorldStatesIfNeed(this);
             break;
         }
@@ -2601,7 +2601,7 @@ uint32 GameObject::GetLinkedWorldState(bool stateId)
     {
         case GAMEOBJECT_TYPE_DESTRUCTIBLE_BUILDING:
         {
-            if (GetGOInfo()->destructibleBuilding.linkedWorldState > WORLDSTATES_BEGIN)
+            if (WorldStateMgr::CheckWorldState(GetGOInfo()->destructibleBuilding.linkedWorldState))
                 return stateId ?
                     GetGOInfo()->destructibleBuilding.linkedWorldState :
                     sWorldStateMgr.GetWorldStateValueFor(this,GetGOInfo()->destructibleBuilding.linkedWorldState);
