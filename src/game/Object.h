@@ -75,6 +75,7 @@ class UpdateMask;
 class InstanceData;
 class TerrainInfo;
 class Transport;
+class TransportInfo;
 
 typedef UNORDERED_MAP<Player*, UpdateData> UpdateDataMapType;
 
@@ -450,6 +451,10 @@ class MANGOS_DLL_SPEC WorldObject : public Object
 
         void _Create(ObjectGuid guid, uint32 phaseMask);
 
+        TransportInfo* GetTransportInfo() const { return m_transportInfo; }
+        bool IsBoarded() const { return m_transportInfo != NULL; }
+        void SetTransportInfo(TransportInfo* transportInfo) { m_transportInfo = transportInfo; }
+
         void Relocate(float x, float y, float z, float orientation);
         void Relocate(float x, float y, float z);
 
@@ -658,6 +663,8 @@ class MANGOS_DLL_SPEC WorldObject : public Object
         uint32 m_lootGroupRecipientId;                      // group who will have rights for looting if set and exist
 
         std::string m_name;
+
+        TransportInfo* m_transportInfo;
 
     private:
         Map * m_currMap;                                    //current object's Map location
