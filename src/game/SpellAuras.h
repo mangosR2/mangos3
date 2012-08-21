@@ -565,6 +565,7 @@ class MANGOS_DLL_SPEC AuraPair
         {
             m_holder = pair.m_holder;
             m_index  = pair.m_index;
+            return *this;
         }
 
         Aura* operator () () { return m_holder->GetAuraByEffectIndex(m_index); };
