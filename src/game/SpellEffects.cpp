@@ -12850,8 +12850,6 @@ void Spell::EffectKnockBackFromPosition(SpellEffectIndex eff_idx)
         m_caster->GetPosition(x, y, z);
 
     float angle = unitTarget->GetAngle(x,y) + M_PI_F;
-    angle = MapManager::NormalizeOrientation(angle);
-
     float horizontalSpeed = float(m_spellInfo->EffectMiscValue[eff_idx])/10;
     float verticalSpeed = float(damage)/10;
     unitTarget->KnockBackWithAngle(angle, horizontalSpeed, verticalSpeed);
