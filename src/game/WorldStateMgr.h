@@ -299,9 +299,6 @@ class MANGOS_DLL_DECL WorldStateMgr
         void CreateInstanceState(uint32 mapId, uint32 instanceId);
         void DeleteInstanceState(uint32 mapId, uint32 instanceId);
 
-        // Methods for digging current states (need remove after finish alfa state)
-        void SaveToTemplate(WorldStateType type, uint32 state, uint32 value, uint32 data);
-
         // Cleanup states
         void Update();
 
@@ -326,9 +323,6 @@ class MANGOS_DLL_DECL WorldStateMgr
         void   SetWorldStateValueFor(Map* map, uint32 stateId, uint32 value);
         void   SetWorldStateValueFor(WorldObject* object, uint32 stateId, uint32 value);
 
-        // Method for initial (per-script) WorldState filling (need move all updates like this in DB!)
-        void FillInitialWorldState(uint32 stateId, uint32 value, WorldStateType type, uint32 data = 0 /*zone id*/);
-
         WorldStateSet GetWorldStates(uint32 flags) { return GetWorldStatesFor(NULL, flags); };
         WorldStateSet GetWorldStatesFor(Player* player, WorldStateFlags flag) { return GetWorldStatesFor(player, (1 << flag)); };
         WorldStateSet GetWorldStatesFor(Player* player, uint32 flags = UINT32_MAX);
@@ -346,9 +340,6 @@ class MANGOS_DLL_DECL WorldStateMgr
         // Create and manage asynchronous player update lists
         void AddWorldStateFor(Player* player, uint32 stateId, uint32 instanceId);
         void RemoveWorldStateFor(Player* player, uint32 stateId, uint32 instanceId);
-
-        void RemovePendingWorldStateFor(Player* player, uint32 mapId, uint32 instanceId, uint32 zoneId, uint32 areaId);
-        void SendPendingWorldStateFor(Player* player, uint32 mapId, uint32 instanceId, uint32 zoneId, uint32 areaId);
 
         WorldStateSet GetDownLinkedWorldStates(WorldState const* state);
         WorldState const* GetUpLinkWorldState(WorldState const* state);

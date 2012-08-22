@@ -155,15 +155,8 @@ void OutdoorPvP::RespawnGO(const WorldObject* objRef, ObjectGuid goGuid, bool re
     }
 }
 
-void OutdoorPvP::FillInitialWorldState(uint32 zoneId, uint32 stateId, uint32& value)
+void OutdoorPvP::FillInitialWorldState(uint32 zoneId, uint32 stateId, uint32 value)
 {
-    uint32 stateValue = sWorldStateMgr.GetWorldStateValueFor(UINT32_MAX, UINT32_MAX, zoneId, UINT32_MAX, stateId);
-
-    if (stateValue != UINT32_MAX)
-    {
-        value = stateValue;
-    }
-    else
-        sWorldStateMgr.FillInitialWorldState(stateId, value, WORLD_STATE_TYPE_ZONE, zoneId);
+    sWorldStateMgr.SetWorldStateValueFor(zoneId, stateId, value);
 }
 
