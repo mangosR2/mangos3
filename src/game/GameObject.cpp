@@ -2366,9 +2366,11 @@ void GameObject::SetCapturePointSlider(int8 value)
     {
         case CAPTURE_SLIDER_ALLIANCE_LOCKED:
             m_captureSlider = CAPTURE_SLIDER_ALLIANCE;
+            SetLootState(GO_JUST_DEACTIVATED);
             break;
         case CAPTURE_SLIDER_HORDE_LOCKED:
             m_captureSlider = CAPTURE_SLIDER_HORDE;
+            SetLootState(GO_JUST_DEACTIVATED);
             break;
         case CAPTURE_SLIDER_GET_VALUE:
             m_captureSlider = (float)sWorldStateMgr.GetWorldStateValueFor(this,info->capturePoint.worldState2);
