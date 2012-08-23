@@ -1427,6 +1427,7 @@ uint32 WorldStateMgr::GetMapIdByZoneId(uint32 zoneId) const
                     return areaEntry->mapid;
         }
     }
+    return 451; /*Programmers Isle. possible need assert here.*/
 }
 
 bool WorldState::IsExpired() const
