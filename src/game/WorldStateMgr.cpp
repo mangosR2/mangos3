@@ -597,6 +597,9 @@ void WorldStateMgr::Save(WorldState const* state)
 
 void WorldStateMgr::DeleteWorldState(WorldState* state)
 {
+    if (!state)
+        return;
+
     static SqlStatementID wsDel;
 
     SqlStatement stmt = CharacterDatabase.CreateStatement(wsDel, "DELETE FROM `worldstate_data` WHERE `state_id` = ? AND `instance` = ?");
@@ -606,7 +609,13 @@ void WorldStateMgr::DeleteWorldState(WorldState* state)
     for (WorldStateMap::iterator iter = m_worldState.begin(); iter != m_worldState.end();)
     {
         if (&iter->second == state)
-            m_worldState.erase(iter++);
+        {
+            // currently not need remove states immediately, remove his in World update cycle.
+            //m_worldState.erase(iter++);
+            iter->second.RemoveFlag(WORLD_STATE_FLAG_ACTIVE);
+            iter->second.AddFlag(WORLD_STATE_FLAG_DELETED);
+            break;
+        }
         else
             ++iter;
     }
@@ -749,6 +758,9 @@ bool WorldStateMgr::IsFitToCondition(Player* player, WorldState const* state)
     if (!player || !state)
         return false;
 
+    if (state->HasFlag(WORLD_STATE_FLAG_DELETED))
+        return false;
+
     switch (state->GetType())
     {
         case WORLD_STATE_TYPE_WORLD:
@@ -822,6 +834,9 @@ bool WorldStateMgr::IsFitToCondition(Map* map, WorldState const* state)
 bool WorldStateMgr::IsFitToCondition(uint32 mapId, uint32 instanceId, uint32 zoneId, uint32 areaId, WorldState const* state)
 {
     if (!state)
+        return false;
+
+    if (state->HasFlag(WORLD_STATE_FLAG_DELETED))
         return false;
 
     switch (state->GetType())
