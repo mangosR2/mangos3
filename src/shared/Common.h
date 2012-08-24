@@ -266,7 +266,7 @@ inline char * mangos_strdup(const char * source)
 #    define NOTSAFE_SEMAPHORE_OVERHANDLING "MacOS"
 #endif
 
-#ifndef INT8_MAX
+#if (PLATFORM != PLATFORM_WINDOWS) && !defined (INT8_MAX)
 #  define INT8_MAX       0x7f
 #  define INT8_MIN       0xff
 #  define UINT8_MAX      0xff
