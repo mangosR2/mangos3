@@ -795,11 +795,21 @@ bool Creature::AIM_Initialize()
         return false;
     }
 
-    CreatureAI * oldAI = i_AI;
-    i_motionMaster.Initialize();
+    LockAI(true);
+    CreatureAI* oldAI = i_AI;
+
+    //i_motionMaster.Initialize();
+
     i_AI = FactorySelector::selectAI(this);
-    if (oldAI)
+
+    if (oldAI && oldAI != i_AI)
+    {
+        MAPLOCK_WRITE(this, MAP_LOCK_TYPE_DEFAULT);
+        GetEvents()->CleanupEventList();
         delete oldAI;
+    }
+
+    LockAI(false);
     return true;
 }
 
@@ -2789,7 +2799,7 @@ bool EvadeDelayEvent::Execute(uint64 /*e_time*/, uint32 /*p_time*/)
             if (c_owner->IsAILocked())
                 return false;
 
-            if (c_owner->IsDespawned())
+            if (c_owner->IsDespawned() || c_owner->isCharmed() || c_owner->hasUnitState(UNIT_STAT_CAN_NOT_REACT_OR_LOST_CONTROL))
                 return true;
 
             if (c_owner->isAlive())
