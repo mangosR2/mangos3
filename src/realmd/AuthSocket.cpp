@@ -482,7 +482,7 @@ bool AuthSocket::_HandleLogonChallenge()
             {
                 QueryResult* checkIPresult = LoginDatabase.PQuery("SELECT COUNT(last_ip) FROM account WHERE last_ip = '%s'",get_remote_address().c_str());
 
-                uint32 regCount = checkIPresult ? (*checkIPresult)[0].GetUInt32() : 0;
+                int32 regCount = checkIPresult ? (*checkIPresult)[0].GetUInt32() : 0;
 
                 if (regCount >= sConfig.GetIntDefault("AutoRegistration.Amount", 1))
                 {

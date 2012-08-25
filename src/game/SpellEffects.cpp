@@ -5238,7 +5238,7 @@ void Spell::EffectPowerDrain(SpellEffectIndex eff_idx)
         drainDamageInfo.damage -= unitTarget->GetSpellCritDamageReduction(drainDamageInfo.damage);
 
     uint32 new_damage = std::min(curPower, drainDamageInfo.damage);
-    unitTarget->ModifyPower(drain_power,-new_damage);
+    unitTarget->ModifyPower(drain_power,-int32(new_damage));
 
     // Don`t restore from self drain
     if (drain_power == POWER_MANA && m_caster != unitTarget)
@@ -6257,7 +6257,7 @@ void Spell::DoSummonGroupPets(SpellEffectIndex eff_idx)
     }
 
     // Pet not found in database
-    for (uint32 count = 0; count < amount; ++count)
+    for (uint32 count = 0; count < abs(amount); ++count)
     {
         Pet* pet = new Pet(SUMMON_PET);
         pet->SetPetCounter(amount - count - 1);
@@ -6712,7 +6712,7 @@ void Spell::DoSummonGuardian(SpellEffectIndex eff_idx, uint32 forceFaction)
         amount = 1;
 
     //uint32 level  = m_caster->getLevel();
-    uint32 level  = m_spellInfo->EffectRealPointsPerLevel[eff_idx] ? (damage < m_caster->getLevel() ? damage : m_caster->getLevel()) : m_caster->getLevel();
+    uint32 level  = m_spellInfo->EffectRealPointsPerLevel[eff_idx] ? (damage < int32(m_caster->getLevel()) ? damage : m_caster->getLevel()) : m_caster->getLevel();
 
     // level of pet summoned using engineering item based at engineering skill level
     if (m_caster->GetTypeId() == TYPEID_PLAYER && m_CastItem)
