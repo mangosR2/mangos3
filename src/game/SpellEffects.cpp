@@ -5908,8 +5908,8 @@ void Spell::EffectOpenLock(SpellEffectIndex eff_idx)
             // Check if object is handled by outdoor pvp
             // GameObject is handling some events related to world battleground events
             if (OutdoorPvP* outdoorPvP = sOutdoorPvPMgr.GetScript(player->GetZoneId()))
-                outdoorPvP->HandleGameObjectUse(player, gameObjTarget);
-                return;
+                if(outdoorPvP->HandleGameObjectUse(player, gameObjTarget))
+                    return;
         }
 
         lockId = goInfo->GetLockId();
