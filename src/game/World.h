@@ -24,6 +24,7 @@
 #define __WORLD_H
 
 #include "Common.h"
+#include "LockedQueue.h"
 #include "Timer.h"
 #include "Policies/Singleton.h"
 #include "SharedDefines.h"

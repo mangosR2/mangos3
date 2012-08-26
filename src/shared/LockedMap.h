@@ -20,10 +20,9 @@
 #ifndef LOCKEDMAP_H
 #define LOCKEDMAP_H
 
-#include <ace/RW_Thread_Mutex.h>
+#include "Common.h"
 #include <map>
 #include <assert.h>
-#include "Errors.h"
 
 namespace ACE_Based
 {

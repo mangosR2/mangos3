@@ -22,11 +22,10 @@
 #ifndef LOCKEDVECTOR_H
 #define LOCKEDVECTOR_H
 
-#include <ace/RW_Thread_Mutex.h>
+#include "Common.h"
 #include <vector>
 #include <list>
 #include <assert.h>
-#include "Errors.h"
 
 namespace ACE_Based
 {
