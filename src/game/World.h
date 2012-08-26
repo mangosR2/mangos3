@@ -514,6 +514,8 @@ class World
         World();
         ~World();
 
+        void CleanupsBeforeStop();
+
         WorldSession* FindSession(uint32 id) const;
         void AddSession(WorldSession *s);
         void SendBroadcast();
