@@ -799,7 +799,7 @@ bool Creature::AIM_Initialize()
     LockAI(true);
     CreatureAI* oldAI = i_AI;
 
-    //i_motionMaster.Initialize();
+    GetMotionMaster()->Initialize();
 
     i_AI = FactorySelector::selectAI(this);
 
