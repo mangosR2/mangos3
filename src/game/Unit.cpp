@@ -13412,40 +13412,6 @@ bool Unit::IsAllowedDamageInArea(Unit* pVictim) const
     return true;
 }
 
-class RelocationNotifyEvent : public BasicEvent
-{
-public:
-    RelocationNotifyEvent(Unit& owner) : BasicEvent(), m_owner(owner)
-    {
-        m_owner._SetAINotifyScheduled(true);
-    }
-
-    bool Execute(uint64 /*e_time*/, uint32 /*p_time*/)
-    {
-        float radius = MAX_CREATURE_ATTACK_RADIUS * sWorld.getConfig(CONFIG_FLOAT_RATE_CREATURE_AGGRO);
-        if (m_owner.GetTypeId() == TYPEID_PLAYER)
-        {
-            MaNGOS::PlayerRelocationNotifier notify((Player&)m_owner);
-            Cell::VisitAllObjects(&m_owner,notify,radius);
-        }
-        else //if(m_owner.GetTypeId() == TYPEID_UNIT)
-        {
-            MaNGOS::CreatureRelocationNotifier notify((Creature&)m_owner);
-            Cell::VisitAllObjects(&m_owner,notify,radius);
-        }
-        m_owner._SetAINotifyScheduled(false);
-        return true;
-    }
-
-    void Abort(uint64)
-    {
-        m_owner._SetAINotifyScheduled(false);
-    }
-
-private:
-    Unit& m_owner;
-};
-
 void Unit::ScheduleAINotify(uint32 delay)
 {
     if (!IsAINotifyScheduled())
@@ -13785,36 +13751,6 @@ void Unit::SendSpellDamageImmune(Unit* target, uint32 spellId)
     SendMessageToSet(&data, true);
 }
 
-EventProcessor* Unit::GetEvents()
-{
-    return &m_Events;
-}
-
-void Unit::KillAllEvents(bool force)
-{
-    MAPLOCK_WRITE(this, MAP_LOCK_TYPE_DEFAULT);
-    GetEvents()->KillAllEvents(force);
-}
-
-void Unit::AddEvent(BasicEvent* Event, uint64 e_time, bool set_addtime)
-{
-    MAPLOCK_WRITE(this, MAP_LOCK_TYPE_DEFAULT);
-    if (set_addtime)
-        GetEvents()->AddEvent(Event, GetEvents()->CalculateTime(e_time), set_addtime);
-    else
-        GetEvents()->AddEvent(Event, e_time, set_addtime);
-}
-
-void Unit::UpdateEvents(uint32 update_diff, uint32 time)
-{
-    {
-        MAPLOCK_READ(this, MAP_LOCK_TYPE_DEFAULT);
-        GetEvents()->RenewEvents();
-    }
-
-    GetEvents()->Update(update_diff);
-}
-
 void DamageInfo::Reset(uint32 _damage)
 {
     if (SpellID > 0)
@@ -13877,10 +13813,4 @@ void Unit::SetLastManaUse()
         if (diff > 0)
             ((Player*)this)->RegenerateAll(diff);
     }
-}
-
-bool ManaUseEvent::Execute(uint64 /*e_time*/, uint32 /*p_time*/)
-{
-    m_caster.SetLastManaUse();
-    return true;
 }

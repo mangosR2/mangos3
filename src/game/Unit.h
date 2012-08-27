@@ -29,7 +29,6 @@
 #include "HostileRefManager.h"
 #include "FollowerReference.h"
 #include "FollowerRefManager.h"
-#include "Utilities/EventProcessor.h"
 #include "MapManager.h"
 #include "MotionMaster.h"
 #include "DBCStructure.h"
@@ -1843,12 +1842,6 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         float m_modSpellSpeedPctNeg;
         float m_modSpellSpeedPctPos;
 
-        // Event handler
-        EventProcessor* GetEvents();
-        void UpdateEvents(uint32 update_diff, uint32 time);
-        void KillAllEvents(bool force);
-        void AddEvent(BasicEvent* Event, uint64 e_time, bool set_addtime = true);
-
         // stat system
         bool HandleStatModifier(UnitMods unitMod, UnitModifierType modifierType, float amount, bool apply);
         void SetModifierValue(UnitMods unitMod, UnitModifierType modifierType, float value) { m_auraModifiersGroup[unitMod][modifierType] = value; }
@@ -2305,8 +2298,6 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
 
         GroupPetList m_groupPets;
 
-        EventProcessor m_Events;
-
         GuidSet m_guardianPets;
 
         ObjectGuid m_TotemSlot[MAX_TOTEM_SLOT];
@@ -2407,15 +2398,5 @@ bool Unit::CheckAllControlledUnits(Func const& func, uint32 controlledMask) cons
 
     return false;
 }
-
-class ManaUseEvent : public BasicEvent
-{
-    public:
-        ManaUseEvent(Unit& caster) : BasicEvent(), m_caster(caster) {}
-        bool Execute(uint64 e_time, uint32 p_time);
-
-    private:
-        Unit& m_caster;
-};
 
 #endif

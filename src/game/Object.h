@@ -27,6 +27,7 @@
 #include "Camera.h"
 #include "ObjectLock.h"
 #include "SharedDefines.h"
+#include "WorldObjectEvents.h"
 
 #include <set>
 #include <string>
@@ -647,6 +648,12 @@ class MANGOS_DLL_SPEC WorldObject : public Object
         void UpdateWorldState(uint32 state, uint32 value);
         uint32 GetWorldState(uint32 state);
 
+        // Event handler
+        EventProcessor* GetEvents();
+        void UpdateEvents(uint32 update_diff, uint32 time);
+        void KillAllEvents(bool force);
+        void AddEvent(BasicEvent* Event, uint64 e_time, bool set_addtime = true);
+
     protected:
         explicit WorldObject();
 
@@ -679,6 +686,8 @@ class MANGOS_DLL_SPEC WorldObject : public Object
         bool m_isActiveObject;
 
         uint32 m_LastUpdateTime;
+
+        EventProcessor m_Events;
 };
 
 #endif

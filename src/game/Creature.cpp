@@ -96,40 +96,6 @@ VendorItem const* VendorItemData::FindItemCostPair(uint32 item_id, uint32 extend
     return NULL;
 }
 
-bool AssistDelayEvent::Execute(uint64 /*e_time*/, uint32 /*p_time*/)
-{
-    if (Unit* victim = m_owner.GetMap()->GetUnit(m_victimGuid))
-    {
-        while (!m_assistantGuids.empty())
-        {
-            Creature* assistant = m_owner.GetMap()->GetAnyTypeCreature(*m_assistantGuids.rbegin());
-            m_assistantGuids.pop_back();
-
-            if (assistant && assistant->CanAssistTo(&m_owner, victim))
-            {
-                assistant->SetNoCallAssistance(true);
-                if (assistant->AI())
-                    assistant->AI()->AttackStart(victim);
-            }
-        }
-    }
-    return true;
-}
-
-AssistDelayEvent::AssistDelayEvent(ObjectGuid victim, Unit& owner, std::list<Creature*> const& assistants) : BasicEvent(), m_victimGuid(victim), m_owner(owner)
-{
-    // Pushing guids because in delay can happen some creature gets despawned => invalid pointer
-    m_assistantGuids.reserve(assistants.size());
-    for (std::list<Creature*>::const_iterator itr = assistants.begin(); itr != assistants.end(); ++itr)
-        m_assistantGuids.push_back((*itr)->GetObjectGuid());
-}
-
-bool ForcedDespawnDelayEvent::Execute(uint64 /*e_time*/, uint32 /*p_time*/)
-{
-    m_owner.ForcedDespawn();
-    return true;
-}
-
 void CreatureCreatePos::SelectFinalPoint(Creature* cr, bool checkLOS)
 {
     // if object provided then selected point at specific dist/angle from object forward look
@@ -2649,50 +2615,6 @@ void Creature::SetLevitate(bool enable)
     SendMessageToSet(&data, true);
 }
 
-bool AttackResumeEvent::Execute(uint64 /*e_time*/, uint32 /*p_time*/)
-{
-    if (!m_owner.isAlive())
-        return true;
-
-    if (m_owner.hasUnitState(UNIT_STAT_CAN_NOT_REACT) || m_owner.HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PACIFIED))
-        return true;
-
-    Unit* victim = m_owner.getVictim();
-
-    if (!victim || !victim->IsInMap(&m_owner))
-        return true;
-
-    switch(m_owner.GetObjectGuid().GetHigh())
-    {
-        case HIGHGUID_UNIT:
-        case HIGHGUID_VEHICLE:
-        {
-            m_owner.AttackStop(!b_force);
-            CreatureAI* ai = ((Creature*)&m_owner)->AI();
-            if (ai)
-            {
-            // Reset EventAI now unsafe, temp disabled (require correct writing EventAI scripts)
-            //    if (CreatureEventAI* eventai = (CreatureEventAI*)ai)
-            //        eventai->Reset();
-                ai->AttackStart(victim);
-            }
-            break;
-        }
-        case HIGHGUID_PET:
-        {
-            m_owner.AttackStop(!b_force);
-           ((Pet*)&m_owner)->AI()->AttackStart(victim);
-            break;
-        }
-        case HIGHGUID_PLAYER:
-            break;
-        default:
-            sLog.outError("AttackResumeEvent::Execute try execute for unsupported owner %s!", m_owner.GetObjectGuid().GetString().c_str());
-        break;
-    }
-    return true;
-}
-
 Unit* Creature::SelectPreferredTargetForSpell(SpellEntry const* spellInfo)
 {
     Unit* target = NULL;
@@ -2778,83 +2700,6 @@ Unit* Creature::SelectPreferredTargetForSpell(SpellEntry const* spellInfo)
     }
 
     return target;
-}
-
-bool EvadeDelayEvent::Execute(uint64 /*e_time*/, uint32 /*p_time*/)
-{
-    if (m_owner.IsInEvadeMode())
-        return true;
-
-    if (m_owner.SelectHostileTarget(false))
-        return true;
-
-    switch (m_owner.GetObjectGuid().GetHigh())
-    {
-        case HIGHGUID_UNIT:
-        case HIGHGUID_VEHICLE:
-        {
-            Creature* c_owner = (Creature*)(&m_owner);
-            if (!c_owner)
-                return true;
-
-            if (c_owner->IsAILocked())
-                return false;
-
-            if (c_owner->IsDespawned() || c_owner->isCharmed() || c_owner->hasUnitState(UNIT_STAT_CAN_NOT_REACT_OR_LOST_CONTROL))
-                return true;
-
-            if (c_owner->isAlive())
-                c_owner->GetMotionMaster()->MoveTargetedHome();
-
-            CreatureAI* ai = c_owner->AI();
-            if (ai)
-                ai->EnterEvadeMode();
-
-            if (InstanceData* mapInstance = c_owner->GetInstanceData())
-                mapInstance->OnCreatureEvade(c_owner);
-            break;
-        }
-        case HIGHGUID_PET:
-        {
-            Creature* c_owner = (Creature*)(&m_owner);
-            if (!c_owner)
-                return true;
-
-            if (c_owner->IsAILocked())
-                return false;
-
-            if (c_owner->IsDespawned())
-                return true;
-
-            if (c_owner->isAlive())
-                c_owner->GetMotionMaster()->MoveTargetedHome();
-
-            Pet* p_owner = (Pet*)(&m_owner);
-            if (!p_owner)
-                return true;
-
-            CreatureAI* ai = p_owner->AI();
-            if (ai)
-            {
-                if (PetAI* pai = (PetAI*)ai)
-                    pai->EnterEvadeMode();
-                else
-                    ai->EnterEvadeMode();
-            }
-
-            if (p_owner->GetOwner() && p_owner->GetOwner()->GetTypeId() == TYPEID_UNIT)
-            {
-                if (InstanceData* mapInstance = p_owner->GetInstanceData())
-                    mapInstance->OnCreatureEvade(c_owner);
-            }
-            break;
-        }
-        case HIGHGUID_PLAYER:
-        default:
-            sLog.outError("EvadeDelayEvent::Execute try execute for unsupported owner %s!", m_owner.GetObjectGuid().GetString().c_str());
-        break;
-    }
-    return true;
 }
 
 void Creature::SetRoot(bool enable)
