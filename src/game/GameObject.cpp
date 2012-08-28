@@ -182,12 +182,6 @@ bool GameObject::Create(uint32 guidlow, uint32 name_id, Map* map, uint32 phaseMa
     SetGoArtKit(0);                                         // unknown what this is
     SetGoAnimProgress(animprogress);
 
-    // Notify the map's instance data.
-    // Only works if you create the object in it, not if it is moves to that map.
-    // Normally non-players do not teleport to other maps.
-    if (InstanceData* iData = map->GetInstanceData())
-        iData->OnObjectCreate(this);
-
     // Notify the outdoor pvp script
     if (OutdoorPvP* outdoorPvP = sOutdoorPvPMgr.GetScript(GetZoneId()))
         outdoorPvP->HandleGameObjectCreate(this);
@@ -405,9 +399,8 @@ void GameObject::Update(uint32 update_diff, uint32 p_time)
                         if (IsBattleGroundTrap && ok->GetTypeId() == TYPEID_PLAYER)
                         {
                             // BattleGround gameobjects case
-                            if (((Player*)ok)->InBattleGround())
-                                if (BattleGround* bg = ((Player*)ok)->GetBattleGround())
-                                    bg->HandleTriggerBuff(GetObjectGuid());
+                            if (BattleGround* bg = ((Player*)ok)->GetBattleGround())
+                                bg->HandleTriggerBuff(GetObjectGuid());
                         }
                     }
                 }
