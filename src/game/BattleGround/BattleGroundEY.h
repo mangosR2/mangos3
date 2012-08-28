@@ -329,7 +329,7 @@ class BattleGroundEY : public BattleGround
         virtual void EventPlayerDroppedFlag(Player *Source);
 
         /* achievement req. */
-        bool IsAllNodesConrolledByTeam(Team team) const;
+        bool IsAllNodesControlledByTeam(Team team) const override;
 
     private:
         void EventPlayerCapturedFlag(Player *Source, BG_EY_Nodes node);
