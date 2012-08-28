@@ -287,10 +287,12 @@ void BattleGroundEY::EndBattleGround(Team winner)
 
 void BattleGroundEY::UpdatePointsCount(Team team)
 {
+//    sWorldStateMgr.SetWorldStateValueFor(GetBgMap());
+
     if (team == ALLIANCE)
-        UpdateWorldState(EY_ALLIANCE_BASE, m_TeamPointsCount[TEAM_INDEX_ALLIANCE]);
+        sWorldStateMgr.SetWorldStateValueFor(GetBgMap(),EY_ALLIANCE_BASE, m_TeamPointsCount[TEAM_INDEX_ALLIANCE]);
     else
-        UpdateWorldState(EY_HORDE_BASE, m_TeamPointsCount[TEAM_INDEX_HORDE]);
+        sWorldStateMgr.SetWorldStateValueFor(GetBgMap(),EY_HORDE_BASE, m_TeamPointsCount[TEAM_INDEX_HORDE]);
 }
 
 void BattleGroundEY::UpdatePointsIcons(Team team, uint32 Point)
