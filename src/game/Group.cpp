@@ -35,8 +35,9 @@
 #include "Util.h"
 #include "LootMgr.h"
 #include "LFGMgr.h"
+#include "UpdateFieldFlags.h"
 
-// Playerbot  	
+// Playerbot
 #include "playerbot/PlayerbotMgr.h"
 
 #define LOOT_ROLL_TIMEOUT  (1*MINUTE*IN_MILLISECONDS)
@@ -367,6 +368,48 @@ bool Group::AddMember(ObjectGuid guid, const char* name)
         if(isRaidGroup())
             player->UpdateForQuestWorldObjects();
 
+        // Broadcast new player group member fields to rest of the group
+        player->SetFieldNotifyFlag(UF_FLAG_PARTY_MEMBER);
+
+        UpdateData data;
+        WorldPacket packet;
+
+        // Broadcast group members' fields to player
+        for (GroupReference* itr = GetFirstMember(); itr != NULL; itr = itr->next())
+        {
+            if (itr->getSource() == player)
+                continue;
+
+            if (Player* member = itr->getSource())
+            {
+                if (player->HaveAtClient(member))
+                {
+                    member->SetFieldNotifyFlag(UF_FLAG_PARTY_MEMBER);
+                    member->BuildValuesUpdateBlockForPlayer(&data, player);
+                    member->RemoveFieldNotifyFlag(UF_FLAG_PARTY_MEMBER);
+                }
+
+                if (member->HaveAtClient(player))
+                {
+                    UpdateData mdata;
+                    WorldPacket mpacket;
+                    player->BuildValuesUpdateBlockForPlayer(&mdata, member);
+                    if (mdata.HasData())
+                    {
+                        mdata.BuildPacket(&mpacket);
+                        member->SendDirectMessage(&mpacket);
+                    }
+                }
+            }
+        }
+
+        if (data.HasData())
+        {
+            data.BuildPacket(&packet);
+            player->SendDirectMessage(&packet);
+        }
+
+        player->RemoveFieldNotifyFlag(UF_FLAG_PARTY_MEMBER);
     }
 
     return true;
@@ -377,7 +420,7 @@ uint32 Group::RemoveMember(ObjectGuid guid, uint8 method)
     // Frozen Mod
     BroadcastGroupUpdate();
     // Frozen Mod
-	
+
     if (!sWorld.getConfig(CONFIG_BOOL_PLAYERBOT_DISABLE))
     {
         Player* const player = sObjectMgr.GetPlayer(guid);
