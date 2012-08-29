@@ -570,11 +570,10 @@ void BattleGroundAB::UpdatePlayerScore(Player* Source, uint32 type, uint32 value
 
 bool BattleGroundAB::IsAllNodesConrolledByTeam(Team team) const
 {
-    uint32 count = 0;
-    for (int i = 0; i < BG_AB_NODES_MAX; ++i)
-        if ((team == ALLIANCE && m_Nodes[i] == BG_AB_NODE_STATUS_ALLY_OCCUPIED) ||
-            (team == HORDE    && m_Nodes[i] == BG_AB_NODE_STATUS_HORDE_OCCUPIED))
-            ++count;
+    for (uint8 i = 0; i < BG_AB_NODES_MAX; ++i)
+        if ((team == ALLIANCE && m_Nodes[i] != BG_AB_NODE_STATUS_ALLY_OCCUPIED) ||
+                (team == HORDE && m_Nodes[i] != BG_AB_NODE_STATUS_HORDE_OCCUPIED))
+            return false;
 
-    return count == BG_AB_NODES_MAX;
+    return true;
 }
