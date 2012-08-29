@@ -1750,7 +1750,6 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
     uint32 unMaxTargets = SpellMgr::GetSpellMaxTargetsWithCustom(m_spellInfo, GetAffectiveUnitCaster());
     uint32 unEffectChainTarget = SpellMgr::GetSpellTargetsForChainWithCustom(m_spellInfo, GetAffectiveUnitCaster(), effIndex);
 
-
     std::list<GameObject*> tempTargetGOList;
 
     switch (targetMode)
