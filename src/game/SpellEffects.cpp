@@ -3183,9 +3183,7 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
 
                     // Init dest coordinates
                     float x,y,z;
-                    x = m_targets.m_destX;
-                    y = m_targets.m_destY;
-                    z = m_targets.m_destZ;
+                    m_targets.getDestination(x, y, z);
 
                     MaNGOS::NormalizeMapCoord(x);
                     MaNGOS::NormalizeMapCoord(y);
@@ -4770,10 +4768,7 @@ void Spell::EffectTriggerSpell(SpellEffectIndex effIndex)
     {
         // Init dest coordinates
         float x,y,z;
-
-        x = m_targets.m_destX;
-        y = m_targets.m_destY;
-        z = m_targets.m_destZ;
+        m_targets.getDestination(x, y, z);
         if (m_caster->GetTypeId() == TYPEID_PLAYER)
             ((Player*)m_caster)->RemoveSpellCooldown(triggered_spell_id);
 
@@ -4815,9 +4810,7 @@ void Spell::EffectTriggerMissileSpell(SpellEffectIndex effect_idx)
     {
         // Init dest coordinates
         float x,y,z;
-        x = m_targets.m_destX;
-        y = m_targets.m_destY;
-        z = m_targets.m_destZ;
+        m_targets.getDestination(x, y, z);
 
         MaNGOS::NormalizeMapCoord(x);
         MaNGOS::NormalizeMapCoord(y);
@@ -4970,9 +4963,8 @@ void Spell::EffectTeleportUnits(SpellEffectIndex eff_idx)   // TODO - Use target
                 pTarget = unitTarget->GetMap()->GetUnit(((Player*)unitTarget)->GetSelectionGuid());
 
             // Init dest coordinates
-            float x = m_targets.m_destX;
-            float y = m_targets.m_destY;
-            float z = m_targets.m_destZ;
+            float x,y,z;
+            m_targets.getDestination(x, y, z);
             float orientation = pTarget ? pTarget->GetOrientation() : unitTarget->GetOrientation();
             unitTarget->NearTeleportTo(x,y,z,orientation,unitTarget==m_caster);
             return;
@@ -4986,9 +4978,8 @@ void Spell::EffectTeleportUnits(SpellEffectIndex eff_idx)   // TODO - Use target
                 return;
             }
             // Init dest coordinates
-            float x = m_targets.m_destX;
-            float y = m_targets.m_destY;
-            float z = m_targets.m_destZ;
+            float x,y,z;
+            m_targets.getDestination(x, y, z);
             float orientation = unitTarget->GetOrientation();
             // Teleport
             unitTarget->NearTeleportTo(x,y,z,orientation,unitTarget==m_caster);
@@ -6312,9 +6303,7 @@ void Spell::EffectSummonPossessed(SpellEffectIndex eff_idx)
     if (m_targets.m_targetMask & TARGET_FLAG_DEST_LOCATION)
     {
         // Summon 1 unit in dest location
-        px = m_targets.m_destX;
-        py = m_targets.m_destY;
-        pz = m_targets.m_destZ;
+        m_targets.getDestination(px, py, pz);
     }
     // Summon if dest location not present near caster
     else
@@ -6609,9 +6598,8 @@ void Spell::DoSummonWild(SpellEffectIndex eff_idx, uint32 forceFaction)
         return;
 
     // select center of summon position
-    float center_x = m_targets.m_destX;
-    float center_y = m_targets.m_destY;
-    float center_z = m_targets.m_destZ;
+    float center_x, center_y, center_z;
+    m_targets.getDestination(center_x, center_y, center_z);
 
     float radius = GetSpellRadius(sSpellRadiusStore.LookupEntry(m_spellInfo->EffectRadiusIndex[eff_idx]));
     TempSummonType summonType = (m_duration == 0) ? TEMPSUMMON_DEAD_DESPAWN : TEMPSUMMON_TIMED_OR_DEAD_DESPAWN;
@@ -6734,9 +6722,8 @@ void Spell::DoSummonGuardian(SpellEffectIndex eff_idx, uint32 forceFaction)
     }
 
     // select center of summon position
-    float center_x = m_targets.m_destX;
-    float center_y = m_targets.m_destY;
-    float center_z = m_targets.m_destZ;
+    float center_x, center_y, center_z;
+    m_targets.getDestination(center_x, center_y, center_z);
 
     if (!MapManager::ExistMapAndVMap(m_caster->GetMapId(),center_x,center_y))
     {
@@ -6835,9 +6822,7 @@ void Spell::DoSummonVehicle(SpellEffectIndex eff_idx, uint32 forceFaction)
     // If dest location present
     if (m_targets.m_targetMask & TARGET_FLAG_DEST_LOCATION)
     {
-        px = m_targets.m_destX;
-        py = m_targets.m_destY;
-        pz = m_targets.m_destZ;
+        m_targets.getDestination(px, py, pz);
     }
     // Summon if dest location not present near caster
     else
@@ -12802,9 +12787,7 @@ void Spell::EffectSuspendGravity(SpellEffectIndex eff_idx)
 
     if (m_targets.m_targetMask & TARGET_FLAG_DEST_LOCATION)
     {
-        x = m_targets.m_destX;
-        y = m_targets.m_destY;
-        z = m_targets.m_destZ;
+        m_targets.getDestination(x, y, z);
     }
     else
     {

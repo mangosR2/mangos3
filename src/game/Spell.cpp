@@ -347,6 +347,30 @@ void SpellCastTargets::ReadAdditionalData(ByteBuffer& data)
     }
 }
 
+bool SpellCastTargets::HasLocation() const
+{
+    if (m_targetMask & TARGET_FLAG_DEST_LOCATION)
+    {
+        if (fabs(m_destX) > M_NULL_F || fabs(m_destY) > M_NULL_F || fabs(m_destZ) > M_NULL_F)
+            return true;
+    }
+    if (m_targetMask & TARGET_FLAG_SOURCE_LOCATION)
+    {
+        if (fabs(m_srcX) > M_NULL_F || fabs(m_srcY) > M_NULL_F || fabs(m_srcZ) > M_NULL_F)
+            return true;
+    }
+    return false;
+};
+
+void SpellCastTargets::GetLocation(float& x, float& y, float& z) const
+{
+    if (m_targetMask & TARGET_FLAG_DEST_LOCATION)
+        getDestination(x,y,z);
+    else if (m_targetMask & TARGET_FLAG_SOURCE_LOCATION)
+        getSource(x,y,z);
+    // Possible need substitution for another cases
+}
+
 Spell::Spell( Unit* caster, SpellEntry const *info, bool triggered, ObjectGuid originalCasterGUID, SpellEntry const* triggeredBy )
 {
     MANGOS_ASSERT( caster != NULL && info != NULL );

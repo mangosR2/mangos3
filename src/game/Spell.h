@@ -157,6 +157,9 @@ class SpellCastTargets
         void getDestination(float& x, float& y, float& z) const { x = m_destX; y = m_destY; z = m_destZ; }
         void getSource(float& x, float& y, float& z) const { x = m_srcX; y = m_srcY, z = m_srcZ; }
 
+        bool HasLocation() const;
+        void GetLocation(float& x, float& y, float& z) const;
+
         void setGOTarget(GameObject* target);
         ObjectGuid getGOTargetGuid() const { return m_GOTargetGUID; }
         GameObject* getGOTarget() const { return m_GOTarget; }
@@ -186,6 +189,7 @@ class SpellCastTargets
 
         float m_srcX, m_srcY, m_srcZ;
         float m_destX, m_destY, m_destZ;
+
         std::string m_strTarget;
 
         float GetElevation() const { return m_elevation; }
