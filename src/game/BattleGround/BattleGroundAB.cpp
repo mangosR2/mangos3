@@ -568,7 +568,7 @@ void BattleGroundAB::UpdatePlayerScore(Player* Source, uint32 type, uint32 value
     Source->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_BG_OBJECTIVE_CAPTURE, 1, achCriId);
 }
 
-bool BattleGroundAB::IsAllNodesConrolledByTeam(Team team) const
+bool BattleGroundAB::IsAllNodesControlledByTeam(Team team) const
 {
     for (uint8 i = 0; i < BG_AB_NODES_MAX; ++i)
         if ((team == ALLIANCE && m_Nodes[i] != BG_AB_NODE_STATUS_ALLY_OCCUPIED) ||

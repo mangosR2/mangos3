@@ -13763,7 +13763,6 @@ uint32 Player::GetGossipTextId(uint32 menuId, WorldObject* pSource)
             }
         }
     }
-    }
 
     // Start related script
     if (scriptId)

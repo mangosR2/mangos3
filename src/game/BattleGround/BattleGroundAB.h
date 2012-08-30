@@ -207,7 +207,7 @@ class BattleGroundAB : public BattleGround
 
         /* achievement req. */
         bool IsAllNodesControlledByTeam(Team team) const override;
-        bool IsTeamScores500Disadvantage(Team team) const { return m_TeamScores500Disadvantage[GetTeamIndexByTeamId(team)]; }
+        bool IsTeamScores500Disadvantage(Team team) const { return m_TeamScores500Disadvantage[GetTeamIndex(team)]; }
 
     private:
         /* Gameobject spawning/despawning */

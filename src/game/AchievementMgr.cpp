@@ -2385,7 +2385,7 @@ void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, ui
                         {
                             case 211:                    // EY, capture flag while controling all 4 bases
                             {
-                                if (!bg->IsAllNodesConrolledByTeam(GetPlayer()->GetTeam()))
+                                if (!bg->IsAllNodesControlledByTeam(GetPlayer()->GetTeam()))
                                     continue;
                                 break;
                             }
