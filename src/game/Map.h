@@ -97,6 +97,16 @@ enum LevelRequirementVsMode
 
 typedef std::map<ObjectGuid,GuidSet>  AttackersMap;
 
+struct LoadingObjectQueue
+{
+    explicit LoadingObjectQueue(uint32 _guid, TypeID _objectTypeID, GridType& _grid) :
+        guid(_guid), objectTypeID(_objectTypeID), grid(_grid)
+    {}
+    uint32 guid;
+    TypeID objectTypeID;
+    GridType& grid;
+};
+
 class MANGOS_DLL_SPEC Map : public GridRefManager<NGridType>
 {
     friend class MapReference;
@@ -302,6 +312,12 @@ class MANGOS_DLL_SPEC Map : public GridRefManager<NGridType>
         void InsertGameObjectModel(const GameObjectModel& mdl);
         void RemoveGameObjectModel(const GameObjectModel& mdl);
         bool ContainsGameObjectModel(const GameObjectModel& mdl) const;
+
+        void AddLoadingObject(LoadingObjectQueue obj)
+        {
+            i_loadingObjectQueue.push(obj);
+        }
+
     private:
         void LoadMapAndVMap(int gx, int gy);
 
@@ -331,6 +347,10 @@ class MANGOS_DLL_SPEC Map : public GridRefManager<NGridType>
             return i_grids[x][y];
         }
 
+        template<class T> void LoadObjectToGrid(uint32& guid, GridType& grid, BattleGround* bg);
+        template<class T> void setUnitCell(T* /*obj*/) {}
+        void setUnitCell(Creature* obj);
+
         bool isGridObjectDataLoaded(uint32 x, uint32 y) const { return getNGrid(x,y) ? getNGrid(x,y)->isGridObjectDataLoaded() : false; }
         void setGridObjectDataLoaded(bool pLoaded, uint32 x, uint32 y) { getNGrid(x,y)->setGridObjectDataLoaded(pLoaded); }
 
@@ -341,6 +361,7 @@ class MANGOS_DLL_SPEC Map : public GridRefManager<NGridType>
         std::set<Object *> i_objectsToClientUpdate;
         std::set<Object *> i_objectsToClientNotUpdate;
         std::queue<Object*> i_objectsToClientUpdateQueue;
+        std::queue<LoadingObjectQueue> i_loadingObjectQueue;
 
     protected:
         MapEntry const* i_mapEntry;
