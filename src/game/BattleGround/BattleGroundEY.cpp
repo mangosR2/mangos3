@@ -204,6 +204,8 @@ void BattleGroundEY::HandleGameObjectCreate(GameObject* go)
             m_towers[NODE_DRAENEI_RUINS] = go->GetObjectGuid();
             go->SetCapturePointSlider(CAPTURE_SLIDER_NEUTRAL);
             break;
+        default:
+            break;
     }
 }
 
@@ -571,12 +573,11 @@ void BattleGroundEY::FillInitialWorldStates()
     FillInitialWorldState(WORLD_STATE_EY_NETHERSTORM_FLAG_STATE_ALLIANCE, m_flagState == EY_FLAG_STATE_ON_ALLIANCE_PLAYER ? 2 : 1);
     FillInitialWorldState(WORLD_STATE_EY_NETHERSTORM_FLAG_STATE_HORDE, m_flagState == EY_FLAG_STATE_ON_HORDE_PLAYER ? 2 : 1);
 
-    // capture point states
-    // if you leave the bg while being in capture point radius - and later join same type of bg the slider would still be displayed because the client caches it
-    FillInitialWorldState(WORLD_STATE_EY_CAPTURE_POINT_SLIDER_DISPLAY, WORLD_STATE_REMOVE);
+    // capture point states - not need fill! unique for each other point
+    // FillInitialWorldState(WORLD_STATE_EY_CAPTURE_POINT_SLIDER_DISPLAY, WORLD_STATE_REMOVE);
 }
 
-WorldSafeLocsEntry const *BattleGroundEY::GetClosestGraveYard(Player* player)
+WorldSafeLocsEntry const* BattleGroundEY::GetClosestGraveYard(Player* player)
 {
     uint32 g_id = 0;
 
