@@ -1281,16 +1281,16 @@ namespace MaNGOS
             uint32 i_spellId;
     };
 
-    class AnyPlayerInObjectRangeWithOutdoorPvPCheck
+    class AnyPlayerInCapturePointRange
     {
         public:
-            AnyPlayerInObjectRangeWithOutdoorPvPCheck(WorldObject const* obj, float range)
+            AnyPlayerInCapturePointRange(WorldObject const* obj, float range)
                 : i_obj(obj), i_range(range) {}
             WorldObject const& GetFocusObject() const { return *i_obj; }
             bool operator()(Player* u)
             {
-                return u->CanUseOutdoorCapturePoint() &&
-                    i_obj->IsWithinDistInMap(u, i_range);
+                return u->CanUseCapturePoint() &&
+                       i_obj->IsWithinDistInMap(u, i_range);
             }
         private:
             WorldObject const* i_obj;

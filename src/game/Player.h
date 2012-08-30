@@ -2196,10 +2196,8 @@ class MANGOS_DLL_SPEC Player : public Unit
         /***                 OUTDOOR PVP SYSTEM                ***/
         /*********************************************************/
 
+        // returns true if the player is in active state for capture point capturing
         bool CanUseCapturePoint();
-        // returns true if the player is in active state for outdoor pvp objective capturing
-        bool CanUseOutdoorCapturePoint();
-
         bool IsOutdoorPvPActive();
         virtual void HandleObjectiveComplete(Player* /*pPlayer*/) {};
 
