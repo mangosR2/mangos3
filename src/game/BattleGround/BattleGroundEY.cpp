@@ -218,7 +218,7 @@ bool BattleGroundEY::HandleEvent(uint32 eventId, GameObject* go)
         {
             for (uint8 j = 0; j < 4; ++j)
             {
-                if (eyTowerEvents[i][j].eventEntry == eventId)
+                if (eyTowerEvents[i][j].eventEntry == eventId && m_towerWorldState[i] != eyTowerEvents[i][j].worldState)
                 {
                     ProcessCaptureEvent(go, i, eyTowerEvents[i][j].team, eyTowerEvents[i][j].worldState, eyTowerEvents[i][j].message);
 
