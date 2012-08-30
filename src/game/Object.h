@@ -123,7 +123,7 @@ class WorldUpdateCounter
 };
 
 class Object;
-class UpdateFieldData
+struct UpdateFieldData
 {
     public:
         UpdateFieldData(Object const* object, Player* target);

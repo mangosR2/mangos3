@@ -59,7 +59,7 @@ class BasicEvent
 typedef std::multimap<uint64, BasicEvent*> EventList;
 typedef std::queue<std::pair<uint64, BasicEvent*> > EventNewQueue;
 
-class EventProcessor
+class MANGOS_DLL_SPEC EventProcessor
 {
     public:
 
