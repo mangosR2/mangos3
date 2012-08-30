@@ -1083,6 +1083,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\game\UpdateFieldFlags.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game\UpdateFieldFlags.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\game\VehicleHandler.cpp"
 				>
 			</File>
@@ -1600,6 +1608,14 @@
 			</File>
 			<File
 				RelativePath="..\..\src\game\WardenHandler.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game\WorldObjectEvents.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game\WorldObjectEvents.h"
 				>
 			</File>
 		</Filter>
