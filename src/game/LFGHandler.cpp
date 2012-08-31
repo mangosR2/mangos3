@@ -912,7 +912,7 @@ void WorldSession::SendLfgPlayerReward(LFGDungeonEntry const* dungeon, const LFG
         return;
     }
 
-    LFGDungeonEntry const* realdungeon = *GetPlayer()->GetLFGPlayerState()->GetDungeons()->begin();
+    LFGDungeonEntry const* realdungeon = GetPlayer()->GetLFGPlayerState()->GetDungeon();
 
     if (!dungeon || !realdungeon || !reward || !qRew)
         return;
