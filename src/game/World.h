@@ -669,6 +669,10 @@ class World
         void setDuelResetEnableAreaIds(const char* areas);
         bool IsAreaIdEnabledDuelReset(uint32 areaId);
 
+        // Disable dungeons for LFG system
+        void setDisabledMapIdForDungeonFinder(const char* areas);
+        bool IsDungeonMapIdDisable(uint32 mapId);
+
     protected:
         void _UpdateGameTime();
 
@@ -770,6 +774,8 @@ class World
 
         // reset duel system
         std::set<uint32> areaEnabledIds; //set of areaIds where is enabled the Duel reset system
+        // Disable dungeons for LFG system
+        std::set<uint32> disabledMapIdForDungeonFinder; // set of MapIds which are disabled for DungeonFinder
 
 };
 
