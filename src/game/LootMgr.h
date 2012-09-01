@@ -143,7 +143,7 @@ struct Loot;
 class LootTemplate;
 
 typedef std::vector<QuestItem> QuestItemList;
-typedef std::map<uint32, QuestItemList *> QuestItemMap;
+typedef std::map<uint32, QuestItemList> QuestItemMap;
 typedef std::vector<LootStoreItem> LootStoreItemList;
 typedef UNORDERED_MAP<uint32, LootTemplate*> LootTemplateMap;
 
@@ -263,18 +263,9 @@ struct Loot
     // void clear();
     void clear()
     {
-        for (QuestItemMap::const_iterator itr = m_playerQuestItems.begin(); itr != m_playerQuestItems.end(); ++itr)
-            delete itr->second;
         m_playerQuestItems.clear();
-
-        for (QuestItemMap::const_iterator itr = m_playerFFAItems.begin(); itr != m_playerFFAItems.end(); ++itr)
-            delete itr->second;
         m_playerFFAItems.clear();
-
-        for (QuestItemMap::const_iterator itr = m_playerNonQuestNonFFAConditionalItems.begin(); itr != m_playerNonQuestNonFFAConditionalItems.end(); ++itr)
-            delete itr->second;
         m_playerNonQuestNonFFAConditionalItems.clear();
-
         m_playersLooting.clear();
         items.clear();
         m_questItems.clear();

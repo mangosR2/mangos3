@@ -504,7 +504,9 @@ void Loot::FillNotNormalLootFor(Player* pl)
 
 QuestItemList* Loot::FillFFALoot(Player* player)
 {
-    QuestItemList *ql = new QuestItemList();
+    QuestItemList* ql = &m_playerFFAItems[player->GetGUIDLow()];
+
+    ql->clear();
 
     for(uint8 i = 0; i < items.size(); ++i)
     {
@@ -516,19 +518,19 @@ QuestItemList* Loot::FillFFALoot(Player* player)
         }
     }
     if (ql->empty())
-    {
-        delete ql;
         return NULL;
-    }
 
-    m_playerFFAItems[player->GetGUIDLow()] = ql;
     return ql;
 }
 
 QuestItemList* Loot::FillQuestLoot(Player* player)
 {
-    if (items.size() == MAX_NR_LOOT_ITEMS) return NULL;
-    QuestItemList *ql = new QuestItemList();
+    if (items.size() == MAX_NR_LOOT_ITEMS)
+        return NULL;
+
+    QuestItemList* ql = &m_playerQuestItems[player->GetGUIDLow()];
+
+    ql->clear();
 
     for(uint8 i = 0; i < m_questItems.size(); ++i)
     {
@@ -550,21 +552,20 @@ QuestItemList* Loot::FillQuestLoot(Player* player)
                 break;
         }
     }
-    if (ql->empty())
-    {
-        delete ql;
-        return NULL;
-    }
 
-    m_playerQuestItems[player->GetGUIDLow()] = ql;
+    if (ql->empty())
+        return NULL;
+
     return ql;
 }
 
 QuestItemList* Loot::FillNonQuestNonFFAConditionalLoot(Player* player)
 {
-    QuestItemList *ql = new QuestItemList();
+    QuestItemList *ql = &m_playerNonQuestNonFFAConditionalItems[player->GetGUIDLow()];
 
-    for(uint8 i = 0; i < items.size(); ++i)
+    ql->clear();
+
+    for (uint8 i = 0; i < items.size(); ++i)
     {
         LootItem &item = items[i];
         if(!item.is_looted && !item.freeforall && item.AllowedForPlayer(player))
@@ -581,13 +582,10 @@ QuestItemList* Loot::FillNonQuestNonFFAConditionalLoot(Player* player)
             }
         }
     }
-    if (ql->empty())
-    {
-        delete ql;
-        return NULL;
-    }
 
-    m_playerNonQuestNonFFAConditionalItems[player->GetGUIDLow()] = ql;
+    if (ql->empty())
+        return NULL;
+
     return ql;
 }
 
@@ -639,10 +637,10 @@ void Loot::NotifyQuestItemRemoved(uint8 questIndex)
         if (Player* pl = ObjectAccessor::FindPlayer(*i))
         {
             QuestItemMap::const_iterator pq = m_playerQuestItems.find(pl->GetGUIDLow());
-            if (pq != m_playerQuestItems.end() && pq->second)
+            if (pq != m_playerQuestItems.end() && !pq->second.empty())
             {
                 // find where/if the player has the given item in it's vector
-                QuestItemList& pql = *pq->second;
+                QuestItemList const& pql = pq->second;
 
                 uint8 j;
                 for (j = 0; j < pql.size(); ++j)
@@ -679,10 +677,10 @@ LootItem* Loot::LootItemInSlot(uint32 lootSlot, Player* player, QuestItem **qite
     {
         uint32 questSlot = lootSlot - items.size();
         QuestItemMap::const_iterator itr = m_playerQuestItems.find(player->GetGUIDLow());
-        if (itr != m_playerQuestItems.end() && questSlot < itr->second->size())
+        if (itr != m_playerQuestItems.end() && questSlot < itr->second.size())
         {
-            QuestItem *qitem2 = &itr->second->at(questSlot);
-            if(qitem)
+            QuestItem* qitem2 = const_cast<QuestItem*>(&itr->second.at(questSlot));
+            if (qitem)
                 *qitem = qitem2;
             item = &m_questItems[qitem2->index];
             is_looted = qitem2->is_looted;
@@ -697,8 +695,8 @@ LootItem* Loot::LootItemInSlot(uint32 lootSlot, Player* player, QuestItem **qite
             QuestItemMap::const_iterator itr = m_playerFFAItems.find(player->GetGUIDLow());
             if (itr != m_playerFFAItems.end())
             {
-                for(QuestItemList::const_iterator iter=itr->second->begin(); iter!= itr->second->end(); ++iter)
-                    if(iter->index==lootSlot)
+                for (QuestItemList::const_iterator iter=itr->second.begin(); iter!= itr->second.end(); ++iter)
+                    if (iter->index==lootSlot)
                     {
                         QuestItem *ffaitem2 = (QuestItem*)&(*iter);
                         if(ffaitem)
@@ -713,9 +711,9 @@ LootItem* Loot::LootItemInSlot(uint32 lootSlot, Player* player, QuestItem **qite
             QuestItemMap::const_iterator itr = m_playerNonQuestNonFFAConditionalItems.find(player->GetGUIDLow());
             if (itr != m_playerNonQuestNonFFAConditionalItems.end())
             {
-                for(QuestItemList::const_iterator iter=itr->second->begin(); iter!= itr->second->end(); ++iter)
+                for (QuestItemList::const_iterator iter=itr->second.begin(); iter!= itr->second.end(); ++iter)
                 {
-                    if(iter->index==lootSlot)
+                    if (iter->index==lootSlot)
                     {
                         QuestItem *conditem2 = (QuestItem*)&(*iter);
                         if(conditem)
@@ -737,7 +735,7 @@ LootItem* Loot::LootItemInSlot(uint32 lootSlot, Player* player, QuestItem **qite
 uint32 Loot::GetMaxSlotInLootFor(Player* player) const
 {
     QuestItemMap::const_iterator itr = m_playerQuestItems.find(player->GetGUIDLow());
-    return items.size() + (itr != m_playerQuestItems.end() ?  itr->second->size() : 0);
+    return items.size() + (itr != m_playerQuestItems.end() ?  itr->second.size() : 0);
 }
 
 ByteBuffer& operator<<(ByteBuffer& b, LootItem const& li)
@@ -789,8 +787,8 @@ ByteBuffer& operator<<(ByteBuffer& b, LootView const& lv)
     QuestItemMap::const_iterator nn_itr = lootPlayerNonQuestNonFFAConditionalItems.find(lv.viewer->GetGUIDLow());
     if (nn_itr != lootPlayerNonQuestNonFFAConditionalItems.end())
     {
-        QuestItemList *conditional_list =  nn_itr->second;
-        for (QuestItemList::const_iterator ci = conditional_list->begin() ; ci != conditional_list->end(); ++ci)
+        QuestItemList const& conditional_list =  nn_itr->second;
+        for (QuestItemList::const_iterator ci = conditional_list.begin() ; ci != conditional_list.end(); ++ci)
         {
             LootItem &item = l.items[ci->index];
 
@@ -811,13 +809,13 @@ ByteBuffer& operator<<(ByteBuffer& b, LootView const& lv)
     QuestItemMap::const_iterator q_itr = lootPlayerQuestItems.find(lv.viewer->GetGUIDLow());
     if (q_itr != lootPlayerQuestItems.end())
     {
-        QuestItemList *q_list = q_itr->second;
-        for (QuestItemList::const_iterator qi = q_list->begin() ; qi != q_list->end(); ++qi)
+        QuestItemList const& q_list = q_itr->second;
+        for (QuestItemList::const_iterator qi = q_list.begin() ; qi != q_list.end(); ++qi)
         {
             LootItem &item = l.m_questItems[qi->index];
             if (!qi->is_looted && !item.is_looted)
             {
-                b << uint8(l.items.size() + (qi - q_list->begin()));
+                b << uint8(l.items.size() + (qi - q_list.begin()));
                 b << item;
                 b << uint8(slot_type);                      // allow loot
                 ++itemsShown;
@@ -829,8 +827,8 @@ ByteBuffer& operator<<(ByteBuffer& b, LootView const& lv)
     QuestItemMap::const_iterator ffa_itr = lootPlayerFFAItems.find(lv.viewer->GetGUIDLow());
     if (ffa_itr != lootPlayerFFAItems.end())
     {
-        QuestItemList *ffa_list = ffa_itr->second;
-        for (QuestItemList::const_iterator fi = ffa_list->begin() ; fi != ffa_list->end(); ++fi)
+        QuestItemList const& ffa_list = ffa_itr->second;
+        for (QuestItemList::const_iterator fi = ffa_list.begin() ; fi != ffa_list.end(); ++fi)
         {
             LootItem &item = l.items[fi->index];
             if (!fi->is_looted && !item.is_looted)
