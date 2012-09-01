@@ -589,7 +589,7 @@ Player::~Player ()
     //m_social = NULL;
 
     // Clear chache need only if player true loaded, not in broken state
-    if (!GetObjectGuid().IsEmpty())
+    if (m_uint32Values && !GetObjectGuid().IsEmpty())
         sAccountMgr.ClearPlayerDataCache(GetObjectGuid());
 
     // Note: buy back item already deleted from DB when player was saved
