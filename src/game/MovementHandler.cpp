@@ -165,12 +165,12 @@ void WorldSession::HandleMoveWorldportAckOpcode()
     GetPlayer()->SendInitialPacketsAfterAddToMap();
 
     // flight fast teleport case
-    if(GetPlayer()->GetMotionMaster()->GetCurrentMovementGeneratorType() == FLIGHT_MOTION_TYPE)
+    if (GetPlayer()->IsInUnitState(UNIT_ACTION_TAXI))
     {
-        if(!_player->InBattleGround())
+        if (!_player->InBattleGround())
         {
             // short preparations to continue flight
-            FlightPathMovementGenerator* flight = (FlightPathMovementGenerator*)(GetPlayer()->GetMotionMaster()->top());
+            FlightPathMovementGenerator* flight = (FlightPathMovementGenerator*)(GetPlayer()->GetMotionMaster()->CurrentMovementGenerator());
             flight->Reset(*GetPlayer());
             return;
         }

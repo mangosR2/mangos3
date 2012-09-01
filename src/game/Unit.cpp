@@ -10317,7 +10317,7 @@ bool Unit::SelectHostileTarget(bool withEvade)
             {
                 if ((caster = (*aura)->GetCaster()) && caster->IsInMap(this) &&
                     caster->isTargetableForAttack() && caster->isInAccessablePlaceFor(this) &&
-//                  (!IsCombatStationary() || CanReachWithMeleeAttack(caster)) &&
+                    (!IsCombatStationary() || CanReachWithMeleeAttack(caster)) &&
                     !IsSecondChoiceTarget(caster, true))
                 {
                     target = caster;
@@ -13663,7 +13663,7 @@ uint32 Unit::GetModelForForm() const
 
 bool Unit::IsCombatStationary()
 {
-    return GetMotionMaster()->GetCurrentMovementGeneratorType() != CHASE_MOTION_TYPE || isInRoots();
+    return isInCombat() && !IsInUnitState(UNIT_ACTION_CHASE);
 }
 
 bool Unit::HasMorePoweredBuff(uint32 spellId)
