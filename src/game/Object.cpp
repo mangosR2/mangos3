@@ -2280,7 +2280,7 @@ uint32 WorldObject::GetWorldState(uint32 stateId)
     return sWorldStateMgr.GetWorldStateValueFor(this, stateId);
 }
 
-EventProcessor* WorldObject::GetEvents()
+WorldObjectEventProcessor* WorldObject::GetEvents()
 {
     return &m_Events;
 }
