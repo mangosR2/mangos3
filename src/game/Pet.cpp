@@ -2883,6 +2883,15 @@ Unit* Pet::GetOwner() const
 
 bool Pet::IsInEvadeMode() const
 {
+    switch (GetCharmState(CHARM_STATE_COMMAND))
+    {
+        case COMMAND_STAY:
+            return false;
+        case COMMAND_FOLLOW:
+        case COMMAND_ATTACK:
+        default:
+            return IsInUnitState(UNIT_ACTION_HOME) && !IsWithinDistInMap(GetOwner(), PET_FOLLOW_DIST + 1.0f);
+    }
     return false;
 }
 

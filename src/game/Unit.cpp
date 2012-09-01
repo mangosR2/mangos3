@@ -11480,6 +11480,7 @@ void Unit::DoPetAction( Player* owner, uint8 flag, uint32 spellid, ObjectGuid pe
                     StopMoving();
                     GetMotionMaster()->Clear(true);
                     GetCharmInfo()->SetState(CHARM_STATE_COMMAND,COMMAND_STAY);
+                    GetMotionMaster()->MoveTargetedHome();
                     SendCharmState();
                     break;
                 }
@@ -11489,8 +11490,8 @@ void Unit::DoPetAction( Player* owner, uint8 flag, uint32 spellid, ObjectGuid pe
                         InterruptNonMeleeSpells(false);
                     AttackStop();
                     GetMotionMaster()->Clear(true);
-                    GetMotionMaster()->MoveFollow(owner,PET_FOLLOW_DIST,((Pet*)this)->GetPetFollowAngle());
                     GetCharmInfo()->SetState(CHARM_STATE_COMMAND,COMMAND_FOLLOW);
+                    GetMotionMaster()->MoveTargetedHome();
                     SendCharmState();
                     break;
                 }

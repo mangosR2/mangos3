@@ -104,10 +104,21 @@ void MotionMaster::MoveTargetedHome()
     }
     else if (m_owner->GetTypeId() == TYPEID_UNIT && ((Creature*)m_owner)->GetCharmerOrOwnerGuid())
     {
-        if (Unit *target = ((Creature*)m_owner)->GetCharmerOrOwner())
+        if (Unit* target = ((Creature*)m_owner)->GetCharmerOrOwner())
         {
+            float angle = ((Creature*)m_owner)->IsPet() ? ((Pet*)m_owner)->GetPetFollowAngle() : PET_FOLLOW_ANGLE;
             DEBUG_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS, "MotionMaster: %s follow to %s", m_owner->GetGuidStr().c_str(), target->GetGuidStr().c_str());
-            Mutate(new FollowMovementGenerator<Creature>(*target,PET_FOLLOW_DIST,PET_FOLLOW_ANGLE), UNIT_ACTION_HOME);
+            switch (((Creature*)m_owner)->GetCharmState(CHARM_STATE_COMMAND))
+            {
+                case COMMAND_STAY:
+                    MoveIdle();
+                    break;
+                case COMMAND_FOLLOW:
+                case COMMAND_ATTACK:
+                default:
+                    Mutate(new FollowMovementGenerator<Creature>(*target,PET_FOLLOW_DIST,angle), UNIT_ACTION_HOME);
+                    break;
+            }
         }
         else
         {

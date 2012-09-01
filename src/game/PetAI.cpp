@@ -378,15 +378,7 @@ void PetAI::_stopAttack()
     m_creature->CastStop(true);
     m_creature->AttackStop();
 
-    Unit* owner = m_creature->GetCharmerOrOwner();
-    if(owner && m_creature->GetCharmInfo() && m_creature->GetCharmInfo()->HasState(CHARM_STATE_COMMAND,COMMAND_FOLLOW))
-    {
-        m_creature->GetMotionMaster()->MoveFollow(owner,PET_FOLLOW_DIST, m_creature->IsPet() ? ((Pet*)m_creature)->GetPetFollowAngle() : PET_FOLLOW_ANGLE);
-    }
-    else
-    {
-        m_creature->GetMotionMaster()->MoveIdle();
-    }
+    m_creature->GetMotionMaster()->MoveTargetedHome();
 }
 
 void PetAI::UpdateAI(const uint32 diff)
@@ -503,17 +495,13 @@ void PetAI::UpdateAI(const uint32 diff)
     }
     else if (owner && m_creature->GetCharmInfo())
     {
-        if (owner->isInCombat() && !(m_creature->GetCharmInfo()->HasState(CHARM_STATE_REACT,REACT_PASSIVE) || m_creature->GetCharmInfo()->HasState(CHARM_STATE_COMMAND,COMMAND_STAY)))
+        if (owner->isInCombat() && owner->getVictim() && owner->getVictim()->isAlive() &&
+            !(m_creature->GetCharmInfo()->HasState(CHARM_STATE_REACT,REACT_PASSIVE) || m_creature->GetCharmInfo()->HasState(CHARM_STATE_COMMAND,COMMAND_STAY)))
         {
             AttackStart(owner->getAttackerForHelper());
         }
-        else if(m_creature->GetCharmInfo()->HasState(CHARM_STATE_COMMAND,COMMAND_FOLLOW))
-        {
-            if (!m_creature->hasUnitState(UNIT_STAT_FOLLOW) )
-            {
-                m_creature->GetMotionMaster()->MoveFollow(owner,PET_FOLLOW_DIST, m_creature->IsPet() ? ((Pet*)m_creature)->GetPetFollowAngle() : PET_FOLLOW_ANGLE);
-            }
-        }
+        else 
+            m_creature->GetMotionMaster()->MoveTargetedHome();
     }
 
     UpdateAIType();

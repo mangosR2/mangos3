@@ -537,7 +537,7 @@ class MANGOS_DLL_SPEC Creature : public Unit
 
         uint8 getRace() const;
 
-        bool IsInEvadeMode() const;
+        bool IsInEvadeMode() const override;
 
         bool AIM_Initialize();
 
