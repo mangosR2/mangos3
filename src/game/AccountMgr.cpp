@@ -311,7 +311,7 @@ AccountOpResult AccountMgr::DeleteRAFLink(uint32 accid, uint32 friendid)
         for (RafLinkedList::iterator itr1 = referred->begin(); itr1 != referred->end();)
         {
             if (*itr1 == accid)
-                referred->erase(itr1);
+                itr1 = referred->erase(itr1);
             else
                 ++itr1;
         }
@@ -323,7 +323,7 @@ AccountOpResult AccountMgr::DeleteRAFLink(uint32 accid, uint32 friendid)
         for (RafLinkedList::iterator itr1 = referal->begin(); itr1 != referal->end();)
         {
             if (*itr1 == friendid)
-                referal->erase(itr1);
+                itr1 = referal->erase(itr1);
             else
                 ++itr1;
         }
