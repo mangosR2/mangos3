@@ -5597,13 +5597,10 @@ void Unit::RemoveNotOwnSingleTargetAuras(uint32 newPhase)
 
 void Unit::RemoveSpellAuraHolder(SpellAuraHolderPtr holder, AuraRemoveMode mode)
 {
-    {
-        MAPLOCK_WRITE(this,MAP_LOCK_TYPE_AURAS);
-        if (!holder || holder->IsDeleted())
-            return;
+    if (!holder || holder->IsDeleted())
+        return;
 
-        holder->SetDeleted();
-    }
+    holder->SetDeleted();
 
     if (!AddSpellAuraHolderToRemoveList(holder))
     {
