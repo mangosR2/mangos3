@@ -1059,6 +1059,15 @@ void Map::AddObjectToRemoveList(WorldObject *obj)
     //DEBUG_LOG("Object (GUID: %u TypeId: %u ) added to removing list.",obj->GetGUIDLow(),obj->GetTypeId());
 }
 
+void Map::RemoveObjectFromRemoveList(WorldObject* obj)
+{
+    if (i_objectsToRemove.empty())
+        return;
+    std::set< WorldObject* >::const_iterator itr = i_objectsToRemove.find(obj);
+    if (itr != i_objectsToRemove.end())
+        i_objectsToRemove.erase(itr);
+}
+
 void Map::RemoveAllObjectsInRemoveList()
 {
     if(i_objectsToRemove.empty())

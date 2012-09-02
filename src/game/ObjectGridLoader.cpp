@@ -256,6 +256,8 @@ ObjectGridUnloader::Visit(GridRefManager<T> &m)
             obj->SaveRespawnTime();
         ///- object must be out of world before delete
         obj->RemoveFromWorld();
+        ///- Prevent double remove
+        obj->RemoveObjectFromRemoveList();
         ///- object will get delinked from the manager when deleted
         delete obj;
     }

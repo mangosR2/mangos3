@@ -216,6 +216,7 @@ class MANGOS_DLL_SPEC Map : public GridRefManager<NGridType>
         MapPersistentState* GetPersistentState() const;
 
         void AddObjectToRemoveList(WorldObject *obj);
+        void RemoveObjectFromRemoveList(WorldObject* obj);
 
         void UpdateObjectVisibility(WorldObject* obj, Cell cell, CellPair cellpair);
 
