@@ -368,7 +368,7 @@ BattleGroundMap* BattleGround::GetBgMap()
 
 uint32 BattleGround::GetInstanceID()
 {
-    return GetBgMap() ? GetBgMap()->GetInstanceId() : 0;
+    return m_Map ? m_Map->GetInstanceId() : 0;
 }
 
 void BattleGround::Update(uint32 diff)
