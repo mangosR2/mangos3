@@ -3306,7 +3306,9 @@ void Unit::SendMeleeAttackStop(Unit* victim)
     data << (victim ? victim->GetPackGUID() : PackedGuid());                           // can be 0x00...
     data << uint32(0);                                                                 // can be 0x1
     SendMessageToSet(&data, true);
-    DETAIL_FILTER_LOG(LOG_FILTER_COMBAT, "Unit::SendMeleeAttackStop %s stopped attacking %s", GetObjectGuid().GetString().c_str(), victim ? victim->GetObjectGuid().GetString().c_str() : "<none>");
+
+    if (victim)
+        DETAIL_FILTER_LOG(LOG_FILTER_COMBAT, "Unit::SendMeleeAttackStop %s stopped attacking %s", GetObjectGuid().GetString().c_str(), victim ? victim->GetObjectGuid().GetString().c_str() : "<none>");
 
     /*if (victim->GetTypeId() == TYPEID_UNIT)
         ((Creature*)victim)->AI().EnterEvadeMode(this);*/

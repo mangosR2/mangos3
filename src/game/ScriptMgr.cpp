@@ -1231,7 +1231,11 @@ void ScriptAction::HandleScriptStep()
                 break;
 
             uint32 creatureEntry = m_script->killCredit.creatureEntry;
-            WorldObject* pRewardSource = pSource && pSource->GetTypeId() == TYPEID_UNIT ? pSource : (pTarget && pTarget->GetTypeId() == TYPEID_UNIT ? pTarget : NULL);
+            WorldObject* pRewardSource = (pSource && pSource->GetTypeId() == TYPEID_UNIT) ? pSource : ((pTarget && pTarget->GetTypeId() == TYPEID_UNIT) ? pTarget : NULL);
+
+            // seems as pRewardSource may be not unit... any suggestions? (/dev/rsa)
+            if (!pRewardSource)
+                break;
 
             // dynamic effect, take entry of reward Source
             if (!creatureEntry)

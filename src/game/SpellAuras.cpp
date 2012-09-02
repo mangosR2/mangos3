@@ -10737,6 +10737,14 @@ void SpellAuraHolder::_RemoveSpellAuraHolder()
             if (Item* castItem = ((Player*)m_target)->GetItemByGuid(castItemGuid))
                 ((Player*)m_target)->DestroyItemWithOnStoreSpell(castItem, GetId());
 
+    // reset cooldown state for spells
+    if (caster && caster->GetTypeId() == TYPEID_PLAYER)
+    {
+        if (GetSpellProto()->Attributes & SPELL_ATTR_DISABLED_WHILE_ACTIVE)
+            // note: item based cooldowns and cooldown spell mods with charges ignored (unknown existing cases)
+            ((Player*)caster)->SendCooldownEvent(GetSpellProto());
+    }
+
     //passive auras do not get put in slots - said who? ;)
     // Note: but totem can be not accessible for aura target in time remove (to far for find in grid)
     //if (m_isPassive && !(caster && caster->GetTypeId() == TYPEID_UNIT && ((Creature*)caster)->IsTotem()))
@@ -10862,13 +10870,6 @@ void SpellAuraHolder::_RemoveSpellAuraHolder()
                 m_target->ModifyAuraState(AuraState(removeState), false);
         }
 
-        // reset cooldown state for spells
-        if (caster && caster->GetTypeId() == TYPEID_PLAYER)
-        {
-            if (GetSpellProto()->HasAttribute(SPELL_ATTR_DISABLED_WHILE_ACTIVE))
-                // note: item based cooldowns and cooldown spell mods with charges ignored (unknown existing cases)
-                ((Player*)caster)->SendCooldownEvent(GetSpellProto());
-        }
     }
 }
 
@@ -12305,7 +12306,6 @@ void SpellAuraHolder::HandleSpellSpecificBoostsForward(bool apply)
 
 SpellAuraHolder::~SpellAuraHolder()
 {
-    m_aurasStorage.clear();
 //    DEBUG_LOG("SpellAuraHolder:: destructor for SpellAuraHolder of spell %u called.", GetId());
 }
 

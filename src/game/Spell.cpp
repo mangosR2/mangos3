@@ -4399,6 +4399,16 @@ void Spell::SendSpellGo()
     }
 
     m_caster->SendMessageToSet(&data, true);
+
+    DEBUG_FILTER_LOG(LOG_FILTER_SPELL_CAST,"Spell::SendSpellGo: %s cast spell %u on %s, targets count (mask %u) %u %u %u",
+                m_caster->GetObjectGuid().GetString().c_str(),
+                m_spellInfo->Id,
+                m_targets.getUnitTarget() ? m_targets.getUnitTarget()->GetObjectGuid().GetString().c_str() : "<none>",
+                m_targets.m_targetMask,
+                m_UniqueTargetInfo.size(),
+                m_UniqueGOTargetInfo.size(),
+                m_UniqueItemInfo.size()
+                );
 }
 
 void Spell::WriteAmmoToPacket(WorldPacket* data)

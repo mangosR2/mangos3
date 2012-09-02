@@ -615,8 +615,11 @@ ActionInfo* UnitStateMgr::CurrentState()
 
 void UnitStateMgr::DropAllStates()
 {
-    DEBUG_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS, "UnitStateMgr:DropAllStates %s drop all active states", GetOwnerStr().c_str());
-    DropActionHigherThen(UNIT_ACTION_PRIORITY_IDLE);
+    if (!m_actions.empty())
+    {
+        DEBUG_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS, "UnitStateMgr:DropAllStates %s drop all active states (count = %u)", GetOwnerStr().c_str(), m_actions.size());
+        DropActionHigherThen(UNIT_ACTION_PRIORITY_IDLE);
+    }
     PushAction(UNIT_ACTION_IDLE);
 }
 
