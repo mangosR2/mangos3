@@ -2120,61 +2120,61 @@ struct SpellEntry
     template <SpellFamily family, CFM_ARGS_1>
     bool IsFitToFamily() const
     {
-        return SpellFamily(SpellFamilyName) == family && SpellFamilyFlags.test<CFM_VALUES_1>();
+        return SpellFamily(SpellFamilyName) == family && GetSpellFamilyFlags().test<CFM_VALUES_1>();
     }
 
     template <SpellFamily family, CFM_ARGS_2>
     bool IsFitToFamily() const
     {
-        return SpellFamily(SpellFamilyName) == family && SpellFamilyFlags.test<CFM_VALUES_2>();
+        return SpellFamily(SpellFamilyName) == family && GetSpellFamilyFlags().test<CFM_VALUES_2>();
     }
 
     template <SpellFamily family, CFM_ARGS_3>
     bool IsFitToFamily() const
     {
-        return SpellFamily(SpellFamilyName) == family && SpellFamilyFlags.test<CFM_VALUES_3>();
+        return SpellFamily(SpellFamilyName) == family && GetSpellFamilyFlags().test<CFM_VALUES_3>();
     }
 
     template <SpellFamily family, CFM_ARGS_4>
     bool IsFitToFamily() const
     {
-        return SpellFamily(SpellFamilyName) == family && SpellFamilyFlags.test<CFM_VALUES_4>();
+        return SpellFamily(SpellFamilyName) == family && GetSpellFamilyFlags().test<CFM_VALUES_4>();
     }
 
     template <SpellFamily family, CFM_ARGS_5>
     bool IsFitToFamily() const
     {
-        return SpellFamily(SpellFamilyName) == family && SpellFamilyFlags.test<CFM_VALUES_5>();
+        return SpellFamily(SpellFamilyName) == family && GetSpellFamilyFlags().test<CFM_VALUES_5>();
     }
 
     template <SpellFamily family, CFM_ARGS_6>
     bool IsFitToFamily() const
     {
-        return SpellFamily(SpellFamilyName) == family && SpellFamilyFlags.test<CFM_VALUES_6>();
+        return SpellFamily(SpellFamilyName) == family && GetSpellFamilyFlags().test<CFM_VALUES_6>();
     }
 
     template <SpellFamily family, CFM_ARGS_7>
     bool IsFitToFamily() const
     {
-        return SpellFamily(SpellFamilyName) == family && SpellFamilyFlags.test<CFM_VALUES_7>();
+        return SpellFamily(SpellFamilyName) == family && GetSpellFamilyFlags().test<CFM_VALUES_7>();
     }
 
     template <SpellFamily family, CFM_ARGS_8>
     bool IsFitToFamily() const
     {
-        return SpellFamily(SpellFamilyName) == family && SpellFamilyFlags.test<CFM_VALUES_8>();
+        return SpellFamily(SpellFamilyName) == family && GetSpellFamilyFlags().test<CFM_VALUES_8>();
     }
 
     template <SpellFamily family, CFM_ARGS_9>
     bool IsFitToFamily() const
     {
-        return SpellFamily(SpellFamilyName) == family && SpellFamilyFlags.test<CFM_VALUES_9>();
+        return SpellFamily(SpellFamilyName) == family && GetSpellFamilyFlags().test<CFM_VALUES_9>();
     }
 
     template <SpellFamily family, CFM_ARGS_10>
     bool IsFitToFamily() const
     {
-        return SpellFamily(SpellFamilyName) == family && SpellFamilyFlags.test<CFM_VALUES_10>();
+        return SpellFamily(SpellFamilyName) == family && GetSpellFamilyFlags().test<CFM_VALUES_10>();
     }
 
     inline bool HasAttribute(SpellAttributes attribute) const { return Attributes & attribute; }
@@ -2195,6 +2195,7 @@ struct SpellEntry
     inline uint32 GetEffectImplicitTargetBByIndex(SpellEffectIndex j) const { return EffectImplicitTargetB[j];};
     inline uint32 GetEffectApplyAuraNameByIndex(SpellEffectIndex j) const   { return EffectApplyAuraName[j];};
     inline uint32 GetEffectMiscValue(SpellEffectIndex j) const              { return EffectMiscValue[j];};
+    inline ClassFamilyMask GetSpellFamilyFlags() const                      { return SpellFamilyFlags; };
 
     SpellEffectEntry const* GetSpellEffect(SpellEffectIndex j) const;
 

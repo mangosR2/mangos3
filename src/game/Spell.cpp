@@ -809,38 +809,38 @@ void Spell::prepareDataForTriggerSystem()
         {
             case SPELLFAMILY_MAGE:
                 // Arcane Missiles / Blizzard triggers need do it
-                if (m_spellInfo->SpellFamilyFlags.test<CF_MAGE_BLIZZARD, CF_MAGE_ARCANE_MISSILES2>() || m_spellInfo->SpellIconID == 212)
+                if (m_spellInfo->GetSpellFamilyFlags().test<CF_MAGE_BLIZZARD, CF_MAGE_ARCANE_MISSILES2>() || m_spellInfo->SpellIconID == 212)
                     m_canTrigger = true;
                 // Clearcasting trigger need do it
                 // Replenish Mana, item spell with triggered cases (Mana Agate, etc mana gems)
                 // Fingers of Frost: triggered by Frost/Ice Armor
                 // Living Bomb - can trigger Hot Streak
-                else if (m_spellInfo->SpellFamilyFlags.test<CF_MAGE_CLEARCASTING, CF_MAGE_REPLENISH_MANA, CF_MAGE_CHILLED, CF_MAGE_LIVING_BOMB_AOE>())
+                else if (m_spellInfo->GetSpellFamilyFlags().test<CF_MAGE_CLEARCASTING, CF_MAGE_REPLENISH_MANA, CF_MAGE_CHILLED, CF_MAGE_LIVING_BOMB_AOE>())
                     m_canTrigger = true;
                 break;
             case SPELLFAMILY_WARLOCK:
                 // For Hellfire Effect / Rain of Fire / Seed of Corruption triggers need do it
-                if (m_spellInfo->SpellFamilyFlags.test<CF_WARLOCK_RAIN_OF_FIRE, CF_WARLOCK_HELLFIRE, CF_WARLOCK_SEED_OF_CORRUPTION2>())
+                if (m_spellInfo->GetSpellFamilyFlags().test<CF_WARLOCK_RAIN_OF_FIRE, CF_WARLOCK_HELLFIRE, CF_WARLOCK_SEED_OF_CORRUPTION2>())
                     m_canTrigger = true;
                 break;
             case SPELLFAMILY_PRIEST:
                 // For Penance,Mind Sear,Mind Flay,Improved Devouring Plague heal/damage triggers need do it
-                if (m_spellInfo->SpellFamilyFlags.test<CF_PRIEST_MIND_FLAY1, CF_PRIEST_PENANCE_DMG, CF_PRIEST_PENANCE_HEAL, CF_PRIEST_IMP_DEVOURING_PLAGUE, CF_PRIEST_MIND_FLAY2>())
+                if (m_spellInfo->GetSpellFamilyFlags().test<CF_PRIEST_MIND_FLAY1, CF_PRIEST_PENANCE_DMG, CF_PRIEST_PENANCE_HEAL, CF_PRIEST_IMP_DEVOURING_PLAGUE, CF_PRIEST_MIND_FLAY2>())
                     m_canTrigger = true;
                 break;
             case SPELLFAMILY_ROGUE:
                 // For poisons need do it
-                if (m_spellInfo->SpellFamilyFlags.test<CF_ROGUE_INSTANT_POISON, CF_ROGUE_CRIPPLING_POISON, CF_ROGUE_MIND_NUMBING_POISON, CF_ROGUE_DEADLY_POISON, CF_ROGUE_WOUND_POISON, CF_ROGUE_ANESTHETIC_POISON>())
+                if (m_spellInfo->GetSpellFamilyFlags().test<CF_ROGUE_INSTANT_POISON, CF_ROGUE_CRIPPLING_POISON, CF_ROGUE_MIND_NUMBING_POISON, CF_ROGUE_DEADLY_POISON, CF_ROGUE_WOUND_POISON, CF_ROGUE_ANESTHETIC_POISON>())
                     m_canTrigger = true;
                 break;
             case SPELLFAMILY_HUNTER:
                 // Hunter Rapid Killing/Explosive Trap Effect/Immolation Trap Effect/Frost Trap Aura/Snake Trap Effect/Explosive Shot
-                if (m_spellInfo->SpellFamilyFlags.test<CF_HUNTER_FIRE_TRAP_EFFECTS, CF_HUNTER_FROST_TRAP_EFFECTS, CF_HUNTER_SNAKE_TRAP_EFFECT, CF_HUNTER_RAPID_KILLING, CF_HUNTER_EXPLOSIVE_SHOT2>())
+                if (m_spellInfo->GetSpellFamilyFlags().test<CF_HUNTER_FIRE_TRAP_EFFECTS, CF_HUNTER_FROST_TRAP_EFFECTS, CF_HUNTER_SNAKE_TRAP_EFFECT, CF_HUNTER_RAPID_KILLING, CF_HUNTER_EXPLOSIVE_SHOT2>())
                     m_canTrigger = true;
                 break;
             case SPELLFAMILY_PALADIN:
                 // For Judgements (all) / Holy Shock triggers need do it
-                if (m_spellInfo->SpellFamilyFlags.test<CF_PALADIN_JUDGEMENT_OF_RIGHT, CF_PALADIN_JUDGEMENT_OF_WISDOM_LIGHT, CF_PALADIN_JUDGEMENT_OF_JUSTICE, CF_PALADIN_HOLY_SHOCK1, CF_PALADIN_JUDGEMENT_ACTIVATE, CF_PALADIN_JUDGEMENT_OF_LIGHT, CF_PALADIN_JUDGEMENT_OF_BLOOD_MARTYR, CF_PALADIN_HOLY_SHOCK>())
+                if (m_spellInfo->GetSpellFamilyFlags().test<CF_PALADIN_JUDGEMENT_OF_RIGHT, CF_PALADIN_JUDGEMENT_OF_WISDOM_LIGHT, CF_PALADIN_JUDGEMENT_OF_JUSTICE, CF_PALADIN_HOLY_SHOCK1, CF_PALADIN_JUDGEMENT_ACTIVATE, CF_PALADIN_JUDGEMENT_OF_LIGHT, CF_PALADIN_JUDGEMENT_OF_BLOOD_MARTYR, CF_PALADIN_HOLY_SHOCK>())
                     m_canTrigger = true;
                 break;
             case SPELLFAMILY_WARRIOR:
@@ -1294,7 +1294,7 @@ void Spell::DoAllEffectOnTarget(TargetInfo *target)
         // Haunt (NOTE: for avoid use additional field damage stored in dummy value (replace unused 100%)
         // apply before deal damage because aura can be removed at target kill
         if (m_spellInfo->SpellFamilyName == SPELLFAMILY_WARLOCK && m_spellInfo->SpellIconID == 3172 &&
-            m_spellInfo->SpellFamilyFlags.test<CF_WARLOCK_HAUNT>())
+            m_spellInfo->GetSpellFamilyFlags().test<CF_WARLOCK_HAUNT>())
             if (Aura const* dummy = unitTarget->GetDummyAura(m_spellInfo->Id))
                 dummy->GetModifier()->m_amount = damageInfo.damage + damageInfo.absorb;
 
@@ -3459,7 +3459,7 @@ void Spell::cast(bool skipCheck)
         case SPELLFAMILY_MAGE:
         {
             // Ice Block
-            if (m_spellInfo->SpellFamilyFlags.test<CF_MAGE_ICE_BLOCK>())
+            if (m_spellInfo->GetSpellFamilyFlags().test<CF_MAGE_ICE_BLOCK>())
                 AddPrecastSpell(41425);                     // Hypothermia
             // Icy Veins
             else if (m_spellInfo->Id == 12472)
@@ -3479,13 +3479,13 @@ void Spell::cast(bool skipCheck)
         case SPELLFAMILY_WARRIOR:
         {
             // Shield Slam
-            if (m_spellInfo->SpellFamilyFlags.test<CF_WARRIOR_SHIELD_SLAM>() && m_spellInfo->Category==1209)
+            if (m_spellInfo->GetSpellFamilyFlags().test<CF_WARRIOR_SHIELD_SLAM>() && m_spellInfo->Category==1209)
             {
                 if (m_caster->HasAura(58375))               // Glyph of Blocking
                     AddTriggeredSpell(58374);               // Glyph of Blocking
             }
             // Bloodrage
-            if (m_spellInfo->SpellFamilyFlags.test<CF_WARRIOR_BLOODRAGE>())
+            if (m_spellInfo->GetSpellFamilyFlags().test<CF_WARRIOR_BLOODRAGE>())
             {
                 if (m_caster->HasAura(70844))               // Item - Warrior T10 Protection 4P Bonus
                     AddTriggeredSpell(70845);               // Stoicism
@@ -3511,10 +3511,10 @@ void Spell::cast(bool skipCheck)
         {
             // Power Word: Shield
             if (m_spellInfo->Mechanic == MECHANIC_SHIELD &&
-                m_spellInfo->SpellFamilyFlags.test<CF_PRIEST_POWER_WORD_SHIELD>())
+                m_spellInfo->GetSpellFamilyFlags().test<CF_PRIEST_POWER_WORD_SHIELD>())
                 AddPrecastSpell(6788);                      // Weakened Soul
             // Prayer of Mending (jump animation), we need formal caster instead original for correct animation
-            else if (m_spellInfo->SpellFamilyFlags.test<CF_PRIEST_PRAYER_OF_MENDING>())
+            else if (m_spellInfo->GetSpellFamilyFlags().test<CF_PRIEST_PRAYER_OF_MENDING>())
                 AddTriggeredSpell(41637);
 
             switch(m_spellInfo->Id)
@@ -3587,7 +3587,7 @@ void Spell::cast(bool skipCheck)
                     AddPrecastSpell(67485);                 // Hand of Reckoning
             }
             // Divine Shield, Divine Protection or Hand of Protection
-            else if (m_spellInfo->SpellFamilyFlags.test<CF_PALADIN_HAND_OF_PROTECTION, CF_PALADIN_DIVINE_SHIELD>())
+            else if (m_spellInfo->GetSpellFamilyFlags().test<CF_PALADIN_HAND_OF_PROTECTION, CF_PALADIN_DIVINE_SHIELD>())
             {
                 AddPrecastSpell(25771);                     // Forbearance
 
@@ -3596,7 +3596,7 @@ void Spell::cast(bool skipCheck)
                     AddPrecastSpell(61987);                     // Avenging Wrath Marker
             }
             // Lay on Hands
-            else if (m_spellInfo->SpellFamilyFlags.test<CF_PALADIN_LAY_ON_HANDS>())
+            else if (m_spellInfo->GetSpellFamilyFlags().test<CF_PALADIN_LAY_ON_HANDS>())
             {
                 // only for self cast
                 if (m_caster == m_targets.getUnitTarget())
@@ -3606,7 +3606,7 @@ void Spell::cast(bool skipCheck)
                 }
             }
             // Avenging Wrath
-            else if (m_spellInfo->SpellFamilyFlags.test<CF_PALADIN_AVENGING_WRATH>())
+            else if (m_spellInfo->GetSpellFamilyFlags().test<CF_PALADIN_AVENGING_WRATH>())
                 AddPrecastSpell(61987);                     // Avenging Wrath Marker
             break;
         }
@@ -3622,7 +3622,7 @@ void Spell::cast(bool skipCheck)
             else if (m_spellInfo->Id == 58875)
                 AddPrecastSpell(58876);
             // Totem of Wrath
-            else if (m_spellInfo->Effect[EFFECT_INDEX_0]==SPELL_EFFECT_APPLY_AREA_AURA_RAID && m_spellInfo->SpellFamilyFlags.test<CF_SHAMAN_TOTEM_OF_WRATH>())
+            else if (m_spellInfo->Effect[EFFECT_INDEX_0]==SPELL_EFFECT_APPLY_AREA_AURA_RAID && m_spellInfo->GetSpellFamilyFlags().test<CF_SHAMAN_TOTEM_OF_WRATH>())
                 // only for main totem spell cast
                 AddTriggeredSpell(30708);                   // Totem of Wrath
             break;
@@ -5388,7 +5388,7 @@ SpellCastResult Spell::CheckCast(bool strict)
 
             // Lay on Hands (self cast)
             if (m_spellInfo->SpellFamilyName == SPELLFAMILY_PALADIN &&
-                m_spellInfo->SpellFamilyFlags.test<CF_PALADIN_LAY_ON_HANDS>())
+                m_spellInfo->GetSpellFamilyFlags().test<CF_PALADIN_LAY_ON_HANDS>())
             {
                 if (target->HasAura(25771))                 // Forbearance
                     return SPELL_FAILED_CASTER_AURASTATE;
@@ -5787,7 +5787,7 @@ SpellCastResult Spell::CheckCast(bool strict)
                     if (m_caster->IsInWater())
                         return SPELL_FAILED_ONLY_ABOVEWATER;
                 }
-                else if (m_spellInfo->SpellFamilyName == SPELLFAMILY_DEATHKNIGHT && m_spellInfo->SpellFamilyFlags.test<CF_DEATHKNIGHT_DEATH_COIL>()) // Death Coil (DeathKnight)
+                else if (m_spellInfo->SpellFamilyName == SPELLFAMILY_DEATHKNIGHT && m_spellInfo->GetSpellFamilyFlags().test<CF_DEATHKNIGHT_DEATH_COIL>()) // Death Coil (DeathKnight)
                 {
                     Unit* target = m_targets.getUnitTarget();
                     if (!target || (target->IsFriendlyTo(m_caster) && target->GetCreatureType() != CREATURE_TYPE_UNDEAD))
