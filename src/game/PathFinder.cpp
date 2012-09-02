@@ -621,10 +621,10 @@ uint32 PathFinder::fixupCorridor(dtPolyRef* path, uint32 npath, uint32 maxPath,
 
     // Adjust beginning of the buffer to include the visited.
     uint32 req = nvisited - furthestVisited;
-    uint32 orig = uint32(furthestPath+1) < npath ? furthestPath+1 : npath;
-    uint32 size = npath-orig > 0 ? npath-orig : 0;
-    if (req+size > maxPath)
-        size = maxPath-req;
+    uint32 orig = uint32(furthestPath + 1) < npath ? furthestPath + 1 : npath;
+    uint32 size = npath > orig ? npath - orig : 0;
+    if (req + size > maxPath)
+        size = maxPath - req;
 
     if (size)
         memmove(path+req, path+orig, size*sizeof(dtPolyRef));
