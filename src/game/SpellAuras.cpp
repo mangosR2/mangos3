@@ -1301,23 +1301,6 @@ void Aura::HandleAddModifier(bool apply, bool Real)
             default:
                 break;
         }
-
-        // Everlasting Affliction, overwrite wrong data, if will need more better restore support of spell_affect table
-        if (spellProto->SpellFamilyName == SPELLFAMILY_WARLOCK && spellProto->SpellIconID == 3169)
-        {
-            // Corruption and Unstable Affliction
-            // TODO: drop when override will be possible
-            SpellEntry *entry = const_cast<SpellEntry*>(spellProto);
-            entry->EffectSpellClassMask[GetEffIndex()] = ClassFamilyMask::create<CF_WARLOCK_CORRUPTION, CF_WARLOCK_UNSTABLE_AFFLICTION>();
-        }
-        // Improved Flametongue Weapon, overwrite wrong data, maybe time re-add table
-        else if (spellProto->Id == 37212)
-        {
-            // Flametongue Weapon (Passive)
-            // TODO: drop when override will be possible
-            SpellEntry *entry = const_cast<SpellEntry*>(spellProto);
-            entry->EffectSpellClassMask[GetEffIndex()] = ClassFamilyMask::create<CF_SHAMAN_FLAMETONGUE_WEAPON>();
-        }
     }
 
     ((Player*)GetTarget())->AddSpellMod(this, apply);
