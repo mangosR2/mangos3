@@ -1092,3 +1092,11 @@ void WorldSession::InitWarden(BigNumber *K, std::string os)
 
     m_Warden->Init(this, K);
 }
+
+void WorldSession::SendPlaySpellVisual(ObjectGuid guid, uint32 spellArtKit)
+{
+    WorldPacket data(SMSG_PLAY_SPELL_VISUAL, 8+4);          // visual effect on guid
+    data << guid;
+    data << spellArtKit;                                    // index from SpellVisualKit.dbc
+    SendPacket(&data);
+}

@@ -67,13 +67,13 @@ void BattleGroundDS::Update(uint32 diff)
 
                     float angle = (plr->GetBGTeam() == ALLIANCE /*gold*/) ? plr->GetAngle(1259.58f, 764.43f) : plr->GetAngle(1325.84f, 817.304f);
 
-                    plr->KnockBackPlayerWithAngle(angle, 45, 7);
+                    plr->KnockBackWithAngle(angle, 45, 7);
 
                     if (plr->IsWithinDist2d(1214, 765, 50) && plr->IsWithinLOS(1214, 765, 14))
-                        plr->KnockBackPlayerWithAngle(6.40f,55,7);
+                        plr->KnockBackWithAngle(6.40f,55,7);
 
                     if (plr->IsWithinDist2d(1369, 817, 50) && plr->IsWithinLOS(1369, 817, 14))
-                        plr->KnockBackPlayerWithAngle(3.03f,55,7);
+                        plr->KnockBackWithAngle(3.03f,55,7);
                 }
                 pushbackCheck = false;
                 m_uiKnockback = 1000;

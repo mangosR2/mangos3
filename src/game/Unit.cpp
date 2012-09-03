@@ -13154,15 +13154,16 @@ void Unit::KnockBackFrom(Unit* target, float horizontalSpeed, float verticalSpee
 
 void Unit::KnockBackWithAngle(float angle, float horizontalSpeed, float verticalSpeed)
 {
-    float vsin = sin(angle);
-    float vcos = cos(angle);
-
     if (GetTypeId() == TYPEID_PLAYER)
     {
-        KnockBackPlayerWithAngle(angle, horizontalSpeed, verticalSpeed);
+        ((Player*)this)->GetAntiCheat()->SetImmune(uint32((3 * verticalSpeed / Movement::gravity) * 1000));
+        ((Player*)this)->GetSession()->SendKnockBack(angle, horizontalSpeed, verticalSpeed);
     }
     else
     {
+        float vsin = sin(angle);
+        float vcos = cos(angle);
+
         float moveTimeHalf = verticalSpeed / Movement::gravity;
         float max_height = -Movement::computeFallElevation(moveTimeHalf,false,-verticalSpeed);
 
@@ -13175,29 +13176,6 @@ void Unit::KnockBackWithAngle(float angle, float horizontalSpeed, float vertical
 
         MonsterMoveToDestination(fx,fy,fz,GetOrientation(),horizontalSpeed,max_height, true);
     }
-}
-
-void Unit::KnockBackPlayerWithAngle(float angle, float horizontalSpeed, float verticalSpeed)
-{
-    float vsin = sin(angle);
-    float vcos = cos(angle);
-
-    // Effect propertly implemented only for players
-    if (GetTypeId()==TYPEID_PLAYER)
-    {
-        ((Player*)this)->GetAntiCheat()->SetImmune(uint32((3 * verticalSpeed / Movement::gravity) * 1000));
-        WorldPacket data(SMSG_MOVE_KNOCK_BACK, 9+4+4+4+4+4);
-        data << GetPackGUID();
-        data << uint32(0);                                  // Sequence
-        data << float(vcos);                                // x direction
-        data << float(vsin);                                // y direction
-        data << float(horizontalSpeed);                     // Horizontal speed
-        data << float(-verticalSpeed);                      // Z Movement speed (vertical)
-        ((Player*)this)->GetSession()->SendPacket(&data);
-
-    }
-    else
-        sLog.outError("KnockBackPlayer: Target of KnockBackPlayer must be player!");
 }
 
 float Unit::GetCombatRatingReduction(CombatRating cr) const
