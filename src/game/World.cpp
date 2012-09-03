@@ -1134,6 +1134,9 @@ void World::SetInitialWorldSettings()
     sLog.outString("Loading GameObject models...");
     LoadGameObjectModelList();
 
+    sLog.outString( "Loading SpellDbc..." );
+    sSpellMgr.LoadSpellDbc();
+
     sLog.outString( "Loading SpellTemplate..." );
     sObjectMgr.LoadSpellTemplate();
 

@@ -5343,3 +5343,62 @@ SpellPreferredTargetType GetPreferredTargetForSpell(SpellEntry const* spellInfo)
 
     return SPELL_PREFERRED_TARGET_SELF;
 }
+
+static char* SPELL_DBC_SPELL      = "reconstructed by spell_dbc spell";
+
+struct SpellDbcLoader : public SQLStorageLoaderBase<SpellDbcLoader>
+{
+    template<class S, class D>
+    void default_fill(uint32 field_pos, S src, D &dst)
+    {
+        dst = D(src);
+    }
+
+    void default_fill_to_str(uint32 field_pos, char const* /*src*/, char * & dst)
+    {
+        if (field_pos == LOADED_SPELLDBC_FIELD_POS_SPELLNAME_0)
+        {
+            dst = SPELL_DBC_SPELL;
+        }
+        else
+        {
+            dst = new char[1];
+            *dst = 0;
+        }
+    }
+};
+
+void SpellMgr::LoadSpellDbc()
+{
+    SpellDbcLoader loader;
+    loader.Load(sSpellDbcTemplate);
+
+    sLog.outString(">> Loaded %u spell definitions", sSpellDbcTemplate.RecordCount);
+    sLog.outString();
+
+    for (uint32 i = 1; i < sSpellDbcTemplate.MaxEntry; ++i)
+    {
+        // check data correctness
+        SpellEntry const* spellEntry = sSpellDbcTemplate.LookupEntry<SpellEntry>(i);
+        if (!spellEntry)
+            continue;
+
+        // insert serverside spell data
+        if (sSpellStore.GetNumRows() <= i)
+        {
+            sLog.outErrorDb("SpellMgr::LoadSpellDbc Loading Spell Template for spell %u, index out of bounds (max = %u)", i, sSpellStore.GetNumRows());
+            continue;
+        }
+        else if (SpellEntry const* originalSpellEntry = sSpellStore.LookupEntry(i))
+        {
+            sLog.outDetail("SpellMgr::LoadSpellDbc Index %u already exists in SpellStorage! replacing on spell_dbc data fields!", i, spellEntry->Id);
+            sSpellStore.EraseEntry(i);
+            sSpellStore.InsertEntry(const_cast<SpellEntry*>(spellEntry), i);
+        }
+        else
+        {
+            sLog.outDetail("SpellMgr::LoadSpellDbc reconstructed spell %u inserted in SpellStorage", spellEntry->Id);
+            sSpellStore.InsertEntry(const_cast<SpellEntry*>(spellEntry), i);
+        }
+    }
+}

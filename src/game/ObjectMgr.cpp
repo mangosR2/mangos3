@@ -7240,7 +7240,7 @@ void ObjectMgr::LoadSpellTemplate()
             sLog.outErrorDb("Loading Spell Template for spell %u, index out of bounds (max = %u)", i, sSpellStore.GetNumRows());
             continue;
         }
-        else if (SpellEntry const* spellEntry = sSpellStore.LookupEntry(i))
+        else if (SpellEntry const* originalSpellEntry = sSpellStore.LookupEntry(i))
         {
             sLog.outErrorDb("Loading Spell Template for spell %u failed, index already handled (possible in spell_dbc)", i);
             continue;

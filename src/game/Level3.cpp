@@ -681,6 +681,14 @@ bool ChatHandler::HandleReloadSpellClickSpellsCommand(char* /*args*/)
     return true;
 }
 
+bool ChatHandler::HandleReloadSpellDbcCommand(char* /*args*/)
+{
+    sLog.outString( "Re-Loading `spell_dbc` Table!" );
+    sSpellMgr.LoadSpellDbc();
+    SendGlobalSysMessage("DB table `spell_dbc` reloaded.");
+    return true;
+}
+
 bool ChatHandler::HandleReloadReservedNameCommand(char* /*args*/)
 {
     sLog.outString( "Loading ReservedNames... (`reserved_name`)" );
