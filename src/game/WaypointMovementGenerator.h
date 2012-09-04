@@ -129,7 +129,7 @@ public PathMovementBase<Player,TaxiPathNodeList const*>
         virtual void Reset(Player &u)      {_Reset(u);};
 
         bool Update(Player &, const uint32 &);
-        MovementGeneratorType GetMovementGeneratorType() const { return FLIGHT_MOTION_TYPE; }
+        MovementGeneratorType GetMovementGeneratorType() const override { return FLIGHT_MOTION_TYPE; }
 
         TaxiPathNodeList const& GetPath() { return *i_path; }
         uint32 GetPathAtMapEnd() const;
@@ -146,4 +146,5 @@ public PathMovementBase<Player,TaxiPathNodeList const*>
         void _Reset(Player &);
 
 };
+
 #endif

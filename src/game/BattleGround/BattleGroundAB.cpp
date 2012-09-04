@@ -52,7 +52,7 @@ void BattleGroundAB::Update(uint32 diff)
     {
         int team_points[PVP_TEAM_COUNT] = { 0, 0 };
 
-        for (int node = 0; node < BG_AB_NODES_MAX; ++node)
+        for (uint8 node = 0; node < BG_AB_NODES_MAX; ++node)
         {
             // 3 sec delay to spawn new banner instead previous despawned one
             if (m_BannerTimers[node].timer)
@@ -97,13 +97,21 @@ void BattleGroundAB::Update(uint32 diff)
                 }
             }
 
+<<<<<<< HEAD:src/game/BattleGround/BattleGroundAB.cpp
             for (int team = 0; team < PVP_TEAM_COUNT; ++team)
+=======
+            for (uint8 team = 0; team < BG_TEAMS_COUNT; ++team)
+>>>>>>> d972b57ff0bd9520936ce36fdce69bd5a5859c27:src/game/BattleGround/BattleGroundAB.cpp
                 if (m_Nodes[node] == team + BG_AB_NODE_TYPE_OCCUPIED)
                     ++team_points[team];
         }
 
         // Accumulate points
+<<<<<<< HEAD:src/game/BattleGround/BattleGroundAB.cpp
         for (int team = 0; team < PVP_TEAM_COUNT; ++team)
+=======
+        for (uint8 team = 0; team < BG_TEAMS_COUNT; ++team)
+>>>>>>> d972b57ff0bd9520936ce36fdce69bd5a5859c27:src/game/BattleGround/BattleGroundAB.cpp
         {
             int points = team_points[team];
             if (!points)
@@ -113,17 +121,24 @@ void BattleGroundAB::Update(uint32 diff)
             {
                 m_lastTick[team] -= BG_AB_TickIntervals[points];
                 m_TeamScores[team] += BG_AB_TickPoints[points];
-                m_HonorScoreTics[team] += BG_AB_TickPoints[points];
+                m_honorScoreTicks[team] += BG_AB_TickPoints[points];
                 m_ReputationScoreTics[team] += BG_AB_TickPoints[points];
                 if (m_ReputationScoreTics[team] >= m_ReputationTicks)
                 {
                     (team == TEAM_INDEX_ALLIANCE) ? RewardReputationToTeam(509, 10, ALLIANCE) : RewardReputationToTeam(510, 10, HORDE);
                     m_ReputationScoreTics[team] -= m_ReputationTicks;
                 }
+<<<<<<< HEAD:src/game/BattleGround/BattleGroundAB.cpp
                 if (m_HonorScoreTics[team] >= m_HonorTicks)
                 {
                     RewardHonorToTeam(GetBonusHonorFromKill(1), (team == TEAM_INDEX_ALLIANCE) ? ALLIANCE : HORDE);
                     m_HonorScoreTics[team] -= m_HonorTicks;
+=======
+                if (m_honorScoreTicks[team] >= m_honorTicks)
+                {
+                    RewardHonorToTeam(GetBonusHonorFromKill(1), (team == BG_TEAM_ALLIANCE) ? ALLIANCE : HORDE);
+                    m_honorScoreTicks[team] -= m_honorTicks;
+>>>>>>> d972b57ff0bd9520936ce36fdce69bd5a5859c27:src/game/BattleGround/BattleGroundAB.cpp
                 }
                 if (!m_IsInformedNearVictory && m_TeamScores[team] > BG_AB_WARNING_NEAR_VICTORY_SCORE)
                 {
@@ -162,13 +177,13 @@ void BattleGroundAB::Update(uint32 diff)
 void BattleGroundAB::StartingEventCloseDoors()
 {
     // despawn buffs
-    for (int i = 0; i < BG_AB_NODES_MAX * 3; ++i)
+    for (uint8 i = 0; i < BG_AB_NODES_MAX * 3; ++i)
         SpawnBGObject(m_BgObjects[BG_AB_OBJECT_SPEEDBUFF_STABLES + i], RESPAWN_ONE_DAY);
 }
 
 void BattleGroundAB::StartingEventOpenDoors()
 {
-    for (int i = 0; i < BG_AB_NODES_MAX; ++i)
+    for (uint8 i = 0; i < BG_AB_NODES_MAX; ++i)
     {
         //randomly select buff to spawn
         uint8 buff = urand(0, 2);
@@ -194,21 +209,21 @@ void BattleGroundAB::RemovePlayer(Player * /*plr*/, ObjectGuid /*guid*/)
 
 }
 
-void BattleGroundAB::HandleAreaTrigger(Player *Source, uint32 Trigger)
+void BattleGroundAB::HandleAreaTrigger(Player* source, uint32 trigger)
 {
-    switch(Trigger)
+    switch (trigger)
     {
         case 3948:                                          // Arathi Basin Alliance Exit.
-            if (Source->GetTeam() != ALLIANCE)
-                Source->GetSession()->SendNotification(LANG_BATTLEGROUND_ONLY_ALLIANCE_USE);
+            if (source->GetTeam() != ALLIANCE)
+                source->GetSession()->SendNotification(LANG_BATTLEGROUND_ONLY_ALLIANCE_USE);
             else
-                Source->LeaveBattleground();
+                source->LeaveBattleground();
             break;
         case 3949:                                          // Arathi Basin Horde Exit.
-            if (Source->GetTeam() != HORDE)
-                Source->GetSession()->SendNotification(LANG_BATTLEGROUND_ONLY_HORDE_USE);
+            if (source->GetTeam() != HORDE)
+                source->GetSession()->SendNotification(LANG_BATTLEGROUND_ONLY_HORDE_USE);
             else
-                Source->LeaveBattleground();
+                source->LeaveBattleground();
             break;
         case 3866:                                          // Stables
         case 3869:                                          // Gold Mine
@@ -219,8 +234,8 @@ void BattleGroundAB::HandleAreaTrigger(Player *Source, uint32 Trigger)
         case 4021:                                          // Unk2
             //break;
         default:
-            //sLog.outError("WARNING: Unhandled AreaTrigger in Battleground: %u", Trigger);
-            //Source->GetSession()->SendAreaTriggerMessage("Warning: Unhandled AreaTrigger in Battleground: %u", Trigger);
+            // sLog.outError("WARNING: Unhandled AreaTrigger in Battleground: %u", trigger);
+            // source->GetSession()->SendAreaTriggerMessage("Warning: Unhandled AreaTrigger in Battleground: %u", trigger);
             break;
     }
 }
@@ -302,11 +317,11 @@ void BattleGroundAB::_SendNodeUpdate(uint8 node)
     const uint8 plusArray[] = {0, 2, 3, 0, 1};
 
     if (m_prevNodes[node])
-        UpdateWorldState(BG_AB_OP_NODESTATES[node] + plusArray[m_prevNodes[node]], 0);
+        UpdateWorldState(BG_AB_OP_NODESTATES[node] + plusArray[m_prevNodes[node]], WORLD_STATE_REMOVE);
     else
-        UpdateWorldState(BG_AB_OP_NODEICONS[node], 0);
+        UpdateWorldState(BG_AB_OP_NODEICONS[node], WORLD_STATE_REMOVE);
 
-    UpdateWorldState(BG_AB_OP_NODESTATES[node] + plusArray[m_Nodes[node]], 1);
+    UpdateWorldState(BG_AB_OP_NODESTATES[node] + plusArray[m_Nodes[node]], WORLD_STATE_ADD);
 
     // How many bases each team owns
     uint8 ally = 0, horde = 0;
@@ -445,7 +460,7 @@ void BattleGroundAB::EventPlayerClickedOnFlag(Player *source, GameObject* target
 bool BattleGroundAB::SetupBattleGround()
 {
     //buffs
-    for (int i = 0; i < BG_AB_NODES_MAX; ++i)
+    for (uint8 i = 0; i < BG_AB_NODES_MAX; ++i)
     {
         if (!AddObject(BG_AB_OBJECT_SPEEDBUFF_STABLES + 3 * i, Buff_Entries[0], BG_AB_BuffPositions[i][0], BG_AB_BuffPositions[i][1], BG_AB_BuffPositions[i][2], BG_AB_BuffPositions[i][3], 0, 0, sin(BG_AB_BuffPositions[i][3]/2), cos(BG_AB_BuffPositions[i][3]/2), RESPAWN_ONE_DAY)
             || !AddObject(BG_AB_OBJECT_SPEEDBUFF_STABLES + 3 * i + 1, Buff_Entries[1], BG_AB_BuffPositions[i][0], BG_AB_BuffPositions[i][1], BG_AB_BuffPositions[i][2], BG_AB_BuffPositions[i][3], 0, 0, sin(BG_AB_BuffPositions[i][3]/2), cos(BG_AB_BuffPositions[i][3]/2), RESPAWN_ONE_DAY)
@@ -466,15 +481,20 @@ void BattleGroundAB::Reset()
     {
         m_TeamScores[i]          = 0;
         m_lastTick[i]            = 0;
-        m_HonorScoreTics[i]      = 0;
+        m_honorScoreTicks[i] = 0;
         m_ReputationScoreTics[i] = 0;
         m_TeamScores500Disadvantage[i] = false;
     }
 
     m_IsInformedNearVictory                 = false;
     bool isBGWeekend = BattleGroundMgr::IsBGWeekend(GetTypeID());
+<<<<<<< HEAD:src/game/BattleGround/BattleGroundAB.cpp
     m_HonorTicks = isBGWeekend ? AB_WEEKEND_HONOR_INTERVAL : AB_NORMAL_HONOR_INTERVAL;
     m_ReputationTicks = isBGWeekend ? AB_WEEKEND_REPUTATION_INTERVAL : AB_NORMAL_REPUTATION_INTERVAL;
+=======
+    m_honorTicks = isBGWeekend ? AB_WEEKEND_HONOR_INTERVAL : AB_NORMAL_HONOR_INTERVAL;
+    m_ReputationTics = isBGWeekend ? AB_WEEKEND_REPUTATION_INTERVAL : AB_NORMAL_REPUTATION_INTERVAL;
+>>>>>>> d972b57ff0bd9520936ce36fdce69bd5a5859c27:src/game/BattleGround/BattleGroundAB.cpp
 
     for (uint8 i = 0; i < BG_AB_NODES_MAX; ++i)
     {
@@ -542,9 +562,9 @@ WorldSafeLocsEntry const* BattleGroundAB::GetClosestGraveYard(Player* player)
     return good_entry;
 }
 
-void BattleGroundAB::UpdatePlayerScore(Player* Source, uint32 type, uint32 value)
+void BattleGroundAB::UpdatePlayerScore(Player* source, uint32 type, uint32 value)
 {
-    BattleGroundScoreMap::iterator itr = m_PlayerScores.find(Source->GetObjectGuid());
+    BattleGroundScoreMap::iterator itr = m_PlayerScores.find(source->GetObjectGuid());
     if (itr == m_PlayerScores.end())                         // player not found...
         return;
 
@@ -561,8 +581,13 @@ void BattleGroundAB::UpdatePlayerScore(Player* Source, uint32 type, uint32 value
             achCriId = AB_OBJECTIVE_DEFEND_BASE;
             break;
         default:
+<<<<<<< HEAD:src/game/BattleGround/BattleGroundAB.cpp
             BattleGround::UpdatePlayerScore(Source,type,value);
             return;
+=======
+            BattleGround::UpdatePlayerScore(source, type, value);
+            break;
+>>>>>>> d972b57ff0bd9520936ce36fdce69bd5a5859c27:src/game/BattleGround/BattleGroundAB.cpp
     }
 
     Source->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_BG_OBJECTIVE_CAPTURE, 1, achCriId);

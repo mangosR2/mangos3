@@ -40,11 +40,11 @@ class TemporarySummon : public Creature
         bool IsDespawned() const override;
 
     private:
-        void SaveToDB(uint32, uint8, uint32)                // overwrited of Creature::SaveToDB     - don't must be called
+        void SaveToDB(uint32, uint8, uint32) override       // overwrited of Creature::SaveToDB     - don't must be called
         {
             MANGOS_ASSERT(false);
         }
-        void DeleteFromDB()                                 // overwrited of Creature::DeleteFromDB - don't must be called
+        void DeleteFromDB() override                        // overwrited of Creature::DeleteFromDB - don't must be called
         {
             MANGOS_ASSERT(false);
         }

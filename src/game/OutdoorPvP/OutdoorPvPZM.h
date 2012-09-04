@@ -16,13 +16,12 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
-
 #ifndef WORLD_PVP_ZM
 #define WORLD_PVP_ZM
 
 #include "Common.h"
 #include "OutdoorPvP.h"
-#include "../Language.h"
+#include "Language.h"
 
 enum
 {

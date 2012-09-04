@@ -19,8 +19,8 @@
 #include "MoveSplineInit.h"
 #include "MoveSpline.h"
 #include "packet_builder.h"
-#include "../Unit.h"
-#include "../TransportSystem.h"
+#include "Unit.h"
+#include "TransportSystem.h"
 
 namespace Movement
 {
@@ -83,7 +83,7 @@ namespace Movement
         else
             moveFlags &= ~MOVEFLAG_WALK_MODE;
 
-        moveFlags |= (MOVEFLAG_SPLINE_ENABLED | MOVEFLAG_FORWARD);
+        moveFlags |= MOVEFLAG_FORWARD;
 
         if (fabs(args.velocity) < M_NULL_F)
             args.velocity = unit.GetSpeed(SelectSpeedType(moveFlags));

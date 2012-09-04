@@ -659,7 +659,7 @@ bool PathFinder::getSteerTarget(const float* startPos, const float* endPos,
         if ((steerPathFlags[ns] & DT_STRAIGHTPATH_OFFMESH_CONNECTION) ||
             !inRangeYZX(&steerPath[ns*VERTEX_SIZE], startPos, minTargetDist, 1000.0f))
             break;
-        ns++;
+        ++ns;
     }
     // Failed to find good point to steer to.
     if (ns >= nsteerPath)
@@ -692,7 +692,7 @@ dtStatus PathFinder::findSmoothPath(const float* startPos, const float* endPos,
         return DT_FAILURE;
 
     dtVcopy(&smoothPath[nsmoothPath*VERTEX_SIZE], iterPos);
-    nsmoothPath++;
+    ++nsmoothPath;
 
     // Move towards target a small advancement at a time until target reached or
     // when ran out of memory to store the path.
@@ -743,7 +743,7 @@ dtStatus PathFinder::findSmoothPath(const float* startPos, const float* endPos,
             if (nsmoothPath < maxSmoothPathSize)
             {
                 dtVcopy(&smoothPath[nsmoothPath*VERTEX_SIZE], iterPos);
-                nsmoothPath++;
+                ++nsmoothPath;
             }
             break;
         }
@@ -757,7 +757,7 @@ dtStatus PathFinder::findSmoothPath(const float* startPos, const float* endPos,
             {
                 prevRef = polyRef;
                 polyRef = polys[npos];
-                npos++;
+                ++npos;
             }
 
             for (uint32 i = npos; i < npolys; ++i)
@@ -772,7 +772,7 @@ dtStatus PathFinder::findSmoothPath(const float* startPos, const float* endPos,
                 if (nsmoothPath < maxSmoothPathSize)
                 {
                     dtVcopy(&smoothPath[nsmoothPath*VERTEX_SIZE], startPos);
-                    nsmoothPath++;
+                    ++nsmoothPath;
                 }
                 // Move position at the other side of the off-mesh link.
                 dtVcopy(iterPos, endPos);
@@ -786,7 +786,7 @@ dtStatus PathFinder::findSmoothPath(const float* startPos, const float* endPos,
         if (nsmoothPath < maxSmoothPathSize)
         {
             dtVcopy(&smoothPath[nsmoothPath*VERTEX_SIZE], iterPos);
-            nsmoothPath++;
+            ++nsmoothPath;
         }
     }
 

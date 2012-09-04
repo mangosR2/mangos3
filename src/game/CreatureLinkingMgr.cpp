@@ -474,8 +474,11 @@ void CreatureLinkingHolder::DoCreatureLinkingEvent(CreatureLinkingEvent eventTyp
                         break;
                     case LINKING_EVENT_DIE:                 // Nothing linked for this case
                         break;
+<<<<<<< HEAD
                     default:
                         break;
+=======
+>>>>>>> d972b57ff0bd9520936ce36fdce69bd5a5859c27
                 }
             }
         }

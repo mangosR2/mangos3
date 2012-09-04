@@ -55,13 +55,17 @@ INSTANTIATE_SINGLETON_1( BattleGroundMgr );
 
 BattleGroundQueue::BattleGroundQueue()
 {
+<<<<<<< HEAD:src/game/BattleGround/BattleGroundMgr.cpp
     for(uint32 i = 0; i < PVP_TEAM_COUNT; ++i)
+=======
+    for (uint8 i = 0; i < BG_TEAMS_COUNT; ++i)
+>>>>>>> d972b57ff0bd9520936ce36fdce69bd5a5859c27:src/game/BattleGround/BattleGroundMgr.cpp
     {
-        for(uint32 j = 0; j < MAX_BATTLEGROUND_BRACKETS; ++j)
+        for (uint8 j = 0; j < MAX_BATTLEGROUND_BRACKETS; ++j)
         {
             m_SumOfWaitTimes[i][j] = 0;
             m_WaitTimeLastPlayer[i][j] = 0;
-            for(uint32 k = 0; k < COUNT_OF_PLAYERS_TO_AVERAGE_WAIT_TIME; ++k)
+            for (uint8 k = 0; k < COUNT_OF_PLAYERS_TO_AVERAGE_WAIT_TIME; ++k)
                 m_WaitTimes[i][j][k] = 0;
         }
     }
@@ -70,9 +74,9 @@ BattleGroundQueue::BattleGroundQueue()
 BattleGroundQueue::~BattleGroundQueue()
 {
     m_QueuedPlayers.clear();
-    for (int i = 0; i < MAX_BATTLEGROUND_BRACKETS; ++i)
+    for (uint8 i = 0; i < MAX_BATTLEGROUND_BRACKETS; ++i)
     {
-        for(uint32 j = 0; j < BG_QUEUE_GROUP_TYPES_COUNT; ++j)
+        for (uint8 j = 0; j < BG_QUEUE_GROUP_TYPES_COUNT; ++j)
         {
             for(GroupsQueueType::iterator itr = m_QueuedGroups[i][j].begin(); itr!= m_QueuedGroups[i][j].end(); ++itr)
                 delete (*itr);
@@ -174,7 +178,7 @@ GroupQueueInfo * BattleGroundQueue::AddGroup(Player *leader, Group* grp, BattleG
         index += PVP_TEAM_COUNT;                            // BG_QUEUE_PREMADE_* -> BG_QUEUE_NORMAL_*
 
     if (ginfo->GroupTeam == HORDE)
-        index++;                                            // BG_QUEUE_*_ALLIANCE -> BG_QUEUE_*_HORDE
+        ++index;                                            // BG_QUEUE_*_ALLIANCE -> BG_QUEUE_*_HORDE
 
     DEBUG_LOG("Adding Group to BattleGroundQueue bgTypeId : %u, bracket_id : %u, index : %u", BgTypeId, bracketId, index);
 
@@ -327,11 +331,11 @@ void BattleGroundQueue::RemovePlayer(ObjectGuid guid, bool decreaseInvitedCount)
     // variable index removes useless searching in other team's queue
     uint32 index = GetTeamIndex(group->GroupTeam);
 
-    for (int32 bracket_id_tmp = MAX_BATTLEGROUND_BRACKETS - 1; bracket_id_tmp >= 0 && bracket_id == -1; --bracket_id_tmp)
+    for (int8 bracket_id_tmp = MAX_BATTLEGROUND_BRACKETS - 1; bracket_id_tmp >= 0 && bracket_id == -1; --bracket_id_tmp)
     {
         //we must check premade and normal team's queue - because when players from premade are joining bg,
         //they leave groupinfo so we can't use its players size to find out index
-        for (uint32 j = index; j < BG_QUEUE_GROUP_TYPES_COUNT; j += BG_QUEUE_NORMAL_ALLIANCE)
+        for (uint8 j = index; j < BG_QUEUE_GROUP_TYPES_COUNT; j += BG_QUEUE_NORMAL_ALLIANCE)
         {
             for(group_itr_tmp = m_QueuedGroups[bracket_id_tmp][j].begin(); group_itr_tmp != m_QueuedGroups[bracket_id_tmp][j].end(); ++group_itr_tmp)
             {
@@ -524,13 +528,21 @@ void BattleGroundQueue::FillPlayersToBG(BattleGround* bg, BattleGroundBracketId 
     uint32 aliCount = m_QueuedGroups[bracket_id][BG_QUEUE_NORMAL_ALLIANCE].size();
     //index to queue which group is current
     uint32 aliIndex = 0;
+<<<<<<< HEAD:src/game/BattleGround/BattleGroundMgr.cpp
     for (; aliIndex < aliCount && m_SelectionPools[TEAM_INDEX_ALLIANCE].AddGroup((*Ali_itr), aliFree); aliIndex++)
+=======
+    for (; aliIndex < aliCount && m_SelectionPools[BG_TEAM_ALLIANCE].AddGroup((*Ali_itr), aliFree); ++aliIndex)
+>>>>>>> d972b57ff0bd9520936ce36fdce69bd5a5859c27:src/game/BattleGround/BattleGroundMgr.cpp
         ++Ali_itr;
     //the same thing for horde
     GroupsQueueType::const_iterator Horde_itr = m_QueuedGroups[bracket_id][BG_QUEUE_NORMAL_HORDE].begin();
     uint32 hordeCount = m_QueuedGroups[bracket_id][BG_QUEUE_NORMAL_HORDE].size();
     uint32 hordeIndex = 0;
+<<<<<<< HEAD:src/game/BattleGround/BattleGroundMgr.cpp
     for (; hordeIndex < hordeCount && m_SelectionPools[TEAM_INDEX_HORDE].AddGroup((*Horde_itr), hordeFree); hordeIndex++)
+=======
+    for (; hordeIndex < hordeCount && m_SelectionPools[BG_TEAM_HORDE].AddGroup((*Horde_itr), hordeFree); ++hordeIndex)
+>>>>>>> d972b57ff0bd9520936ce36fdce69bd5a5859c27:src/game/BattleGround/BattleGroundMgr.cpp
         ++Horde_itr;
 
     //if ofc like BG queue invitation is set in config, then we are happy
@@ -556,7 +568,11 @@ void BattleGroundQueue::FillPlayersToBG(BattleGround* bg, BattleGroundBracketId 
             //kick alliance group, add to pool new group if needed
             if (m_SelectionPools[TEAM_INDEX_ALLIANCE].KickGroup(diffHorde - diffAli))
             {
+<<<<<<< HEAD:src/game/BattleGround/BattleGroundMgr.cpp
                 for (; aliIndex < aliCount && m_SelectionPools[TEAM_INDEX_ALLIANCE].AddGroup((*Ali_itr), (aliFree >= diffHorde) ? aliFree - diffHorde : 0); aliIndex++)
+=======
+                for (; aliIndex < aliCount && m_SelectionPools[BG_TEAM_ALLIANCE].AddGroup((*Ali_itr), (aliFree >= diffHorde) ? aliFree - diffHorde : 0); ++aliIndex)
+>>>>>>> d972b57ff0bd9520936ce36fdce69bd5a5859c27:src/game/BattleGround/BattleGroundMgr.cpp
                     ++Ali_itr;
             }
             //if ali selection is already empty, then kick horde group, but if there are less horde than ali in bg - break;
@@ -572,7 +588,11 @@ void BattleGroundQueue::FillPlayersToBG(BattleGround* bg, BattleGroundBracketId 
             //kick horde group, add to pool new group if needed
             if (m_SelectionPools[TEAM_INDEX_HORDE].KickGroup(diffAli - diffHorde))
             {
+<<<<<<< HEAD:src/game/BattleGround/BattleGroundMgr.cpp
                 for (; hordeIndex < hordeCount && m_SelectionPools[TEAM_INDEX_HORDE].AddGroup((*Horde_itr), (hordeFree >= diffAli) ? hordeFree - diffAli : 0); hordeIndex++)
+=======
+                for (; hordeIndex < hordeCount && m_SelectionPools[BG_TEAM_HORDE].AddGroup((*Horde_itr), (hordeFree >= diffAli) ? hordeFree - diffAli : 0); ++hordeIndex)
+>>>>>>> d972b57ff0bd9520936ce36fdce69bd5a5859c27:src/game/BattleGround/BattleGroundMgr.cpp
                     ++Horde_itr;
             }
             if (!m_SelectionPools[TEAM_INDEX_HORDE].GetPlayerCount())
@@ -613,7 +633,11 @@ bool BattleGroundQueue::CheckPremadeMatch(BattleGroundBracketId bracket_id, uint
             //add groups/players from normal queue to size of bigger group
             uint32 maxPlayers = std::max(m_SelectionPools[TEAM_INDEX_ALLIANCE].GetPlayerCount(), m_SelectionPools[TEAM_INDEX_HORDE].GetPlayerCount());
             GroupsQueueType::const_iterator itr;
+<<<<<<< HEAD:src/game/BattleGround/BattleGroundMgr.cpp
             for(uint32 i = 0; i < PVP_TEAM_COUNT; i++)
+=======
+            for (uint8 i = 0; i < BG_TEAMS_COUNT; ++i)
+>>>>>>> d972b57ff0bd9520936ce36fdce69bd5a5859c27:src/game/BattleGround/BattleGroundMgr.cpp
             {
                 for(itr = m_QueuedGroups[bracket_id][BG_QUEUE_NORMAL_ALLIANCE + i].begin(); itr != m_QueuedGroups[bracket_id][BG_QUEUE_NORMAL_ALLIANCE + i].end(); ++itr)
                 {
@@ -631,7 +655,11 @@ bool BattleGroundQueue::CheckPremadeMatch(BattleGroundBracketId bracket_id, uint
     // if first is invited to BG and seconds timer expired, but we can ignore it, because players have only 80 seconds to click to enter bg
     // and when they click or after 80 seconds the queue info is removed from queue
     uint32 time_before = WorldTimer::getMSTime() - sWorld.getConfig(CONFIG_UINT32_BATTLEGROUND_PREMADE_GROUP_WAIT_FOR_MATCH);
+<<<<<<< HEAD:src/game/BattleGround/BattleGroundMgr.cpp
     for(uint32 i = 0; i < PVP_TEAM_COUNT; i++)
+=======
+    for (uint8 i = 0; i < BG_TEAMS_COUNT; ++i)
+>>>>>>> d972b57ff0bd9520936ce36fdce69bd5a5859c27:src/game/BattleGround/BattleGroundMgr.cpp
     {
         if (!m_QueuedGroups[bracket_id][BG_QUEUE_PREMADE_ALLIANCE + i].empty())
         {
@@ -651,8 +679,13 @@ bool BattleGroundQueue::CheckPremadeMatch(BattleGroundBracketId bracket_id, uint
 // this method tries to create battleground or arena with MinPlayersPerTeam against MinPlayersPerTeam
 bool BattleGroundQueue::CheckNormalMatch(BattleGround* bg_template, BattleGroundBracketId bracket_id, uint32 minPlayers, uint32 maxPlayers)
 {
+<<<<<<< HEAD:src/game/BattleGround/BattleGroundMgr.cpp
     GroupsQueueType::const_iterator itr_team[PVP_TEAM_COUNT];
     for(uint32 i = 0; i < PVP_TEAM_COUNT; i++)
+=======
+    GroupsQueueType::const_iterator itr_team[BG_TEAMS_COUNT];
+    for (uint8 i = 0; i < BG_TEAMS_COUNT; ++i)
+>>>>>>> d972b57ff0bd9520936ce36fdce69bd5a5859c27:src/game/BattleGround/BattleGroundMgr.cpp
     {
         itr_team[i] = m_QueuedGroups[bracket_id][BG_QUEUE_NORMAL_ALLIANCE + i].begin();
         for(; itr_team[i] != m_QueuedGroups[bracket_id][BG_QUEUE_NORMAL_ALLIANCE + i].end(); ++(itr_team[i]))
@@ -867,8 +900,13 @@ void BattleGroundQueue::Update(BattleGroundTypeId bgTypeId, BattleGroundBracketI
                 return;
             }
             //invite those selection pools
+<<<<<<< HEAD:src/game/BattleGround/BattleGroundMgr.cpp
             for(uint32 i = 0; i < PVP_TEAM_COUNT; i++)
                 for(GroupsQueueType::const_iterator citr = m_SelectionPools[TEAM_INDEX_ALLIANCE + i].SelectedGroups.begin(); citr != m_SelectionPools[TEAM_INDEX_ALLIANCE + i].SelectedGroups.end(); ++citr)
+=======
+            for (uint8 i = 0; i < BG_TEAMS_COUNT; ++i)
+                for (GroupsQueueType::const_iterator citr = m_SelectionPools[BG_TEAM_ALLIANCE + i].SelectedGroups.begin(); citr != m_SelectionPools[BG_TEAM_ALLIANCE + i].SelectedGroups.end(); ++citr)
+>>>>>>> d972b57ff0bd9520936ce36fdce69bd5a5859c27:src/game/BattleGround/BattleGroundMgr.cpp
                     InviteGroupToBG((*citr), bg2, (*citr)->GroupTeam);
             //start bg
             bg2->StartBattleGround();
@@ -894,8 +932,13 @@ void BattleGroundQueue::Update(BattleGroundTypeId bgTypeId, BattleGroundBracketI
             }
 
             // invite those selection pools
+<<<<<<< HEAD:src/game/BattleGround/BattleGroundMgr.cpp
             for(uint32 i = 0; i < PVP_TEAM_COUNT; i++)
                 for(GroupsQueueType::const_iterator citr = m_SelectionPools[TEAM_INDEX_ALLIANCE + i].SelectedGroups.begin(); citr != m_SelectionPools[TEAM_INDEX_ALLIANCE + i].SelectedGroups.end(); ++citr)
+=======
+            for (uint8 i = 0; i < BG_TEAMS_COUNT; ++i)
+                for (GroupsQueueType::const_iterator citr = m_SelectionPools[BG_TEAM_ALLIANCE + i].SelectedGroups.begin(); citr != m_SelectionPools[BG_TEAM_ALLIANCE + i].SelectedGroups.end(); ++citr)
+>>>>>>> d972b57ff0bd9520936ce36fdce69bd5a5859c27:src/game/BattleGround/BattleGroundMgr.cpp
                     InviteGroupToBG((*citr), bg2, (*citr)->GroupTeam);
             // start bg
             bg2->StartBattleGround();
@@ -944,9 +987,13 @@ void BattleGroundQueue::Update(BattleGroundTypeId bgTypeId, BattleGroundBracketI
 
         //optimalization : --- we dont need to use selection_pools - each update we select max 2 groups
 
+<<<<<<< HEAD:src/game/BattleGround/BattleGroundMgr.cpp
         uint32 teamId = 0;
 
         for(uint32 i = BG_QUEUE_PREMADE_ALLIANCE; i < BG_QUEUE_NORMAL_ALLIANCE; i++)
+=======
+        for (uint8 i = BG_QUEUE_PREMADE_ALLIANCE; i < BG_QUEUE_NORMAL_ALLIANCE; ++i)
+>>>>>>> d972b57ff0bd9520936ce36fdce69bd5a5859c27:src/game/BattleGround/BattleGroundMgr.cpp
         {
             // take the group that joined first
             itr_team[i] = m_QueuedGroups[bracket_id][i].begin();
@@ -1049,9 +1096,9 @@ void BattleGroundQueue::Update(BattleGroundTypeId bgTypeId, BattleGroundBracketI
 /***            BATTLEGROUND MANAGER                   ***/
 /*********************************************************/
 
-BattleGroundMgr::BattleGroundMgr() : m_AutoDistributionTimeChecker(0), m_ArenaTesting(false)
+BattleGroundMgr::BattleGroundMgr() : m_ArenaTesting(false)
 {
-    for(uint32 i = BATTLEGROUND_TYPE_NONE; i < MAX_BATTLEGROUND_TYPE_ID; i++)
+    for (uint8 i = BATTLEGROUND_TYPE_NONE; i < MAX_BATTLEGROUND_TYPE_ID; ++i)
         m_BattleGrounds[i].clear();
     m_NextRatingDiscardUpdate = sWorld.getConfig(CONFIG_UINT32_ARENA_RATING_DISCARD_TIMER);
     m_Testing=false;
@@ -1065,7 +1112,7 @@ BattleGroundMgr::~BattleGroundMgr()
 void BattleGroundMgr::DeleteAllBattleGrounds()
 {
     // will also delete template bgs:
-    for(uint32 i = BATTLEGROUND_TYPE_NONE; i < MAX_BATTLEGROUND_TYPE_ID; ++i)
+    for (uint8 i = BATTLEGROUND_TYPE_NONE; i < MAX_BATTLEGROUND_TYPE_ID; ++i)
     {
         for(BattleGroundSet::iterator itr = m_BattleGrounds[i].begin(); itr != m_BattleGrounds[i].end();)
         {
@@ -1092,7 +1139,7 @@ void BattleGroundMgr::Update(uint32 diff)
             //release lock
         }
 
-        for (uint8 i = 0; i < scheduled.size(); i++)
+        for (uint8 i = 0; i < scheduled.size(); ++i)
         {
             uint32 arenaRating = scheduled[i] >> 32;
             ArenaType arenaType = ArenaType(scheduled[i] >> 24 & 255);
@@ -1111,8 +1158,8 @@ void BattleGroundMgr::Update(uint32 diff)
         {
             // forced update for rated arenas (scan all, but skipped non rated)
             DEBUG_LOG("BattleGroundMgr: UPDATING ARENA QUEUES");
-            for(int qtype = BATTLEGROUND_QUEUE_2v2; qtype <= BATTLEGROUND_QUEUE_5v5; ++qtype)
-                for(int bracket = BG_BRACKET_ID_FIRST; bracket < MAX_BATTLEGROUND_BRACKETS; ++bracket)
+            for (uint8 qtype = BATTLEGROUND_QUEUE_2v2; qtype <= BATTLEGROUND_QUEUE_5v5; ++qtype)
+                for (uint8 bracket = BG_BRACKET_ID_FIRST; bracket < MAX_BATTLEGROUND_BRACKETS; ++bracket)
                     m_BattleGroundQueues[qtype].Update(
                         BATTLEGROUND_AA, BattleGroundBracketId(bracket),
                         BattleGroundMgr::BGArenaType(BattleGroundQueueTypeId(qtype)), true, 0);
@@ -1121,21 +1168,6 @@ void BattleGroundMgr::Update(uint32 diff)
         }
         else
             m_NextRatingDiscardUpdate -= diff;
-    }
-    if (sWorld.getConfig(CONFIG_BOOL_ARENA_AUTO_DISTRIBUTE_POINTS))
-    {
-        if (m_AutoDistributionTimeChecker < diff)
-        {
-            if (sWorld.GetGameTime() > m_NextAutoDistributionTime)
-            {
-                DistributeArenaPoints();
-                m_NextAutoDistributionTime = time_t(m_NextAutoDistributionTime + BATTLEGROUND_ARENA_POINT_DISTRIBUTION_DAY * sWorld.getConfig(CONFIG_UINT32_ARENA_AUTO_DISTRIBUTE_INTERVAL_DAYS));
-                CharacterDatabase.PExecute("UPDATE saved_variables SET NextArenaPointDistributionTime = '"UI64FMTD"'", uint64(m_NextAutoDistributionTime));
-            }
-            m_AutoDistributionTimeChecker = 600000; // check 10 minutes
-        }
-        else
-            m_AutoDistributionTimeChecker -= diff;
     }
 }
 
@@ -1195,7 +1227,11 @@ void BattleGroundMgr::BuildPvpLogDataPacket(WorldPacket *data, BattleGround *bg)
 
     if (type)                                                // arena
     {
+<<<<<<< HEAD:src/game/BattleGround/BattleGroundMgr.cpp
         // it seems this must be according to BG_WINNER_A/H and _NOT_ TEAM_INDEX_A/H
+=======
+        // it seems this must be according to BG_WINNER_A/H and _NOT_ BG_TEAM_A/H
+>>>>>>> d972b57ff0bd9520936ce36fdce69bd5a5859c27:src/game/BattleGround/BattleGroundMgr.cpp
         for (int8 i = 1; i >= 0; --i)
         {
             uint32 pointsLost = bg->m_ArenaTeamRatingChanges[i] < 0 ? abs(bg->m_ArenaTeamRatingChanges[i]) : 0;
@@ -1363,7 +1399,7 @@ BattleGround * BattleGroundMgr::GetBattleGround(uint32 InstanceID, BattleGroundT
     BattleGroundSet::iterator itr;
     if (bgTypeId == BATTLEGROUND_TYPE_NONE)
     {
-        for(uint32 i = BATTLEGROUND_AV; i < MAX_BATTLEGROUND_TYPE_ID; i++)
+        for (uint8 i = BATTLEGROUND_AV; i < MAX_BATTLEGROUND_TYPE_ID; ++i)
         {
             itr = m_BattleGrounds[i].find(InstanceID);
             if (itr != m_BattleGrounds[i].end())
@@ -1664,7 +1700,8 @@ void BattleGroundMgr::CreateInitialBattleGrounds()
             continue;
 
         ++count;
-    } while (result->NextRow());
+    }
+    while (result->NextRow());
 
     delete result;
 
@@ -1672,6 +1709,7 @@ void BattleGroundMgr::CreateInitialBattleGrounds()
     sLog.outString( ">> Loaded %u battlegrounds", count );
 }
 
+<<<<<<< HEAD:src/game/BattleGround/BattleGroundMgr.cpp
 void BattleGroundMgr::InitAutomaticArenaPointDistribution()
 {
     if (sWorld.getConfig(CONFIG_BOOL_ARENA_AUTO_DISTRIBUTE_POINTS))
@@ -1744,21 +1782,30 @@ void BattleGroundMgr::DistributeArenaPoints()
 }
 
 void BattleGroundMgr::BuildBattleGroundListPacket(WorldPacket *data, ObjectGuid guid, Player* plr, BattleGroundTypeId bgTypeId, uint8 fromWhere)
+=======
+void BattleGroundMgr::BuildBattleGroundListPacket(WorldPacket* data, ObjectGuid guid, Player* plr, BattleGroundTypeId bgTypeId)
+>>>>>>> d972b57ff0bd9520936ce36fdce69bd5a5859c27:src/game/BattleGround/BattleGroundMgr.cpp
 {
     if (!plr)
         return;
 
+<<<<<<< HEAD:src/game/BattleGround/BattleGroundMgr.cpp
     uint32 win_kills = plr->GetRandomWinner() ? BG_REWARD_WINNER_HONOR_LAST : BG_REWARD_WINNER_HONOR_FIRST;
     uint32 win_arena = plr->GetRandomWinner() ? BG_REWARD_WINNER_ARENA_LAST : BG_REWARD_WINNER_ARENA_FIRST;
     uint32 loos_kills = plr->GetRandomWinner() ? BG_REWARD_LOOSER_HONOR_LAST : BG_REWARD_LOOSER_HONOR_FIRST;
 
     win_kills = (uint32)MaNGOS::Honor::hk_honor_at_level(plr->getLevel(), win_kills*4);
     loos_kills = (uint32)MaNGOS::Honor::hk_honor_at_level(plr->getLevel(), loos_kills*4);
+=======
+    BattleGround* bgTemplate = sBattleGroundMgr.GetBattleGroundTemplate(bgTypeId);
+>>>>>>> d972b57ff0bd9520936ce36fdce69bd5a5859c27:src/game/BattleGround/BattleGroundMgr.cpp
 
     data->Initialize(SMSG_BATTLEFIELD_LIST);
-    *data << guid;                                          // battlemaster guid
-    *data << uint8(fromWhere);                              // from where you joined
+    *data << uint32(0);                     // 4.3.4 winConquest weekend
+    *data << uint32(0);                     // 4.3.4 winConquest random
+    *data << uint32(0);                     // 4.3.4 lossHonor weekend
     *data << uint32(bgTypeId);                              // battleground id
+<<<<<<< HEAD:src/game/BattleGround/BattleGroundMgr.cpp
     *data << uint8(0);                                      // unk
     *data << uint8(0);                                      // unk
 
@@ -1790,6 +1837,19 @@ void BattleGroundMgr::BuildBattleGroundListPacket(WorldPacket *data, ObjectGuid 
         *data << uint32(0);                                 // number of bg instances
 
         BattleGround* bgTemplate = sBattleGroundMgr.GetBattleGroundTemplate(bgTypeId);
+=======
+    *data << uint32(0);                     // 4.3.4 lossHonor random
+    *data << uint32(0);                     // 4.3.4 winHonor random
+    *data << uint32(0);                     // 4.3.4 winHonor weekend
+    *data << uint8(0);                      // max level
+    *data << uint8(0);                      // min level
+    data->WriteGuidMask<0, 1, 7>(guid);
+    data->WriteBit(false);                  // has holiday bg currency bonus ??
+    data->WriteBit(false);                  // has random bg currency bonus ??
+
+    uint32 count = 0;
+    ByteBuffer buf;
+>>>>>>> d972b57ff0bd9520936ce36fdce69bd5a5859c27:src/game/BattleGround/BattleGroundMgr.cpp
         if (bgTemplate)
         {
             // expected bracket entry
@@ -1799,13 +1859,22 @@ void BattleGroundMgr::BuildBattleGroundListPacket(WorldPacket *data, ObjectGuid 
                 ClientBattleGroundIdSet const& ids = m_ClientBattleGroundIds[bgTypeId][bracketId];
                 for(ClientBattleGroundIdSet::const_iterator itr = ids.begin(); itr != ids.end();++itr)
                 {
-                    *data << uint32(*itr);
+                buf << uint32(*itr);
                     ++count;
                 }
-                data->put<uint32>( count_pos , count);
-            }
         }
     }
+
+    data->WriteBits(count, 24);
+    data->WriteGuidMask<6, 4, 2, 3>(guid);
+    data->WriteBit(true);                   // unk
+    data->WriteGuidMask<5>(guid);
+    data->WriteBit(true);                   // signals EVENT_PVPQUEUE_ANYWHERE_SHOW if set
+
+    data->WriteGuidBytes<6, 1, 7, 5>(guid);
+    if (count)
+        data->append(buf);
+    data->WriteGuidBytes<0, 2, 4, 3>(guid);
 }
 
 void BattleGroundMgr::SendToBattleGround(Player *pl, uint32 instanceId, BattleGroundTypeId bgTypeId)
@@ -1863,7 +1932,15 @@ BattleGroundQueueTypeId BattleGroundMgr::BGQueueTypeId(BattleGroundTypeId bgType
         case BATTLEGROUND_IC:
             return BATTLEGROUND_QUEUE_IC;
         case BATTLEGROUND_RB:
+<<<<<<< HEAD:src/game/BattleGround/BattleGroundMgr.cpp
             return BATTLEGROUND_QUEUE_RB;
+=======
+            return BATTLEGROUND_QUEUE_NONE;
+        case BATTLEGROUND_TP:
+            return BATTLEGROUND_QUEUE_TP;
+        case BATTLEGROUND_BG:
+            return BATTLEGROUND_QUEUE_BG;
+>>>>>>> d972b57ff0bd9520936ce36fdce69bd5a5859c27:src/game/BattleGround/BattleGroundMgr.cpp
         case BATTLEGROUND_AA:
         case BATTLEGROUND_NA:
         case BATTLEGROUND_RL:
@@ -1904,8 +1981,15 @@ BattleGroundTypeId BattleGroundMgr::BGTemplateId(BattleGroundQueueTypeId bgQueue
             return BATTLEGROUND_SA;
         case BATTLEGROUND_QUEUE_IC:
             return BATTLEGROUND_IC;
+<<<<<<< HEAD:src/game/BattleGround/BattleGroundMgr.cpp
         case BATTLEGROUND_QUEUE_RB:
             return BATTLEGROUND_RB;
+=======
+        case BATTLEGROUND_QUEUE_TP:
+            return BATTLEGROUND_TP;
+        case BATTLEGROUND_QUEUE_BG:
+            return BATTLEGROUND_BG;
+>>>>>>> d972b57ff0bd9520936ce36fdce69bd5a5859c27:src/game/BattleGround/BattleGroundMgr.cpp
         case BATTLEGROUND_QUEUE_2v2:
         case BATTLEGROUND_QUEUE_3v3:
         case BATTLEGROUND_QUEUE_5v5:
@@ -1954,7 +2038,7 @@ void BattleGroundMgr::ScheduleQueueUpdate(uint32 arenaRating, ArenaType arenaTyp
     //we will use only 1 number created of bgTypeId and bracket_id
     uint64 schedule_id = ((uint64)arenaRating << 32) | (arenaType << 24) | (bgQueueTypeId << 16) | (bgTypeId << 8) | bracket_id;
     bool found = false;
-    for (uint8 i = 0; i < m_QueueUpdateScheduler.size(); i++)
+    for (uint8 i = 0; i < m_QueueUpdateScheduler.size(); ++i)
     {
         if (m_QueueUpdateScheduler[i] == schedule_id)
         {
@@ -2022,7 +2106,8 @@ void BattleGroundMgr::LoadBattleMastersEntry()
 
         mBattleMastersMap[entry] = BattleGroundTypeId(bgTypeId);
 
-    } while(result->NextRow());
+    }
+    while (result->NextRow());
 
     delete result;
 
@@ -2035,10 +2120,13 @@ HolidayIds BattleGroundMgr::BGTypeToWeekendHolidayId(BattleGroundTypeId bgTypeId
     switch (bgTypeId)
     {
         case BATTLEGROUND_AV: return HOLIDAY_CALL_TO_ARMS_AV;
-        case BATTLEGROUND_EY: return HOLIDAY_CALL_TO_ARMS_EY;
         case BATTLEGROUND_WS: return HOLIDAY_CALL_TO_ARMS_WS;
-        case BATTLEGROUND_SA: return HOLIDAY_CALL_TO_ARMS_SA;
         case BATTLEGROUND_AB: return HOLIDAY_CALL_TO_ARMS_AB;
+        case BATTLEGROUND_EY: return HOLIDAY_CALL_TO_ARMS_EY;
+        case BATTLEGROUND_SA: return HOLIDAY_CALL_TO_ARMS_SA;
+        case BATTLEGROUND_IC: return HOLIDAY_CALL_TO_ARMS_IC;
+        case BATTLEGROUND_TP: return HOLIDAY_CALL_TO_ARMS_TP;
+        case BATTLEGROUND_BG: return HOLIDAY_CALL_TO_ARMS_BG;
         default: return HOLIDAY_NONE;
     }
 }
@@ -2048,10 +2136,13 @@ BattleGroundTypeId BattleGroundMgr::WeekendHolidayIdToBGType(HolidayIds holiday)
     switch (holiday)
     {
         case HOLIDAY_CALL_TO_ARMS_AV: return BATTLEGROUND_AV;
-        case HOLIDAY_CALL_TO_ARMS_EY: return BATTLEGROUND_EY;
         case HOLIDAY_CALL_TO_ARMS_WS: return BATTLEGROUND_WS;
-        case HOLIDAY_CALL_TO_ARMS_SA: return BATTLEGROUND_SA;
         case HOLIDAY_CALL_TO_ARMS_AB: return BATTLEGROUND_AB;
+        case HOLIDAY_CALL_TO_ARMS_EY: return BATTLEGROUND_EY;
+        case HOLIDAY_CALL_TO_ARMS_SA: return BATTLEGROUND_SA;
+        case HOLIDAY_CALL_TO_ARMS_IC: return BATTLEGROUND_IC;
+        case HOLIDAY_CALL_TO_ARMS_TP: return BATTLEGROUND_TP;
+        case HOLIDAY_CALL_TO_ARMS_BG: return BATTLEGROUND_BG;
         default: return BATTLEGROUND_TYPE_NONE;
     }
 }
@@ -2168,7 +2259,8 @@ void BattleGroundMgr::LoadBattleEventIndexes()
 
         ++count;
 
-    } while(result->NextRow());
+    }
+    while (result->NextRow());
 
     sLog.outString();
     sLog.outString( ">> Loaded %u battleground eventindexes", count);

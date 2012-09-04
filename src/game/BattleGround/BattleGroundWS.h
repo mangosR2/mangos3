@@ -114,14 +114,15 @@ class BattleGroundWS : public BattleGround
         /* Construction */
         BattleGroundWS();
         ~BattleGroundWS();
-        void Update(uint32 diff);
+        void Update(uint32 diff) override;
 
         /* inherited from BattlegroundClass */
-        virtual void AddPlayer(Player *plr);
-        virtual void StartingEventCloseDoors();
-        virtual void StartingEventOpenDoors();
+        virtual void AddPlayer(Player* plr) override;
+        virtual void StartingEventCloseDoors() override;
+        virtual void StartingEventOpenDoors() override;
 
         /* BG Flags */
+<<<<<<< HEAD:src/game/BattleGround/BattleGroundWS.h
         ObjectGuid GetAllianceFlagCarrierGuid() const{ return m_FlagKeepers[TEAM_INDEX_ALLIANCE]; }
         ObjectGuid GetHordeFlagCarrierGuid() const   { return m_FlagKeepers[TEAM_INDEX_HORDE]; }
 
@@ -138,23 +139,41 @@ class BattleGroundWS : public BattleGround
         void RespawnFlagAfterDrop(Team team);
 
         uint8 GetFlagState(Team team)             { return m_FlagState[GetTeamIndex(team)]; }
+=======
+        ObjectGuid GetAllianceFlagCarrierGuid() const { return m_flagCarrierAlliance; }
+        ObjectGuid GetHordeFlagCarrierGuid() const { return m_flagCarrierHorde; }
+
+        void SetAllianceFlagCarrier(ObjectGuid guid) { m_flagCarrierAlliance = guid; }
+        void SetHordeFlagCarrier(ObjectGuid guid) { m_flagCarrierHorde = guid; }
+
+        void ClearAllianceFlagCarrier() { m_flagCarrierAlliance.Clear(); }
+        void ClearHordeFlagCarrier() { m_flagCarrierHorde.Clear(); }
+
+        bool IsAllianceFlagPickedUp() const { return !m_flagCarrierAlliance.IsEmpty(); }
+        bool IsHordeFlagPickedUp() const { return !m_flagCarrierHorde.IsEmpty(); }
+
+        void RespawnFlag(Team team, bool captured);
+        void RespawnDroppedFlag(Team team);
+        uint8 GetFlagState(Team team) { return m_FlagState[GetTeamIndexByTeamId(team)]; }
+>>>>>>> d972b57ff0bd9520936ce36fdce69bd5a5859c27:src/game/BattleGround/BattleGroundWS.h
 
         /* Battleground Events */
-        virtual void EventPlayerDroppedFlag(Player *Source);
-        virtual void EventPlayerClickedOnFlag(Player *Source, GameObject* target_obj);
-        virtual void EventPlayerCapturedFlag(Player *Source);
+        virtual void EventPlayerDroppedFlag(Player* source) override;
+        virtual void EventPlayerClickedOnFlag(Player* source, GameObject* target_obj) override;
+        virtual void EventPlayerCapturedFlag(Player* source) override;
 
-        void RemovePlayer(Player *plr, ObjectGuid guid);
-        void HandleAreaTrigger(Player *Source, uint32 Trigger);
-        void HandleKillPlayer(Player *player, Player *killer);
-        bool SetupBattleGround();
-        virtual void Reset();
-        void EndBattleGround(Team winner);
-        virtual WorldSafeLocsEntry const* GetClosestGraveYard(Player* player);
+        void RemovePlayer(Player* plr, ObjectGuid guid) override;
+        void HandleAreaTrigger(Player* source, uint32 trigger) override;
+        void HandleKillPlayer(Player* player, Player* killer) override;
+        bool SetupBattleGround() override;
+        virtual void Reset() override;
+        void EndBattleGround(Team winner) override;
+        virtual WorldSafeLocsEntry const* GetClosestGraveYard(Player* player) override;
         uint32 GetRemainingTimeInMinutes() { return m_EndTimer ? (m_EndTimer-1) / (MINUTE * IN_MILLISECONDS) + 1 : 0; }
 
         void UpdateFlagState(Team team, uint32 value);
         void UpdateTeamScore(Team team);
+<<<<<<< HEAD:src/game/BattleGround/BattleGroundWS.h
         void UpdatePlayerScore(Player *Source, uint32 type, uint32 value);
         void SetDroppedFlagGuid(ObjectGuid guid, Team team)  { m_DroppedFlagGuid[GetTeamIndex(team)] = guid;}
         void ClearDroppedFlagGuid(Team team)  { m_DroppedFlagGuid[GetTeamIndex(team)].Clear();}
@@ -170,6 +189,17 @@ class BattleGroundWS : public BattleGround
         void PickOrReturnFlag(Player* pPlayer, Team forTeam, bool pickedUp, bool fromGround = false);
 
         ObjectGuid m_FlagKeepers[PVP_TEAM_COUNT];
+=======
+        void UpdatePlayerScore(Player* source, uint32 type, uint32 value) override;
+        void SetDroppedFlagGuid(ObjectGuid guid, Team team)  { m_DroppedFlagGuid[GetTeamIndexByTeamId(team)] = guid;}
+        void ClearDroppedFlagGuid(Team team)  { m_DroppedFlagGuid[GetTeamIndexByTeamId(team)].Clear();}
+        ObjectGuid const& GetDroppedFlagGuid(Team team) const { return m_DroppedFlagGuid[GetTeamIndexByTeamId(team)];}
+        virtual void FillInitialWorldStates(WorldPacket& data, uint32& count) override;
+
+    private:
+        ObjectGuid m_flagCarrierAlliance;
+        ObjectGuid m_flagCarrierHorde;
+>>>>>>> d972b57ff0bd9520936ce36fdce69bd5a5859c27:src/game/BattleGround/BattleGroundWS.h
 
         ObjectGuid m_DroppedFlagGuid[PVP_TEAM_COUNT];
         uint8 m_FlagState[PVP_TEAM_COUNT];

@@ -23,6 +23,26 @@
 #include "Utilities/ByteConverter.h"
 #include "ace/Stack_Trace.h"
 
+#define BITS_1 uint8 _1
+#define BITS_2 BITS_1, uint8 _2
+#define BITS_3 BITS_2, uint8 _3
+#define BITS_4 BITS_3, uint8 _4
+#define BITS_5 BITS_4, uint8 _5
+#define BITS_6 BITS_5, uint8 _6
+#define BITS_7 BITS_6, uint8 _7
+#define BITS_8 BITS_7, uint8 _8
+
+#define BIT_VALS_1 _1
+#define BIT_VALS_2 BIT_VALS_1, _2
+#define BIT_VALS_3 BIT_VALS_2, _3
+#define BIT_VALS_4 BIT_VALS_3, _4
+#define BIT_VALS_5 BIT_VALS_4, _5
+#define BIT_VALS_6 BIT_VALS_5, _6
+#define BIT_VALS_7 BIT_VALS_6, _7
+#define BIT_VALS_8 BIT_VALS_7, _8
+
+class ObjectGuid;
+
 class ByteBufferException
 {
     public:
@@ -33,11 +53,53 @@ class ByteBufferException
         }
 
         void PrintPosError() const;
+
     private:
         bool add;
         size_t pos;
         size_t esize;
         size_t size;
+};
+
+class BitStream
+{
+    public:
+        BitStream(): _rpos(0), _wpos(0) {}
+
+        BitStream(uint32 val, size_t len): _rpos(0), _wpos(0)
+        {
+            WriteBits(val, len);
+        }
+
+        BitStream(BitStream const& bs) : _rpos(bs._rpos), _wpos(bs._wpos), _data(bs._data) {}
+
+        void Clear();
+        uint8 GetBit(uint32 bit);
+        uint8 ReadBit();
+        void WriteBit(uint32 bit);
+        template <typename T> void WriteBits(T value, size_t bits);
+        bool Empty();
+        void Reverse();
+        void Print();
+
+        size_t GetLength() { return _data.size(); }
+        uint32 GetReadPosition() { return _rpos; }
+        uint32 GetWritePosition() { return _wpos; }
+        void SetReadPos(uint32 pos) { _rpos = pos; }
+
+        uint8 const& operator[](uint32 const pos) const
+        {
+            return _data[pos];
+        }
+
+        uint8& operator[] (uint32 const pos)
+        {
+            return _data[pos];
+        }
+
+    private:
+        std::vector<uint8> _data;
+        uint32 _rpos, _wpos;
 };
 
 template<class T>
@@ -52,24 +114,186 @@ class ByteBuffer
         const static size_t DEFAULT_SIZE = 64;
 
         // constructor
-        ByteBuffer(): _rpos(0), _wpos(0)
+        ByteBuffer(): _rpos(0), _wpos(0), _bitpos(8), _curbitval(0)
         {
         }
 
         // constructor
-        ByteBuffer(size_t res): _rpos(0), _wpos(0)
+        ByteBuffer(size_t res): _rpos(0), _wpos(0), _bitpos(8), _curbitval(0)
         {
             _storage.reserve(res);
         }
 
         // copy constructor
-        ByteBuffer(const ByteBuffer &buf): _rpos(buf._rpos), _wpos(buf._wpos), _storage(buf._storage) { }
+        ByteBuffer(const ByteBuffer &buf) : _rpos(buf._rpos), _wpos(buf._wpos),
+            _storage(buf._storage), _bitpos(buf._bitpos), _curbitval(buf._curbitval)
+        {
+        }
 
         void clear()
         {
             _storage.clear();
             _rpos = _wpos = 0;
         }
+
+        template <typename T> ByteBuffer& append(T value)
+        {
+            FlushBits();
+            EndianConvert(value);
+            return append((uint8*)&value, sizeof(value));
+        }
+
+        void FlushBits()
+        {
+            if (_bitpos == 8)
+                return;
+
+            append((uint8 *)&_curbitval, sizeof(uint8));
+            _curbitval = 0;
+            _bitpos = 8;
+        }
+
+        void ResetBitReader()
+        {
+            _bitpos = 8;
+        }
+
+        template <typename T> bool WriteBit(T bit)
+        {
+            --_bitpos;
+            if (bit)
+                _curbitval |= (1 << (_bitpos));
+
+            if (_bitpos == 0)
+            {
+                _bitpos = 8;
+                append((uint8 *)&_curbitval, sizeof(_curbitval));
+                _curbitval = 0;
+            }
+
+            return (bit != 0);
+        }
+
+        bool ReadBit()
+        {
+            ++_bitpos;
+            if (_bitpos > 7)
+            {
+                _curbitval = read<uint8>();
+                _bitpos = 0;
+            }
+
+            return ((_curbitval >> (7-_bitpos)) & 1) != 0;
+        }
+
+        template <typename T> void WriteBits(T value, size_t bits)
+        {
+            for (int32 i = bits-1; i >= 0; --i)
+                WriteBit((value >> i) & 1);
+        }
+
+        uint32 ReadBits(size_t bits)
+        {
+            uint32 value = 0;
+            for (int32 i = bits-1; i >= 0; --i)
+                if (ReadBit())
+                    value |= (1 << i);
+
+            return value;
+        }
+
+        BitStream ReadBitStream(uint32 len)
+        {
+            BitStream b;
+            for (uint32 i = 0; i < len; ++i)
+                b.WriteBit(ReadBit());
+            return b;
+        }
+
+        void WriteGuidMask(uint64 guid, uint8* maskOrder, uint8 maskCount, uint8 maskPos = 0)
+        {
+            uint8* guidByte = ((uint8*)&guid);
+
+            for (uint8 i = 0; i < maskCount; i++)
+                WriteBit(guidByte[maskOrder[i + maskPos]]);
+        }
+
+        void WriteGuidBytes(uint64 guid, uint8* byteOrder, uint8 byteCount, uint8 bytePos)
+        {
+            uint8* guidByte = ((uint8*)&guid);
+
+            for (uint8 i = 0; i < byteCount; i++)
+                if (guidByte[byteOrder[i + bytePos]])
+                    (*this) << uint8(guidByte[byteOrder[i + bytePos]] ^ 1);
+        }
+
+        template<BITS_1>
+            void ReadGuidMask(ObjectGuid& guid);
+        template<BITS_2>
+            void ReadGuidMask(ObjectGuid& guid);
+        template<BITS_3>
+            void ReadGuidMask(ObjectGuid& guid);
+        template<BITS_4>
+            void ReadGuidMask(ObjectGuid& guid);
+        template<BITS_5>
+            void ReadGuidMask(ObjectGuid& guid);
+        template<BITS_6>
+            void ReadGuidMask(ObjectGuid& guid);
+        template<BITS_7>
+            void ReadGuidMask(ObjectGuid& guid);
+        template<BITS_8>
+            void ReadGuidMask(ObjectGuid& guid);
+
+        template<BITS_1>
+            void WriteGuidMask(ObjectGuid guid);
+        template<BITS_2>
+            void WriteGuidMask(ObjectGuid guid);
+        template<BITS_3>
+            void WriteGuidMask(ObjectGuid guid);
+        template<BITS_4>
+            void WriteGuidMask(ObjectGuid guid);
+        template<BITS_5>
+            void WriteGuidMask(ObjectGuid guid);
+        template<BITS_6>
+            void WriteGuidMask(ObjectGuid guid);
+        template<BITS_7>
+            void WriteGuidMask(ObjectGuid guid);
+        template<BITS_8>
+            void WriteGuidMask(ObjectGuid guid);
+
+        template<BITS_1>
+            void ReadGuidBytes(ObjectGuid& guid);
+        template<BITS_2>
+            void ReadGuidBytes(ObjectGuid& guid);
+        template<BITS_3>
+            void ReadGuidBytes(ObjectGuid& guid);
+        template<BITS_4>
+            void ReadGuidBytes(ObjectGuid& guid);
+        template<BITS_5>
+            void ReadGuidBytes(ObjectGuid& guid);
+        template<BITS_6>
+            void ReadGuidBytes(ObjectGuid& guid);
+        template<BITS_7>
+            void ReadGuidBytes(ObjectGuid& guid);
+        template<BITS_8>
+            void ReadGuidBytes(ObjectGuid& guid);
+
+        template<BITS_1>
+            void WriteGuidBytes(ObjectGuid guid);
+        template<BITS_2>
+            void WriteGuidBytes(ObjectGuid guid);
+        template<BITS_3>
+            void WriteGuidBytes(ObjectGuid guid);
+        template<BITS_4>
+            void WriteGuidBytes(ObjectGuid guid);
+        template<BITS_5>
+            void WriteGuidBytes(ObjectGuid guid);
+        template<BITS_6>
+            void WriteGuidBytes(ObjectGuid guid);
+        template<BITS_7>
+            void WriteGuidBytes(ObjectGuid guid);
+        template<BITS_8>
+            void WriteGuidBytes(ObjectGuid guid);
 
         template <typename T> void put(size_t pos,T value)
         {
@@ -239,10 +463,18 @@ class ByteBuffer
             return read_skip<T>();
         }
 
-
-        uint8 operator[](size_t pos) const
+        uint8& operator[](size_t const pos)
         {
-            return read<uint8>(pos);
+            if (pos >= size())
+                throw ByteBufferException(false, pos, 1, size());
+            return _storage[pos];
+        }
+
+        uint8 const& operator[](size_t const pos) const
+        {
+            if (pos >= size())
+                throw ByteBufferException(false, pos, 1, size());
+            return _storage[pos];
         }
 
         size_t rpos() const { return _rpos; }
@@ -251,6 +483,11 @@ class ByteBuffer
         {
             _rpos = rpos_;
             return _rpos;
+        }
+
+        void rfinish()
+        {
+            _rpos = wpos();
         }
 
         size_t wpos() const { return _wpos; }
@@ -270,6 +507,7 @@ class ByteBuffer
 
         ByteBuffer& read_skip(size_t skip)
         {
+            ResetBitReader();
             if(_rpos + skip > size())
                 throw ByteBufferException(false, _rpos, skip, size());
             _rpos += skip;
@@ -279,6 +517,7 @@ class ByteBuffer
 
         template <typename T> T read()
         {
+            ResetBitReader();
             T r = read<T>(_rpos);
             _rpos += sizeof(T);
             return r;
@@ -295,6 +534,7 @@ class ByteBuffer
 
         ByteBuffer& read(uint8* dest, size_t len)
         {
+            ResetBitReader();
             if(_rpos  + len > size())
                 throw ByteBufferException(false, _rpos, len, size());
             memcpy(dest, &_storage[_rpos], len);
@@ -320,6 +560,93 @@ class ByteBuffer
             }
 
             return guid;
+        }
+
+        uint8 ReadUInt8()
+        {
+            uint8 u = 0;
+            (*this) >> u;
+            return u;
+        }
+
+        uint16 ReadUInt16()
+        {
+            uint16 u = 0;
+            (*this) >> u;
+            return u;
+        }
+
+        uint32 ReadUInt32()
+        {
+            uint32 u = 0;
+            (*this) >> u;
+            return u;
+        }
+
+        uint64 ReadUInt64()
+        {
+            uint64 u = 0;
+            (*this) >> u;
+            return u;
+        }
+
+        int8 ReadInt8()
+        {
+            int8 u = 0;
+            (*this) >> u;
+            return u;
+        }
+
+        int16 ReadInt16()
+        {
+            int16 u = 0;
+            (*this) >> u;
+            return u;
+        }
+
+        int32 ReadInt32()
+        {
+            uint32 u = 0;
+            (*this) >> u;
+            return u;
+        }
+
+        int64 ReadInt64()
+        {
+            int64 u = 0;
+            (*this) >> u;
+            return u;
+        }
+
+        std::string ReadString()
+        {
+            std::string s = 0;
+            (*this) >> s;
+            return s;
+        }
+
+        std::string ReadString(uint32 count)
+        {
+            std::string out;
+            uint32 start = rpos();
+            while (rpos() < size() && rpos() < start + count)       // prevent crash at wrong string format in packet
+                out += read<char>();
+
+            return out;
+        }
+
+        bool ReadBoolean()
+        {
+            uint8 b = 0;
+            (*this) >> b;
+            return b > 0 ? true : false;
+        }
+
+        float ReadSingle()
+        {
+            float f = 0;
+            (*this) >> f;
+            return f;
         }
 
         const uint8 *contents() const { return &_storage[0]; }
@@ -430,12 +757,13 @@ class ByteBuffer
         }
 
     protected:
-        size_t _rpos, _wpos;
+        size_t _rpos, _wpos, _bitpos;
+        uint8 _curbitval;
         std::vector<uint8> _storage;
 };
 
 template <typename T>
-inline ByteBuffer &operator<<(ByteBuffer &b, std::vector<T> const& v)
+inline ByteBuffer &operator<<(ByteBuffer &b, std::vector<T> v)
 {
     b << (uint32)v.size();
     for (typename std::vector<T>::iterator i = v.begin(); i != v.end(); ++i)
@@ -461,7 +789,7 @@ inline ByteBuffer &operator>>(ByteBuffer &b, std::vector<T> &v)
 }
 
 template <typename T>
-inline ByteBuffer &operator<<(ByteBuffer &b, std::list<T> const& v)
+inline ByteBuffer &operator<<(ByteBuffer &b, std::list<T> v)
 {
     b << (uint32)v.size();
     for (typename std::list<T>::iterator i = v.begin(); i != v.end(); ++i)
@@ -513,6 +841,14 @@ inline ByteBuffer &operator>>(ByteBuffer &b, std::map<K, V> &m)
     return b;
 }
 
+// TODO: Make a ByteBuffer.cpp and move all this inlining to it.
+template<> inline std::string ByteBuffer::read<std::string>()
+{
+    std::string tmp;
+    *this >> tmp;
+    return tmp;
+}
+
 template<>
 inline ByteBuffer& ByteBuffer::read_skip<char*>()
 {
@@ -533,4 +869,28 @@ inline ByteBuffer& ByteBuffer::read_skip<std::string>()
 {
     return read_skip<char*>();
 }
+
+class BitConverter
+{
+    public:
+        static uint8 ToUInt8(ByteBuffer const& buff, size_t start = 0)
+        {
+            return buff.read<uint8>(start);
+        }
+
+        static uint16 ToUInt16(ByteBuffer const& buff, size_t start = 0)
+        {
+            return buff.read<uint16>(start);
+        }
+
+        static uint32 ToUInt32(ByteBuffer const& buff, size_t start = 0)
+        {
+            return buff.read<uint32>(start);
+        }
+
+        static uint64 ToUInt64(ByteBuffer const& buff, size_t start = 0)
+        {
+            return buff.read<uint64>(start);
+}
+
 #endif

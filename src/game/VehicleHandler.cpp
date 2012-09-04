@@ -1,5 +1,9 @@
 /*
+<<<<<<< HEAD
  * Copyright (C) 2005-2010 MaNGOS <http://getmangos.com/>
+=======
+ * Copyright (C) 2005-2012 MaNGOS <http://getmangos.com/>
+>>>>>>> d972b57ff0bd9520936ce36fdce69bd5a5859c27
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,10 +24,15 @@
 #include "WorldPacket.h"
 #include "WorldSession.h"
 #include "Opcodes.h"
+<<<<<<< HEAD
+=======
+#include "ObjectGuid.h"
+>>>>>>> d972b57ff0bd9520936ce36fdce69bd5a5859c27
 #include "Log.h"
 #include "Player.h"
 #include "Vehicle.h"
 #include "ObjectMgr.h"
+<<<<<<< HEAD
 #include "SpellAuras.h"
 #include "SpellMgr.h"
 #include "TemporarySummon.h"
@@ -31,6 +40,12 @@
 void WorldSession::HandleDismissControlledVehicle(WorldPacket &recv_data)
 {
     DEBUG_LOG("WORLD: Received CMSG_DISMISS_CONTROLLED_VEHICLE");
+=======
+
+void WorldSession::HandleDismissControlledVehicle(WorldPacket& recv_data)
+{
+    DEBUG_LOG("WORLD: Recvd CMSG_DISMISS_CONTROLLED_VEHICLE");
+>>>>>>> d972b57ff0bd9520936ce36fdce69bd5a5859c27
     recv_data.hexlike();
 
     ObjectGuid guid;
@@ -39,6 +54,7 @@ void WorldSession::HandleDismissControlledVehicle(WorldPacket &recv_data)
     recv_data >> guid.ReadAsPacked();
     recv_data >> mi;
 
+<<<<<<< HEAD
     if(!GetPlayer()->GetVehicle())
         return;
 
@@ -233,4 +249,11 @@ void WorldSession::HandleChangeSeatsOnControlledVehicle(WorldPacket &recv_data)
             DEBUG_LOG("WorldSession::HandleChangeSeatsOnControlledVehicle player %s try seat on vehicle %s, seat %u.",GetPlayer()->GetObjectGuid().GetString().c_str(),guid2.GetString().c_str(), seatId);
         }
     }
+=======
+    ObjectGuid vehicleGUID = _player->GetCharmGuid();
+    if (!vehicleGUID)                                       // something wrong here...
+        return;
+
+    _player->m_movementInfo = mi;
+>>>>>>> d972b57ff0bd9520936ce36fdce69bd5a5859c27
 }

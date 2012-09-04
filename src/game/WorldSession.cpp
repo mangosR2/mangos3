@@ -155,6 +155,14 @@ void WorldSession::SendPacket(WorldPacket const* packet)
     if (!m_Socket)
         return;
 
+    if (opcodeTable[packet->GetOpcode()].status == STATUS_UNHANDLED)
+    {
+        sLog.outError("SESSION: tried to send an unhandled opcode 0x%.4X", packet->GetOpcode());
+        return;
+    }
+
+    const_cast<WorldPacket*>(packet)->FlushBits();
+
     #ifdef MANGOS_DEBUG
 
     // Code for network use statistic
@@ -294,7 +302,7 @@ bool WorldSession::Update(PacketFilter& updater)
                         packet->GetOpcode());
                     break;
                 case STATUS_UNHANDLED:
-                    DEBUG_LOG("SESSION: received not handled opcode %s (0x%.4X)",
+                    sLog.outError("SESSION: received not handled opcode %s (0x%.4X)",
                         LookupOpcodeName(packet->GetOpcode()),
                         packet->GetOpcode());
                     break;
@@ -433,9 +441,14 @@ void WorldSession::LogoutPlayer(bool Save)
                     if(owner->GetTypeId() == TYPEID_PLAYER)
                         aset.insert((Player*)owner);
                 }
+<<<<<<< HEAD
                 else
                     if(attacker->GetTypeId() == TYPEID_PLAYER)
                         aset.insert((Player*)(attacker));
+=======
+                else if ((*itr)->GetTypeId() == TYPEID_PLAYER)
+                    aset.insert((Player*)(*itr));
+>>>>>>> d972b57ff0bd9520936ce36fdce69bd5a5859c27
             }
 
             GetPlayer()->SetPvPDeath(!aset.empty());
@@ -653,7 +666,9 @@ void WorldSession::SendNotification(const char *format,...)
         va_end(ap);
 
         WorldPacket data(SMSG_NOTIFICATION, (strlen(szStr)+1));
-        data << szStr;
+        data.WriteBits(strlen(szStr), 13);
+        data.FlushBits();
+        data.append(szStr, strlen(szStr));
         SendPacket(&data);
     }
 }
@@ -671,15 +686,58 @@ void WorldSession::SendNotification(int32 string_id,...)
         va_end(ap);
 
         WorldPacket data(SMSG_NOTIFICATION, (strlen(szStr)+1));
-        data << szStr;
+        data.WriteBits(strlen(szStr), 13);
+        data.FlushBits();
+        data.append(szStr, strlen(szStr));
         SendPacket(&data);
     }
 }
 
-void WorldSession::SendSetPhaseShift(uint32 PhaseShift)
+void WorldSession::SendSetPhaseShift(uint32 phaseMask, uint16 mapId)
 {
-    WorldPacket data(SMSG_SET_PHASE_SHIFT, 4);
-    data << uint32(PhaseShift);
+    ObjectGuid guid = _player->GetObjectGuid();
+
+    uint32 phaseFlags = 0;
+
+    for (uint32 i = 0; i < sPhaseStore.GetNumRows(); i++)
+    {
+        if (PhaseEntry const* phase = sPhaseStore.LookupEntry(i))
+        {
+            if (phase->PhaseShift == phaseMask)
+            {
+                phaseFlags = phase->Flags;
+                break;
+            }
+        }
+    }
+
+    WorldPacket data(SMSG_SET_PHASE_SHIFT, 30);
+    data.WriteGuidMask<2, 3, 1, 6, 4, 5, 0, 7>(guid);
+    data.WriteGuidBytes<7, 4>(guid);
+
+    // Seen only 0 bytes
+    data << uint32(0);
+
+    data.WriteGuidBytes<1>(guid);
+    data << uint32(phaseMask ? phaseFlags : 8);
+    data.WriteGuidBytes<2, 6>(guid);
+
+    // Seen only 0 bytes
+    data << uint32(0);
+
+    // PhaseShift, uint16 (2 bytes)
+    data << uint32(phaseMask ? 2 : 0);
+    if (phaseMask)
+        data << uint16(phaseMask);
+
+    data.WriteGuidBytes<3, 0>(guid);
+
+    // MapId , uint16 (2 bytes)
+    data << uint32(mapId ? 2 : 0);
+    if (mapId)
+        data << uint16(mapId);
+
+    data.WriteGuidBytes<5>(guid);
     SendPacket(&data);
 }
 
@@ -720,16 +778,20 @@ void WorldSession::SendAuthWaitQue(uint32 position)
 {
     if(position == 0)
     {
-        WorldPacket packet( SMSG_AUTH_RESPONSE, 1 );
+        WorldPacket packet( SMSG_AUTH_RESPONSE, 2 );
+        packet.WriteBit(false);
+        packet.WriteBit(false);
         packet << uint8( AUTH_OK );
         SendPacket(&packet);
     }
     else
     {
         WorldPacket packet( SMSG_AUTH_RESPONSE, 1+4+1 );
+        packet.WriteBit(true);      // has queue
+        packet.WriteBit(false);     // unk queue-related
+        packet.WriteBit(false);     // has account info
         packet << uint8(AUTH_WAIT_QUEUE);
         packet << uint32(position);
-        packet << uint8(0);                                 // unk 3.3.0
         SendPacket(&packet);
     }
 }
@@ -773,7 +835,8 @@ void WorldSession::LoadAccountData(QueryResult* result, uint32 mask)
         m_accountData[type].Time = time_t(fields[1].GetUInt64());
         m_accountData[type].Data = fields[2].GetCppString();
 
-    } while (result->NextRow());
+    }
+    while (result->NextRow());
 
     delete result;
 }
@@ -904,7 +967,7 @@ void WorldSession::SaveTutorialsData()
     m_tutorialState = TUTORIALDATA_UNCHANGED;
 }
 
-void WorldSession::ReadAddonsInfo(WorldPacket &data)
+void WorldSession::ReadAddonsInfo(ByteBuffer &data)
 {
     if (data.rpos() + 4 > data.size())
         return;

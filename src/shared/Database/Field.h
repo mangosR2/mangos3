@@ -42,7 +42,7 @@ class Field
         enum DataTypes GetType() const { return mType; }
         bool IsNULL() const { return mValue == NULL; }
 
-        const char *GetString() const { return mValue; }
+        const char* GetString() const { return mValue; }
         std::string GetCppString() const
         {
             return mValue ? mValue : "";                    // std::string s = 0 have undefine result in C++
@@ -57,15 +57,15 @@ class Field
         uint64 GetUInt64() const
         {
             uint64 value = 0;
-            if(!mValue || sscanf(mValue,UI64FMTD,&value) == -1)
+            if (!mValue || sscanf(mValue, UI64FMTD, &value) == -1)
                 return 0;
 
             return value;
         }
 
         void SetType(enum DataTypes type) { mType = type; }
-        //no need for memory allocations to store resultset field strings
-        //all we need is to cache pointers returned by different DBMS APIs
+        // no need for memory allocations to store resultset field strings
+        // all we need is to cache pointers returned by different DBMS APIs
         void SetValue(const char* value) { mValue = value; };
 
     private:

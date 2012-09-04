@@ -29,7 +29,10 @@
 #include "Formulas.h"
 #include "ObjectAccessor.h"
 #include "BattleGround/BattleGround.h"
+<<<<<<< HEAD
 #include "BattleGround/BattleGroundMgr.h"
+=======
+>>>>>>> d972b57ff0bd9520936ce36fdce69bd5a5859c27
 #include "MapManager.h"
 #include "MapPersistentStateMgr.h"
 #include "Util.h"
@@ -117,7 +120,6 @@ Group::~Group()
             itr2->second.state->RemoveGroup(this);
 
     // Sub group counters clean up
-    if (m_subGroupsCounts)
         delete[] m_subGroupsCounts;
 
     if (m_LFGState)
@@ -1131,9 +1133,15 @@ void Group::SendUpdate()
         data << (isLFGGroup() ? uint8(citr->roles) : uint8(0)); // roles mask
         if(isLFGGroup())
         {
+<<<<<<< HEAD
             uint32 dungeonID = GetLFGGroupState()->GetDungeon() ? GetLFGGroupState()->GetDungeon()->ID : 0;
             data << uint8(GetLFGGroupState()->GetState() == LFG_STATE_FINISHED_DUNGEON ? 2 : 0);
             data << uint32(dungeonID);
+=======
+            data << uint8(0);
+            data << uint32(0);
+            data << uint8(0);
+>>>>>>> d972b57ff0bd9520936ce36fdce69bd5a5859c27
         }
         data << GetObjectGuid();                            // group guid
         data << uint32(0);                                  // 3.3, this value increments every time SMSG_GROUP_LIST is sent
@@ -1150,8 +1158,13 @@ void Group::SendUpdate()
             data << citr2->guid;
             data << uint8(onlineState);                     // online-state
             data << uint8(citr2->group);                    // groupid
+<<<<<<< HEAD
             data << uint8(citr2->flags);                    // group flags
             data << (isLFGGroup() ? uint8(citr2->roles) : uint8(0));  // 3.3, role?
+=======
+            data << uint8(GetFlags(*citr2));                // group flags
+            data << uint8(0);                               // roles mask
+>>>>>>> d972b57ff0bd9520936ce36fdce69bd5a5859c27
         }
 
         data << m_leaderGuid;                               // leader guid

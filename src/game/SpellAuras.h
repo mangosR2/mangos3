@@ -170,14 +170,18 @@ class MANGOS_DLL_SPEC SpellAuraHolder
             if (m_procCharges == 0)
                 return false;
 
-            m_procCharges--;
+            --m_procCharges;
             SendAuraUpdate(false);
             return m_procCharges == 0;
         }
 
         time_t GetAuraApplyTime() const { return m_applyTime; }
 
+<<<<<<< HEAD
         void SetVisibleAura(bool remove);
+=======
+        void SetVisibleAura(bool remove) { m_target->SetVisibleAura(m_auraSlot, remove ? NULL : this); }
+>>>>>>> d972b57ff0bd9520936ce36fdce69bd5a5859c27
         void SetRemoveMode(AuraRemoveMode mode) { m_removeMode = mode; }
         void SetLoadedState(ObjectGuid const& casterGUID, ObjectGuid const& itemGUID, uint32 stackAmount, uint32 charges, int32 maxduration, int32 duration)
         {
@@ -196,8 +200,11 @@ class MANGOS_DLL_SPEC SpellAuraHolder
         ~SpellAuraHolder();
 
     private:
+<<<<<<< HEAD
         void AddAura(Aura aura, SpellEffectIndex index);
 
+=======
+>>>>>>> d972b57ff0bd9520936ce36fdce69bd5a5859c27
         SpellEntry const* m_spellProto;
 
         Unit* m_target;
@@ -426,9 +433,10 @@ class MANGOS_DLL_SPEC Aura
         void SetModifier(AuraType t, int32 a, uint32 pt, int32 miscValue);
         Modifier*       GetModifier()       { return &m_modifier; }
         Modifier const* GetModifier() const { return &m_modifier; }
-        int32 GetMiscValue() const { return m_spellAuraHolder->GetSpellProto()->EffectMiscValue[m_effIndex]; }
-        int32 GetMiscBValue() const { return m_spellAuraHolder->GetSpellProto()->EffectMiscValueB[m_effIndex]; }
+        int32 GetMiscValue() const { return m_spellEffect ? m_spellEffect->EffectMiscValue : 0; }
+        int32 GetMiscBValue() const { return m_spellEffect ? m_spellEffect->EffectMiscValueB : 0; }
 
+<<<<<<< HEAD
         SpellEntry const* GetSpellProto() const { return ( GetHolder() ? GetHolder()->GetSpellProto() : NULL); }
         uint32 GetId() const { return ( (GetHolder() && GetHolder()->GetSpellProto()) ? GetHolder()->GetSpellProto()->Id : 0 ); }
         ObjectGuid const& GetCastItemGuid() const;
@@ -438,6 +446,15 @@ class MANGOS_DLL_SPEC Aura
 
         ObjectGuid const& GetAffectiveCasterGuid() const;
         Unit* GetAffectiveCaster() const { return ( GetHolder() ? GetHolder()->GetAffectiveCaster() : NULL); }
+=======
+        SpellEntry const* GetSpellProto() const { return GetHolder()->GetSpellProto(); }
+        SpellEffectEntry const* GetSpellEffect() const { return m_spellEffect; }
+        uint32 GetId() const{ return GetHolder()->GetSpellProto()->Id; }
+        ObjectGuid const& GetCastItemGuid() const { return GetHolder()->GetCastItemGuid(); }
+        ObjectGuid const& GetCasterGuid() const { return GetHolder()->GetCasterGuid(); }
+        Unit* GetCaster() const { return GetHolder()->GetCaster(); }
+        Unit* GetTarget() const { return GetHolder()->GetTarget(); }
+>>>>>>> d972b57ff0bd9520936ce36fdce69bd5a5859c27
 
         SpellEffectIndex GetEffIndex() const{ return m_effIndex; }
         int32 GetBasePoints() const { return m_currentBasePoints; }
@@ -494,10 +511,15 @@ class MANGOS_DLL_SPEC Aura
         bool isAffectedOnSpell(SpellEntry const *spell) const;
         bool CanProcFrom(SpellEntry const *spell, uint32 procFlag, uint32 EventProcEx, uint32 procEx, bool active, bool useClassMask) const;
 
+<<<<<<< HEAD
         //SpellAuraHolder const* GetHolder() const { return m_spellHolder; }
         SpellAuraHolderPtr GetHolder() { return m_spellAuraHolder; }
         SpellAuraHolderPtr const GetHolder() const { return m_spellAuraHolder; }
         AuraClassType const GetAuraClassType() const { return m_classType; }
+=======
+        SpellAuraHolder* GetHolder() { return m_spellAuraHolder; }
+        SpellAuraHolder const* GetHolder() const { return m_spellAuraHolder; }
+>>>>>>> d972b57ff0bd9520936ce36fdce69bd5a5859c27
 
         bool IsLastAuraOnHolder();
 
@@ -522,7 +544,9 @@ class MANGOS_DLL_SPEC Aura
         void ReapplyAffectedPassiveAuras();
 
         Modifier m_modifier;
+        SpellModifier *m_spellmod;
 
+        SpellEffectEntry const* m_spellEffect;
         time_t m_applyTime;
 
         int32 m_currentBasePoints;                          // cache SpellEntry::CalculateSimpleValue and use for set custom base points
@@ -547,6 +571,16 @@ class MANGOS_DLL_SPEC Aura
 
         ObjectGuid m_castersTargetGuid;
 
+<<<<<<< HEAD
+=======
+class MANGOS_DLL_SPEC AreaAura : public Aura
+{
+    public:
+        AreaAura(SpellEntry const* spellproto, SpellEffectIndex eff, int32* currentBasePoints, SpellAuraHolder* holder, Unit* target, Unit* caster = NULL, Item* castItem = NULL);
+        ~AreaAura();
+    protected:
+        void Update(uint32 diff) override;
+>>>>>>> d972b57ff0bd9520936ce36fdce69bd5a5859c27
     private:
         void ReapplyAffectedPassiveAuras(Unit* target, bool owner_mode);
         float m_radius;
@@ -558,9 +592,17 @@ MANGOS_DLL_SPEC SpellAuraHolderPtr CreateSpellAuraHolder(SpellEntry const* spell
 class MANGOS_DLL_SPEC AuraPair
 {
     public:
+<<<<<<< HEAD
         AuraPair() : m_holder(SpellAuraHolderPtr()), m_index(MAX_EFFECT_INDEX) {};
         AuraPair(SpellAuraHolderPtr holder, SpellEffectIndex idx) : m_holder(holder), m_index(idx) {};
         AuraPair(Aura const* aura) : m_holder(aura->GetHolder()), m_index(aura->GetEffIndex()) {};
+=======
+        PersistentAreaAura(SpellEntry const* spellproto, SpellEffectIndex eff, int32* currentBasePoints, SpellAuraHolder* holder, Unit* target, Unit* caster = NULL, Item* castItem = NULL);
+        ~PersistentAreaAura();
+    protected:
+        void Update(uint32 diff) override;
+};
+>>>>>>> d972b57ff0bd9520936ce36fdce69bd5a5859c27
 
         AuraPair& operator= (AuraPair const& pair)
         {
@@ -569,8 +611,14 @@ class MANGOS_DLL_SPEC AuraPair
             return *this;
         }
 
+<<<<<<< HEAD
         Aura* operator () () { return m_holder->GetAuraByEffectIndex(m_index); };
         Aura const* operator () () const { return m_holder->GetAura(m_index); };
+=======
+    public:
+        ~SingleEnemyTargetAura();
+        Unit* GetTriggerTarget() const override;
+>>>>>>> d972b57ff0bd9520936ce36fdce69bd5a5859c27
 
         Aura* operator -> () { return m_holder->GetAuraByEffectIndex(m_index); };
         Aura const* operator -> () const { return m_holder->GetAura(m_index); };

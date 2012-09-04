@@ -174,6 +174,7 @@ struct BattleGroundObjectInfo
 enum BattleGroundQueueTypeId
 {
     BATTLEGROUND_QUEUE_NONE     = 0,
+<<<<<<< HEAD:src/game/BattleGround/BattleGround.h
     BATTLEGROUND_QUEUE_AV       = 1,    // Alterac Vally
     BATTLEGROUND_QUEUE_WS       = 2,    // Warsong Gulch
     BATTLEGROUND_QUEUE_AB       = 3,    // Arathi basin
@@ -186,6 +187,22 @@ enum BattleGroundQueueTypeId
     BATTLEGROUND_QUEUE_5v5      = 10
 };
 #define MAX_BATTLEGROUND_QUEUE_TYPES 11
+=======
+    BATTLEGROUND_QUEUE_AV       = 1,
+    BATTLEGROUND_QUEUE_WS       = 2,
+    BATTLEGROUND_QUEUE_AB       = 3,
+    BATTLEGROUND_QUEUE_EY       = 4,
+    BATTLEGROUND_QUEUE_SA       = 5,
+    BATTLEGROUND_QUEUE_IC       = 6,
+    BATTLEGROUND_QUEUE_TP       = 7,
+    BATTLEGROUND_QUEUE_BG       = 8,
+    BATTLEGROUND_QUEUE_2v2      = 9,
+    BATTLEGROUND_QUEUE_3v3      = 10,
+    BATTLEGROUND_QUEUE_5v5      = 11,
+};
+
+#define MAX_BATTLEGROUND_QUEUE_TYPES 12
+>>>>>>> d972b57ff0bd9520936ce36fdce69bd5a5859c27:src/game/BattleGround/BattleGround.h
 
 enum ScoreType
 {
@@ -321,6 +338,7 @@ class BattleGround
 
         /* Battleground */
         // Get methods:
+        ObjectGuid GetObjectGuid() { return ObjectGuid(HIGHGUID_BATTLEGROUND, uint32(0), uint32(m_TypeID)); }
         char const* GetName() const         { return m_Name; }
         BattleGroundTypeId GetTypeID(bool GetRandom = false) const { return GetRandom ? m_RandomTypeID : m_TypeID; }
         BattleGroundBracketId GetBracketId() const { return m_BracketId; }

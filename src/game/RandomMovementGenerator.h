@@ -36,7 +36,7 @@ class MANGOS_DLL_SPEC RandomMovementGenerator
         void Interrupt(T &);
         void Reset(T &);
         bool Update(T &, const uint32 &);
-        MovementGeneratorType GetMovementGeneratorType() const { return RANDOM_MOTION_TYPE; }
+        MovementGeneratorType GetMovementGeneratorType() const override { return RANDOM_MOTION_TYPE; }
         const char* Name() const { return "<Random>"; }
 
     private:

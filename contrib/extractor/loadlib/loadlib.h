@@ -7,9 +7,14 @@
 
 #include "StormLib.h"
 #include <deque>
+<<<<<<< HEAD
 #include <string>
 
 #if defined (WIN32) && !defined (__MINGW32__)
+=======
+
+#ifdef WIN32
+>>>>>>> d972b57ff0bd9520936ce36fdce69bd5a5859c27
 typedef __int64            int64;
 typedef __int32            int32;
 typedef __int16            int16;

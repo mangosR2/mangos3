@@ -73,7 +73,7 @@ namespace MaNGOS
                 data << ObjectGuid(targetGuid);
                 data << uint32(strlen(text)+1);
                 data << text;
-                data << uint8(i_source ? i_source->GetChatTag() : CHAT_TAG_NONE);
+                data << uint8(i_source ? i_source->GetChatTag() : uint8(CHAT_TAG_NONE));
             }
 
             ChatMsg i_msgtype;
@@ -197,7 +197,7 @@ namespace MaNGOS
                 data << ObjectGuid(targetGuid);
                 data << uint32(strlen(str)+1);
                 data << str;
-                data << uint8(i_source ? i_source->GetChatTag() : CHAT_TAG_NONE);
+                data << uint8(i_source ? i_source->GetChatTag() : uint8(CHAT_TAG_NONE));
             }
         private:
 
@@ -939,6 +939,7 @@ void BattleGround::EndBattleGround(Team winner)
                 }
 
                 winner_arena_team->MemberWon(plr,loser_rating);
+                plr->ModifyCurrencyCount(CURRENCY_CONQUEST_ARENA_META, sWorld.getConfig(CONFIG_UINT32_CURRENCY_ARENA_CONQUEST_POINTS_REWARD));
 
                 if (member)
                 {
@@ -996,9 +997,6 @@ void BattleGround::EndBattleGround(Team winner)
 
     if (isArena() && isRated() && winner_arena_team && loser_arena_team)
     {
-        // update arena points only after increasing the player's match count!
-        //obsolete: winner_arena_team->UpdateArenaPointsHelper();
-        //obsolete: loser_arena_team->UpdateArenaPointsHelper();
         // save the stat changes
         winner_arena_team->SaveToDB();
         loser_arena_team->SaveToDB();
@@ -1955,7 +1953,7 @@ void BattleGround::HandleTriggerBuff(ObjectGuid go_guid)
     // TODO this can be done when poolsystem works for instances
     int32 index = m_BgObjects.size() - 1;
     while (index >= 0 && m_BgObjects[index] != go_guid)
-        index--;
+        --index;
     if (index < 0)
     {
         sLog.outError("BattleGround (Type: %u) has buff trigger %s GOType: %u but it hasn't that object in its internal data",

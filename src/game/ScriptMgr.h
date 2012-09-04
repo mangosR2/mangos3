@@ -96,7 +96,8 @@ enum ScriptCommand                                          // resSource, resTar
 #define MAX_TEXT_ID 4                                       // used for SCRIPT_COMMAND_TALK
 
 enum ScriptInfoDataFlags
-{                                                           // default: s/b -> t
+{
+    // default: s/b -> t
     SCRIPT_FLAG_BUDDY_AS_TARGET             = 0x01,         // s -> b
     SCRIPT_FLAG_REVERSE_DIRECTION           = 0x02,         // t* -> s* (* result after previous flag is evaluated)
     SCRIPT_FLAG_SOURCE_TARGETS_SELF         = 0x04,         // s* -> s* (* result after previous flag is evaluated)

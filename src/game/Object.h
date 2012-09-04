@@ -25,9 +25,13 @@
 #include "UpdateData.h"
 #include "ObjectGuid.h"
 #include "Camera.h"
+<<<<<<< HEAD
 #include "ObjectLock.h"
 #include "SharedDefines.h"
 #include "WorldObjectEvents.h"
+=======
+#include "Util.h"
+>>>>>>> d972b57ff0bd9520936ce36fdce69bd5a5859c27
 
 #include <set>
 #include <string>
@@ -75,7 +79,10 @@ class Map;
 class UpdateMask;
 class InstanceData;
 class TerrainInfo;
+<<<<<<< HEAD
 class Transport;
+=======
+>>>>>>> d972b57ff0bd9520936ce36fdce69bd5a5859c27
 class TransportInfo;
 
 typedef UNORDERED_MAP<Player*, UpdateData> UpdateDataMapType;
@@ -95,9 +102,9 @@ struct WorldLocation
     float coord_z;
     float orientation;
     explicit WorldLocation(uint32 _mapid = 0, float _x = 0, float _y = 0, float _z = 0, float _o = 0)
-        : mapid(_mapid), coord_x(_x), coord_y(_y), coord_z(_z), orientation(_o) {}
+        : mapid(_mapid), coord_x(_x), coord_y(_y), coord_z(_z), orientation(NormalizeOrientation(_o)) {}
     WorldLocation(WorldLocation const &loc)
-        : mapid(loc.mapid), coord_x(loc.coord_x), coord_y(loc.coord_y), coord_z(loc.coord_z), orientation(loc.orientation) {}
+        : mapid(loc.mapid), coord_x(loc.coord_x), coord_y(loc.coord_y), coord_z(loc.coord_z), orientation(NormalizeOrientation(loc.orientation)) {}
 };
 
 
@@ -197,7 +204,6 @@ class MANGOS_DLL_SPEC Object
 
         void BuildValuesUpdateBlockForPlayer( UpdateData *data, Player *target ) const;
         void BuildOutOfRangeUpdateBlock( UpdateData *data ) const;
-        void BuildMovementUpdateBlock( UpdateData * data, uint16 flags = 0 ) const;
 
         virtual void DestroyForPlayer( Player *target, bool anim = false ) const;
 
@@ -477,6 +483,10 @@ class MANGOS_DLL_SPEC WorldObject : public Object
         bool IsBoarded() const { return m_transportInfo != NULL; }
         void SetTransportInfo(TransportInfo* transportInfo) { m_transportInfo = transportInfo; }
 
+        TransportInfo* GetTransportInfo() const { return m_transportInfo; }
+        bool IsBoarded() const { return m_transportInfo != NULL; }
+        void SetTransportInfo(TransportInfo* transportInfo) { m_transportInfo = transportInfo; }
+
         void Relocate(float x, float y, float z, float orientation);
         void Relocate(float x, float y, float z);
 
@@ -631,9 +641,9 @@ class MANGOS_DLL_SPEC WorldObject : public Object
         //obtain terrain data for map where this object belong...
         TerrainInfo const* GetTerrain() const;
 
-        void AddToClientUpdateList();
-        void RemoveFromClientUpdateList();
-        void BuildUpdateData(UpdateDataMapType &);
+        void AddToClientUpdateList() override;
+        void RemoveFromClientUpdateList() override;
+        void BuildUpdateData(UpdateDataMapType&) override;
 
         Creature* SummonCreature(uint32 id, float x, float y, float z, float ang,TempSummonType spwtype,uint32 despwtime, bool asActiveObject = false);
 
@@ -666,6 +676,7 @@ class MANGOS_DLL_SPEC WorldObject : public Object
         // ASSERT print helper
         bool PrintCoordinatesError(float x, float y, float z, char const* descr) const;
 
+<<<<<<< HEAD
         // WorldState operations
         void UpdateWorldState(uint32 state, uint32 value);
         uint32 GetWorldState(uint32 state);
@@ -675,6 +686,9 @@ class MANGOS_DLL_SPEC WorldObject : public Object
         void UpdateEvents(uint32 update_diff, uint32 time);
         void KillAllEvents(bool force);
         void AddEvent(BasicEvent* Event, uint64 e_time, bool set_addtime = true);
+=======
+        virtual void StartGroupLoot(Group* /*group*/, uint32 /*timer*/) {}
+>>>>>>> d972b57ff0bd9520936ce36fdce69bd5a5859c27
 
     protected:
         explicit WorldObject();

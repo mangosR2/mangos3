@@ -18,11 +18,11 @@
 
 #include "OutdoorPvPHP.h"
 #include "WorldPacket.h"
-#include "../World.h"
-#include "../Object.h"
-#include "../Creature.h"
-#include "../GameObject.h"
-#include "../Player.h"
+#include "World.h"
+#include "Object.h"
+#include "Creature.h"
+#include "GameObject.h"
+#include "Player.h"
 
 OutdoorPvPHP::OutdoorPvPHP() : OutdoorPvP(),
     m_towersAlliance(0),
@@ -78,6 +78,8 @@ void OutdoorPvPHP::HandlePlayerLeaveZone(Player* player, bool isMainZone)
 
 void OutdoorPvPHP::HandleGameObjectCreate(GameObject* go)
 {
+    OutdoorPvP::HandleGameObjectCreate(go);
+
     switch (go->GetEntry())
     {
         case GO_TOWER_BANNER_OVERLOOK:

@@ -48,11 +48,8 @@ Map::~Map()
     if (GetPersistentState())
         GetPersistentState()->SetUsedByMapState(NULL);         // field pointer can be deleted after this
 
-    if(i_data)
-    {
         delete i_data;
         i_data = NULL;
-    }
 
     // unload instance specific navigation data
     MMAP::MMapFactory::createOrGetMMapManager()->unloadMapInstance(m_TerrainData->GetMapId(), GetInstanceId());
@@ -961,13 +958,11 @@ void Map::SendInitSelf( Player * player )
 {
     DETAIL_LOG("Creating player data for himself %u", player->GetGUIDLow());
 
-    UpdateData data;
+    UpdateData data(player->GetMapId());
 
     // attach to player data current transport data
     if(Transport* transport = player->GetTransport())
-    {
         transport->BuildCreateUpdateBlockForPlayer(&data, player);
-    }
 
     // build data for self presence in world at own client (one time for map)
     player->BuildCreateUpdateBlockForPlayer(&data, player);
@@ -998,7 +993,7 @@ void Map::SendInitTransports( Player * player )
     if (tmap.find(player->GetMapId()) == tmap.end())
         return;
 
-    UpdateData transData;
+    UpdateData transData(player->GetMapId());
 
     MapManager::TransportSet& tset = tmap[player->GetMapId()];
 
@@ -1013,6 +1008,11 @@ void Map::SendInitTransports( Player * player )
 
     WorldPacket packet;
     transData.BuildPacket(&packet);
+
+    // Prevent sending transport maps in player update object
+    if (packet.ReadUInt16() != player->GetMapId())
+        return;
+
     player->GetSession()->SendPacket(&packet);
 }
 
@@ -1025,7 +1025,7 @@ void Map::SendRemoveTransports( Player * player )
     if (tmap.find(player->GetMapId()) == tmap.end())
         return;
 
-    UpdateData transData;
+    UpdateData transData(player->GetMapId());
 
     MapManager::TransportSet& tset = tmap[player->GetMapId()];
 
@@ -1036,6 +1036,11 @@ void Map::SendRemoveTransports( Player * player )
 
     WorldPacket packet;
     transData.BuildPacket(&packet);
+
+    // Prevent sending transport maps in player update object
+    if (packet.ReadUInt16() != player->GetMapId())
+        return;
+
     player->GetSession()->SendPacket(&packet);
 }
 
@@ -2031,6 +2036,7 @@ void Map::PlayDirectSoundToMap(uint32 soundId, uint32 zoneId /*=0*/)
 {
     WorldPacket data(SMSG_PLAY_SOUND, 4);
     data << uint32(soundId);
+    data << ObjectGuid();
 
     Map::PlayerList const& pList = GetPlayers();
     for (PlayerList::const_iterator itr = pList.begin(); itr != pList.end(); ++itr)
@@ -2338,4 +2344,22 @@ template<class T> void Map::LoadObjectToGrid(uint32& guid, GridType& grid, Battl
 
     if (bg)
         bg->OnObjectDBLoad(obj);
+}
+
+ * Function to check if a point is in line of sight from an other point
+ */
+bool Map::IsInLineOfSight(float srcX, float srcY, float srcZ, float destX, float destY, float destZ)
+{
+    VMAP::IVMapManager* vMapManager = VMAP::VMapFactory::createOrGetVMapManager();
+    return vMapManager->isInLineOfSight(GetId(), srcX, srcY, srcZ, destX, destY, destZ);
+}
+
+/**
+ * get the hit position and return true if we hit something
+ * otherwise the result pos will be the dest pos
+ */
+bool Map::GetObjectHitPos(float srcX, float srcY, float srcZ, float destX, float destY, float destZ, float& resX, float& resY, float& resZ, float pModifyDist)
+{
+    VMAP::IVMapManager* vMapManager = VMAP::VMapFactory::createOrGetVMapManager();
+    return vMapManager->getObjectHitPos(GetId(), srcX, srcY, srcZ, destX, destY, destZ, resX, resY, resZ, pModifyDist);
 }

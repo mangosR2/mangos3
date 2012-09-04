@@ -388,6 +388,17 @@ struct QuestPOI
 typedef std::vector<QuestPOI> QuestPOIVector;
 typedef UNORDERED_MAP<uint32, QuestPOIVector> QuestPOIMap;
 
+struct QuestPhaseMaps
+{
+    uint16 MapId;
+    uint32 PhaseMask;
+
+    QuestPhaseMaps(uint16 mapId, uint32 phaseMask) : MapId(mapId), PhaseMask(phaseMask) {}
+};
+
+typedef std::vector<QuestPhaseMaps> QuestPhaseMapsVector;
+typedef UNORDERED_MAP<uint32, QuestPhaseMapsVector> QuestPhaseMapsMap;
+
 #define WEATHER_SEASONS 4
 struct WeatherSeasonChances
 {
@@ -423,7 +434,8 @@ typedef std::multimap<uint32 /*zoneId*/, GraveYardData> GraveYardMap;
 typedef std::pair<GraveYardMap::const_iterator, GraveYardMap::const_iterator> GraveYardMapBounds;
 
 enum ConditionType
-{                                                           // value1       value2  for the Condition enumed
+{
+    // value1       value2  for the Condition enumed
     CONDITION_NOT                   = -3,                   // cond-id-1    0          returns !cond-id-1
     CONDITION_OR                    = -2,                   // cond-id-1    cond-id-2  returns cond-id-1 OR cond-id-2
     CONDITION_AND                   = -1,                   // cond-id-1    cond-id-2  returns cond-id-1 AND cond-id-2
@@ -602,12 +614,7 @@ class ObjectMgr
 
         AntiCheatConfig const* GetAntiCheatConfig(uint32 checkType) const;
 
-        PlayerClassInfo const* GetPlayerClassInfo(uint32 class_) const
-        {
-            if(class_ >= MAX_CLASSES) return NULL;
-            return &playerClassInfo[class_];
-        }
-        void GetPlayerClassLevelInfo(uint32 class_,uint32 level, PlayerClassLevelInfo* info) const;
+        void GetPlayerClassLevelInfo(uint32 class_, uint32 level, uint32& baseHP, uint32& baseMana) const;
 
         PlayerInfo const* GetPlayerInfo(uint32 race, uint32 class_) const
         {
@@ -717,6 +724,14 @@ class ObjectMgr
             return NULL;
         }
 
+        QuestPhaseMapsVector const* GetQuestPhaseMapVector(uint32 questId)
+        {
+            QuestPhaseMapsMap::const_iterator itr = mQuestPhaseMap.find(questId);
+            if(itr != mQuestPhaseMap.end())
+                return &itr->second;
+
+            return NULL;
+        }
 
         // Static wrappers for various accessors
         static GameObjectInfo const* GetGameObjectInfo(uint32 id);                  ///< Wrapper for sGOStorage.LookupEntry
@@ -802,6 +817,7 @@ class ObjectMgr
 
         void LoadPointsOfInterest();
         void LoadQuestPOI();
+        void LoadQuestPhaseMaps();
 
         void LoadNPCSpellClickSpells();
         void LoadSpellTemplate();
@@ -1116,9 +1132,9 @@ class ObjectMgr
             return &iter->second;
         }
 
-        void AddVendorItem(uint32 entry,uint32 item, uint32 maxcount, uint32 incrtime, uint32 ExtendedCost);
-        bool RemoveVendorItem(uint32 entry,uint32 item);
-        bool IsVendorItemValid(bool isTemplate, char const* tableName, uint32 vendor_entry, uint32 item, uint32 maxcount, uint32 ptime, uint32 ExtendedCost, Player* pl = NULL, std::set<uint32>* skip_vendors = NULL) const;
+        void AddVendorItem(uint32 entry, uint32 item, uint8 type, uint32 maxcount, uint32 incrtime, uint32 ExtendedCost);
+        bool RemoveVendorItem(uint32 entry, uint32 item, uint8 type);
+        bool IsVendorItemValid(bool isTemplate, char const* tableName, uint32 vendor_entry, uint32 item, uint8 type, uint32 maxcount, uint32 ptime, uint32 ExtendedCost, Player* pl = NULL, std::set<uint32>* skip_vendors = NULL) const;
 
         int GetOrNewIndexForLocale(LocaleConstant loc);
 
@@ -1249,6 +1265,7 @@ class ObjectMgr
         PointOfInterestMap  mPointsOfInterest;
 
         QuestPOIMap         mQuestPOIMap;
+        QuestPhaseMapsMap   mQuestPhaseMap;
 
         WeatherZoneMap      mWeatherZoneMap;
 

@@ -568,7 +568,9 @@ LexicsCutterNoActionOnGM = 1
 #
 #    Expansion
 #        Allow server use content from expansion
-#        Default: 2 - check expansion 2 maps existence, and if client support expansion 2 and account have
+#        Default: 3 - check expansion 3 maps existence, and if client support expansion 3 and account have
+#                     expansion 3 setting then allow visit expansion 3 maps, allow create new race and class character)
+#                 2 - check expansion 2 maps existence, and if client support expansion 2 and account have
 #                     expansion 2 setting then allow visit expansion 2 maps, allow create new class character)
 #                 1 - check expansion 1 maps existence, and if client support expansion 1 and account have
 #                     expansion 1 setting then allow visit expansion 1 maps, allow create new races character)
@@ -663,7 +665,7 @@ LexicsCutterNoActionOnGM = 1
 #    MaxPlayerLevel
 #        Max level that can be reached by a player for experience (in range from 1 to 100).
 #        Change not recommended
-#        Default: 80
+#        Default: 85
 #
 #    StartPlayerLevel
 #        Staring level that have character at creating (in range 1 to MaxPlayerLevel)
@@ -676,27 +678,6 @@ LexicsCutterNoActionOnGM = 1
 #    StartPlayerMoney
 #        Amount of money that new players will start with.
 #        If you want to start with one silver, use for example 100 (100 copper = 1 silver)
-#        Default: 0
-#
-#    MaxHonorPoints
-#        Max honor points that player can have.
-#        Default: 75000
-#
-#    StartHonorPoints
-#        Amount of honor that new players will start with
-#        Default: 0
-#
-#    AllowHonorKillsTitles
-#        Allow characters to get titles, depending of honor kills amount (something like old 1.xx honor system)
-#        Default: 0 - disallow
-#                 1 - allow
-#
-#    MaxArenaPoints
-#        Max arena points that player can have.
-#        Default: 5000
-#
-#    StartArenaPoints
-#        Amount of arena points that new players will start with
 #        Default: 0
 #
 #    InstantLogout
@@ -945,7 +926,7 @@ LexicsCutterNoActionOnGM = 1
 
 GameType = 1
 RealmZone = 1
-Expansion = 2
+Expansion = 3
 DBC.Locale = 255
 DeclinedNames = 0
 StrictPlayerNames = 0
@@ -960,15 +941,10 @@ CharactersPerRealm = 10
 HeroicCharactersPerRealm = 1
 MinLevelForHeroicCharacterCreating = 55
 SkipCinematics = 0
-MaxPlayerLevel = 80
+MaxPlayerLevel = 85
 StartPlayerLevel = 1
 StartHeroicPlayerLevel = 55
 StartPlayerMoney = 0
-MaxHonorPoints = 75000
-StartHonorPoints = 0
-AllowHonorKillsTitles = 0
-MaxArenaPoints = 5000
-StartArenaPoints = 0
 InstantLogout = 1
 DisableWaterBreath = 4
 AllFlightPaths = 0
@@ -1718,15 +1694,6 @@ BattleGround.Random.ResetHour = 6
 #        Default: 600000 (10 minutes, recommended)
 #                 0 (disable)
 #
-#    Arena.AutoDistributePoints
-#        Set if arena points should be distributed automatically, or by GM command
-#        Default: 0 (disable) (recommended): use gm command or sql query to distribute the points
-#                 1 (enable)  arena points are distributed automatically
-#
-#    Arena.AutoDistributeInterval
-#        How often should the distribution take place
-#        If automatic distribution is enabled in days
-#        Default: 7 (weekly)
 #
 #    Arena.QueueAnnouncer.Join
 #        Enable arena queue announcer posting to chat at join
@@ -1775,8 +1742,6 @@ BattleGround.Random.ResetHour = 6
 
 Arena.MaxRatingDifference = 150
 Arena.RatingDiscardTimer = 600000
-Arena.AutoDistributePoints = 0
-Arena.AutoDistributeInterval = 7
 Arena.QueueAnnouncer.Join = 0
 Arena.QueueAnnouncer.Exit = 0
 Arena.QueueAnnouncer.Start = 0
@@ -1810,6 +1775,29 @@ OutdoorPvp.TFEnabled = 1
 OutdoorPvp.NAEnabled = 1
 OutdoorPvp.GHEnabled = 1
 OutdoorPvp.WGEnabled = 0
+
+###################################################################################################################
+# OUTDOOR PVP CONFIG
+#
+#    OutdoorPvp.SIEnabled               #Enable Silithus Outdoor pvp
+#    OutdoorPvp.EPEnabled               #Enable Eastern Plaguelands Outdoor pvp
+#    OutdoorPvp.HPEnabled               #Enable Hellfire Peninsula Outdoor pvp
+#    OutdoorPvp.ZMEnabled               #Enable Zangarmarsh Outdoor pvp
+#    OutdoorPvp.TFEnabled               #Enable Terokkar Forest  Outdoor pvp
+#    OutdoorPvp.NAEnabled               #Enable Halaa (Nagrand) Outdoor pvp
+#    OutdoorPvp.GHEnabled               #Enable Venture Bay (Grizzly Hills) Outdoor pvp
+#        Default: 1 (enable)
+#                 0 (disable)
+#
+###################################################################################################################
+
+OutdoorPvp.SIEnabled = 1
+OutdoorPvp.EPEnabled = 1
+OutdoorPvp.HPEnabled = 1
+OutdoorPvp.ZMEnabled = 1
+OutdoorPvp.TFEnabled = 1
+OutdoorPvp.NAEnabled = 1
+OutdoorPvp.GHEnabled = 1
 
 ###################################################################################################################
 # NETWORK CONFIG
@@ -2146,3 +2134,44 @@ VMSS.ForceUnloadDelay = 3000
 ###################################################################################################################
 DuelReset.Enable = 0
 DuelReset.AreaIds = "12,14,4570"
+
+###################################################################################################################
+# CURRENCIES
+#
+#    Currency.StartHonorPoints
+#        Amount of honor that new players will start with
+#        Default: 0 (with precision)
+#
+#    Currency.StartConquestPoints
+#        Amount of conquest points that new players will start with
+#        Default: 0 (with precision)
+#
+#    Currency.ResetInterval
+#        How often should currency week count reset (days)
+#        Default: 7 (weekly)
+#
+#    Currency.ResetWeekDay
+#        Week day when currency week count is reset (0..6) 0 == Sunday
+#        Default: 3 (Wednesday)
+#
+#    Currency.ResetHour
+#        Hour of a day when currency week count is reset (0..23)
+#        Default: 6
+#
+#    Currency.ConquestPointsDefaultWeekCap
+#        Amount of conquest points that player can earn per week
+#        Default: 135000 (with precision)
+#
+#    Currency.ConquestPointsArenaReward
+#        Amount of conquest points rewarded by winning arenas
+#        Default: 12000 (with precision)
+#
+###################################################################################################################
+
+Currency.StartHonorPoints = 0
+Currency.StartConquestPoints = 0
+Currency.ResetInterval = 7
+Currency.ResetWeekDay = 3
+Currency.ResetHour = 6
+Currency.ConquestPointsDefaultWeekCap = 135000
+Currency.ConquestPointsArenaReward = 12000

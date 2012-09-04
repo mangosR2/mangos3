@@ -262,6 +262,7 @@ void WorldSession::HandleLootMoneyOpcode( WorldPacket & /*recv_data*/ )
                 WorldPacket data(SMSG_LOOT_MONEY_NOTIFY, 4+1);
                 data << uint32(money_per_player);
                 data << uint8(playersNear.size() > 1 ? 0 : 1);// 0 is "you share of loot..."
+                data << uint32(0);                              // guild share
 
                 (*i)->GetSession()->SendPacket(&data);
             }
@@ -274,6 +275,7 @@ void WorldSession::HandleLootMoneyOpcode( WorldPacket & /*recv_data*/ )
             WorldPacket data(SMSG_LOOT_MONEY_NOTIFY, 4+1);
             data << uint32(pLoot->gold);
             data << uint8(1);                               // 1 is "you loot..."
+            data << uint32(0);                              // guild share
             player->GetSession()->SendPacket(&data);
         }
 
@@ -387,7 +389,8 @@ void WorldSession::DoLootRelease(ObjectGuid lguid)
                         go->SetLootState(GO_JUST_DEACTIVATED);
                 }
                 else if (go->GetGoType() == GAMEOBJECT_TYPE_FISHINGHOLE)
-                {                                               // The fishing hole used once more
+                {
+                    // The fishing hole used once more
                     go->AddUse();                               // if the max usage is reached, will be despawned at next tick
                     if (go->GetUseCount() >= urand(go->GetGOInfo()->fishinghole.minSuccessOpens,go->GetGOInfo()->fishinghole.maxSuccessOpens))
                     {
@@ -553,7 +556,7 @@ void WorldSession::HandleLootMasterGiveOpcode( WorldPacket & recv_data )
 
     if (slotid > pLoot->items.size())
     {
-        DEBUG_LOG("AutoLootItem: Player %s might be using a hack! (slot %d, size %lu)",GetPlayer()->GetName(), slotid, (unsigned long)pLoot->items.size());
+        DEBUG_LOG("AutoLootItem: Player %s might be using a hack! (slot %d, size " SIZEFMTD ")", GetPlayer()->GetName(), slotid, pLoot->items.size());
         return;
     }
 

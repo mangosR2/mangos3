@@ -24,25 +24,19 @@ void WorldSession::HandleJoinChannelOpcode(WorldPacket& recvPacket)
     DEBUG_LOG("Opcode %u", recvPacket.GetOpcode());
 
     uint32 channel_id;
-    uint8 unknown1, unknown2;
     std::string channelname, pass;
 
-    recvPacket >> channel_id >> unknown1 >> unknown2;
-    recvPacket >> channelname;
+    recvPacket >> channel_id;
+    recvPacket.ReadBit();       // has voice
+    recvPacket.ReadBit();       // zone update
+
+    uint8 channelLength = recvPacket.ReadBits(8);
+    uint8 passwordLength = recvPacket.ReadBits(8);
+    channelname = recvPacket.ReadString(channelLength);
+    pass = recvPacket.ReadString(passwordLength);
 
     if (channelname.empty())
         return;
-
-    recvPacket >> pass;
-    // don't allow creating channels starting with a number (triggers a client-side bug)
-    if (isdigit((unsigned char)channelname[0]))
-    {
-        WorldPacket data(SMSG_CHANNEL_NOTIFY, 1+channelname.size()+1);
-        data << uint8(CHAT_INVALID_NAME_NOTICE);
-        data << channelname;
-        SendPacket(&data);
-        return;
-    }
 
     if (ChannelMgr* cMgr = channelMgr(_player->GetTeam()))
         if (Channel* chn = cMgr->GetJoinChannel(channelname, channel_id))

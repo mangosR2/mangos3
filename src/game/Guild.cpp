@@ -365,7 +365,8 @@ bool Guild::LoadRanksFromDB(QueryResult *guildRanksResult)
             rankRights |= GR_RIGHT_ALL;
 
         AddRank(rankName, rankRights, rankMoney);
-    } while( guildRanksResult->NextRow() );
+    }
+    while (guildRanksResult->NextRow());
 
     if (m_Ranks.size() < GUILD_RANKS_MIN_COUNT)             // if too few ranks, renew them
     {
@@ -465,7 +466,8 @@ bool Guild::LoadMembersFromDB(QueryResult *guildMembersResult)
 
         members[lowguid]      = newmember;
 
-    } while (guildMembersResult->NextRow());
+    }
+    while (guildMembersResult->NextRow());
 
     if (members.empty())
         return false;
@@ -574,6 +576,23 @@ void Guild::BroadcastToGuild(WorldSession *session, const std::string& msg, uint
     }
 }
 
+void Guild::BroadcastAddonToGuild(WorldSession* session, const std::string& msg, const std::string& prefix)
+{
+    if (session && session->GetPlayer() && HasRankRight(session->GetPlayer()->GetRank(), GR_RIGHT_GCHATSPEAK))
+    {
+        WorldPacket data;
+        ChatHandler::FillMessageData(&data, session,CHAT_MSG_GUILD, CHAT_MSG_ADDON, NULL, ObjectGuid(), msg.c_str(), NULL, prefix.c_str());
+
+        for (MemberList::const_iterator itr = members.begin(); itr != members.end(); ++itr)
+        {
+            Player* pl = ObjectAccessor::FindPlayer(ObjectGuid(HIGHGUID_PLAYER, itr->first));
+
+            if (pl && pl->GetSession() && HasRankRight(pl->GetRank(), GR_RIGHT_GCHATLISTEN) && !pl->GetSocial()->HasIgnore(session->GetPlayer()->GetObjectGuid()))
+                pl->GetSession()->SendPacket(&data);
+        }
+    }
+}
+
 void Guild::BroadcastToOfficers(WorldSession *session, const std::string& msg, uint32 language)
 {
     if (session && session->GetPlayer() && HasRankRight(session->GetPlayer()->GetRank(), GR_RIGHT_OFFCHATSPEAK))
@@ -586,6 +605,23 @@ void Guild::BroadcastToOfficers(WorldSession *session, const std::string& msg, u
             Player *pl = ObjectAccessor::FindPlayer(ObjectGuid(HIGHGUID_PLAYER, itr->first));
 
             if (pl && pl->GetSession() && HasRankRight(pl->GetRank(),GR_RIGHT_OFFCHATLISTEN) && !pl->GetSocial()->HasIgnore(session->GetPlayer()->GetObjectGuid()))
+                pl->GetSession()->SendPacket(&data);
+        }
+    }
+}
+
+void Guild::BroadcastAddonToOfficers(WorldSession* session, const std::string& msg, const std::string& prefix)
+{
+    if (session && session->GetPlayer() && HasRankRight(session->GetPlayer()->GetRank(), GR_RIGHT_OFFCHATSPEAK))
+    {
+        for (MemberList::const_iterator itr = members.begin(); itr != members.end(); ++itr)
+        {
+            WorldPacket data;
+            ChatHandler::FillMessageData(&data, session, CHAT_MSG_OFFICER, CHAT_MSG_ADDON, NULL, ObjectGuid(), msg.c_str(), NULL, prefix.c_str());
+
+            Player* pl = ObjectAccessor::FindPlayer(ObjectGuid(HIGHGUID_PLAYER, itr->first));
+
+            if (pl && pl->GetSession() && HasRankRight(pl->GetRank(), GR_RIGHT_OFFCHATLISTEN) && !pl->GetSocial()->HasIgnore(session->GetPlayer()->GetObjectGuid()))
                 pl->GetSession()->SendPacket(&data);
         }
     }
@@ -899,7 +935,8 @@ void Guild::LoadGuildEventLogFromDB()
         // Add entry to list
         m_GuildEventLog.push_front(NewEvent);
 
-    } while( result->NextRow() );
+    }
+    while (result->NextRow());
     delete result;
 }
 
@@ -1149,7 +1186,8 @@ void Guild::LoadGuildBankFromDB()
         NewTab->Text = fields[3].GetCppString();
 
         m_TabListMap[tabId] = NewTab;
-    } while (result->NextRow());
+    }
+    while (result->NextRow());
 
     delete result;
 
@@ -1198,7 +1236,8 @@ void Guild::LoadGuildBankFromDB()
 
         pItem->AddToWorld();
         m_TabListMap[TabId]->Slots[SlotId] = pItem;
-    } while (result->NextRow());
+    }
+    while (result->NextRow());
 
     delete result;
 }
@@ -1425,7 +1464,8 @@ bool Guild::LoadBankRightsFromDB(QueryResult *guildBankTabRightsResult)
 
         SetBankRightsAndSlots(rankId, TabId, right, SlotPerDay, false);
 
-    } while (guildBankTabRightsResult->NextRow());
+    }
+    while (guildBankTabRightsResult->NextRow());
 
     return true;
 }
@@ -1478,7 +1518,8 @@ void Guild::LoadGuildBankEventLogFromDB()
                 // we don't have to do m_GuildBankEventLogNextGuid_Item[tabId] %= configCount; - it will be done when creating new record
                 isNextLogGuidSet = true;
             }
-        } while (result->NextRow());
+        }
+        while (result->NextRow());
         delete result;
     }
 
@@ -1515,7 +1556,8 @@ void Guild::LoadGuildBankEventLogFromDB()
             // events are ordered from oldest (in beginning) to latest (in the end)
             m_GuildBankEventLog_Money.push_front(NewEvent);
 
-    } while (result->NextRow());
+    }
+    while (result->NextRow());
     delete result;
 }
 
@@ -1962,7 +2004,8 @@ void Guild::SwapItems(Player * pl, uint8 BankTab, uint8 BankTabSlot, uint8 BankT
     }
 
     if (SplitedAmount)
-    {                                                   // Bank -> Bank item split (in empty or non empty slot
+    {
+        // Bank -> Bank item split (in empty or non empty slot
         GuildItemPosCountVec dest;
         InventoryResult msg = CanStoreItem(BankTabDst, BankTabSlotDst, dest, SplitedAmount, pItemSrc, false);
         if (msg != EQUIP_ERR_OK)
@@ -2070,7 +2113,8 @@ void Guild::MoveFromBankToChar( Player * pl, uint8 BankTab, uint8 BankTabSlot, u
         SplitedAmount = 0;                              // no split
 
     if (SplitedAmount)
-    {                                                   // Bank -> Char split to slot (patly move)
+    {
+        // Bank -> Char split to slot (patly move)
         Item *pNewItem = pItemBank->CloneItem( SplitedAmount );
         if (!pNewItem)
         {
@@ -2228,7 +2272,8 @@ void Guild::MoveFromCharToBank( Player * pl, uint8 PlayerBag, uint8 PlayerSlot, 
         SplitedAmount = 0;                                  // no split
 
     if (SplitedAmount)
-    {                                                       // Char -> Bank split to empty or non-empty slot (partly move)
+    {
+        // Char -> Bank split to empty or non-empty slot (partly move)
         GuildItemPosCountVec dest;
         InventoryResult msg = CanStoreItem(BankTab, BankTabSlot, dest, SplitedAmount, pItemChar, false);
         if (msg != EQUIP_ERR_OK)

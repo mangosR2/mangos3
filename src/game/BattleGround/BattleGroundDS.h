@@ -36,13 +36,14 @@ class BattleGroundDS : public BattleGround
     public:
         BattleGroundDS();
         ~BattleGroundDS();
-        void Update(uint32 diff);
+        void Update(uint32 diff) override;
 
         /* inherited from BattlegroundClass */
-        virtual void AddPlayer(Player *plr);
-        virtual void StartingEventCloseDoors();
-        virtual void StartingEventOpenDoors();
+        virtual void AddPlayer(Player* plr) override;
+        virtual void StartingEventCloseDoors() override;
+        virtual void StartingEventOpenDoors() override;
 
+<<<<<<< HEAD:src/game/BattleGround/BattleGroundDS.h
         void RemovePlayer(Player *plr, ObjectGuid guid);
         void HandleAreaTrigger(Player *Source, uint32 Trigger);
         bool SetupBattleGround();
@@ -59,5 +60,11 @@ class BattleGroundDS : public BattleGround
 
     private:
         uint32 m_uiKnockback;
+=======
+        void RemovePlayer(Player* plr, ObjectGuid guid) override;
+        void HandleAreaTrigger(Player* source, uint32 trigger) override;
+        bool SetupBattleGround() override;
+        void HandleKillPlayer(Player* player, Player* killer) override;
+>>>>>>> d972b57ff0bd9520936ce36fdce69bd5a5859c27:src/game/BattleGround/BattleGroundDS.h
 };
 #endif

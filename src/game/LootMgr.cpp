@@ -27,7 +27,8 @@
 #include "DBCStores.h"
 #include "SQLStorages.h"
 
-static eConfigFloatValues const qualityToRate[MAX_ITEM_QUALITY] = {
+static eConfigFloatValues const qualityToRate[MAX_ITEM_QUALITY] =
+{
     CONFIG_FLOAT_RATE_DROP_ITEM_POOR,                                    // ITEM_QUALITY_POOR
     CONFIG_FLOAT_RATE_DROP_ITEM_NORMAL,                                  // ITEM_QUALITY_NORMAL
     CONFIG_FLOAT_RATE_DROP_ITEM_UNCOMMON,                                // ITEM_QUALITY_UNCOMMON
@@ -165,14 +166,15 @@ void LootStore::LoadLootTable()
             tab->second->AddEntry(storeitem);
             ++count;
 
-        } while (result->NextRow());
+        }
+        while (result->NextRow());
 
         delete result;
 
         Verify();                                           // Checks validity of the loot store
 
         sLog.outString();
-        sLog.outString( ">> Loaded %u loot definitions (%lu templates)", count, (unsigned long)m_LootTemplates.size());
+        sLog.outString(">> Loaded %u loot definitions (" SIZEFMTD " templates)", count, m_LootTemplates.size());
     }
     else
     {
@@ -415,7 +417,10 @@ LootSlotType LootItem::GetSlotTypeForSharedLoot(PermissionTypes permission, Play
             return !is_underthreshold ? LOOT_SLOT_MASTER : LOOT_SLOT_NORMAL;
         case OWNER_PERMISSION:
             return LOOT_SLOT_OWNER;
+<<<<<<< HEAD
         case NONE_PERMISSION:
+=======
+>>>>>>> d972b57ff0bd9520936ce36fdce69bd5a5859c27
         default:
             return MAX_LOOT_SLOT_TYPE;
     }
@@ -757,21 +762,24 @@ ByteBuffer& operator<<(ByteBuffer& b, LootView const& lv)
     {
         b << uint32(0);                                     //gold
         b << uint8(0);                                      // item count
-        return b;                                           // nothing output more
+        b << uint8(0);                                      // currency count
+        return b;
     }
 
     Loot &l = lv.loot;
 
     uint8 itemsShown = 0;
+    uint8 currenciesShown = 0;
 
-    //gold
-    b << uint32(l.gold);
+    b << uint32(l.gold);                                    // gold
 
     size_t count_pos = b.wpos();                            // pos of item count byte
     b << uint8(0);                                          // item count placeholder
+    size_t currency_count_pos = b.wpos();                   // pos of currency count byte
+    b << uint8(0);                                          // currency count placeholder
 
     if (lv.permission == NONE_PERMISSION)
-        return b;                                           // nothing output more
+        return b;
 
 
     for (uint8 i = 0; i < l.items.size(); ++i)
@@ -842,8 +850,9 @@ ByteBuffer& operator<<(ByteBuffer& b, LootView const& lv)
         }
     }
 
-    //update number of items shown
+    // update number of items and currencies shown
     b.put<uint8>(count_pos,itemsShown);
+    b.put<uint8>(currency_count_pos, currenciesShown);
 
     return b;
 }

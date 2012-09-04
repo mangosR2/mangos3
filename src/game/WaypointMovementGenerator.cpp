@@ -291,6 +291,8 @@ void FlightPathMovementGenerator::_Reset(Player & player)
     }
     init.SetFirstPointId(GetCurrentNode());
     init.SetFly();
+    init.SetSmooth();
+    init.SetWalk(true);
     init.SetVelocity(PLAYER_FLIGHT_SPEED);
     init.Launch();
 }
@@ -308,7 +310,8 @@ bool FlightPathMovementGenerator::Update(Player &player, const uint32 &diff)
                 break;
             i_currentNode += (uint32)departureEvent;
             departureEvent = !departureEvent;
-        } while(true);
+        }
+        while (true);
     }
 
     return !(player.movespline->Finalized() || i_currentNode >= (i_path->size()-1));

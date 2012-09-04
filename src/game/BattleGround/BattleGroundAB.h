@@ -135,12 +135,15 @@ enum BG_AB_Sounds
     BG_AB_SOUND_NEAR_VICTORY            = 8456
 };
 
+<<<<<<< HEAD:src/game/BattleGround/BattleGroundAB.h
 enum BG_AB_Objectives
 {
     AB_OBJECTIVE_ASSAULT_BASE = 122,
     AB_OBJECTIVE_DEFEND_BASE  = 123
 };
 
+=======
+>>>>>>> d972b57ff0bd9520936ce36fdce69bd5a5859c27:src/game/BattleGround/BattleGroundAB.h
 #define AB_NORMAL_HONOR_INTERVAL        260
 #define AB_WEEKEND_HONOR_INTERVAL       160
 #define AB_NORMAL_REPUTATION_INTERVAL   160
@@ -155,7 +158,8 @@ const uint32 BG_AB_TickPoints[6] = {0, 10, 10, 10, 10, 30};
 const uint32 BG_AB_GraveyardIds[7] = {895, 894, 893, 897, 896, 898, 899};
 
 // x, y, z, o
-const float BG_AB_BuffPositions[BG_AB_NODES_MAX][4] = {
+const float BG_AB_BuffPositions[BG_AB_NODES_MAX][4] =
+{
     {1185.71f, 1185.24f, -56.36f, 2.56f},                   // stables
     {990.75f, 1008.18f, -42.60f, 2.43f},                    // blacksmith
     {817.66f, 843.34f, -56.54f, 3.01f},                     // farm
@@ -187,29 +191,37 @@ class BattleGroundAB : public BattleGround
         BattleGroundAB();
         ~BattleGroundAB();
 
-        void Update(uint32 diff);
-        void AddPlayer(Player *plr);
-        virtual void StartingEventCloseDoors();
-        virtual void StartingEventOpenDoors();
-        void RemovePlayer(Player *plr, ObjectGuid guid);
-        void HandleAreaTrigger(Player *Source, uint32 Trigger);
-        virtual bool SetupBattleGround();
-        virtual void Reset();
-        void EndBattleGround(Team winner);
-        virtual WorldSafeLocsEntry const* GetClosestGraveYard(Player* player);
+        void Update(uint32 diff) override;
+        void AddPlayer(Player* plr) override;
+        virtual void StartingEventCloseDoors() override;
+        virtual void StartingEventOpenDoors() override;
+        void RemovePlayer(Player* plr, ObjectGuid guid) override;
+        void HandleAreaTrigger(Player* source, uint32 trigger) override;
+        virtual bool SetupBattleGround() override;
+        virtual void Reset() override;
+        void EndBattleGround(Team winner) override;
+        virtual WorldSafeLocsEntry const* GetClosestGraveYard(Player* player) override;
 
         /* Scorekeeping */
-        virtual void UpdatePlayerScore(Player *Source, uint32 type, uint32 value);
+        virtual void UpdatePlayerScore(Player* source, uint32 type, uint32 value) override;
 
+<<<<<<< HEAD:src/game/BattleGround/BattleGroundAB.h
         virtual void FillInitialWorldStates();
+=======
+        virtual void FillInitialWorldStates(WorldPacket& data, uint32& count) override;
+>>>>>>> d972b57ff0bd9520936ce36fdce69bd5a5859c27:src/game/BattleGround/BattleGroundAB.h
 
         /* Nodes occupying */
-        virtual void EventPlayerClickedOnFlag(Player *source, GameObject* target_obj);
+        virtual void EventPlayerClickedOnFlag(Player* source, GameObject* target_obj) override;
 
         /* achievement req. */
         bool IsAllNodesControlledByTeam(Team team) const override;
+<<<<<<< HEAD:src/game/BattleGround/BattleGroundAB.h
         bool IsTeamScores500Disadvantage(Team team) const { return m_TeamScores500Disadvantage[GetTeamIndex(team)]; }
 
+=======
+        bool IsTeamScores500Disadvantage(Team team) const { return m_TeamScores500Disadvantage[GetTeamIndexByTeamId(team)]; }
+>>>>>>> d972b57ff0bd9520936ce36fdce69bd5a5859c27:src/game/BattleGround/BattleGroundAB.h
     private:
         /* Gameobject spawning/despawning */
         void _CreateBanner(uint8 node, uint8 type, uint8 teamIndex, bool delay);
@@ -232,12 +244,21 @@ class BattleGroundAB : public BattleGround
         uint8               m_prevNodes[BG_AB_NODES_MAX];   // used for performant wordlstate-updating
         BG_AB_BannerTimer   m_BannerTimers[BG_AB_NODES_MAX];
         uint32              m_NodeTimers[BG_AB_NODES_MAX];
+<<<<<<< HEAD:src/game/BattleGround/BattleGroundAB.h
         uint32              m_lastTick[PVP_TEAM_COUNT];
         uint32              m_HonorScoreTics[PVP_TEAM_COUNT];
         uint32              m_ReputationScoreTics[PVP_TEAM_COUNT];
         bool                m_IsInformedNearVictory;
         uint32              m_HonorTicks;
         uint32              m_ReputationTicks;
+=======
+        uint32              m_lastTick[BG_TEAMS_COUNT];
+        uint32              m_honorScoreTicks[BG_TEAMS_COUNT];
+        uint32              m_ReputationScoreTics[BG_TEAMS_COUNT];
+        bool                m_IsInformedNearVictory;
+        uint32              m_honorTicks;
+        uint32              m_ReputationTics;
+>>>>>>> d972b57ff0bd9520936ce36fdce69bd5a5859c27:src/game/BattleGround/BattleGroundAB.h
         // need for achievements
         bool                m_TeamScores500Disadvantage[PVP_TEAM_COUNT];
 };

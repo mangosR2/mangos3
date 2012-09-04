@@ -72,6 +72,7 @@ enum HighGuid
     HIGHGUID_VEHICLE        = 0xF15,                        // blizz F15/F55
     HIGHGUID_DYNAMICOBJECT  = 0xF10,                        // blizz F10/F50
     HIGHGUID_CORPSE         = 0xF50,                        // blizz F10/F50 used second variant to resolve conflict with HIGHGUID_DYNAMICOBJECT
+    HIGHGUID_BATTLEGROUND   = 0x1F1,                        // blizz 1F1, used for battlegrounds and battlefields
     HIGHGUID_MO_TRANSPORT   = 0x1FC,                        // blizz 1FC (for GAMEOBJECT_TYPE_MO_TRANSPORT)
     HIGHGUID_INSTANCE       = 0x1F4,                        // blizz 1F4
     HIGHGUID_GROUP          = 0x1F5,                        // blizz 1F5
@@ -86,12 +87,14 @@ struct PackedGuidReader
     ObjectGuid* m_guidPtr;
 };
 
+#define NUM_GUID_BYTES sizeof(uint64)
+
 class MANGOS_DLL_SPEC ObjectGuid
 {
     public:                                                 // constructors
         ObjectGuid() : m_guid(0) {}
         explicit ObjectGuid(uint64 guid) : m_guid(guid) {}
-        ObjectGuid(HighGuid hi, uint32 entry, uint32 counter) : m_guid(counter ? uint64(counter) | (uint64(entry) << 24) | (uint64(hi) << 52) : 0) {}
+        ObjectGuid(HighGuid hi, uint32 entry, uint32 counter) : m_guid(counter ? uint64(counter) | (uint64(entry) << 32) | (uint64(hi) << 52) : 0) {}
         ObjectGuid(HighGuid hi, uint32 counter) : m_guid(counter ? uint64(counter) | (uint64(hi) << 52) : 0) {}
 
         operator uint64() const { return m_guid; }
@@ -110,19 +113,19 @@ class MANGOS_DLL_SPEC ObjectGuid
     public:                                                 // accessors
         uint64   GetRawValue() const { return m_guid; }
         HighGuid GetHigh() const { return HighGuid((m_guid >> 52) & 0x00000FFF); }
-        uint32   GetEntry() const { return HasEntry() ? uint32((m_guid >> 24) & UI64LIT(0x0000000000FFFFFF)) : 0; }
+        uint32   GetEntry() const { return HasEntry() ? uint32((m_guid >> 32) & UI64LIT(0xFFFF)) : 0; }
         uint32   GetCounter()  const
         {
             return HasEntry()
-                ? uint32(m_guid & UI64LIT(0x0000000000FFFFFF))
-                : uint32(m_guid & UI64LIT(0x00000000FFFFFFFF));
+                   ? uint32(m_guid & UI64LIT(0x00000000FFFFFFFF))
+                   : uint32(m_guid & UI64LIT(0x000000FFFFFFFFFF));
         }
 
         static uint32 GetMaxCounter(HighGuid high)
         {
             return HasEntry(high)
-                ? uint32(0x00FFFFFF)
-                : uint32(0xFFFFFFFF);
+                   ? uint32(0x00FFFFFFFF)
+                   : uint32(0xFFFFFFFFFF);
         }
 
         uint32 GetMaxCounter() const { return GetMaxCounter(GetHigh()); }
@@ -174,6 +177,28 @@ class MANGOS_DLL_SPEC ObjectGuid
         bool operator!= (ObjectGuid const& guid) const { return GetRawValue() != guid.GetRawValue(); }
         bool operator< (ObjectGuid const& guid) const { return GetRawValue() < guid.GetRawValue(); }
 
+        uint8& operator[] (uint8 index)
+        {
+            MANGOS_ASSERT(index < NUM_GUID_BYTES);
+
+#if MANGOS_ENDIAN == MANGOS_LITTLEENDIAN
+            return m_guidBytes[index];
+#else
+            return m_guidBytes[NUM_GUID_BYTES - 1 - index];
+#endif
+        }
+
+        uint8 const& operator[] (uint8 index) const
+        {
+            MANGOS_ASSERT(index < NUM_GUID_BYTES);
+
+#if MANGOS_ENDIAN == MANGOS_LITTLEENDIAN
+            return m_guidBytes[index];
+#else
+            return m_guidBytes[NUM_GUID_BYTES - 1 - index];
+#endif
+        }
+
     public:                                                 // accessors - for debug
         static char const* GetTypeName(HighGuid high);
         char const* GetTypeName() const { return !IsEmpty() ? GetTypeName(GetHigh()) : "None"; }
@@ -203,18 +228,30 @@ class MANGOS_DLL_SPEC ObjectGuid
         }
 
     private:                                                // fields
+        union
+        {
         uint64 m_guid;
+<<<<<<< HEAD
 
     public:
         bool HasEntry() const { return HasEntry(GetHigh()); }
         // predefined empty object for safe return by reference
         static ObjectGuid const Null;
+=======
+            uint8 m_guidBytes[NUM_GUID_BYTES];
+        };
+>>>>>>> d972b57ff0bd9520936ce36fdce69bd5a5859c27
 };
 
 // Some Shared defines
 typedef std::set<ObjectGuid> GuidSet;
+<<<<<<< HEAD
 typedef ACE_Based::LockedVector<ObjectGuid> GuidList;
 typedef ACE_Based::LockedVector<ObjectGuid> GuidVector;
+=======
+typedef std::list<ObjectGuid> GuidList;
+typedef std::vector<ObjectGuid> GuidVector;
+>>>>>>> d972b57ff0bd9520936ce36fdce69bd5a5859c27
 
 //minimum buffer size for packed guid is 9 bytes
 #define PACKED_GUID_MIN_BUFFER_SIZE 9
@@ -278,5 +315,75 @@ HASH_NAMESPACE_START
     };
 
 HASH_NAMESPACE_END
+
+#define DEFINE_READGUIDMASK(T1, T2) template <T1> \
+    void ByteBuffer::ReadGuidMask(ObjectGuid& guid) \
+    { \
+        uint8 maskArr[] = { T2 }; \
+        for (uint8 i = 0; i < countof(maskArr); ++i) \
+            guid[maskArr[i]] = ReadBit(); \
+    }
+
+#define DEFINE_WRITEGUIDMASK(T1, T2) template <T1> \
+    void ByteBuffer::WriteGuidMask(ObjectGuid guid) \
+    { \
+        uint8 maskArr[] = { T2 }; \
+        for (uint8 i = 0; i < countof(maskArr); ++i) \
+            WriteBit(guid[maskArr[i]]); \
+    }
+
+#define DEFINE_READGUIDBYTES(T1, T2) template <T1> \
+    void ByteBuffer::ReadGuidBytes(ObjectGuid& guid) \
+    { \
+        uint8 maskArr[] = { T2 }; \
+        for (uint8 i = 0; i < countof(maskArr); ++i) \
+            if (guid[maskArr[i]] != 0) \
+                guid[maskArr[i]] ^= read<uint8>(); \
+    }
+
+#define DEFINE_WRITEGUIDBYTES(T1, T2) template <T1> \
+    void ByteBuffer::WriteGuidBytes(ObjectGuid guid) \
+    { \
+        uint8 maskArr[] = { T2 }; \
+        for (uint8 i = 0; i < countof(maskArr); ++i) \
+            if (guid[maskArr[i]] != 0) \
+                (*this) << uint8(guid[maskArr[i]] ^ 1); \
+    }
+
+DEFINE_READGUIDMASK(BITS_1, BIT_VALS_1)
+DEFINE_READGUIDMASK(BITS_2, BIT_VALS_2)
+DEFINE_READGUIDMASK(BITS_3, BIT_VALS_3)
+DEFINE_READGUIDMASK(BITS_4, BIT_VALS_4)
+DEFINE_READGUIDMASK(BITS_5, BIT_VALS_5)
+DEFINE_READGUIDMASK(BITS_6, BIT_VALS_6)
+DEFINE_READGUIDMASK(BITS_7, BIT_VALS_7)
+DEFINE_READGUIDMASK(BITS_8, BIT_VALS_8)
+
+DEFINE_WRITEGUIDMASK(BITS_1, BIT_VALS_1)
+DEFINE_WRITEGUIDMASK(BITS_2, BIT_VALS_2)
+DEFINE_WRITEGUIDMASK(BITS_3, BIT_VALS_3)
+DEFINE_WRITEGUIDMASK(BITS_4, BIT_VALS_4)
+DEFINE_WRITEGUIDMASK(BITS_5, BIT_VALS_5)
+DEFINE_WRITEGUIDMASK(BITS_6, BIT_VALS_6)
+DEFINE_WRITEGUIDMASK(BITS_7, BIT_VALS_7)
+DEFINE_WRITEGUIDMASK(BITS_8, BIT_VALS_8)
+
+DEFINE_READGUIDBYTES(BITS_1, BIT_VALS_1)
+DEFINE_READGUIDBYTES(BITS_2, BIT_VALS_2)
+DEFINE_READGUIDBYTES(BITS_3, BIT_VALS_3)
+DEFINE_READGUIDBYTES(BITS_4, BIT_VALS_4)
+DEFINE_READGUIDBYTES(BITS_5, BIT_VALS_5)
+DEFINE_READGUIDBYTES(BITS_6, BIT_VALS_6)
+DEFINE_READGUIDBYTES(BITS_7, BIT_VALS_7)
+DEFINE_READGUIDBYTES(BITS_8, BIT_VALS_8)
+
+DEFINE_WRITEGUIDBYTES(BITS_1, BIT_VALS_1)
+DEFINE_WRITEGUIDBYTES(BITS_2, BIT_VALS_2)
+DEFINE_WRITEGUIDBYTES(BITS_3, BIT_VALS_3)
+DEFINE_WRITEGUIDBYTES(BITS_4, BIT_VALS_4)
+DEFINE_WRITEGUIDBYTES(BITS_5, BIT_VALS_5)
+DEFINE_WRITEGUIDBYTES(BITS_6, BIT_VALS_6)
+DEFINE_WRITEGUIDBYTES(BITS_7, BIT_VALS_7)
+DEFINE_WRITEGUIDBYTES(BITS_8, BIT_VALS_8)
 
 #endif

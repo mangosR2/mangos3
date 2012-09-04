@@ -681,6 +681,7 @@ bool ArenaTeam::HaveMember(ObjectGuid guid) const
     return false;
 }
 
+<<<<<<< HEAD
 uint32 ArenaTeam::GetPoints(uint32 MemberRating)
 {
     // returns how many points would be awarded with this team type with this rating
@@ -708,6 +709,8 @@ uint32 ArenaTeam::GetPoints(uint32 MemberRating)
     return (uint32) points;
 }
 
+=======
+>>>>>>> d972b57ff0bd9520936ce36fdce69bd5a5859c27
 float ArenaTeam::GetChanceAgainst(uint32 own_rating, uint32 enemy_rating)
 {
     // returns the chance to win against a team with the given rating, used in the rating adjustment calculation
@@ -886,35 +889,6 @@ void ArenaTeam::MemberWon(Player* plr, uint32 againstRating)
             plr->SetArenaTeamInfoField(GetSlot(), ARENA_TEAM_GAMES_SEASON, itr->games_season);
             return;
         }
-    }
-}
-
-void ArenaTeam::UpdateArenaPointsHelper(std::map<uint32, uint32>& PlayerPoints)
-{
-    // called after a match has ended and the stats are already modified
-    // helper function for arena point distribution (this way, when distributing, no actual calculation is required, just a few comparisons)
-    // 10 played games per week is a minimum
-    if (m_stats.games_week < 10)
-        return;
-    // to get points, a player has to participate in at least 30% of the matches
-    uint32 min_plays = (uint32) ceil(m_stats.games_week * 0.3);
-    for (MemberList::const_iterator itr = m_members.begin(); itr !=  m_members.end(); ++itr)
-    {
-        // the player participated in enough games, update his points
-        uint32 points_to_add = 0;
-        if (itr->games_week >= min_plays)
-            points_to_add = GetPoints(itr->personal_rating);
-        // OBSOLETE : CharacterDatabase.PExecute("UPDATE arena_team_member SET points_to_add = '%u' WHERE arenateamid = '%u' AND guid = '%u'", points_to_add, m_TeamId, itr->guid);
-
-        std::map<uint32, uint32>::iterator plr_itr = PlayerPoints.find(itr->guid.GetCounter());
-        if (plr_itr != PlayerPoints.end())
-        {
-            // check if there is already more points
-            if (plr_itr->second < points_to_add)
-                PlayerPoints[itr->guid.GetCounter()] = points_to_add;
-        }
-        else
-            PlayerPoints[itr->guid.GetCounter()] = points_to_add;
     }
 }
 

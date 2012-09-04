@@ -438,7 +438,6 @@ void WaypointManager::Unload()
 void WaypointManager::_clearPath(WaypointPath &path)
 {
     for(WaypointPath::const_iterator itr = path.begin(); itr != path.end(); ++itr)
-        if(itr->behavior)
             delete itr->behavior;
     path.clear();
 }
@@ -452,7 +451,7 @@ void WaypointManager::AddLastNode(uint32 id, float x, float y, float z, float o,
 /// - Insert after a certain point
 void WaypointManager::AddAfterNode(uint32 id, uint32 point, float x, float y, float z, float o, uint32 delay, uint32 wpGuid)
 {
-    for(uint32 i = GetLastPoint(id, 0); i > point; i--)
+    for (uint32 i = GetLastPoint(id, 0); i > point; --i)
         WorldDatabase.PExecuteLog("UPDATE creature_movement SET point=point+1 WHERE id=%u AND point=%u", id, i);
 
     _addNode(id, point + 1, x, y, z, o, delay, wpGuid);

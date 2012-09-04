@@ -143,7 +143,8 @@ bool ChatHandler::GetDeletedCharacterInfoList(DeletedInfoList& foundList, std::s
             info.deleteDate = time_t(fields[3].GetUInt64());
 
             foundList.push_back(info);
-        } while (resultChar->NextRow());
+        }
+        while (resultChar->NextRow());
 
         delete resultChar;
     }
@@ -468,7 +469,7 @@ bool ChatHandler::HandleAccountOnlineListCommand(char* args)
 
     ///- Get the list of accounts ID logged to the realm
     //                                                 0   1         2        3        4
-    QueryResult *result = LoginDatabase.PQuery("SELECT id, username, last_ip, gmlevel, expansion FROM account WHERE active_realm_id = %u", realmID);
+    QueryResult* result = LoginDatabase.PQuery("SELECT a.id, a.username, a.last_ip, aa.gmlevel, a.expansion FROM account a LEFT JOIN account_access aa ON (a.id = aa.id) WHERE active_realm_id = %u", realmID);
 
     return ShowAccountListHelper(result,&limit);
 }
@@ -622,7 +623,7 @@ void CliRunnable::run()
         char *command_str = fgets(commandbuf,sizeof(commandbuf),stdin);
         if (command_str != NULL)
         {
-            for(int x=0;command_str[x];x++)
+            for (int x = 0; command_str[x]; ++x)
                 if(command_str[x]=='\r'||command_str[x]=='\n')
             {
                 command_str[x]=0;

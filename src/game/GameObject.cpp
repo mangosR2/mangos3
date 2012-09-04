@@ -36,12 +36,18 @@
 #include "MapPersistentStateMgr.h"
 #include "BattleGround/BattleGround.h"
 #include "BattleGround/BattleGroundAV.h"
+<<<<<<< HEAD
 #include "OutdoorPvP/OutdoorPvPMgr.h"
 #include "OutdoorPvP/OutdoorPvP.h"
 #include "Util.h"
 #include "ScriptMgr.h"
 #include "vmap/GameObjectModel.h"
 #include "vmap/DynamicTree.h"
+=======
+#include "OutdoorPvP/OutdoorPvP.h"
+#include "Util.h"
+#include "ScriptMgr.h"
+>>>>>>> d972b57ff0bd9520936ce36fdce69bd5a5859c27
 #include "SQLStorages.h"
 #include <G3D/Quat.h>
 
@@ -54,7 +60,7 @@ GameObject::GameObject() : WorldObject(),
     m_objectType |= TYPEMASK_GAMEOBJECT;
     m_objectTypeId = TYPEID_GAMEOBJECT;
 
-    m_updateFlag = (UPDATEFLAG_HIGHGUID | UPDATEFLAG_HAS_POSITION | UPDATEFLAG_POSITION | UPDATEFLAG_ROTATION);
+    m_updateFlag = UPDATEFLAG_HAS_POSITION | UPDATEFLAG_ROTATION;
 
     m_valuesCount = GAMEOBJECT_END;
     m_respawnTime = 0;
@@ -65,8 +71,11 @@ GameObject::GameObject() : WorldObject(),
     m_spellId = 0;
     m_cooldownTime = 0;
 
+<<<<<<< HEAD
     m_health = 0;
 
+=======
+>>>>>>> d972b57ff0bd9520936ce36fdce69bd5a5859c27
     m_captureTimer = 0;
 
     m_packedRotation = 0;
@@ -110,6 +119,10 @@ void GameObject::RemoveFromWorld()
     ///- Remove the gameobject from the accessor
     if (IsInWorld())
     {
+        // Notify the outdoor pvp script
+        if (OutdoorPvP* outdoorPvP = sOutdoorPvPMgr.GetScript(GetZoneId()))
+            outdoorPvP->HandleGameObjectRemove(this);
+
         // Remove GO from owner
         if (ObjectGuid owner_guid = GetOwnerGuid())
         {
@@ -187,6 +200,12 @@ bool GameObject::Create(uint32 guidlow, uint32 name_id, Map* map, uint32 phaseMa
     SetGoType(GameobjectTypes(goinfo->type));
     SetGoArtKit(0);                                         // unknown what this is
     SetGoAnimProgress(animprogress);
+
+    // Notify the battleground or outdoor pvp script
+    if (map->IsBattleGroundOrArena())
+        ((BattleGroundMap*)map)->GetBG()->HandleGameObjectCreate(this);
+    else if (OutdoorPvP* outdoorPvP = sOutdoorPvPMgr.GetScript(GetZoneId()))
+        outdoorPvP->HandleGameObjectCreate(this);
 
     // Notify the map's instance data.
     // Only works if you create the object in it, not if it is moves to that map.
@@ -496,13 +515,23 @@ void GameObject::Update(uint32 update_diff, uint32 p_time)
                     // remove capturing players because slider wont be displayed if capture point is being locked
                     for (GuidSet::const_iterator itr = m_UniqueUsers.begin(); itr != m_UniqueUsers.end(); ++itr)
                     {
+<<<<<<< HEAD
                         if (Player* owner = ObjectMgr::GetPlayer(*itr))
                             sWorldStateMgr.RemoveWorldStateFor(owner,GetGOInfo()->capturePoint.worldState1, GetObjectGuid().GetCounter());
+=======
+                        if (Player* owner = GetMap()->GetPlayer(*itr))
+                            owner->SendUpdateWorldState(GetGOInfo()->capturePoint.worldState1, WORLD_STATE_REMOVE);
+>>>>>>> d972b57ff0bd9520936ce36fdce69bd5a5859c27
                     }
 
                     m_UniqueUsers.clear();
                     SetLootState(GO_READY);
                     return; // SetLootState and return because go is treated as "burning flag" due to GetGoAnimProgress() being 100 and would be removed on the client
+<<<<<<< HEAD
+=======
+                default:
+                    break;
+>>>>>>> d972b57ff0bd9520936ce36fdce69bd5a5859c27
             }
 
             if (!HasStaticDBSpawnData())                    // Remove wild summoned after use
@@ -2248,9 +2277,14 @@ float GameObject::GetObjectBoundingRadius() const
     //FIXME:
     // 1. This is clearly hack way because GameObjectDisplayInfoEntry have 6 floats related to GO sizes, but better that use DEFAULT_WORLD_OBJECT_SIZE
     // 2. In some cases this must be only interactive size, not GO size, current way can affect creature target point auto-selection in strange ways for big underground/virtual GOs
+<<<<<<< HEAD
     if (m_displayInfo)
 //        return fabs(m_displayInfo->minX) * GetObjectScale();
         return GetDeterminativeSize(false) * GetObjectScale();
+=======
+    /*if (m_displayInfo)
+        return fabs(m_displayInfo->unknown12) * GetObjectScale();*/
+>>>>>>> d972b57ff0bd9520936ce36fdce69bd5a5859c27
 
     return DEFAULT_WORLD_OBJECT_SIZE;
 }
@@ -2323,6 +2357,7 @@ bool GameObject::HasStaticDBSpawnData() const
     return sObjectMgr.GetGOData(GetGUIDLow()) != NULL;
 }
 
+<<<<<<< HEAD
 bool GameObject::IsWildSummoned() const
 {
     // All Wild GOs are summoned by a spell and have no owner entry
@@ -2399,6 +2434,29 @@ void GameObject::SetCapturePointSlider(int8 value)
     else if (m_captureSlider > CAPTURE_SLIDER_NEUTRAL + info->capturePoint.neutralPercent * 0.5f)
         m_captureState = CAPTURE_STATE_PROGRESS_ALLIANCE;
     else if (m_captureSlider < CAPTURE_SLIDER_NEUTRAL - info->capturePoint.neutralPercent * 0.5f)
+=======
+void GameObject::SetCapturePointSlider(float value)
+{
+    GameObjectInfo const* info = GetGOInfo();
+
+    // only activate non-locked capture point
+    if (value >= 0)
+    {
+        m_captureSlider = value;
+        SetLootState(GO_ACTIVATED);
+    }
+    else
+        m_captureSlider = -value;
+
+    // set the state of the capture point based on the slider value
+    if ((int)m_captureSlider == CAPTURE_SLIDER_ALLIANCE)
+        m_captureState = CAPTURE_STATE_WIN_ALLIANCE;
+    else if ((int)m_captureSlider == CAPTURE_SLIDER_HORDE)
+        m_captureState = CAPTURE_STATE_WIN_HORDE;
+    else if (m_captureSlider > CAPTURE_SLIDER_MIDDLE + info->capturePoint.neutralPercent * 0.5f)
+        m_captureState = CAPTURE_STATE_PROGRESS_ALLIANCE;
+    else if (m_captureSlider < CAPTURE_SLIDER_MIDDLE - info->capturePoint.neutralPercent * 0.5f)
+>>>>>>> d972b57ff0bd9520936ce36fdce69bd5a5859c27
         m_captureState = CAPTURE_STATE_PROGRESS_HORDE;
     else
         m_captureState = CAPTURE_STATE_NEUTRAL;
@@ -2408,6 +2466,7 @@ void GameObject::TickCapturePoint()
 {
     // TODO: On retail: Ticks every 5.2 seconds. slider value increase when new player enters on tick
 
+<<<<<<< HEAD
     GameObjectInfo const* goInfo = GetGOInfo();
 
     if (!goInfo || goInfo->type != GAMEOBJECT_TYPE_CAPTURE_POINT)
@@ -2416,6 +2475,10 @@ void GameObject::TickCapturePoint()
     float  radius   = goInfo->capturePoint.radius;
     uint32 oldValue = sWorldStateMgr.GetWorldStateValueFor(this,goInfo->capturePoint.worldState2);
     uint32 neutralPercent = goInfo->capturePoint.neutralPercent;
+=======
+    GameObjectInfo const* info = GetGOInfo();
+    float radius = info->capturePoint.radius;
+>>>>>>> d972b57ff0bd9520936ce36fdce69bd5a5859c27
 
     // search for players in radius
     std::list<Player*> capturingPlayers;
@@ -2424,32 +2487,60 @@ void GameObject::TickCapturePoint()
     Cell::VisitWorldObjects(this, checker, radius);
 
     GuidSet tempUsers(m_UniqueUsers);
+<<<<<<< HEAD
+=======
+    uint32 neutralPercent = info->capturePoint.neutralPercent;
+    int oldValue = m_captureSlider;
+>>>>>>> d972b57ff0bd9520936ce36fdce69bd5a5859c27
     int rangePlayers = 0;
 
     for (std::list<Player*>::iterator itr = capturingPlayers.begin(); itr != capturingPlayers.end(); ++itr)
     {
+<<<<<<< HEAD
         Player* player = *itr;
         if (!player)
             continue;
 
         if (player->GetTeam() == ALLIANCE)
+=======
+        if ((*itr)->GetTeam() == ALLIANCE)
+>>>>>>> d972b57ff0bd9520936ce36fdce69bd5a5859c27
             ++rangePlayers;
         else
             --rangePlayers;
 
+<<<<<<< HEAD
         ObjectGuid guid = player->GetObjectGuid();
+=======
+        ObjectGuid guid = (*itr)->GetObjectGuid();
+>>>>>>> d972b57ff0bd9520936ce36fdce69bd5a5859c27
         if (!tempUsers.erase(guid))
         {
             // new player entered capture point zone
             m_UniqueUsers.insert(guid);
+<<<<<<< HEAD
             sWorldStateMgr.AddWorldStateFor(player, goInfo->capturePoint.worldState1, GetObjectGuid().GetCounter());
+=======
+
+            // send capture point enter packets
+            (*itr)->SendUpdateWorldState(info->capturePoint.worldState3, neutralPercent);
+            (*itr)->SendUpdateWorldState(info->capturePoint.worldState2, oldValue);
+            (*itr)->SendUpdateWorldState(info->capturePoint.worldState1, WORLD_STATE_ADD);
+            (*itr)->SendUpdateWorldState(info->capturePoint.worldState2, oldValue); // also redundantly sent on retail to prevent displaying the initial capture direction on client capture slider incorrectly
+>>>>>>> d972b57ff0bd9520936ce36fdce69bd5a5859c27
         }
     }
 
     for (GuidSet::iterator itr = tempUsers.begin(); itr != tempUsers.end(); ++itr)
     {
         // send capture point leave packet
+<<<<<<< HEAD
         sWorldStateMgr.RemoveWorldStateFor(ObjectMgr::GetPlayer(*itr), goInfo->capturePoint.worldState1, GetObjectGuid().GetCounter());
+=======
+        if (Player* owner = GetMap()->GetPlayer(*itr))
+            owner->SendUpdateWorldState(info->capturePoint.worldState1, WORLD_STATE_REMOVE);
+
+>>>>>>> d972b57ff0bd9520936ce36fdce69bd5a5859c27
         // player left capture point zone
         m_UniqueUsers.erase(*itr);
     }
@@ -2467,17 +2558,28 @@ void GameObject::TickCapturePoint()
     SetActiveObjectState(true);
 
     // cap speed
+<<<<<<< HEAD
     int maxSuperiority = goInfo->capturePoint.maxSuperiority;
+=======
+    int maxSuperiority = info->capturePoint.maxSuperiority;
+>>>>>>> d972b57ff0bd9520936ce36fdce69bd5a5859c27
     if (rangePlayers > maxSuperiority)
         rangePlayers = maxSuperiority;
     else if (rangePlayers < -maxSuperiority)
         rangePlayers = -maxSuperiority;
 
     // time to capture from 0% to 100% is maxTime for minSuperiority amount of players and minTime for maxSuperiority amount of players (linear function: y = dy/dx*x+d)
+<<<<<<< HEAD
     float deltaSlider = goInfo->capturePoint.minTime;
 
     if (int deltaSuperiority = maxSuperiority - goInfo->capturePoint.minSuperiority)
         deltaSlider += (float)(maxSuperiority - abs(rangePlayers)) / deltaSuperiority * (goInfo->capturePoint.maxTime - goInfo->capturePoint.minTime);
+=======
+    float deltaSlider = info->capturePoint.minTime;
+
+    if (int deltaSuperiority = maxSuperiority - info->capturePoint.minSuperiority)
+        deltaSlider += (float)(maxSuperiority - abs(rangePlayers)) / deltaSuperiority * (info->capturePoint.maxTime - info->capturePoint.minTime);
+>>>>>>> d972b57ff0bd9520936ce36fdce69bd5a5859c27
 
     // calculate changed slider value for a duration of 5 seconds (5 * 100%)
     deltaSlider = 500.0f / deltaSlider;
@@ -2499,17 +2601,27 @@ void GameObject::TickCapturePoint()
     }
 
     // return if slider did not move a whole percent
+<<<<<<< HEAD
     if ((uint32)m_captureSlider == oldValue)
         return;
 
     // on retail this is also sent to newly added players even though they already received a slider value
     sWorldStateMgr.SetWorldStateValueFor(this, goInfo->capturePoint.worldState2, (uint32)m_captureSlider);
+=======
+    if ((int)m_captureSlider == oldValue)
+        return;
+
+    // on retail this is also sent to newly added players even though they already received a slider value
+    for (std::list<Player*>::iterator itr = capturingPlayers.begin(); itr != capturingPlayers.end(); ++itr)
+        (*itr)->SendUpdateWorldState(info->capturePoint.worldState2, (uint32)m_captureSlider);
+>>>>>>> d972b57ff0bd9520936ce36fdce69bd5a5859c27
 
     // send capture point events
     uint32 eventId = 0;
 
     /* WIN EVENTS */
     // alliance wins tower with max points
+<<<<<<< HEAD
     if (m_captureState != CAPTURE_STATE_WIN_ALLIANCE && (uint32)m_captureSlider == CAPTURE_SLIDER_ALLIANCE)
     {
         eventId = goInfo->capturePoint.winEventID1;
@@ -2526,6 +2638,25 @@ void GameObject::TickCapturePoint()
     else if (m_captureState != CAPTURE_STATE_PROGRESS_ALLIANCE && m_captureSlider > CAPTURE_SLIDER_NEUTRAL + neutralPercent * 0.5f && progressFaction == ALLIANCE)
     {
         eventId = goInfo->capturePoint.progressEventID1;
+=======
+    if (m_captureState != CAPTURE_STATE_WIN_ALLIANCE && (int)m_captureSlider == CAPTURE_SLIDER_ALLIANCE)
+    {
+        eventId = info->capturePoint.winEventID1;
+        m_captureState = CAPTURE_STATE_WIN_ALLIANCE;
+    }
+    // horde wins tower with max points
+    else if (m_captureState != CAPTURE_STATE_WIN_HORDE && (int)m_captureSlider == CAPTURE_SLIDER_HORDE)
+    {
+        eventId = info->capturePoint.winEventID2;
+        m_captureState = CAPTURE_STATE_WIN_HORDE;
+    }
+
+    /* PROGRESS EVENTS */
+    // alliance takes the tower from neutral, contested or horde (if there is no neutral area) to alliance
+    else if (m_captureState != CAPTURE_STATE_PROGRESS_ALLIANCE && m_captureSlider > CAPTURE_SLIDER_MIDDLE + neutralPercent * 0.5f && progressFaction == ALLIANCE)
+    {
+        eventId = info->capturePoint.progressEventID1;
+>>>>>>> d972b57ff0bd9520936ce36fdce69bd5a5859c27
 
         // handle objective complete
         if (m_captureState == CAPTURE_STATE_NEUTRAL)
@@ -2536,9 +2667,15 @@ void GameObject::TickCapturePoint()
         m_captureState = CAPTURE_STATE_PROGRESS_ALLIANCE;
     }
     // horde takes the tower from neutral, contested or alliance (if there is no neutral area) to horde
+<<<<<<< HEAD
     else if (m_captureState != CAPTURE_STATE_PROGRESS_HORDE && m_captureSlider < CAPTURE_SLIDER_NEUTRAL - neutralPercent * 0.5f && progressFaction == HORDE)
     {
         eventId = goInfo->capturePoint.progressEventID2;
+=======
+    else if (m_captureState != CAPTURE_STATE_PROGRESS_HORDE && m_captureSlider < CAPTURE_SLIDER_MIDDLE - neutralPercent * 0.5f && progressFaction == HORDE)
+    {
+        eventId = info->capturePoint.progressEventID2;
+>>>>>>> d972b57ff0bd9520936ce36fdce69bd5a5859c27
 
         // handle objective complete
         if (m_captureState == CAPTURE_STATE_NEUTRAL)
@@ -2551,6 +2688,7 @@ void GameObject::TickCapturePoint()
 
     /* NEUTRAL EVENTS */
     // alliance takes the tower from horde to neutral
+<<<<<<< HEAD
     else if (m_captureState != CAPTURE_STATE_NEUTRAL && m_captureSlider >= CAPTURE_SLIDER_NEUTRAL - neutralPercent * 0.5f && m_captureSlider <= CAPTURE_SLIDER_NEUTRAL + neutralPercent * 0.5f && progressFaction == ALLIANCE)
     {
         eventId = goInfo->capturePoint.neutralEventID1;
@@ -2560,6 +2698,17 @@ void GameObject::TickCapturePoint()
     else if (m_captureState != CAPTURE_STATE_NEUTRAL && m_captureSlider >= CAPTURE_SLIDER_NEUTRAL - neutralPercent * 0.5f && m_captureSlider <= CAPTURE_SLIDER_NEUTRAL + neutralPercent * 0.5f && progressFaction == HORDE)
     {
         eventId = goInfo->capturePoint.neutralEventID2;
+=======
+    else if (m_captureState != CAPTURE_STATE_NEUTRAL && m_captureSlider >= CAPTURE_SLIDER_MIDDLE - neutralPercent * 0.5f && m_captureSlider <= CAPTURE_SLIDER_MIDDLE + neutralPercent * 0.5f && progressFaction == ALLIANCE)
+    {
+        eventId = info->capturePoint.neutralEventID1;
+        m_captureState = CAPTURE_STATE_NEUTRAL;
+    }
+    // horde takes the tower from alliance to neutral
+    else if (m_captureState != CAPTURE_STATE_NEUTRAL && m_captureSlider >= CAPTURE_SLIDER_MIDDLE - neutralPercent * 0.5f && m_captureSlider <= CAPTURE_SLIDER_MIDDLE + neutralPercent * 0.5f && progressFaction == HORDE)
+    {
+        eventId = info->capturePoint.neutralEventID2;
+>>>>>>> d972b57ff0bd9520936ce36fdce69bd5a5859c27
         m_captureState = CAPTURE_STATE_NEUTRAL;
     }
 
@@ -2567,18 +2716,27 @@ void GameObject::TickCapturePoint()
     // alliance attacks tower which is in control or progress by horde (except if alliance also gains control in that case)
     else if ((m_captureState == CAPTURE_STATE_WIN_HORDE || m_captureState == CAPTURE_STATE_PROGRESS_HORDE) && progressFaction == ALLIANCE)
     {
+<<<<<<< HEAD
         eventId = goInfo->capturePoint.contestedEventID1;
+=======
+        eventId = info->capturePoint.contestedEventID1;
+>>>>>>> d972b57ff0bd9520936ce36fdce69bd5a5859c27
         m_captureState = CAPTURE_STATE_CONTEST_HORDE;
     }
     // horde attacks tower which is in control or progress by alliance (except if horde also gains control in that case)
     else if ((m_captureState == CAPTURE_STATE_WIN_ALLIANCE || m_captureState == CAPTURE_STATE_PROGRESS_ALLIANCE) && progressFaction == HORDE)
     {
+<<<<<<< HEAD
         eventId = goInfo->capturePoint.contestedEventID2;
+=======
+        eventId = info->capturePoint.contestedEventID2;
+>>>>>>> d972b57ff0bd9520936ce36fdce69bd5a5859c27
         m_captureState = CAPTURE_STATE_CONTEST_ALLIANCE;
     }
 
     if (eventId)
     {
+<<<<<<< HEAD
         GuidSet players;
         for (GuidSet::iterator itr = m_UniqueUsers.begin(); itr != m_UniqueUsers.end(); ++itr)
         {
@@ -2587,21 +2745,34 @@ void GameObject::TickCapturePoint()
                 players.insert(*itr);
         }
 
+=======
+>>>>>>> d972b57ff0bd9520936ce36fdce69bd5a5859c27
         // Notify the battleground or outdoor pvp script
         if (BattleGround* bg = (*capturingPlayers.begin())->GetBattleGround())
         {
             // Allow only certain events to be handled by other script engines
+<<<<<<< HEAD
             bg->HandleEvent(eventId, this);
+=======
+            if (bg->HandleEvent(eventId, this))
+                return;
+>>>>>>> d972b57ff0bd9520936ce36fdce69bd5a5859c27
         }
         else if (OutdoorPvP* outdoorPvP = sOutdoorPvPMgr.GetScript((*capturingPlayers.begin())->GetCachedZoneId()))
         {
             // Allow only certain events to be handled by other script engines
+<<<<<<< HEAD
             outdoorPvP->HandleEvent(eventId, this);
+=======
+            if (outdoorPvP->HandleEvent(eventId, this))
+                return;
+>>>>>>> d972b57ff0bd9520936ce36fdce69bd5a5859c27
         }
 
         // Send script event to SD2 and database as well - this can be used for summoning creatures, casting specific spells or spawning GOs
         if (!sScriptMgr.OnProcessEvent(eventId, this, this, true))
             GetMap()->ScriptsStart(sEventScripts, eventId, this, this);
+<<<<<<< HEAD
 
         DEBUG_LOG("GameObject::TickCapturePoint gameobject %s send event %u to faction %u, players group size %u, new state %u",
             GetObjectGuid().GetString().c_str(),
@@ -2780,3 +2951,7 @@ bool GameObject::SetTeam(Team team)
     return false;
 }
 
+=======
+    }
+}
+>>>>>>> d972b57ff0bd9520936ce36fdce69bd5a5859c27

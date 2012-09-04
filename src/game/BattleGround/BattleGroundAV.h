@@ -174,7 +174,8 @@ enum BG_AV_Graveyards
     BG_AV_GRAVE_MAIN_HORDE         = 610
 };
 
-const uint32 BG_AV_GraveyardIds[9]= {
+const uint32 BG_AV_GraveyardIds[9] =
+{
     BG_AV_GRAVE_STORM_AID,
     BG_AV_GRAVE_STORM_GRAVE,
     BG_AV_GRAVE_STONE_GRAVE,
@@ -203,13 +204,19 @@ enum BG_AV_WorldStates
 };
 
 // alliance_control horde_control neutral_control
+<<<<<<< HEAD:src/game/BattleGround/BattleGroundAV.h
 const uint32 BG_AV_MineWorldStates[2][3] = {
+=======
+const uint32 BG_AV_MineWorldStates[2][BG_AV_TEAMS_COUNT] =
+{
+>>>>>>> d972b57ff0bd9520936ce36fdce69bd5a5859c27:src/game/BattleGround/BattleGroundAV.h
     {1358, 1359, 1360},
     {1355, 1356, 1357}
 };
 
 // alliance_control alliance_assault h_control h_assault
-const uint32 BG_AV_NodeWorldStates[BG_AV_NODES_MAX][4] = {
+const uint32 BG_AV_NodeWorldStates[BG_AV_NODES_MAX][4] =
+{
     // Stormpike first aid station
     {1326,1325,1328,1327},
     // Stormpike Graveyard
@@ -313,35 +320,44 @@ class BattleGroundAV : public BattleGround
     public:
         BattleGroundAV();
         ~BattleGroundAV();
-        void Update(uint32 diff);
+        void Update(uint32 diff) override;
 
         /* inherited from BattlegroundClass */
-        virtual void AddPlayer(Player *plr);
+        virtual void AddPlayer(Player* plr) override;
 
-        virtual void StartingEventCloseDoors();
-        virtual void StartingEventOpenDoors();
+        virtual void StartingEventCloseDoors() override;
+        virtual void StartingEventOpenDoors() override;
         // world states
+<<<<<<< HEAD:src/game/BattleGround/BattleGroundAV.h
         virtual void FillInitialWorldStates();
+=======
+        virtual void FillInitialWorldStates(WorldPacket& data, uint32& count) override;
+>>>>>>> d972b57ff0bd9520936ce36fdce69bd5a5859c27:src/game/BattleGround/BattleGroundAV.h
 
-        void RemovePlayer(Player *plr, ObjectGuid guid);
-        void HandleAreaTrigger(Player *Source, uint32 Trigger);
-        virtual void Reset();
+        void RemovePlayer(Player* plr, ObjectGuid guid) override;
+        void HandleAreaTrigger(Player* source, uint32 trigger) override;
+        virtual void Reset() override;
 
         /*general stuff*/
+<<<<<<< HEAD:src/game/BattleGround/BattleGroundAV.h
         void UpdateScore(TeamIndex teamIdx, int32 points);
         void UpdatePlayerScore(Player *Source, uint32 type, uint32 value);
+=======
+        void UpdateScore(BattleGroundTeamIndex teamIdx, int32 points);
+        void UpdatePlayerScore(Player* source, uint32 type, uint32 value) override;
+>>>>>>> d972b57ff0bd9520936ce36fdce69bd5a5859c27:src/game/BattleGround/BattleGroundAV.h
 
         /*handle stuff*/ // these are functions which get called from extern scripts
-        virtual void EventPlayerClickedOnFlag(Player *source, GameObject* target_obj);
-        void HandleKillPlayer(Player* player, Player *killer);
-        void HandleKillUnit(Creature *creature, Player *killer);
+        virtual void EventPlayerClickedOnFlag(Player* source, GameObject* target_obj) override;
+        void HandleKillPlayer(Player* player, Player* killer) override;
+        void HandleKillUnit(Creature* creature, Player* killer) override;
         void HandleQuestComplete(uint32 questid, Player *player);
         bool PlayerCanDoMineQuest(int32 GOId, Team team);
         bool IsMineOwnedBy(uint8 mine, uint32 team) { return (m_Mine_Owner[mine] == int8(team)) ? true : false; }
 
-        void EndBattleGround(Team winner);
+        void EndBattleGround(Team winner) override;
 
-        virtual WorldSafeLocsEntry const* GetClosestGraveYard(Player *plr);
+        virtual WorldSafeLocsEntry const* GetClosestGraveYard(Player* plr) override;
 
         // for achievement Stormpike/Frostwolf Perfection
         bool hasAllTowers(TeamIndex team);

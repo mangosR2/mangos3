@@ -34,14 +34,14 @@ class Item;
 
 enum GuildDefaultRanks
 {
-    //these ranks can be modified, but they cannot be deleted
+    // these ranks can be modified, but they cannot be deleted
     GR_GUILDMASTER  = 0,
     GR_OFFICER      = 1,
     GR_VETERAN      = 2,
     GR_MEMBER       = 3,
     GR_INITIATE     = 4,
-    //When promoting member server does: rank--;!
-    //When demoting member server does: rank++;!
+    // When promoting member server does: rank--;!
+    // When demoting member server does: rank++;!
 };
 
 enum GuildRankRights
@@ -108,26 +108,29 @@ enum CommandErrors
 
 enum GuildEvents
 {
-    GE_PROMOTION                    = 0x00,
-    GE_DEMOTION                     = 0x01,
-    GE_MOTD                         = 0x02,
-    GE_JOINED                       = 0x03,
-    GE_LEFT                         = 0x04,
-    GE_REMOVED                      = 0x05,
-    GE_LEADER_IS                    = 0x06,
-    GE_LEADER_CHANGED               = 0x07,
-    GE_DISBANDED                    = 0x08,
-    GE_TABARDCHANGE                 = 0x09,
-    GE_UNK1                         = 0x0A,                 // string, string EVENT_GUILD_ROSTER_UPDATE tab content change?
-    GE_UNK2                         = 0x0B,                 // EVENT_GUILD_ROSTER_UPDATE
-    GE_SIGNED_ON                    = 0x0C,                 // ERR_FRIEND_ONLINE_SS
-    GE_SIGNED_OFF                   = 0x0D,                 // ERR_FRIEND_OFFLINE_S
-    GE_GUILDBANKBAGSLOTS_CHANGED    = 0x0E,                 // EVENT_GUILDBANKBAGSLOTS_CHANGED
-    GE_BANKTAB_PURCHASED            = 0x0F,                 // EVENT_GUILDBANK_UPDATE_TABS
-    GE_UNK5                         = 0x10,                 // EVENT_GUILDBANK_UPDATE_TABS
-    GE_GUILDBANK_UPDATE_MONEY       = 0x11,                 // EVENT_GUILDBANK_UPDATE_MONEY, string 0000000000002710 is 1 gold
-    GE_GUILD_BANK_MONEY_WITHDRAWN   = 0x12,                 // MSG_GUILD_BANK_MONEY_WITHDRAWN
-    GE_GUILDBANK_TEXT_CHANGED       = 0x13                  // EVENT_GUILDBANK_TEXT_CHANGED
+    GE_PROMOTION                    = 0x01,
+    GE_DEMOTION                     = 0x02,
+    GE_MOTD                         = 0x03,
+    GE_JOINED                       = 0x04,
+    GE_LEFT                         = 0x05,
+    GE_REMOVED                      = 0x06,
+    GE_LEADER_IS                    = 0x07,
+    GE_LEADER_CHANGED               = 0x08,
+    GE_DISBANDED                    = 0x09,
+    GE_TABARDCHANGE                 = 0x0A,
+    GE_UPDATE_RANK                  = 0x0B,                 // string, string EVENT_GUILD_ROSTER_UPDATE tab content change?
+    GE_CREATE_RANK                  = 0x0C,                 // EVENT_GUILD_ROSTER_UPDATE
+    GE_DELETE_RANK                  = 0x0D,
+    GE_RANK_ORDER_CHANGE            = 0x0E,
+    GE_UNK                          = 0x0F,
+    GE_SIGNED_ON                    = 0x10,                 // ERR_FRIEND_ONLINE_SS
+    GE_SIGNED_OFF                   = 0x11,                 // ERR_FRIEND_OFFLINE_S
+    GE_GUILDBANKBAGSLOTS_CHANGED    = 0x12,                 // EVENT_GUILDBANKBAGSLOTS_CHANGED
+    GE_BANKTAB_PURCHASED            = 0x13,                 // EVENT_GUILDBANK_UPDATE_TABS
+    GE_BANKTAB_UPDATED              = 0x14,                 // EVENT_GUILDBANK_UPDATE_TABS
+    GE_GUILDBANK_UPDATE_MONEY       = 0x15,                 // EVENT_GUILDBANK_UPDATE_MONEY, string 0000000000002710 is 1 gold
+    GE_GUILD_BANK_MONEY_WITHDRAWN   = 0x16,                 // MSG_GUILD_BANK_MONEY_WITHDRAWN
+    GE_GUILDBANK_TEXT_CHANGED       = 0x17                  // EVENT_GUILDBANK_TEXT_CHANGED
 };
 
 enum PetitionTurns
@@ -191,7 +194,7 @@ enum GuildEmblem
 
 inline uint32 GetGuildBankTabPrice(uint8 Index)
 {
-    switch(Index)
+    switch (Index)
     {
         case 0: return 100;
         case 1: return 250;
@@ -225,8 +228,8 @@ struct GuildBankEventLogEntry
     bool isMoneyEvent() const
     {
         return EventType == GUILD_BANK_LOG_DEPOSIT_MONEY ||
-            EventType == GUILD_BANK_LOG_WITHDRAW_MONEY ||
-            EventType == GUILD_BANK_LOG_REPAIR_MONEY;
+               EventType == GUILD_BANK_LOG_WITHDRAW_MONEY ||
+               EventType == GUILD_BANK_LOG_REPAIR_MONEY;
     }
 };
 
@@ -279,7 +282,7 @@ struct RankInfo
 {
     RankInfo(const std::string& _name, uint32 _rights, uint32 _money) : Name(_name), Rights(_rights), BankMoneyPerDay(_money)
     {
-        for(uint8 i = 0; i < GUILD_BANK_MAX_TABS; ++i)
+        for (uint8 i = 0; i < GUILD_BANK_MAX_TABS; ++i)
         {
             TabRight[i] = 0;
             TabSlotPerDay[i] = 0;
@@ -307,7 +310,7 @@ class Guild
         typedef UNORDERED_MAP<uint32, MemberSlot> MemberList;
         typedef std::vector<RankInfo> RankList;
 
-        uint32 GetId(){ return m_Id; }
+        uint32 GetId() { return m_Id; }
         ObjectGuid GetLeaderGuid() const { return m_LeaderGuid; }
         std::string const& GetName() const { return m_Name; }
         std::string const& GetMOTD() const { return MOTD; }
@@ -324,7 +327,7 @@ class Guild
         void SetLeader(ObjectGuid guid);
         bool AddMember(ObjectGuid plGuid, uint32 plRank);
         bool DelMember(ObjectGuid guid, bool isDisbanding = false);
-        //lowest rank is the count of ranks - 1 (the highest rank_id in table)
+        // lowest rank is the count of ranks - 1 (the highest rank_id in table)
         uint32 GetLowestRank() const { return m_Ranks.size() - 1; }
 
         void SetMOTD(std::string motd);
@@ -334,15 +337,17 @@ class Guild
         uint32 GetMemberSize() const { return members.size(); }
         uint32 GetAccountsNumber();
 
-        bool LoadGuildFromDB(QueryResult *guildDataResult);
+        bool LoadGuildFromDB(QueryResult* guildDataResult);
         bool CheckGuildStructure();
-        bool LoadRanksFromDB(QueryResult *guildRanksResult);
-        bool LoadMembersFromDB(QueryResult *guildMembersResult);
+        bool LoadRanksFromDB(QueryResult* guildRanksResult);
+        bool LoadMembersFromDB(QueryResult* guildMembersResult);
 
-        void BroadcastToGuild(WorldSession *session, const std::string& msg, uint32 language = LANG_UNIVERSAL);
-        void BroadcastToOfficers(WorldSession *session, const std::string& msg, uint32 language = LANG_UNIVERSAL);
-        void BroadcastPacketToRank(WorldPacket *packet, uint32 rankId);
-        void BroadcastPacket(WorldPacket *packet);
+        void BroadcastToGuild(WorldSession* session, const std::string& msg, uint32 language = LANG_UNIVERSAL);
+        void BroadcastAddonToGuild(WorldSession* session, const std::string& msg, const std::string& prefix);
+        void BroadcastToOfficers(WorldSession* session, const std::string& msg, uint32 language = LANG_UNIVERSAL);
+        void BroadcastAddonToOfficers(WorldSession* session, const std::string& msg, const std::string& prefix);
+        void BroadcastPacketToRank(WorldPacket* packet, uint32 rankId);
+        void BroadcastPacket(WorldPacket* packet);
 
         void BroadcastEvent(GuildEvents event, ObjectGuid guid, char const* str1 = NULL, char const* str2 = NULL, char const* str3 = NULL);
         void BroadcastEvent(GuildEvents event, char const* str1 = NULL, char const* str2 = NULL, char const* str3 = NULL)
@@ -353,13 +358,13 @@ class Guild
         template<class Do>
         void BroadcastWorker(Do& _do, Player* except = NULL)
         {
-            for(MemberList::iterator itr = members.begin(); itr != members.end(); ++itr)
-                if(Player *player = ObjectAccessor::FindPlayer(ObjectGuid(HIGHGUID_PLAYER, itr->first)))
-                    if(player != except)
+            for (MemberList::iterator itr = members.begin(); itr != members.end(); ++itr)
+                if (Player* player = ObjectAccessor::FindPlayer(ObjectGuid(HIGHGUID_PLAYER, itr->first)))
+                    if (player != except)
                         _do(player);
         }
 
-        void CreateRank(std::string name,uint32 rights);
+        void CreateRank(std::string name, uint32 rights);
         void DelRank();
         std::string GetRankName(uint32 rankId);
         uint32 GetRankRights(uint32 rankId);
@@ -386,44 +391,44 @@ class Guild
 
         MemberSlot* GetMemberSlot(const std::string& name)
         {
-            for(MemberList::iterator itr = members.begin(); itr != members.end(); ++itr)
-                if(itr->second.Name == name)
+            for (MemberList::iterator itr = members.begin(); itr != members.end(); ++itr)
+                if (itr->second.Name == name)
                     return &itr->second;
 
             return NULL;
         }
 
-        void Roster(WorldSession *session = NULL);          // NULL = broadcast
-        void Query(WorldSession *session);
+        void Roster(WorldSession* session = NULL);          // NULL = broadcast
+        void Query(WorldSession* session);
 
         // Guild EventLog
         void   LoadGuildEventLogFromDB();
-        void   DisplayGuildEventLog(WorldSession *session);
+        void   DisplayGuildEventLog(WorldSession* session);
         void   LogGuildEvent(uint8 EventType, ObjectGuid playerGuid1, ObjectGuid playerGuid2 = ObjectGuid(), uint8 newRank = 0);
 
         // ** Guild bank **
         // Content & item deposit/withdraw
-        void   DisplayGuildBankContent(WorldSession *session, uint8 TabId);
-        void   DisplayGuildBankMoneyUpdate(WorldSession *session);
+        void   DisplayGuildBankContent(WorldSession* session, uint8 TabId);
+        void   DisplayGuildBankMoneyUpdate(WorldSession* session);
 
-        void   SwapItems( Player * pl, uint8 BankTab, uint8 BankTabSlot, uint8 BankTabDst, uint8 BankTabSlotDst, uint32 SplitedAmount);
-        void   MoveFromBankToChar( Player * pl, uint8 BankTab, uint8 BankTabSlot, uint8 PlayerBag, uint8 PlayerSlot, uint32 SplitedAmount);
-        void   MoveFromCharToBank( Player * pl, uint8 PlayerBag, uint8 PlayerSlot, uint8 BankTab, uint8 BankTabSlot, uint32 SplitedAmount);
+        void   SwapItems(Player* pl, uint8 BankTab, uint8 BankTabSlot, uint8 BankTabDst, uint8 BankTabSlotDst, uint32 SplitedAmount);
+        void   MoveFromBankToChar(Player* pl, uint8 BankTab, uint8 BankTabSlot, uint8 PlayerBag, uint8 PlayerSlot, uint32 SplitedAmount);
+        void   MoveFromCharToBank(Player* pl, uint8 PlayerBag, uint8 PlayerSlot, uint8 BankTab, uint8 BankTabSlot, uint32 SplitedAmount);
 
         // Tabs
-        void   DisplayGuildBankTabsInfo(WorldSession *session);
+        void   DisplayGuildBankTabsInfo(WorldSession* session);
         void   CreateNewBankTab();
         void   SetGuildBankTabText(uint8 TabId, std::string text);
-        void   SendGuildBankTabText(WorldSession *session, uint8 TabId);
+        void   SendGuildBankTabText(WorldSession* session, uint8 TabId);
         void   SetGuildBankTabInfo(uint8 TabId, std::string name, std::string icon);
         uint8  GetPurchasedTabs() const { return m_TabListMap.size(); }
         uint32 GetBankRights(uint32 rankId, uint8 TabId) const;
-        bool   IsMemberHaveRights(uint32 LowGuid, uint8 TabId,uint32 rights) const;
+        bool   IsMemberHaveRights(uint32 LowGuid, uint8 TabId, uint32 rights) const;
         bool   CanMemberViewTab(uint32 LowGuid, uint8 TabId) const;
         // Load
         void   LoadGuildBankFromDB();
         // Money deposit/withdraw
-        void   SendMoneyInfo(WorldSession *session, uint32 LowGuid);
+        void   SendMoneyInfo(WorldSession* session, uint32 LowGuid);
         bool   MemberMoneyWithdraw(uint32 amount, uint32 LowGuid);
         uint64 GetGuildBankMoney() { return m_GuildBankMoney; }
         void   SetBankMoney(int64 money);
@@ -436,15 +441,15 @@ class Guild
         uint32 GetBankMoneyPerDay(uint32 rankId);
         uint32 GetBankSlotPerDay(uint32 rankId, uint8 TabId);
         // rights per day
-        bool   LoadBankRightsFromDB(QueryResult *guildBankTabRightsResult);
+        bool   LoadBankRightsFromDB(QueryResult* guildBankTabRightsResult);
         // Guild Bank Event Logs
         void   LoadGuildBankEventLogFromDB();
-        void   DisplayGuildBankLogs(WorldSession *session, uint8 TabId);
-        void   LogBankEvent(uint8 EventType, uint8 TabId, uint32 PlayerGuidLow, uint32 ItemOrMoney, uint8 ItemStackCount=0, uint8 DestTabId=0);
-        bool   AddGBankItemToDB(uint32 GuildId, uint32 BankTab , uint32 BankTabSlot , uint32 GUIDLow, uint32 Entry );
+        void   DisplayGuildBankLogs(WorldSession* session, uint8 TabId);
+        void   LogBankEvent(uint8 EventType, uint8 TabId, uint32 PlayerGuidLow, uint32 ItemOrMoney, uint8 ItemStackCount = 0, uint8 DestTabId = 0);
+        bool   AddGBankItemToDB(uint32 GuildId, uint32 BankTab , uint32 BankTabSlot , uint32 GUIDLow, uint32 Entry);
 
     protected:
-        void AddRank(const std::string& name,uint32 rights,uint32 money);
+        void AddRank(const std::string& name, uint32 rights, uint32 money);
 
         uint32 m_Id;
         std::string m_Name;
@@ -486,16 +491,16 @@ class Guild
 
         // used only from high level Swap/Move functions
         Item*  GetItem(uint8 TabId, uint8 SlotId);
-        InventoryResult CanStoreItem( uint8 tab, uint8 slot, GuildItemPosCountVec& dest, uint32 count, Item *pItem, bool swap = false) const;
-        Item*  StoreItem( uint8 tab, GuildItemPosCountVec const& pos, Item *pItem );
-        void   RemoveItem(uint8 tab, uint8 slot );
+        InventoryResult CanStoreItem(uint8 tab, uint8 slot, GuildItemPosCountVec& dest, uint32 count, Item* pItem, bool swap = false) const;
+        Item*  StoreItem(uint8 tab, GuildItemPosCountVec const& pos, Item* pItem);
+        void   RemoveItem(uint8 tab, uint8 slot);
         void   DisplayGuildBankContentUpdate(uint8 TabId, int32 slot1, int32 slot2 = -1);
         void   DisplayGuildBankContentUpdate(uint8 TabId, GuildItemPosCountVec const& slots);
 
         // internal common parts for CanStore/StoreItem functions
-        void AppendDisplayGuildBankSlot( WorldPacket& data, GuildBankTab const *tab, int32 slot );
-        InventoryResult _CanStoreItem_InSpecificSlot( uint8 tab, uint8 slot, GuildItemPosCountVec& dest, uint32& count, bool swap, Item *pSrcItem ) const;
-        InventoryResult _CanStoreItem_InTab( uint8 tab, GuildItemPosCountVec& dest, uint32& count, bool merge, Item *pSrcItem, uint8 skip_slot ) const;
-        Item* _StoreItem( uint8 tab, uint8 slot, Item *pItem, uint32 count, bool clone );
+        void AppendDisplayGuildBankSlot(WorldPacket& data, GuildBankTab const* tab, int32 slot);
+        InventoryResult _CanStoreItem_InSpecificSlot(uint8 tab, uint8 slot, GuildItemPosCountVec& dest, uint32& count, bool swap, Item* pSrcItem) const;
+        InventoryResult _CanStoreItem_InTab(uint8 tab, GuildItemPosCountVec& dest, uint32& count, bool merge, Item* pSrcItem, uint8 skip_slot) const;
+        Item* _StoreItem(uint8 tab, uint8 slot, Item* pItem, uint32 count, bool clone);
 };
 #endif

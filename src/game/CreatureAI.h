@@ -79,7 +79,7 @@ class MANGOS_DLL_SPEC CreatureAI
         ///== Reactions At =================================
 
         /**
-         * Called if IsVisible(Unit* pWho) is true at each (relative) pWho move, reaction at visibility zone enter
+         * Called if IsVisible(Unit* pWho) is true at each (relative) override pWho move, reaction at visibility zone enter
          * Note: The Unit* pWho can be out of Line of Sight, usually this is only visibiliy (by state) and range dependendend
          * Note: This function is not called for creatures who are in evade mode
          * @param pWho Unit* who moved in the visibility range and is visisble
@@ -216,12 +216,15 @@ class MANGOS_DLL_SPEC CreatureAI
          * @param uiEmote ID of the emote the player used with the creature as target
          */
         virtual void ReceiveEmote(Player* /*pPlayer*/, uint32 /*uiEmote*/) {}
+<<<<<<< HEAD
 
         // Called when Unit get/remove a passenger
         virtual void PassengerBoarded(Unit * /*pWho*/, int8 /*seatId*/, bool /*apply*/) {}
 
         // Called when Unit enter/remove a Vehicle
         virtual void EnteredVehicle(Unit* /*pWho*/, int8 /*seatId*/, bool /*apply*/) {}
+=======
+>>>>>>> d972b57ff0bd9520936ce36fdce69bd5a5859c27
 
         ///== Triggered Actions Requested ==================
 
@@ -288,7 +291,7 @@ struct CreatureAIFactory : public SelectableAI
 {
     CreatureAIFactory(const char* name) : SelectableAI(name) {}
 
-    CreatureAI* Create(void*) const;
+    CreatureAI* Create(void*) const override;
 
     int Permit(const Creature* c) const { return REAL_AI::Permissible(c); }
 };

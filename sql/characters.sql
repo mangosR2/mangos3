@@ -21,7 +21,7 @@
 
 DROP TABLE IF EXISTS `character_db_version`;
 CREATE TABLE `character_db_version` (
-  `required_11785_02_characters_instance` bit(1) default NULL
+  `required_12161_01_characters_characters` bit(1) default NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Last applied sql update to DB';
 
 --
@@ -221,6 +221,7 @@ CREATE TABLE `characters` (
   `rest_bonus` float NOT NULL default '0',
   `resettalents_cost` int(11) unsigned NOT NULL default '0',
   `resettalents_time` bigint(20) unsigned NOT NULL default '0',
+  `primary_trees` varchar(10) NOT NULL DEFAULT '0 0 ',
   `trans_x` float NOT NULL default '0',
   `trans_y` float NOT NULL default '0',
   `trans_z` float NOT NULL default '0',
@@ -232,15 +233,10 @@ CREATE TABLE `characters` (
   `zone` int(11) unsigned NOT NULL default '0',
   `death_expire_time` bigint(20) unsigned NOT NULL default '0',
   `taxi_path` text,
-  `arenaPoints` int(10) UNSIGNED NOT NULL default '0',
-  `totalHonorPoints` int(10) UNSIGNED NOT NULL default '0',
-  `todayHonorPoints` int(10) UNSIGNED NOT NULL default '0',
-  `yesterdayHonorPoints` int(10) UNSIGNED NOT NULL default '0',
   `totalKills` int(10) UNSIGNED NOT NULL default '0',
   `todayKills` smallint(5) UNSIGNED NOT NULL default '0',
   `yesterdayKills` smallint(5) UNSIGNED NOT NULL default '0',
   `chosenTitle` int(10) UNSIGNED NOT NULL default '0',
-  `knownCurrencies` bigint(20) UNSIGNED NOT NULL default '0',
   `watchedFaction` int(10) UNSIGNED NOT NULL default '0',
   `drunk` smallint(5) UNSIGNED NOT NULL default '0',
   `health` int(10) UNSIGNED NOT NULL default '0',
@@ -249,15 +245,13 @@ CREATE TABLE `characters` (
   `power3` int(10) UNSIGNED NOT NULL default '0',
   `power4` int(10) UNSIGNED NOT NULL default '0',
   `power5` int(10) UNSIGNED NOT NULL default '0',
-  `power6` int(10) UNSIGNED NOT NULL default '0',
-  `power7` int(10) UNSIGNED NOT NULL default '0',
   `specCount` tinyint(3) UNSIGNED NOT NULL default '1',
   `activeSpec` tinyint(3) UNSIGNED NOT NULL default '0',
   `exploredZones` longtext,
   `equipmentCache` longtext,
-  `ammoId` int(10) UNSIGNED NOT NULL default '0',
   `knownTitles` longtext,
   `actionBars` tinyint(3) UNSIGNED NOT NULL default '0',
+  `slot` tinyint(3) unsigned NOT NULL DEFAULT '255',
   `deleteInfos_Account` int(11) UNSIGNED default NULL,
   `deleteInfos_Name` varchar(12) default NULL,
   `deleteDate` bigint(20) unsigned default NULL,
@@ -424,6 +418,30 @@ CREATE TABLE `character_battleground_data` (
 LOCK TABLES `character_battleground_data` WRITE;
 /*!40000 ALTER TABLE `character_battleground_data` DISABLE KEYS */;
 /*!40000 ALTER TABLE `character_battleground_data` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `character_currencies`
+--
+
+DROP TABLE IF EXISTS `character_currencies`;
+CREATE TABLE `character_currencies` (
+  `guid` int(11) unsigned NOT NULL DEFAULT '0',
+  `id` smallint(5) unsigned NOT NULL DEFAULT '0',
+  `totalCount` int(11) unsigned NOT NULL DEFAULT '0',
+  `weekCount` int(11) unsigned NOT NULL DEFAULT '0',
+  `seasonCount` int(11) unsigned NOT NULL DEFAULT '0',
+  `flags` tinyint(2) unsigned NOT NULL DEFAULT '0',
+  PRIMARY KEY (`guid`,`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+--
+-- Dumping data for table `character_currencies`
+--
+
+LOCK TABLES `character_currencies` WRITE;
+/*!40000 ALTER TABLE `character_currencies` DISABLE KEYS */;
+/*!40000 ALTER TABLE `character_currencies` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -630,7 +648,6 @@ CREATE TABLE `character_pet` (
   `slot` int(11) unsigned NOT NULL default '0',
   `curhealth` int(11) unsigned NOT NULL default '1',
   `curmana` int(11) unsigned NOT NULL default '0',
-  `curhappiness` int(11) unsigned NOT NULL default '0',
   `savetime` bigint(20) unsigned NOT NULL default '0',
   `resettalents_cost` int(11) unsigned NOT NULL default '0',
   `resettalents_time` bigint(20) unsigned NOT NULL default '0',
@@ -672,6 +689,27 @@ CREATE TABLE `character_pet_declinedname` (
 LOCK TABLES `character_pet_declinedname` WRITE;
 /*!40000 ALTER TABLE `character_pet_declinedname` DISABLE KEYS */;
 /*!40000 ALTER TABLE `character_pet_declinedname` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `character_phase_data`
+--
+
+DROP TABLE IF EXISTS `character_phase_data`;
+CREATE TABLE `character_phase_data` (
+  `guid` int(11) NOT NULL,
+  `map` smallint(6) NOT NULL,
+  `phase` int(11) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`guid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC;
+
+--
+-- Dumping data for table `character_phase_data`
+--
+
+LOCK TABLES `character_phase_data` WRITE;
+/*!40000 ALTER TABLE `character_phase_data` DISABLE KEYS */;
+/*!40000 ALTER TABLE `character_phase_data` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -899,8 +937,6 @@ CREATE TABLE `character_stats` (
   `maxpower3` int(10) UNSIGNED NOT NULL default '0',
   `maxpower4` int(10) UNSIGNED NOT NULL default '0',
   `maxpower5` int(10) UNSIGNED NOT NULL default '0',
-  `maxpower6` int(10) UNSIGNED NOT NULL default '0',
-  `maxpower7` int(10) UNSIGNED NOT NULL default '0',
   `strength` int(10) UNSIGNED NOT NULL default '0',
   `agility` int(10) UNSIGNED NOT NULL default '0',
   `stamina` int(10) UNSIGNED NOT NULL default '0',
@@ -1690,7 +1726,7 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `saved_variables`;
 CREATE TABLE `saved_variables` (
-    `NextArenaPointDistributionTime` bigint(40) UNSIGNED NOT NULL DEFAULT '0',
+    `NextCurrenciesResetTime` bigint(40) UNSIGNED NOT NULL DEFAULT '0',
     `NextDailyQuestResetTime` bigint(40) unsigned NOT NULL default '0',
     `NextWeeklyQuestResetTime` bigint(40) unsigned NOT NULL default '0',
     `NextMonthlyQuestResetTime` bigint(40) unsigned NOT NULL default '0',

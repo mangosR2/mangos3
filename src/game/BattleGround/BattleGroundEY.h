@@ -25,8 +25,11 @@ class BattleGround;
 
 #define EY_FLAG_RESPAWN_TIME            (10 * IN_MILLISECONDS) //10 seconds
 #define EY_RESOURCES_UPDATE_TIME        (2 * IN_MILLISECONDS) //2 seconds
+<<<<<<< HEAD
 #define BG_EY_EVENT_START_BATTLE        13180
 #define EY_OBJECTIVE_CAPTURE_FLAG       183
+=======
+>>>>>>> d972b57ff0bd9520936ce36fdce69bd5a5859c27
 
 enum EYWorldStates
 {
@@ -63,6 +66,10 @@ enum EYWorldStates
     WORLD_STATE_EY_NETHERSTORM_FLAG_STATE_ALLIANCE      = 2769,
     WORLD_STATE_EY_NETHERSTORM_FLAG_STATE_HORDE         = 2770,
 
+<<<<<<< HEAD
+=======
+    WORLD_STATE_EY_CAPTURE_POINT_SLIDER_DISPLAY         = 2718
+>>>>>>> d972b57ff0bd9520936ce36fdce69bd5a5859c27
 };
 
 enum EYCapturePoints
@@ -259,12 +266,21 @@ class BattleGroundEY : public BattleGround
     public:
         BattleGroundEY();
         ~BattleGroundEY();
+<<<<<<< HEAD
         void Update(uint32 diff);
 
         /* inherited from BattlegroundClass */
         virtual void AddPlayer(Player *plr);
         virtual void StartingEventCloseDoors();
         virtual void StartingEventOpenDoors();
+=======
+        void Update(uint32 diff) override;
+
+        /* inherited from BattlegroundClass */
+        virtual void AddPlayer(Player* plr) override;
+        virtual void StartingEventCloseDoors() override;
+        virtual void StartingEventOpenDoors() override;
+>>>>>>> d972b57ff0bd9520936ce36fdce69bd5a5859c27
 
         /* BG Flags */
         ObjectGuid const& GetFlagCarrierGuid() const { return m_flagCarrier; }
@@ -285,16 +301,27 @@ class BattleGroundEY : public BattleGround
         virtual bool SetupBattleGround() override;
         virtual void Reset() override;
         void UpdateTeamScore(Team team);
+<<<<<<< HEAD
         void EndBattleGround(Team winner);
         void UpdatePlayerScore(Player *Source, uint32 type, uint32 value);
         virtual void FillInitialWorldStates();
+=======
+        void EndBattleGround(Team winner) override;
+        void UpdatePlayerScore(Player* source, uint32 type, uint32 value) override;
+        virtual void FillInitialWorldStates(WorldPacket& data, uint32& count) override;
+>>>>>>> d972b57ff0bd9520936ce36fdce69bd5a5859c27
         void SetDroppedFlagGuid(ObjectGuid guid)     { m_DroppedFlagGuid = guid;}
         void ClearDroppedFlagGuid()                  { m_DroppedFlagGuid.Clear();}
         ObjectGuid const& GetDroppedFlagGuid() const { return m_DroppedFlagGuid;}
 
         /* Battleground Events */
+<<<<<<< HEAD
         virtual void EventPlayerClickedOnFlag(Player *Source, GameObject* target_obj);
         virtual void EventPlayerDroppedFlag(Player *Source);
+=======
+        virtual void EventPlayerClickedOnFlag(Player* source, GameObject* target_obj) override;
+        virtual void EventPlayerDroppedFlag(Player* source) override;
+>>>>>>> d972b57ff0bd9520936ce36fdce69bd5a5859c27
 
         /* achievement req. */
         bool IsAllNodesControlledByTeam(Team team) const override;
@@ -321,7 +348,11 @@ class BattleGroundEY : public BattleGround
         ObjectGuid m_towers[EY_NODES_MAX];
 
         uint32 m_honorTicks;
+<<<<<<< HEAD
         uint32 m_honorScoreTicks[PVP_TEAM_COUNT];
+=======
+        uint32 m_honorScoreTicks[BG_TEAMS_COUNT];
+>>>>>>> d972b57ff0bd9520936ce36fdce69bd5a5859c27
 
         uint32 m_flagRespawnTimer;
         uint32 m_resourceUpdateTimer;

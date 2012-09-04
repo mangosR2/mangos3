@@ -67,18 +67,12 @@ namespace MMAP
 
     void MMapFactory::clear()
     {
-        if(g_mmapDisabledIds)
-        {
             delete g_mmapDisabledIds;
-            g_mmapDisabledIds = NULL;
-        }
-
-        if(g_MMapManager)
-        {
             delete g_MMapManager;
+
+        g_mmapDisabledIds = NULL;
             g_MMapManager = NULL;
         }
-    }
 
     // ######################## MMapManager ########################
     MMapManager::~MMapManager()

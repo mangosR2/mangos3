@@ -245,7 +245,7 @@ QueryNamedResult* MySQLConnection::QueryNamed(const char *sql)
         return NULL;
 
     QueryFieldNames names(fieldCount);
-    for (uint32 i = 0; i < fieldCount; i++)
+    for (uint32 i = 0; i < fieldCount; ++i)
         names[i] = fields[i].name;
 
     QueryResultMysql *queryResult = new QueryResultMysql(result, fields, rowCount, fieldCount);
@@ -412,7 +412,7 @@ void MySqlPreparedStatement::bind( const SqlStmtParameters& holder )
         return;
     }
 
-    int nIndex = 0;
+    unsigned int nIndex = 0;
     SqlStmtParameters::ParameterContainer const& _args = holder.params();
 
     SqlStmtParameters::ParameterContainer::const_iterator iter_last = _args.end();
@@ -430,7 +430,7 @@ void MySqlPreparedStatement::bind( const SqlStmtParameters& holder )
     }
 }
 
-void MySqlPreparedStatement::addParam( int nIndex, const SqlStmtFieldData& data )
+void MySqlPreparedStatement::addParam(unsigned int nIndex, const SqlStmtFieldData& data)
 {
     MANGOS_ASSERT(m_pInputArgs);
     MANGOS_ASSERT(nIndex < (int)m_nParams);

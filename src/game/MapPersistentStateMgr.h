@@ -189,9 +189,9 @@ class WorldPersistentState : public MapPersistentState
 
         ~WorldPersistentState() {}
 
-        SpawnedPoolData& GetSpawnedPoolData() { return m_sharedSpawnedPoolData; }
+        SpawnedPoolData& GetSpawnedPoolData() override { return m_sharedSpawnedPoolData; }
     protected:
-        bool CanBeUnload() const;                           // overwrite MapPersistentState::CanBeUnload
+        bool CanBeUnload() const override;                  // overwrite MapPersistentState::CanBeUnload
 
     private:
         static SpawnedPoolData m_sharedSpawnedPoolData;     // Pools spawns state for map, shared by all non-instanced maps
@@ -217,7 +217,7 @@ class DungeonPersistentState : public MapPersistentState
 
         ~DungeonPersistentState();
 
-        SpawnedPoolData& GetSpawnedPoolData() { return m_spawnedPoolData; }
+        SpawnedPoolData& GetSpawnedPoolData() override { return m_spawnedPoolData; }
 
         InstanceTemplate const* GetTemplate() const;
 
@@ -269,7 +269,7 @@ class DungeonPersistentState : public MapPersistentState
         void DeleteRespawnTimes();
 
     protected:
-        bool CanBeUnload() const;                           // overwrite MapPersistentState::CanBeUnload
+        bool CanBeUnload() const override;                  // overwrite MapPersistentState::CanBeUnload
         bool HasBounds() const { return !m_playerList.empty() || !m_groupList.empty(); }
 
     private:
@@ -304,9 +304,9 @@ class BattleGroundPersistentState : public MapPersistentState
 
         ~BattleGroundPersistentState() {}
 
-        SpawnedPoolData& GetSpawnedPoolData() { return m_spawnedPoolData; }
+        SpawnedPoolData& GetSpawnedPoolData() override { return m_spawnedPoolData; }
     protected:
-        bool CanBeUnload() const;                           // overwrite MapPersistentState::CanBeUnload
+        bool CanBeUnload() const override;                  // overwrite MapPersistentState::CanBeUnload
 
     private:
         SpawnedPoolData m_spawnedPoolData;                  // Pools spawns state for map copy

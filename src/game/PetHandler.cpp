@@ -79,8 +79,20 @@ void WorldSession::HandlePetAction(WorldPacket& recv_data)
     }
     else if (((Creature*)pet)->IsPet())
     {
+<<<<<<< HEAD
         // pet can have action bar disabled
         if (charmInfo->HasState(CHARM_STATE_ACTION,ACTIONS_DISABLE))
+=======
+                SpellEffectEntry const* spellEffect = spellInfo->GetSpellEffect(SpellEffectIndex(i));
+                if (!spellEffect)
+                    continue;
+                if (spellEffect->EffectImplicitTargetA == TARGET_ALL_ENEMY_IN_AREA || spellEffect->EffectImplicitTargetA == TARGET_ALL_ENEMY_IN_AREA_INSTANT || spellEffect->EffectImplicitTargetA == TARGET_ALL_ENEMY_IN_AREA_CHANNELED)
+                    return;
+            }
+
+            // do not cast not learned spells
+            if (!pet->HasSpell(spellid) || IsPassiveSpell(spellInfo))
+>>>>>>> d972b57ff0bd9520936ce36fdce69bd5a5859c27
             return;
     }
 
@@ -398,11 +410,30 @@ void WorldSession::HandlePetAbandon(WorldPacket& recv_data)
     if (Creature* pet = GetPlayer()->GetMap()->GetAnyTypeCreature(guid))
     {
         if (pet->IsPet())
+<<<<<<< HEAD
         {
             if (pet->GetObjectGuid() == _player->GetPetGuid())
                 pet->ModifyPower(POWER_HAPPINESS, -50000);
 
             ((Pet*)pet)->Unsummon(PET_SAVE_AS_DELETED, GetPlayer());
+=======
+            ((Pet*)pet)->Unsummon(PET_SAVE_AS_DELETED, _player);
+        else if (pet->GetObjectGuid() == _player->GetCharmGuid())
+        {
+            _player->Uncharm();
+        }
+    }
+}
+
+void WorldSession::HandlePetUnlearnOpcode(WorldPacket& recvPacket)
+{
+    DETAIL_LOG("CMSG_PET_UNLEARN");
+
+    ObjectGuid guid;
+    recvPacket >> guid;                 // Pet guid
+
+    Pet* pet = _player->GetPet();
+>>>>>>> d972b57ff0bd9520936ce36fdce69bd5a5859c27
 
         }
         else if (pet->GetObjectGuid() == GetPlayer()->GetCharmGuid())
@@ -466,11 +497,11 @@ void WorldSession::HandlePetCastSpellOpcode(WorldPacket& recvPacket)
     ObjectGuid guid;
     uint32 spellid;
     uint8  cast_count;
-    uint8  unk_flags;                                       // flags (if 0x02 - some additional data are received)
+    uint8  cast_flags;                                      // flags (if 0x02 - some additional data are received)
 
-    recvPacket >> guid >> cast_count >> spellid >> unk_flags;
+    recvPacket >> guid >> cast_count >> spellid >> cast_flags;
 
-    DEBUG_LOG("WORLD: CMSG_PET_CAST_SPELL, %s, cast_count: %u, spellid %u, unk_flags %u", guid.GetString().c_str(), cast_count, spellid, unk_flags);
+    DEBUG_LOG("WORLD: CMSG_PET_CAST_SPELL, %s, cast_count: %u, spellid %u, cast_flags %u", guid.GetString().c_str(), cast_count, spellid, cast_flags);
 
     Creature* pet = GetPlayer()->GetMap()->GetAnyTypeCreature(guid);
 
@@ -503,8 +534,18 @@ void WorldSession::HandlePetCastSpellOpcode(WorldPacket& recvPacket)
         || IsPassiveSpell(spellInfo))
         return;
 
+<<<<<<< HEAD
     if (pet->IsNonMeleeSpellCasted(false) && !triggered)
         pet->InterruptNonMeleeSpells(false);
+=======
+    SpellCastTargets targets;
+
+    recvPacket >> targets.ReadForCaster(pet);
+
+    targets.ReadAdditionalData(recvPacket, cast_flags);
+
+    pet->clearUnitState(UNIT_STAT_MOVING);
+>>>>>>> d972b57ff0bd9520936ce36fdce69bd5a5859c27
 
     if (pet->IsPet() || pet->isCharmed())
         GetPlayer()->CallForAllControlledUnits(DoPetCastWithHelper(GetPlayer(), cast_count, &targets, spellInfo ),CONTROLLED_PET|CONTROLLED_GUARDIANS|CONTROLLED_CHARM);

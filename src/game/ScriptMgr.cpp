@@ -88,14 +88,18 @@ ScriptMgr::~ScriptMgr()
 // returns priority (0 == cannot start script)
 uint8 GetSpellStartDBScriptPriority(SpellEntry const* spellinfo, SpellEffectIndex effIdx)
 {
-    if (spellinfo->Effect[effIdx] == SPELL_EFFECT_SCRIPT_EFFECT)
+    SpellEffectEntry const* spellEffect = spellinfo->GetSpellEffect(effIdx);
+    if (!spellEffect)
+        return 0;
+
+    if (spellEffect->Effect == SPELL_EFFECT_SCRIPT_EFFECT)
         return 10;
 
-    if (spellinfo->Effect[effIdx] == SPELL_EFFECT_DUMMY)
+    if (spellEffect->Effect == SPELL_EFFECT_DUMMY)
         return 9;
 
     // NonExisting triggered spells can also start DB-Spell-Scripts
-    if (spellinfo->Effect[effIdx] == SPELL_EFFECT_TRIGGER_SPELL && !sSpellStore.LookupEntry(spellinfo->EffectTriggerSpell[effIdx]))
+    if (spellEffect->Effect == SPELL_EFFECT_TRIGGER_SPELL && !sSpellStore.LookupEntry(spellEffect->EffectTriggerSpell))
         return 5;
 
     // Can not start script
@@ -598,7 +602,15 @@ void ScriptMgr::LoadScripts(ScriptMapMapName& scripts, const char* tablename)
                         if (SpellEntry const* spell = sSpellStore.LookupEntry(i))
                             for (int j = 0; j < MAX_EFFECT_INDEX; ++j)
                             {
+<<<<<<< HEAD
                                 if (spell->Effect[j] == SPELL_EFFECT_SEND_TAXI && spell->EffectMiscValue[j] == int32(tmp.sendTaxiPath.taxiPathId))
+=======
+                                SpellEffectEntry const* spellEffect = spell->GetSpellEffect(SpellEffectIndex(j));
+                                if (!spellEffect)
+                                    continue;
+
+                                if (spellEffect->Effect == SPELL_EFFECT_SEND_TAXI && spellEffect->EffectMiscValue == tmp.sendTaxiPath.taxiPathId)
+>>>>>>> d972b57ff0bd9520936ce36fdce69bd5a5859c27
                                 {
                                     taxiSpell = i;
                                     break;
@@ -629,7 +641,8 @@ void ScriptMgr::LoadScripts(ScriptMapMapName& scripts, const char* tablename)
         scripts.second[tmp.id].insert(ScriptMap::value_type(tmp.delay, tmp));
 
         ++count;
-    } while(result->NextRow());
+    }
+    while (result->NextRow());
 
     delete result;
 
@@ -751,10 +764,14 @@ void ScriptMgr::LoadEventScripts()
         {
             for(int j = 0; j < MAX_EFFECT_INDEX; ++j)
             {
-                if (spell->Effect[j] == SPELL_EFFECT_SEND_EVENT)
+                SpellEffectEntry const* spellEffect = spell->GetSpellEffect(SpellEffectIndex(j));
+                if (!spellEffect)
+                    continue;
+
+                if (spellEffect->Effect == SPELL_EFFECT_SEND_EVENT)
                 {
-                    if (spell->EffectMiscValue[j])
-                        evt_scripts.insert(spell->EffectMiscValue[j]);
+                    if (spellEffect->EffectMiscValue)
+                        evt_scripts.insert(spellEffect->EffectMiscValue);
                 }
             }
         }
@@ -1638,6 +1655,10 @@ void ScriptAction::HandleScriptStep()
                 pGo->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_NO_INTERACT);
             else if (m_script->goLockState.lockState & 0x08)
                 pGo->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_NO_INTERACT);
+<<<<<<< HEAD
+=======
+
+>>>>>>> d972b57ff0bd9520936ce36fdce69bd5a5859c27
             break;
         }
         case SCRIPT_COMMAND_STAND_STATE:                    // 28
@@ -1727,7 +1748,8 @@ void ScriptMgr::LoadAreaTriggerScripts()
         }
 
         m_AreaTriggerScripts[triggerId] = GetScriptId(scriptName);
-    } while(result->NextRow());
+    }
+    while (result->NextRow());
 
     delete result;
 
@@ -1787,10 +1809,14 @@ void ScriptMgr::LoadEventIdScripts()
         {
             for(int j = 0; j < MAX_EFFECT_INDEX; ++j)
             {
-                if (spell->Effect[j] == SPELL_EFFECT_SEND_EVENT)
+                SpellEffectEntry const* spellEffect = spell->GetSpellEffect(SpellEffectIndex(j));
+                if (!spellEffect)
+                    continue;
+
+                if (spellEffect->Effect == SPELL_EFFECT_SEND_EVENT)
                 {
-                    if (spell->EffectMiscValue[j])
-                        evt_scripts.insert(spell->EffectMiscValue[j]);
+                    if (spellEffect->EffectMiscValue)
+                        evt_scripts.insert(spellEffect->EffectMiscValue);
                 }
             }
         }
@@ -1827,7 +1853,8 @@ void ScriptMgr::LoadEventIdScripts()
                 eventId, SPELL_EFFECT_SEND_EVENT);
 
         m_EventIdScripts[eventId] = GetScriptId(scriptName);
-    } while(result->NextRow());
+    }
+    while (result->NextRow());
 
     delete result;
 
@@ -1870,7 +1897,8 @@ void ScriptMgr::LoadScriptNames()
         bar.step();
         m_scriptNames.push_back((*result)[0].GetString());
         ++count;
-    } while (result->NextRow());
+    }
+    while (result->NextRow());
     delete result;
 
     std::sort(m_scriptNames.begin(), m_scriptNames.end());

@@ -27,6 +27,7 @@ struct AchievementEntry;
 struct AchievementCriteriaEntry;
 struct AreaTrigger;
 struct AreaTriggerEntry;
+struct CurrencyTypesEntry;
 struct FactionEntry;
 struct FactionState;
 struct GameTele;
@@ -69,7 +70,7 @@ class MANGOS_DLL_SPEC ChatHandler
         explicit ChatHandler(Player* player);
         virtual ~ChatHandler();
 
-        static void FillMessageData(WorldPacket* data, WorldSession* session, uint8 type, uint32 language, const char* channelName, ObjectGuid targetGuid, const char* message, Unit* speaker);
+        static void FillMessageData(WorldPacket* data, WorldSession* session, uint8 type, uint32 language, const char* channelName, ObjectGuid targetGuid, const char* message, Unit* speaker, const char* addonPrefix = NULL);
 
         static void FillMessageData(WorldPacket* data, WorldSession* session, uint8 type, uint32 language, ObjectGuid targetGuid, const char* message)
         {
@@ -277,7 +278,7 @@ class MANGOS_DLL_SPEC ChatHandler
 
         bool HandleHonorAddCommand(char* args);
         bool HandleHonorAddKillCommand(char* args);
-        bool HandleHonorUpdateCommand(char* args);
+        bool HandleHonorKillsUpdateCommand(char* args);
 
         bool HandleInstanceListBindsCommand(char* args);
         bool HandleInstanceUnbindCommand(char* args);
@@ -308,6 +309,7 @@ class MANGOS_DLL_SPEC ChatHandler
         bool HandleLookupAchievementCommand(char* args);
         bool HandleLookupAreaCommand(char* args);
         bool HandleLookupCreatureCommand(char* args);
+        bool HandleLookupCurrencyCommand(char* args);
         bool HandleLookupEventCommand(char* args);
         bool HandleLookupFactionCommand(char* args);
         bool HandleLookupItemCommand(char* args);
@@ -339,9 +341,8 @@ class MANGOS_DLL_SPEC ChatHandler
         bool HandleModifyMountCommand(char* args);
         bool HandleModifyFactionCommand(char* args);
         bool HandleModifyTalentCommand(char* args);
-        bool HandleModifyHonorCommand(char* args);
         bool HandleModifyRepCommand(char* args);
-        bool HandleModifyArenaCommand(char* args);
+        bool HandleModifyCurrencyCommand(char* args);
         bool HandleModifyPhaseCommand(char* args);
         bool HandleModifyGenderCommand(char* args);
         bool HandleModifyPowerTypeCommand(char* args);
@@ -349,12 +350,14 @@ class MANGOS_DLL_SPEC ChatHandler
         //-----------------------Npc Commands-----------------------
         bool HandleNpcAddCommand(char* args);
         bool HandleNpcAddMoveCommand(char* args);
+        bool HandleNpcAddVendorCurrencyCommand(char* args);
         bool HandleNpcAddVendorItemCommand(char* args);
         bool HandleNpcAIInfoCommand(char* args);
         bool HandleNpcAllowMovementCommand(char* args);
         bool HandleNpcChangeEntryCommand(char* args);
         bool HandleNpcChangeLevelCommand(char* args);
         bool HandleNpcDeleteCommand(char* args);
+        bool HandleNpcDelVendorCurrencyCommand(char* args);
         bool HandleNpcDelVendorItemCommand(char* args);
         bool HandleNpcFactionIdCommand(char* args);
         bool HandleNpcFlagCommand(char* args);
@@ -606,7 +609,6 @@ class MANGOS_DLL_SPEC ChatHandler
         bool HandleRespawnCommand(char* args);
         bool HandleComeToMeCommand(char* args);
         bool HandleCombatStopCommand(char* args);
-        bool HandleFlushArenaPointsCommand(char* args);
         bool HandleRepairitemsCommand(char* args);
         bool HandleStableCommand(char* args);
         bool HandleWaterwalkCommand(char* args);
@@ -683,6 +685,7 @@ class MANGOS_DLL_SPEC ChatHandler
         void ShowItemListHelper(uint32 itemId, int loc_idx, Player* target = NULL);
         void ShowQuestListHelper(uint32 questId, int32 loc_idx, Player* target = NULL);
         bool ShowPlayerListHelper(QueryResult* result, uint32* limit = NULL, bool title = true, bool error = true);
+        void ShowCurrencyListHelper(Player* target, CurrencyTypesEntry const* currency, LocaleConstant loc);
         void ShowSpellListHelper(Player* target, SpellEntry const* spellInfo, LocaleConstant loc);
         void ShowPoolListHelper(uint16 pool_id);
         void ShowTicket(GMTicket const* ticket);
@@ -744,15 +747,15 @@ class CliHandler : public ChatHandler
             : m_accountId(accountId), m_loginAccessLevel(accessLevel), m_callbackArg(callbackArg), m_print(zprint) {}
 
         // overwrite functions
-        const char* GetMangosString(int32 entry) const;
-        uint32 GetAccountId() const;
-        AccountTypes GetAccessLevel() const;
-        bool isAvailable(ChatCommand const& cmd) const;
-        void SendSysMessage(const char* str);
-        std::string GetNameLink() const;
-        bool needReportToTarget(Player* chr) const;
-        LocaleConstant GetSessionDbcLocale() const;
-        int GetSessionDbLocaleIndex() const;
+        const char* GetMangosString(int32 entry) const override;
+        uint32 GetAccountId() const override;
+        AccountTypes GetAccessLevel() const override;
+        bool isAvailable(ChatCommand const& cmd) const override;
+        void SendSysMessage(const char* str) override;
+        std::string GetNameLink() const override;
+        bool needReportToTarget(Player* chr) const override;
+        LocaleConstant GetSessionDbcLocale() const override;
+        int GetSessionDbLocaleIndex() const override;
 
     private:
         uint32 m_accountId;
