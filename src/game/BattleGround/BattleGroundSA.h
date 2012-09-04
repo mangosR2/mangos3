@@ -260,8 +260,8 @@ class BattleGroundSA : public BattleGround
         bool isDemolisherDestroyed[2];
 
     private:
-        uint8 m_Gyd[BG_SA_GRY_MAX];
-        uint8 m_prevGyd[BG_SA_GRY_MAX];   // used for performant wordlstate-updating
+        uint8 m_Gyd[BG_SA_GRY_MAX + 1];
+        uint8 m_prevGyd[BG_SA_GRY_MAX + 1];   // used for performant wordlstate-updating
         BG_SA_RoundScore RoundScores[2];
         /* Gameobject spawning/despawning */
         void _CreateBanner(uint8 node, uint8 type, uint8 teamIndex, bool delay);

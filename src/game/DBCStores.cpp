@@ -229,8 +229,8 @@ static bool ReadDBCBuildFileText(const std::string& dbc_path, char const* locale
         char buf[100];
         fread(buf, 1, 100 - 1, file);
         fclose(file);
-
-        text = &buf[0];
+        text.clear();
+        text.append(buf);
         return true;
     }
     else
