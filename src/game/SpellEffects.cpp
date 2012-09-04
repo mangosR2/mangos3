@@ -11556,7 +11556,23 @@ void Spell::EffectLeapForward(SpellEffectIndex eff_idx)
 
     if (m_targets.m_targetMask & TARGET_FLAG_DEST_LOCATION)
     {
-        unitTarget->NearTeleportTo(m_targets.m_destX, m_targets.m_destY, m_targets.m_destZ, m_caster->GetOrientation(), unitTarget == m_caster);
+        float x,y,z;
+        m_targets.getDestination(x,y,z);
+
+        // Try to normalize Z coord 
+        m_caster->UpdateGroundPositionZ(x, y, z);
+        z += 0.2f;
+
+        if (sWorld.getConfig(CONFIG_BOOL_BLINK_ANIMATION_TYPE))
+        {
+            float speed = BASE_CHARGE_SPEED * 10.0f;
+            m_caster->MonsterMoveWithSpeed(x, y, z, speed, !m_caster->IsFalling(), true);
+        }
+        else
+        {
+            unitTarget->SetFallInformation(0, unitTarget->GetPositionZ());
+            unitTarget->NearTeleportTo(x, y, z, m_caster->GetOrientation(), unitTarget == m_caster);
+        }
     }
     else
         sLog.outError("Spell::EffectLeapForward teleport %s failed - desination point not setted.", unitTarget->GetObjectGuid().GetString().c_str());

@@ -771,7 +771,7 @@ void Spell::FillTargetMap()
 
         for (UnitList::iterator itr = tmpUnitLists[effToIndex[i]].begin(); itr != tmpUnitLists[effToIndex[i]].end();)
         {
-            if (!CheckTarget (*itr, SpellEffectIndex(i)))
+            if (!CheckTarget(*itr, SpellEffectIndex(i)))
             {
                 itr = tmpUnitLists[effToIndex[i]].erase(itr);
                 continue;
@@ -1840,22 +1840,22 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
 
             float fx = target->GetPositionX() + distance * cos(direction);
             float fy = target->GetPositionY() + distance * sin(direction);
-            float fz = oz + 5.0f;
 
             MaNGOS::NormalizeMapCoord(fx);
             MaNGOS::NormalizeMapCoord(fy);
 
+            float fz = std::max(oz, m_caster->GetTerrain()->GetWaterOrGroundLevel(fx, fy, oz + 8.0f));
+
             Map* pMap = target->GetMap();
             if (pMap)
             {
-                if (!pMap->GetHitPosition(ox,oy,oz,fx,fy,fz, target->GetPhaseMask(), -0.5f))
+                if (!pMap->GetHitPosition(ox,oy,oz + 2.0f,fx,fy,fz, target->GetPhaseMask(), -0.5f))
                     DEBUG_LOG("Spell::EffectLeap/Teleport unit %u forwarded on %f", target->GetObjectGuid().GetCounter(), target->GetDistance(fx,fy,fz));
                 else
                     DEBUG_LOG("Spell::EffectLeap/Teleport unit %u NOT forwarded on %f, real distance is %f", target->GetObjectGuid().GetCounter(), distance, target->GetDistance(fx,fy,fz));
             }
-            target->UpdateAllowedPositionZ(fx, fy, fz);
-            m_targets.setDestination(fx,fy,fz);
 
+            m_targets.setDestination(fx,fy,fz);
             break;
         }
         case TARGET_RANDOM_POINT_NEAR_TARGET:
@@ -3661,6 +3661,19 @@ void Spell::cast(bool skipCheck)
     // set to real guid to be sent later to the client
     m_targets.updateTradeSlotItem();
 
+    FillTargetMap();
+
+    SpellCastResult checkTargetResult = CheckCastTargets();
+
+    if (checkTargetResult != SPELL_CAST_OK)
+    {
+        SendCastResult(checkTargetResult);
+        finish(false);
+        m_caster->DecreaseCastCounter();
+        SetExecutedCurrently(false);
+        return;
+    }
+
     if (m_caster->GetTypeId() == TYPEID_PLAYER)
     {
         if (!m_IsTriggeredSpell && m_CastItem)
@@ -3671,8 +3684,6 @@ void Spell::cast(bool skipCheck)
 
         ((Player*)m_caster)->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_CAST_SPELL, m_spellInfo->Id);
     }
-
-    FillTargetMap();
 
     if (m_spellState == SPELL_STATE_FINISHED)                // stop cast if spell marked as finish somewhere in FillTargetMap
     {
@@ -6174,21 +6185,6 @@ SpellCastResult Spell::CheckCast(bool strict)
 
                 break;
             }
-            case SPELL_EFFECT_LEAP:
-            {
-                // Check destination point (if setted it SetTargetMap())
-                if (m_targets.m_targetMask & TARGET_FLAG_DEST_LOCATION)
-                {
-                    // spell failed, if distance less then 1.0f
-                    if (m_caster->GetDistance2d(m_targets.m_destX,m_targets.m_destY) < 1.0f)
-                        return SPELL_FAILED_TRY_AGAIN;
-
-                    if (fabs(m_caster->GetPositionZ() - m_targets.m_destZ) > 8.0f)
-                        return SPELL_FAILED_TRY_AGAIN;
-                }
-                // Target point setted after first time check
-            }
-            // no break here!
             case SPELL_EFFECT_LEAP_BACK:
             {
                 if (m_spellInfo->Id == 781)
@@ -6736,6 +6732,68 @@ SpellCastResult Spell::CheckCasterAuras() const
         else
             return prevented_reason;
     }
+    return SPELL_CAST_OK;
+}
+
+SpellCastResult Spell::CheckCastTargets() const
+{
+
+    // Spell without any target
+    if (!m_targets.HasLocation() &&
+        m_UniqueTargetInfo.empty() &&
+        m_UniqueGOTargetInfo.empty() &&
+        m_UniqueItemInfo.empty())
+        return SPELL_FAILED_BAD_TARGETS;
+
+    // check by target mask - NY currently
+    /*
+    if (m_targets.m_targetMask & (TARGET_FLAG_DEST_LOCATION | TARGET_FLAG_SRC_LOCATION))
+        if (!m_targets.HasLocation())
+            return SPELL_FAILED_BAD_TARGETS;
+    if (m_targets.m_targetMask & (TARGET_FLAG_SELF | TARGET_FLAG_UNIT))
+        if (m_UniqueTargetInfo.empty())
+            return SPELL_FAILED_BAD_TARGETS;
+    if (m_targets.m_targetMask & TARGET_FLAG_ITEM)
+        if (m_UniqueItemInfo.empty())
+            return SPELL_FAILED_BAD_TARGETS;
+    if (m_targets.m_targetMask & (TARGET_FLAG_OBJECT | TARGET_FLAG_OBJECT_UNK))
+        if (m_UniqueGOTargetInfo.empty())
+            return SPELL_FAILED_BAD_TARGETS;
+    */
+
+    for (int i = 0; i < MAX_EFFECT_INDEX; ++i)
+    {
+        switch (m_spellInfo->Effect[i])
+        {
+            case SPELL_EFFECT_LEAP:
+            {
+                // Destination point checked only in third (CheckTargets) check phase, in first/second his not setted
+                if (m_targets.m_targetMask & TARGET_FLAG_DEST_LOCATION)
+                {
+                    float x,y,z;
+                    m_targets.getDestination(x,y,z);
+
+                    // spell failed, if distance less then 1.0f
+                    if (m_caster->GetDistance2d(x,y) < 1.0f)
+                        return SPELL_FAILED_TOO_CLOSE;
+
+                    if (fabs(m_caster->GetPositionZ() - z) > 8.0f)
+                        return SPELL_FAILED_NOPATH;
+
+                    float pz  = m_caster->GetMap()->GetHeight(m_caster->GetPhaseMask(), x, y, z, true);
+
+                    if (fabs(pz - z) > 8.0f)
+                        return SPELL_FAILED_NOPATH;
+                }
+                else
+                    return SPELL_FAILED_TRY_AGAIN;
+                break;
+            }
+            default:
+                break;
+        }
+    }
+
     return SPELL_CAST_OK;
 }
 

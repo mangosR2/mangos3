@@ -2243,7 +2243,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         /*********************************************************/
         bool HasMovementFlag(MovementFlags f) const;        // for script access to m_movementInfo.HasMovementFlag
         void UpdateFallInformationIfNeed(MovementInfo const& minfo,uint16 opcode);
-        void SetFallInformation(uint32 time, float z)
+        void SetFallInformation(uint32 time, float z) override
         {
             m_lastFallTime = time;
             m_lastFallZ = z;

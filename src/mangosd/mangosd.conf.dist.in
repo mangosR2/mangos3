@@ -935,6 +935,10 @@ LexicsCutterNoActionOnGM = 1
 #        enable/disable alternative resilence damage reduction calculation (for Avenger/Sanctified wrath mostly)
 #        Default: 0     (disable, default mangos style)
 #
+#    BlinkAnimationType
+#        enable/disable alternative (fast move, like 2.4.3/3.0.1) animation type for blink-like spells
+#        Default: 0     (disable, default mangos style - teleport)
+#
 #    AllowTransferToCustomMap
 #        Allowing moving to maps, enter for which absent in AraeTrigger.dbc (by custom areatrigger_teleport entryes)
 #        Attention! Changing this option "on-the-fly" required reload areatrigger_teleport table!
@@ -1022,6 +1026,7 @@ Raid.MinLevel = 10
 CrowdControlHPBase = 0.1
 AllowTransferToCustomMap = 0
 ResilenceAlternativeCalculation = 0
+BlinkAnimationType = 0
 
 ###################################################################################################################
 # PLAYER INTERACTION
