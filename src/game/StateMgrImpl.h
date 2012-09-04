@@ -70,8 +70,8 @@ enum UnitActionPriority
     UNIT_ACTION_PRIORITY_NONE        = -1,
     UNIT_ACTION_PRIORITY_IDLE        =  0,
     UNIT_ACTION_PRIORITY_DOWAYPOINTS =  1,
-    UNIT_ACTION_PRIORITY_CHASE       =  2,
-    UNIT_ACTION_PRIORITY_HOME        =  3,
+    UNIT_ACTION_PRIORITY_HOME        =  2,
+    UNIT_ACTION_PRIORITY_CHASE       =  3,
     UNIT_ACTION_PRIORITY_ASSISTANCE  =  4,
     UNIT_ACTION_PRIORITY_CONTROLLED  =  5,
     UNIT_ACTION_PRIORITY_CONFUSED    =  6,
@@ -92,6 +92,7 @@ enum eActionType
     ACTION_TYPE_RESTOREABLE    = 1,                   // Action be restored after interrupt (normal type)
     ACTION_TYPE_REPLACEABLE    = 2,                   // Action be restored after interrupt, some attributes 
                                                       // removed only on finalize, not in interrupted state
+    ACTION_TYPE_END,
 };
 
 enum ActionUpdateState
@@ -134,6 +135,7 @@ class UnitAction
     virtual bool IsReachable() const { return true; };
     virtual const char* Name() const { return "<Uninitialized>"; };
     virtual MovementGeneratorType GetMovementGeneratorType() const = 0;
+    virtual void UnitSpeedChanged() {};
 
     /* Returns true to show that state expired and can be finalized. */
     virtual bool Update(Unit &, const uint32& diff) = 0;

@@ -33,7 +33,7 @@
 #include "Guild.h"
 #include "GuildMgr.h"
 #include "World.h"
-#include "BattleGroundMgr.h"
+#include "BattleGround/BattleGroundMgr.h"
 #include "MapManager.h"
 #include "SocialMgr.h"
 #include "LFGMgr.h"
@@ -523,7 +523,7 @@ void WorldSession::LogoutPlayer(bool Save)
 
         GetPlayer()->InterruptNonMeleeSpells(true);
 
-        if (VehicleKit* vehicle = GetPlayer()->GetVehicle())
+        if (VehicleKitPtr vehicle = GetPlayer()->GetVehicle())
         {
             if (Creature* base = ((Creature*)vehicle->GetBase()))
             {
@@ -1091,4 +1091,12 @@ void WorldSession::InitWarden(BigNumber *K, std::string os)
         m_Warden = (WardenBase*)new WardenMac();
 
     m_Warden->Init(this, K);
+}
+
+void WorldSession::SendPlaySpellVisual(ObjectGuid guid, uint32 spellArtKit)
+{
+    WorldPacket data(SMSG_PLAY_SPELL_VISUAL, 8+4);          // visual effect on guid
+    data << guid;
+    data << spellArtKit;                                    // index from SpellVisualKit.dbc
+    SendPacket(&data);
 }

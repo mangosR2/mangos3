@@ -49,7 +49,7 @@
 #include "Mail.h"
 #include "Util.h"
 #include "ItemEnchantmentMgr.h"
-#include "BattleGroundMgr.h"
+#include "BattleGround/BattleGroundMgr.h"
 #include "MapPersistentStateMgr.h"
 #include "InstanceData.h"
 #include "CreatureEventAIMgr.h"
@@ -88,7 +88,7 @@ bool ChatHandler::HandleAHBotItemsAmountQualityCommand(char* args)
         return false;
     sAuctionBot.SetItemsAmountForQuality(AuctionQuality(Q), qVal);
     PSendSysMessage(LANG_AHBOT_ITEMS_AMOUNT, GetMangosString(ahbotQualityIds[Q]),
-        sAuctionBotConfig.getConfigItemQualityAmount(AuctionQuality(Q)));
+                    sAuctionBotConfig.getConfigItemQualityAmount(AuctionQuality(Q)));
     return true;
 }
 
@@ -183,12 +183,12 @@ bool ChatHandler::HandleAHBotStatusCommand(char* args)
     uint32 fmtId = m_session ? LANG_AHBOT_STATUS_FORMAT_CHAT : LANG_AHBOT_STATUS_FORMAT_CONSOLE;
 
     PSendSysMessage(fmtId, GetMangosString(LANG_AHBOT_STATUS_ITEM_COUNT),
-        statusInfo[AUCTION_HOUSE_ALLIANCE].ItemsCount,
-        statusInfo[AUCTION_HOUSE_HORDE].ItemsCount,
-        statusInfo[AUCTION_HOUSE_NEUTRAL].ItemsCount,
-        statusInfo[AUCTION_HOUSE_ALLIANCE].ItemsCount +
-        statusInfo[AUCTION_HOUSE_HORDE].ItemsCount +
-        statusInfo[AUCTION_HOUSE_NEUTRAL].ItemsCount);
+                    statusInfo[AUCTION_HOUSE_ALLIANCE].ItemsCount,
+                    statusInfo[AUCTION_HOUSE_HORDE].ItemsCount,
+                    statusInfo[AUCTION_HOUSE_NEUTRAL].ItemsCount,
+                    statusInfo[AUCTION_HOUSE_ALLIANCE].ItemsCount +
+                    statusInfo[AUCTION_HOUSE_HORDE].ItemsCount +
+                    statusInfo[AUCTION_HOUSE_NEUTRAL].ItemsCount);
 
     if (all)
     {
@@ -678,6 +678,14 @@ bool ChatHandler::HandleReloadSpellClickSpellsCommand(char* /*args*/)
     sLog.outString( "Re-Loading `npc_spellclick_spells` Table!" );
     sObjectMgr.LoadNPCSpellClickSpells();
     SendGlobalSysMessage("DB table `npc_spellclick_spells` reloaded.");
+    return true;
+}
+
+bool ChatHandler::HandleReloadSpellDbcCommand(char* /*args*/)
+{
+    sLog.outString( "Re-Loading `spell_dbc` Table!" );
+    sSpellMgr.LoadSpellDbc();
+    SendGlobalSysMessage("DB table `spell_dbc` reloaded.");
     return true;
 }
 
@@ -3939,7 +3947,7 @@ bool ChatHandler::HandleDamageCommand(char* args)
 
         target->CalculateDamageAbsorbAndResist(m_session->GetPlayer(),&damageInfo, false);
 
-        m_session->GetPlayer()->DealDamageMods(target, damageInfo.damage, &damageInfo.absorb);
+        m_session->GetPlayer()->DealDamageMods(&damageInfo);
         m_session->GetPlayer()->DealDamage(target,&damageInfo,false);
         m_session->GetPlayer()->SendAttackStateUpdate(&damageInfo);
         return true;
@@ -6647,8 +6655,10 @@ bool ChatHandler::HandleInstanceSaveDataCommand(char* /*args*/)
 bool ChatHandler::HandleGMListFullCommand(char* /*args*/)
 {
     ///- Get the accounts with GM Level >0
-    QueryResult *result = LoginDatabase.Query( "SELECT username,gmlevel FROM account WHERE gmlevel > 0" );
-    if(result)
+    QueryResult* result = LoginDatabase.PQuery("SELECT ac.username, ac.gmlevel, af.Security FROM account ac LEFT JOIN "
+                                               "account_forcepermission af ON ac.id = af.AccountID WHERE (af.Security > 0 AND realmID = '%u') "
+                                               "OR ac.gmlevel > 0", sConfig.GetIntDefault("RealmID", 0));
+    if (result)
     {
         SendSysMessage(LANG_GMLIST);
         SendSysMessage("========================");
@@ -6658,9 +6668,9 @@ bool ChatHandler::HandleGMListFullCommand(char* /*args*/)
         ///- Circle through them. Display username and GM level
         do
         {
-            Field *fields = result->Fetch();
-            PSendSysMessage("|%15s|%6s|", fields[0].GetString(),fields[1].GetString());
-        }while( result->NextRow() );
+            Field* fields = result->Fetch();
+            PSendSysMessage("|%15s|%6u|", fields[0].GetString(), (fields[1].GetUInt8() > fields[2].GetUInt8()) ? fields[1].GetUInt8() : fields[2].GetUInt8());
+        } while(result->NextRow());
 
         PSendSysMessage("========================");
         delete result;

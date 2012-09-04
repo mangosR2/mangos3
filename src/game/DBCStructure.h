@@ -44,11 +44,11 @@ struct AchievementEntry
     uint32    ID;                                           // 0        m_ID
     uint32    factionFlag;                                  // 1        m_faction -1=all, 0=horde, 1=alliance
     uint32    mapID;                                        // 2        m_instance_id -1=none
-    //uint32 parentAchievement;                             // 3        m_supercedes its Achievement parent (can`t start while parent uncomplete, use its Criteria if don`t have own, use its progress on begin)
-    char *name[16];                                         // 4-19     m_title_lang
-    //uint32 name_flags;                                    // 20 string flags
-    //char *description[16];                                // 21-36    m_description_lang
-    //uint32 desc_flags;                                    // 37 string flags
+    // uint32 parentAchievement;                            // 3        m_supercedes its Achievement parent (can`t start while parent uncomplete, use its Criteria if don`t have own, use its progress on begin)
+    char* name[16];                                         // 4-19     m_title_lang
+    // uint32 name_flags;                                   // 20 string flags
+    // char *description[16];                               // 21-36    m_description_lang
+    // uint32 desc_flags;                                   // 37 string flags
     uint32    categoryId;                                   // 38       m_category
     uint32    points;                                       // 39       m_points
     //uint32 OrderInCategory;                               // 40       m_ui_order
@@ -1931,6 +1931,48 @@ private:
     };
 };
 
+struct MANGOS_DLL_SPEC SpellEntry;
+
+struct SpellEffectEntry
+{
+    SpellEffectEntry(SpellEntry const* spellEntry, SpellEffectIndex i);
+
+    //uint32        Id;                                         // 0        m_ID
+    uint32        Effect;                                       // 73-75    m_effect
+    float         EffectMultipleValue;                          // 106-108  m_effectAmplitude
+    uint32        EffectApplyAuraName;                          // 100-102  m_effectAura
+    uint32        EffectAmplitude;                              // 103-105  m_effectAuraPeriod
+    int32         EffectBasePoints;                             // 82-84    m_effectBasePoints (don't must be used in spell/auras explicitly, must be used cached Spell::m_currentBasePoints)
+    //float         unk_320_4;                                  // 169-171  3.2.0
+    float         DmgMultiplier;                                // 156-158  m_effectChainAmplitude
+    uint32        EffectChainTarget;                            // 109-111  m_effectChainTargets
+    int32         EffectDieSides;                               // 76-78    m_effectDieSides
+    uint32        EffectItemType;                               // 112-114  m_effectItemType
+    uint32        EffectMechanic;                               // 85-87    m_effectMechanic
+    int32         EffectMiscValue;                              // 115-117  m_effectMiscValue
+    int32         EffectMiscValueB;                             // 118-120  m_effectMiscValueB
+    float         EffectPointsPerComboPoint;                    // 124-126  m_effectPointsPerCombo
+    uint32        EffectRadiusIndex;                            // 94-96    m_effectRadiusIndex - spellradius.dbc
+    //uint32        EffectRadiusMaxIndex;                       // 97-99    4.0.0
+    float         EffectRealPointsPerLevel;                     // 79-81    m_effectRealPointsPerLevel
+    ClassFamilyMask EffectSpellClassMask;                       // 127-129  m_effectSpellClassMask
+    uint32        EffectTriggerSpell;                           // 121-123  m_effectTriggerSpell
+    uint32        EffectImplicitTargetA;                        // 88-90    m_implicitTargetA
+    uint32        EffectImplicitTargetB;                        // 91-93    m_implicitTargetB
+    uint32        EffectSpellId;                                // new 4.0.0
+    uint32        EffectIndex;                                  // new 4.0.0
+    //uint32        unk;                                        // 24 - 4.2.0
+    // helpers
+
+    int32 CalculateSimpleValue() const { return EffectBasePoints; };
+
+    void Initialize(const SpellEntry* spellEntry, SpellEffectIndex i);
+
+    private:
+        SpellEffectEntry() {};
+        SpellEffectEntry(SpellEffectEntry const&) {};
+};
+
 #define MAX_SPELL_REAGENTS 8
 #define MAX_SPELL_TOTEMS 2
 #define MAX_SPELL_TOTEM_CATEGORIES 2
@@ -2078,61 +2120,61 @@ struct SpellEntry
     template <SpellFamily family, CFM_ARGS_1>
     bool IsFitToFamily() const
     {
-        return SpellFamily(SpellFamilyName) == family && SpellFamilyFlags.test<CFM_VALUES_1>();
+        return SpellFamily(SpellFamilyName) == family && GetSpellFamilyFlags().test<CFM_VALUES_1>();
     }
 
     template <SpellFamily family, CFM_ARGS_2>
     bool IsFitToFamily() const
     {
-        return SpellFamily(SpellFamilyName) == family && SpellFamilyFlags.test<CFM_VALUES_2>();
+        return SpellFamily(SpellFamilyName) == family && GetSpellFamilyFlags().test<CFM_VALUES_2>();
     }
 
     template <SpellFamily family, CFM_ARGS_3>
     bool IsFitToFamily() const
     {
-        return SpellFamily(SpellFamilyName) == family && SpellFamilyFlags.test<CFM_VALUES_3>();
+        return SpellFamily(SpellFamilyName) == family && GetSpellFamilyFlags().test<CFM_VALUES_3>();
     }
 
     template <SpellFamily family, CFM_ARGS_4>
     bool IsFitToFamily() const
     {
-        return SpellFamily(SpellFamilyName) == family && SpellFamilyFlags.test<CFM_VALUES_4>();
+        return SpellFamily(SpellFamilyName) == family && GetSpellFamilyFlags().test<CFM_VALUES_4>();
     }
 
     template <SpellFamily family, CFM_ARGS_5>
     bool IsFitToFamily() const
     {
-        return SpellFamily(SpellFamilyName) == family && SpellFamilyFlags.test<CFM_VALUES_5>();
+        return SpellFamily(SpellFamilyName) == family && GetSpellFamilyFlags().test<CFM_VALUES_5>();
     }
 
     template <SpellFamily family, CFM_ARGS_6>
     bool IsFitToFamily() const
     {
-        return SpellFamily(SpellFamilyName) == family && SpellFamilyFlags.test<CFM_VALUES_6>();
+        return SpellFamily(SpellFamilyName) == family && GetSpellFamilyFlags().test<CFM_VALUES_6>();
     }
 
     template <SpellFamily family, CFM_ARGS_7>
     bool IsFitToFamily() const
     {
-        return SpellFamily(SpellFamilyName) == family && SpellFamilyFlags.test<CFM_VALUES_7>();
+        return SpellFamily(SpellFamilyName) == family && GetSpellFamilyFlags().test<CFM_VALUES_7>();
     }
 
     template <SpellFamily family, CFM_ARGS_8>
     bool IsFitToFamily() const
     {
-        return SpellFamily(SpellFamilyName) == family && SpellFamilyFlags.test<CFM_VALUES_8>();
+        return SpellFamily(SpellFamilyName) == family && GetSpellFamilyFlags().test<CFM_VALUES_8>();
     }
 
     template <SpellFamily family, CFM_ARGS_9>
     bool IsFitToFamily() const
     {
-        return SpellFamily(SpellFamilyName) == family && SpellFamilyFlags.test<CFM_VALUES_9>();
+        return SpellFamily(SpellFamilyName) == family && GetSpellFamilyFlags().test<CFM_VALUES_9>();
     }
 
     template <SpellFamily family, CFM_ARGS_10>
     bool IsFitToFamily() const
     {
-        return SpellFamily(SpellFamilyName) == family && SpellFamilyFlags.test<CFM_VALUES_10>();
+        return SpellFamily(SpellFamilyName) == family && GetSpellFamilyFlags().test<CFM_VALUES_10>();
     }
 
     inline bool HasAttribute(SpellAttributes attribute) const { return Attributes & attribute; }
@@ -2144,6 +2186,19 @@ struct SpellEntry
     inline bool HasAttribute(SpellAttributesEx6 attribute) const { return AttributesEx6 & attribute; }
     inline bool HasAttribute(SpellAttributesEx7 attribute) const { return AttributesEx7 & attribute; }
 
+    inline uint32 GetMechanic() const { return Mechanic; };
+    inline uint32 GetManaCost() const { return manaCost; };
+    inline uint32 GetSpellFamilyName() const { return SpellFamilyName; };
+    inline uint32 GetAuraInterruptFlags() const { return AuraInterruptFlags; };
+    inline uint32 GetStackAmount() const { return StackAmount; };
+    inline uint32 GetEffectImplicitTargetAByIndex(SpellEffectIndex j) const { return EffectImplicitTargetA[j];};
+    inline uint32 GetEffectImplicitTargetBByIndex(SpellEffectIndex j) const { return EffectImplicitTargetB[j];};
+    inline uint32 GetEffectApplyAuraNameByIndex(SpellEffectIndex j) const   { return EffectApplyAuraName[j];};
+    inline uint32 GetEffectMiscValue(SpellEffectIndex j) const              { return EffectMiscValue[j];};
+    inline ClassFamilyMask GetSpellFamilyFlags() const                      { return SpellFamilyFlags; };
+
+    SpellEffectEntry const* GetSpellEffect(SpellEffectIndex j) const;
+
     private:
         // prevent creating custom entries (copy data from original in fact)
         SpellEntry(SpellEntry const&);                      // DON'T must have implementation
@@ -2152,6 +2207,7 @@ struct SpellEntry
         template<typename T>
         bool IsFitToFamilyMask(SpellFamily family, T t) const;
 };
+
 
 // A few fields which are required for automated convertion
 // NOTE that these fields are count by _skipping_ the fields that are unused!
@@ -2583,6 +2639,25 @@ struct TalentSpellPos
 };
 
 typedef std::map<uint32,TalentSpellPos> TalentSpellPosMap;
+
+struct SpellEffect
+{
+    SpellEffectEntry const* effects[MAX_EFFECT_INDEX];
+
+    SpellEffect()
+    {
+        for (uint8 i = 0; i < MAX_EFFECT_INDEX; ++i)
+            effects[SpellEffectIndex(i)] = NULL;
+    }
+
+    ~SpellEffect()
+    {
+        for (uint8 i = 0; i < MAX_EFFECT_INDEX; ++i)
+            delete effects[SpellEffectIndex(i)];
+    }
+};
+
+typedef std::map<uint32, SpellEffect> SpellEffectMap;
 
 struct TaxiPathBySourceAndDestination
 {

@@ -56,8 +56,6 @@ m_declinedname(NULL)
 
 Pet::~Pet()
 {
-    CleanupsBeforeDelete();
-
     delete m_declinedname;
 
     if (m_PetScalingData)
@@ -65,6 +63,8 @@ Pet::~Pet()
 
     if (m_baseBonusData)
         delete m_baseBonusData;
+
+    m_removed = true;
 }
 
 void Pet::AddToWorld()
@@ -2881,6 +2881,19 @@ Unit* Pet::GetOwner() const
         return NULL;
 }
 
+bool Pet::IsInEvadeMode() const
+{
+    switch (GetCharmState(CHARM_STATE_COMMAND))
+    {
+        case COMMAND_STAY:
+            return false;
+        case COMMAND_FOLLOW:
+        case COMMAND_ATTACK:
+        default:
+            return IsInUnitState(UNIT_ACTION_HOME) && !IsWithinDistInMap(GetOwner(), PET_FOLLOW_DIST + 1.0f);
+    }
+    return false;
+}
 
 bool Pet::ReapplyScalingAura(Aura* aura, int32 basePoints)
 {

@@ -196,7 +196,7 @@ class LFGMgr
         void Teleport(Group* pGroup, bool bOut = false);
         void Teleport(Player* pPlayer, bool bOut = false, bool bFromOpcode = false);
 
-        // LFR ebschaxtend system
+        // LFR extend system
         void UpdateLFRGroups();
         bool IsGroupCompleted(Group* pGroup, uint8 uiAddMembers = 0);
 
@@ -226,8 +226,9 @@ class LFGMgr
 
         // Dungeon operations
         LFGDungeonEntry const* GetDungeon(uint32 dungeonID);
-        bool IsRandomDungeon(LFGDungeonEntry const* dungeon);
         LFGDungeonSet GetRandomDungeonsForPlayer(Player* pPlayer);
+        static bool IsRandomDungeon(LFGDungeonEntry const* dungeon);
+        static bool CheckWorldEvent(LFGDungeonEntry const* dungeon);
 
         // Group operations
         void AddMemberToLFDGroup(ObjectGuid guid);

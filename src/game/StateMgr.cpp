@@ -34,14 +34,14 @@ static const class staticActionInfo
     {
         actionInfo[UNIT_ACTION_IDLE](UNIT_ACTION_PRIORITY_IDLE,ACTION_TYPE_RESTOREABLE);
         actionInfo[UNIT_ACTION_DOWAYPOINTS](UNIT_ACTION_PRIORITY_DOWAYPOINTS,ACTION_TYPE_NONRESTOREABLE);
-        actionInfo[UNIT_ACTION_HOME](UNIT_ACTION_PRIORITY_CHASE,ACTION_TYPE_NONRESTOREABLE);
+        actionInfo[UNIT_ACTION_HOME](UNIT_ACTION_PRIORITY_HOME,ACTION_TYPE_NONRESTOREABLE);
         actionInfo[UNIT_ACTION_CHASE](UNIT_ACTION_PRIORITY_CHASE,ACTION_TYPE_NONRESTOREABLE);
         actionInfo[UNIT_ACTION_ASSISTANCE](UNIT_ACTION_PRIORITY_ASSISTANCE,ACTION_TYPE_NONRESTOREABLE);
         actionInfo[UNIT_ACTION_CONTROLLED](UNIT_ACTION_PRIORITY_CONTROLLED,ACTION_TYPE_NONRESTOREABLE);
         actionInfo[UNIT_ACTION_CONFUSED](UNIT_ACTION_PRIORITY_CONFUSED,ACTION_TYPE_NONRESTOREABLE);
         actionInfo[UNIT_ACTION_FEARED]( UNIT_ACTION_PRIORITY_FEARED,ACTION_TYPE_NONRESTOREABLE);
         actionInfo[UNIT_ACTION_ROOT](UNIT_ACTION_PRIORITY_ROOT,ACTION_TYPE_RESTOREABLE);
-        actionInfo[UNIT_ACTION_STUN](UNIT_ACTION_PRIORITY_STUN,ACTION_TYPE_NONRESTOREABLE);
+        actionInfo[UNIT_ACTION_STUN](UNIT_ACTION_PRIORITY_STUN,ACTION_TYPE_RESTOREABLE);
         actionInfo[UNIT_ACTION_FEIGNDEATH](UNIT_ACTION_PRIORITY_FEIGNDEATH,ACTION_TYPE_NONRESTOREABLE);
         actionInfo[UNIT_ACTION_ONVEHICLE](UNIT_ACTION_PRIORITY_ONVEHICLE,ACTION_TYPE_NONRESTOREABLE);
         actionInfo[UNIT_ACTION_TAXI](UNIT_ACTION_PRIORITY_TAXI,ACTION_TYPE_NONRESTOREABLE);
@@ -351,6 +351,9 @@ UnitActionPtr UnitStateMgr::CreateStandartState(UnitActionId stateId, ...)
     UnitActionPtr state = UnitActionPtr(NULL);
     switch (stateId)
     {
+        case UNIT_ACTION_IDLE:
+            state = UnitActionPtr(new IdleMovementGenerator());
+            break;
         case UNIT_ACTION_CONFUSED:
         case UNIT_ACTION_FEARED:
         case UNIT_ACTION_CHASE:
@@ -385,19 +388,22 @@ UnitActionPtr UnitStateMgr::CreateStandartState(UnitActionId stateId, ...)
             break;
         }
         default:
+            sLog.outError("UnitStateMgr: attempt to create unknown standart state %u, creating IDLE state instead", stateId);
+            state = UnitActionPtr(new IdleMovementGenerator());
             break;
     }
 
     va_end(vargs);
 
-    if (!state)
-        state = UnitActionPtr(new IdleMovementGenerator());
+    MANGOS_ASSERT(state);
 
     return state;
 }
 
 UnitStateMgr::UnitStateMgr(Unit* owner) : m_owner(owner), m_needReinit(false)
 {
+    m_actions.clear();
+
     for (int32 i = UNIT_ACTION_IDLE; i != UNIT_ACTION_END; ++i)
         m_stateCounter[i] = 0;
 
@@ -609,21 +615,17 @@ ActionInfo* UnitStateMgr::CurrentState()
 
 void UnitStateMgr::DropAllStates()
 {
-    DEBUG_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS, "UnitStateMgr:DropAllStates %s drop all active states", GetOwnerStr().c_str());
-    DropActionHigherThen(UNIT_ACTION_PRIORITY_IDLE);
+    if (!m_actions.empty())
+    {
+        DEBUG_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS, "UnitStateMgr:DropAllStates %s drop all active states (count = %u)", GetOwnerStr().c_str(), m_actions.size());
+        DropActionHigherThen(UNIT_ACTION_PRIORITY_IDLE);
+    }
     PushAction(UNIT_ACTION_IDLE);
 }
 
 std::string const UnitStateMgr::GetOwnerStr() 
 {
     return GetOwner()->IsInWorld() ? GetOwner()->GetGuidStr() : "<Uninitialized>"; 
-};
-
-bool ActionInfo::operator < (const ActionInfo& val) const
-{
-    if (priority > val.priority)
-        return true;
-    return false;
 };
 
 bool ActionInfo::operator == (ActionInfo& val)

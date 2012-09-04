@@ -24,6 +24,7 @@
 #define __WORLD_H
 
 #include "Common.h"
+#include "LockedQueue.h"
 #include "Timer.h"
 #include "Policies/Singleton.h"
 #include "SharedDefines.h"
@@ -363,6 +364,14 @@ enum eConfigBoolValues
     CONFIG_BOOL_ARENA_QUEUE_ANNOUNCER_JOIN,
     CONFIG_BOOL_ARENA_QUEUE_ANNOUNCER_EXIT,
     CONFIG_BOOL_ARENA_QUEUE_ANNOUNCER_START,
+    CONFIG_BOOL_OUTDOORPVP_SI_ENABLED,
+    CONFIG_BOOL_OUTDOORPVP_EP_ENABLED,
+    CONFIG_BOOL_OUTDOORPVP_HP_ENABLED,
+    CONFIG_BOOL_OUTDOORPVP_ZM_ENABLED,
+    CONFIG_BOOL_OUTDOORPVP_TF_ENABLED,
+    CONFIG_BOOL_OUTDOORPVP_NA_ENABLED,
+    CONFIG_BOOL_OUTDOORPVP_GH_ENABLED,
+    CONFIG_BOOL_OUTDOORPVP_WG_ENABLED,
     CONFIG_BOOL_KICK_PLAYER_ON_BAD_PACKET,
     CONFIG_BOOL_STATS_SAVE_ONLY_ON_LOGOUT,
     CONFIG_BOOL_CLEAN_CHARACTER_DB,
@@ -505,6 +514,8 @@ class World
         World();
         ~World();
 
+        void CleanupsBeforeStop();
+
         WorldSession* FindSession(uint32 id) const;
         void AddSession(WorldSession *s);
         void SendBroadcast();
@@ -577,11 +588,12 @@ class World
 
         void SendWorldText(int32 string_id, ...);
         void SendWorldTextWithSecurity(AccountTypes security, int32 string_id, ...);
-        void SendGlobalText(const char* text, WorldSession* self);
         void SendGlobalMessage(WorldPacket* packet, WorldSession* self = NULL, Team team = TEAM_NONE, AccountTypes security = SEC_PLAYER);
         void SendZoneMessage(uint32 zone, WorldPacket* packet, WorldSession* self = NULL, Team team = TEAM_NONE);
         void SendZoneText(uint32 zone, const char* text, WorldSession* self = NULL, Team team = TEAM_NONE);
         void SendServerMessage(ServerMessageType type, const char* text = "", Player* player = NULL);
+        void SendZoneUnderAttackMessage(uint32 zoneId, Team team);
+        void SendDefenseMessage(uint32 zoneId, int32 textId);
 
         /// Are we in the middle of a shutdown?
         bool IsShutdowning() const { return m_ShutdownTimer > 0; }
@@ -656,6 +668,10 @@ class World
         // reset duel system
         void setDuelResetEnableAreaIds(const char* areas);
         bool IsAreaIdEnabledDuelReset(uint32 areaId);
+
+        // Disable dungeons for LFG system
+        void setDisabledMapIdForDungeonFinder(const char* areas);
+        bool IsDungeonMapIdDisable(uint32 mapId);
 
     protected:
         void _UpdateGameTime();
@@ -754,10 +770,12 @@ class World
         std::string m_CreatureEventAIVersion;
 
         // World locking for global (not-in-map) objects.
-        ObjectLockType   i_lock[MAP_LOCK_TYPE_MAX];
+        mutable ObjectLockType   i_lock[MAP_LOCK_TYPE_MAX];
 
         // reset duel system
         std::set<uint32> areaEnabledIds; //set of areaIds where is enabled the Duel reset system
+        // Disable dungeons for LFG system
+        std::set<uint32> disabledMapIdForDungeonFinder; // set of MapIds which are disabled for DungeonFinder
 
 };
 

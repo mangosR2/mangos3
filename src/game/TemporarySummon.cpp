@@ -24,7 +24,7 @@
 #include "GridNotifiers.h"
 
 TemporarySummon::TemporarySummon( ObjectGuid summoner ) :
-Creature(CREATURE_SUBTYPE_TEMPORARY_SUMMON), m_type(TEMPSUMMON_TIMED_OR_CORPSE_DESPAWN), m_timer(0), m_lifetime(0), m_summoner(summoner)
+Creature(CREATURE_SUBTYPE_TEMPORARY_SUMMON), m_type(TEMPSUMMON_TIMED_OR_CORPSE_DESPAWN), m_timer(0), m_lifetime(0), m_summoner(summoner), m_isActive(true)
 {
 }
 
@@ -250,6 +250,9 @@ void TemporarySummon::Update( uint32 update_diff,  uint32 diff )
             break;
     }
 
+    if (!m_isActive)
+        return;
+
     Creature::Update( update_diff, diff );
 }
 
@@ -267,10 +270,12 @@ void TemporarySummon::UnSummon(uint32 delay)
 {
     if (delay > 0)
     {
-        m_type = TEMPSUMMON_TIMED_DESPAWN;
+        m_type = TEMPSUMMON_TIMED_OR_DEAD_DESPAWN;
         m_timer = delay;
         return;
     }
+
+    m_isActive = false;
 
     CombatStop();
 
@@ -278,6 +283,8 @@ void TemporarySummon::UnSummon(uint32 delay)
         if(Creature* sum = GetMap()->GetCreature(GetSummonerGuid()))
             if (sum->AI())
                 sum->AI()->SummonedCreatureDespawn(this);
+
+    KillAllEvents(false);
 
     AddObjectToRemoveList();
 
@@ -287,4 +294,9 @@ void TemporarySummon::UnSummon(uint32 delay)
 
 void TemporarySummon::SaveToDB()
 {
+}
+
+bool TemporarySummon::IsDespawned() const
+{
+    return !m_isActive || getDeathState() ==  DEAD;
 }

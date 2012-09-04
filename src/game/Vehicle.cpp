@@ -607,26 +607,6 @@ void VehicleKit::SetDestination(float x, float y, float z, float o, float speed,
         b_dstSet = true;
 };
 
-bool PassengerEjectEvent::Execute(uint64 /*e_time*/, uint32 /*p_time*/)
-{
-    if (!m_vehicle.GetVehicleInfo())
-        return true;
-
-    VehicleKit* pVehicle = m_vehicle.GetVehicleKit();
-
-    if (!pVehicle)
-        return true;
-
-    Unit* passenger = pVehicle->GetPassenger(m_seatId);
-
-    if (passenger && passenger->IsInWorld())
-    {
-        if (!m_vehicle.RemoveSpellsCausingAuraByCaster(SPELL_AURA_CONTROL_VEHICLE, passenger->GetObjectGuid()))
-            passenger->ExitVehicle();
-    }
-    return true;
-}
-
 bool VehicleSeat::IsProtectPassenger() const
 {
     if (seatInfo &&
@@ -645,12 +625,13 @@ Aura* VehicleKit::GetControlAura(Unit* passenger)
         return NULL;
 
     ObjectGuid casterGuid = passenger->GetObjectGuid();
-    Unit::AuraList const& auras = GetBase()->GetAurasByType(SPELL_AURA_CONTROL_VEHICLE);
 
-    for(Unit::AuraList::const_iterator i = auras.begin();i != auras.end(); ++i)
+    MAPLOCK_READ(GetBase(),MAP_LOCK_TYPE_AURAS);
+    Unit::AuraList& auras = GetBase()->GetAurasByType(SPELL_AURA_CONTROL_VEHICLE);
+    for (Unit::AuraList::iterator itr = auras.begin(); itr != auras.end(); ++itr)
     {
-        if ((*i) && !(*i)->IsDeleted() && (*i)->GetCasterGuid() == casterGuid)
-            return *i;
+        if (!itr->IsEmpty() && (*itr)->GetCasterGuid() == casterGuid)
+            return (*itr)();
     }
     return NULL;
 }

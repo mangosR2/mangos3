@@ -85,14 +85,15 @@
 #include <algorithm>
 
 #include "Errors.h"
-#include "LockedQueue.h"
 #include "Threading.h"
 
 #include <ace/Basic_Types.h>
 #include <ace/Guard_T.h>
 #include <ace/RW_Thread_Mutex.h>
 #include <ace/Thread_Mutex.h>
+#include <ace/Null_Mutex.h>
 #include <ace/OS_NS_arpa_inet.h>
+#include <ace/Refcounted_Auto_Ptr.h>
 
 // Old ACE versions (pre-ACE-5.5.4) not have this type (add for allow use at Unix side external old ACE versions)
 #if PLATFORM != PLATFORM_WINDOWS
@@ -258,31 +259,73 @@ inline char * mangos_strdup(const char * source)
 #define countof(array) (sizeof(array) / sizeof((array)[0]))
 #endif
 
-#if defined WIN32
-#     define NOTSAFE_SEMAPHORE_OVERHANDLING "Win32"
+#if defined WIN64
+#     define  NOTSAFE_SEMAPHORE_OVERHANDLING "Win64"
+#     define  WINDOWS_MUTEX_MODEL "Win64"
+#elif defined WIN32
+#     define  NOTSAFE_SEMAPHORE_OVERHANDLING "Win32"
+#     define  WINDOWS_MUTEX_MODEL "Win32"
 #elif defined  (__FreeBSD__)
-#    define NOTSAFE_SEMAPHORE_OVERHANDLING "FreeBSD"
+#     define  NOTSAFE_SEMAPHORE_OVERHANDLING "FreeBSD"
+#     undef   WINDOWS_MUTEX_MODEL
 #elif defined(__APPLE__)
-#    define NOTSAFE_SEMAPHORE_OVERHANDLING "MacOS"
+#     define  NOTSAFE_SEMAPHORE_OVERHANDLING "MacOS"
+#     undef   WINDOWS_MUTEX_MODEL
+// All other possibility - linux, android  and some other, has all needed methods
+#else
+#     undef   NOTSAFE_SEMAPHORE_OVERHANDLING
+#     undef   WINDOWS_MUTEX_MODEL
 #endif
 
-#ifndef INT8_MAX
-#  define INT8_MAX       0x7f
-#  define INT8_MIN       0xff
-#  define UINT8_MAX      0xff
-#  define UINT8_MIN      0x00
-#  define INT16_MAX      0x7fff
-#  define INT16_MIN      0xffff
-#  define UINT16_MAX     0xffff
-#  define UINT16_MIN     0x0000
-#  define INT32_MAX      0x7fffffff
-#  define INT32_MIN      0xffffffff
-#  define UINT32_MAX     0xffffffff
-#  define UINT32_MIN     0x00000000
-#  define INT64_MAX      0x7fffffffffffffff
-#  define INT64_MIN      0xffffffffffffffff
-#  define UINT64_MAX     0xffffffffffffffff
-#  define UINT64_MIN     0x0000000000000000
+#include <stdint.h>
+#
+#if !defined (INT8_MIN)
+#   define INT8_MIN    0xFF
+#endif
+#if !defined (INT8_MAX)
+#   define INT8_MAX    0x7F
+#endif
+#if !defined (UINT8_MIN)
+#   define UINT8_MIN    0x00
+#endif
+#if !defined (UINT8_MAX)
+#   define UINT8_MAX    0xFF
+#endif
+#if !defined (INT16_MAX)
+#   define INT16_MAX    0x7fff
+#endif
+#if !defined (INT16_MIN)
+#   define INT16_MIN    0xffff
+#endif
+#if !defined (UINT16_MAX)
+#  define UINT16_MAX    0xffff
+#endif
+#if !defined (UINT16_MIN)
+#  define UINT16_MIN    0x0000
+#endif
+#if !defined (INT32_MAX)
+#   define INT32_MAX    0x7fffffff
+#endif
+#if !defined (INT32_MIN)
+#   define INT32_MIN    0xffffffff
+#endif
+#if !defined (UINT32_MAX)
+#  define UINT32_MAX    0xffffffff
+#endif
+#if !defined (UINT32_MIN)
+#  define UINT32_MIN    0x00000000
+#endif
+#if !defined (INT64_MAX)
+#   define INT64_MAX    0x7fffffffffffffff
+#endif
+#if !defined (INT64_MIN)
+#   define INT64_MIN    0xffffffffffffffff
+#endif
+#if !defined (UINT64_MAX)
+#  define UINT64_MAX    0xffffffffffffffff
+#endif
+#if !defined (UINT64_MIN)
+#  define UINT64_MIN    0x0000000000000000
 #endif
 
 #define MAX_CLIENT_STAT_VALUE INT16_MAX

@@ -30,13 +30,13 @@ void LFGStateStructure::SetDungeons(LFGDungeonSet dungeons)
     LFGMgr::WriteGuard Guard(sLFGMgr.GetLock());
     m_DungeonsList = dungeons;
     if (m_DungeonsList.empty())
-        m_type = LFG_TYPE_NONE;
+        SetType(LFG_TYPE_NONE);
     else
     {
         if (LFGDungeonEntry const* entry = *m_DungeonsList.begin())
-            m_type = LFGType(entry->type);
+            SetType(LFGType(entry->type));
         else
-            m_type = LFG_TYPE_NONE;
+            SetType(LFG_TYPE_NONE);
     }
 }
 
@@ -45,13 +45,13 @@ void LFGStateStructure::RemoveDungeon(LFGDungeonEntry const* dungeon)
     LFGMgr::WriteGuard Guard(sLFGMgr.GetLock());
     m_DungeonsList.erase(dungeon);
     if (m_DungeonsList.empty())
-        m_type = LFG_TYPE_NONE;
+        SetType(LFG_TYPE_NONE);
     else
     {
         if (LFGDungeonEntry const* entry = *m_DungeonsList.begin())
-            m_type = LFGType(entry->type);
+            SetType(LFGType(entry->type));
         else
-            m_type = LFG_TYPE_NONE;
+            SetType(LFG_TYPE_NONE);
     }
 }
 
