@@ -500,6 +500,10 @@ bool BattleGroundSA::SetupShips()
 
     for (uint8 i = BG_SA_BOAT_ONE; i <= BG_SA_BOAT_TWO; ++i)
     {
+        // Remove old ships
+        if (Phase == SA_ROUND_TWO)
+            DelObject(i);
+
         uint32 boatid=0;
         switch (i)
         {
