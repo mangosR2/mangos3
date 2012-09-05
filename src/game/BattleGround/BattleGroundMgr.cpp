@@ -936,7 +936,7 @@ void BattleGroundQueue::Update(BattleGroundTypeId bgTypeId, BattleGroundBracketI
         // (after what time the ratings aren't taken into account when making teams) then
         // the discard time is current_time - time_to_discard, teams that joined after that, will have their ratings taken into account
         // else leave the discard time on 0, this way all ratings will be discarded
-        uint32 discardTime = WorldTimer::getMSTime() - sBattleGroundMgr.GetRatingDiscardTimer();
+        int32 discardTime = WorldTimer::getMSTime() - sBattleGroundMgr.GetRatingDiscardTimer();
 
         // we need to find 2 teams which will play next game
 
@@ -955,7 +955,7 @@ void BattleGroundQueue::Update(BattleGroundTypeId bgTypeId, BattleGroundBracketI
                 // if group match conditions, then add it to pool
                 if (!(*itr_team[i])->IsInvitedToBGInstanceGUID
                         && (((*itr_team[i])->ArenaTeamRating >= arenaMinRating && (*itr_team[i])->ArenaTeamRating <= arenaMaxRating)
-                            || (*itr_team[i])->JoinTime < discardTime))
+                            || int((*itr_team[i])->JoinTime) < discardTime))
                 {
                     m_SelectionPools[i].AddGroup((*itr_team[i]), MaxPlayersPerTeam);
                     // break for cycle to be able to start selecting another group from same faction queue
@@ -975,7 +975,7 @@ void BattleGroundQueue::Update(BattleGroundTypeId bgTypeId, BattleGroundBracketI
             {
                 if (!(*itr_team[TEAM_INDEX_ALLIANCE])->IsInvitedToBGInstanceGUID
                     && (((*itr_team[TEAM_INDEX_ALLIANCE])->ArenaTeamRating >= arenaMinRating && (*itr_team[TEAM_INDEX_ALLIANCE])->ArenaTeamRating <= arenaMaxRating)
-                        || (*itr_team[TEAM_INDEX_ALLIANCE])->JoinTime < discardTime) )
+                        || int((*itr_team[TEAM_INDEX_ALLIANCE])->JoinTime) < discardTime) )
                 {
                     if ((*itr_team[TEAM_INDEX_ALLIANCE])->ArenaTeamId != teamId)
                     {
@@ -994,7 +994,7 @@ void BattleGroundQueue::Update(BattleGroundTypeId bgTypeId, BattleGroundBracketI
             {
                 if (!(*itr_team[TEAM_INDEX_HORDE])->IsInvitedToBGInstanceGUID
                         && (((*itr_team[TEAM_INDEX_HORDE])->ArenaTeamRating >= arenaMinRating && (*itr_team[TEAM_INDEX_HORDE])->ArenaTeamRating <= arenaMaxRating)
-                            || (*itr_team[TEAM_INDEX_HORDE])->JoinTime < discardTime))
+                            || int((*itr_team[TEAM_INDEX_HORDE])->JoinTime) < discardTime))
                 {
                     if((*itr_team[TEAM_INDEX_HORDE])->ArenaTeamId != teamId)
                     {
@@ -1053,7 +1053,7 @@ BattleGroundMgr::BattleGroundMgr() : m_AutoDistributionTimeChecker(0), m_ArenaTe
 {
     for (uint8 i = BATTLEGROUND_TYPE_NONE; i < MAX_BATTLEGROUND_TYPE_ID; ++i)
         m_BattleGrounds[i].clear();
-    m_NextRatingDiscardUpdate = sWorld.getConfig(CONFIG_UINT32_ARENA_RATING_DISCARD_TIMER);
+    m_NextRatingDiscardUpdate = GetRatingDiscardTimer();
     m_Testing = false;
 }
 
@@ -1104,7 +1104,7 @@ void BattleGroundMgr::Update(uint32 diff)
     }
 
     // if rating difference counts, maybe force-update queues
-    if (sWorld.getConfig(CONFIG_UINT32_ARENA_MAX_RATING_DIFFERENCE) && sWorld.getConfig(CONFIG_UINT32_ARENA_RATING_DISCARD_TIMER))
+    if (sWorld.getConfig(CONFIG_UINT32_ARENA_MAX_RATING_DIFFERENCE) && GetRatingDiscardTimer())
     {
         // it's time to force update
         if (m_NextRatingDiscardUpdate < diff)
@@ -1117,7 +1117,7 @@ void BattleGroundMgr::Update(uint32 diff)
                         BATTLEGROUND_AA, BattleGroundBracketId(bracket),
                         BattleGroundMgr::BGArenaType(BattleGroundQueueTypeId(qtype)), true, 0);
 
-            m_NextRatingDiscardUpdate = sWorld.getConfig(CONFIG_UINT32_ARENA_RATING_DISCARD_TIMER);
+            m_NextRatingDiscardUpdate = GetRatingDiscardTimer();
         }
         else
             m_NextRatingDiscardUpdate -= diff;
