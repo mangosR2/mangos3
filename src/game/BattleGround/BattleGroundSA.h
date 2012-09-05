@@ -200,7 +200,7 @@ class BattleGroundSAScore : public BattleGroundScore
 
 class BattleGroundSA : public BattleGround
 {
-    friend class BattleGroundMgr;
+        friend class BattleGroundMgr;
 
     public:
         BattleGroundSA();
@@ -208,7 +208,7 @@ class BattleGroundSA : public BattleGround
         void Update(uint32 diff);
 
         /* inherited from BattlegroundClass */
-        virtual void AddPlayer(Player *plr);
+        virtual void AddPlayer(Player* plr);
         virtual void StartingEventCloseDoors();
         virtual void StartingEventOpenDoors();
         virtual void EventPlayerDamageGO(Player *player, GameObject* target_obj, uint32 eventId, uint32 doneBy = 0);
@@ -240,7 +240,7 @@ class BattleGroundSA : public BattleGround
         uint32 shipsTimer;
         uint32 pillarOpenTimer;
         /* Scorekeeping */
-        void UpdatePlayerScore(Player *Source, uint32 type, uint32 value);
+        void UpdatePlayerScore(Player* Source, uint32 type, uint32 value);
         /* For boats */
         bool SetupShips();
         void StartShips();
@@ -282,5 +282,4 @@ class BattleGroundSA : public BattleGround
         bool GateRedSunDamaged;
         bool GateYellowMoonDamaged;
 };
-
 #endif

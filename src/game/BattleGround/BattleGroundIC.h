@@ -298,7 +298,7 @@ class BattleGroundICScore : public BattleGroundScore
 
 class BattleGroundIC : public BattleGround
 {
-    friend class BattleGroundMgr;
+        friend class BattleGroundMgr;
 
     public:
         BattleGroundIC();
