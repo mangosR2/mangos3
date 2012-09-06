@@ -23779,9 +23779,9 @@ void Player::SendDuelCountdown(uint32 counter)
     GetSession()->SendPacket(&data);
 }
 
-bool Player::IsImmuneToSpell(SpellEntry const* spellInfo) const
+bool Player::IsImmuneToSpell(SpellEntry const* spellInfo, bool isFriendly) const
 {
-    return Unit::IsImmuneToSpell(spellInfo);
+    return Unit::IsImmuneToSpell(spellInfo, isFriendly);
 }
 
 bool Player::IsImmuneToSpellEffect(SpellEntry const* spellInfo, SpellEffectIndex index) const

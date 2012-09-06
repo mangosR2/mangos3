@@ -822,7 +822,7 @@ void Aura::AreaAuraUpdate(uint32 diff)
                 if (GetSpellProto()->HasAttribute(SPELL_ATTR_EX3_TARGET_ONLY_PLAYER) && i_target->GetTypeId() != TYPEID_PLAYER)
                     continue;
 
-                if (i_target->IsImmuneToSpell(GetSpellProto()))
+                if (i_target->IsImmuneToSpell(GetSpellProto(), GetAffectiveCaster() ? GetAffectiveCaster()->IsFriendlyTo(i_target) : true))
                     continue;
                 else
                 {
@@ -8486,7 +8486,7 @@ void Aura::PeriodicTick()
     if (!holder || !target || !spellProto)
         return;
 
-    if (target->IsImmuneToSpell(spellProto))
+    if (target->IsImmuneToSpell(spellProto, GetAffectiveCaster() ? GetAffectiveCaster()->IsFriendlyTo(target) : true))
         return;
 
     switch(m_modifier.m_auraname)
