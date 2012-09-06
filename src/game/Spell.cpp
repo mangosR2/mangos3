@@ -1400,7 +1400,7 @@ void Spell::DoSpellHitOnUnit(Unit *unit, uint32 effectMask)
     // Recheck immune (only for delayed spells)
     if (m_spellInfo->speed && (
         (IsSpellCauseDamage(m_spellInfo) && unit->IsImmunedToDamage(GetSpellSchoolMask(m_spellInfo))) ||
-        unit->IsImmuneToSpell(m_spellInfo, realCaster->IsFriendlyTo(unit))) &&
+        unit->IsImmuneToSpell(m_spellInfo, GetAffectiveUnitCaster()->IsFriendlyTo(unit))) &&
         !m_spellInfo->HasAttribute(SPELL_ATTR_UNAFFECTED_BY_INVULNERABILITY))
     {
         if (realCaster)
