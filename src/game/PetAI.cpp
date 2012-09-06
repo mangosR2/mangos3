@@ -805,7 +805,7 @@ void PetAI::UpdateAllies()
         m_AllySet.insert(owner->GetObjectGuid());
 }
 
-void PetAI::AttackedBy(Unit *attacker)
+void PetAI::AttackedBy(Unit* attacker)
 {
     if (m_AIType == PET_AI_SLACKER)
     {
