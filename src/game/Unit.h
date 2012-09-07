@@ -899,99 +899,100 @@ enum DamageFlags
 // Spell damage info structure based on structure sending in SMSG_SPELLNONMELEEDAMAGELOG opcode
 struct DamageInfo
 {
-    // Constructors for use with spell and melee damage
-    DamageInfo(Unit *_attacker, Unit *_target, uint32 _SpellID, uint32 _damage)
-        :  attacker(_attacker), target(_target), SpellID(_SpellID), m_spellInfo(NULL)
-    { Reset(_damage); };
+    public:
+        // Constructors for use with spell and melee damage
+        DamageInfo(Unit *_attacker, Unit *_target, uint32 _SpellID, uint32 _damage)
+            :  attacker(_attacker), target(_target), SpellID(_SpellID), m_spellInfo(NULL)
+        { Reset(_damage); };
 
-    DamageInfo(Unit *_attacker, Unit *_target, SpellEntry const* spellInfo, uint32 _damage = 0)
-        :  attacker(_attacker), target(_target), m_spellInfo(spellInfo), SpellID(0)
-    { Reset(_damage); };
+        DamageInfo(Unit *_attacker, Unit *_target, SpellEntry const* spellInfo, uint32 _damage = 0)
+            :  attacker(_attacker), target(_target), m_spellInfo(spellInfo), SpellID(0)
+        { Reset(_damage); };
 
-    // Constructors for use on temporary operation
-    DamageInfo(uint32 _damage)
-        : attacker(NULL), target(NULL), SpellID(0), m_spellInfo(NULL)
-    { Reset(_damage); };
+        // Constructors for use on temporary operation
+        DamageInfo(uint32 _damage)
+            : attacker(NULL), target(NULL), SpellID(0), m_spellInfo(NULL)
+        { Reset(_damage); };
 
-    DamageInfo(uint32 _damage, uint32 _SpellID)
-        : attacker(NULL), target(NULL), SpellID(_SpellID), m_spellInfo(NULL)
-    { Reset(_damage); };
+        DamageInfo(uint32 _damage, uint32 _SpellID)
+            : attacker(NULL), target(NULL), SpellID(_SpellID), m_spellInfo(NULL)
+        { Reset(_damage); };
 
-    DamageInfo(uint32 _damage, SpellEntry const* spellInfo)
-        : attacker(NULL), target(NULL), m_spellInfo(spellInfo), SpellID(0)
-    { Reset(_damage); };
+        DamageInfo(uint32 _damage, SpellEntry const* spellInfo)
+            : attacker(NULL), target(NULL), m_spellInfo(spellInfo), SpellID(0)
+        { Reset(_damage); };
 
-    // main operations
-    void Reset(uint32 _damage = 0);
+        // main operations
+        void Reset(uint32 _damage = 0);
 
-    // compartibility methods
-    void CleanDamage(int32 _signedDamage, uint32 _absorb, WeaponAttackType _attackType, MeleeHitOutcome _hitOutCome)
-    {
-        cleanDamage = _signedDamage;
-        absorb      = _absorb;
-        attackType  = _attackType;
-        hitOutCome  = _hitOutCome;
-    }
+        // compartibility methods
+        void CleanDamage(int32 _signedDamage, uint32 _absorb, WeaponAttackType _attackType, MeleeHitOutcome _hitOutCome)
+        {
+            cleanDamage = _signedDamage;
+            absorb      = _absorb;
+            attackType  = _attackType;
+            hitOutCome  = _hitOutCome;
+        }
 
-    Unit*  attacker;             // Attacker
-    Unit*  target;               // Target for damage
+        Unit*  attacker;             // Attacker
+        Unit*  target;               // Target for damage
 
-    // Spell parameters
-    uint32            GetSpellId()    const { return SpellID; }
-    SpellEntry const* GetSpellProto() const { return m_spellInfo; }
-    SpellSchoolMask   SchoolMask()    const;
+        // Spell parameters
+        uint32            GetSpellId()    const { return SpellID; }
+        SpellEntry const* GetSpellProto() const { return m_spellInfo; }
+        SpellSchoolMask   SchoolMask()    const;
 
-    // Damage types
-    uint32 damage;
-    int32  cleanDamage;          // Used for rage and healing calculation
+        // Damage types
+        uint32 damage;
+        int32  cleanDamage;          // Used for rage and healing calculation
 
-    // Damage calculation
-    uint32 baseDamage;
-    uint32 bonusCrit;
-    int32  bonusDone;
-    int32  bonusTaken;
-    uint32 reduction;
-    uint32 absorb;
-    uint32 resist;
-    uint32 blocked;
-    uint32 Damage() const
-    {
-        return IsHeal() ?
-            (baseDamage + bonusCrit + bonusDone + bonusTaken + reduction + absorb /*+ resist + blocked*/) :
-            (baseDamage + bonusCrit + bonusDone + bonusTaken - reduction - absorb - resist - blocked);
-    };
+        // Damage calculation
+        uint32 baseDamage;
+        uint32 bonusCrit;
+        int32  bonusDone;
+        int32  bonusTaken;
+        uint32 reduction;
+        uint32 absorb;
+        uint32 resist;
+        uint32 blocked;
+        uint32 Damage() const
+        {
+            return IsHeal() ?
+                (baseDamage + bonusCrit + bonusDone + bonusTaken + reduction + absorb /*+ resist + blocked*/) :
+                (baseDamage + bonusCrit + bonusDone + bonusTaken - reduction - absorb - resist - blocked);
+        };
 
-    // Various types
-    WeaponAttackType attackType;
-    DamageEffectType damageType;
-    uint32 HitInfo;
-    uint32 TargetState;
-    MeleeHitOutcome hitOutCome;  // TODO: remove this field (need use TargetState)
+        // Various types
+        WeaponAttackType attackType;
+        DamageEffectType damageType;
+        uint32 HitInfo;
+        uint32 TargetState;
+        MeleeHitOutcome hitOutCome;  // TODO: remove this field (need use TargetState)
 
-    uint32 rage;
+        uint32 rage;
 
-    // Proc states
-    uint32 procAttacker;
-    uint32 procVictim;
-    uint32 procEx;
+        // Proc states
+        uint32 procAttacker;
+        uint32 procVictim;
+        uint32 procEx;
 
-    // Helpers
-    bool   durabilityLoss;
-    bool   physicalLog;
-    bool   unused;
-    bool   IsMeleeDamage() const { return !m_spellInfo; };
-    bool   IsHeal()        const { return cleanDamage < 0; };
+        // Helpers
+        bool   durabilityLoss;
+        bool   physicalLog;
+        bool   unused;
+        bool   IsMeleeDamage() const { return !m_spellInfo; };
+        bool   IsHeal()        const { return cleanDamage < 0; };
 
-    uint32 const&  GetFlags();
-    void           AddFlag(DamageFlags flag)       { m_flags |= (1 << flag); };
-    void           RemoveFlag(DamageFlags flag)    { m_flags &= ~(1 << flag); };
-    bool           HasFlag(DamageFlags flag) const { return (m_flags & (1 << flag)); };
+        uint32 const&  GetFlags();
+        void           AddFlag(DamageFlags flag)       { m_flags |= (1 << flag); };
+        void           RemoveFlag(DamageFlags flag)    { m_flags &= ~(1 << flag); };
+        bool           HasFlag(DamageFlags flag) const { return (m_flags & (1 << flag)); };
 
     private:
-    DamageInfo();     // Don't allow plain initialization!
-    uint32            m_flags;
-    SpellEntry const* m_spellInfo;
-    uint32            SpellID;
+        DamageInfo();     // Don't allow plain initialization!
+        uint32            m_flags;
+        SpellEntry const* m_spellInfo;
+        uint32            SpellID;
 };
 
 
