@@ -11931,6 +11931,11 @@ void Unit::ProcDamageAndSpellFor(bool isVictim, DamageInfo* damageInfo)
                     AddComboPoints(pTarget, 1);
                     StartReactiveTimer( REACTIVE_OVERPOWER );
                 }
+                // Wolverine Bite and similate
+                else if ((procExtra & PROC_EX_CRITICAL_HIT) && GetObjectGuid().IsPet() && isCharmedOwnedByPlayerOrPlayer())
+                {
+                    AddComboPoints(pTarget,1);
+                }
             }
         }
     }
