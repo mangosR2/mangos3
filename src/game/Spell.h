@@ -450,7 +450,7 @@ class Spell
         void FillRaidOrPartyManaPriorityTargets(UnitList &targetUnitMap, Unit* member, Unit* center, float radius, uint32 count, bool raid, bool withPets, bool withcaster);
         void FillRaidOrPartyHealthPriorityTargets(UnitList &targetUnitMap, Unit* member, Unit* center, float radius, uint32 count, bool raid, bool withPets, bool withcaster);
 
-        template<typename T> WorldObject* FindCorpseUsing();
+        template<typename T> WorldObject* FindCorpseUsing(uint32 corpseTypeMask);
 
         bool CheckTarget( Unit* target, SpellEffectIndex eff );
         bool CheckTargetBeforeLimitation(Unit* target, SpellEffectIndex eff);

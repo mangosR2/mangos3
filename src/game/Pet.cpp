@@ -2138,10 +2138,23 @@ bool Pet::Create(uint32 guidlow, CreatureCreatePos& cPos, CreatureInfo const* ci
     return true;
 }
 
-bool Pet::HasSpell(uint32 spell) const
+bool Pet::HasSpell(uint32 spellId) const
 {
-    PetSpellMap::const_iterator itr = m_spells.find(spell);
-    return (itr != m_spells.end() && itr->second.state != PETSPELL_REMOVED );
+    uint32 parentSpell = 0;
+    switch (spellId)
+    {
+        case 54045:
+            parentSpell = 54044;
+            break;
+        case 52749:
+            parentSpell = 52748;
+            break;
+        default:
+            parentSpell = spellId;
+            break;
+    }
+    PetSpellMap::const_iterator itr = m_spells.find(parentSpell);
+    return (itr != m_spells.end() && itr->second.state != PETSPELL_REMOVED);
 }
 
 // Get all passive spells in our skill line

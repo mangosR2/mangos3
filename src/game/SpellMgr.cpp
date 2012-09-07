@@ -763,6 +763,8 @@ bool IsPositiveEffect(SpellEntry const *spellproto, SpellEffectIndex effIndex)
             switch(spellproto->Id)
             {
                 case 28441:                                 // AB Effect 000
+                case 52748:                                 // Voracious Appetite
+                case 54044:                                 // Carrion Feeder
                     return false;
                 case 48021:                                 // support for quest 12173
                     return true;
@@ -5308,10 +5310,13 @@ SpellPreferredTargetType GetPreferredTargetForSpell(SpellEntry const* spellInfo)
         return positive ? SPELL_PREFERRED_TARGET_SELF : SPELL_PREFERRED_TARGET_VICTIM;
 
     uint32 firstTarget = spellInfo->EffectImplicitTargetA[EFFECT_INDEX_0];
+    uint32 firstTargetB = spellInfo->EffectImplicitTargetB[EFFECT_INDEX_0];
+
+    if (firstTarget == TARGET_NONE && firstTargetB == TARGET_NONE)
+        return SPELL_PREFERRED_TARGET_SELF;
 
     if (!IsSpellCauseDamage(spellInfo) && firstTarget == TARGET_DUELVSPLAYER)
         return SPELL_PREFERRED_TARGET_RANDOM;
-
     if (positive)
     {
         switch (firstTarget)

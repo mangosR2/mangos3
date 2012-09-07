@@ -541,7 +541,7 @@ namespace MaNGOS
     class RaiseDeadObjectCheck
     {
         public:
-            RaiseDeadObjectCheck(WorldObject const* fobj, float range) : i_fobj(fobj), i_range(range) {}
+            RaiseDeadObjectCheck(WorldObject const* fobj, float range, uint32 corpseTypeMask) : i_fobj(fobj), i_range(range), i_typeMask(corpseTypeMask) {}
             WorldObject const& GetFocusObject() const { return *i_fobj; }
             bool operator()(Player* u)
             {
@@ -554,7 +554,8 @@ namespace MaNGOS
             bool operator()(Creature* u)
             {
                 if (u->isAlive() || u->IsDeadByDefault() || u->IsTaxiFlying() ||
-                   (u->GetCreatureTypeMask() & CREATURE_TYPEMASK_HUMANOID_OR_UNDEAD) == 0)
+                   ((i_typeMask && !(u->GetCreatureTypeMask() & i_typeMask)) ||
+                   !(u->GetCreatureTypeMask() & CREATURE_TYPEMASK_HUMANOID_OR_UNDEAD)))
                     return false;
 
                 return i_fobj->IsWithinDistInMap(u, i_range);
@@ -563,12 +564,13 @@ namespace MaNGOS
         private:
             WorldObject const* i_fobj;
             float i_range;
+            uint32 i_typeMask;
     };
 
     class RaiseAllyObjectCheck
     {
         public:
-            RaiseAllyObjectCheck(WorldObject const* fobj, float range) : i_fobj(fobj), i_range(range) {}
+            RaiseAllyObjectCheck(WorldObject const* fobj, float range, uint32 corpseTypeMask = 0) : i_fobj(fobj), i_range(range) {}
             WorldObject const& GetFocusObject() const { return *i_fobj; }
             bool operator()(Player* u)
             {
@@ -586,7 +588,7 @@ namespace MaNGOS
     class CannibalizeObjectCheck
     {
         public:
-            CannibalizeObjectCheck(WorldObject const* fobj, float range) : i_fobj(fobj), i_range(range) {}
+            CannibalizeObjectCheck(WorldObject const* fobj, float range, uint32 corpseTypeMask) : i_fobj(fobj), i_range(range), i_typeMask(corpseTypeMask) {}
             WorldObject const& GetFocusObject() const { return *i_fobj; }
             bool operator()(Player* u)
             {
@@ -599,7 +601,7 @@ namespace MaNGOS
             bool operator()(Creature* u)
             {
                 if (i_fobj->IsFriendlyTo(u) || u->isAlive() || u->IsTaxiFlying() ||
-                        (u->GetCreatureTypeMask() & CREATURE_TYPEMASK_HUMANOID_OR_UNDEAD) == 0)
+                        !(u->GetCreatureTypeMask() & i_typeMask))
                     return false;
 
                 return i_fobj->IsWithinDistInMap(u, i_range);
@@ -608,6 +610,7 @@ namespace MaNGOS
         private:
             WorldObject const* i_fobj;
             float i_range;
+            uint32 i_typeMask;
     };
 
     // WorldObject do classes

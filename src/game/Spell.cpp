@@ -502,7 +502,7 @@ Spell::~Spell()
 }
 
 template<typename T>
-WorldObject* Spell::FindCorpseUsing()
+WorldObject* Spell::FindCorpseUsing(uint32 corpseTypeMask)
 {
     // non-standard target selection
     SpellRangeEntry const* srange = sSpellRangeStore.LookupEntry(m_spellInfo->rangeIndex);
@@ -510,11 +510,14 @@ WorldObject* Spell::FindCorpseUsing()
 
     WorldObject* result = NULL;
 
-    T u_check((Player*)m_caster, max_range);
+    T u_check(m_caster, max_range, corpseTypeMask);
     MaNGOS::WorldObjectSearcher<T> searcher(result, u_check);
 
-    Cell::VisitGridObjects(m_caster, searcher, max_range);
+    // Search for creature corpse only if typemask found
+    if (corpseTypeMask != CREATURE_TYPEMASK_NONE)
+        Cell::VisitGridObjects(m_caster, searcher, max_range);
 
+    // Players corpse be searched only if no creatures corpse found
     if (!result)
         Cell::VisitWorldObjects(m_caster, searcher, max_range);
 
@@ -522,7 +525,7 @@ WorldObject* Spell::FindCorpseUsing()
 }
 
 // explicitly instantiate for use in SpellEffects.cpp
-template WorldObject* Spell::FindCorpseUsing<MaNGOS::RaiseDeadObjectCheck>();
+template WorldObject* Spell::FindCorpseUsing<MaNGOS::RaiseDeadObjectCheck>(uint32 corpseTypeMask = CREATURE_TYPEMASK_NONE);
 
 void Spell::FillTargetMap()
 {
@@ -2980,42 +2983,10 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
             {
                 case SPELL_EFFECT_DUMMY:
                 {
-                    switch(m_spellInfo->Id)
-                    {
-                        case 20577:                         // Cannibalize
-                        {
-                            WorldObject* result = FindCorpseUsing<MaNGOS::CannibalizeObjectCheck> ();
 
-                            if (result)
-                            {
-                                switch(result->GetTypeId())
-                                {
-                                    case TYPEID_UNIT:
-                                    case TYPEID_PLAYER:
-                                        targetUnitMap.push_back((Unit*)result);
-                                        break;
-                                    case TYPEID_CORPSE:
-                                        m_targets.setCorpseTarget((Corpse*)result);
-                                        if (Player* owner = ObjectAccessor::FindPlayer(((Corpse*)result)->GetOwnerGuid()))
-                                            targetUnitMap.push_back(owner);
-                                        break;
-                                }
-                            }
-                            else
-                            {
-                                // clear cooldown at fail
-                                if (m_caster->GetTypeId() == TYPEID_PLAYER)
-                                    ((Player*)m_caster)->RemoveSpellCooldown(m_spellInfo->Id, true);
-                                SendCastResult(SPELL_FAILED_NO_EDIBLE_CORPSES);
-                                finish(false);
-                            }
-                            break;
-                        }
-                        default:
-                            if (m_targets.getUnitTarget())
-                                targetUnitMap.push_back(m_targets.getUnitTarget());
-                            break;
-                    }
+                    if (m_targets.getUnitTarget())
+                        targetUnitMap.push_back(m_targets.getUnitTarget());
+
                     // Add AoE target-mask to self, if no target-dest provided already
                     if ((m_targets.m_targetMask & TARGET_FLAG_DEST_LOCATION) == 0)
                         m_targets.setDestination(m_caster->GetPositionX(), m_caster->GetPositionY(), m_caster->GetPositionZ());
@@ -3319,6 +3290,10 @@ void Spell::cancel(bool force)
     if (m_spellState == SPELL_STATE_FINISHED)
         return;
 
+    DEBUG_FILTER_LOG(LOG_FILTER_SPELL_CAST, "Spell::cancel spell %u caster %s target %s cancelled.", 
+        m_spellInfo->Id, m_caster ? m_caster->GetObjectGuid().GetString().c_str() : "<none>",
+        m_targets.getUnitTarget() ? m_targets.getUnitTarget()->GetObjectGuid().GetString().c_str() : "<none>");
+
     // channeled spells don't display interrupted message even if they are interrupted, possible other cases with no "Interrupted" message
     bool sendInterrupt = IsChanneledSpell(m_spellInfo) ? false : true;
 
@@ -3397,6 +3372,8 @@ void Spell::cast(bool skipCheck)
         cancel();
         m_caster->DecreaseCastCounter();
         SetExecutedCurrently(false);
+        DEBUG_FILTER_LOG(LOG_FILTER_SPELL_CAST, "Spell::cast  spell %u caster %s cancelled at lost main target",
+             m_spellInfo->Id, m_caster ? m_caster->GetObjectGuid().GetString().c_str() : "<none>");
         return;
     }
 
@@ -3410,6 +3387,8 @@ void Spell::cast(bool skipCheck)
         finish(false);
         m_caster->DecreaseCastCounter();
         SetExecutedCurrently(false);
+        DEBUG_FILTER_LOG(LOG_FILTER_SPELL_CAST, "Spell::cast  spell %u caster %s cancelled by unsufficient power (code %u)",
+             m_spellInfo->Id, m_caster ?  m_caster->GetObjectGuid().GetString().c_str() : "<none>", castResult);
         return;
     }
 
@@ -3423,6 +3402,8 @@ void Spell::cast(bool skipCheck)
             finish(false);
             m_caster->DecreaseCastCounter();
             SetExecutedCurrently(false);
+            DEBUG_FILTER_LOG(LOG_FILTER_SPELL_CAST, "Spell::cast  spell %u caster %s cancelled by non-stricted check (code %u)",
+                 m_spellInfo->Id, m_caster ? m_caster->GetObjectGuid().GetString().c_str() : "<none>", castResult);
             return;
         }
     }
@@ -3671,6 +3652,8 @@ void Spell::cast(bool skipCheck)
         finish(false);
         m_caster->DecreaseCastCounter();
         SetExecutedCurrently(false);
+        DEBUG_FILTER_LOG(LOG_FILTER_SPELL_CAST, "Spell::cast  spell %u caster %s cancelled by CheckCastTargets check (code %u)",
+             m_spellInfo->Id, m_caster ? m_caster->GetObjectGuid().GetString().c_str() : "<none>", checkTargetResult);
         return;
     }
 
@@ -5825,6 +5808,33 @@ SpellCastResult Spell::CheckCast(bool strict)
                     if (!m_caster->GetTotemGuid(TOTEM_SLOT_FIRE))
                         return SPELL_FAILED_TOTEMS;
                 }
+                // Voracious Appetite && Cannibalize && Carrion Feeder
+                else if (strict /*only in first check!*/
+                    && m_spellInfo->HasAttribute(SPELL_ATTR_ABILITY)
+                    && m_spellInfo->HasAttribute(SPELL_ATTR_EX2_ALLOW_DEAD_TARGET)
+                    && m_spellInfo->TargetCreatureType != CREATURE_TYPEMASK_NONE)
+                {
+                    WorldObject* result = FindCorpseUsing<MaNGOS::CannibalizeObjectCheck>(m_spellInfo->TargetCreatureType);
+                    if (result)
+                    {
+                        switch(result->GetTypeId())
+                        {
+                            case TYPEID_UNIT:
+                            case TYPEID_PLAYER:
+                                m_targets.setUnitTarget((Unit*)result);
+                                break;
+                            case TYPEID_CORPSE:
+                                m_targets.setCorpseTarget((Corpse*)result);
+                                if (Player* owner = ObjectAccessor::FindPlayer(((Corpse*)result)->GetOwnerGuid()))
+                                    m_targets.setUnitTarget(owner);
+                                break;
+                            default:
+                                return SPELL_FAILED_NO_EDIBLE_CORPSES;
+                        }
+                    }
+                    else
+                        return SPELL_FAILED_NO_EDIBLE_CORPSES;
+                }
                 break;
             }
             case SPELL_EFFECT_SCHOOL_DAMAGE:
@@ -7747,8 +7757,10 @@ bool Spell::CheckTarget( Unit* target, SpellEffectIndex eff )
                 return false;
             break;
         case SPELL_EFFECT_DUMMY:
-            if (m_spellInfo->Id != 20577)                    // Cannibalize
-                break;
+            if (!m_spellInfo->HasAttribute(SPELL_ATTR_ABILITY)
+                || !m_spellInfo->HasAttribute(SPELL_ATTR_EX2_ALLOW_DEAD_TARGET)
+                || m_spellInfo->TargetCreatureType == CREATURE_TYPEMASK_NONE)
+            break;                                          // Cannibalize-like spell bundle
             /* no break - fall through*/
         case SPELL_EFFECT_RESURRECT_NEW:
             // player far away, maybe his corpse near?
@@ -8192,10 +8204,7 @@ bool Spell::FillCustomTargetMap(SpellEffectIndex i, UnitList &targetUnitMap)
         }
         case 46584: // Raise Dead
         {
-            Unit* pCorpseTarget = NULL;
-            MaNGOS::NearestCorpseInObjectRangeCheck u_check(*m_caster, radius);
-            MaNGOS::UnitLastSearcher<MaNGOS::NearestCorpseInObjectRangeCheck> searcher(pCorpseTarget, u_check);
-            Cell::VisitGridObjects(m_caster, searcher, radius);
+            Unit* pCorpseTarget = (Unit*)FindCorpseUsing<MaNGOS::RaiseDeadObjectCheck>(CREATURE_TYPEMASK_NONE);
 
             if (pCorpseTarget)
                 targetUnitMap.push_back(pCorpseTarget);
@@ -8424,7 +8433,7 @@ bool Spell::FillCustomTargetMap(SpellEffectIndex i, UnitList &targetUnitMap)
         }
         case 61999: // Raise ally
         {
-            WorldObject* result = FindCorpseUsing<MaNGOS::RaiseAllyObjectCheck>();
+            WorldObject* result = FindCorpseUsing<MaNGOS::RaiseAllyObjectCheck>(CREATURE_TYPEMASK_NONE);
             if (result)
                 targetUnitMap.push_back((Unit*)result);
             else

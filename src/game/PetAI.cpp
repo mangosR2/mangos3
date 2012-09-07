@@ -97,6 +97,13 @@ void PetAI::Reset()
             continue;
         }
 
+        // Voracious Appetite && Cannibalize && Carrion Feeder
+        if (spellInfo->HasAttribute(SPELL_ATTR_ABILITY) && spellInfo->HasAttribute(SPELL_ATTR_EX2_ALLOW_DEAD_TARGET))
+        {
+            m_spellType[PET_SPELL_HEAL].insert(spellID);
+            continue;
+        }
+
         if (IsPositiveSpell(spellInfo) && IsSpellAppliesAura(spellInfo))
         {
             m_spellType[PET_SPELL_BUFF].insert(spellID);
