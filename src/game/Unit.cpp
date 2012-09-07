@@ -845,16 +845,15 @@ uint32 Unit::DealDamage(DamageInfo* damageInfo)
             AuraList const& vShareDamageAuras = pVictim->GetAurasByType(SPELL_AURA_SHARE_DAMAGE_PCT);
             for (AuraList::const_iterator itr = vShareDamageAuras.begin(); itr != vShareDamageAuras.end(); ++itr)
             {
-                Aura* aura = *itr;
-                if (!aura || !aura->GetHolder() || aura->GetHolder()->IsDeleted())
+                if (!(*itr) || !(*itr)->GetHolder() || (*itr)->GetHolder()->IsDeleted())
                     continue;
 
-                if (Unit* shareTarget = aura->GetCaster())
+                if (Unit* shareTarget = (*itr)->GetCaster())
                 {
-                    if (shareTarget != pVictim && (aura->GetMiscValue() & damageInfo->SchoolMask()))
+                    if (shareTarget != pVictim && ((*itr)->GetMiscValue() & damageInfo->SchoolMask()))
                     {
-                        SpellEntry const* shareSpell = aura->GetSpellProto();
-                        int32 shareDamage = int32(damageInfo->damage * aura->GetModifier()->m_amount / 100.0f);
+                        SpellEntry const* shareSpell = (*itr)->GetSpellProto();
+                        int32 shareDamage = int32(damageInfo->damage * (*itr)->GetModifier()->m_amount / 100.0f);
                         linkedDamageList.push_back(DamageInfo(this, shareTarget, spellProto, shareDamage));
                         DamageInfo* sharedDamageInfo   = &linkedDamageList.back();
                         DealDamageMods(sharedDamageInfo);
