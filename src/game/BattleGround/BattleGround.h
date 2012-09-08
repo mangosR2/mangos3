@@ -405,7 +405,7 @@ class BattleGround
         BattleGroundScoreMap::const_iterator GetPlayerScoresBegin() const { return m_PlayerScores.begin(); }
         BattleGroundScoreMap::const_iterator GetPlayerScoresEnd() const { return m_PlayerScores.end(); }
         uint32 GetPlayerScoresSize() const { return m_PlayerScores.size(); }
-        uint32 GetPlayerScore(Player *Source, uint32 type);
+        uint32 GetPlayerScore(Player* pPlayer, uint32 type);
 
         void StartBattleGround();
 

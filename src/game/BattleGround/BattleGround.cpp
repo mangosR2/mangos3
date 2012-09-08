@@ -355,9 +355,9 @@ BattleGround::~BattleGround()
 }
 
 /* Map pointers */
-void BattleGround::SetBgMap(BattleGroundMap* map) 
+void BattleGround::SetBgMap(BattleGroundMap* map)
 {
-    m_Map = map; 
+    m_Map = map;
 }
 
 BattleGroundMap* BattleGround::GetBgMap()
@@ -1438,13 +1438,16 @@ void BattleGround::AddPlayer(Player* plr)
 uint32 BattleGround::GetDamageDoneForTeam(Team team)
 {
     uint32 finaldamage = 0;
-    for(BattleGroundPlayerMap::iterator itr = m_Players.begin(); itr != m_Players.end(); ++itr)
+    for (BattleGroundPlayerMap::iterator itr = m_Players.begin(); itr != m_Players.end(); ++itr)
     {
-        Team bgTeam = itr->second.PlayerTeam;
-        Player *plr = sObjectMgr.GetPlayer(itr->first);
+        Player* plr = sObjectMgr.GetPlayer(itr->first);
         if (!plr)
             continue;
-        if(!bgTeam) bgTeam = plr->GetTeam();
+
+        Team bgTeam = itr->second.PlayerTeam;
+        if (!bgTeam)
+            bgTeam = plr->GetTeam();
+
         if (bgTeam == team)
             finaldamage += GetPlayerScore(plr, SCORE_DAMAGE_DONE);
     }
@@ -2116,19 +2119,26 @@ GameObject* BattleGround::GetBGObject(uint32 type)
     return obj;
 }
 
-uint32 BattleGround::GetPlayerScore(Player *Source, uint32 type)
+uint32 BattleGround::GetPlayerScore(Player* pPlayer, uint32 type)
 {
-    BattleGroundScoreMap::const_iterator itr = m_PlayerScores.find(Source->GetObjectGuid());
-
+    BattleGroundScoreMap::const_iterator itr = m_PlayerScores.find(pPlayer->GetObjectGuid());
     if (itr == m_PlayerScores.end())                         // player not found...
         return 0;
 
     switch(type)
     {
-        case SCORE_KILLING_BLOWS:                           // Killing blows
+        case SCORE_KILLING_BLOWS:                            // Killing blows
             return itr->second->KillingBlows;
-        case SCORE_DEATHS:                                  // Deaths
+        case SCORE_DEATHS:                                   // Deaths
             return itr->second->Deaths;
+        case SCORE_HONORABLE_KILLS:                          // Honorable kills
+            return itr->second->HonorableKills;
+        case SCORE_BONUS_HONOR:                              // Honor bonus
+            return itr->second->BonusHonor;
+        case SCORE_DAMAGE_DONE:                              // Damage Done
+            return itr->second->DamageDone;
+        case SCORE_HEALING_DONE:                             // Healing Done
+            return itr->second->HealingDone;
         default:
             sLog.outError("BattleGround: Unknown player score type %u", type);
             return 0;
