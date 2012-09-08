@@ -1884,7 +1884,7 @@ void Unit::CalculateMeleeDamage(DamageInfo* damageInfo)
             // Increase crit damage from SPELL_AURA_MOD_CRIT_PERCENT_VERSUS
             mod += GetTotalAuraModifierByMiscMask(SPELL_AURA_MOD_CRIT_PERCENT_VERSUS, crTypeMask);
             if (mod!=0)
-                damageInfo->damage  = int32((damageInfo->damage) * float((100.0f + mod)/100.0f));
+                damageInfo->damage = int32((damageInfo->damage) * float((100.0f + mod)/100.0f));
 
             // Resilience - reduce crit damage
             uint32 reduction_affected_damage = CalcNotIgnoreDamageReduction(damageInfo);

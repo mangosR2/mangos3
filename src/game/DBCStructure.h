@@ -2208,7 +2208,6 @@ struct SpellEntry
         bool IsFitToFamilyMask(SpellFamily family, T t) const;
 };
 
-
 // A few fields which are required for automated convertion
 // NOTE that these fields are count by _skipping_ the fields that are unused!
 #define LOADED_SPELLDBC_FIELD_POS_EQUIPPED_ITEM_CLASS  65   // Must be converted to -1
