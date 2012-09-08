@@ -3188,11 +3188,18 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                 }
                 case 55931:                                 // Conjure Flame Sphere
                 {
-                    m_caster->CastSpell(m_caster, 55895, true);
+                    float x, y, z;
+                    m_caster->GetPosition(x, y, z);
                     if (m_caster->GetMap()->IsRegularDifficulty())
-                        return;
-                    m_caster->CastSpell(m_caster, 59511, true);
-                    m_caster->CastSpell(m_caster, 59512, true);
+                    {
+                        m_caster->CastSpell(x, y, z + 5.0f, 55895, true);
+                    }
+                    else
+                    {
+                        m_caster->CastSpell(x, y, z + 5.0f, 55895, true);
+                        m_caster->CastSpell(x, y, z + 5.0f, 59511, true);
+                        m_caster->CastSpell(x, y, z + 5.0f, 59512, true);
+                    }
                     return;
                 }
                 case 56430:                                 // Arcane Bomb
