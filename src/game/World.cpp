@@ -668,6 +668,8 @@ void World::LoadConfigSettings(bool reload)
 
     setConfig(CONFIG_BOOL_BLINK_ANIMATION_TYPE, "BlinkAnimationType", false);
 
+    setConfig(CONFIG_BOOL_FACTION_AND_RACE_CHANGE_WITHOUT_RENAMING, "FactiomAndRaceChangeWithoutRenaming", false);
+
     setConfigMinMax(CONFIG_UINT32_START_PLAYER_MONEY, "StartPlayerMoney", 0, 0, MAX_MONEY_AMOUNT);
 
     setConfig(CONFIG_UINT32_MAX_HONOR_POINTS, "MaxHonorPoints", 75000);

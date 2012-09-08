@@ -945,6 +945,10 @@ LexicsCutterNoActionOnGM = 1
 #        Default: 0 - disabled (only GM's may transfer to this maps
 #                 1 - enabled  (any player, fit to custom areatrigger_teleport condition, may transfer to this maps).
 #
+#    FactiomAndRaceChangeWithoutRenaming
+#        Default: 0 - false
+#                 1 - true -> not blizzlike
+#
 ###################################################################################################################
 
 GameType = 1
@@ -1027,6 +1031,7 @@ CrowdControlHPBase = 0.1
 AllowTransferToCustomMap = 0
 ResilenceAlternativeCalculation = 0
 BlinkAnimationType = 0
+FactiomAndRaceChangeWithoutRenaming = 0
 
 ###################################################################################################################
 # PLAYER INTERACTION
