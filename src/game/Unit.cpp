@@ -9860,12 +9860,12 @@ bool Unit::canDetectInvisibilityOf(Unit const* u) const
 
 void Unit::UpdateSpeed(UnitMoveType mtype, bool forced, float ratio)
 {
-    bool is_player_pet = false;
+    bool isPlayerPet = false;
     if (GetTypeId() == TYPEID_UNIT)
     {
         Creature* pCreature = (Creature*)this;
         if ((pCreature->IsPet() && pCreature->GetOwnerGuid().IsPlayer()))
-        is_player_pet = true;
+            isPlayerPet = true;
     }
     // not in combat pet have same speed as owner
     switch(mtype)
@@ -9896,7 +9896,7 @@ void Unit::UpdateSpeed(UnitMoveType mtype, bool forced, float ratio)
             break;
         case MOVE_RUN:
         {
-            if (GetTypeId() == TYPEID_UNIT && !is_player_pet)
+            if (GetTypeId() == TYPEID_UNIT && !isPlayerPet)
                 ratio *= ((Creature*)this)->GetCreatureInfo()->speed_run;
 
             if (IsMounted()) // Use on mount auras
@@ -10008,7 +10008,7 @@ void Unit::UpdateSpeed(UnitMoveType mtype, bool forced, float ratio)
             speed = min_speed;
     }
 
-    if (GetTypeId() == TYPEID_UNIT && !is_player_pet)
+    if (GetTypeId() == TYPEID_UNIT && !isPlayerPet)
     {
         switch(mtype)
         {
