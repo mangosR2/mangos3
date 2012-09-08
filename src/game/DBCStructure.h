@@ -2098,7 +2098,7 @@ struct SpellEntry
 
     bool IsFitToFamilyMask(uint64 familyFlags, uint32 familyFlags2 = 0) const
     {
-        return SpellFamilyFlags.IsFitToFamilyMask(familyFlags, familyFlags2);
+        return GetSpellFamilyFlags().IsFitToFamilyMask(familyFlags, familyFlags2);
     }
 
     bool IsFitToFamily(SpellFamily family, uint64 familyFlags, uint32 familyFlags2 = 0) const
@@ -2108,7 +2108,7 @@ struct SpellEntry
 
     bool IsFitToFamilyMask(ClassFamilyMask const& mask) const
     {
-        return SpellFamilyFlags.IsFitToFamilyMask(mask);
+        return GetSpellFamilyFlags().IsFitToFamilyMask(mask);
     }
 
     bool IsFitToFamily(SpellFamily family, ClassFamilyMask const& mask) const

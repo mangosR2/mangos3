@@ -3795,7 +3795,7 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(Unit *pVictim, DamageIn
             break;
         case SPELLFAMILY_WARRIOR:
             // Deep Wounds (replace triggered spells to directly apply DoT), dot spell have familyflags
-            if (auraSpellInfo->SpellFamilyName == SPELLFAMILY_WARRIOR && auraSpellInfo->SpellIconID == 243)
+            if (auraSpellInfo->SpellIconID == 243)
             {
                 bool bOffHand = procFlags & PROC_FLAG_SUCCESSFUL_OFFHAND_HIT;
                 if (bOffHand && !haveOffhandWeapon())

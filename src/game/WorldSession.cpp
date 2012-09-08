@@ -529,7 +529,7 @@ void WorldSession::LogoutPlayer(bool Save)
             {
                 bool dismiss = true;
                 if (!base->IsTemporarySummon() ||
-                    base->GetVehicleInfo()->GetEntry()->m_flags & (VEHICLE_FLAG_NOT_DISMISS | VEHICLE_FLAG_ACCESSORY))
+                    (base->GetVehicleInfo()->GetEntry()->m_flags & (VEHICLE_FLAG_NOT_DISMISS | VEHICLE_FLAG_ACCESSORY)))
                     dismiss = false;
 
                 if (!base->RemoveSpellsCausingAuraByCaster(SPELL_AURA_CONTROL_VEHICLE, GetPlayer()->GetObjectGuid()))

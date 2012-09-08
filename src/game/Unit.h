@@ -2242,8 +2242,8 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         Transport* m_transport;
 
         VehicleInfo* m_vehicleInfo;
-        VehicleKitPtr  m_pVehicleKit;
-        VehicleKitPtr  m_pVehicle;
+        VehicleKitPtr m_pVehicleKit;
+        VehicleKitPtr m_pVehicle;
 
         void DisableSpline();
         bool m_isCreatureLinkingTrigger;
