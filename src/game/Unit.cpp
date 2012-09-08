@@ -11780,7 +11780,7 @@ void Unit::DoPetCastSpell(Player *owner, uint8 cast_count, SpellCastTargets* tar
             else
                 SendPetAIReaction();
         }
-/*
+
         if (unit_target && owner && !owner->IsFriendlyTo(unit_target) && !HasAuraType(SPELL_AURA_MOD_POSSESS))
         {
             // This is true if pet has no target or has target but targets differs.
@@ -11795,7 +11795,7 @@ void Unit::DoPetCastSpell(Player *owner, uint8 cast_count, SpellCastTargets* tar
                     pet->AI()->AttackStart(unit_target);
             }
         }
-*/
+
         spell->prepare(&tmpTargets, triggeredByAura);
     }
     else if (pet)
