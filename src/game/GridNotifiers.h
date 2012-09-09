@@ -553,9 +553,9 @@ namespace MaNGOS
             bool operator()(Corpse* u);
             bool operator()(Creature* u)
             {
-                if (u->isAlive() || u->IsDeadByDefault() || u->IsTaxiFlying() ||
+                if (u->isAlive() || u->IsDeadByDefault() ||
                    ((i_typeMask && !(u->GetCreatureTypeMask() & i_typeMask)) ||
-                   !(u->GetCreatureTypeMask() & CREATURE_TYPEMASK_HUMANOID_OR_UNDEAD)))
+                   (i_typeMask == CREATURE_TYPEMASK_NONE && !(u->GetCreatureTypeMask() & CREATURE_TYPEMASK_HUMANOID_OR_UNDEAD))))
                     return false;
 
                 return i_fobj->IsWithinDistInMap(u, i_range);
@@ -600,7 +600,7 @@ namespace MaNGOS
             bool operator()(Corpse* u);
             bool operator()(Creature* u)
             {
-                if (i_fobj->IsFriendlyTo(u) || u->isAlive() || u->IsTaxiFlying() ||
+                if (i_fobj->IsFriendlyTo(u) || u->isAlive() ||
                         !(u->GetCreatureTypeMask() & i_typeMask))
                     return false;
 

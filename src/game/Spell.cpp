@@ -501,8 +501,7 @@ Spell::~Spell()
 {
 }
 
-template<typename T>
-WorldObject* Spell::FindCorpseUsing(uint32 corpseTypeMask)
+template<typename T> WorldObject* Spell::FindCorpseUsing(uint32 corpseTypeMask)
 {
     // non-standard target selection
     SpellRangeEntry const* srange = sSpellRangeStore.LookupEntry(m_spellInfo->rangeIndex);
@@ -523,9 +522,6 @@ WorldObject* Spell::FindCorpseUsing(uint32 corpseTypeMask)
 
     return result;
 }
-
-// explicitly instantiate for use in SpellEffects.cpp
-template WorldObject* Spell::FindCorpseUsing<MaNGOS::RaiseDeadObjectCheck>(uint32 corpseTypeMask = CREATURE_TYPEMASK_NONE);
 
 void Spell::FillTargetMap()
 {
