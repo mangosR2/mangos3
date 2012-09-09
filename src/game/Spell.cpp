@@ -916,7 +916,7 @@ void Spell::CleanupTargetList()
 
 void Spell::AddUnitTarget(Unit* pVictim, SpellEffectIndex effIndex)
 {
-    if (m_spellInfo->Effect[effIndex] == 0)
+    if (m_spellInfo->Effect[effIndex] == SPELL_EFFECT_NONE || !pVictim)
         return;
 
     // Check for effect immune skip if immuned
