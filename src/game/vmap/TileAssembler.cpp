@@ -440,7 +440,7 @@ bool GroupModel_Raw::Read(FILE * rf)
             if (fread(indexarray, nindexes*sizeof(uint16), 1, rf) != 1) 
             {
                 fclose(rf); 
-                delete indexarray;
+                delete[] indexarray;
                 printf("readfail, op = %i\n", readOperation); 
                 return false;
             }
@@ -465,7 +465,7 @@ bool GroupModel_Raw::Read(FILE * rf)
             if (fread(vectorarray, nvectors*sizeof(float)*3, 1, rf) != 1) 
             {
                 fclose(rf); 
-                delete vectorarray;
+                delete[] vectorarray;
                 printf("readfail, op = %i\n", readOperation); 
                 return false;
             }
