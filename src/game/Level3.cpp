@@ -1177,6 +1177,8 @@ bool ChatHandler::HandleAccountSetGmLevelCommand(char* args)
     if (!ExtractInt32(&args, gm))
         return false;
 
+    uint32 gmRealmID = realmID;
+
     if (gm < SEC_PLAYER || gm > SEC_ADMINISTRATOR)
     {
         SendSysMessage(LANG_BAD_VALUE);
@@ -1191,12 +1193,22 @@ bool ChatHandler::HandleAccountSetGmLevelCommand(char* args)
 
     /// account can't set security to same or grater level, need more power GM or console
     AccountTypes plSecurity = GetAccessLevel();
-    if (AccountTypes(gm) >= plSecurity)
+    if (AccountTypes(gm) >= plSecurity || (gmRealmID != realmID && plSecurity < SEC_CONSOLE))
     {
         SendSysMessage(LANG_YOURS_SECURITY_IS_LOW);
         SetSentErrorMessage(true);
         return false;
     }
+
+    /*
+    // Check if provided realmID is not current realmID, or isn't -1
+    if (gmRealmID != realmID && gmRealmID != -1)
+    {
+        SendSysMessage(LANG_INVALID_REALMID);
+        SetSentErrorMessage(true);
+        return false;
+    }
+    */
 
     if (targetPlayer)
     {
@@ -1205,7 +1217,19 @@ bool ChatHandler::HandleAccountSetGmLevelCommand(char* args)
     }
 
     PSendSysMessage(LANG_YOU_CHANGE_SECURITY, targetAccountName.c_str(), gm);
-    LoginDatabase.PExecute("UPDATE account SET gmlevel = '%i' WHERE id = '%u'", gm, targetAccountId);
+
+    // If gmRealmID is -1, delete all values for the account id, else, insert values for the specific realmID
+    if (gmRealmID == -1)
+    {
+        LoginDatabase.PExecute("DELETE FROM account_access WHERE id = '%u'", targetAccountId);
+        LoginDatabase.PExecute("INSERT INTO account_access VALUES ('%u', '%d', -1)", targetAccountId, gm);
+    }
+    else
+    {
+        LoginDatabase.PExecute("DELETE FROM account_access WHERE id = '%u' AND RealmID = '%d'", targetAccountId, realmID);
+        LoginDatabase.PExecute("INSERT INTO account_access VALUES ('%u','%d','%d')", targetAccountId, gm, realmID);
+    }
+    //LoginDatabase.PExecute("UPDATE account SET gmlevel = '%i' WHERE id = '%u'", gm, targetAccountId);
 
     return true;
 }
@@ -6667,9 +6691,9 @@ bool ChatHandler::HandleInstanceSaveDataCommand(char* /*args*/)
 bool ChatHandler::HandleGMListFullCommand(char* /*args*/)
 {
     ///- Get the accounts with GM Level >0
-    QueryResult* result = LoginDatabase.PQuery("SELECT ac.username, ac.gmlevel, af.Security FROM account ac LEFT JOIN "
-                                               "account_forcepermission af ON ac.id = af.AccountID WHERE (af.Security > 0 AND realmID = '%u') "
-                                               "OR ac.gmlevel > 0", sConfig.GetIntDefault("RealmID", 0));
+    QueryResult* result = LoginDatabase.PQuery("SELECT ac.username, af.gmlevel FROM account AS ac LEFT JOIN "
+                                               "account_access AS af ON (ac.id = af.id) WHERE (af.gmlevel > 0 AND (af.RealmID = '%u' OR af.RealmID = -1))"
+                                               , sConfig.GetIntDefault("RealmID", 0));
     if (result)
     {
         SendSysMessage(LANG_GMLIST);
@@ -6681,7 +6705,7 @@ bool ChatHandler::HandleGMListFullCommand(char* /*args*/)
         do
         {
             Field* fields = result->Fetch();
-            PSendSysMessage("|%15s|%6u|", fields[0].GetString(), (fields[1].GetUInt8() > fields[2].GetUInt8()) ? fields[1].GetUInt8() : fields[2].GetUInt8());
+            PSendSysMessage("|%15s|%6u|", fields[0].GetString(), fields[1].GetUInt8());
         }
         while (result->NextRow());
 
