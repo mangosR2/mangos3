@@ -765,11 +765,14 @@ void Spell::FillTargetMap()
         if (tmpUnitLists[effToIndex[i]].size() == 1 && *tmpUnitLists[effToIndex[i]].begin() == m_caster->getVictim())
         {
             if (Unit* pMagnetTarget = m_caster->SelectMagnetTarget(*tmpUnitLists[effToIndex[i]].begin(), this, SpellEffectIndex(i)))
+            {
                 if (pMagnetTarget != *tmpUnitLists[effToIndex[i]].begin())
                 {
                     tmpUnitLists[effToIndex[i]].clear();
                     tmpUnitLists[effToIndex[i]].push_back(pMagnetTarget);
+                    m_spellFlags |= SPELL_FLAG_REDIRECTED;
                 }
+            }
         }
 
         for (UnitList::iterator itr = tmpUnitLists[effToIndex[i]].begin(); itr != tmpUnitLists[effToIndex[i]].end();)
@@ -2061,8 +2064,11 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
             {
                 if (Unit* pUnitTarget = m_caster->SelectMagnetTarget(m_targets.getUnitTarget(), this, effIndex))
                 {
-                    m_targets.setUnitTarget(pUnitTarget);
-                    m_spellFlags |= SPELL_FLAG_REDIRECTED;
+                    if (m_targets.getUnitTarget() != pUnitTarget)
+                    {
+                        m_targets.setUnitTarget(pUnitTarget);
+                        m_spellFlags |= SPELL_FLAG_REDIRECTED;
+                    }
                     targetUnitMap.push_back(pUnitTarget);
                 }
             }
@@ -2609,8 +2615,11 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
                 {
                     if (Unit* pUnitTarget = m_caster->SelectMagnetTarget(m_targets.getUnitTarget(), this, effIndex))
                     {
-                        m_targets.setUnitTarget(pUnitTarget);
-                        m_spellFlags |= SPELL_FLAG_REDIRECTED;
+                        if (m_targets.getUnitTarget() != pUnitTarget)
+                        {
+                            m_targets.setUnitTarget(pUnitTarget);
+                            m_spellFlags |= SPELL_FLAG_REDIRECTED;
+                        }
                         targetUnitMap.push_back(pUnitTarget);
                     }
                 }
@@ -2640,8 +2649,11 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
         {
             if (Unit* pUnitTarget = m_caster->SelectMagnetTarget(m_targets.getUnitTarget(), this, effIndex))
             {
-                m_targets.setUnitTarget(pUnitTarget);
-                m_spellFlags |= SPELL_FLAG_REDIRECTED;
+                if (m_targets.getUnitTarget() != pUnitTarget)
+                {
+                    m_targets.setUnitTarget(pUnitTarget);
+                    m_spellFlags |= SPELL_FLAG_REDIRECTED;
+                }
                 targetUnitMap.push_back(pUnitTarget);
             }
             break;
