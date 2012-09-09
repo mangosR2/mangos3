@@ -663,8 +663,8 @@ class ObjectMgr
             return NULL;
         }
 
-        AreaTrigger const* GetGoBackTrigger(uint32 Map) const;
-        AreaTrigger const* GetMapEntranceTrigger(uint32 Map) const;
+        AreaTrigger const* GetGoBackTrigger(uint32 mapId) const;
+        AreaTrigger const* GetMapEntranceTrigger(uint32 mapId) const;
 
         RepRewardRate const* GetRepRewardRate(uint32 factionId) const
         {

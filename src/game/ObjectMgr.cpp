@@ -5990,9 +5990,9 @@ void ObjectMgr::LoadAreaTriggerTeleports()
 /*
  * Searches for the areatrigger which teleports players out of the given map (only direct to continent)
  */
-AreaTrigger const* ObjectMgr::GetGoBackTrigger(uint32 map_id) const
+AreaTrigger const* ObjectMgr::GetGoBackTrigger(uint32 mapId) const
 {
-    const MapEntry *mapEntry = sMapStore.LookupEntry(map_id);
+    const MapEntry* mapEntry = sMapStore.LookupEntry(mapId);
     if (!mapEntry || mapEntry->ghost_entrance_map < 0)
         return NULL;
 
@@ -6001,26 +6001,34 @@ AreaTrigger const* ObjectMgr::GetGoBackTrigger(uint32 map_id) const
         if (itr->second.target_mapId == uint32(mapEntry->ghost_entrance_map))
         {
             AreaTriggerEntry const* atEntry = sAreaTriggerStore.LookupEntry(itr->first);
-            if(atEntry && atEntry->mapid == map_id)
-                return &itr->second;
-            else if (sWorld.getConfig(CONFIG_BOOL_ALLOW_CUSTOM_MAPS))
+            if (atEntry && atEntry->mapid == mapId)
                 return &itr->second;
         }
     }
+
+    if (sWorld.getConfig(CONFIG_BOOL_ALLOW_CUSTOM_MAPS))
+    {
+        for (AreaTriggerMap::const_iterator itr = mAreaTriggers.begin(); itr != mAreaTriggers.end(); ++itr)
+        {
+            if (itr->second.target_mapId == uint32(mapEntry->ghost_entrance_map))
+                return &itr->second;
+        }
+    }
+
     return NULL;
 }
 
 /**
  * Searches for the areatrigger which teleports players to the given map
  */
-AreaTrigger const* ObjectMgr::GetMapEntranceTrigger(uint32 Map) const
+AreaTrigger const* ObjectMgr::GetMapEntranceTrigger(uint32 mapId) const
 {
     for (AreaTriggerMap::const_iterator itr = mAreaTriggers.begin(); itr != mAreaTriggers.end(); ++itr)
     {
-        if(itr->second.target_mapId == Map)
+        if (itr->second.target_mapId == mapId)
         {
             AreaTriggerEntry const* atEntry = sAreaTriggerStore.LookupEntry(itr->first);
-            if(atEntry)
+            if (atEntry)
                 return &itr->second;
             else if (sWorld.getConfig(CONFIG_BOOL_ALLOW_CUSTOM_MAPS))
                 return &itr->second;
