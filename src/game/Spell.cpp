@@ -7797,8 +7797,8 @@ bool Spell::CheckTarget( Unit* target, SpellEffectIndex eff )
             // Get GO cast coordinates if original caster -> GO
             if (target != m_caster)
             {
-                if (WorldObject *caster = GetCastingObject())
-                    if (!target->IsVisibleTargetForSpell(m_caster, m_spellInfo))
+                if (WorldObject* caster = GetCastingObject())
+                    if (!target->IsVisibleTargetForSpell(caster, m_spellInfo))
                         return false;
             }
             break;
