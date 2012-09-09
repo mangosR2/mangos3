@@ -6010,6 +6010,19 @@ AreaTrigger const* ObjectMgr::GetGoBackTrigger(uint32 mapId) const
             }
         }
     }
+
+    if (!compareTrigger && sWorld.getConfig(CONFIG_BOOL_ALLOW_CUSTOM_MAPS))
+    {
+        for (AreaTriggerMap::const_iterator itr = mAreaTriggers.begin(); itr != mAreaTriggers.end(); ++itr)
+        {
+            if (itr->second.target_mapId == uint32(mapEntry->ghost_entrance_map))
+            {
+                compareTrigger = &itr->second;
+                break;
+            }
+        }
+    }
+
     return compareTrigger;
 }
 
@@ -6019,12 +6032,16 @@ AreaTrigger const* ObjectMgr::GetGoBackTrigger(uint32 mapId) const
 AreaTrigger const* ObjectMgr::GetMapEntranceTrigger(uint32 mapId) const
 {
     AreaTrigger const* compareTrigger = NULL;
-    MapEntry const* mEntry = sMapStore.LookupEntry(Map);
+    MapEntry const* mEntry = sMapStore.LookupEntry(mapId);
 
     for (AreaTriggerMap::const_iterator itr = mAreaTriggers.begin(); itr != mAreaTriggers.end(); ++itr)
     {
         if (itr->second.target_mapId == mapId)
         {
+            AreaTriggerEntry const* atEntry = sAreaTriggerStore.LookupEntry(itr->first);
+            if (!atEntry && sWorld.getConfig(CONFIG_BOOL_ALLOW_CUSTOM_MAPS))
+                return &itr->second;
+
             if (mEntry->Instanceable())
             {
                 // Remark that IsLessOrEqualThan is no total order, and a->IsLeQ(b) != !b->IsLeQ(a)
