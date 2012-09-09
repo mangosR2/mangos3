@@ -20897,18 +20897,8 @@ void Player::SendUpdateToOutOfRangeGroupMembers()
 
 void Player::SendTransferAborted(uint32 mapid, uint8 reason, uint8 arg)
 {
-    WorldPacket data(SMSG_TRANSFER_ABORTED, 4+2);
-    data << uint32(mapid);
-    data << uint8(reason);                                  // transfer abort reason
-    switch(reason)
-    {
-        case TRANSFER_ABORT_INSUF_EXPAN_LVL:
-        case TRANSFER_ABORT_DIFFICULTY:
-        case TRANSFER_ABORT_UNIQUE_MESSAGE:
-            data << uint8(arg);
-            break;
-    }
-    GetSession()->SendPacket(&data);
+    if (GetSession())
+        GetSession()->SendTransferAborted(mapid, reason, arg);
 }
 
 void Player::SendInstanceResetWarning( uint32 mapid, Difficulty difficulty, uint32 time )
