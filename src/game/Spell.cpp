@@ -6762,7 +6762,8 @@ SpellCastResult Spell::CheckCastTargets() const
 {
 
     // Spell without any target
-    if (!m_targets.HasLocation() &&
+    if (!IsSpellWithCasterSourceTargetsOnly(m_spellInfo) &&
+        !m_targets.HasLocation() &&
         m_UniqueTargetInfo.empty() &&
         m_UniqueGOTargetInfo.empty() &&
         m_UniqueItemInfo.empty())
