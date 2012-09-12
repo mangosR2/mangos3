@@ -762,7 +762,7 @@ void Spell::FillTargetMap()
         {
             if (Unit* pMagnetTarget = m_caster->SelectMagnetTarget(*tmpUnitLists[effToIndex[i]].begin(), this, SpellEffectIndex(i)))
             {
-                if (pMagnetTarget != *tmpUnitLists[effToIndex[i]].begin())
+                if (pMagnetTarget && pMagnetTarget != *tmpUnitLists[effToIndex[i]].begin())
                 {
                     tmpUnitLists[effToIndex[i]].clear();
                     tmpUnitLists[effToIndex[i]].push_back(pMagnetTarget);
@@ -782,8 +782,11 @@ void Spell::FillTargetMap()
                 ++itr;
         }
 
-        for (UnitList::const_iterator iunit = tmpUnitLists[effToIndex[i]].begin(); iunit != tmpUnitLists[effToIndex[i]].end(); ++iunit)
-            AddUnitTarget((*iunit), SpellEffectIndex(i));
+        if (!tmpUnitLists[effToIndex[i]].empty())
+        {
+            for (UnitList::const_iterator iunit = tmpUnitLists[effToIndex[i]].begin(); iunit != tmpUnitLists[effToIndex[i]].end(); ++iunit)
+                AddUnitTarget((*iunit), SpellEffectIndex(i));
+        }
     }
 }
 
@@ -2994,7 +2997,6 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
             {
                 case SPELL_EFFECT_DUMMY:
                 {
-
                     if (m_targets.getUnitTarget())
                         targetUnitMap.push_back(m_targets.getUnitTarget());
 
@@ -7683,8 +7685,11 @@ bool Spell::CheckTargetBeforeLimitation(Unit* target, SpellEffectIndex eff)
     return true;
 }
 
-bool Spell::CheckTarget( Unit* target, SpellEffectIndex eff )
+bool Spell::CheckTarget(Unit* target, SpellEffectIndex eff )
 {
+    if (!target)
+        return false;
+
     // Check targets for creature type mask and remove not appropriate (skip explicit self target case, maybe need other explicit targets)
     if (m_spellInfo->EffectImplicitTargetA[eff] != TARGET_SELF )
     {
