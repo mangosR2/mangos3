@@ -66,7 +66,7 @@ void WorldObjectEventProcessor::RenewEvents()
         {
             switch (m_queue.front().second->GetType())
             {
-                WORLDOBJECT_EVENT_TYPE_UNIQUE:
+                case WORLDOBJECT_EVENT_TYPE_UNIQUE:
                 {
                     bool needInsert = true;
                     for (EventList::const_iterator i = m_events.begin(); i != m_events.end(); ++i)
@@ -83,9 +83,9 @@ void WorldObjectEventProcessor::RenewEvents()
                         m_events.insert(m_queue.front());
                     break;
                 }
-                WORLDOBJECT_EVENT_TYPE_REPEATABLE:
-                WORLDOBJECT_EVENT_TYPE_DEATH:
-                WORLDOBJECT_EVENT_TYPE_COMMON:
+                case WORLDOBJECT_EVENT_TYPE_REPEATABLE:
+                case WORLDOBJECT_EVENT_TYPE_DEATH:
+                case WORLDOBJECT_EVENT_TYPE_COMMON:
                 default:
                     m_events.insert(m_queue.front());
                     break;
@@ -438,7 +438,7 @@ bool PassengerEjectEvent::Execute(uint64 /*e_time*/, uint32 /*p_time*/)
 
 // BattleGround events
 BGQueueInviteEvent::BGQueueInviteEvent(ObjectGuid pl_guid, uint32 BgInstanceGUID, BattleGroundTypeId BgTypeId, ArenaType arenaType, uint32 removeTime) :
-    m_PlayerGuid(pl_guid), m_BgInstanceGUID(BgInstanceGUID), m_BgTypeId(BgTypeId), m_ArenaType(arenaType), m_RemoveTime(removeTime), BasicEvent(WORLDOBJECT_EVENT_TYPE_COMMON)
+    BasicEvent(WORLDOBJECT_EVENT_TYPE_COMMON), m_PlayerGuid(pl_guid), m_BgInstanceGUID(BgInstanceGUID), m_BgTypeId(BgTypeId), m_ArenaType(arenaType), m_RemoveTime(removeTime)
 {
 };
 
@@ -486,7 +486,7 @@ void BGQueueInviteEvent::Abort(uint64 /*e_time*/)
     we must remove player in the 5. case even if battleground object doesn't exist!
 */
 BGQueueRemoveEvent::BGQueueRemoveEvent(ObjectGuid plGuid, uint32 bgInstanceGUID, BattleGroundTypeId BgTypeId, BattleGroundQueueTypeId bgQueueTypeId, uint32 removeTime)
-    : m_PlayerGuid(plGuid), m_BgInstanceGUID(bgInstanceGUID), m_RemoveTime(removeTime), m_BgTypeId(BgTypeId), m_BgQueueTypeId(bgQueueTypeId), BasicEvent(WORLDOBJECT_EVENT_TYPE_COMMON)
+    : BasicEvent(WORLDOBJECT_EVENT_TYPE_COMMON), m_PlayerGuid(plGuid), m_BgInstanceGUID(bgInstanceGUID), m_RemoveTime(removeTime), m_BgTypeId(BgTypeId), m_BgQueueTypeId(bgQueueTypeId)
 {
 };
 

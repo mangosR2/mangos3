@@ -410,13 +410,13 @@ void WorldStateMgr::LoadFromDB()
         }
         else if (type == WORLD_STATE_TYPE_CUSTOM)
         {
-            DEBUG_FILTER_LOG(LOG_FILTER_DB_STRICTED_CHECK,"WorldStateMgr::LoadFromDB loaded custom state %u (%u %u %u %u %u)",
+            DEBUG_FILTER_LOG(LOG_FILTER_DB_STRICTED_CHECK,"WorldStateMgr::LoadFromDB loaded custom state %u (%u %u %u %u %u %ld)",
                 stateId, instanceId, type, condition, flags, _value, renewtime);
             m_worldState.insert(WorldStateMap::value_type(stateId, WorldState(stateId, instanceId, flags, _value, renewtime)));
         }
         else
         {
-            sLog.outError("WorldStateMgr::LoadFromDB unknown state %u (%u %u %u %u %u)",
+            sLog.outError("WorldStateMgr::LoadFromDB unknown state %u (%u %u %u %u %u %ld)",
                 stateId, instanceId, type, condition, flags, _value, renewtime);
         }
     }
@@ -1347,7 +1347,7 @@ WorldStateSet WorldStateMgr::GetInstanceStates(uint32 mapId, uint32 instanceId, 
     ReadGuard guard(GetLock());
     for (WorldStateMap::iterator itr = m_worldState.begin(); itr != m_worldState.end(); ++itr)
     {
-        if (!flags || itr->second.GetFlags() & flags)
+        if (!flags || (itr->second.GetFlags() & flags))
         {
             if (itr->second.GetType() == WORLD_STATE_TYPE_MAP &&
                 itr->second.GetCondition() == mapId &&

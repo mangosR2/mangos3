@@ -1983,7 +1983,7 @@ void Aura::TriggerSpell()
                         if (damage >= 0)
                             return;
 
-                        if (triggerTarget->GetPower(POWER_MANA) < abs(damage))
+                        if (int32(triggerTarget->GetPower(POWER_MANA)) < abs(damage))
                         {
                             damage = -int32(triggerTarget->GetPower(POWER_MANA));
                             triggerTarget->RemoveAurasDueToSpell(auraId);
@@ -12685,7 +12685,7 @@ bool Aura::IsAffectedByCrowdControlEffect(uint32 damage)
     if (!IsCrowdControlAura(m_modifier.m_auraname))
         return false;
 
-    if (damage > abs(m_modifier.m_baseamount))
+    if (int32(damage) > abs(m_modifier.m_baseamount))
     {
         m_modifier.m_baseamount = 0;
         return false;

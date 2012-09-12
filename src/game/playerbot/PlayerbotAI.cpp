@@ -3381,7 +3381,7 @@ bool PlayerbotAI::IsInRange(Unit* Target, uint32 spellId)
         return false;
 
     // TODO: ugly line of code
-    if (TempRange->minRange == TempRange->maxRange == 0.0f)
+    if ((TempRange->minRange == TempRange->maxRange) && (TempRange->maxRange == 0.0f))
         return true;
 
     //Unit is out of range of this spell
