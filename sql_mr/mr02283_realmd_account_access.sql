@@ -27,5 +27,5 @@ INSERT IGNORE INTO `account_access` (`id`,`gmlevel`,`RealmID`)
     SELECT `AccountID`,`Security`, `realmID` FROM `account_forcepermission`
 WHERE `account_forcepermission`.`AccountID` > 4;
 
-DROP TABLE IF EXISTS `account_forcepermissions`;
+DROP TABLE IF EXISTS `account_forcepermission`;
 

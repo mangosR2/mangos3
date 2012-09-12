@@ -790,7 +790,7 @@ int WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
                                 "`os` "                       //9
                                 "FROM account "
                                 "WHERE username = '%s'",
-                                safe_account.c_str (), realmID);
+                                safe_account.c_str ());
 
     // Stop if the account is not found
     if (!result)
