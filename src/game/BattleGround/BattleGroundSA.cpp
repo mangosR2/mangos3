@@ -16,18 +16,18 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#include "../GameObject.h"
+#include "GameObject.h"
 #include "BattleGround.h"
 #include "BattleGroundSA.h"
 #include "WorldPacket.h"
-#include "../Language.h"
-#include "../Player.h"
-#include "../Object.h"
-#include "../Creature.h"
+#include "Language.h"
+#include "Player.h"
+#include "Object.h"
+#include "Creature.h"
 #include "BattleGroundMgr.h"
 #include "Util.h"
-#include "../MapManager.h"
-#include "../ObjectMgr.h"
+#include "MapManager.h"
+#include "ObjectMgr.h"
 
 /*
 * BattleGround Strand of the Ancients:
