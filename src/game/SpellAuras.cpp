@@ -376,9 +376,9 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
 static AuraType const frozenAuraTypes[] = { SPELL_AURA_MOD_ROOT, SPELL_AURA_MOD_STUN, SPELL_AURA_NONE };
 
 Aura::Aura(AuraClassType type, SpellEntry const* spellproto, SpellEffectIndex eff, int32 *currentBasePoints, SpellAuraHolderPtr holder, Unit *target, Unit *caster, Item* castItem) :
-m_classType(type),m_periodicTimer(0), m_periodicTick(0), m_removeMode(AURA_REMOVE_BY_DEFAULT),
-m_effIndex(eff), m_positive(false), m_isPeriodic(false), m_isAreaAura(false), m_deleted(false),
-m_isPersistent(false), m_spellAuraHolder(holder)
+m_periodicTimer(0), m_periodicTick(0), m_removeMode(AURA_REMOVE_BY_DEFAULT),
+m_effIndex(eff), m_deleted(false), m_positive(false), m_isPeriodic(false), m_isAreaAura(false),
+m_isPersistent(false), m_spellAuraHolder(holder), m_classType(type)
 {
     MANGOS_ASSERT(target);
     MANGOS_ASSERT(spellproto && spellproto == sSpellStore.LookupEntry( spellproto->Id ) && "`info` must be pointer to sSpellStore element");
@@ -877,7 +877,7 @@ void Aura::AreaAuraUpdate(uint32 diff)
                     {
                         SpellAuraHolderPtr newholder = CreateSpellAuraHolder(actualSpellInfo, i_target,  GetAffectiveCaster());
                         newholder->SetAuraDuration(GetAuraDuration());
-                        Aura* aura = newholder->CreateAura(AURA_CLASS_AREA_AURA, m_effIndex, &actualBasePoints, newholder, i_target, GetAffectiveCaster(), NULL);
+                        /*Aura* aura = */newholder->CreateAura(AURA_CLASS_AREA_AURA, m_effIndex, &actualBasePoints, newholder, i_target, GetAffectiveCaster(), NULL);
                         i_target->AddSpellAuraHolder(newholder);
                     }
                     else
@@ -10474,7 +10474,7 @@ bool Aura::HasMechanic(uint32 mechanic) const
 SpellAuraHolder::SpellAuraHolder(SpellEntry const* spellproto, Unit *target, WorldObject *caster, Item *castItem) :
 m_spellProto(spellproto), m_target(target), m_castItemGuid(castItem ? castItem->GetObjectGuid() : ObjectGuid()),
 m_auraSlot(MAX_AURAS), m_auraFlags(AFLAG_NONE), m_auraLevel(1), m_procCharges(0),
-m_stackAmount(1), m_removeMode(AURA_REMOVE_BY_DEFAULT), m_AuraDRGroup(DIMINISHING_NONE), m_timeCla(1000),
+m_stackAmount(1), m_timeCla(1000), m_removeMode(AURA_REMOVE_BY_DEFAULT), m_AuraDRGroup(DIMINISHING_NONE),
 m_permanent(false), m_isRemovedOnShapeLost(true), m_deleted(false), m_in_use(0)
 {
     MANGOS_ASSERT(target);
@@ -10545,7 +10545,7 @@ m_permanent(false), m_isRemovedOnShapeLost(true), m_deleted(false), m_in_use(0)
 
 void SpellAuraHolder::AddAura(Aura aura, SpellEffectIndex index)
 {
-    if (Aura* _aura = GetAuraByEffectIndex(index))
+    if (/*Aura* _aura = */GetAuraByEffectIndex(index))
     {
         DEBUG_LOG("SpellAuraHolder::AddAura attempt to add aura (effect %u) to holder of spell %u, but holder already have active aura!", index, GetId());
         RemoveAura(index);

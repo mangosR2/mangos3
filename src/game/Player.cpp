@@ -972,10 +972,6 @@ uint32 Player::EnvironmentalDamage(EnviromentalDamage type, uint32 damage)
     if(!isAlive() || isGameMaster())
         return 0;
 
-    // Absorb, resist some environmental damage type
-    uint32 absorb = 0;
-    uint32 resist = 0;
-
     //16455 lava, 16456 slime
     uint32 spellID = 0;
     switch (type)
@@ -11217,7 +11213,6 @@ Item* Player::StoreItem( ItemPosCountVec const& dest, Item* pItem, bool update )
         return NULL;
 
     Item* lastItem = pItem;
-    uint32 entry = pItem->GetEntry();
 
     for(ItemPosCountVec::const_iterator itr = dest.begin(); itr != dest.end(); )
     {
@@ -15891,7 +15886,7 @@ bool Player::LoadFromDB(ObjectGuid guid, SqlQueryHolder *holder )
 
     // player bounded instance saves loaded in _LoadBoundInstances, group versions at group loading
     DungeonPersistentState* state = GetBoundInstanceSaveForSelfOrGroup(savedLocation.mapid);
-    Map* targetMap = sMapMgr.FindMap(savedLocation.mapid, state ? state->GetInstanceId() : 0);
+//    Map* targetMap = sMapMgr.FindMap(savedLocation.mapid, state ? state->GetInstanceId() : 0);
 
     if (m_bgData.bgInstanceID)                              //saved in BattleGround
     {
@@ -24044,16 +24039,16 @@ void Player::LoadAccountLinkedState()
         if (referredAccounts->size() > sWorld.getConfig(CONFIG_UINT32_RAF_MAXREFERERS))
             sLog.outError("Player:RAF:Warning: loaded %u referred accounts instead of %u for player %s",referredAccounts->size(),sWorld.getConfig(CONFIG_UINT32_RAF_MAXREFERERS),GetObjectGuid().GetString().c_str());
         else
-            DEBUG_LOG("Player:RAF: loaded %u referred accounts for player %u",referredAccounts->size(),GetObjectGuid().GetString().c_str());
+            DEBUG_LOG("Player:RAF: loaded %u referred accounts for player %s",referredAccounts->size(),GetObjectGuid().GetString().c_str());
     }
 
     RafLinkedList const* referalAccounts = sAccountMgr.GetRAFAccounts(GetSession()->GetAccountId(), false);
     if (referalAccounts)
     {
         if (referalAccounts->size() > sWorld.getConfig(CONFIG_UINT32_RAF_MAXREFERALS))
-            sLog.outError("Player:RAF:Warning: loaded %u referal accounts instead of %u for player %u",referalAccounts->size(),sWorld.getConfig(CONFIG_UINT32_RAF_MAXREFERALS),GetObjectGuid().GetString().c_str());
+            sLog.outError("Player:RAF:Warning: loaded %u referal accounts instead of %u for player %s",referalAccounts->size(),sWorld.getConfig(CONFIG_UINT32_RAF_MAXREFERALS),GetObjectGuid().GetString().c_str());
         else
-            DEBUG_LOG("Player:RAF: loaded %u referal accounts for player %u",referalAccounts->size(),GetObjectGuid().GetString().c_str());
+            DEBUG_LOG("Player:RAF: loaded %u referal accounts for player %s",referalAccounts->size(),GetObjectGuid().GetString().c_str());
     }
 }
 
