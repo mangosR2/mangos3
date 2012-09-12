@@ -3116,6 +3116,13 @@ enum AreaLockStatus
 #define DEFAULT_VISIBILITY_INSTANCE 120.0f      // default visible distance in instances, 120 yards
 #define DEFAULT_VISIBILITY_BGARENAS 180.0f      // default visible distance in BG/Arenas, 180 yards
 
+enum PhaseMasks
+{
+    PHASEMASK_NONE     = 0,
+    PHASEMASK_NORMAL   = 0x00000001,
+    PHASEMASK_ANYWHERE = 0xFFFFFFFF
+};
+
 enum ActivateTaxiReply
 {
     ERR_TAXIOK                      = 0,

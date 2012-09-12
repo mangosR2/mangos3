@@ -576,6 +576,23 @@ INSERT INTO `worldstate_template` (`state_id`, `type`, `condition`, `flags`, `de
 (4327, 4, 628, @FLAG_INITIAL_ACTIVE, 1, 0, '', ''),
 (4328, 4, 628, @FLAG_INITIAL_ACTIVE, 1, 0, '', '');
 
+-- Arenas
+-- Dalaran arena
+SET @MAP := 617;
+DELETE FROM `worldstate_template` WHERE `type` = 4 AND `condition` = @MAP;
+INSERT INTO `worldstate_template` (`state_id`, `type`, `condition`, `flags`, `default`, `linked_id`, `ScriptName`, `comment`) VALUES
+(3610, 4, @MAP, @FLAG_INITIAL_ACTIVE, 0, 0, '', 'Arena counters activate'),
+(3600, 4, @MAP, @FLAG_INITIAL_ACTIVE, 0, 3610, '', 'Arena Green command counter'),
+(3601, 4, @MAP, @FLAG_INITIAL_ACTIVE, 0, 3610, '', 'Arena Gold command counter');
+
+-- Ring of Valor
+SET @MAP := 618;
+DELETE FROM `worldstate_template` WHERE `type` = 4 AND `condition` = @MAP;
+INSERT INTO `worldstate_template` (`state_id`, `type`, `condition`, `flags`, `default`, `linked_id`, `ScriptName`, `comment`) VALUES
+(3610, 4, @MAP, @FLAG_INITIAL_ACTIVE, 0, 0, '', 'Arena counter activate'),
+(3600, 4, @MAP, @FLAG_INITIAL_ACTIVE, 0, 3610, '', 'Arena Green command counter'),
+(3601, 4, @MAP, @FLAG_INITIAL_ACTIVE, 0, 3610, '', 'Arena Gold command counter');
+
 -- Instances
 -- Zulaman
 SET @MAP := 568;
