@@ -146,14 +146,14 @@ struct WorldState
     public:
     // For create new state
     WorldState(WorldStateTemplate const* _state, uint32 _instance) 
-        : m_pState(_state), m_instanceId(_instance), m_stateId(m_pState->m_stateId), m_type(m_pState->m_stateType)
+        : m_pState(_state), m_stateId(m_pState->m_stateId), m_instanceId(_instance), m_type(m_pState->m_stateType)
     {
         Initialize();
     }
 
     // For load
     WorldState(WorldStateTemplate const* _state, uint32 _instance, uint32 _flags, uint32 _value, time_t _renewtime) 
-        : m_pState(_state), m_instanceId(_instance), m_flags(_flags), m_value(_value), m_renewTime(_renewtime), m_stateId(m_pState->m_stateId), m_type(m_pState->m_stateType)
+        : m_pState(_state), m_stateId(m_pState->m_stateId), m_instanceId(_instance), m_type(m_pState->m_stateType), m_flags(_flags), m_value(_value), m_renewTime(_renewtime)
     {
         m_linkedGuid.Clear();
         m_clientGuids.clear();
@@ -162,14 +162,14 @@ struct WorldState
 
     // For load custom state
     WorldState(uint32 _stateid, uint32 _instance, uint32 _flags, uint32 _value, time_t _renewtime) 
-        : m_pState(NULL), m_stateId(_stateid), m_instanceId(_instance), m_flags(_flags), m_value(_value), m_renewTime(_renewtime), m_type(WORLD_STATE_TYPE_CUSTOM)
+        : m_pState(NULL), m_stateId(_stateid), m_instanceId(_instance), m_type(WORLD_STATE_TYPE_CUSTOM), m_flags(_flags), m_value(_value), m_renewTime(_renewtime)
     {
         Initialize();
     }
 
     // For create new custom state
     WorldState(uint32 _stateid, uint32 _instance, uint32 value) 
-        : m_pState(NULL), m_stateId(_stateid), m_instanceId(_instance), m_value(value), m_type(WORLD_STATE_TYPE_CUSTOM)
+        : m_pState(NULL), m_stateId(_stateid), m_instanceId(_instance), m_type(WORLD_STATE_TYPE_CUSTOM), m_value(value)
     {
         Initialize();
     }
