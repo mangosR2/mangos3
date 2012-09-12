@@ -21,8 +21,8 @@
 
 #include "Common.h"
 #include "Policies/Singleton.h"
-#include "SharedDefines.h"
-#include "DBCEnums.h"
+#include "../SharedDefines.h"
+#include "../DBCEnums.h"
 #include "BattleGround.h"
 #include "ace/Recursive_Thread_Mutex.h"
 

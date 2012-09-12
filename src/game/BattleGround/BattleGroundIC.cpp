@@ -16,19 +16,19 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#include "Player.h"
+#include "../Player.h"
 #include "BattleGround.h"
 #include "BattleGroundIC.h"
 #include "BattleGroundMgr.h"
-#include "Language.h"
+#include "../Language.h"
 #include "WorldPacket.h"
-#include "GameObject.h"
-#include "ObjectMgr.h"
-#include "Vehicle.h"
-#include "Creature.h"
-#include "MapManager.h"
-#include "Transports.h"
-#include "Object.h"
+#include "../GameObject.h"
+#include "../ObjectMgr.h"
+#include "../Vehicle.h"
+#include "../Creature.h"
+#include "../MapManager.h"
+#include "../Transports.h"
+#include "../Object.h"
 #include "Util.h"
 
 /*
