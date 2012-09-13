@@ -385,7 +385,7 @@ void PetAI::_stopAttack()
 {
     inCombat = false;
 
-    if (m_creature->IsInCombat())
+    if (IsInCombat())
     {
         m_creature->CastStop(true);
         m_creature->AttackStop();
@@ -505,6 +505,29 @@ void PetAI::UpdateAI(const uint32 diff)
             }
             else
                 m_attackDistanceRecheckTimer -= diff;
+        }
+    }
+    else if (owner && owner->IsInCombat())
+    {
+        switch (m_creature->GetCharmState(CHARM_STATE_REACT))
+        {
+            case REACT_DEFENSIVE:
+            {
+                if (!m_creature->getVictim() 
+                    || !m_creature->getVictim()->isAlive() 
+                    || (owner->getVictim() != m_creature->getVictim() && owner->getVictim()->isAlive()))
+                    AttackStart(owner->getAttackerForHelper());
+                break;
+            }
+            case REACT_AGGRESSIVE:
+            {
+                if (!m_creature->getVictim() || !m_creature->getVictim()->isAlive())
+                    AttackStart(owner->getAttackerForHelper());
+                break;
+            }
+            case REACT_PASSIVE:
+            default:
+                break;
         }
     }
 
