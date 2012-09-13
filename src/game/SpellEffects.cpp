@@ -4670,7 +4670,8 @@ void Spell::EffectClearQuest(SpellEffectIndex eff_idx)
     }
 
     player->SetQuestStatus(quest_id, QUEST_STATUS_NONE);
-    player->getQuestStatusMap()[quest_id].m_rewarded = false;
+    if (QuestStatusData* data = player->GetQuestStatusData(quest_id))
+        data->m_rewarded = false;
 }
 
 void Spell::EffectForceCast(SpellEffectIndex eff_idx)
