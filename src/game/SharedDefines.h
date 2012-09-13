@@ -1334,7 +1334,7 @@ enum Targets
     TARGET_88                               = 88,
     TARGET_DIRECTLY_FORWARD                 = 89,
     TARGET_NONCOMBAT_PET                    = 90,
-    TARGET_91                               = 91,
+    TARGET_DEST_RADIUS                      = 91,
     TARGET_UNIT_CREATOR                     = 92,
     TARGET_93                               = 93,
     TARGET_OWNED_VEHICLE                    = 94,
