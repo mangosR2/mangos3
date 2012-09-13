@@ -2,9 +2,9 @@
 TRUNCATE TABLE `worldstate_template`;
 
 -- Flags definition
-SET @FLAG_ACTIVE          = 0x2;
-SET @FLAG_INITIAL_STATE   = 0x10000;
-SET @FLAG_NOT_EXPIREABLE  = 0x40000;
+SET @FLAG_ACTIVE          = 0x2 + 0x0;
+SET @FLAG_INITIAL_STATE   = 0x10000 + 0x0;
+SET @FLAG_NOT_EXPIREABLE  = 0x40000 + 0x0;
 
 -- Combinations of flag
 SET @FLAG_INITIAL_ACTIVE = 0x2 + 0x10000;
