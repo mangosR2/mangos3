@@ -5827,6 +5827,7 @@ SpellCastResult Spell::CheckCast(bool strict)
                     && m_spellInfo->HasAttribute(SPELL_ATTR_EX2_ALLOW_DEAD_TARGET)
                     && m_spellInfo->TargetCreatureType != CREATURE_TYPEMASK_NONE)
                 {
+                    m_targets.setUnitTarget(NULL);
                     WorldObject* result = FindCorpseUsing<MaNGOS::CannibalizeObjectCheck>(m_spellInfo->TargetCreatureType);
                     if (result)
                     {
@@ -5837,15 +5838,15 @@ SpellCastResult Spell::CheckCast(bool strict)
                                 m_targets.setUnitTarget((Unit*)result);
                                 break;
                             case TYPEID_CORPSE:
-                                m_targets.setCorpseTarget((Corpse*)result);
                                 if (Player* owner = ObjectAccessor::FindPlayer(((Corpse*)result)->GetOwnerGuid()))
-                                    m_targets.setUnitTarget(owner);
+                                    if (owner->IsInMap(m_caster) && !owner->isAlive())
+                                        m_targets.setUnitTarget(owner);
                                 break;
                             default:
-                                return SPELL_FAILED_NO_EDIBLE_CORPSES;
+                                break;
                         }
                     }
-                    else
+                    if (!m_targets.getUnitTarget())
                         return SPELL_FAILED_NO_EDIBLE_CORPSES;
                 }
                 break;
