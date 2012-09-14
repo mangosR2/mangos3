@@ -496,6 +496,8 @@ void Map::Update(const uint32 &t_diff)
             break;
     }
 
+    UpdateEvents(t_diff);
+
     /// update worldsessions for existing players
     for(m_mapRefIter = m_mapRefManager.begin(); m_mapRefIter != m_mapRefManager.end(); ++m_mapRefIter)
     {
@@ -2338,4 +2340,33 @@ template<class T> void Map::LoadObjectToGrid(uint32& guid, GridType& grid, Battl
 
     if (bg)
         bg->OnObjectDBLoad(obj);
+}
+
+WorldObjectEventProcessor* Map::GetEvents()
+{
+    return &m_Events;
+}
+
+void Map::KillAllEvents(bool force)
+{
+    WriteGuard Guard(GetLock());
+    GetEvents()->KillAllEvents(force);
+}
+
+void Map::AddEvent(BasicEvent* Event, uint64 e_time, bool set_addtime)
+{
+    WriteGuard Guard(GetLock());
+    if (set_addtime)
+        GetEvents()->AddEvent(Event, GetEvents()->CalculateTime(e_time), set_addtime);
+    else
+        GetEvents()->AddEvent(Event, e_time, set_addtime);
+}
+
+void Map::UpdateEvents(uint32 update_diff)
+{
+    {
+        ReadGuard Guard(GetLock());
+        GetEvents()->RenewEvents();
+    }
+    GetEvents()->Update(update_diff);
 }
