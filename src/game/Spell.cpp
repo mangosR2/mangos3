@@ -2997,19 +2997,11 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
             {
                 case SPELL_EFFECT_DUMMY:
                 {
-                    // Voracious Appetite && Cannibalize && Carrion Feeder additional check
-                    if (m_spellInfo->HasAttribute(SPELL_ATTR_ABILITY)
-                        && m_spellInfo->HasAttribute(SPELL_ATTR_EX2_ALLOW_DEAD_TARGET)
-                        && m_spellInfo->TargetCreatureType != CREATURE_TYPEMASK_NONE)
-                    {
-                        if (m_targets.getUnitTarget() != m_caster)
-                            targetUnitMap.push_back(m_targets.getUnitTarget());
-                    }
-                    else if (m_targets.getUnitTarget())
+                    if (m_targets.getUnitTarget())
                         targetUnitMap.push_back(m_targets.getUnitTarget());
 
                     // Add AoE target-mask to self, if no target-dest provided already
-                    if ((m_targets.m_targetMask & TARGET_FLAG_DEST_LOCATION) == 0)
+                    if (!(m_targets.m_targetMask & TARGET_FLAG_DEST_LOCATION))
                         m_targets.setDestination(m_caster->GetPositionX(), m_caster->GetPositionY(), m_caster->GetPositionZ());
                     break;
                 }
@@ -5796,6 +5788,8 @@ SpellCastResult Spell::CheckCast(bool strict)
         // for effects of spells that have only one target
         switch(m_spellInfo->Effect[i])
         {
+            case SPELL_EFFECT_NONE:
+                continue;
             case SPELL_EFFECT_INSTAKILL:
                 break;
             case SPELL_EFFECT_DUMMY:
@@ -5830,10 +5824,8 @@ SpellCastResult Spell::CheckCast(bool strict)
                         return SPELL_FAILED_TOTEMS;
                 }
                 // Voracious Appetite && Cannibalize && Carrion Feeder
-                else if (strict /*only in first check!*/
-                    && m_spellInfo->HasAttribute(SPELL_ATTR_ABILITY)
-                    && m_spellInfo->HasAttribute(SPELL_ATTR_EX2_ALLOW_DEAD_TARGET)
-                    && m_spellInfo->TargetCreatureType != CREATURE_TYPEMASK_NONE)
+                else if (m_UniqueTargetInfo.empty() /*only in first check!*/
+                    && (m_spellInfo->Id == 20577 || m_spellInfo->Id == 52749 || m_spellInfo->Id == 54044))
                 {
                     m_targets.setUnitTarget(NULL);
                     WorldObject* result = FindCorpseUsing<MaNGOS::CannibalizeObjectCheck>(m_spellInfo->TargetCreatureType);
@@ -5851,7 +5843,7 @@ SpellCastResult Spell::CheckCast(bool strict)
                                         m_targets.setUnitTarget((Unit*)owner);
                                 break;
                             default:
-                                break;
+                                return SPELL_FAILED_NO_EDIBLE_CORPSES;
                         }
                     }
                     if (!m_targets.getUnitTarget())
@@ -7783,11 +7775,7 @@ bool Spell::CheckTarget(Unit* target, SpellEffectIndex eff )
                 return false;
             break;
         case SPELL_EFFECT_DUMMY:
-            if (!m_spellInfo->HasAttribute(SPELL_ATTR_ABILITY)
-                || !m_spellInfo->HasAttribute(SPELL_ATTR_EX2_ALLOW_DEAD_TARGET)
-                || m_spellInfo->TargetCreatureType == CREATURE_TYPEMASK_NONE)
-            break;                                          // Cannibalize-like spell bundle
-            /* no break - fall through*/
+            break;
         case SPELL_EFFECT_RESURRECT_NEW:
             // player far away, maybe his corpse near?
             if (target != m_caster && !target->IsVisibleTargetForSpell(m_caster, m_spellInfo))
@@ -8206,6 +8194,17 @@ bool Spell::FillCustomTargetMap(SpellEffectIndex i, UnitList &targetUnitMap)
         case 64804:
         {
             FillAreaTargets(targetUnitMap, radius, PUSH_DEST_CENTER, SPELL_TARGETS_AOE_DAMAGE);
+            break;
+        }
+        // Voracious Appetite && Cannibalize && Carrion Feeder additional check
+        case 20577:
+        case 52748:
+        case 54044:
+        {
+            if (m_targets.getUnitTarget() && m_targets.getUnitTarget() != m_caster)
+                targetUnitMap.push_back(m_targets.getUnitTarget());
+            else
+                targetUnitMap.clear();
             break;
         }
         case 28374: // Decimate - Gluth encounter
