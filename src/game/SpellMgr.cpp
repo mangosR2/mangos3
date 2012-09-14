@@ -2550,6 +2550,7 @@ uint32 SpellMgr::GetSpellMaxTargetsWithCustom(SpellEntry const* spellInfo, Unit 
                 case 50988:                                 // Glare of the Tribunal (Halls of Stone)
                 case 51146:                                 // Searching Gaze (Halls Of Stone)
                 case 52438:                                 // Summon Skittering Swarmer (Azjol Nerub,  Krik'thir the Gatewatcher)
+                case 52449:                                 // Summon Skittering Infector (Azjol Nerub,  Krik'thir the Gatewatcher)
                 case 53457:                                 // Impale (Azjol Nerub,  Anub'arak)
                 case 54148:                                 // Ritual of the Sword (Utgarde Pinnacle, Svala)
                 case 55479:                                 // Forced Obedience (Naxxramas, Razovius)
