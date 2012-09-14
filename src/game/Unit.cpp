@@ -854,7 +854,8 @@ uint32 Unit::DealDamage(DamageInfo* damageInfo)
                     {
                         SpellEntry const* shareSpell = (*itr)->GetSpellProto();
                         int32 shareDamage = int32(damageInfo->damage * (*itr)->GetModifier()->m_amount / 100.0f);
-                        linkedDamageList.push_back(DamageInfo(this, shareTarget, spellProto, shareDamage));
+                        //linkedDamageList.push_back(DamageInfo(this, shareTarget, spellProto, shareDamage));
+                        linkedDamageList.push_back(DamageInfo(this, shareTarget, shareSpell, shareDamage));
                         DamageInfo* sharedDamageInfo   = &linkedDamageList.back();
                         DealDamageMods(sharedDamageInfo);
                         sharedDamageInfo->cleanDamage  = shareDamage;
