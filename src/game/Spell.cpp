@@ -576,7 +576,7 @@ void Spell::FillTargetMap()
                     switch(m_spellInfo->EffectImplicitTargetB[i])
                     {
                         case TARGET_NONE:
-                            if (m_caster->GetObjectGuid().IsPet())
+                            if (m_caster->GetObjectGuid().IsPet() && m_spellInfo->TargetCreatureType == CREATURE_TYPEMASK_NONE)
                                 SetTargetMap(SpellEffectIndex(i), TARGET_SELF, tmpUnitLists[i /*==effToIndex[i]*/]);
                             else
                                 SetTargetMap(SpellEffectIndex(i), TARGET_EFFECT_SELECT, tmpUnitLists[i /*==effToIndex[i]*/]);
@@ -2997,7 +2997,15 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
             {
                 case SPELL_EFFECT_DUMMY:
                 {
-                    if (m_targets.getUnitTarget())
+                    // Voracious Appetite && Cannibalize && Carrion Feeder additional check
+                    if (m_spellInfo->HasAttribute(SPELL_ATTR_ABILITY)
+                        && m_spellInfo->HasAttribute(SPELL_ATTR_EX2_ALLOW_DEAD_TARGET)
+                        && m_spellInfo->TargetCreatureType != CREATURE_TYPEMASK_NONE)
+                    {
+                        if (m_targets.getUnitTarget() != m_caster)
+                            targetUnitMap.push_back(m_targets.getUnitTarget());
+                    }
+                    else if (m_targets.getUnitTarget())
                         targetUnitMap.push_back(m_targets.getUnitTarget());
 
                     // Add AoE target-mask to self, if no target-dest provided already
@@ -5829,9 +5837,9 @@ SpellCastResult Spell::CheckCast(bool strict)
                 {
                     m_targets.setUnitTarget(NULL);
                     WorldObject* result = FindCorpseUsing<MaNGOS::CannibalizeObjectCheck>(m_spellInfo->TargetCreatureType);
-                    if (result)
+                    if (result && result->IsInWorld())
                     {
-                        switch(result->GetTypeId())
+                        switch (result->GetTypeId())
                         {
                             case TYPEID_UNIT:
                             case TYPEID_PLAYER:
@@ -5840,7 +5848,7 @@ SpellCastResult Spell::CheckCast(bool strict)
                             case TYPEID_CORPSE:
                                 if (Player* owner = ObjectAccessor::FindPlayer(((Corpse*)result)->GetOwnerGuid()))
                                     if (owner->IsInMap(m_caster) && !owner->isAlive())
-                                        m_targets.setUnitTarget(owner);
+                                        m_targets.setUnitTarget((Unit*)owner);
                                 break;
                             default:
                                 break;

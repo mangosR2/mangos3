@@ -2143,10 +2143,10 @@ bool Pet::HasSpell(uint32 spellId) const
     uint32 parentSpell = 0;
     switch (spellId)
     {
-        case 54045:
+        case 54045:                  // Carrion feeder - not triggered spell
             parentSpell = 54044;
             break;
-        case 52749:
+        case 52749:                  // Voracious appetite - not triggered spell
             parentSpell = 52748;
             break;
         default:
