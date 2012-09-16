@@ -1665,11 +1665,8 @@ void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, ui
                     continue;
                 // possible additional requirements
                 AchievementCriteriaRequirementSet const* data = sAchievementMgr.GetCriteriaRequirementSet(achievementCriteria);
-                if (!data)
+                if (data && !data->Meets(GetPlayer(), unit, miscvalue1))
                     continue;
-                if (!data->Meets(GetPlayer(), unit, miscvalue1))
-                    continue;
-
                 change = 1;
                 progressType = PROGRESS_ACCUMULATE;
                 break;
