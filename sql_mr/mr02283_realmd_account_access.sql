@@ -9,12 +9,6 @@ CREATE TABLE `account_access` (
   PRIMARY KEY (`id`,`RealmID`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Account Access System';
 
-INSERT INTO `account_access` VALUES
-(1,3,-1),
-(2,2,-1),
-(3,1,-1),
-(4,0,-1);
-
 INSERT IGNORE INTO `account_access` (`id`,`gmlevel`,`RealmID`) 
     SELECT `id`, `gmlevel`, -1 FROM `account` 
     WHERE `account`.`gmlevel` > 0;
