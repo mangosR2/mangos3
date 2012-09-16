@@ -375,7 +375,7 @@ bool EvadeDelayEvent::Execute(uint64 /*e_time*/, uint32 /*p_time*/)
             if (!c_owner)
                 return true;
 
-            if (m_owner.GetOwner() && m_owner.GetOwner()->SelectHostileTarget(false))
+            if (m_owner.GetOwner() && m_owner.GetOwner()->GetTypeId() == TYPEID_UNIT && m_owner.GetOwner()->SelectHostileTarget(false))
                 return true;
 
             if (c_owner->IsAILocked())
