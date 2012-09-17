@@ -259,9 +259,11 @@ bool ManaUseEvent::Execute(uint64 /*e_time*/, uint32 /*p_time*/)
 AssistDelayEvent::AssistDelayEvent(ObjectGuid victim, Unit& owner, std::list<Creature*> const& assistants) : BasicEvent(WORLDOBJECT_EVENT_TYPE_COMMON), m_victimGuid(victim), m_owner(owner)
 {
     // Pushing guids because in delay can happen some creature gets despawned => invalid pointer
-    m_assistantGuids.reserve(assistants.size());
     for (std::list<Creature*>::const_iterator itr = assistants.begin(); itr != assistants.end(); ++itr)
-        m_assistantGuids.push_back((*itr)->GetObjectGuid());
+    {
+        if ((*itr) && (*itr)->IsInWorld())
+            m_assistantGuids.push_back((*itr)->GetObjectGuid());
+    }
 }
 
 bool AssistDelayEvent::Execute(uint64 /*e_time*/, uint32 /*p_time*/)

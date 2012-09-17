@@ -463,6 +463,7 @@ PlayerDataCache const* AccountMgr::GetPlayerDataCache(ObjectGuid guid, bool forc
 
             WriteGuard Guard(GetLock());
             mPlayerDataCacheMap.insert(PlayerDataCacheMap::value_type(guid, cache));
+            delete result;
         }
     }
 
@@ -500,6 +501,7 @@ PlayerDataCache const* AccountMgr::GetPlayerDataCache(const std::string& name)
 
         WriteGuard Guard(GetLock());
         mPlayerDataCacheMap.insert(PlayerDataCacheMap::value_type(guid, cache));
+        delete result;
     }
 
     {

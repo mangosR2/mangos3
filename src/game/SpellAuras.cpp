@@ -594,8 +594,7 @@ Aura* SpellAuraHolder::CreateAura(AuraClassType type, SpellEffectIndex eff, int3
 
 SpellAuraHolderPtr CreateSpellAuraHolder(SpellEntry const* spellproto, Unit *target, WorldObject *caster, Item *castItem)
 {
-     SpellAuraHolder* holder = new SpellAuraHolder(spellproto, target, caster, castItem);
-     SpellAuraHolderPtr holderPtr = SpellAuraHolderPtr(holder);
+     SpellAuraHolderPtr holderPtr = SpellAuraHolderPtr(new SpellAuraHolder(spellproto, target, caster, castItem));
      return holderPtr;
 }
 
@@ -10543,7 +10542,7 @@ m_permanent(false), m_isRemovedOnShapeLost(true), m_deleted(false), m_in_use(0)
     }
 }
 
-void SpellAuraHolder::AddAura(Aura aura, SpellEffectIndex index)
+void SpellAuraHolder::AddAura(Aura const& aura, SpellEffectIndex index)
 {
     if (/*Aura* _aura = */GetAuraByEffectIndex(index))
     {
@@ -10560,7 +10559,7 @@ void SpellAuraHolder::AddAura(Aura aura, SpellEffectIndex index)
         }
     }
 
-    m_aurasStorage.insert(std::make_pair(index,aura));
+    m_aurasStorage.insert(AuraStorage::value_type(index,aura));
     m_auraFlags |= (1 << index);
 }
 

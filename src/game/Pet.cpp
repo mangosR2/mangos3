@@ -56,6 +56,8 @@ m_declinedname(NULL)
 
 Pet::~Pet()
 {
+    m_spells.clear();
+
     delete m_declinedname;
 
     if (m_PetScalingData)
