@@ -549,10 +549,10 @@ void WorldStateMgr::CreateLinkedWorldStatesIfNeed(WorldObject* object)
                 }
                 case GAMEOBJECT_TYPE_DESTRUCTIBLE_BUILDING:
                 {
-                    if (goInfo->destructibleBuilding.linkedWorldState)
+                    if (CheckWorldState(goInfo->destructibleBuilding.linkedWorldState))
                     {
                         WorldState const* _state = NULL;
-                        WorldStateTemplate const* tmpl = FindTemplate(goInfo->destructibleBuilding.linkedWorldState, WORLD_STATE_TYPE_DESTRUCTIBLE_OBJECT, goInfo->id);
+                        WorldStateTemplate const* tmpl = FindTemplate(goInfo->destructibleBuilding.linkedWorldState, WORLD_STATE_TYPE_DESTRUCTIBLE_OBJECT, object->GetZoneId());
                         MANGOS_ASSERT(tmpl);
                         if (_state  = GetWorldState(tmpl, instanceId))
                         {
