@@ -6788,7 +6788,7 @@ SpellCastResult Spell::CheckCasterAuras() const
 SpellCastResult Spell::CheckCastTargets() const
 {
 
-    if (!IsSpellRequresTarget(m_spellInfo) || IsSpellWithCasterSourceTargetsOnly(m_spellInfo))
+    if (!IsSpellRequiresTarget(m_spellInfo) || IsSpellWithCasterSourceTargetsOnly(m_spellInfo))
         return SPELL_CAST_OK;
 
     // Spell without any target
