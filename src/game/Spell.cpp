@@ -3248,8 +3248,7 @@ void Spell::prepare(SpellCastTargets const* targets, Aura const* triggeredByAura
         m_triggeredByAuraSpell  = triggeredByAura->GetSpellProto();
 
     // create and add update event for this spell
-    SpellEvent* Event = new SpellEvent(this);
-    m_caster->AddEvent(Event, 1);
+    m_caster->AddEvent(new SpellEvent(this), 1);
 
     //Prevent casting at cast another spell (ServerSide check)
     if (m_caster->IsNonMeleeSpellCasted(false, true, true) && m_cast_count)

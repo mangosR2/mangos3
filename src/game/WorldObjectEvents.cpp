@@ -254,6 +254,7 @@ bool RelocationNotifyEvent::Execute(uint64 /*e_time*/, uint32 /*p_time*/)
 void RelocationNotifyEvent::Abort(uint64)
 {
     m_owner._SetAINotifyScheduled(false);
+    to_Abort = true;
 };
 
 bool ManaUseEvent::Execute(uint64 /*e_time*/, uint32 /*p_time*/)
