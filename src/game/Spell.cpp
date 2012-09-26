@@ -4000,7 +4000,7 @@ void Spell::update(uint32 difftime)
                 // check if all targets away range
                 if (!m_IsTriggeredSpell && (difftime >= m_timer))
                 {
-                    SpellCastResult result = CheckRange(true, m_targets.getUnitTarget());
+                    SpellCastResult result = CheckRange(false, m_targets.getUnitTarget());
                     bool checkFailed = false;
                     switch (result)
                     {
@@ -4020,8 +4020,12 @@ void Spell::update(uint32 difftime)
 
                     if (checkFailed)
                     {
+                        DEBUG_FILTER_LOG(LOG_FILTER_SPELL_CAST, "Spell::update  spell %u caster %s  target %s cancelled by CheckRange wile cast process continued (code %u)",
+                            m_spellInfo->Id, m_caster ? m_caster->GetObjectGuid().GetString().c_str() : "<none>", 
+                            m_targets.getUnitTarget() ? m_targets.getUnitTarget()->GetObjectGuid().GetString().c_str() : "<none>", 
+                            result);
                         SendCastResult(result);
-                        cancel();
+                        cancel(true);
                         return;
                     }
                 }
@@ -5800,7 +5804,7 @@ SpellCastResult Spell::CheckCast(bool strict)
 
     if(!m_IsTriggeredSpell)
     {
-        SpellCastResult castResult = CheckRange(strict);
+        SpellCastResult castResult = CheckRange(strict, m_targets.getUnitTarget());
         if (castResult != SPELL_CAST_OK)
             return castResult;
     }
@@ -6909,7 +6913,7 @@ SpellCastResult Spell::CheckRange(bool strict, WorldObject* checkTarget)
     bool friendly = target ? target->IsFriendlyTo(m_caster) : false;
     float max_range = GetSpellMaxRange(srange, friendly);
     float min_range = GetSpellMinRange(srange, friendly);
-    float add_range = checkTarget ? 0.0f : (strict ? 1.25f : 6.25f);
+    float add_range = bool(checkTarget) ? checkTarget->GetObjectBoundingRadius() : (strict ? 1.25f : 6.25f);
 
     // special range cases
     switch(m_spellInfo->rangeIndex)
@@ -6983,9 +6987,9 @@ SpellCastResult Spell::CheckRange(bool strict, WorldObject* checkTarget)
     }
 
     // TODO verify that such spells really use bounding radius
-    if (m_targets.m_targetMask == TARGET_FLAG_DEST_LOCATION && m_targets.m_destX != 0 && m_targets.m_destY != 0 && m_targets.m_destZ != 0)
+    if (m_targets.HasLocation())
     {
-        if(!m_caster->IsWithinDist3d(m_targets.m_destX, m_targets.m_destY, m_targets.m_destZ, max_range))
+        if (max_range && !m_caster->IsWithinDist3d(m_targets.m_destX, m_targets.m_destY, m_targets.m_destZ, max_range))
             return SPELL_FAILED_OUT_OF_RANGE;
         if (min_range && m_caster->IsWithinDist3d(m_targets.m_destX, m_targets.m_destY, m_targets.m_destZ, min_range))
             return SPELL_FAILED_TOO_CLOSE;
