@@ -6006,6 +6006,11 @@ AreaTrigger const* ObjectMgr::GetGoBackTrigger(uint32 mapId) const
     const MapEntry* mapEntry = sMapStore.LookupEntry(mapId);
     if (!mapEntry || mapEntry->ghost_entrance_map < 0)
         return NULL;
+    if (mapEntry->ghost_entrance_map == 0 && mapEntry->ghost_entrance_x == 0.0f && mapEntry->ghost_entrance_y == 0.0f)
+    {
+        sLog.outError("(map: %u, %s) can't be ported back to the entrance. Do not have correct ghost_entrance_map", mapEntry->MapID, mapEntry->name[sWorld.GetDefaultDbcLocale()]);
+        return NULL;
+    }
 
     AreaTrigger const* compareTrigger = NULL;
     for (AreaTriggerMap::const_iterator itr = mAreaTriggers.begin(); itr != mAreaTriggers.end(); ++itr)
