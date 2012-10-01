@@ -5365,7 +5365,7 @@ SpellPreferredTargetType GetPreferredTargetForSpell(SpellEntry const* spellInfo)
 
 static char* SPELL_DBC_SPELL      = "reconstructed by spell_dbc spell";
 
-struct SpellDbcLoader : public SQLStorageLoaderBase<SpellDbcLoader, SQLStorage>
+struct SpellDbcLoader : public SQLStorageLoaderBase<SpellDbcLoader, SQLHashStorage>
 {
     template<class S, class D>
     void default_fill(uint32 field_pos, S src, D &dst)
