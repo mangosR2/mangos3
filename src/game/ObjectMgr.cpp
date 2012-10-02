@@ -6006,16 +6006,21 @@ AreaTrigger const* ObjectMgr::GetGoBackTrigger(uint32 mapId) const
     const MapEntry* mapEntry = sMapStore.LookupEntry(mapId);
     if (!mapEntry || mapEntry->ghost_entrance_map < 0)
         return NULL;
+    uint32 ghost_entrance_map = uint32(mapEntry->ghost_entrance_map);
     if (mapEntry->ghost_entrance_map == 0 && mapEntry->ghost_entrance_x == 0.0f && mapEntry->ghost_entrance_y == 0.0f)
     {
-        sLog.outError("(map: %u, %s) can't be ported back to the entrance. Do not have correct ghost_entrance_map", mapEntry->MapID, mapEntry->name[sWorld.GetDefaultDbcLocale()]);
-        return NULL;
+        GraveYardMapBounds bounds = mGraveYardMap.equal_range(mapEntry->linked_zone);
+        for(GraveYardMap::const_iterator itr = bounds.first; itr != bounds.second; ++itr)
+        {
+            WorldSafeLocsEntry const* worldSafeLocsEntry = sWorldSafeLocsStore.LookupEntry(itr->second.safeLocId);
+            ghost_entrance_map = worldSafeLocsEntry->map_id;
+        }
     }
 
     AreaTrigger const* compareTrigger = NULL;
     for (AreaTriggerMap::const_iterator itr = mAreaTriggers.begin(); itr != mAreaTriggers.end(); ++itr)
     {
-        if (itr->second.target_mapId == uint32(mapEntry->ghost_entrance_map))
+        if (itr->second.target_mapId == ghost_entrance_map)
         {
             if (!compareTrigger || itr->second.IsLessOrEqualThan(compareTrigger))
             {
@@ -6031,7 +6036,7 @@ AreaTrigger const* ObjectMgr::GetGoBackTrigger(uint32 mapId) const
     {
         for (AreaTriggerMap::const_iterator itr = mAreaTriggers.begin(); itr != mAreaTriggers.end(); ++itr)
         {
-            if (itr->second.target_mapId == uint32(mapEntry->ghost_entrance_map))
+            if (itr->second.target_mapId == ghost_entrance_map)
             {
                 compareTrigger = &itr->second;
                 break;
