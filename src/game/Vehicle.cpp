@@ -65,8 +65,11 @@ VehicleKit::VehicleKit(Unit* base) :  m_pBase(base), m_uiNumFreeSeats(0)
         if (GetBase()->GetVehicleInfo()->GetEntry()->m_flags & VEHICLE_FLAG_ALLOW_PITCHING)
             GetBase()->m_movementInfo.AddMovementFlag2(MOVEFLAG2_ALLOW_PITCHING);
 
-        if (GetBase()->GetVehicleInfo()->GetEntry()->m_flags & VEHICLE_FLAG_ALLOW_PITCHING)
+        if (GetBase()->GetVehicleInfo()->GetEntry()->m_flags & VEHICLE_FLAG_FULLSPEEDPITCHING)
+        {
+            GetBase()->m_movementInfo.AddMovementFlag2(MOVEFLAG2_ALLOW_PITCHING);
             GetBase()->m_movementInfo.AddMovementFlag2(MOVEFLAG2_FULLSPEEDPITCHING);
+        }
 
     }
     SetDestination();
@@ -74,6 +77,7 @@ VehicleKit::VehicleKit(Unit* base) :  m_pBase(base), m_uiNumFreeSeats(0)
 
 VehicleKit::~VehicleKit()
 {
+    GetBase()->RemoveSpellsCausingAura(SPELL_AURA_CONTROL_VEHICLE);
 }
 
 void VehicleKit::RemoveAllPassengers()
