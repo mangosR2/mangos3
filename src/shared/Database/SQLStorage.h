@@ -50,7 +50,7 @@ class SQLStorageBase
                 void operator ++() { pointer += recordSize; }
                 T const* operator *() const { return getValue(); }
                 T const* operator ->() const { return getValue(); }
-                bool operator <(SQLSIterator& r) const { return pointer < r.pointer; }
+                bool operator <(SQLSIterator const& r) const { return pointer < r.pointer; }
                 void operator =(SQLSIterator& r) { pointer = r.pointer; recordSize = r.recordSize; }
 
             private:
