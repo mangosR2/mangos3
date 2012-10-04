@@ -55,7 +55,6 @@ void WorldObjectEventProcessor::KillAllEvents(bool force)
     EventProcessor::KillAllEvents(force);
 }
 
-
 void WorldObjectEventProcessor::AddEvent(BasicEvent* Event, uint64 e_time, bool set_addtime)
 {
     if (set_addtime)

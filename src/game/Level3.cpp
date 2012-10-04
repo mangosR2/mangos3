@@ -4326,7 +4326,6 @@ bool ChatHandler::HandleNpcInfoCommand(char* /*args*/)
         SendSysMessage(LANG_NPCINFO_TRAINER);
     }
 
-
     ShowNpcOrGoSpawnInformation<Creature>(target->GetGUIDLow());
     return true;
 }
