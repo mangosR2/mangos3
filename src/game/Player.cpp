@@ -2486,13 +2486,13 @@ void Player::SetGMVisible(bool on)
     }
 }
 
-bool Player::IsGroupVisiblefor (Player* p) const
+bool Player::IsGroupVisibleFor(Player* p) const
 {
     switch(sWorld.getConfig(CONFIG_UINT32_GROUP_VISIBILITY))
     {
         default: return IsInSameGroupWith(p);
         case 1:  return IsInSameRaidWith(p);
-        case 2:  return GetTeam()==p->GetTeam();
+        case 2:  return GetTeam() == p->GetTeam();
     }
 }
 
@@ -5027,7 +5027,7 @@ void Player::UpdateLocalChannels(uint32 newZone)
         if (!(*i)->IsConstant())
             continue;
 
-        ChatChannelsEntry const* ch = GetChannelEntryfor ((*i)->GetChannelId());
+        ChatChannelsEntry const* ch = GetChannelEntryFor((*i)->GetChannelId());
         if (!ch)
             continue;
 
@@ -8752,7 +8752,7 @@ void Player::_SendUpdateWorldState(uint32 Field, uint32 Value)
 
 void Player::UpdateWorldState(uint32 state, uint32 value)
 {
-    sWorldStateMgr.SetWorldStateValuefor (this, state, value);
+    sWorldStateMgr.SetWorldStateValueFor(this, state, value);
 }
 
 void Player::SendUpdatedWorldStates(bool force)
@@ -8765,7 +8765,7 @@ void Player::SendUpdatedWorldStates(bool force)
     if (IsBeingTeleported() || GetLastWorldStateUpdateTime() == time(NULL))
         return;
 
-    WorldStateSet wsSet = sWorldStateMgr.GetUpdatedWorldStatesfor (this, force ? 0 : GetLastWorldStateUpdateTime());
+    WorldStateSet wsSet = sWorldStateMgr.GetUpdatedWorldStatesFor(this, force ? 0 : GetLastWorldStateUpdateTime());
 
     if (wsSet.empty())
         return;
@@ -18954,7 +18954,7 @@ void Player::PetSpellInitialize()
     uint8 addlist = 0;
     data << uint8(addlist);                                 // placeholder
 
-    if (pet->IsPermanentPetfor (this))
+    if (pet->IsPermanentPetFor(this))
     {
         // spells loop
         for (PetSpellMap::const_iterator itr = pet->m_spells.begin(); itr != pet->m_spells.end(); ++itr)
@@ -20512,7 +20512,7 @@ bool Player::IsVisibleInGridForPlayer(Player* pl) const
     return false;
 }
 
-bool Player::IsVisibleGloballyfor (Player* u) const
+bool Player::IsVisibleGloballyFor(Player* u) const
 {
     if (!u)
         return false;
@@ -21752,7 +21752,7 @@ struct UpdateZoneDependentPetsHelper
     explicit UpdateZoneDependentPetsHelper(Player* _owner, uint32 zone, uint32 area) : owner(_owner), zone_id(zone), area_id(area) {}
     void operator()(Unit* unit) const
     {
-        if (unit->GetTypeId() == TYPEID_UNIT && ((Creature*)unit)->IsPet() && !((Pet*)unit)->IsPermanentPetfor (owner))
+        if (unit->GetTypeId() == TYPEID_UNIT && ((Creature*)unit)->IsPet() && !((Pet*)unit)->IsPermanentPetFor(owner))
             if (uint32 spell_id = unit->GetUInt32Value(UNIT_CREATED_BY_SPELL))
                 if (SpellEntry const* spellEntry = sSpellStore.LookupEntry(spell_id))
                     if (sSpellMgr.GetSpellAllowedInLocationError(spellEntry, owner->GetMapId(), zone_id, area_id, owner) != SPELL_CAST_OK)
@@ -22317,7 +22317,7 @@ void Player::AutoStoreLoot(uint32 loot_id, LootStore const& store, bool broadcas
 
 void Player::AutoStoreLoot(Loot& loot, bool broadcast, uint8 bag, uint8 slot)
 {
-    uint32 max_slot = loot.GetMaxSlotInLootfor (this);
+    uint32 max_slot = loot.GetMaxSlotInLootFor(this);
     for (uint32 i = 0; i < max_slot; ++i)
     {
         LootItem* lootItem = loot.LootItemInSlot(i,this);
@@ -23885,7 +23885,7 @@ ReferAFriendError Player::GetReferFriendError(Player * target, bool summon)
             return ERR_REFER_A_FRIEND_TARGET_TOO_HIGH;
         if (!GetGrantableLevels())
             return ERR_REFER_A_FRIEND_INSUFFICIENT_GRANTABLE_LEVELS;
-        if (GetDistance(target) > DEFAULT_VISIBILITY_DISTANCE || !target->IsVisibleGloballyfor (this))
+        if (GetDistance(target) > DEFAULT_VISIBILITY_DISTANCE || !target->IsVisibleGloballyFor(this))
             return ERR_REFER_A_FRIEND_TOO_FAR;
         if (target->getLevel() >= sWorld.getConfig(CONFIG_UINT32_RAF_MAXGRANTLEVEL))
             return ERR_REFER_A_FRIEND_GRANT_LEVEL_MAX_I;
