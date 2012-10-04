@@ -396,9 +396,9 @@ bool LootItem::AllowedForPlayer(Player const* player) const
     return true;
 }
 
-void LootItem::AddAllowedLooter(const Player *player)
+void LootItem::AddAllowedLooter(const Player* player)
 {
-    allowedGUIDs.insert(player->GetObjectGuid().GetCounter());
+    allowedGuids.insert(player->GetObjectGuid().GetCounter());
 }
 
 LootSlotType LootItem::GetSlotTypeForSharedLoot(PermissionTypes permission, Player* viewer, bool condition_ok /*= false*/) const
@@ -568,7 +568,10 @@ QuestItemList* Loot::FillNonQuestNonFFAConditionalLoot(Player* player)
         LootItem& item = items[i];
         if (!item.is_looted && !item.freeforall && item.AllowedForPlayer(player))
         {
-            item.AddAllowedLooter(player);
+            ItemPrototype const* pProto = ObjectMgr::GetItemPrototype(item.itemid);
+            if (pProto && !(pProto->Flags & ITEM_FLAG_LOOTABLE))
+                item.AddAllowedLooter(player);
+
             if (item.conditionId)
             {
                 ql->push_back(QuestItem(i));
