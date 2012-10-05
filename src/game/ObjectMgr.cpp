@@ -679,15 +679,6 @@ void ObjectMgr::LoadCreatureTemplates()
                 sLog.outErrorDb("Creature (Entry: %u) has non-existing PetSpellDataId (%u)", cInfo->Entry, cInfo->PetSpellDataId);
         }
 
-        for(int j = 0; j < CREATURE_MAX_SPELLS; ++j)
-        {
-            if(cInfo->spells[j] && !sSpellStore.LookupEntry(cInfo->spells[j]))
-            {
-                sLog.outErrorDb("Creature (Entry: %u) has non-existing Spell%d (%u), set to 0", cInfo->Entry, j+1,cInfo->spells[j]);
-                const_cast<CreatureInfo*>(cInfo)->spells[j] = 0;
-            }
-        }
-
         if(cInfo->MovementType >= MAX_DB_MOTION_TYPE)
         {
             sLog.outErrorDb("Creature (Entry: %u) has wrong movement generator type (%u), ignore and set to IDLE.",cInfo->Entry,cInfo->MovementType);
@@ -2930,15 +2921,6 @@ void ObjectMgr::LoadCreatureSpells()
         Field* fields = result->Fetch();
 
         uint32 creature_id = fields[0].GetUInt32();
-
-        CreatureInfo const* pInfo = sCreatureStorage.LookupEntry<CreatureInfo>(creature_id);
-
-        if(!pInfo)
-        {
-            sLog.outErrorDb("Wrong creature id %u in creature_spell table, ignoring.",creature_id);
-            continue;
-        }
-
 
         uint8 activeState  = fields[3].GetUInt8();
         CreatureSpellsList* pCreatureSpells = &m_creatureSpellStorage[activeState][creature_id];

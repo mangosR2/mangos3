@@ -1229,11 +1229,12 @@ void World::SetInitialWorldSettings()
     sLog.outString( "Loading Equipment templates...");
     sObjectMgr.LoadEquipmentTemplates();
 
-    sLog.outString( "Loading Creature templates..." );
-    sObjectMgr.LoadCreatureTemplates();
-
+    // FIXME! currently spells must be loaded _before_ templates for correct detection.
     sLog.outString( "Loading Creature spells..." );
     sObjectMgr.LoadCreatureSpells();
+
+    sLog.outString( "Loading Creature templates..." );
+    sObjectMgr.LoadCreatureTemplates();
 
     sLog.outString( "Loading Creature Model for race..." ); // must be after creature templates
     sObjectMgr.LoadCreatureModelRace();

@@ -3875,8 +3875,12 @@ void SpellMgr::LoadPetDefaultSpells()
                     continue;
 
                 PetDefaultSpellsEntry petDefSpells;
-                for(int j = 0; j < MAX_CREATURE_SPELL_DATA_SLOT; ++j)
-                    petDefSpells.spellid[j] = cInfo->spells[j];
+                CreatureSpellsList const* spellList = sObjectMgr.GetCreatureSpells(creature_id);
+                if (spellList)
+                {
+                    for (CreatureSpellsList::const_iterator itr = spellList->begin(); itr != spellList->end(); ++itr)
+                        petDefSpells.spellid[itr->first] = itr->second.spell;
+                }
 
                 if (LoadPetDefaultSpells_helper(cInfo, petDefSpells))
                 {
