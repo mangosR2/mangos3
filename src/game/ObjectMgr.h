@@ -736,15 +736,6 @@ class ObjectMgr
             return NULL;
         }
 
-        VehicleAccessoryList const* GetVehicleAccessoryList(uint32 uiEntry) const
-        {
-            VehicleAccessoryMap::const_iterator itr = m_VehicleAccessoryMap.find(uiEntry);
-            if (itr != m_VehicleAccessoryMap.end())
-                return &itr->second;
-            return NULL;
-        }
-
-
         // Static wrappers for various accessors
         static GameObjectInfo const* GetGameObjectInfo(uint32 id);                  ///< Wrapper for sGOStorage.LookupEntry
         static Player* GetPlayer(const char* name);                                 ///< Wrapper for ObjectAccessor::FindPlayerByName
@@ -843,7 +834,7 @@ class ObjectMgr
         void LoadTrainerTemplates();
         void LoadTrainers() { LoadTrainers("npc_trainer", false); }
 
-        void LoadVehicleAccessories();
+        void LoadVehicleAccessory();
 
         std::string GeneratePetName(uint32 entry);
         uint32 GetBaseXP(uint32 level) const;
@@ -1285,8 +1276,6 @@ class ObjectMgr
         ItemConvertMap        m_ItemConvert;
         ItemConvertMap        m_ItemExpireConvert;
         ItemRequiredTargetMap m_ItemRequiredTarget;
-
-        VehicleAccessoryMap m_VehicleAccessoryMap;
 
         typedef             std::vector<LocaleConstant> LocalForIndex;
         LocalForIndex        m_LocalForIndex;

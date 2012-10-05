@@ -1392,71 +1392,35 @@ void ObjectMgr::RemoveCreatureFromGrid(uint32 guid, CreatureData const* data)
     }
 }
 
-void ObjectMgr::LoadVehicleAccessories()
+void ObjectMgr::LoadVehicleAccessory()
 {
-    m_VehicleAccessoryMap.clear();                           // needed for reload case
+    sVehicleAccessoryStorage.Load();
 
-    uint32 count = 0;
-
-    //                                                     0                 1         2        3
-    QueryResult* result = WorldDatabase.Query("SELECT `entry`,`accessory_entry`,`seat_id`,`minion`,"
-    //                                                 4          5          6          7
-                                              "`offset_x`,`offset_y`,`offset_z`,`offset_o` "
-    //
-                                              "FROM `vehicle_accessory`");
-
-    if (!result)
-    {
-        BarGoLink bar(1);
-
-        bar.step();
-
-        sLog.outString();
-        sLog.outErrorDb(">> Loaded 0 vehicle accessories. DB table `vehicle_accessory` is empty.");
-        return;
-    }
-
-    BarGoLink bar((int)result->GetRowCount());
-
-    do
-    {
-        Field *fields = result->Fetch();
-        bar.step();
-
-        uint32 uiEntry       = fields[0].GetUInt32();
-        uint32 uiAccessory   = fields[1].GetUInt32();
-        int32   uiSeat       = fields[2].GetInt32();
-        bool   bMinion       = fields[3].GetBool();
-
-        float  x             = fields[4].GetFloat();
-        float  y             = fields[5].GetFloat();
-        float  z             = fields[6].GetFloat();
-        float  o             = fields[7].GetFloat();
-
-        if (!sCreatureStorage.LookupEntry<CreatureInfo>(uiEntry))
-        {
-            sLog.outErrorDb("Table `vehicle_accessory`: creature template entry %u does not exist.", uiEntry);
-            continue;
-        }
-
-        if (!sCreatureStorage.LookupEntry<CreatureInfo>(uiAccessory))
-        {
-            sLog.outErrorDb("Table `vehicle_accessory`: Accessory %u does not exist.", uiAccessory);
-            continue;
-        }
-
-        VehicleAccessory accessory = VehicleAccessory(uiAccessory, uiSeat, bMinion);
-        accessory.Offset(x,y,z,o);
-
-        m_VehicleAccessoryMap[uiEntry].push_back(accessory);
-
-        ++count;
-    } while (result->NextRow());
-
-    delete result;
-
+    sLog.outString(">> Loaded %u vehicle accessories", sVehicleAccessoryStorage.GetRecordCount());
     sLog.outString();
-    sLog.outString(">> Loaded %u Vehicle Accessories", count);
+
+    // Check content
+    for (SQLMultiStorage::SQLSIterator<VehicleAccessory> itr = sVehicleAccessoryStorage.getDataBegin<VehicleAccessory>(); itr < sVehicleAccessoryStorage.getDataEnd<VehicleAccessory>(); ++itr)
+    {
+        if (!sCreatureStorage.LookupEntry<CreatureInfo>(itr->vehicleEntry))
+        {
+            sLog.outErrorDb("Table `vehicle_accessory` has entry (vehicle entry: %u, seat %u, passenger %u) where vehicle_entry is invalid, skip vehicle.", itr->vehicleEntry, itr->seatId, itr->passengerEntry);
+            sVehicleAccessoryStorage.EraseEntry(itr->vehicleEntry);
+            continue;
+        }
+        if (!sCreatureStorage.LookupEntry<CreatureInfo>(itr->passengerEntry))
+        {
+            sLog.outErrorDb("Table `vehicle_accessory` has entry (vehicle entry: %u, seat %u, passenger %u) where accessory_entry is invalid, skip vehicle.", itr->vehicleEntry, itr->seatId, itr->passengerEntry);
+            sVehicleAccessoryStorage.EraseEntry(itr->vehicleEntry);
+            continue;
+        }
+        if (itr->seatId >= MAX_VEHICLE_SEAT)
+        {
+            sLog.outErrorDb("Table `vehicle_accessory` has entry (vehicle entry: %u, seat %u, passenger %u) where seat is invalid (must be between 0 and %u), skip vehicle.", itr->vehicleEntry, itr->seatId, itr->passengerEntry, MAX_VEHICLE_SEAT - 1);
+            sVehicleAccessoryStorage.EraseEntry(itr->vehicleEntry);
+            continue;
+        }
+    }
 }
 
 void ObjectMgr::LoadGameObjects()
