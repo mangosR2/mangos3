@@ -3339,8 +3339,8 @@ void Spell::cancel(bool force)
         return;
 
     DEBUG_FILTER_LOG(LOG_FILTER_SPELL_CAST, "Spell::cancel spell %u caster %s target %s cancelled.", 
-        m_spellInfo->Id, m_caster ? m_caster->GetObjectGuid().GetString().c_str() : "<none>",
-        m_targets.getUnitTarget() ? m_targets.getUnitTarget()->GetObjectGuid().GetString().c_str() : "<none>");
+        m_spellInfo->Id, (m_caster && m_caster->IsInWorld()) ? m_caster->GetObjectGuid().GetString().c_str() : "<none>",
+        (m_targets.getUnitTarget() && m_targets.getUnitTarget()->IsInWorld()) ? m_targets.getUnitTarget()->GetObjectGuid().GetString().c_str() : "<none>");
 
     // channeled spells don't display interrupted message even if they are interrupted, possible other cases with no "Interrupted" message
     bool sendInterrupt = IsChanneledSpell(m_spellInfo) ? false : true;
