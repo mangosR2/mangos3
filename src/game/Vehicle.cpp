@@ -26,6 +26,7 @@
 #include "Util.h"
 #include "WorldPacket.h"
 #include "movement/MoveSpline.h"
+#include "SQLStorages.h"
 
 VehicleInfo::VehicleInfo(VehicleEntry const* entry) :
     m_vehicleEntry(entry)
