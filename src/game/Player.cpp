@@ -2188,10 +2188,9 @@ void Player::Regenerate(Powers power, uint32 diff)
         case POWER_RAGE:                                    // Regenerate rage
         {
             float RageDecreaseRate = sWorld.getConfig(CONFIG_FLOAT_RATE_POWER_RAGE_LOSS);
-            addvalue += 20 * RageDecreaseRate;               // 2 rage by tick (= 2 seconds => 1 rage/sec)
-            break;
-        }
-        case POWER_ENERGY:                                  // Regenerate energy (rogue)
+            addvalue += 20 * RageDecreaseRate;              // 2 rage by tick (= 2 seconds => 1 rage/sec)
+        }   break;
+        case POWER_ENERGY:                                  // Regenerate energy
         {
             float EnergyRate = sWorld.getConfig(CONFIG_FLOAT_RATE_POWER_ENERGY);
             addvalue += 20 * EnergyRate;
