@@ -1098,6 +1098,22 @@ uint32 Unit::DealDamage(DamageInfo* damageInfo)
                 playerVictim->GetSession()->SendPacket(&data);
             }
 
+            if (!spiritOfRedemtionTalentReady)              // Before informing Battleground
+            {
+                DEBUG_FILTER_LOG(LOG_FILTER_DAMAGE, "Unit::DealDamage %s SET JUST_DIED", pVictim->GetGuidStr().c_str());
+                pVictim->SetDeathState(JUST_DIED);
+            }
+
+            // playerVictim was in duel, duel must be interrupted
+            // last damage from non duel opponent or non opponent controlled creature
+            if (duel_hasEnded)
+            {
+                playerVictim->duel->opponent->CombatStopWithPets(true);
+                playerVictim->CombatStopWithPets(true);
+
+                playerVictim->DuelComplete(DUEL_INTERUPTED);
+            }
+
             if (player_tap)                                 // PvP kill
             {
                 if (playerVictim->InBattleGround())
@@ -1112,33 +1128,17 @@ uint32 Unit::DealDamage(DamageInfo* damageInfo)
                         outdoorPvP->HandlePlayerKill(player_tap, playerVictim);
                 }
             }
-
-            // last damage from non duel opponent or opponent controlled creature
-            if (duel_hasEnded)
-            {
-                MANGOS_ASSERT(playerVictim->duel);
-
-                playerVictim->duel->opponent->CombatStopWithPets(true);
-                playerVictim->CombatStopWithPets(true);
-
-                playerVictim->DuelComplete(DUEL_INTERUPTED);
-            }
         }
         else                                                // Killed creature
         {
-            MANGOS_ASSERT(!duel_hasEnded);                  // Killing a creature must not end a duel
-
             JustKilledCreature((Creature*)pVictim);
+
+            DEBUG_FILTER_LOG(LOG_FILTER_DAMAGE,"Unit::DealDamage %s JUST_DIED", pVictim->GetGuidStr().c_str());
+            pVictim->SetDeathState(JUST_DIED);              // if !spiritOfRedemtionTalentReady always true for unit
 
             if (player_tap)                                 // killedby Player
                 if (BattleGround* bg = player_tap->GetBattleGround())
                     bg->HandleKillUnit((Creature*)pVictim, player_tap);
-        }
-
-        if (!spiritOfRedemtionTalentReady)
-        {
-            DEBUG_FILTER_LOG(LOG_FILTER_DAMAGE, "Unit::DealDamage %s SET JUST_DIED", pVictim->GetGuidStr().c_str());
-            pVictim->SetDeathState(JUST_DIED);
         }
     }
     else                                                    // if (health <= damage)
