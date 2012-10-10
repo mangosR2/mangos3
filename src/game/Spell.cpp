@@ -4745,7 +4745,7 @@ void Spell::SendChannelUpdate(uint32 time)
             if (possessed)
                 player->SetClientControl(possessed, 0);
             player->SetMover(NULL);
-            player->GetCamera().ResetView();
+            player->SetViewPoint(NULL);
             player->RemovePetActionBar();
 
             if (possessed)
@@ -6320,6 +6320,11 @@ SpellCastResult Spell::CheckCast(bool strict)
                     return SPELL_FAILED_ROOTED;
                 break;
             }
+            case SPELL_EFFECT_ADD_FARSIGHT:
+            {
+                if (m_caster->GetTypeId() != TYPEID_PLAYER || ((Player*)m_caster)->HasExternalViewPoint())
+                    return SPELL_FAILED_BAD_TARGETS;
+            }
             default:
                 break;
         }
@@ -6519,6 +6524,12 @@ SpellCastResult Spell::CheckCast(bool strict)
                         return SPELL_FAILED_BAD_TARGETS;
                 }
                 break;
+            }
+            case SPELL_AURA_FAR_SIGHT:
+            case SPELL_AURA_BIND_SIGHT:
+            {
+                if (m_caster->GetTypeId() != TYPEID_PLAYER || ((Player*)m_caster)->HasExternalViewPoint())
+                    return SPELL_FAILED_BAD_TARGETS;
             }
             default:
                 break;
