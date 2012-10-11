@@ -165,41 +165,16 @@ Creature::~Creature()
 
 void Creature::AddToWorld()
 {
-    ///- Register the creature for guid lookup
-    if (!IsInWorld() && GetObjectGuid().IsCreatureOrVehicle())
-    {
-        MAPLOCK_WRITE(this, MAP_LOCK_TYPE_DEFAULT);
-        GetMap()->GetObjectsStore().insert<Creature>(GetObjectGuid(), (Creature*)this);
-    }
+    Unit::AddToWorld();
 
-    if (IsInWorld() && GetObjectGuid().IsPet())
-    {
-        DEBUG_LOG("Creature::AddToWorld called, but creature (guid %u) is pet! Crush possible later.", GetObjectGuid().GetCounter());
-        ((Pet*)this)->AddToWorld();
-    }
-    else
-        Unit::AddToWorld();
-
+    // Not one time call this "added to world" creatures, spawned with negative spawn time (BG events mostly)
     if (GetVehicleKit())
         GetVehicleKit()->Reset();
 }
 
-void Creature::RemoveFromWorld()
+void Creature::RemoveFromWorld(bool remove)
 {
-    ///- Remove the creature from the accessor
-    if (IsInWorld() && GetObjectGuid().IsCreatureOrVehicle())
-    {
-        MAPLOCK_WRITE(this, MAP_LOCK_TYPE_DEFAULT);
-        GetMap()->GetObjectsStore().erase<Creature>(GetObjectGuid(), (Creature*)NULL);
-    }
-
-    if (IsInWorld() && GetObjectGuid().IsPet())
-    {
-        DEBUG_LOG("Creature::RemoveFromWorld called, but creature (guid %u) is pet! Crush possible later.", GetObjectGuid().GetCounter());
-        ((Pet*)this)->RemoveFromWorld();
-    }
-    else
-        Unit::RemoveFromWorld();
+    Unit::RemoveFromWorld(remove);
 }
 
 void Creature::RemoveCorpse()

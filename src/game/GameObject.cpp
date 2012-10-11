@@ -83,22 +83,16 @@ GameObject::~GameObject()
 
 void GameObject::AddToWorld()
 {
-    ///- Register the gameobject for guid lookup
-    if(!IsInWorld())
-    {
-        MAPLOCK_WRITE(this, MAP_LOCK_TYPE_DEFAULT);
-        GetMap()->GetObjectsStore().insert<GameObject>(GetObjectGuid(), (GameObject*)this);
-    }
+    WorldObject::AddToWorld();
 
     if (m_model)
         GetMap()->InsertGameObjectModel(*m_model);
 
     EnableCollision(CalculateCurrentCollisionState());
 
-    Object::AddToWorld();
 }
 
-void GameObject::RemoveFromWorld()
+void GameObject::RemoveFromWorld(bool remove)
 {
     // store the slider value for non instance, non locked capture points
     if (!GetMap()->IsBattleGroundOrArena())
@@ -121,11 +115,6 @@ void GameObject::RemoveFromWorld()
                               GetGuidStr().c_str(), m_spellId, GetGOInfo()->GetLinkedGameObjectEntry(), owner_guid.GetString().c_str());
             }
         }
-
-        MAPLOCK_WRITE(this, MAP_LOCK_TYPE_DEFAULT);
-
-        GetMap()->GetObjectsStore().erase<GameObject>(GetObjectGuid(), (GameObject*)NULL);
-
         EnableCollision(false);
     }
 
@@ -133,7 +122,7 @@ void GameObject::RemoveFromWorld()
         if (GetMap()->ContainsGameObjectModel(*m_model))
             GetMap()->RemoveGameObjectModel(*m_model);
 
-    Object::RemoveFromWorld();
+    WorldObject::RemoveFromWorld(remove);
 }
 
 bool GameObject::Create(uint32 guidlow, uint32 name_id, Map* map, uint32 phaseMask, float x, float y, float z, float ang, QuaternionData rotation, uint8 animprogress, GOState go_state)
