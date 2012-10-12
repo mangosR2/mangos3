@@ -10058,7 +10058,7 @@ void Aura::PeriodicCheck()
         {
             if (caster->GetObjectGuid().IsPlayer() && target->GetObjectGuid().IsCreatureOrVehicle())
             {
-                if (caster->MagicSpellHitResult(target, spellProto) != SPELL_MISS_NONE)
+                if (caster->SpellResistResult(target, spellProto) != SPELL_MISS_NONE)
                 {
                     caster->SendSpellDamageResist(target, spellProto->Id);
                     target->RemoveAurasDueToSpell(GetId());
