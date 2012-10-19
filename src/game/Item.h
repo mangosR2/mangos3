@@ -394,6 +394,7 @@ class MANGOS_DLL_SPEC Item : public Object
         bool HasInvolvedQuest(uint32 /*quest_id*/) const override { return false; }
         bool IsPotion() const { return GetProto()->IsPotion(); }
         bool IsConjuredConsumable() const { return GetProto()->IsConjuredConsumable(); }
+        bool IsRangedWeapon() const { return GetProto()->IsRangedWeapon(); }
 
         void AddToClientUpdateList() override;
         void RemoveFromClientUpdateList() override;
@@ -413,6 +414,8 @@ class MANGOS_DLL_SPEC Item : public Object
         bool IsEligibleForSoulboundTrade(AllowedLooterSet* allowedLooters) const;
         void SetSoulboundTradeable(Player* owner, AllowedLooterSet* allowedLooters, bool load = false);
         void SetNotSoulboundTradeable(Player* owner, bool load = false);
+        void SetPlayedTimeField(uint32 time) { SetInt32Value(ITEM_FIELD_CREATE_PLAYED_TIME, time); }
+        uint32 GetPlayedTimeField() const { return GetInt32Value(ITEM_FIELD_CREATE_PLAYED_TIME); }
 
         bool LoadSoulboundTradeableDataFromDB(Player* owner);
         bool CheckSoulboundTradeExpire(Player* owner);
@@ -429,6 +432,11 @@ class MANGOS_DLL_SPEC Item : public Object
         static uint32 GetSpecialPrice(ItemPrototype const* proto, uint32 minimumPrice = 10000);
         uint32 GetSpecialPrice(uint32 minimumPrice = 10000) const { return Item::GetSpecialPrice(GetProto(), minimumPrice); }
         int32 GetReforgableStat(ItemModType statType) const;
+
+        bool CanBeTransmogrified() const;
+        bool CanTransmogrify() const;
+        static bool CanTransmogrifyItemWithItem(Item const* transmogrified, Item const* transmogrifier);
+        bool HasStats() const;
 
     private:
         void GetDataValuesStr(std::ostringstream& ss);

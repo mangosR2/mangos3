@@ -1670,3 +1670,143 @@ void WorldSession::HandleReforgeItemOpcode(WorldPacket& recvData)
     if (item->IsEquipped())
         player->ApplyReforgeEnchantment(item, true);
 }
+
+void WorldSession::HandleTransmogrifyItems(WorldPacket& recvData)
+{
+    sLog.outDebug("WORLD: Received CMSG_TRANSMOGRIFY_ITEMS");
+
+    // Read data
+    uint32 count = recvData.ReadBits(22);
+
+    if (count < EQUIPMENT_SLOT_START || count >= EQUIPMENT_SLOT_END)
+    {
+        sLog.outDebug("WORLD: HandleTransmogrifyItems - Player (GUID: %s) sent a wrong count (%u) when transmogrifying items.", _player->GetGuidStr().c_str(), count);
+        recvData.rfinish();
+        return;
+    }
+
+    std::vector<ObjectGuid> itemGuids(count, ObjectGuid());
+    std::vector<uint32> newEntries(count, 0);
+    std::vector<uint32> slots(count, 0);
+
+    for (uint8 i = 0; i < count; ++i)
+        recvData.ReadGuidMask<0, 5, 6, 2, 3, 7, 4, 1>(itemGuids[i]);
+
+    ObjectGuid npcGuid;
+    recvData.ReadGuidMask<7, 3, 5, 6, 1, 4, 0, 2>(npcGuid);
+
+    for (uint32 i = 0; i < count; ++i)
+    {
+        recvData >> newEntries[i];
+        recvData.ReadGuidBytes<1, 5, 0, 4, 6, 7, 3, 2>(itemGuids[i]);
+        recvData >> slots[i];
+    }
+
+    recvData.ReadGuidBytes<7, 2, 5, 4, 3, 1, 6, 0>(npcGuid);
+
+    // Validate
+    if (!_player->GetNPCIfCanInteractWith(npcGuid, UNIT_NPC_FLAG_TRANSMOGRIFIER))
+    {
+        sLog.outDebug("WORLD: HandleTransmogrifyItems - Unit (GUID: %s) not found or player can't interact with it.", npcGuid.GetString().c_str());
+        return;
+    }
+
+    int32 cost = 0;
+    for (uint8 i = 0; i < count; ++i)
+    {
+        // slot of the transmogrified item
+        if (slots[i] < EQUIPMENT_SLOT_START || slots[i] >= EQUIPMENT_SLOT_END)
+        {
+            sLog.outDebug("WORLD: HandleTransmogrifyItems - Player (GUID: %s) tried to transmogrify an item (lowguid: %u) with a wrong slot (%u) when transmogrifying items.", _player->GetGuidStr().c_str(), itemGuids[i].GetCounter(), slots[i]);
+            return;
+        }
+
+        // entry of the transmogrifier item, if it's not 0
+        if (newEntries[i])
+        {
+            ItemPrototype const* proto = sObjectMgr.GetItemPrototype(newEntries[i]);
+            if (!proto)
+            {
+                sLog.outDebug("WORLD: HandleTransmogrifyItems - Player (GUID: %s) tried to transmogrify to an invalid item (entry: %u).", _player->GetGuidStr().c_str(), newEntries[i]);
+                return;
+            }
+        }
+
+        Item* itemTransmogrifier = NULL;
+        // guid of the transmogrifier item, if it's not 0
+        if (itemGuids[i])
+        {
+            itemTransmogrifier = _player->GetItemByGuid(itemGuids[i]);
+            if (!itemTransmogrifier)
+            {
+                sLog.outDebug("WORLD: HandleTransmogrifyItems - Player (GUID: %s) tried to transmogrify with an invalid item (lowguid: %u).", _player->GetGuidStr().c_str(), itemGuids[i].GetCounter());
+                return;
+            }
+        }
+
+        // transmogrified item
+        Item* itemTransmogrified = _player->GetItemByPos(INVENTORY_SLOT_BAG_0, slots[i]);
+        if (!itemTransmogrified)
+        {
+            sLog.outDebug("WORLD: HandleTransmogrifyItems - Player (GUID: %s) tried to transmogrify an invalid item in a valid slot (slot: %u).", _player->GetGuidStr().c_str(), slots[i]);
+            return;
+        }
+
+        // uint16 tempDest;
+        //// has to be able to equip item transmogrified item
+        //if (!player->CanEquipItem(slots[i], tempDest, itemTransmogrified, true, true))
+        //{
+        //    sLog->outDebug(LOG_FILTER_NETWORKIO, "WORLD: HandleTransmogrifyItems - Player (GUID: %u, name: %s) can't equip the item to be transmogrified (slot: %u, entry: %u).", player->GetGUIDLow(), player->GetName(), slots[i], itemTransmogrified->GetEntry());
+        //    return;
+        //}
+        //
+        //// has to be able to equip item transmogrifier item
+        //if (!player->CanEquipItem(slots[i], tempDest, itemTransmogrifier, true, true))
+        //{
+        //    sLog->outDebug(LOG_FILTER_NETWORKIO, "WORLD: HandleTransmogrifyItems - Player (GUID: %u, name: %s) can't equip the transmogrifier item (slot: %u, entry: %u).", player->GetGUIDLow(), player->GetName(), slots[i], itemTransmogrifier->GetEntry());
+        //    return;
+        //}
+
+        if (!newEntries[i]) // reset look
+        {
+            itemTransmogrified->ClearEnchantment(TRANSMOGRIFY_ENCHANTMENT_SLOT);
+            _player->SetVisibleItemSlot(slots[i], itemTransmogrified);
+        }
+        else
+        {
+            if (!Item::CanTransmogrifyItemWithItem(itemTransmogrified, itemTransmogrifier))
+            {
+                sLog.outDebug("WORLD: HandleTransmogrifyItems - Player (GUID: %s) failed CanTransmogrifyItemWithItem (%u with %u).", _player->GetGuidStr().c_str(), itemTransmogrified->GetEntry(), itemTransmogrifier->GetEntry());
+                return;
+            }
+
+            // All okay, proceed
+            itemTransmogrified->SetEnchantment(TRANSMOGRIFY_ENCHANTMENT_SLOT, newEntries[i], 0, 0);
+            _player->SetVisibleItemSlot(slots[i], itemTransmogrified);
+
+            itemTransmogrified->SetPlayedTimeField(_player->GetTotalPlayedTime());
+
+            itemTransmogrified->SetOwnerGuid(_player->GetObjectGuid());
+            //itemTransmogrified->SetRefundable(false);
+            //_player->DeleteRefundReference(itemTransmogrified->GetObjectGuid());
+            //itemTransmogrified->SetSoulboundTradeable(NULL, _player, false);
+            //_player->RemoveSoulboundTradeableItem(itemTransmogrified->GetObjectGuid());
+
+            if (itemTransmogrifier->GetProto()->Bonding == BIND_WHEN_EQUIPPED || itemTransmogrifier->GetProto()->Bonding == BIND_WHEN_USE)
+                itemTransmogrifier->SetBinding(true);
+
+            itemTransmogrifier->SetOwnerGuid(_player->GetObjectGuid());
+            //itemTransmogrifier->SetRefundable(false);
+            //_player->DeleteRefundReference(itemTransmogrifier->GetObjectGuid());
+            //itemTransmogrifier->SetSoulboundTradeable(NULL, _player, false);
+            //_player->RemoveSoulboundTradeableItem(itemTransmogrifier->GetObjectGuid());
+
+            cost += itemTransmogrified->GetSpecialPrice();
+        }
+    }
+
+    // trusting the client, if it got here it has to have enough money
+    // ... unless client was modified
+    if (cost) // 0 cost if reverting look
+        _player->ModifyMoney(-int64(cost));
+}

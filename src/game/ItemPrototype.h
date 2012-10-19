@@ -154,6 +154,9 @@ enum ItemPrototypeFlags2
     ITEM_FLAG2_NEED_ROLL_DISABLED             = 0x00000100, // need roll during looting is not allowed for this item
     ITEM_FLAG2_CASTER_WEAPON                  = 0x00000200, // uses caster specific dbc file for DPS calculations
     ITEM_FLAG2_HAS_NORMAL_PRICE               = 0x00004000,
+    ITEM_FLAG2_CANNOT_BE_TRANSMOG             = 0x00200000,
+    ITEM_FLAG2_CANNOT_TRANSMOG                = 0x00400000,
+    ITEM_FLAG2_CAN_TRANSMOG                   = 0x00800000,
 };
 
 enum BagFamilyMask
@@ -672,6 +675,14 @@ struct ItemPrototype
         }
 
         return 0;
+    }
+
+    bool IsRangedWeapon() const
+    {
+        return Class == ITEM_CLASS_WEAPON ||
+               SubClass == ITEM_SUBCLASS_WEAPON_BOW ||
+               SubClass == ITEM_SUBCLASS_WEAPON_GUN ||
+               SubClass == ITEM_SUBCLASS_WEAPON_CROSSBOW;
     }
 };
 
