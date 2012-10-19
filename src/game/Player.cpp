@@ -12556,7 +12556,7 @@ void Player::ApplyEnchantment(Item* item, bool apply)
         ApplyEnchantment(item, EnchantmentSlot(slot), apply);
 }
 
-void Player::ApplyEnchantment(Item* item, EnchantmentSlot slot, bool apply, bool apply_dur, bool ignore_condition)
+void Player::ApplyEnchantment(Item *item, EnchantmentSlot slot, bool apply, bool apply_dur, bool ignore_condition, bool ignore_skill)
 {
     if (slot == REFORGE_ENCHANTMENT_SLOT)
     {
@@ -12591,22 +12591,16 @@ void Player::ApplyEnchantment(Item* item, EnchantmentSlot slot, bool apply, bool
     if (!enchant_id)
         return;
 
-    SpellItemEnchantmentEntry const* pEnchant = sSpellItemEnchantmentStore.LookupEntry(enchant_id);
+    SpellItemEnchantmentEntry const *pEnchant = sSpellItemEnchantmentStore.LookupEntry(enchant_id);
     if (!pEnchant)
         return;
 
     if (!ignore_condition && pEnchant->EnchantmentCondition && !EnchantmentFitsRequirements(pEnchant->EnchantmentCondition, -1))
         return;
-/*
-    if (pEnchant->requiredLevel > getLevel())
+
+    if (!ignore_skill && !CheckEnchantmentActiveBySkills(item, slot))
         return;
 
-    if ((pEnchant->requiredSkill) > 0)
-    {
-       if (pEnchant->requiredSkillValue > GetSkillValue(pEnchant->requiredSkill))
-        return;
-    }
-*/
     if (!item->IsBroken())
     {
         for (int s = 0; s < 3; ++s)
@@ -12640,11 +12634,11 @@ void Player::ApplyEnchantment(Item* item, EnchantmentSlot slot, bool apply, bool
                             // Random Property Exist - try found basepoints for spell (basepoints depends from item suffix factor)
                             if (item->GetItemRandomPropertyId())
                             {
-                                ItemRandomSuffixEntry const* item_rand = sItemRandomSuffixStore.LookupEntry(abs(item->GetItemRandomPropertyId()));
+                                ItemRandomSuffixEntry const *item_rand = sItemRandomSuffixStore.LookupEntry(abs(item->GetItemRandomPropertyId()));
                                 if (item_rand)
                                 {
                                     // Search enchant_amount
-                                    for (int k = 0; k < 3; ++k)
+                                    for (int k = 0; k < 5; ++k)
                                     {
                                         if (item_rand->enchant_id[k] == enchant_id)
                                         {
@@ -12668,7 +12662,7 @@ void Player::ApplyEnchantment(Item* item, EnchantmentSlot slot, bool apply, bool
                 case ITEM_ENCHANTMENT_TYPE_RESISTANCE:
                     if (!enchant_amount)
                     {
-                        ItemRandomSuffixEntry const* item_rand = sItemRandomSuffixStore.LookupEntry(abs(item->GetItemRandomPropertyId()));
+                        ItemRandomSuffixEntry const *item_rand = sItemRandomSuffixStore.LookupEntry(abs(item->GetItemRandomPropertyId()));
                         if (item_rand)
                         {
                             for (int k = 0; k < 3; ++k)
@@ -12688,10 +12682,10 @@ void Player::ApplyEnchantment(Item* item, EnchantmentSlot slot, bool apply, bool
                 {
                     if (!enchant_amount)
                     {
-                        ItemRandomSuffixEntry const* item_rand_suffix = sItemRandomSuffixStore.LookupEntry(abs(item->GetItemRandomPropertyId()));
+                        ItemRandomSuffixEntry const *item_rand_suffix = sItemRandomSuffixStore.LookupEntry(abs(item->GetItemRandomPropertyId()));
                         if (item_rand_suffix)
                         {
-                            for (int k = 0; k < 3; ++k)
+                            for (int k = 0; k < 5; ++k)
                             {
                                 if (item_rand_suffix->enchant_id[k] == enchant_id)
                                 {
@@ -12788,14 +12782,13 @@ void Player::ApplyEnchantment(Item* item, EnchantmentSlot slot, bool apply, bool
                             ApplySpellPowerBonus(enchant_amount, apply);
                             DEBUG_LOG("+ %u SPELL_POWER", enchant_amount);
                             break;
-                        case ITEM_MOD_HEALTH_REGEN:
-                            ApplyHealthRegenBonus(enchant_amount, apply);
-                            DEBUG_LOG("+ %u HEALTH_REGENERATION", enchant_amount);
-                            break;
                         case ITEM_MOD_SPELL_PENETRATION:
                             ApplyModInt32Value(PLAYER_FIELD_MOD_TARGET_RESISTANCE, -int32(enchant_amount), apply);
                             m_spellPenetrationItemMod += apply ? enchant_amount : -int32(enchant_amount);
                             DEBUG_LOG("+ %u SPELL_PENETRATION", -int32(enchant_amount));
+                        case ITEM_MOD_HEALTH_REGEN:
+                            ApplyHealthRegenBonus(enchant_amount, apply);
+                            DEBUG_LOG("+ %u HEALTH_REGENERATION", enchant_amount);
                             break;
                         case ITEM_MOD_MASTERY_RATING:
                             ApplyRatingMod(CR_MASTERY, enchant_amount, apply);
@@ -24540,6 +24533,165 @@ void Player::_LoadRandomBGStatus(QueryResult* result)
     {
         m_isRandomBGWinner = true;
         delete result;
+    }
+}
+
+bool Player::CheckEnchantmentActiveBySkills(Item* pItem, EnchantmentSlot slot)
+{
+    uint32 enchant_id = pItem->GetEnchantmentId(EnchantmentSlot(slot));
+    if (!enchant_id)
+        return false;
+
+    SpellItemEnchantmentEntry const * pEnchant = sSpellItemEnchantmentStore.LookupEntry(enchant_id);
+    if (!pEnchant)
+        return false;
+
+    if (pEnchant->requiredLevel > getLevel())
+        return false;
+
+    if (pEnchant->requiredSkill && GetSkillValue(pEnchant->requiredSkill) < pEnchant->requiredSkillValue)
+        return false;
+
+    // Cogwheel gems dont have requirement data set in SpellItemEnchantment.dbc, but they do have it in Item-sparse.db2
+    if (ItemPrototype const* gem = sObjectMgr.GetItemPrototype(pEnchant->GemID))
+        if (gem->RequiredSkill && GetSkillValue(gem->RequiredSkill) < gem->RequiredSkillRank)
+            return;
+
+    if (slot >= SOCK_ENCHANTMENT_SLOT && slot < SOCK_ENCHANTMENT_SLOT + MAX_GEM_SOCKETS)
+    {
+        int slotidx = slot - SOCK_ENCHANTMENT_SLOT;
+        // check socket color and prismatic enchant existance from gem slots
+        if (!pItem->GetProto()->Socket[slotidx].Color)
+        {
+            uint32 prismatic = pItem->GetEnchantmentId(PRISMATIC_ENCHANTMENT_SLOT);
+            // WPE?
+            if (!prismatic)
+                return false;
+
+            SpellItemEnchantmentEntry const * prismaticEntry = sSpellItemEnchantmentStore.LookupEntry(prismatic);
+            if (!prismaticEntry)
+                return false;
+
+            if (prismaticEntry->requiredLevel > getLevel())
+                return false;
+
+            if (prismaticEntry->requiredSkill && GetSkillValue(prismaticEntry->requiredSkill) < prismaticEntry->requiredSkillValue)
+                return false;
+        }
+    }
+
+    return true;
+}
+
+void Player::UpdateItemEnchantAtSkill(Item* pItem, EnchantmentSlot slot, uint32 checkSkill, uint32 oldSkillValue, uint32 newSkillValue)
+{
+    if (!checkSkill || oldSkillValue == newSkillValue)
+        return;
+
+    bool prismaticActiveBefore = false;     // whether was active before skill change
+    bool prismaticActiveAfter = false;      // whether active after skill change
+    bool enchActiveBefore = false;
+    bool enchActiveAfter = false;
+
+    uint32 enchant_id = pItem->GetEnchantmentId(slot);
+    if (!enchant_id)
+        return;
+
+    SpellItemEnchantmentEntry const * pEnchant = sSpellItemEnchantmentStore.LookupEntry(enchant_id);
+    if (!pEnchant)
+        return;
+
+    if (pEnchant->requiredLevel > getLevel())
+        return;
+
+    if (!pEnchant->requiredSkill)
+    {
+        enchActiveBefore = true;
+        enchActiveAfter = true;
+    }
+    else if (pEnchant->requiredSkill == checkSkill)
+    {
+        enchActiveBefore = oldSkillValue >= pEnchant->requiredSkillValue;
+        enchActiveAfter = newSkillValue >= pEnchant->requiredSkillValue;
+    }
+    else
+        enchActiveBefore = enchActiveAfter = GetSkillValue(pEnchant->requiredSkill) >= pEnchant->requiredSkillValue;
+
+    // ench was not active neither before nor now - nothing to do
+    if (!enchActiveBefore && !enchActiveAfter)
+        return;
+
+    // check gem slots
+    if (slot >= SOCK_ENCHANTMENT_SLOT && slot < SOCK_ENCHANTMENT_SLOT + MAX_GEM_SOCKETS)
+    {
+        int slotidx = slot - SOCK_ENCHANTMENT_SLOT;
+        // if slot is prismatic or unexistent
+        if (!pItem->GetProto()->Socket[slotidx].Color)
+        {
+            uint32 prismatic = pItem->GetEnchantmentId(PRISMATIC_ENCHANTMENT_SLOT);
+            // WPE?
+            if (!prismatic)
+                return;
+
+            SpellItemEnchantmentEntry const * prismaticEntry = sSpellItemEnchantmentStore.LookupEntry(prismatic);
+            if (!prismaticEntry)
+                return;
+
+            if (prismaticEntry->requiredLevel > getLevel())
+                return;
+
+            if (!prismaticEntry->requiredSkill)
+            {
+                prismaticActiveBefore = true;
+                prismaticActiveAfter = true;
+            }
+            else if (prismaticEntry->requiredSkill == checkSkill)
+            {
+                prismaticActiveBefore = oldSkillValue >= prismaticEntry->requiredSkillValue;
+                prismaticActiveAfter = newSkillValue >= prismaticEntry->requiredSkillValue;
+            }
+            else
+                prismaticActiveBefore = prismaticActiveAfter = GetSkillValue(prismaticEntry->requiredSkill) >= prismaticEntry->requiredSkillValue;
+
+            // if ench was and is active, change if prismatic enchant status changed
+            if (enchActiveBefore && enchActiveAfter)
+            {
+                if (prismaticActiveBefore != prismaticActiveAfter)
+                    ApplyEnchantment(pItem, slot, newSkillValue > oldSkillValue, true, false, true);
+            }
+            // enchActiveBefore && !enchActiveAfter || enchActiveAfter && !enchActiveAfter
+            // if ench deactivated, prismatic ench may only deactivate too or not change and
+            // if ench activated, prismatic ench may only activate too or not change
+            // else if (enchActiveBefore || enchActiveAfter)
+            else
+            {
+                if (!prismaticActiveBefore && !prismaticActiveAfter)
+                    return;
+
+                if (prismaticActiveBefore && prismaticActiveAfter || prismaticActiveBefore == enchActiveBefore && prismaticActiveAfter == enchActiveAfter)
+                    ApplyEnchantment(pItem, slot, newSkillValue > oldSkillValue, true, false, true);
+            }
+
+            return;
+        }
+    }
+
+    if (enchActiveBefore != enchActiveAfter)
+        ApplyEnchantment(pItem, slot, newSkillValue > oldSkillValue, true, false, true);
+}
+
+void Player::UpdateAllItemEnchantsAtSkill(uint32 checkSkill, uint32 oldSkillValue, uint32 newSkillValue)
+{
+    if (!checkSkill || oldSkillValue == newSkillValue)
+        return;
+
+    for (int i = EQUIPMENT_SLOT_START; i < EQUIPMENT_SLOT_END; ++i)
+    {
+        if (Item* pItem = GetItemByPos(INVENTORY_SLOT_BAG_0, i))
+        {
+            for (int slot = 0; slot < MAX_ENCHANTMENT_SLOT; ++slot)
+                UpdateItemEnchantAtSkill(pItem, EnchantmentSlot(slot), checkSkill, oldSkillValue, newSkillValue);
+        }
     }
 }
 

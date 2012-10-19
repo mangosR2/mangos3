@@ -2735,9 +2735,9 @@ struct SpellItemEnchantmentEntry
     uint32      slot;                                       // 16       m_flags
     uint32      GemID;                                      // 17       m_src_itemID
     uint32      EnchantmentCondition;                       // 18       m_condition_id
-    //uint32      requiredSkill;                            // 19       m_requiredSkillID
-    //uint32      requiredSkillValue;                       // 20       m_requiredSkillRank
-                                                            // 21       new in 3.1
+    uint32      requiredSkill;                              // 19       m_requiredSkillID
+    uint32      requiredSkillValue;                         // 20       m_requiredSkillRank
+    uint32      requiredLevel;                              // 21       new in 3.1
                                                             // 22       new in 3.1
 };
 

@@ -1144,6 +1144,14 @@ void WorldSession::HandleSocketOpcode(WorldPacket& recv_data)
         // tried to put meta gem in normal socket
         if (itemProto->Socket[i].Color != SOCKET_COLOR_META && GemProps[i]->color == SOCKET_COLOR_META)
             return;
+
+        // tried to put normal gem in cogwheel socket
+        if (itemProto->Socket[i].Color == SOCKET_COLOR_COGWHEEL && GemProps[i]->color != SOCKET_COLOR_COGWHEEL)
+            return;
+
+        // tried to put cogwheel gem in normal socket
+        if (itemProto->Socket[i].Color != SOCKET_COLOR_COGWHEEL && GemProps[i]->color == SOCKET_COLOR_COGWHEEL)
+            return;
     }
 
     uint32 GemEnchants[MAX_GEM_SOCKETS];
