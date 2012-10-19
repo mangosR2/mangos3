@@ -426,6 +426,10 @@ class MANGOS_DLL_SPEC Item : public Object
             return GetEntry();
         }
 
+        static uint32 GetSpecialPrice(ItemPrototype const* proto, uint32 minimumPrice = 10000);
+        uint32 GetSpecialPrice(uint32 minimumPrice = 10000) const { return Item::GetSpecialPrice(GetProto(), minimumPrice); }
+        int32 GetReforgableStat(ItemModType statType) const;
+
     private:
         void GetDataValuesStr(std::ostringstream& ss);
 

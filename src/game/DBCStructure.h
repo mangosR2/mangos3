@@ -1229,7 +1229,7 @@ struct ItemClassEntry
     uint32 Class;                                           // 1
     //uint32 unk2;                                          // 2 looks like second class
     //uint32 unk3;                                          // 3 1 for weapons
-    //float Multiplier                                      // 4
+    float PriceFactor;                                      // 4
     DBCString name;                                         // 5        m_name_lang
 };
 
@@ -1288,6 +1288,15 @@ struct ItemRandomSuffixEntry
                                                             // 2        m_internalName
     uint32    enchant_id[5];                                // 3-7      m_enchantment
     uint32    prefix[5];                                    // 8-12     m_allocationPct
+};
+
+struct ItemReforgeEntry
+{
+    uint32 Id;
+    uint32 SourceStat;
+    float SourceMultiplier;
+    uint32 FinalStat;
+    float FinalMultiplier;
 };
 
 struct ItemSetEntry

@@ -84,6 +84,7 @@ const char ItemDamagefmt[] = "nfffffffi";
 const char ItemLimitCategoryEntryfmt[] = "nxii";
 const char ItemRandomPropertiesfmt[] = "nxiiiiis";
 const char ItemRandomSuffixfmt[] = "nsxiiiiiiiiii";
+const char ItemReforgefmt[]="nifif";
 const char ItemSetEntryfmt[] = "dsxxxxxxxxxxxxxxxxxiiiiiiiiiiiiiiiiii";
 const char LFGDungeonEntryfmt[] = "nxiiiiiiiiixxixixixxx";
 const char LFGDungeonExpansionEntryfmt[] = "niiiiiii";

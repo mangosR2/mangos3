@@ -928,6 +928,10 @@ class MANGOS_DLL_SPEC WorldSession
         void SendLfgUpdateList(uint32 dungeonID);
         void SendLfgDisabled();
 
+        // Reforge
+        void HandleReforgeItemOpcode(WorldPacket& recvData);
+        void SendReforgeResult(bool success);
+
         // BattleField system
         void SendBfInvitePlayerToWar(ObjectGuid battlefieldGuid, uint32 uiZoneId, uint32 uiTimeToAccept);
         void SendBfInvitePlayerToQueue(ObjectGuid battlefieldGuid);
