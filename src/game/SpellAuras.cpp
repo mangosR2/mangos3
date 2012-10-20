@@ -399,7 +399,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleNULL,                                      //342 SPELL_AURA_MOD_ATTACKSPEED_2 17 spells in 4.3.4
     &Aura::HandleNULL,                                      //343 SPELL_AURA_MOD_ALL_DAMAGE_FROM_CASTER 2 spells in 4.3.4
     &Aura::HandleNoImmediateEffect,                         //344 SPELL_AURA_MOD_AUTOATTACK_DAMAGE 6 spells in 4.3.4
-    &Aura::HandleNULL,                                      //345 SPELL_AURA_MOD_IGNORE_ARMOR_PCT 3 spells in 4.3.4
+    &Aura::HandleNoImmediateEffect,                         //345 SPELL_AURA_MOD_IGNORE_ARMOR_PCT 3 spells in 4.3.4, implemented in Unit::CalcArmorReducedDamage
     &Aura::HandleNULL,                                      //346 SPELL_AURA_ALT_POWER_INDICATOR 32 spells in 4.3.4
     &Aura::HandleNULL,                                      //347 SPELL_AURA_MOD_CD_FROM_HASTE 2 spells in 4.3.4
     &Aura::HandleNoImmediateEffect,                         //348 SPELL_AURA_MOD_MONEY_TO_GUILD_BANK 2 spells in 4.3.4, implemented in WorldSession::HandleLootMoneyOpcode
@@ -8952,7 +8952,7 @@ void Aura::PeriodicTick()
             // Calculate armor mitigation if it is a physical spell
             if (Unit::IsDamageReducedByArmor(GetSpellSchoolMask(spellProto), spellProto, GetEffIndex()))
             {
-                uint32 pdamageReductedArmor = pCaster->CalcArmorReducedDamage(target, damageInfo.damage);
+                uint32 pdamageReductedArmor = pCaster->CalcArmorReducedDamage(target, damageInfo.damage, NULL);
                 damageInfo.cleanDamage += damageInfo.damage - pdamageReductedArmor;
                 damageInfo.damage = pdamageReductedArmor;
             }
@@ -9061,7 +9061,7 @@ void Aura::PeriodicTick()
             // Calculate armor mitigation if it is a physical spell
             if (Unit::IsDamageReducedByArmor(GetSpellSchoolMask(spellProto), spellProto, GetEffIndex()))
             {
-                uint32 pdamageReductedArmor = pCaster->CalcArmorReducedDamage(target, damageInfo.damage);
+                uint32 pdamageReductedArmor = pCaster->CalcArmorReducedDamage(target, damageInfo.damage, NULL);
                 damageInfo.cleanDamage += damageInfo.damage - pdamageReductedArmor;
                 damageInfo.damage = pdamageReductedArmor;
             }
