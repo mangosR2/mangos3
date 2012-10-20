@@ -375,7 +375,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleModIncreaseSpellPowerPct,                  //317 SPELL_AURA_MOD_INCREASE_SPELL_POWER_PCT 13 spells in 4.3.4, implemented in Unit::SpellBaseDamageBonusDone and Unit::SpellBaseHealingBonusDone
     &Aura::HandleAuraMastery,                               //318 SPELL_AURA_MASTERY 12 spells in 4.3
     &Aura::HandleModMeleeSpeedPct,                          //319 SPELL_AURA_MOD_MELEE_ATTACK_SPEED 47 spells in 4.3.4
-    &Aura::HandleNULL,                                      //320 SPELL_AURA_MOD_RANGED_ATTACK_SPEED 5 spells in 4.3.4
+    &Aura::HandleAuraModRangedHaste,                        //320 SPELL_AURA_MOD_RANGED_ATTACK_SPEED 5 spells in 4.3.4
     &Aura::HandleNULL,                                      //321 1 spells in 4.3 Hex
     &Aura::HandleNULL,                                      //322 SPELL_AURA_INTERFERE_TARGETING 6 spells in 4.3
     &Aura::HandleUnused,                                    //323 0 spells in 4.3.4
