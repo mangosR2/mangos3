@@ -196,7 +196,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleModMeleeSpeedPct,                          //138 SPELL_AURA_MOD_MELEE_HASTE
     &Aura::HandleForceReaction,                             //139 SPELL_AURA_FORCE_REACTION
     &Aura::HandleAuraModRangedHaste,                        //140 SPELL_AURA_MOD_RANGED_HASTE
-    &Aura::HandleRangedAmmoHaste,                           //141 SPELL_AURA_MOD_RANGED_AMMO_HASTE
+    &Aura::HandleUnused,                                    //141 SPELL_AURA_MOD_RANGED_AMMO_HASTE
     &Aura::HandleAuraModBaseResistancePCT,                  //142 SPELL_AURA_MOD_BASE_RESISTANCE_PCT
     &Aura::HandleAuraModResistanceExclusive,                //143 SPELL_AURA_MOD_RESISTANCE_EXCLUSIVE
     &Aura::HandleAuraSafeFall,                              //144 SPELL_AURA_SAFE_FALL                  implemented in WorldSession::HandleMovementOpcodes
@@ -374,7 +374,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleUnused,                                    //316 old SPELL_AURA_MOD_PERIODIC_HASTE 0 spells in 4.3.4
     &Aura::HandleModIncreaseSpellPowerPct,                  //317 SPELL_AURA_MOD_INCREASE_SPELL_POWER_PCT 13 spells in 4.3.4, implemented in Unit::SpellBaseDamageBonusDone and Unit::SpellBaseHealingBonusDone
     &Aura::HandleAuraMastery,                               //318 SPELL_AURA_MASTERY 12 spells in 4.3
-    &Aura::HandleNULL,                                      //319 SPELL_AURA_MOD_MELEE_ATTACK_SPEED 47 spells in 4.3.4
+    &Aura::HandleModMeleeSpeedPct,                          //319 SPELL_AURA_MOD_MELEE_ATTACK_SPEED 47 spells in 4.3.4
     &Aura::HandleNULL,                                      //320 SPELL_AURA_MOD_RANGED_ATTACK_SPEED 5 spells in 4.3.4
     &Aura::HandleNULL,                                      //321 1 spells in 4.3 Hex
     &Aura::HandleNULL,                                      //322 SPELL_AURA_INTERFERE_TARGETING 6 spells in 4.3
@@ -397,7 +397,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleNULL,                                      //339 SPELL_AURA_MOD_SKILLCHANCE 1 spells in 4.3.4
     &Aura::HandleNULL,                                      //340 SPELL_AURA_MOD_RESSURECTED_HEALTH_PCT 1 spells in 4.3.4
     &Aura::HandleNULL,                                      //341 SPELL_AURA_MOD_SPELL_CATEGORY_COOLDOWN 2 spells in 4.3.4 modifies cooldown of hearthstone and cast time of archaeology mining
-    &Aura::HandleNULL,                                      //342 SPELL_AURA_MOD_ATTACKSPEED_2 17 spells in 4.3.4
+    &Aura::HandleModMeleeRangedSpeedPct,                    //342 SPELL_AURA_MOD_ATTACKSPEED_2 17 spells in 4.3.4
     &Aura::HandleNULL,                                      //343 SPELL_AURA_MOD_ALL_DAMAGE_FROM_CASTER 2 spells in 4.3.4
     &Aura::HandleNoImmediateEffect,                         //344 SPELL_AURA_MOD_AUTOATTACK_DAMAGE 6 spells in 4.3.4
     &Aura::HandleNoImmediateEffect,                         //345 SPELL_AURA_MOD_IGNORE_ARMOR_PCT 3 spells in 4.3.4, implemented in Unit::CalcArmorReducedDamage
@@ -7875,13 +7875,6 @@ void Aura::HandleModMeleeSpeedPct(bool apply, bool /*Real*/)
 
 void Aura::HandleAuraModRangedHaste(bool apply, bool /*Real*/)
 {
-    GetTarget()->ApplyAttackTimePercentMod(RANGED_ATTACK, float(m_modifier.m_amount), apply);
-}
-
-void Aura::HandleRangedAmmoHaste(bool apply, bool /*Real*/)
-{
-    if (GetTarget()->GetTypeId() != TYPEID_PLAYER)
-        return;
     GetTarget()->ApplyAttackTimePercentMod(RANGED_ATTACK, float(m_modifier.m_amount), apply);
 }
 

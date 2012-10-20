@@ -353,7 +353,6 @@ class MANGOS_DLL_SPEC Aura
         void HandleAuraTrackStealthed(bool Apply, bool Real);
         void HandleForceReaction(bool Apply, bool Real);
         void HandleAuraModRangedHaste(bool Apply, bool Real);
-        void HandleRangedAmmoHaste(bool Apply, bool Real);
         void HandleModHealingDone(bool Apply, bool Real);
         void HandleModTotalPercentStat(bool Apply, bool Real);
         void HandleAuraModTotalThreat(bool Apply, bool Real);
