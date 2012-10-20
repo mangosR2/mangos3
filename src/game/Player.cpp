@@ -508,7 +508,6 @@ Player::Player(WorldSession* session): Unit(), m_mover(this), m_camera(NULL), m_
     m_canBlock = false;
     m_canDualWield = false;
     m_canTitanGrip = false;
-    m_ammoDPS = 0.0f;
 
     m_temporaryUnsummonedPetNumber.clear();
 
@@ -908,11 +907,6 @@ bool Player::Create(uint32 guidlow, const std::string& name, uint8 race, uint8 c
                     RemoveItem(INVENTORY_SLOT_BAG_0, i, true);
                     pItem = StoreItem(sDest, pItem, true);
                 }
-
-                // if  this is ammo then use it
-                msg = CanUseAmmo(pItem->GetEntry());
-                if (msg == EQUIP_ERR_OK)
-                    SetAmmo(pItem->GetEntry());
             }
         }
     }
@@ -7540,8 +7534,6 @@ void Player::_ApplyItemMods(Item* item, uint8 slot, bool apply)
 
     _ApplyItemBonuses(proto, slot, apply);
 
-    if (slot == EQUIPMENT_SLOT_RANGED)
-        _ApplyAmmoBonuses();
 
     ApplyItemEquipSpell(item, apply);
     ApplyEnchantment(item, apply);
@@ -8311,9 +8303,6 @@ void Player::_RemoveAllItemMods()
                 _ApplyWeaponDependentAuraMods(m_items[i], WeaponAttackType(attacktype), false);
 
             _ApplyItemBonuses(proto, i, false);
-
-            if (i == EQUIPMENT_SLOT_RANGED)
-                _ApplyAmmoBonuses();
         }
     }
 
@@ -8340,9 +8329,6 @@ void Player::_ApplyAllItemMods()
                 _ApplyWeaponDependentAuraMods(m_items[i], WeaponAttackType(attacktype), true);
 
             _ApplyItemBonuses(proto, i, true);
-
-            if (i == EQUIPMENT_SLOT_RANGED)
-                _ApplyAmmoBonuses();
         }
     }
 
@@ -8385,63 +8371,6 @@ void Player::_ApplyAllLevelScaleItemMods(bool apply)
             _ApplyItemBonuses(proto, i, apply, true);
         }
     }
-}
-
-void Player::_ApplyAmmoBonuses()
-{
-    //// check ammo
-    //uint32 ammo_id = GetUInt32Value(PLAYER_AMMO_ID);
-    //if(!ammo_id)
-    //    return;
-
-    //float currentAmmoDPS;
-
-    //ItemPrototype const *ammo_proto = ObjectMgr::GetItemPrototype( ammo_id );
-    //if( !ammo_proto || ammo_proto->Class!=ITEM_CLASS_PROJECTILE || !CheckAmmoCompatibility(ammo_proto))
-    //    currentAmmoDPS = 0.0f;
-    //else
-    //    currentAmmoDPS = ammo_proto->Damage[0].DamageMin;
-
-    //if(currentAmmoDPS == GetAmmoDPS())
-    //    return;
-
-    //m_ammoDPS = currentAmmoDPS;
-
-    //if(CanModifyStats())
-    //    UpdateDamagePhysical(RANGED_ATTACK);
-}
-
-bool Player::CheckAmmoCompatibility(const ItemPrototype* ammo_proto) const
-{
-    if (!ammo_proto)
-        return false;
-
-    // check ranged weapon
-    Item* weapon = GetWeaponForAttack(RANGED_ATTACK, true, false);
-    if (!weapon)
-        return false;
-
-    ItemPrototype const* weapon_proto = weapon->GetProto();
-    if (!weapon_proto || weapon_proto->Class != ITEM_CLASS_WEAPON)
-        return false;
-
-    // check ammo ws. weapon compatibility
-    switch (weapon_proto->SubClass)
-    {
-        case ITEM_SUBCLASS_WEAPON_BOW:
-        case ITEM_SUBCLASS_WEAPON_CROSSBOW:
-            if (ammo_proto->SubClass != ITEM_SUBCLASS_ARROW)
-                return false;
-            break;
-        case ITEM_SUBCLASS_WEAPON_GUN:
-            if (ammo_proto->SubClass != ITEM_SUBCLASS_BULLET)
-                return false;
-            break;
-        default:
-            return false;
-    }
-
-    return true;
 }
 
 /*  If in a battleground a player dies, and an enemy removes the insignia, the player's bones is lootable
@@ -10934,71 +10863,6 @@ InventoryResult Player::CanUseItem(ItemPrototype const* pProto) const
         return EQUIP_ERR_OK;
     }
     return EQUIP_ERR_ITEM_NOT_FOUND;
-}
-
-InventoryResult Player::CanUseAmmo(uint32 item) const
-{
-    DEBUG_LOG("STORAGE: CanUseAmmo item = %u", item);
-    if (!isAlive())
-        return EQUIP_ERR_YOU_ARE_DEAD;
-    // if (isStunned())
-    //    return EQUIP_ERR_YOU_ARE_STUNNED;
-    ItemPrototype const* pProto = ObjectMgr::GetItemPrototype(item);
-    if (pProto)
-    {
-        if (pProto->InventoryType != INVTYPE_AMMO)
-            return EQUIP_ERR_ONLY_AMMO_CAN_GO_HERE;
-
-        InventoryResult msg = CanUseItem(pProto);
-        if (msg != EQUIP_ERR_OK)
-            return msg;
-
-        /*if (GetReputationMgr().GetReputation() < pProto->RequiredReputation)
-        return EQUIP_ERR_CANT_EQUIP_REPUTATION;
-        */
-
-        // Requires No Ammo
-        if (GetDummyAura(46699))
-            return EQUIP_ERR_BAG_FULL6;
-
-        return EQUIP_ERR_OK;
-    }
-    return EQUIP_ERR_ITEM_NOT_FOUND;
-}
-
-void Player::SetAmmo(uint32 item)
-{
-    //if(!item)
-    //    return;
-
-    //// already set
-    //if( GetUInt32Value(PLAYER_AMMO_ID) == item )
-    //    return;
-
-    //// check ammo
-    //if (item)
-    //{
-    //    InventoryResult msg = CanUseAmmo( item );
-    //    if (msg != EQUIP_ERR_OK)
-    //    {
-    //        SendEquipError(msg, NULL, NULL, item);
-    //        return;
-    //    }
-    //}
-
-    //SetUInt32Value(PLAYER_AMMO_ID, item);
-
-    //_ApplyAmmoBonuses();
-}
-
-void Player::RemoveAmmo()
-{
-    //SetUInt32Value(PLAYER_AMMO_ID, 0);
-
-    //m_ammoDPS = 0.0f;
-
-    //if (CanModifyStats())
-    //    UpdateDamagePhysical(RANGED_ATTACK);
 }
 
 // Return stored item (if stored to stack, it can diff. from pItem). And pItem ca be deleted in this case.

@@ -936,11 +936,6 @@ void WorldSession::HandleSetAmmoOpcode(WorldPacket& recv_data)
     uint32 item;
 
     recv_data >> item;
-
-    if (!item)
-        GetPlayer()->RemoveAmmo();
-    else
-        GetPlayer()->SetAmmo(item);
 }
 
 void WorldSession::SendEnchantmentLog(ObjectGuid targetGuid, ObjectGuid casterGuid, uint32 itemId, uint32 spellId)
