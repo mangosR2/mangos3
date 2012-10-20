@@ -2223,7 +2223,7 @@ void Map::ForcedUnload()
         {
             WorldLocation old_loc;
             player->GetPosition(old_loc);
-            if (!player->TeleportTo(old_loc))
+            if (!player->TeleportTo(old_loc, TELE_TO_NODELAY))
             {
                 DETAIL_LOG("Map::ForcedUnload: %s is in teleport state, cannot be ported to his previous place, teleporting him to his homebind place...",
                     player->GetGuidStr().c_str());

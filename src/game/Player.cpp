@@ -1772,7 +1772,8 @@ bool Player::TeleportTo(WorldLocation const& loc, uint32 options)
     if (!InBattleGround() && mEntry->IsBattleGroundOrArena())
         return false;
 
-    // client without expansion support
+    if (!GetMap())
+        options |= TELE_TO_NODELAY;
 
     if (Group* grp = GetGroup())
         grp->SetPlayerMap(GetObjectGuid(), loc.mapid);
@@ -1807,7 +1808,7 @@ bool Player::TeleportTo(WorldLocation const& loc, uint32 options)
         SetSemaphoreTeleportFar(false);
 
         // try preload grid, targeted for teleport
-        if (!GetMap()->PreloadGrid(loc.coord_x, loc.coord_y))
+        if (!(options & TELE_TO_NODELAY) && !GetMap()->PreloadGrid(loc.coord_x, loc.coord_y))
         {
             // If loading grid not finished, delay teleport on one update tick
             AddEvent(new TeleportDelayEvent(*this, loc, options),
@@ -1885,7 +1886,7 @@ bool Player::TeleportTo(WorldLocation const& loc, uint32 options)
             }
 
             // try preload grid, targeted for teleport
-            if (!map->PreloadGrid(loc.coord_x, loc.coord_y))
+            if (!(options & TELE_TO_NODELAY) && !map->PreloadGrid(loc.coord_x, loc.coord_y))
             {
                 // If loading grid not finished, delay teleport 5 map update ticks
                 AddEvent(new TeleportDelayEvent(*this, WorldLocation(loc.coord_x, loc.coord_y, loc.coord_z, loc.orientation, loc.mapid, map->GetInstanceId(), sWorld.getConfig(CONFIG_UINT32_REALMID)), options),
