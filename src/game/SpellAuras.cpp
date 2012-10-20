@@ -1364,10 +1364,7 @@ void Aura::HandleAddModifier(bool apply, bool Real)
         {
             case 17941:                                     // Shadow Trance
             case 22008:                                     // Netherwind Focus
-            case 31834:                                     // Light's Grace
-            case 34754:                                     // Clearcasting
             case 34936:                                     // Backlash
-            case 44401:                                     // Missile Barrage
             case 48108:                                     // Hot Streak
             case 51124:                                     // Killing Machine
             case 54741:                                     // Firestarter
@@ -2228,9 +2225,6 @@ void Aura::TriggerSpell()
                         // trigger_spell_id not set and unknown effect triggered in this case, ignoring for while
                         return;
                     case 22842:                             // Frenzied Regeneration
-                    case 22895:
-                    case 22896:
-                    case 26999:
                     {
                         int32 LifePerRage = GetModifier()->m_amount;
 
