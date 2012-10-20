@@ -49,6 +49,7 @@
 #include "InstanceData.h"
 #include "Language.h"
 #include "MapManager.h"
+#include "Weather.h"
 
 #define NULL_AURA_SLOT 0xFF
 
@@ -385,7 +386,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleNULL,                                      //328 SPELL_AURA_PROC_ON_POWER_AMOUNT 3 spells in 4.3.4 Eclipse Mastery Driver Passive
     &Aura::HandleNULL,                                      //329 SPELL_AURA_MOD_RUNIC_POWER_REGEN 3 spells in 4.3.4
     &Aura::HandleNoImmediateEffect,                         //330 SPELL_AURA_ALLOW_CAST_WHILE_MOVING 16 spells in 4.3.4
-    &Aura::HandleNULL,                                      //331 SPELL_AURA_MOD_WEATHER 10 spells in 4.3.4
+    &Aura::HandleAuraForceWeather,                          //331 SPELL_AURA_MOD_WEATHER 10 spells in 4.3.4
     &Aura::HandleNULL,                                      //332 SPELL_AURA_OVERRIDE_ACTIONBAR_SPELLS 16 spells in 4.3.4
     &Aura::HandleNULL,                                      //333 SPELL_AURA_OVERRIDE_ACTIONBAR_SPELLS_2 10 spells in 4.3.4
     &Aura::HandleNULL,                                      //334 SPELL_AURA_BLIND_SIGHT 2 spells in 4.3.4
@@ -13218,4 +13219,39 @@ void Aura::HandleOverrideSpellPowerByAp(bool apply, bool Real)
         return;
 
     ((Player*)GetTarget())->UpdateSpellDamageAndHealingBonus();
+}
+
+void Aura::HandleAuraForceWeather(bool apply, bool Real)
+{
+    if (!Real)
+        return;
+
+    Unit* target = GetTarget();
+
+    if (target->GetTypeId() != TYPEID_PLAYER)
+        return;
+
+    Player* plrTarget = (Player*)target;
+
+    if (apply)
+    {
+        WorldPacket data(SMSG_WEATHER, (4 + 4 + 1));
+
+        data << uint32(GetMiscValue()) << 1.0f << uint8(0);
+        plrTarget->GetSession()->SendPacket(&data);
+    }
+    else
+    {
+        // send weather for current zone
+        if (Weather* weather = sWorld.FindWeather(plrTarget->GetZoneId()))
+            weather->SendWeatherUpdateToPlayer(plrTarget);
+        else
+        {
+            if (!sWorld.AddWeather(plrTarget->GetZoneId()))
+            {
+                // send fine weather packet to remove old weather
+                Weather::SendFineWeatherUpdateToPlayer(plrTarget);
+            }
+        }
+    }
 }
