@@ -5042,7 +5042,8 @@ bool ChatHandler::HandleListAurasCommand(char* /*args*/)
             if (m_session)
             {
                 std::ostringstream ss_name;
-                ss_name << "|cffffffff|Hspell:" << itr->second->GetId() << "|h[" << name << "]|h|r";
+                ss_name << "|cffffffff|Hspell:" << holder->GetId() << "|h[" << name << "]|h|r";
+                ss_name << " (s:" << holder->GetStackAmount() << "ch:" << holder->GetAuraCharges() << "bp:" << aur->GetModifier()->m_amount << ")";
 
                 PSendSysMessage(LANG_COMMAND_TARGET_AURADETAIL, holder->GetId(), aur->GetEffIndex(),
                                 aur->GetModifier()->m_auraname, aur->GetAuraDuration(), aur->GetAuraMaxDuration(),
@@ -5075,6 +5076,7 @@ bool ChatHandler::HandleListAurasCommand(char* /*args*/)
             {
                 std::ostringstream ss_name;
                 ss_name << "|cffffffff|Hspell:" << (*itr)->GetId() << "|h[" << name << "]|h|r";
+                ss_name << " (s:" << (*itr)->GetStackAmount() << "c:" << (*itr)->GetHolder()->GetAuraCharges() << "bp:" << (*itr)->GetModifier()->m_amount << ")";
 
                 PSendSysMessage(LANG_COMMAND_TARGET_AURASIMPLE, (*itr)->GetId(), (*itr)->GetEffIndex(),
                                 ss_name.str().c_str(), ((*itr)->GetHolder()->IsPassive() ? passiveStr : ""), (talent ? talentStr : ""),
