@@ -31,6 +31,7 @@
 #include "World.h"
 #include "Util.h"
 #include "DBCStores.h"
+#include "Guild.h"
 
 void WorldSession::HandleAutostoreLootItemOpcode(WorldPacket& recv_data)
 {
@@ -276,7 +277,11 @@ void WorldSession::HandleLootMoneyOpcode(WorldPacket& /*recv_data*/)
                 (*i)->ModifyMoney(money_per_player);
                 (*i)->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_LOOT_MONEY, money_per_player);
 
-                WorldPacket data(SMSG_LOOT_MONEY_NOTIFY, 4 + 1);
+                if (Guild* guild = sGuildMgr.GetGuildById((*i)->GetGuildId()))
+                    if (uint32 guildGold = (*i)->GetTotalAuraModifier(SPELL_AURA_MOD_MONEY_TO_GUILD_BANK) / 100.0f * money_per_player)
+                        guild->HandleCashFlow(guildGold, *i);
+
+                WorldPacket data(SMSG_LOOT_MONEY_NOTIFY, 4+1);
                 data << uint32(money_per_player);
                 data << uint8(playersNear.size() > 1 ? 0 : 1);// 0 is "you share of loot..."
                 (*i)->GetSession()->SendPacket(&data);
@@ -287,7 +292,11 @@ void WorldSession::HandleLootMoneyOpcode(WorldPacket& /*recv_data*/)
             player->ModifyMoney(pLoot->gold);
             player->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_LOOT_MONEY, pLoot->gold);
 
-            WorldPacket data(SMSG_LOOT_MONEY_NOTIFY, 4 + 1);
+            if (Guild* guild = sGuildMgr.GetGuildById(player->GetGuildId()))
+                if (uint32 guildGold = player->GetTotalAuraModifier(SPELL_AURA_MOD_MONEY_TO_GUILD_BANK) / 100.0f * pLoot->gold)
+                    guild->HandleCashFlow(guildGold, player);
+
+            WorldPacket data(SMSG_LOOT_MONEY_NOTIFY, 4+1);
             data << uint32(pLoot->gold);
             data << uint8(1);                               // 1 is "you loot..."
             player->GetSession()->SendPacket(&data);

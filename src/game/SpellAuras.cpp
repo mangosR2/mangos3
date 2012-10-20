@@ -402,7 +402,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleNULL,                                      //345 SPELL_AURA_MOD_IGNORE_ARMOR_PCT 3 spells in 4.3.4
     &Aura::HandleNULL,                                      //346 SPELL_AURA_ALT_POWER_INDICATOR 32 spells in 4.3.4
     &Aura::HandleNULL,                                      //347 SPELL_AURA_MOD_CD_FROM_HASTE 2 spells in 4.3.4
-    &Aura::HandleNULL,                                      //348 SPELL_AURA_MOD_MONEY_TO_GUILD_BANK 2 spells in 4.3.4
+    &Aura::HandleNoImmediateEffect,                         //348 SPELL_AURA_MOD_MONEY_TO_GUILD_BANK 2 spells in 4.3.4, implemented in WorldSession::HandleLootMoneyOpcode
     &Aura::HandleNoImmediateEffect,                         //349 SPELL_AURA_MOD_CURRENCY_GAIN 16 spells in 4.3.4
     &Aura::HandleNoImmediateEffect,                         //350 SPELL_AURA_MOD_ITEM_LOOT 1 spells in 4.3.4
     &Aura::HandleNoImmediateEffect,                         //351 SPELL_AURA_MOD_CURRENCY_LOOT 8 spells in 4.3.4
