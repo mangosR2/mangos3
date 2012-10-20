@@ -3026,6 +3026,39 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, DamageInfo* damageI
                     }
                     return SPELL_AURA_PROC_FAILED;
                 }
+                // Fulmination marker
+                case 95774:
+                {
+                    // Earth Shock
+                    if (!procSpell || procSpell->Id != 8042)
+                        return SPELL_AURA_PROC_FAILED;
+
+                    // Fulmination dmg spell
+                    SpellEntry const * triggeredInfo = sSpellStore.LookupEntry(88767);
+                    if (!triggeredInfo)
+                        return SPELL_AURA_PROC_OK;
+
+                    int32 minCharges = triggeredInfo->CalculateSimpleValue(EFFECT_INDEX_0);
+
+                    // Lightning Shield
+                    SpellAuraHolderPtr ls = GetSpellAuraHolder(324);
+                    int32 charges = ls ? int32(ls->GetAuraCharges()) : 0;
+                    if (!ls || charges <= minCharges)
+                        return SPELL_AURA_PROC_OK;
+
+                    SpellEffectEntry const * shieldDmgEff = ls->GetSpellProto()->GetSpellEffect(EFFECT_INDEX_0);
+                    if (!shieldDmgEff)
+                        return SPELL_AURA_PROC_OK;
+
+                    SpellEntry const * shieldDmgEntry = sSpellStore.LookupEntry(shieldDmgEff->EffectTriggerSpell);
+                    if (!shieldDmgEntry)
+                        return SPELL_AURA_PROC_OK;
+
+                    int32 bp = CalculateSpellDamage(pVictim, shieldDmgEntry, EFFECT_INDEX_0) * (charges - minCharges);
+                    CastCustomSpell(pVictim, triggeredInfo, &bp, NULL, NULL, true);
+                    ls->SetAuraCharges(minCharges);
+                    return SPELL_AURA_PROC_OK;
+                }
             }
             // Storm, Earth and Fire
             if (dummySpell->GetSpellIconID() == 3063)

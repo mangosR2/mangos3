@@ -6507,6 +6507,7 @@ void Spell::EffectEnergisePct(SpellEffectEntry const* effect)
     // Rolling Thunder
     if (m_spellInfo->Id == 88765 && m_triggeredByAuraSpell)
     {
+        int32 charges = 0;
         // Lightning Shield
         if (SpellAuraHolderPtr holder = m_caster->GetSpellAuraHolder(324))
         {

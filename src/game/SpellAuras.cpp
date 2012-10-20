@@ -3118,6 +3118,9 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                     case 55198:                             // Tidal Force
                         target->CastSpell(target, 55166, true, NULL, this);
                         return;
+                    case 95774:                             // Fulmination marker
+                        GetHolder()->SetAuraCharges(1);
+                        return;
                 }
 
                 // Earth Shield
