@@ -5344,6 +5344,10 @@ SpellCastResult Spell::CheckCast(bool strict)
             }
         }
 
+        // Disengage-like spells allow use only in combat
+        if (m_spellInfo->HasAttribute(SPELL_ATTR_STOP_ATTACK_TARGET) && m_spellInfo->HasAttribute(SPELL_ATTR_EX2_UNK26) && !m_caster->isInCombat())
+            return SPELL_FAILED_CASTER_AURASTATE;
+
         if (!m_IsTriggeredSpell 
             && NeedsComboPoints(m_spellInfo) 
             && !m_caster->IsIgnoreUnitState(m_spellInfo, IGNORE_UNIT_TARGET_STATE) 
