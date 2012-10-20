@@ -4330,12 +4330,6 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(Unit *pVictim, DamageIn
                         return SPELL_AURA_PROC_FAILED;
                 }
             }
-            // Lightning Shield (The Ten Storms set)
-            else if (auraSpellInfo->Id == 23551)
-            {
-                trigger_spell_id = 23552;
-                target = pVictim;
-            }
             // Damage from Lightning Shield (The Ten Storms set)
             else if (auraSpellInfo->Id == 23552)
                 trigger_spell_id = 27635;

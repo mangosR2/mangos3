@@ -6503,6 +6503,26 @@ void Spell::EffectEnergisePct(SpellEffectEntry const* effect)
 
     uint32 gain = damage * maxPower / 100;
     m_caster->EnergizeBySpell(unitTarget, m_spellInfo->Id, gain, power);
+
+    // Rolling Thunder
+    if (m_spellInfo->Id == 88765 && m_triggeredByAuraSpell)
+    {
+        // Lightning Shield
+        if (SpellAuraHolderPtr holder = m_caster->GetSpellAuraHolder(324))
+        {
+            charges = holder->GetAuraCharges();
+            if (charges < m_triggeredByAuraSpell->CalculateSimpleValue(EFFECT_INDEX_0))
+            {
+                holder->SetAuraCharges(charges + 1);
+                holder->RefreshHolder();
+            }
+        }
+
+        // Fulmination
+        if (Aura* fulmination = m_caster->GetAura(88766, EFFECT_INDEX_0))
+            if (charges && charges + 1 > fulmination->GetModifier()->m_amount)
+                m_caster->CastSpell(m_caster, 95774, true);     // Fulmination marker
+    }
 }
 
 void Spell::SendLoot(ObjectGuid guid, LootType loottype, LockType lockType)
