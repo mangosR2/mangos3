@@ -2788,11 +2788,11 @@ void Unit::CalculateDamageAbsorbAndResist(Unit* pCaster, DamageInfo* damageInfo,
             {
                 case SPELLFAMILY_GENERIC:
                 {
-                    // Astral Shift
-                    if (spellProto->GetSpellIconID() == 3066)
+                    // Ancestral Resolve
+                    if (spellProto->GetSpellIconID() == 3923)
                     {
-                        //reduces all damage taken while stun, fear or silence
-                        if (unitflag & (UNIT_FLAG_STUNNED|UNIT_FLAG_FLEEING|UNIT_FLAG_SILENCED))
+                        // reduces all damage taken while casting
+                        if (IsNonMeleeSpellCasted(false, false, true))
                             RemainingDamage -= RemainingDamage * currentAbsorb / 100;
                         continue;
                     }
