@@ -12567,32 +12567,13 @@ void Aura::HandleAuraSetVehicle(bool apply, bool real)
 
     Unit* target = GetTarget();
 
-    if (target->GetTypeId() != TYPEID_PLAYER || !target->IsInWorld())
+    if (!target || !target->IsInWorld())
         return;
 
     uint32 vehicleId = GetMiscValue();
 
-    if (vehicleId == 0)
-        return;
+    target->SetVehicleId(apply ? vehicleId : 0);
 
-    if (apply)
-    {
-        target->SetVehicleId(vehicleId);
-    }
-    else
-        if (target->GetVehicleKit())
-            target->RemoveVehicleKit();
-
-    WorldPacket data(SMSG_SET_VEHICLE_REC_ID, target->GetPackGUID().size()+4);
-    data.appendPackGUID(target->GetObjectGuid());
-    data << uint32(apply ? vehicleId : 0);
-    target->SendMessageToSet(&data, true);
-
-    if (apply)
-    {
-        data.Initialize(SMSG_ON_CANCEL_EXPECTED_RIDE_VEHICLE_AURA, 0);
-        ((Player*)target)->GetSession()->SendPacket(&data);
-    }
 }
 
 void Aura::HandleAuraFactionChange(bool apply, bool real)
