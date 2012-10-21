@@ -266,11 +266,12 @@ void WorldSession::HandleMoveTeleportAckOpcode(WorldPacket& recv_data)
 void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
 {
     uint32 opcode = recv_data.GetOpcode();
-    DEBUG_LOG("WORLD: Recvd %s (%u, 0x%X) opcode", LookupOpcodeName(opcode), opcode, opcode);
-    recv_data.hexlike();
 
-    Unit *mover = _player->GetMover();
-    Player *plMover = mover->GetTypeId() == TYPEID_PLAYER ? (Player*)mover : NULL;
+    DEBUG_FILTER_LOG(LOG_FILTER_PLAYER_MOVES,"WorldSession::HandleMovementOpcodes: Recvd %s (%u, 0x%X) opcode", LookupOpcodeName(opcode), opcode, opcode);
+    //recv_data.hexlike();
+
+    Unit* mover = _player->GetMover();
+    Player* plMover = mover->GetTypeId() == TYPEID_PLAYER ? (Player*)mover : NULL;
 
     // ignore, waiting processing in WorldSession::HandleMoveWorldportAckOpcode and WorldSession::HandleMoveTeleportAck
     if(plMover && plMover->IsBeingTeleported())
