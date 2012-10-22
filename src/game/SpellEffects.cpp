@@ -7145,7 +7145,7 @@ void Spell::EffectDispel(SpellEffectEntry const* effect)
         std::list < uint32 > fail_list;                     // spell_id
 
         // some spells have effect value = 0 and all from its by meaning expect 1
-        if (!damage)
+        if(!damage && m_spellInfo->GetSpellFamilyName() == SPELLFAMILY_GENERIC)
             damage = 1;
 
         // Dispel N = damage buffs (or while exist buffs for dispel)
