@@ -942,6 +942,12 @@ bool ChatHandler::HandleGameObjectDeleteCommand(char* args)
         return false;
     }
 
+    if (m_session->GetSecurity() < SEC_ADMINISTRATOR && obj->GetMap()->GetInstanceId() && !sWorld.getConfig(CONFIG_BOOL_INSTANCE_ALLOW_OBJECT_SPAWNING))
+    {
+        SendSysMessage("Can't delete in instances!");
+        return false;
+    }
+
     if (ObjectGuid ownerGuid = obj->GetOwnerGuid())
     {
         Unit* owner = ObjectAccessor::GetUnit(*m_session->GetPlayer(), ownerGuid);
@@ -1108,6 +1114,12 @@ bool ChatHandler::HandleGameObjectAddCommand(char* args)
     float z = float(plr->GetPositionZ());
     float o = float(plr->GetOrientation());
     Map* map = plr->GetMap();
+
+    if (m_session->GetSecurity() < SEC_ADMINISTRATOR && map->GetInstanceId() && !sWorld.getConfig(CONFIG_BOOL_INSTANCE_ALLOW_OBJECT_SPAWNING))
+    {
+        SendSysMessage("Can't spawn in instances!");
+        return false;
+    }
 
     // used guids from specially reserved range (can be 0 if no free values)
     uint32 db_lowGUID = sObjectMgr.GenerateStaticGameObjectLowGuid();
@@ -1620,7 +1632,11 @@ bool ChatHandler::HandleNpcAddCommand(char* args)
     CreatureCreatePos pos(chr, chr->GetOrientation());
     Map* map = chr->GetMap();
 
-    Creature* pCreature = new Creature;
+    if (m_session->GetSecurity() < SEC_ADMINISTRATOR && map->GetInstanceId() && !sWorld.getConfig(CONFIG_BOOL_INSTANCE_ALLOW_OBJECT_SPAWNING))
+    {
+        SendSysMessage("Can't spawn in instances!");
+        return false;
+    }
 
     // used guids from specially reserved range (can be 0 if no free values)
     uint32 lowguid = sObjectMgr.GenerateStaticCreatureLowGuid();
@@ -1631,12 +1647,20 @@ bool ChatHandler::HandleNpcAddCommand(char* args)
         return false;
     }
 
+    Creature* pCreature = new Creature;
     if (!pCreature->Create(lowguid, pos, cinfo))
     {
         delete pCreature;
         return false;
     }
 
+    // Pashtet: prevent some scripted NPCs spawning.
+    if (m_session->GetSecurity() < SEC_ADMINISTRATOR && (pCreature->IsWorldBoss() || (pCreature->GetCreatureInfo()->flags_extra & CREATURE_FLAG_EXTRA_INSTANCE_BIND)))
+    {
+        SendSysMessage("Can't spawn boss!");
+        delete pCreature;
+        return false;
+    }
     pCreature->SaveToDB(map->GetId(), (1 << map->GetSpawnMode()), chr->GetPhaseMaskForSpawn());
 
     uint32 db_guid = pCreature->GetGUIDLow();
@@ -1966,6 +1990,12 @@ bool ChatHandler::HandleNpcDeleteCommand(char* args)
         SetSentErrorMessage(true);
         return false;
     }
+    
+    if (m_session->GetSecurity() < SEC_ADMINISTRATOR && unit->GetMap()->GetInstanceId() && !sWorld.getConfig(CONFIG_BOOL_INSTANCE_ALLOW_OBJECT_SPAWNING))
+    {
+        SendSysMessage("Can't delete in instances!");
+        return false;
+    }
 
     switch (unit->GetSubtype())
     {
@@ -2036,6 +2066,12 @@ bool ChatHandler::HandleNpcMoveCommand(char* args)
         lowguid = pCreature->GetGUIDLow();
 
     WorldLocation loc = m_session->GetPlayer()->GetPosition();
+
+    if (m_session->GetSecurity() < SEC_ADMINISTRATOR && loc.GetInstanceId() && !sWorld.getConfig(CONFIG_BOOL_INSTANCE_ALLOW_OBJECT_SPAWNING))
+    {
+        SendSysMessage("Can't move in instances!");
+        return false;
+    }
 
     if (pCreature)
     {

@@ -820,6 +820,11 @@ LexicsCutterNoActionOnGM = 1
 #        Default: 0 (false)
 #                 1 (true)
 #
+#    Instance.AllowObjectSpawning
+#        Allow or not Gamemaster Spawning in instances by commands.
+#        Default: 0 (false)
+#                 1 (true)
+#
 #    Instance.ResetTimeHour
 #        The hour of the day (0-23) when the global instance resets occur.
 #        Default: 4
@@ -1096,6 +1101,7 @@ BirthdayTime = 1125180000
 RabbitDay = 0
 Instance.IgnoreLevel = 0
 Instance.IgnoreRaid = 0
+Instance.AllowObjectSpawning = 0
 Instance.ResetTimeHour = 4
 Instance.UnloadDelay = 1800000
 InstancesResetAnnounce = 0
