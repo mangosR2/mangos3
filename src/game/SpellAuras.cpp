@@ -7438,11 +7438,30 @@ void Aura::HandleAuraModIncreaseHealth(bool apply, bool Real)
         case 50322:                                         // Survival Instincts (Cast with percentage-value by CastCustomSpell)
         case 53479:                                         // Hunter pet - Last Stand (Cast with percentage-value by CastCustomSpell)
         case 59465:                                         // Brood Rage (Ahn'Kahet)
+        case 105284:                                        // Ancestral Vigor
         {
             if (Real)
             {
                 if (apply)
                 {
+                    // Ancestral Vigor, increase max health not more than 5/10%
+                    if (GetId() == 105284)
+                    {
+                        if (Unit* caster = GetCaster())
+                        {
+                            Aura* talent = caster->GetAura(16176, EFFECT_INDEX_1);
+                            if (!talent)
+                                talent = caster->GetAura(16235, EFFECT_INDEX_1);
+
+                            if (talent)
+                            {
+                                float hpMax = float(talent->GetModifier()->m_amount) * target->GetMaxHealth() / 100.0f;
+                                if (m_modifier.m_amount > int32(hpMax))
+                                    ChangeAmount(int32(hpMax));
+                            }
+                        }
+                    }
+
                     target->HandleStatModifier(UNIT_MOD_HEALTH, TOTAL_VALUE, float(m_modifier.m_amount), apply);
                     target->ModifyHealth(m_modifier.m_amount);
                 }
