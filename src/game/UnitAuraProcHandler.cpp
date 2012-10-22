@@ -3094,10 +3094,19 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, DamageInfo* damageI
                 break;
             }
             // Telluric Currents
-            if (dummySpell->SpellIconID == 4777)
+            if (dummySpell->SpellIconID == 320)
             {
                 triggered_spell_id = 82987;
                 basepoints[0] = int32(damage * triggerAmount / 100);
+                target = this;
+                break;
+            }
+            // Tidal Waves
+            if (dummySpell->SpellIconID == 3057)
+            {
+                triggered_spell_id = 53390;
+                basepoints[0] = triggerAmount;
+                basepoints[1] = triggerAmount;
                 target = this;
                 break;
             }
