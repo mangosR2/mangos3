@@ -9318,6 +9318,21 @@ uint32 Unit::SpellHealingBonusDone(Unit *pVictim, SpellEntry const *spellProto, 
             }
         }
     }
+    else if (classOptions && classOptions->SpellFamilyName == SPELLFAMILY_SHAMAN)
+    {
+        // Earth Shield
+        if (pVictim->HasAura(974))
+        {
+            // Search Nature's Blessing
+            Unit::AuraList const& mDummyAuras = owner->GetAurasByType(SPELL_AURA_DUMMY);
+            for (Unit::AuraList::const_iterator itr = mDummyAuras.begin(); itr != mDummyAuras.end(); ++itr)
+                if ((*itr)->GetSpellProto()->SpellIconID == 2012 && (*itr)->GetSpellEffect()->EffectMiscValue == damagetype)
+                {
+                    DoneTotalMod *= (100.0f + (*itr)->GetModifier()->m_amount) / 100.0f;
+                    break;
+                }
+        }
+    }
 
     // Done fixed damage bonus auras
     int32 DoneAdvertisedBenefit  = SpellBaseHealingBonusDone(GetSpellSchoolMask(spellProto));
