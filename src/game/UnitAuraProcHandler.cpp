@@ -3123,6 +3123,40 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, DamageInfo* damageI
                 target = this;
                 break;
             }
+            // Resurgence
+            if (dummySpell->SpellIconID == 2287)
+            {
+                if (!procSpell || !HasAura(52127))  // do not proc if no Water Shield aura present
+                    return SPELL_AURA_PROC_FAILED;
+
+                float mod = 1.0f;
+                switch (procSpell->Id)
+                {
+                    case 331:   // Healing Wave
+                    case 77472: // Greater Healing Wave
+                        mod = 1.0f;
+                        break;
+                    case 8004:  // Healing Surge
+                    case 61295: // Riptide
+                    case 73685: // Unleash Life
+                        mod = 0.6f;
+                        break;
+                    case 1064:  // Chain Heal
+                        mod = 0.333f;
+                        break;
+                    default:
+                        return SPELL_AURA_PROC_FAILED;
+                }
+
+                triggered_spell_id = 101033;
+                SpellEntry const * triggeredInfo = sSpellStore.LookupEntry(triggered_spell_id);
+                if (!triggeredInfo)
+                    return SPELL_AURA_PROC_FAILED;
+
+                target = this;
+                basepoints[0] = int32(CalculateSpellDamage(target, triggeredInfo, EFFECT_INDEX_0) * mod * triggerAmount / 100.0f);
+                break;
+            }
             // Flametongue Weapon (Passive), Ranks
             if (dummySpell->GetSpellFamilyFlags().test<CF_SHAMAN_FLAMETONGUE_WEAPON>())
             {
@@ -3197,6 +3231,52 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, DamageInfo* damageI
                     }
                 }
                 return SPELL_AURA_PROC_FAILED;
+            }
+            // Flametongue Weapon (Passive)
+            if (dummySpell->IsFitToFamilyMask(UI64LIT(0x200000)))
+            {
+                if(GetTypeId()!=TYPEID_PLAYER)
+                    return SPELL_AURA_PROC_FAILED;
+
+                if(!castItem || !castItem->IsEquipped())
+                    return SPELL_AURA_PROC_FAILED;
+
+                //  firehit =  dummySpell->EffectBasePoints[0] / ((4*19.25) * 1.3);
+                SpellEffectEntry const * effect = dummySpell->GetSpellEffect(EFFECT_INDEX_0);
+                float fire_onhit = effect ? effect->EffectBasePoints / 100.0 : 0.0f;
+
+                float add_spellpower = SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_FIRE)
+                                     + pVictim->SpellBaseDamageBonusTaken(SPELL_SCHOOL_MASK_FIRE);
+
+                // 1.3speed = 5%, 2.6speed = 10%, 4.0 speed = 15%, so, 1.0speed = 3.84%
+                add_spellpower= add_spellpower / 100.0 * 3.84;
+
+                // Enchant on Off-Hand and ready?
+                if ( castItem->GetSlot() == EQUIPMENT_SLOT_OFFHAND && isAttackReady(OFF_ATTACK))
+                {
+                    float BaseWeaponSpeed = GetAttackTime(OFF_ATTACK)/1000.0;
+
+                    // Value1: add the tooltip damage by swingspeed + Value2: add spelldmg by swingspeed
+                    basepoints[EFFECT_INDEX_0] = int32( (fire_onhit * BaseWeaponSpeed) + (add_spellpower * BaseWeaponSpeed) );
+                    triggered_spell_id = 10444;
+                }
+
+                // Enchant on Main-Hand and ready?
+                else if ( castItem->GetSlot() == EQUIPMENT_SLOT_MAINHAND && isAttackReady(BASE_ATTACK))
+                {
+                    float BaseWeaponSpeed = GetAttackTime(BASE_ATTACK)/1000.0;
+
+                    // Value1: add the tooltip damage by swingspeed +  Value2: add spelldmg by swingspeed
+                    basepoints[EFFECT_INDEX_0] = int32( (fire_onhit * BaseWeaponSpeed) + (add_spellpower * BaseWeaponSpeed) );
+                    triggered_spell_id = 10444;
+                }
+
+                // If not ready, we should  return, shouldn't we?!
+                else
+                    return SPELL_AURA_PROC_FAILED;
+
+                CastCustomSpell(pVictim,triggered_spell_id,&basepoints[EFFECT_INDEX_0],NULL,NULL,true,castItem,triggeredByAura);
+                return SPELL_AURA_PROC_OK;
             }
             // Lightning Overload
             if (dummySpell->GetSpellIconID() == 2018)            // only this spell have SpellFamily Shaman SpellIconID == 2018 and dummy aura
