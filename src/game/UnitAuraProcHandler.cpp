@@ -3093,6 +3093,14 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, DamageInfo* damageI
                 target = this;
                 break;
             }
+            // Telluric Currents
+            if (dummySpell->SpellIconID == 4777)
+            {
+                triggered_spell_id = 82987;
+                basepoints[0] = int32(damage * triggerAmount / 100);
+                target = this;
+                break;
+            }
             // Flametongue Weapon (Passive), Ranks
             if (dummySpell->GetSpellFamilyFlags().test<CF_SHAMAN_FLAMETONGUE_WEAPON>())
             {
