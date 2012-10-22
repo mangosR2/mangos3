@@ -521,6 +521,19 @@ bool Unit::IsTriggeredAtSpellProcEvent(Unit *pVictim, SpellAuraHolderPtr holder,
         modOwner->ApplySpellMod(spellProto->Id,SPELLMOD_FREQUENCY_OF_SUCCESS,chance);
     }
 
+    // Earthliving procs more often with Blessing of the Eternals on low hp targets
+    if (spellProto->Id == 52007 && pVictim->GetHealthPercent() < 35.0f)
+    {
+        // Search Blessing of the Eternals
+        Unit::AuraList const& dummyAuras = GetAurasByType(SPELL_AURA_DUMMY);
+        for (Unit::AuraList::const_iterator itr = dummyAuras.begin(); itr != dummyAuras.end(); ++itr)
+            if ((*itr)->GetSpellProto()->SpellIconID == 3157 && (*itr)->GetSpellProto()->GetSpellFamilyName() == SPELLFAMILY_SHAMAN)
+            {
+                chance += (*itr)->GetModifier()->m_amount;
+                break;
+            }
+    }
+
     return roll_chance_f(chance);
 }
 
