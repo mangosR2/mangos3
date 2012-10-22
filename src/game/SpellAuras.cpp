@@ -2424,11 +2424,6 @@ void Aura::TriggerSpell()
                  }
                 break;
             }
-            case 16191:                                     // Mana Tide
-            {
-                triggerTarget->CastCustomSpell(triggerTarget, trigger_spell_id, &m_modifier.m_amount, NULL, NULL, true, NULL, this);
-                return;
-            }
             case 28084:                                     // Negative Charge
             {
                 if (triggerTarget->HasAura(29660))
@@ -7184,7 +7179,26 @@ void Aura::HandleAuraModStat(bool apply, bool /*Real*/)
 
     Unit *target = GetTarget();
 
-    for (int32 i = STAT_STRENGTH; i < MAX_STATS; i++)
+    if (apply)
+    {
+        switch (GetSpellProto()->Id)
+        {
+            // Mana Tide Totem
+            case 16191:
+            {
+                if (Unit* caster = GetCaster())
+                {
+                    if (Unit* owner = caster->GetOwner())
+                        m_modifier.m_amount = int32(owner->GetTotalStatValue(STAT_SPIRIT) * m_modifier.m_amount / 100.0f);
+                }
+                break;
+            }
+            default:
+                break;
+        }
+    }
+
+    for (int32 i = STAT_STRENGTH; i < MAX_STATS; ++i)
     {
         // -1 or -2 is all stats ( misc < -2 checked in function beginning )
         if (m_modifier.m_miscvalue < 0 || m_modifier.m_miscvalue == i)
