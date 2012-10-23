@@ -4961,18 +4961,18 @@ void Spell::EffectDummy(SpellEffectEntry const* effect)
                                     m_caster->CastSpell(unitTarget, 73681, true);
                                     break;
                                 }
-                                case 3021:      // Rockbiter
+                                case 3021:      // Rockbiter Weapon
                                 {
                                     m_caster->CastSpell(unitTarget, 73684, true);
                                     break;
                                 }
-                                case 3345:      // Earthliving
+                                case 3345:      // Earthliving Weapon
                                 {
                                     SpellEntry const * triggeredInfo = sSpellStore.LookupEntry(73685);
                                     if (!triggeredInfo)
                                         return;
                                     int32 bp = triggeredInfo->CalculateSimpleValue(EFFECT_INDEX_1);
-                                    m_caster->CastCustomSpell(unitTarget, 73683, NULL, &bp, &bp, true);
+                                    m_caster->CastCustomSpell(unitTarget, 73685, NULL, &bp, &bp, true);
                                     break;
                                 }
                                 default:
