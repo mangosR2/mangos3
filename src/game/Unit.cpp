@@ -11555,7 +11555,7 @@ int32 Unit::CalculateSpellDamage(Unit const* target, SpellEntry const* spellProt
         if (scalingEntry->coefLevelBase > level)
             scale *= (1.0f - scalingEntry->coefBase) * (level - 1) / (scalingEntry->coefLevelBase - 1) + scalingEntry->coefBase;
 
-        basePoints = int32(scalingEntry->coeff1[effect_index] * scale);
+        basePoints = effBasePoints ? *effBasePoints : int32(scalingEntry->coeff1[effect_index] * scale);
         int32 randomPoints = int32(scalingEntry->coeff1[effect_index] * scale * scalingEntry->coeff2[effect_index]);
         basePoints += irand(-randomPoints, randomPoints) / 2;
         comboDamage = uint32(scalingEntry->coeff3[effect_index] * scale);
