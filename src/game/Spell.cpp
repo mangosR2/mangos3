@@ -6533,7 +6533,8 @@ SpellCastResult Spell::CheckCast(bool strict)
                     if(m_caster->m_movementInfo.HasMovementFlag(MovementFlags(MOVEFLAG_FALLING | MOVEFLAG_FALLINGFAR)))
                         return SPELL_FAILED_MOVING;
                 }
-                else if (m_spellInfo->GetSpellFamilyName() == SPELLFAMILY_SHAMAN && m_spellInfo->GetSpellIconID() == 33)
+                // Fire Nova
+                else if (m_spellInfo->GetSpellFamilyName() == SPELLFAMILY_SHAMAN && m_spellInfo->SpellIconID == 33)
                 {
                     // fire totems slot
                     if (!m_caster->GetTotemGuid(TOTEM_SLOT_FIRE))
@@ -6564,6 +6565,31 @@ SpellCastResult Spell::CheckCast(bool strict)
                     }
                     if (!m_targets.getUnitTarget())
                         return SPELL_FAILED_NO_EDIBLE_CORPSES;
+                }
+                // Unleash Elements
+                else if (m_spellInfo->Id == 73680)
+                {
+                    bool hasAnyEnch = false;
+                    uint8 slots[2]= { EQUIPMENT_SLOT_MAINHAND, EQUIPMENT_SLOT_OFFHAND };
+                    for (uint8 i = 0; i < 2; ++i)
+                    {
+                        if (Item* item = ((Player*)m_caster)->GetItemByPos(INVENTORY_SLOT_BAG_0, slots[i]))
+                            if (uint32 ench = item->GetEnchantmentId(TEMP_ENCHANTMENT_SLOT))
+                                switch (ench)
+                                {
+                                    case 2:         // Frostbrand Weapon
+                                    case 5:         // Flametongue Weapon
+                                    case 283:       // Windfury Weapon
+                                    case 3021:      // Rockbiter
+                                    case 3345:      // Earthliving
+                                        hasAnyEnch = true;
+                                        break;
+                                    default:
+                                        break;
+                                }
+                    }
+                    if (!hasAnyEnch)
+                        return SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW;
                 }
                 break;
             }

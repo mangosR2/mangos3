@@ -4898,15 +4898,6 @@ void Spell::EffectDummy(SpellEffectEntry const* effect)
                 }
                 return;
             }
-            // Mana Spring Totem
-            if (shamClassOptions && shamClassOptions->SpellFamilyFlags & UI64LIT(0x0000000000004000))
-            {
-                if (!unitTarget || unitTarget->getPowerType()!=POWER_MANA)
-                    return;
-
-                m_caster->CastCustomSpell(unitTarget, 52032, &damage, 0, 0, true, 0, 0, m_originalCasterGuid);
-                return;
-            }
             // Flametongue Weapon Proc, Ranks
             if (shamClassOptions && shamClassOptions->SpellFamilyFlags & UI64LIT(0x0000000000200000))
             {
@@ -4924,9 +4915,10 @@ void Spell::EffectDummy(SpellEffectEntry const* effect)
                 m_caster->CastCustomSpell(unitTarget, 10444, &totalDamage, NULL, NULL, true, m_CastItem);
                 return;
             }
-            if (m_spellInfo->Id == 39610)                   // Mana Tide Totem effect
+            // Unleash Elements
+            if (m_spellInfo->Id == 73680)
             {
-                if (!unitTarget || unitTarget->getPowerType() != POWER_MANA)
+                if (!unitTarget || m_caster->GetTypeId() != TYPEID_PLAYER)
                     return;
 
                 // Glyph of Mana Tide
@@ -4937,6 +4929,57 @@ void Spell::EffectDummy(SpellEffectEntry const* effect)
                 int32 EffectBasePoints0 = unitTarget->GetMaxPower(POWER_MANA)  * damage / 100;
                 m_caster->CastCustomSpell(unitTarget, 39609, &EffectBasePoints0, NULL, NULL, true, NULL, NULL, m_originalCasterGuid);
                 return;
+                uint8 slots[2]= { EQUIPMENT_SLOT_MAINHAND, EQUIPMENT_SLOT_OFFHAND };
+                for (uint8 i = 0; i < 2; ++i)
+                {
+                    if (Item* item = ((Player*)m_caster)->GetItemByPos(INVENTORY_SLOT_BAG_0, slots[i]))
+                        if (uint32 ench = item->GetEnchantmentId(TEMP_ENCHANTMENT_SLOT))
+                        {
+                            uint32 triggered_spell = 0;
+                            switch (ench)
+                            {
+                                case 2:         // Frostbrand Weapon
+                                {
+                                    SpellEntry const * triggeredInfo = sSpellStore.LookupEntry(73682);
+                                    if (!triggeredInfo)
+                                        return;
+                                    int32 bp = triggeredInfo->CalculateSimpleValue(EFFECT_INDEX_1);
+                                    m_caster->CastCustomSpell(unitTarget, 73682, NULL, &bp, NULL, true);
+                                    break;
+                                }
+                                case 5:         // Flametongue Weapon
+                                {
+                                    SpellEntry const * triggeredInfo = sSpellStore.LookupEntry(73683);
+                                    if (!triggeredInfo)
+                                        return;
+                                    int32 bp = triggeredInfo->CalculateSimpleValue(EFFECT_INDEX_1);
+                                    m_caster->CastCustomSpell(unitTarget, 73683, NULL, &bp, &bp, true);
+                                    break;
+                                }
+                                case 283:       // Windfury Weapon
+                                {
+                                    m_caster->CastSpell(unitTarget, 73681, true);
+                                    break;
+                                }
+                                case 3021:      // Rockbiter
+                                {
+                                    m_caster->CastSpell(unitTarget, 73684, true);
+                                    break;
+                                }
+                                case 3345:      // Earthliving
+                                {
+                                    SpellEntry const * triggeredInfo = sSpellStore.LookupEntry(73685);
+                                    if (!triggeredInfo)
+                                        return;
+                                    int32 bp = triggeredInfo->CalculateSimpleValue(EFFECT_INDEX_1);
+                                    m_caster->CastCustomSpell(unitTarget, 73683, NULL, &bp, &bp, true);
+                                    break;
+                                }
+                                default:
+                                    break;
+                            }
+                        }
+                }
             }
             // Lava Lash
             if (m_spellInfo->GetSpellFamilyFlags().test<CF_SHAMAN_LAVA_LASH>())
