@@ -4148,10 +4148,6 @@ void Aura::HandleAuraMounted(bool apply, bool Real)
     {
         target->Unmount(true);
 
-        // remove speed aura
-        if (MountCapabilityEntry const* mountCapability = target->GetMountCapability(uint32(GetMiscBValue())))
-            target->RemoveAurasDueToSpell(mountCapability->SpeedModSpell);
-
         CreatureInfo const* ci = ObjectMgr::GetCreatureTemplate(m_modifier.m_miscvalue);
         if (ci && target->IsVehicle() && ci->vehicleId == target->GetVehicleKit()->GetEntry()->m_ID)
         {
