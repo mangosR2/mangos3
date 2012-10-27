@@ -1702,7 +1702,7 @@ void BattleGroundMap::UnloadAll(bool pForce)
     {
         if(Player * plr = m_mapRefManager.getFirst()->getSource())
         {
-            plr->TeleportTo(plr->GetBattleGroundEntryPoint());
+            plr->TeleportTo(plr->GetBattleGroundEntryPoint(), TELE_TO_NODELAY);
             // TeleportTo removes the player from this map (if the map exists) -> calls BattleGroundMap::Remove -> invalidates the iterator.
             // just in case, remove the player from the list explicitly here as well to prevent a possible infinite loop
             // note that this remove is not needed if the code works well in other places
