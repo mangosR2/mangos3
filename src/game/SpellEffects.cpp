@@ -9892,7 +9892,7 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                 }
                 case 62705:                                 // Auto-repair (Ulduar: RX-214)
                 {
-                    if (!unitTarget || unitTarget->GetObjectGuid().IsVehicle())
+                    if (!unitTarget || !unitTarget->GetObjectGuid().IsVehicle())
                         return;
 
                     unitTarget->SetHealthPercent(m_spellInfo->CalculateSimpleValue(eff_idx));
