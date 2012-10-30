@@ -525,7 +525,11 @@ void WorldSession::LogoutPlayer(bool Save)
 
         if (VehicleKitPtr vehicle = GetPlayer()->GetVehicle())
         {
-            if (Creature* base = ((Creature*)vehicle->GetBase()))
+            vehicle->SetDestination();
+
+            Creature* base = (Creature*)vehicle->GetBase();
+
+            if (base && base->IsInWorld())
             {
                 bool dismiss = true;
                 if (!base->IsTemporarySummon() ||
@@ -541,6 +545,7 @@ void WorldSession::LogoutPlayer(bool Save)
                 if (dismiss)
                     base->ForcedDespawn(1000);
             }
+            // else do nothing.
         }
 
         ///- empty buyback items and save the player in the database
