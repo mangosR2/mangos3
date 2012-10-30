@@ -1274,7 +1274,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         typedef std::pair<SpellAuraHolderMap::iterator, SpellAuraHolderMap::iterator> SpellAuraHolderBounds;
         typedef std::pair<SpellAuraHolderMap::const_iterator, SpellAuraHolderMap::const_iterator> SpellAuraHolderConstBounds;
         typedef std::queue<SpellAuraHolderPtr> SpellAuraHolderQueue;
-        typedef ACE_Based::LockedVector<AuraPair> AuraList;
+        typedef std::list<AuraPair> AuraList;
         typedef std::list<DiminishingReturn> Diminishing;
         typedef std::set<ObjectGuid> ComboPointHolderSet;
         typedef ACE_Based::LockedMap<uint8, SpellAuraHolderPtr> VisibleAuraMap;
