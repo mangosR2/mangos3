@@ -1839,6 +1839,9 @@ bool Player::TeleportTo(WorldLocation const& loc, uint32 options)
         if (!(options & TELE_TO_NOT_LEAVE_COMBAT))
             CombatStop();
 
+        InterruptSpell(CURRENT_CHANNELED_SPELL);
+        RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_TELEPORTED);
+
         // this will be used instead of the current location in SaveToDB
         m_teleport_dest = loc;
         SetFallInformation(0, loc.coord_z);
@@ -1911,6 +1914,9 @@ bool Player::TeleportTo(WorldLocation const& loc, uint32 options)
             SetSelectionGuid(ObjectGuid());
 
             CombatStop();
+
+            InterruptSpell(CURRENT_CHANNELED_SPELL);
+            RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_TELEPORTED);
 
             ResetContestedPvP();
 
