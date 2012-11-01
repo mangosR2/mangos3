@@ -421,13 +421,10 @@ bool EvadeDelayEvent::Execute(uint64 /*e_time*/, uint32 /*p_time*/)
 // Vehicle events
 bool PassengerEjectEvent::Execute(uint64 /*e_time*/, uint32 /*p_time*/)
 {
-    if (!m_vehicle.GetVehicleInfo())
+    if (!m_vehicle.IsVehicle())
         return true;
 
     VehicleKitPtr pVehicle = m_vehicle.GetVehicleKit();
-
-    if (!pVehicle)
-        return true;
 
     Unit* passenger = pVehicle->GetPassenger(m_seatId);
 

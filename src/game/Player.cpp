@@ -1790,7 +1790,7 @@ bool Player::TeleportTo(WorldLocation const& loc, uint32 options)
     if (GetVehicleKit())
         GetVehicleKit()->RemoveAllPassengers();
 
-    ExitVehicle();
+    ExitVehicle(true);
 
     // The player was ported to another map and looses the duel immediately.
     // We have to perform this check before the teleport, otherwise the

@@ -10163,7 +10163,7 @@ void Aura::HandleAuraControlVehicle(bool apply, bool Real)
 
         if (caster->GetVehicle() && caster->GetVehicle() == target->GetVehicleKit())
         {
-            if (m_removeMode == AURA_REMOVE_BY_STACK)
+            if (m_removeMode == AURA_REMOVE_BY_STACK || m_removeMode == AURA_REMOVE_BY_TRACKING)
                 caster->GetVehicle()->RemovePassenger(caster, false);
             else
                 caster->_ExitVehicle();
@@ -10193,7 +10193,7 @@ void Aura::HandleAuraLinked(bool apply, bool Real)
     if (apply)
     {
         if (pCaster && pCaster->GetTypeId() == TYPEID_PLAYER &&
-            pTarget->GetObjectGuid().IsVehicle() &&
+            pTarget->IsVehicle() &&
             spellInfo->HasAttribute(SPELL_ATTR_EX_HIDDEN_AURA) &&
             spellInfo->HasAttribute(SPELL_ATTR_HIDE_IN_COMBAT_LOG))
         {

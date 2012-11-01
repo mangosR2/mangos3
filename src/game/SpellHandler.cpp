@@ -392,7 +392,7 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
         mover = _mover;
 
     // casting own spells on some vehicles
-    if (mover->GetObjectGuid().IsVehicle() && mover->GetCharmerOrOwnerPlayerOrPlayerItself())
+    if (mover->IsVehicle() && mover->GetCharmerOrOwnerPlayerOrPlayerItself())
     {
         Player *plr = mover->GetCharmerOrOwnerPlayerOrPlayerItself();
         if (mover->GetVehicleKit()->GetSeatInfo(plr) &&
@@ -647,11 +647,11 @@ void WorldSession::HandleSpellClick( WorldPacket & recv_data )
     ObjectGuid guid;
     recv_data >> guid;
 
-    Creature *unit = _player->GetMap()->GetAnyTypeCreature(guid);
+    Creature* unit = _player->GetMap()->GetAnyTypeCreature(guid);
     if (!unit)
         return;
 
-    if (_player->isInCombat() && !guid.IsVehicle())                              // client prevent click and set different icon at combat state
+    if (_player->isInCombat() && !unit->IsVehicle())                              // client prevent click and set different icon at combat state
         return;
 
     SpellClickInfoMapBounds clickPair = sObjectMgr.GetSpellClickInfoMapBounds(unit->GetEntry());

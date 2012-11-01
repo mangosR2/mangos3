@@ -1439,9 +1439,6 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         void Mount(uint32 mount, uint32 spellId = 0, uint32 vehicleId = 0, uint32 creatureEntry = 0);
         void Unmount(bool from_aura = false);
 
-        VehicleInfo* GetVehicleInfo() { return m_vehicleInfo; }
-        bool IsVehicle() const { return m_vehicleInfo != NULL; }
-        void SetVehicleId(uint32 entry);
 
         uint16 GetMaxSkillValueForLevel(Unit const* target = NULL) const { return (target ? GetLevelForTarget(target) : getLevel()) * 5; }
         void DealDamageMods(DamageInfo* damageInfo);
@@ -1606,7 +1603,6 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         void MonsterMoveToDestination(float x, float y, float z, float o, float speed, float height, bool isKnockBack = false, Unit* target = NULL);
         // recommend use MonsterMove/MonsterMoveWithSpeed for most case that correctly work with movegens
         // if used additional args in ... part then floats must explicitly casted to double
-        void SendMonsterMoveTransport(WorldObject *transport, SplineType type, SplineFlags flags, uint32 moveTime, ...);
         virtual bool SetPosition(float x, float y, float z, float orientation, bool teleport = false);
         virtual void SetFallInformation(uint32 time, float z) {};
 
@@ -2184,15 +2180,19 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         // Vehicle system (over-aura operation)
         void EnterVehicle(Unit* base, int8 seatId = -1);
         void EnterVehicle(VehicleKitPtr vehicle, int8 seatId = -1);
-        void ExitVehicle();
+        void ExitVehicle(bool forceDismount = false);
         // Vehicle system (direct operation)
         void _EnterVehicle(VehicleKitPtr vehicle, int8 seatId = -1);
-        void _ExitVehicle();
+        void _ExitVehicle(bool forceDismount = false);
 
         void ChangeSeat(int8 seatId, bool next = true);
         VehicleKitPtr GetVehicle() const { return m_pVehicle; }
         VehicleKitPtr GetVehicleKit() const { return m_pVehicleKit; }
         void RemoveVehicleKit();
+
+        VehicleEntry const* GetVehicleInfo() const;
+        virtual bool IsVehicle() const override { return GetVehicleInfo() != NULL; }
+        void SetVehicleId(uint32 entry);
 
         void ScheduleAINotify(uint32 delay);
         bool IsAINotifyScheduled() const { return m_AINotifyScheduled;}
@@ -2256,7 +2256,6 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         // Transports
         Transport* m_transport;
 
-        VehicleInfo* m_vehicleInfo;
         VehicleKitPtr m_pVehicleKit;
         VehicleKitPtr m_pVehicle;
 
