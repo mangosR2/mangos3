@@ -13687,7 +13687,7 @@ uint32 Unit::CalculateSpellDurationWithHaste(SpellEntry const* spellProto, uint3
     return duration;
 }
 
-bool Unit::IsVisibleTargetForSpell(WorldObject const* caster, SpellEntry const* spellInfo) const
+bool Unit::IsVisibleTargetForSpell(WorldObject const* caster, SpellEntry const* spellInfo, WorldLocation const* location) const
 {
     bool no_stealth = false;
     switch (spellInfo->SpellFamilyName)
@@ -13715,10 +13715,24 @@ bool Unit::IsVisibleTargetForSpell(WorldObject const* caster, SpellEntry const* 
         return isVisibleForOrDetect(static_cast<Unit const*>(caster), caster, true, false, true);
 
     // spell can't hit stealth/invisible targets
-    if (no_stealth && caster->isType(TYPEMASK_UNIT) && !isVisibleForOrDetect(static_cast<Unit const*>(caster), caster, false))
+    if (no_stealth && caster->isType(TYPEMASK_UNIT) && !isVisibleForOrDetect(static_cast<Unit const*>(caster), caster, false, false, true, true))
         return false;
 
-    return spellInfo->HasAttribute(SPELL_ATTR_EX2_IGNORE_LOS) ? true : IsWithinLOSInMap(caster);
+    if (spellInfo->HasAttribute(SPELL_ATTR_EX2_IGNORE_LOS))
+        return true;
+
+    if (location && location->HasMap()) // check only for fully initialized WorldLocation
+    {
+        DEBUG_FILTER_LOG(LOG_FILTER_SPELL_CAST, "Unit::IsVisibleTargetForSpell check LOS for spell %u, caster %s, location %f %f %f, target %s", 
+            spellInfo->Id, caster->GetObjectGuid().GetString().c_str(), location->x, location->y, location->z, GetObjectGuid().GetString().c_str());
+        return ((GetMapId() == location->mapid) && IsWithinLOS(location->x, location->y, location->z));
+    }
+    else
+    {
+        DEBUG_FILTER_LOG(LOG_FILTER_SPELL_CAST, "Unit::IsVisibleTargetForSpell check LOS for spell %u, caster %s, target %s", 
+            spellInfo->Id, caster->GetObjectGuid().GetString().c_str(), GetObjectGuid().GetString().c_str());
+        return IsWithinLOSInMap(caster);
+    }
 }
 
 uint32 Unit::GetModelForForm(SpellShapeshiftFormEntry const* ssEntry) const

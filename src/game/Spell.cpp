@@ -7903,7 +7903,12 @@ bool Spell::CheckTarget(Unit* target, SpellEffectIndex eff )
             // Get GO cast coordinates if original caster -> GO
             if (target != m_caster)
             {
-                if (WorldObject* caster = GetCastingObject())
+                if (DynamicObject* dynObj = m_caster->GetDynObject(m_triggeredByAuraSpell ? m_triggeredByAuraSpell->Id : m_spellInfo->Id))
+                {
+                    if (!target->IsVisibleTargetForSpell(dynObj, m_spellInfo))
+                        return false;
+                }
+                else if (WorldObject* caster = GetCastingObject())
                     if (!target->IsVisibleTargetForSpell(caster, m_spellInfo))
                         return false;
             }
