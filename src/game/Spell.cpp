@@ -2166,8 +2166,21 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
                 loc.x += cos(angle) * radius;
                 loc.y += sin(angle) * radius;
                 loc.z = m_caster->GetPositionZ();
-                m_caster->UpdateGroundPositionZ(loc.x, loc.y, loc.z);
-                m_targets.setDestination(loc);
+                if (!MapManager::IsValidMapCoord(m_caster->GetMapId(), loc.x, loc.y, loc.z))
+                {
+                    sLog.outError("Spell::SetTargetMap: invalid map coordinates for spell %u eff_idx %u target mode %u: mapid %u x %f y %f z %f\n" 
+                        "spell radius: %f caster position: x %f y %f z %f\n"
+                        "base dest position: x %f y %f z %f",
+                        m_spellInfo->Id, effIndex, targetMode, m_caster->GetMapId(), loc.x, loc.y, loc.z,
+                        radius, m_caster->GetPositionX(), m_caster->GetPositionY(), m_caster->GetPositionZ(),
+                        m_targets.getSource().getX(), m_targets.getSource().getY(), m_targets.getSource().getZ());
+                    m_targets.setDestination(m_caster->GetPosition());
+                }
+                else
+                {
+                    m_caster->UpdateGroundPositionZ(loc.x, loc.y, loc.z);
+                    m_targets.setDestination(loc);
+                }
             }
 
             // This targetMode is often used as 'last' implicitTarget for positive spells, that just require coordinates
