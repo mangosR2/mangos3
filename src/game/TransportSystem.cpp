@@ -44,11 +44,6 @@ TransportBase::TransportBase(WorldObject* owner) :
     MANGOS_ASSERT(m_owner);
 }
 
-TransportBase::~TransportBase()
-{
-    MANGOS_ASSERT(m_passengers.size() == 0);
-}
-
 // Update every now and then (after some change of transporter's position)
 // This is used to calculate global positions (which don't have to be exact, they are only required for some server-side calculations
 void TransportBase::Update(uint32 diff)

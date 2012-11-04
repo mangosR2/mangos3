@@ -90,7 +90,7 @@ class MANGOS_DLL_SPEC VehicleKit : public TransportBase
         void SetDestination() { m_dst_x = 0.0f; m_dst_y = 0.0f; m_dst_z  = 0.0f; m_dst_o  = 0.0f; m_dst_speed  = 0.0f; m_dst_elevation  = 0.0f; b_dstSet = false;};
         void DisableDismount(Unit* passenger);
 
-        Unit* GetBase() const { return m_pBase; }
+        Unit* GetBase() const { return (Unit*)GetOwner(); }
         Aura* GetControlAura(Unit* passenger);
 
     private:
@@ -105,7 +105,6 @@ class MANGOS_DLL_SPEC VehicleKit : public TransportBase
 
         void Dismount(Unit* passenger, VehicleSeatEntry const* pSeatInfo = NULL);
 
-        Unit*   m_pBase;
         VehicleEntry const* m_vehicleEntry;
         SeatMap m_Seats;
         uint32  m_uiNumFreeSeats;
