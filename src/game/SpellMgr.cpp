@@ -766,8 +766,8 @@ bool IsPositiveEffect(SpellEntry const *spellproto, SpellEffectIndex effIndex)
                 case 52748:                                 // Voracious Appetite
                 case 54044:                                 // Carrion Feeder
                     return false;
+                case 18153:                                 // Kodo Kombobulator
                 case 48021:                                 // support for quest 12173
-                    return true;
                 case 49634:                                 // Sergeant's Flare
                 case 54530:                                 // Opening
                 case 62105:                                 // To'kini's Blowgun
