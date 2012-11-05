@@ -899,6 +899,7 @@ int32 GetDiminishingReturnsLimitDuration(DiminishingGroup group, SpellEntry cons
 MANGOS_DLL_SPEC SpellEntry const* GetSpellEntryByDifficulty(uint32 id, Difficulty difficulty, bool isRaid);
 
 int32 GetMasteryCoefficient(SpellEntry const * spellProto);
+uint32 GetResistancesAtLevel(uint32 level);
 
 int32 GetMasteryCoefficient(SpellEntry const * spellProto);
 

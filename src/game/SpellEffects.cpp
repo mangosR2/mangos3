@@ -8533,6 +8533,7 @@ void Spell::EffectInterruptCast(SpellEffectEntry const* effect)
     if (!unitTarget->isAlive())
         return;
 
+    uint32 spellSchoolMask = 0;
     // TODO: not all spells that used this effect apply cooldown at school spells
     // also exist case: apply cooldown to interrupted cast only and to all spells
     for (uint32 i = CURRENT_FIRST_NON_MELEE_SPELL; i < CURRENT_MAX_SPELL; ++i)
@@ -8544,8 +8545,34 @@ void Spell::EffectInterruptCast(SpellEffectEntry const* effect)
             if ((curSpellInfo->GetInterruptFlags() & SPELL_INTERRUPT_FLAG_INTERRUPT) && curSpellInfo->GetPreventionType() == SPELL_PREVENTION_TYPE_SILENCE )
             {
                 unitTarget->ProhibitSpellSchool(GetSpellSchoolMask(curSpellInfo), unitTarget->CalculateAuraDuration(m_spellInfo, (1 << effect->EffectIndex), GetSpellDuration(m_spellInfo), m_caster));
-                unitTarget->InterruptSpell(CurrentSpellTypes(i),false);
+                unitTarget->InterruptSpell(CurrentSpellTypes(i), false);
+                spellSchoolMask = GetSpellSchoolMask(curSpellInfo);
                 SendEffectLogExecute(effect, unitTarget->GetObjectGuid(), curSpellInfo->Id);
+            }
+        }
+    }
+
+    if (spellSchoolMask && m_spellInfo->Id == 57994 && m_caster->GetTypeId() == TYPEID_PLAYER && m_caster->getClass() == CLASS_SHAMAN)
+    {
+        Player* plrCaster = (Player*)m_caster;
+        // Frozen Power
+        if (SpellEntry const * spellProto = plrCaster->GetKnownTalentRankById(11220))
+        {
+            uint32 triggeredSpell = 0;
+            if (spellSchoolMask & SPELL_SCHOOL_MASK_FIRE)
+                triggeredSpell = 97618;
+            else if (spellSchoolMask & SPELL_SCHOOL_MASK_FROST)
+                triggeredSpell = 97619;
+            else if (spellSchoolMask & SPELL_SCHOOL_MASK_NATURE)
+                triggeredSpell = 97620;
+            else if (spellSchoolMask & SPELL_SCHOOL_MASK_ARCANE)
+                triggeredSpell = 97621;
+            else if (spellSchoolMask & SPELL_SCHOOL_MASK_SHADOW)
+                triggeredSpell = 97622;
+            if (triggeredSpell)
+            {
+                int32 bp = GetResistancesAtLevel(m_caster->getLevel()) * (spellProto->Id == 16086 ? 0.5f : 1.0f);
+                m_caster->CastCustomSpell(m_caster, triggeredSpell, &bp, NULL, NULL, true);
             }
         }
     }

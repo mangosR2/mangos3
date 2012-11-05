@@ -5419,6 +5419,37 @@ SpellAuraProcResult Unit::HandleSpellMagnetAuraProc(Unit *pVictim, DamageInfo* d
 {
     if (triggeredByAura->GetId() == 8178)                   // Grounding Totem Effect
     {
+        // Frozen Power checks
+        if (Unit* owner = GetOwner())
+        {
+            if (procSpell && owner->GetTypeId() == TYPEID_PLAYER && owner->getClass() == CLASS_SHAMAN)
+            {
+                if (uint32 spellSchoolMask = GetSpellSchoolMask(procSpell))
+                {
+                    Player* plrOwner = (Player*)owner;
+                    if (SpellEntry const * spellProto = plrOwner->GetKnownTalentRankById(11220))
+                    {
+                        uint32 triggeredSpell = 0;
+                        if (spellSchoolMask & SPELL_SCHOOL_MASK_FIRE)
+                            triggeredSpell = 97618;
+                        else if (spellSchoolMask & SPELL_SCHOOL_MASK_FROST)
+                            triggeredSpell = 97619;
+                        else if (spellSchoolMask & SPELL_SCHOOL_MASK_NATURE)
+                            triggeredSpell = 97620;
+                        else if (spellSchoolMask & SPELL_SCHOOL_MASK_ARCANE)
+                            triggeredSpell = 97621;
+                        else if (spellSchoolMask & SPELL_SCHOOL_MASK_SHADOW)
+                            triggeredSpell = 97622;
+                        if (triggeredSpell)
+                        {
+                            int32 bp = GetResistancesAtLevel(plrOwner->getLevel()) * (spellProto->Id == 16086 ? 0.5f : 1.0f);
+                            plrOwner->CastCustomSpell(plrOwner, triggeredSpell, &bp, NULL, NULL, true);
+                        }
+                    }
+                }
+            }
+        }
+
         // for spells that doesn't do damage but need to destroy totem anyway
         if ((!damageInfo->damage || damageInfo->damage < GetHealth()) && GetTypeId() == TYPEID_UNIT && ((Creature*)this)->IsTotem())
         {
