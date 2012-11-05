@@ -1281,6 +1281,31 @@ void Spell::EffectSchoolDMG(SpellEffectEntry const* effect)
                 }
                 break;
             }
+            case SPELLFAMILY_SHAMAN:
+            {
+                // Attack (Searing Totem effect)
+                if (unitTarget && m_spellInfo->Id == 22048)
+                {
+                    if (Unit* owner = m_caster->GetOwner())
+                    {
+                        if (owner->GetTypeId() == TYPEID_PLAYER)
+                        {
+                            Player* plrOwner = (Player*)owner;
+                            // Improved Lava Lash
+                            if (SpellEntry const * spellInfo = plrOwner->GetKnownTalentRankById(2083))
+                            {
+                                if (roll_chance_i(spellInfo->CalculateSimpleValue(EFFECT_INDEX_0)))
+                                {
+                                    int32 bp = damage >= 0 ? m_damage + damage : damage;
+                                    // Cast Searing Flames
+                                    m_caster->CastCustomSpell(unitTarget, 77661, &bp, NULL, NULL, true, NULL, NULL, owner->GetObjectGuid());
+                                }
+                            }
+                        }
+                    }
+                }
+                break;
+            }
         }
 
         if (damage >= 0)
@@ -8350,6 +8375,38 @@ void Spell::EffectWeaponDmg(SpellEffectEntry const* effect)
                     {
                         m_caster->CastSpell(m_caster, 38430, true, NULL, (*citr)());
                         break;
+                    }
+                }
+            }
+            // Lava Lash
+            if (m_spellInfo->Id == 60103)
+            {
+                if (unitTarget && m_caster->GetTypeId() == TYPEID_PLAYER)
+                {
+                    // Improved Lava Lash
+                    if (SpellEntry const * spellInfo = ((Player*)m_caster)->GetKnownTalentRankById(5563))
+                    {
+                        // Searing Flames
+                        if (SpellAuraHolderPtr flames = unitTarget->GetSpellAuraHolder(77661, m_caster->GetObjectGuid()))
+                        {
+                            m_damage = int32(m_damage * (flames->GetStackAmount() * spellInfo->CalculateSimpleValue(EFFECT_INDEX_1) + 100.0f) / 100.0f);
+                            unitTarget->RemoveSpellAuraHolder(flames);
+                        }
+
+                        UnitList nearUnits;
+                        MaNGOS::AnyUnfriendlyUnitInObjectRangeCheck u_check(unitTarget, unitTarget, 12.0f);
+                        MaNGOS::UnitListSearcher<MaNGOS::AnyUnfriendlyUnitInObjectRangeCheck > searcher(nearUnits, u_check);
+                        Cell::VisitAllObjects(unitTarget, searcher, 12.0f);
+                        int targets = 4;
+                        for (UnitList::iterator itr = nearUnits.begin(); itr != nearUnits.end() && targets >= 0; ++itr)
+                        {
+                            if ((*itr)->GetObjectGuid() != unitTarget->GetObjectGuid())
+                            {
+                                // cast flame shock
+                                m_caster->CastSpell(*itr, 8050, true);
+                                --targets;
+                            }
+                        }
                     }
                 }
             }
