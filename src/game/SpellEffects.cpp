@@ -12180,6 +12180,20 @@ void Spell::EffectScriptEffect(SpellEffectEntry const* effect)
             }
             break;
         }
+        case SPELLFAMILY_SHAMAN:
+        {
+            switch (m_spellInfo->Id)
+            {
+                case 73921:                                     // Earthquake
+                {
+                    // Cast Stun
+                    if (unitTarget && roll_chance_i(damage))
+                        m_caster->CastSpell(unitTarget, 77505, true);
+                    break;
+                }
+            }
+            break;
+        }
         default:
             break;
     }
