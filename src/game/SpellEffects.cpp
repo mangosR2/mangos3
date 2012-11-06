@@ -12759,40 +12759,37 @@ void Spell::EffectWMORepair(SpellEffectIndex eff_idx)
 
 void Spell::EffectWMOChange(SpellEffectIndex eff_idx)
 {
-    if (gameObjTarget && gameObjTarget->GetGoType() == GAMEOBJECT_TYPE_DESTRUCTIBLE_BUILDING)
+    Unit* caster = GetAffectiveCaster();
+
+    if (!caster)
+        return;
+
+    if (!gameObjTarget || gameObjTarget->GetGoType() != GAMEOBJECT_TYPE_DESTRUCTIBLE_BUILDING)
     {
-        DEBUG_LOG( "Spell::EffectWMOChange,  spell ID %u, object %u, command %u", m_spellInfo->Id,gameObjTarget->GetEntry(), m_spellInfo->EffectMiscValue[eff_idx]);
-
-        Unit* caster = m_originalCaster;
-
-        if (!caster)
-            return;
-
-        switch (m_spellInfo->EffectMiscValue[eff_idx])
-        {
-            case 0: // intact
-                if (gameObjTarget->HasFlag(GAMEOBJECT_FLAGS, GO_FLAG_DAMAGED))
-                    gameObjTarget->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_DAMAGED);
-                if (gameObjTarget->HasFlag(GAMEOBJECT_FLAGS, GO_FLAG_DESTROYED))
-                    gameObjTarget->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_DESTROYED);
-                break;
-            case 1: // damaged
-                gameObjTarget->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_DAMAGED);
-                break;
-            case 2: // destroyed
-                gameObjTarget->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_DESTROYED);
-                break;
-            case 3: // rebuild
-                gameObjTarget->Rebuild(caster);
-                break;
-            default:
-                DEBUG_LOG( "Spell::EffectWMOChange,  spell ID %u with defined change value %u", m_spellInfo->Id,m_spellInfo->EffectMiscValue[eff_idx]);
-                break;
-        }
+        sLog.outError("Spell::EffectWMOChange called, but no valid targets. Caster %s, spell %u (current target %s)", caster->GetObjectGuid().GetString().c_str(), m_spellInfo->Id, gameObjTarget ? gameObjTarget->GetObjectGuid().GetString().c_str() : "<none>");
+        return;
     }
-    else
-        DEBUG_LOG( "Spell::EffectWMORepair called, but no valid targets. Spell ID %u", m_spellInfo->Id);
 
+    DEBUG_LOG( "Spell::EffectWMOChange,  spell ID %u, object %s, command %u", m_spellInfo->Id, gameObjTarget->GetObjectGuid().GetString().c_str(), m_spellInfo->EffectMiscValue[eff_idx]);
+
+    switch (m_spellInfo->EffectMiscValue[eff_idx] + 1)
+    {
+        case OBJECT_STATE_INTACT:                                               // still intact
+            gameObjTarget->DamageTaken(caster, gameObjTarget->GetHealth() - gameObjTarget->GetMaxHealth(), m_spellInfo->Id);
+            break;
+        case OBJECT_STATE_DAMAGE:                                               // damaged
+            gameObjTarget->DamageTaken(caster, gameObjTarget->GetHealth() - gameObjTarget->GetGOInfo()->destructibleBuilding.damagedNumHits,  m_spellInfo->Id);
+            break;
+        case OBJECT_STATE_DESTROY:                                              // destroyed
+            gameObjTarget->DamageTaken(caster, gameObjTarget->GetHealth(),  m_spellInfo->Id);
+            break;
+        case OBJECT_STATE_REBUILD:                                              // rebuild
+            gameObjTarget->Rebuild(caster);
+            break;
+        default:
+            sLog.outError("Spell::EffectWMOChange, spell Id %u with undefined command %u!", m_spellInfo->Id,m_spellInfo->EffectMiscValue[eff_idx]);
+            break;
+    }
 }
 
 void Spell::EffectFriendSummon( SpellEffectIndex eff_idx )
