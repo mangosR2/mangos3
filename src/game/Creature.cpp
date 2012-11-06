@@ -1799,24 +1799,7 @@ void Creature::CallAssistance()
     if (!m_AlreadyCallAssistance && getVictim() && !isCharmed())
     {
         SetNoCallAssistance(true);
-
-        float radius = sWorld.getConfig(CONFIG_FLOAT_CREATURE_FAMILY_ASSISTANCE_RADIUS);
-        if (radius > 0)
-        {
-            std::list<Creature*> assistList;
-
-            {
-                MaNGOS::AnyAssistCreatureInRangeCheck u_check(this, getVictim(), radius);
-                MaNGOS::CreatureListSearcher<MaNGOS::AnyAssistCreatureInRangeCheck> searcher(assistList, u_check);
-                Cell::VisitGridObjects(this, searcher, radius);
-            }
-
-            if (!assistList.empty())
-            {
-                AssistDelayEvent* event = new AssistDelayEvent(getVictim()->GetObjectGuid(), *this, assistList);
-                AddEvent(event, sWorld.getConfig(CONFIG_UINT32_CREATURE_FAMILY_ASSISTANCE_DELAY));
-            }
-        }
+        AI()->SendAIEvent(AI_EVENT_CALL_ASSISTANCE, getVictim(), sWorld.getConfig(CONFIG_UINT32_CREATURE_FAMILY_ASSISTANCE_DELAY), sWorld.getConfig(CONFIG_FLOAT_CREATURE_FAMILY_ASSISTANCE_RADIUS));
     }
 }
 
@@ -1830,6 +1813,7 @@ void Creature::CallForHelp(float fRadius)
     Cell::VisitGridObjects(this, worker, fRadius);
 }
 
+/// if enemy provided, check for initial combat help against enemy
 bool Creature::CanAssistTo(const Unit* u, const Unit* enemy, bool checkfaction /*= true*/) const
 {
     // we don't need help from zombies :)
@@ -1844,7 +1828,7 @@ bool Creature::CanAssistTo(const Unit* u, const Unit* enemy, bool checkfaction /
         return false;
 
     // skip fighting creature
-    if (isInCombat())
+    if (enemy && isInCombat())
         return false;
 
     // only free creature
@@ -1864,7 +1848,7 @@ bool Creature::CanAssistTo(const Unit* u, const Unit* enemy, bool checkfaction /
     }
 
     // skip non hostile to caster enemy creatures
-    if (!IsHostileTo(enemy))
+    if (enemy && !IsHostileTo(enemy))
         return false;
 
     return true;

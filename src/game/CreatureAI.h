@@ -286,6 +286,33 @@ class MANGOS_DLL_SPEC CreatureAI
         void SetCombatMovement(bool enable, bool stopOrStartMovement = false);
         bool IsCombatMovement() const { return m_isCombatMovement; }
 
+        ///== Event Handling ===============================
+
+        /**
+         * Send an AI Event to nearby Creatures around
+         * @param uiType number to specify the event, default cases listed in enum AIEventType
+         * @param pInvoker Unit that triggered this event (like an attacker)
+         * @param uiDelay  delay time until the Event will be triggered
+         * @param fRadius  range in which for receiver is searched
+         */
+        void SendAIEvent(AIEventType eventType, Unit* pInvoker, uint32 uiDelay, float fRadius) const;
+
+        /**
+         * Send an AI Event to a Creature
+         * @param eventType to specify the event, default cases listed in enum AIEventType
+         * @param pInvoker Unit that triggered this event (like an attacker)
+         * @param pReceiver Creature to receive this event
+         */
+        void SendAIEvent(AIEventType eventType, Unit* pInvoker, Creature* pReceiver) const;
+
+        /**
+         * Called when an AI Event is received
+         * @param eventType to specify the event, default cases listed in enum AIEventType
+         * @param pSender Creature that sent this event
+         * @param pInvoker Unit that triggered this event (like an attacker)
+         */
+        virtual void ReceiveAIEvent(AIEventType /*eventType*/, Creature* /*pSender*/, Unit* /*pInvoker*/) {}
+
     protected:
         void HandleMovementOnAttackStart(Unit* victim);
 
