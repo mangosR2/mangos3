@@ -309,7 +309,6 @@ echo
 
 ###############################################################################
 # R2
-
 searchDir=$mangosSource"/sql_mr"
 checkupdateField=$(db_exec $realmhost $realmport $realmuser $realmpass $realmdb "SELECT COLUMN_NAME FROM information_schema.COLUMNS WHERE TABLE_SCHEMA='"$realmdb"' AND TABLE_NAME='realmd_db_version' AND COLUMN_NAME='r2_db_version'")
 if [[ $checkupdateField == "" ]]; then
@@ -326,7 +325,7 @@ fi
 checkupdateField=$(db_exec $charhost $charport $charuser $charpass $chardb "SELECT COLUMN_NAME FROM information_schema.COLUMNS WHERE TABLE_SCHEMA='"$chardb"' AND TABLE_NAME='character_db_version' AND COLUMN_NAME='r2_db_version'")
 if [[ $checkupdateField == "" ]]; then
     checkUpdateField=$(db_exec $charhost $charport $charuser $charpass $chardb "ALTER TABLE character_db_version ADD COLUMN r2_db_version smallint NOT NULL default 0")
-    _rc=$(db_exec $charhost $charport $charuser $charpass $chardb $searchDir"/custom_characters_tables.sql")
+    _rc=$(db_run $charhost $charport $charuser $charpass $chardb $searchDir"/custom_characters_tables.sql")
 fi
 
 length=$((${#searchDir}+3));
@@ -418,5 +417,5 @@ num=$(($_num));
 done;
 
 if [ $count -gt 0 ]; then
-    _rc=$(db_run $sdhost $sdport $sduser $sdpass $sddb $searchDir"/last_mangos_sql_at_every_db_update.sql")
+    _rc=$(db_run $mangoshost $mangosport $mangosuser $mangospass $mangosdb  $searchDir"/last_mangos_sql_at_every_db_update.sql")
 fi
