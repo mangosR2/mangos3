@@ -584,7 +584,13 @@ void Pet::Update(uint32 update_diff, uint32 diff)
         {
             if (m_corpseDecayTimer <= update_diff)
             {
-                MANGOS_ASSERT(getPetType()!=SUMMON_PET && "Must be already removed.");
+                if (getPetType() != SUMMON_PET)
+                {
+                    sLog.outError("Pet::Update pet %s (owner %s) has CORPSE state, but not must (has type %u). Crush possible later.", 
+                        GetObjectGuid().GetString().c_str(), GetOwner() ? GetOwner()->GetObjectGuid().GetString().c_str() : "<none>", getPetType());
+                    RemoveCorpse();
+                    return;
+                };
                 Unsummon(PET_SAVE_NOT_IN_SLOT);             //hunters' pets never get removed because of death, NEVER!
                 return;
             }
