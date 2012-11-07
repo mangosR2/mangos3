@@ -384,6 +384,13 @@ fi
 checkupdateField=$(db_exec $sdhost $sdport $sduser $sdpass $sddb "SELECT COLUMN_NAME FROM information_schema.COLUMNS WHERE TABLE_SCHEMA='"$sddb"' AND TABLE_NAME='sd2_db_version' AND COLUMN_NAME='r2_db_version'")
 if [[ $checkupdateField == "" ]]; then
     checkUpdateField=$(db_exec $sdhost $sdport $sduser $sdpass $sddb "ALTER TABLE sd2_db_version ADD COLUMN r2_db_version smallint NOT NULL default 0 after db_version")
+    #_rc=$(db_run $sdhost $sdport $sduser $sdpass $sddb $searchDir"/custom_scriptdev2_stuff.sql")
+fi
+
+checkupdateField=$(db_exec $mangoshost $mangosport $mangosuser $mangospass $mangosdb "SELECT COLUMN_NAME FROM information_schema.COLUMNS WHERE TABLE_SCHEMA='"$mangosdb"' AND TABLE_NAME='db_version' AND COLUMN_NAME='r2_sd2_db_version'")
+if [[ $checkupdateField == "" ]]; then
+    checkUpdateField=$(db_exec $mangoshost $mangosport $mangosuser $mangospass $mangosdb "ALTER TABLE db_version ADD COLUMN r2_sd2_db_version smallint NOT NULL default 0")
+    #_rc=$(db_run $mangoshost $mangosport $mangosuser $mangospass $mangosdb $searchDir"/custom_mangos_stuff.sql")
 fi
 
 length=$((${#searchDir}+3));
@@ -395,25 +402,24 @@ for j in $todb; do
 _num=`echo $j|sed -r "s/.*sql_mr\/mr//"|sed -r "s/_.*//"|sed -r "s/^0*//g"`
 num=$(($_num));
     if [[ $j =~ .*_mangos_.* ]]; then
-        dblastupdate=$(db_exec $mangoshost $mangosport $mangosuser $mangospass $mangosdb "SELECT r2_db_version FROM db_version")
-        if [[ $num -ge $dblastupdate ]]; then
+        dblastupdatemangos=$(db_exec $mangoshost $mangosport $mangosuser $mangospass $mangosdb "SELECT r2_sd2_db_version FROM db_version")
+        if [[ $num -ge $dblastupdatemangos ]]; then
             _rc=$(db_run $mangoshost $mangosport $mangosuser $mangospass $mangosdb "$j")
             echo "Installed update "$j"  with rc="$_rc
-            newlastupdate=$(db_exec $mangoshost $mangosport $mangosuser $mangospass $mangosdb "UPDATE db_version SET r2_db_version='$num'")
-            dblastupdate=$num;
+            newlastupdate=$(db_exec $mangoshost $mangosport $mangosuser $mangospass $mangosdb "UPDATE db_version SET r2_sd2_db_version='$num'")
+            dblastupdatemangos=$num;
         fi
     fi
     if [[ $j =~ .*_scriptdev2_.* ]]; then
-        dblastupdate=$(db_exec $sdhost $sdport $sduser $sdpass $sddb "SELECT r2_db_version FROM sd2_db_version")
-        if [[ $num -ge $dblastupdate ]]; then
+        dblastupdatesd2=$(db_exec $sdhost $sdport $sduser $sdpass $sddb "SELECT r2_db_version FROM sd2_db_version")
+        if [[ $num -ge $dblastupdatesd2 ]]; then
         _rc=$(db_run $charhost $sdport $sduser $sdpass $sddb "$j")
             echo "Installed update "$j"  with rc="$_rc
             newlastupdate=$(db_exec $sdhost $sdport $sduser $sdpass $sddb "UPDATE sd2_db_version SET r2_db_version='$num'")
-            dblastupdate=$num;
+            dblastupdatesd2=$num;
         fi
     fi
     count=$(($count+1));
-    dblastupdate=$num;
 done;
 
 if [ $count -gt 0 ]; then
