@@ -24765,6 +24765,21 @@ Object* Player::GetDependentObject(ObjectGuid const& guid)
     return (Object*)GetItemByGuid(guid);
 }
 
+void Player::AddUpdateObject(ObjectGuid const& guid) override
+{
+    i_objectsToClientUpdate.insert(guid);
+
+    // Not need add owner to update queue if owner already marked for update.
+    if (!IsMarkedForClientUpdate() && GetMap())
+        GetMap()->AddUpdateObject(GetObjectGuid());
+}
+
+void Player::RemoveUpdateObject(ObjectGuid const& guid) override
+{
+    // possible required remove player from update queue also.
+    i_objectsToClientUpdate.erase(guid);
+}
+
 void Player::AddItemWithTimeCheck(uint32 lowGuid)
 {
     m_itemsWithTimeCheck.insert(lowGuid);

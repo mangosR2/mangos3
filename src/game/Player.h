@@ -2465,14 +2465,8 @@ class MANGOS_DLL_SPEC Player : public Unit
         // Parent objects (items currently) update system
         Object* GetDependentObject(ObjectGuid const& guid) override;
         virtual GuidSet const* GetObjectsUpdateQueue() override { return &i_objectsToClientUpdate; };
-        void AddUpdateObject(ObjectGuid const& guid) override
-        {
-            i_objectsToClientUpdate.insert(guid);
-        }
-        void RemoveUpdateObject(ObjectGuid const& guid) override
-        {
-            i_objectsToClientUpdate.erase(guid);
-        }
+        void AddUpdateObject(ObjectGuid const& guid) override;
+        void RemoveUpdateObject(ObjectGuid const& guid) override;
 
     protected:
 
