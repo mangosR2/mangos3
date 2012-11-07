@@ -108,7 +108,7 @@ pEffect SpellEffects[TOTAL_SPELL_EFFECTS]=
     &Spell::EffectJump,                                     // 42 SPELL_EFFECT_JUMP2
     &Spell::EffectTeleUnitsFaceCaster,                      // 43 SPELL_EFFECT_TELEPORT_UNITS_FACE_CASTER
     &Spell::EffectLearnSkill,                               // 44 SPELL_EFFECT_SKILL_STEP
-    &Spell::EffectNULL,                                     // 45 SPELL_EFFECT_PLAY_MOVIE
+    &Spell::EffectPlayMovie,                                // 45 SPELL_EFFECT_PLAY_MOVIE
     &Spell::EffectNULL,                                     // 46 SPELL_EFFECT_SPAWN                    spawn/login animation, expected by spawn unit cast, also base points store some dynflags
     &Spell::EffectTradeSkill,                               // 47 SPELL_EFFECT_TRADE_SKILL
     &Spell::EffectUnused,                                   // 48 SPELL_EFFECT_STEALTH                  one spell: Base Stealth
@@ -229,7 +229,7 @@ pEffect SpellEffects[TOTAL_SPELL_EFFECTS]=
     &Spell::EffectUnused,                                   //163 unused in 3.3.5a
     &Spell::EffectCancelAura,                               //164 SPELL_EFFECT_CANCEL_AURA
     &Spell::EffectNULL,                                     //165 SPELL_EFFECT_DAMAGE_FROM_MAX_HEALTH_PCT 82 spells in 4.3.4
-    &Spell::EffectNULL,                                     //166 SPELL_EFFECT_REWARD_CURRENCY          56 spells in 4.3.4
+    &Spell::EffectRewardCurrency,                           //166 SPELL_EFFECT_REWARD_CURRENCY          56 spells in 4.3.4
     &Spell::EffectNULL,                                     //167 SPELL_EFFECT_167                      42 spells in 4.3.4
     &Spell::EffectNULL,                                     //168 SPELL_EFFECT_168                      2 spells in 4.3.4 Allows give commands to controlled pet
     &Spell::EffectNULL,                                     //169 SPELL_EFFECT_DESTROY_ITEM             9 spells in 4.3.4
@@ -7741,6 +7741,18 @@ void Spell::EffectLearnSkill(SpellEffectEntry const* effect)
         DEBUG_LOG("Spell: %s has learned skill %u value %u from %s", unitTarget->GetGuidStr().c_str(), skillid, skillval, caster->GetGuidStr().c_str());
 }
 
+void Spell::EffectPlayMovie(SpellEffectEntry const* effect)
+{
+    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
+        return;
+
+    uint32 movieId = effect->EffectMiscValue;
+    if (!sMovieStore.LookupEntry(movieId))
+        return;
+
+    ((Player*)unitTarget)->SendMovieStart(movieId);
+}
+
 void Spell::EffectTradeSkill(SpellEffectEntry const* /*effect*/)
 {
     if (unitTarget->GetTypeId() != TYPEID_PLAYER)
@@ -14337,4 +14349,12 @@ void Spell::EffectSurvey(SpellEffectEntry const* effect)
         ((Creature*)m_caster)->AI()->JustSummoned(pGameObj);
     if (m_originalCaster && m_originalCaster != m_caster && m_originalCaster->GetTypeId() == TYPEID_UNIT && ((Creature*)m_originalCaster)->AI())
         ((Creature*)m_originalCaster)->AI()->JustSummoned(pGameObj);
+}
+
+void Spell::EffectRewardCurrency(SpellEffectEntry const* effect)
+{
+    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
+        return;
+
+    ((Player*)unitTarget)->ModifyCurrencyCount(effect->EffectMiscValue, damage);
 }
