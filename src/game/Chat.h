@@ -629,6 +629,15 @@ class MANGOS_DLL_SPEC ChatHandler
         bool HandleWorldStateUpdateCommand(char* args);
         bool HandleWorldStateReloadCommand(char* args);
 
+        // Transport debugging commands
+        bool HandleTransportListCommand(char* args);
+        bool HandleTransportCurrentCommand(char* args);
+        bool HandleTransportPathCommand(char* args);
+        bool HandleTransportGoCommand(char* args);
+        bool HandleTransportStartCommand(char* args);
+        bool HandleTransportStopCommand(char* args);
+        bool HandleTransportCommand(char* args);
+
         //! Development Commands
         bool HandleSaveAllCommand(char* args);
 

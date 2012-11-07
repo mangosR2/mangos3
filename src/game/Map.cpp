@@ -102,6 +102,7 @@ Map::Map(uint32 id, time_t expiry, uint32 InstanceId, uint8 SpawnMode)
     MapPersistentState* persistentState = sMapPersistentStateMgr.AddPersistentState(i_mapEntry, GetInstanceId(), GetDifficulty(), 0, IsDungeon());
     persistentState->SetUsedByMapState(this);
     SetBroken(false);
+    //sObjectMgr.LoadTransports(this);
 }
 
 MapPersistentState* Map::GetPersistentState() const
@@ -593,6 +594,13 @@ void Map::Update(const uint32 &t_diff)
 
             if (!obj->IsInWorld() || !obj->IsPositionValid())
                 continue;
+
+            // Update active MO_TRANSPORT objects (if not updated in other objects chain)
+            //if (obj->GetObjectGuid().IsMOTransport())
+            //{
+            //    WorldObject::UpdateHelper helper(obj);
+            //    helper.Update(t_diff);
+            //}
 
             //lets update mobs/objects in ALL visible cells around player!
             CellArea area = Cell::CalculateCellArea(obj->GetPositionX(), obj->GetPositionY(), GetVisibilityDistance());

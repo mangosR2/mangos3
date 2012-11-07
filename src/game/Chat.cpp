@@ -430,6 +430,18 @@ ChatCommand* ChatHandler::getCommandTable()
         { NULL,             0,                  false, NULL,                                           "", NULL }
     };
 
+    static ChatCommand transportCommandTable[] =
+    {
+        { "list",           SEC_ADMINISTRATOR,  false, &ChatHandler::HandleTransportListCommand,       "", NULL },
+        { "current",        SEC_ADMINISTRATOR,  false, &ChatHandler::HandleTransportCurrentCommand,    "", NULL },
+        { "path",           SEC_ADMINISTRATOR,  false, &ChatHandler::HandleTransportPathCommand,       "", NULL },
+        { "go",             SEC_ADMINISTRATOR,  false, &ChatHandler::HandleTransportGoCommand,         "", NULL },
+        { "start",          SEC_ADMINISTRATOR,  false, &ChatHandler::HandleTransportStartCommand,      "", NULL },
+        { "stop",           SEC_ADMINISTRATOR,  false, &ChatHandler::HandleTransportStopCommand,       "", NULL },
+        { "",               SEC_ADMINISTRATOR,  false, &ChatHandler::HandleTransportCommand,           "", NULL },
+        { NULL,             0,                  false, NULL,                                           "", NULL }
+    };
+
     static ChatCommand modifyCommandTable[] =
     {
         { "hp",             SEC_MODERATOR,      false, &ChatHandler::HandleModifyHPCommand,            "", NULL },
@@ -856,6 +868,7 @@ ChatCommand* ChatHandler::getCommandTable()
         { "gearscore",      SEC_ADMINISTRATOR,  false, &ChatHandler::HandleShowGearScoreCommand,       "", NULL },
         { "mmap",           SEC_GAMEMASTER,     false, NULL,                                           "", mmapCommandTable },
         { "ws",             SEC_GAMEMASTER,     false, NULL,                                           "", WSCommandTable },
+        { "transport",      SEC_ADMINISTRATOR,  false, NULL,                                           "", transportCommandTable },
 
         { NULL,             0,                  false, NULL,                                           "", NULL }
     };

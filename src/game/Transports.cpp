@@ -497,7 +497,7 @@ void Transport::TeleportTransport(uint32 newMapid, float x, float y, float z)
     Map* newMap = sMapMgr.CreateMap(newMapid, this);
     SetMap(newMap);
 
-    if(oldMap != newMap)
+    if (oldMap != newMap)
     {
         UpdateForMap(oldMap);
         oldMap->EraseObject(this);
@@ -569,10 +569,10 @@ void Transport::Update( uint32 update_diff, uint32 /*p_time*/)
 void Transport::UpdateForMap(Map const* targetMap)
 {
     Map::PlayerList const& pl = targetMap->GetPlayers();
-    if(pl.isEmpty())
+    if (pl.isEmpty())
         return;
 
-    if(GetMapId()==targetMap->GetId())
+    if (GetMapId()==targetMap->GetId())
     {
         for(Map::PlayerList::const_iterator itr = pl.begin(); itr != pl.end(); ++itr)
         {
@@ -622,4 +622,62 @@ void Transport::BuildStopMovePacket(Map const* targetMap)
     RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_IN_USE);
     SetGoState(GO_STATE_READY);
     UpdateForMap(targetMap);
+}
+
+uint32 Transport::GetPossibleMapByEntry(uint32 entry, bool start)
+{
+    GameObjectInfo const* goinfo = ObjectMgr::GetGameObjectInfo(entry);
+    if (!goinfo || goinfo->type != GAMEOBJECT_TYPE_MO_TRANSPORT)
+        return UINT32_MAX;
+
+    if (goinfo->moTransport.taxiPathId >= sTaxiPathNodesByPath.size())
+        return UINT32_MAX;
+
+    TaxiPathNodeList const& path = sTaxiPathNodesByPath[goinfo->moTransport.taxiPathId];
+
+    if (path.empty())
+        return UINT32_MAX;
+
+    if (!start)
+    {
+        for (size_t i = 0; i < path.size(); ++i)
+            if (path[i].mapid != path[0].mapid)
+                return path[i].mapid;
+    }
+
+    return path[0].mapid;
+}
+
+bool Transport::IsSpawnedAtDifficulty(uint32 entry, Difficulty difficulty)
+{
+    GameObjectInfo const* goinfo = ObjectMgr::GetGameObjectInfo(entry);
+    if (!goinfo || goinfo->type != GAMEOBJECT_TYPE_MO_TRANSPORT)
+        return false;
+    if (!goinfo->moTransport.difficultyMask)
+        return true;
+    return goinfo->moTransport.difficultyMask & uint32( 1 << difficulty);
+}
+
+void Transport::Start()
+{
+    DETAIL_FILTER_LOG(LOG_FILTER_TRANSPORT_MOVES, "Transport::StartMovement %s (%s) start moves, period %u/%u",
+        GetObjectGuid().GetString().c_str(),
+        GetName(),
+        m_pathTime,
+        GetPeriod()
+        );
+    SetActiveObjectState(true);
+    BuildStartMovePacket(GetMap());
+}
+ 
+void Transport::Stop()
+{
+    DETAIL_FILTER_LOG(LOG_FILTER_TRANSPORT_MOVES, "Transport::StartMovement %s (%s) stop moves, period %u/%u",
+        GetObjectGuid().GetString().c_str(),
+        GetName(),
+        m_pathTime,
+        GetPeriod()
+        );
+    SetActiveObjectState(false);
+    BuildStopMovePacket(GetMap());
 }

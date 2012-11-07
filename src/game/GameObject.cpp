@@ -233,7 +233,8 @@ void GameObject::Update(uint32 update_diff, uint32 p_time)
 {
     if (GetObjectGuid().IsMOTransport())
     {
-        //((Transport*)this)->Update(p_time);
+        //GetTransportKit()->Update(update_diff, diff);
+        //DEBUG_LOG("Transport::Update %s", GetObjectGuid().GetString().c_str());
         return;
     }
 
@@ -1377,6 +1378,24 @@ void GameObject::Use(Unit* user)
 
             return;
         }
+        case GAMEOBJECT_TYPE_MO_TRANSPORT:                   // 15
+        {
+            if (GetGoState() == GO_STATE_READY)
+            {
+                SetGoState(GO_STATE_ACTIVE);
+                SetActiveObjectState(false);
+            }
+            else
+            {
+                SetGoState(GO_STATE_READY);
+                SetActiveObjectState(true);
+            }
+
+            // activate script
+            if (!scriptReturnValue)
+                GetMap()->ScriptsStart(sGameObjectScripts, GetGUIDLow(), spellCaster, this);
+            return;
+        }
         case GAMEOBJECT_TYPE_FISHINGNODE:                   // 17 fishing bobber
         {
             if (user->GetTypeId() != TYPEID_PLAYER)
@@ -2433,11 +2452,6 @@ float GameObject::GetDeterminativeSize(bool b_priorityZ) const
     float dz = info->maxZ - info->minZ;
 
     return b_priorityZ ? dz : sqrt(dx*dx + dy*dy +dz*dz);
-}
-
-void GameObject::SetActiveObjectState(bool active)
-{
-    WorldObject::SetActiveObjectState(active);
 }
 
 void GameObject::SetCapturePointSlider(int8 value)
