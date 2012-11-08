@@ -81,8 +81,9 @@
 #endif
 
 // SIMM include
+#ifdef __SSE__ /* G3DFIX: Only Intel Vector Extension enabled */
 #include <xmmintrin.h>
-
+#endif /* G3DFIX: Only Intel Vector Extension enabled */
 
 namespace G3D {
 
@@ -1694,6 +1695,7 @@ std::string System::currentDateString() {
 
 // VC on Intel
 void System::cpuid(CPUIDFunction func, uint32& areg, uint32& breg, uint32& creg, uint32& dreg) {
+#if !defined(G3D_64BIT) /* G3DFIX: Don't check if on 64-bit platform */
     // Can't copy from assembler direct to a function argument (which is on the stack) in VC.
     uint32 a,b,c,d;
 
@@ -1711,6 +1713,14 @@ void System::cpuid(CPUIDFunction func, uint32& areg, uint32& breg, uint32& creg,
     breg = b; 
     creg = c;
     dreg = d;
+#else /* G3DFIX: Don't check if on 64-bit platform */
+ int CPUInfo[4];
+ __cpuid(CPUInfo, func);
+ memcpy(&areg, &CPUInfo[0], 4);
+ memcpy(&breg, &CPUInfo[1], 4);
+ memcpy(&creg, &CPUInfo[2], 4);
+ memcpy(&dreg, &CPUInfo[3], 4);
+#endif /* G3DFIX: Don't check if on 64-bit platform */
 }
 
 #elif defined(G3D_OSX) && ! defined(G3D_OSX_INTEL)
