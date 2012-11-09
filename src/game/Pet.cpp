@@ -69,6 +69,33 @@ Pet::~Pet()
     m_removed = true;
 }
 
+void Pet::AddToWorld()
+{
+    ///- Register the pet for guid lookup
+    if (!((Creature*)this)->IsInWorld())
+    {
+        MAPLOCK_WRITE(this, MAP_LOCK_TYPE_DEFAULT);
+        GetMap()->GetObjectsStore().insert<Pet>(GetObjectGuid(), (Pet*)this);
+    }
+    else
+        DEBUG_LOG("Pet::AddToWorld called, but pet (guid %u) already in world!", GetObjectGuid().GetCounter());
+
+    Unit::AddToWorld();
+}
+
+void Pet::RemoveFromWorld()
+{
+    ///- Remove the pet from the accessor
+    if (((Creature*)this)->IsInWorld())
+    {
+        MAPLOCK_WRITE(this, MAP_LOCK_TYPE_DEFAULT);
+        GetMap()->GetObjectsStore().erase<Pet>(GetObjectGuid(), (Pet*)NULL);
+    }
+
+    ///- Don't call the function for Creature, normal mobs + totems go in a different storage
+    Unit::RemoveFromWorld();
+}
+
 bool Pet::LoadPetFromDB(Player* owner, uint32 petentry, uint32 petnumber, bool current, CreatureCreatePos* pos)
 {
     m_loading = true;
