@@ -6845,7 +6845,9 @@ void Spell::DoSummonGuardian(SpellEffectIndex eff_idx, uint32 forceFaction)
 
         spawnCreature->SetCreateSpellID(originalSpellID);
         spawnCreature->SetDuration(m_duration);
-        spawnCreature->SetPetCounter(amount - count - 1);
+
+        GroupPetList guardians = m_caster->GetGuardians();
+        spawnCreature->SetPetCounter(guardians.size());
 
         // If dest location if present
         // Summon 1 unit in dest location

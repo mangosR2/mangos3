@@ -11014,15 +11014,6 @@ void Unit::SetLevel(uint32 lvl)
         ((Player*)this)->SetGroupUpdateFlag(GROUP_UPDATE_FLAG_LEVEL);
 }
 
-
-uint8 Unit::getRace() const
-{
-    return GetTypeId() == TYPEID_UNIT ?
-        ((Creature*)this)->getRace() :
-        GetByteValue(UNIT_FIELD_BYTES_0, 0);
-}
-
-
 void Unit::SetHealth(uint32 val)
 {
     uint32 maxHealth = GetMaxHealth();

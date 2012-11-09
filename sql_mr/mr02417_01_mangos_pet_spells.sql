@@ -28,3 +28,10 @@ INSERT INTO `creature_template_addon`(`entry`, `auras`)
 -- Valkyr guardian
 UPDATE `creature_template` SET `minmana` = '6500', `maxmana` = '6500', `spell1` = '71841' WHERE `entry` =38391;
 REPLACE INTO `creature_spell` (`guid`,`spell`,`index`) VALUES (38391, 71841, 0);
+
+-- Mirror Image
+UPDATE `creature_template` SET `speed_walk` = 2.5, `modelid_1` = 11686, `modelid_3` = 11686, `minlevel` = 80, `maxlevel` = 80, `AIName` = '', `equipment_id` = 0, `ScriptName`='' WHERE `entry` = 31216;
+DELETE FROM `creature_spell` WHERE `guid` IN (31216);
+INSERT INTO `creature_spell` (`guid`, `spell`, `index`) VALUES
+(31216, 59637, 0),
+(31216, 59638, 1);
