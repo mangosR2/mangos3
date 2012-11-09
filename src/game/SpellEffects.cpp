@@ -4679,28 +4679,45 @@ void Spell::EffectForceCast(SpellEffectIndex eff_idx)
     if (!unitTarget)
         return;
 
+    Unit* caster = GetAffectiveUnitCaster();
+    if (!caster)
+        return;
+
     uint32 triggered_spell_id = m_spellInfo->EffectTriggerSpell[eff_idx];
 
     // normal case
-    SpellEntry const *spellInfo = sSpellStore.LookupEntry(triggered_spell_id);
+    SpellEntry const* spellInfo = sSpellStore.LookupEntry(triggered_spell_id);
 
     if (!spellInfo)
     {
-        sLog.outError("EffectForceCast of spell %u: triggering unknown spell id %i", m_spellInfo->Id, triggered_spell_id);
+        sLog.outError("Spell::EffectForceCast of spell %u: triggering unknown spell %u (caster %s)", m_spellInfo->Id, triggered_spell_id, caster ? caster->GetObjectGuid().GetString().c_str() : "<none>");
         return;
     }
 
-    // if triggered spell has SPELL_AURA_CONTROL_VEHICLE, it must be casted on caster
+    bool b_castBack = false;
+
+    // in some cases requred spell direction target->caster
     for (uint32 i = 0; i < MAX_EFFECT_INDEX; ++i)
     {
-        if (spellInfo->EffectApplyAuraName[i] == SPELL_AURA_CONTROL_VEHICLE)
+        if (spellInfo->Effect[i] == SPELL_EFFECT_NONE)
+            continue;
+
+        if (spellInfo->EffectImplicitTargetA[i] == TARGET_DUELVSPLAYER && 
+            spellInfo->EffectImplicitTargetB[i] == TARGET_NONE)
         {
-            unitTarget->CastSpell(m_caster, spellInfo, true, NULL, NULL, ObjectGuid(), m_spellInfo);
-            return;
+            b_castBack = true;
+            break;
+        }
+
+        if (spellInfo->Effect[i] == SPELL_EFFECT_APPLY_AURA &&
+            spellInfo->EffectApplyAuraName[i] == SPELL_AURA_CONTROL_VEHICLE)
+        {
+            b_castBack = true;
+            break;
         }
     }
 
-    unitTarget->CastSpell(unitTarget, spellInfo, true, NULL, NULL, m_originalCasterGUID, m_spellInfo);
+    unitTarget->CastSpell(b_castBack ? caster : unitTarget, spellInfo, true, m_CastItem, NULL, b_castBack ? unitTarget->GetObjectGuid() : m_originalCasterGUID, m_spellInfo);
 }
 
 void Spell::EffectTriggerSpell(SpellEffectIndex effIndex)
