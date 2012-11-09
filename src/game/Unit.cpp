@@ -7252,12 +7252,16 @@ Pet* Unit::GetPet() const
         {
             if (Pet* pet = GetMap()->GetPet(pet_guid))
                 return pet;
+            else
+            {
+                sLog.outError("Unit::GetPet: %s not exist.", pet_guid.GetString().c_str());
+                const_cast<Unit*>(this)->SetPet(NULL);
+            }
         }
 
         sLog.outError("Unit::GetPet: %s not exist.", pet_guid.GetString().c_str());
-        const_cast<Unit*>(this)->SetPet(0);
+        const_cast<Unit*>(this)->SetPet(NULL);
     }
-
     return NULL;
 }
 
@@ -7324,7 +7328,8 @@ void Unit::SetPet(Pet* pet)
 {
     if (pet)
     {
-        SetPetGuid(pet->GetObjectGuid()) ;  //Using last pet guid for player
+        if (!pet->GetPetCounter())
+            SetPetGuid(pet->GetObjectGuid()) ;  //Using last pet guid for player
         AddPetToList(pet);
     }
     else
