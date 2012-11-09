@@ -538,7 +538,35 @@ inline bool HasInterruptSpellEffect(SpellEntry const *spellInfo)
     return false;
 }
 
-inline bool IsDispelSpell(SpellEntry const *spellInfo)
+inline bool IsOnlySelfTargeting(SpellEntry const* spellInfo)
+{
+    for (int32 i = 0; i < MAX_EFFECT_INDEX; ++i)
+    {
+        if (!spellInfo->Effect[i])
+            return true;
+
+        switch (spellInfo->EffectImplicitTargetA[i])
+        {
+            case TARGET_SELF:
+            case TARGET_SELF2:
+                break;
+            default:
+                return false;
+        }
+        switch (spellInfo->EffectImplicitTargetA[i])
+        {
+            case TARGET_SELF:
+            case TARGET_SELF2:
+            case TARGET_NONE:
+                break;
+            default:
+                return false;
+        }
+    }
+    return true;
+}
+
+inline bool IsDispelSpell(SpellEntry const* spellInfo)
 {
     return IsSpellHaveEffect(spellInfo, SPELL_EFFECT_DISPEL);
 }
