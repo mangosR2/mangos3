@@ -435,12 +435,7 @@ void WaypointManager::Unload()
     m_pathMap.clear();
 
     for (WaypointPathMap::iterator itr = m_pathTemplateMap.begin(); itr != m_pathTemplateMap.end(); ++itr)
-    {
-        for (WaypointPath::iterator itr1 = itr->second.begin(); itr1 != itr->second.end(); ++itr1)
-            if ((*itr1).behavior)
-                delete (*itr1).behavior;
-    }
-
+        _clearPath(itr->second);
     m_pathTemplateMap.clear();
 }
 
