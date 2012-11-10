@@ -1270,16 +1270,16 @@ class  VehicleKit;
 class MANGOS_DLL_SPEC Unit : public WorldObject
 {
     public:
-        typedef std::multimap<uint32 /*spellId*/, SpellAuraHolderPtr> SpellAuraHolderMap;
+        typedef UNORDERED_MULTIMAP<uint32 /*spellId*/, SpellAuraHolderPtr> SpellAuraHolderMap;
         typedef std::pair<SpellAuraHolderMap::iterator, SpellAuraHolderMap::iterator> SpellAuraHolderBounds;
         typedef std::pair<SpellAuraHolderMap::const_iterator, SpellAuraHolderMap::const_iterator> SpellAuraHolderConstBounds;
         typedef std::queue<SpellAuraHolderPtr> SpellAuraHolderQueue;
         typedef std::list<AuraPair> AuraList;
         typedef std::list<DiminishingReturn> Diminishing;
-        typedef std::set<ObjectGuid> ComboPointHolderSet;
-        typedef ACE_Based::LockedMap<uint8, SpellAuraHolderPtr> VisibleAuraMap;
-        typedef std::map<SpellEntry const*, ObjectGuid /*targetGuid*/> TrackedAuraTargetMap;
-        typedef std::set<uint32> SpellIdSet;
+        typedef UNORDERED_SET<ObjectGuid> ComboPointHolderSet;
+        typedef std::map<uint8, SpellAuraHolderPtr> VisibleAuraMap;
+        typedef UNORDERED_MAP<SpellEntry const*, ObjectGuid /*targetGuid*/> TrackedAuraTargetMap;
+        typedef UNORDERED_SET<uint32> SpellIdSet;
 
         virtual ~Unit ( );
 

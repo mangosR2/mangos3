@@ -107,7 +107,7 @@ enum GameObjectWorldState
     OBJECT_STATE_LAST_INDEX          = OBJECT_STATE_ALLIANCE_DESTROY,
 };
 
-typedef std::set<uint32> WorldStatesLinkedSet;
+typedef UNORDERED_SET<uint32> WorldStatesLinkedSet;
 
 struct WorldStateTemplate
 {

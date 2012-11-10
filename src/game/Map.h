@@ -402,7 +402,7 @@ class MANGOS_DLL_SPEC Map : public GridRefManager<NGridType>
         MapRefManager m_mapRefManager;
         MapRefManager::iterator m_mapRefIter;
 
-        typedef std::set<WorldObject*> ActiveNonPlayers;
+        typedef UNORDERED_SET<WorldObject*> ActiveNonPlayers;
         ActiveNonPlayers m_activeNonPlayers;
         ActiveNonPlayers::iterator m_activeNonPlayersIter;
         MapStoredObjectTypesContainer m_objectsStore;
@@ -420,7 +420,7 @@ class MANGOS_DLL_SPEC Map : public GridRefManager<NGridType>
 
         std::bitset<TOTAL_NUMBER_OF_CELLS_PER_MAP*TOTAL_NUMBER_OF_CELLS_PER_MAP> marked_cells;
 
-        std::set<WorldObject *> i_objectsToRemove;
+        UNORDERED_SET<WorldObject*> i_objectsToRemove;
 
         typedef std::multimap<time_t, ScriptAction> ScriptScheduleMap;
         ScriptScheduleMap m_scriptSchedule;

@@ -72,7 +72,7 @@ struct SpellClickInfo
     bool IsFitToRequirements(Player const* player) const;
 };
 
-typedef std::multimap<uint32, SpellClickInfo> SpellClickInfoMap;
+typedef UNORDERED_MULTIMAP<uint32, SpellClickInfo> SpellClickInfoMap;
 typedef std::pair<SpellClickInfoMap::const_iterator,SpellClickInfoMap::const_iterator> SpellClickInfoMapBounds;
 
 struct AreaTrigger
@@ -218,9 +218,9 @@ typedef UNORDERED_MAP<uint32,GossipMenuItemsLocale> GossipMenuItemsLocaleMap;
 typedef UNORDERED_MAP<uint32,PointOfInterestLocale> PointOfInterestLocaleMap;
 typedef UNORDERED_MAP<uint32,uint32> ItemConvertMap;
 
-typedef std::multimap<int32, uint32> ExclusiveQuestGroupsMap;
-typedef std::multimap<uint32, ItemRequiredTarget> ItemRequiredTargetMap;
-typedef std::multimap<uint32, uint32> QuestRelationsMap;
+typedef UNORDERED_MULTIMAP<int32, uint32> ExclusiveQuestGroupsMap;
+typedef UNORDERED_MULTIMAP<uint32, ItemRequiredTarget> ItemRequiredTargetMap;
+typedef UNORDERED_MULTIMAP<uint32, uint32> QuestRelationsMap;
 typedef std::pair<ExclusiveQuestGroupsMap::const_iterator, ExclusiveQuestGroupsMap::const_iterator> ExclusiveQuestGroupsMapBounds;
 typedef std::pair<ItemRequiredTargetMap::const_iterator, ItemRequiredTargetMap::const_iterator> ItemRequiredTargetMapBounds;
 typedef std::pair<QuestRelationsMap::const_iterator, QuestRelationsMap::const_iterator> QuestRelationsMapBounds;
@@ -307,7 +307,7 @@ struct AntiCheatConfig
     float  checkFloatParam[ANTICHEAT_CHECK_PARAMETERS];
     uint32 actionType[ANTICHEAT_ACTIONS];
     uint32 actionParam[ANTICHEAT_ACTIONS];
-    std::set<uint32> disabledZones;
+    UNORDERED_SET<uint32> disabledZones;
     std::string description;
 
 };
@@ -1237,10 +1237,10 @@ class ObjectMgr
 
         typedef UNORDERED_MAP<uint32, GossipText> GossipTextMap;
         typedef UNORDERED_MAP<uint32, uint32> QuestAreaTriggerMap;
-        typedef std::set<uint32> TavernAreaTriggerSet;
-        typedef std::set<uint32> GameObjectForQuestSet;
+        typedef UNORDERED_SET<uint32> TavernAreaTriggerSet;
+        typedef UNORDERED_SET<uint32> GameObjectForQuestSet;
 
-        typedef std::multimap<uint32, CreatureModelRace> CreatureModelRaceMap;
+        typedef UNORDERED_MULTIMAP<uint32, CreatureModelRace> CreatureModelRaceMap;
         typedef std::pair<CreatureModelRaceMap::const_iterator, CreatureModelRaceMap::const_iterator> CreatureModelRaceMapBounds;
 
         GroupMap            mGroupMap;
@@ -1265,7 +1265,7 @@ class ObjectMgr
         WeatherZoneMap      mWeatherZoneMap;
 
         //character reserved names
-        typedef std::set<std::wstring> ReservedNamesMap;
+        typedef UNORDERED_SET<std::wstring> ReservedNamesMap;
         ReservedNamesMap    m_ReservedNames;
 
         typedef UNORDERED_MAP<uint32, uint32> SpellDisabledMap;
