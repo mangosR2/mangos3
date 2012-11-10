@@ -351,15 +351,15 @@ class MANGOS_DLL_DECL WorldStateMgr
         void   SetWorldStateValueFor(WorldObject* object, uint32 stateId, uint32 value);
         void   SetWorldStateValueFor(uint32 zoneId, uint32 stateId, uint32 value);
 
-        WorldStateSet GetWorldStates(uint32 flags) { return GetWorldStatesFor(NULL, flags); };
-        WorldStateSet GetWorldStatesFor(Player* player, WorldStateFlags flag) { return GetWorldStatesFor(player, (1 << flag)); };
-        WorldStateSet GetWorldStatesFor(Player* player, uint32 flags = UINT32_MAX);
+        WorldStateSet* GetWorldStates(uint32 flags) { return GetWorldStatesFor(NULL, flags); };
+        WorldStateSet* GetWorldStatesFor(Player* player, WorldStateFlags flag) { return GetWorldStatesFor(player, (1 << flag)); };
+        WorldStateSet* GetWorldStatesFor(Player* player, uint32 flags = UINT32_MAX);
 
-        WorldStateSet GetUpdatedWorldStatesFor(Player* player, time_t lastUpdateTime = 0);
+        WorldStateSet* GetUpdatedWorldStatesFor(Player* player, time_t lastUpdateTime = 0);
 
-        WorldStateSet GetInstanceStates(Map* map, uint32 flags = 0, bool full = false);
-        WorldStateSet GetInstanceStates(uint32 mapId, uint32 instanceId, uint32 flags = 0, bool full = false);
-        WorldStateSet GetInitWorldStates(uint32 mapId, uint32 instanceId, uint32 zoneId, uint32 areaId);
+        WorldStateSet* GetInstanceStates(Map* map, uint32 flags = 0, bool full = false);
+        WorldStateSet* GetInstanceStates(uint32 mapId, uint32 instanceId, uint32 flags = 0, bool full = false);
+        WorldStateSet* GetInitWorldStates(uint32 mapId, uint32 instanceId, uint32 zoneId, uint32 areaId);
 
         bool          IsFitToCondition(Player* player, WorldState const* state);
         bool          IsFitToCondition(Map* map, WorldState const* state);
@@ -369,7 +369,7 @@ class MANGOS_DLL_DECL WorldStateMgr
         void AddWorldStateFor(Player* player, uint32 stateId, uint32 instanceId);
         void RemoveWorldStateFor(Player* player, uint32 stateId, uint32 instanceId);
 
-        WorldStateSet GetDownLinkedWorldStates(WorldState const* state);
+        WorldStateSet* GetDownLinkedWorldStates(WorldState const* state);
         WorldState const* GetUpLinkWorldState(WorldState const* state);
 
         static bool CheckWorldState(uint32 stateId)  { return (stateId >= WORLDSTATES_BEGIN) && (stateId <= WORLDSTATES_END); };

@@ -752,10 +752,10 @@ void WorldStateMgr::MapUpdate(Map* map)
     }
 }
 
-WorldStateSet WorldStateMgr::GetWorldStatesFor(Player* player, uint32 flags)
+WorldStateSet* WorldStateMgr::GetWorldStatesFor(Player* player, uint32 flags)
 {
-    WorldStateSet statesSet;
-    statesSet.clear();
+    WorldStateSet* statesSet = new WorldStateSet();
+    statesSet->clear();
 
     bool bFull = player ? !player->IsInWorld() : true;
 
@@ -764,33 +764,32 @@ WorldStateSet WorldStateMgr::GetWorldStatesFor(Player* player, uint32 flags)
     {
         if (itr->second.GetFlags() & flags)
             if (bFull || IsFitToCondition(player, &itr->second))
-                statesSet.push_back(&itr->second);
+                statesSet->push_back(&itr->second);
     }
     return statesSet;
 };
 
-WorldStateSet WorldStateMgr::GetUpdatedWorldStatesFor(Player* player, time_t updateTime)
+WorldStateSet* WorldStateMgr::GetUpdatedWorldStatesFor(Player* player, time_t updateTime)
 {
-    WorldStateSet statesSet;
-    statesSet.clear();
-
+    WorldStateSet* statesSet = new WorldStateSet();
+    statesSet->clear();
     ReadGuard guard(GetLock());
+
     for (WorldStateMap::iterator itr = m_worldState.begin(); itr != m_worldState.end(); ++itr)
     {
-            if (itr->second.HasFlag(WORLD_STATE_FLAG_ACTIVE) && 
-                itr->second.GetRenewTime() >= updateTime &&
-                itr->second.GetRenewTime() != time(NULL) &&
-                IsFitToCondition(player, &itr->second))
-                {
-                    // Always send UpLinked worldstate with own chains
-                    // Attention! possible need sent ALL linked chain in this case. need tests.
-                    if (itr->second.GetTemplate() && itr->second.GetTemplate()->m_linkedId)
-                        if (WorldStateTemplate const* tmpl = FindTemplate(itr->second.GetTemplate()->m_linkedId, itr->second.GetType(), itr->second.GetCondition()))
-                            if (WorldState const* state = GetWorldState(tmpl, itr->second.GetInstance()))
-                                statesSet.push_back(state);
-
-                    statesSet.push_back(&itr->second);
-                }
+        if (itr->second.HasFlag(WORLD_STATE_FLAG_ACTIVE) && 
+            itr->second.GetRenewTime() >= updateTime &&
+            itr->second.GetRenewTime() != time(NULL) &&
+            IsFitToCondition(player, &itr->second))
+        {
+            // Always send UpLinked worldstate with own chains
+            // Attention! possible need sent ALL linked chain in this case. need tests.
+            if (itr->second.GetTemplate() && itr->second.GetTemplate()->m_linkedId)
+                if (WorldStateTemplate const* tmpl = FindTemplate(itr->second.GetTemplate()->m_linkedId, itr->second.GetType(), itr->second.GetCondition()))
+                    if (WorldState const* state = GetWorldState(tmpl, itr->second.GetInstance()))
+                        statesSet->push_back(state);
+            statesSet->push_back(&itr->second);
+        }
     }
     return statesSet;
 };
@@ -1295,10 +1294,10 @@ void WorldStateMgr::AddWorldStateFor(Player* player, uint32 stateId, uint32 inst
             // DownLinked states sended always before main!
             if (state->HasDownLink())
             {
-                WorldStateSet statesSet = GetDownLinkedWorldStates(state);
-                if (!statesSet.empty())
+                WorldStateSet* statesSet = GetDownLinkedWorldStates(state);
+                if (statesSet && !statesSet->empty())
                 {
-                    for (WorldStateSet::const_iterator itr = statesSet.begin(); itr != statesSet.end(); ++itr)
+                    for (WorldStateSet::const_iterator itr = statesSet->begin(); itr != statesSet->end(); ++itr)
                     {
                         const_cast<WorldState*>(*itr)->AddClient(player);
                         player->_SendUpdateWorldState((*itr)->GetId(), (*itr)->GetValue());
@@ -1307,6 +1306,8 @@ void WorldStateMgr::AddWorldStateFor(Player* player, uint32 stateId, uint32 inst
                         player->GetObjectGuid().GetString().c_str());
                     };
                 }
+                if (statesSet)
+                    delete statesSet;
             }
             player->_SendUpdateWorldState(stateId, WORLD_STATE_ADD);
             DEBUG_LOG("WorldStateMgr::AddWorldStateFor send main state %u value %u for %s",
@@ -1328,12 +1329,14 @@ void WorldStateMgr::RemoveWorldStateFor(Player* player, uint32 stateId, uint32 i
             // DownLinked states - only client removed
         if (state->HasDownLink())
         {
-            WorldStateSet statesSet = GetDownLinkedWorldStates(state);
-            if (!statesSet.empty())
+            WorldStateSet* statesSet = GetDownLinkedWorldStates(state);
+            if (!statesSet->empty())
             {
-                for (WorldStateSet::const_iterator itr = statesSet.begin(); itr != statesSet.end(); ++itr)
+                for (WorldStateSet::const_iterator itr = statesSet->begin(); itr != statesSet->end(); ++itr)
                         const_cast<WorldState*>(*itr)->RemoveClient(player);
             }
+            if (statesSet)
+                delete statesSet;
         }
         const_cast<WorldState*>(state)->RemoveClient(player);
         player->_SendUpdateWorldState(stateId, WORLD_STATE_REMOVE);
@@ -1399,31 +1402,30 @@ void WorldStateMgr::DeleteInstanceState(uint32 mapId, uint32 instanceId)
         return;
     }
 
-    WorldStateSet statesSet = GetInstanceStates(mapId,instanceId);
-    if (statesSet.empty())
-        return;
-
-    for (WorldStateSet::const_iterator itr = statesSet.begin(); itr != statesSet.end(); ++itr)
+    WorldStateSet* statesSet = GetInstanceStates(mapId,instanceId);
+    if (statesSet && !statesSet->empty())
     {
-        DeleteWorldState(const_cast<WorldState*>(*itr));
+        for (WorldStateSet::const_iterator itr = statesSet->begin(); itr != statesSet->end(); ++itr)
+        {
+            DeleteWorldState(const_cast<WorldState*>(*itr));
+        }
     }
+    if (statesSet)
+        delete statesSet;
 }
 
-WorldStateSet WorldStateMgr::GetInstanceStates(Map* map, uint32 flags, bool full)
+WorldStateSet* WorldStateMgr::GetInstanceStates(Map* map, uint32 flags, bool full)
 {
-    WorldStateSet statesSet;
-    statesSet.clear();
-
     if (!map)
-        return statesSet;
+        return NULL;
 
     return GetInstanceStates(map->GetId(), map->GetInstanceId(), flags, full);
 }
 
-WorldStateSet WorldStateMgr::GetInstanceStates(uint32 mapId, uint32 instanceId, uint32 flags, bool full)
+WorldStateSet* WorldStateMgr::GetInstanceStates(uint32 mapId, uint32 instanceId, uint32 flags, bool full)
 {
-    WorldStateSet statesSet;
-    statesSet.clear();
+    WorldStateSet* statesSet = new WorldStateSet();
+    statesSet->clear();
 
     ReadGuard guard(GetLock());
     for (WorldStateMap::iterator itr = m_worldState.begin(); itr != m_worldState.end(); ++itr)
@@ -1433,22 +1435,22 @@ WorldStateSet WorldStateMgr::GetInstanceStates(uint32 mapId, uint32 instanceId, 
             if (itr->second.GetType() == WORLD_STATE_TYPE_MAP &&
                 itr->second.GetCondition() == mapId &&
                 itr->second.GetInstance() == instanceId)
-                statesSet.push_back(&itr->second);
+                statesSet->push_back(&itr->second);
             else if (full)
             {
                 Map* map = sMapMgr.FindMap(mapId, instanceId);
                 if (IsFitToCondition(map, &itr->second))
-                    statesSet.push_back(&itr->second);
+                    statesSet->push_back(&itr->second);
             }
         }
     }
     return statesSet;
 }
 
-WorldStateSet WorldStateMgr::GetInitWorldStates(uint32 mapId, uint32 instanceId, uint32 zoneId, uint32 areaId)
+WorldStateSet* WorldStateMgr::GetInitWorldStates(uint32 mapId, uint32 instanceId, uint32 zoneId, uint32 areaId)
 {
-    WorldStateSet statesSet;
-    statesSet.clear();
+    WorldStateSet* statesSet = new WorldStateSet();
+    statesSet->clear();
 
     ReadGuard guard(GetLock());
     for (WorldStateMap::const_iterator itr = m_worldState.begin(); itr != m_worldState.end(); ++itr)
@@ -1464,23 +1466,26 @@ WorldStateSet WorldStateMgr::GetInitWorldStates(uint32 mapId, uint32 instanceId,
             // DownLinked states sended always before main!
             if (state->HasDownLink())
             {
-                WorldStateSet linkedStatesSet = GetDownLinkedWorldStates(state);
-                if (!linkedStatesSet.empty())
-                    std::copy(linkedStatesSet.begin(), linkedStatesSet.end(), std::back_inserter(statesSet));
+                WorldStateSet* linkedStatesSet = GetDownLinkedWorldStates(state);
+                if (!linkedStatesSet->empty())
+                    std::copy(linkedStatesSet->begin(), linkedStatesSet->end(), std::back_inserter(*statesSet));
+                if (linkedStatesSet)
+                    delete linkedStatesSet;
             }
-            statesSet.push_back(&itr->second);
+            statesSet->push_back(&itr->second);
         }
     }
     return statesSet;
 };
 
-WorldStateSet WorldStateMgr::GetDownLinkedWorldStates(WorldState const* state)
+WorldStateSet* WorldStateMgr::GetDownLinkedWorldStates(WorldState const* state)
 {
     // This method get DownLinked worldstates with this
-    WorldStateSet statesSet;
-    statesSet.clear();
     if (!state->HasDownLink())
-        return statesSet;
+        return NULL;
+
+    WorldStateSet* statesSet = new WorldStateSet();
+    statesSet->clear();
 
     for (WorldStatesLinkedSet::const_iterator itr = state->GetLinkedSet()->begin(); itr != state->GetLinkedSet()->end(); ++itr)
     {
@@ -1490,7 +1495,7 @@ WorldStateSet WorldStateMgr::GetDownLinkedWorldStates(WorldState const* state)
             continue;
 
         if (WorldState const* linkedState = GetWorldState(tmpl, state->GetInstance()))
-            statesSet.push_back(linkedState);
+            statesSet->push_back(linkedState);
     }
     return statesSet;
 }

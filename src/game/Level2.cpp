@@ -5688,28 +5688,38 @@ bool ChatHandler::HandleWorldStateCommand(char* args)
 
 bool ChatHandler::HandleWorldStateListCommand(char* args)
 {
-    WorldStateSet wsSet = sWorldStateMgr.GetWorldStatesFor(m_session->GetPlayer());
+    WorldStateSet* wsSet = sWorldStateMgr.GetWorldStatesFor(m_session->GetPlayer());
 
-    if (wsSet.empty())
+    if (!wsSet || wsSet->empty())
+    {
+        if (wsSet)
+            delete wsSet;
         return false;
+    }
 
-    for (WorldStateSet::const_iterator itr = wsSet.begin(); itr != wsSet.end(); ++itr)
+    for (WorldStateSet::const_iterator itr = wsSet->begin(); itr != wsSet->end(); ++itr)
     {
         PSendSysMessage(LANG_WORLDSTATE_LIST,(*itr)->GetId(), (*itr)->GetType(), (*itr)->GetCondition(), (*itr)->GetInstance(), (*itr)->GetValue());
     }
+    delete wsSet;
     return true;
 }
 
 bool ChatHandler::HandleWorldStateListAllCommand(char* args)
 {
-    WorldStateSet wsSet = sWorldStateMgr.GetWorldStates(UINT32_MAX);
-    if (wsSet.empty())
+    WorldStateSet* wsSet = sWorldStateMgr.GetWorldStates(UINT32_MAX);
+    if (!wsSet || wsSet->empty())
+    {
+        if (wsSet)
+            delete wsSet;
         return false;
+    }
 
-    for (WorldStateSet::const_iterator itr = wsSet.begin(); itr != wsSet.end(); ++itr)
+    for (WorldStateSet::const_iterator itr = wsSet->begin(); itr != wsSet->end(); ++itr)
     {
         PSendSysMessage(LANG_WORLDSTATE_LIST_FULL, (*itr)->GetId(), (*itr)->GetType(), (*itr)->GetCondition(), (*itr)->GetInstance(), (*itr)->GetValue());
     }
+    delete wsSet;
     return true;
 }
 
