@@ -141,7 +141,7 @@ struct WorldStateTemplate
     bool               HasFlag(WorldStateFlags flag) const { return (m_flags & (1 << flag)); };
 };
 
-typedef std::multimap<uint32 /* state id */, WorldStateTemplate>  WorldStateTemplateMap;
+typedef UNORDERED_MULTIMAP<uint32 /* state id */, WorldStateTemplate>  WorldStateTemplateMap;
 typedef std::pair<WorldStateTemplateMap::const_iterator,WorldStateTemplateMap::const_iterator> WorldStateTemplateBounds;
 
 struct WorldState
@@ -289,7 +289,7 @@ struct WorldState
     uint32                             m_phasemask;     // Phase mask for this state
 };
 
-typedef std::multimap<uint32 /* state id */, WorldState>   WorldStateMap;
+typedef UNORDERED_MULTIMAP<uint32 /* state id */, WorldState>   WorldStateMap;
 typedef std::pair<WorldStateMap::const_iterator,WorldStateMap::const_iterator> WorldStateBounds;
 typedef std::vector<WorldState const*> WorldStateSet;
 
