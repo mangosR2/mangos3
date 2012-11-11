@@ -1825,10 +1825,15 @@ WorldObject* Map::FindObject(ObjectGuid guid)
  *
  * @param guid must be player guid (HIGHGUID_PLAYER)
  */
-Player* Map::GetPlayer(ObjectGuid guid)
+Player* Map::GetPlayer(ObjectGuid guid, bool globalSearch)
 {
-    Player* plr = ObjectAccessor::FindPlayer(guid);         // return only in world players
-    return plr && plr->GetMap() == this ? plr : NULL;
+    if (globalSearch)                                           // possible obsolete
+    {
+        Player* plr = ObjectAccessor::FindPlayer(guid);         // return only in world players
+        return plr && plr->GetMap() == this ? plr : NULL;
+    }
+    else
+        return (Player*)FindObject(guid);
 }
 
 /**

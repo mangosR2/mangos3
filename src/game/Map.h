@@ -259,7 +259,7 @@ class MANGOS_DLL_SPEC Map : public GridRefManager<NGridType>
         // must called with RemoveFromWorld
         void RemoveFromActive(WorldObject* obj);
 
-        Player* GetPlayer(ObjectGuid guid);
+        Player* GetPlayer(ObjectGuid guid, bool globalSearch = false);
         Creature* GetCreature(ObjectGuid guid);
         Pet* GetPet(ObjectGuid guid);
         Creature* GetAnyTypeCreature(ObjectGuid guid);      // normal creature or pet or vehicle
