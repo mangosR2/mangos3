@@ -308,7 +308,7 @@ class MANGOS_DLL_SPEC Map : public GridRefManager<NGridType>
         void AddAttackerFor(ObjectGuid targetGuid, ObjectGuid attackerGuid);
         void RemoveAttackerFor(ObjectGuid targetGuid, ObjectGuid attackerGuid);
         void RemoveAllAttackersFor(ObjectGuid targetGuid);
-        GuidSet GetAttackersFor(ObjectGuid targetGuid);
+        GuidSet& GetAttackersFor(ObjectGuid targetGuid);
         void CreateAttackersStorageFor(ObjectGuid targetGuid);
         void RemoveAttackersStorageFor(ObjectGuid targetGuid);
 

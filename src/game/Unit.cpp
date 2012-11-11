@@ -6973,7 +6973,7 @@ Unit* Unit::getAttackerForHelper()
     if (!IsInCombat())
         return NULL;
 
-    GuidSet attackers = GetMap()->GetAttackersFor(GetObjectGuid());
+    GuidSet& attackers = GetMap()->GetAttackersFor(GetObjectGuid());
     if (!attackers.empty())
     {
         for(GuidSet::const_iterator itr = attackers.begin(); itr != attackers.end();)
@@ -7202,15 +7202,16 @@ void Unit::RemoveAllAttackers()
     if (!GetMap())
         return;
 
-    GuidSet attackers = GetMap()->GetAttackersFor(GetObjectGuid());
+    GuidSet& attackers = GetMap()->GetAttackersFor(GetObjectGuid());
 
-    for (GuidSet::const_iterator itr = attackers.begin(); itr != attackers.end(); ++itr)
+    for (GuidSet::iterator itr = attackers.begin(); itr != attackers.end();)
     {
-        Unit* attacker = GetMap()->GetUnit(*itr);
+        ObjectGuid guid = *itr++;
+        Unit* attacker = GetMap()->GetUnit(guid);
         if(!attacker || !attacker->AttackStop())
         {
             sLog.outError("WORLD: Unit has an attacker that isn't attacking it!");
-            GetMap()->RemoveAttackerFor(GetObjectGuid(),*itr);
+            GetMap()->RemoveAttackerFor(GetObjectGuid(),guid);
         }
     }
     GetMap()->RemoveAllAttackersFor(GetObjectGuid());
@@ -10568,9 +10569,9 @@ bool Unit::SelectHostileTarget(bool withEvade)
     // Note: creature not have targeted movement generator but have attacker in this case
     if (!IsInUnitState(UNIT_ACTION_CHASE))
     {
-        GuidSet attackers = GetMap()->GetAttackersFor(GetObjectGuid());
+        GuidSet& attackers = GetMap()->GetAttackersFor(GetObjectGuid());
 
-        for (GuidSet::const_iterator itr = attackers.begin(); itr != attackers.end(); ++itr)
+        for (GuidSet::iterator itr = attackers.begin(); itr != attackers.end(); ++itr)
         {
             Unit* attacker = GetMap()->GetUnit(*itr);
             if (attacker && attacker->IsInMap(this) && attacker->isTargetableForAttack() && attacker->isInAccessablePlaceFor(this))
@@ -13498,19 +13499,20 @@ void Unit::StopAttackFaction(uint32 faction_id)
         }
     }
 
-    GuidSet attackers = GetMap()->GetAttackersFor(GetObjectGuid());
+    GuidSet& attackers = GetMap()->GetAttackersFor(GetObjectGuid());
 
-    for (GuidSet::iterator itr = attackers.begin(); itr != attackers.end(); ++itr)
+    for (GuidSet::iterator itr = attackers.begin(); itr != attackers.end();)
     {
-        Unit* attacker = GetMap()->GetUnit(*itr);
+        ObjectGuid guid = *itr++;
+        Unit* attacker = GetMap()->GetUnit(guid);
 
-        if (attacker)
+        if (attacker && attacker->IsInWorld())
         {
             if (attacker->getFactionTemplateEntry()->faction == faction_id)
                 attacker->AttackStop();
         }
         else
-            GetMap()->RemoveAttackerFor(GetObjectGuid(),*itr);
+            GetMap()->RemoveAttackerFor(GetObjectGuid(),guid);
     }
 
     getHostileRefManager().deleteReferencesForFaction(faction_id);

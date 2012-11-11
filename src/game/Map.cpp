@@ -2260,17 +2260,10 @@ void Map::RemoveAllAttackersFor(ObjectGuid targetGuid)
     }
 }
 
-GuidSet Map::GetAttackersFor(ObjectGuid targetGuid)
+GuidSet& Map::GetAttackersFor(ObjectGuid targetGuid)
 {
-    if (!targetGuid.IsEmpty())
-    {
-        ReadGuard Guard(GetLock());
-        AttackersMap::const_iterator itr = m_attackersMap.find(targetGuid);
-        if (itr != m_attackersMap.end())
-            return itr->second;
-    }
-
-    return GuidSet();
+    ReadGuard Guard(GetLock());
+    return m_attackersMap[targetGuid];
 }
 
 void Map::CreateAttackersStorageFor(ObjectGuid targetGuid)
