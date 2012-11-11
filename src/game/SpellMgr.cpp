@@ -1145,6 +1145,8 @@ bool IsPositiveEffect(SpellEntry const* spellproto, SpellEffectIndex effIndex)
                     else
                         return false;
                 }
+                case SPELL_AURA_PREVENT_RESURRECTION:
+                    return false;
                 default:
                     break;
             }

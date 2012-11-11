@@ -369,7 +369,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleNULL,                                      //311 2 spells in 4.3.4 some kind of stun effect
     &Aura::HandleNULL,                                      //312 37 spells in 4.3.4 some cosmetic auras
     &Aura::HandleNULL,                                      //313 0 spells in 4.3.4
-    &Aura::HandleNULL,                                      //314 SPELL_AURA_PREVENT_RESURRECTION 2 spells int 4.3.4 prevents ressurection ?
+    &Aura::HandleAuraPreventResurrection,                   //314 SPELL_AURA_PREVENT_RESURRECTION 2 spells int 4.3.4 prevents ressurection ?
     &Aura::HandleNULL,                                      //315 SPELL_AURA_UNDERWATER_WALKING 4 spells in 4.3.4 underwater walking
     &Aura::HandleUnused,                                    //316 old SPELL_AURA_MOD_PERIODIC_HASTE 0 spells in 4.3.4
     &Aura::HandleModIncreaseSpellPowerPct,                  //317 SPELL_AURA_MOD_INCREASE_SPELL_POWER_PCT 13 spells in 4.3.4, implemented in Unit::SpellBaseDamageBonusDone and Unit::SpellBaseHealingBonusDone
@@ -13296,4 +13296,12 @@ void Aura::HandleAuraForceWeather(bool apply, bool Real)
             }
         }
     }
+}
+
+void Aura::HandleAuraPreventResurrection(bool apply, bool Real)
+{
+    if (apply)
+        GetTarget()->RemoveByteFlag(PLAYER_FIELD_BYTES, 0, PLAYER_FIELD_BYTE_RELEASE_TIMER);
+    else if (!GetTarget()->GetMap()->Instanceable())
+        GetTarget()->SetByteFlag(PLAYER_FIELD_BYTES, 0, PLAYER_FIELD_BYTE_RELEASE_TIMER);
 }
