@@ -48,8 +48,7 @@ void WorldSession::HandleMoveWorldportAckOpcode()
         _player->GetVehicleKit()->RemoveAllPassengers();
 
     // get start teleport coordinates (will used later in fail case)
-    WorldLocation old_loc;
-    GetPlayer()->GetPosition(old_loc);
+    WorldLocation old_loc = GetPlayer()->GetPosition();
 
     // get the teleport destination
     WorldLocation &loc = GetPlayer()->GetTeleportDest();

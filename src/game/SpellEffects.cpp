@@ -12632,7 +12632,7 @@ void Spell::EffectBind(SpellEffectIndex eff_idx)
     }
     else
     {
-        player->GetPosition(loc);
+        loc = player->GetPosition();
         area_id = player->GetAreaId();
     }
 

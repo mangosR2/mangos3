@@ -48,13 +48,15 @@ struct Position
 
     virtual bool HasMap() const { return false; };
 
-    bool operator == (Position const &pos) const
+    virtual bool operator == (Position const &pos) const
     {
-        return ((x - pos.x < M_NULL_F)
-            && (y - pos.y < M_NULL_F)
-            && (z - pos.z < M_NULL_F));
+        return ((fabs(x - pos.x) < M_NULL_F)
+            && (fabs(y - pos.y) < M_NULL_F)
+            && (fabs(z - pos.z) < M_NULL_F));
     }
 };
+
+class WorldObject;
 
 struct WorldLocation : public Position
 {
@@ -85,22 +87,26 @@ struct WorldLocation : public Position
         : Position(loc.coord_x, loc.coord_y, loc.coord_z, loc.orientation), mapid(loc.mapid), instance(loc.instance), realmid(loc.realmid)
     {}
 
+    WorldLocation(WorldObject const& object);
+
     ~WorldLocation() {};
 
-    bool operator == (WorldLocation const &loc) const
+    virtual bool operator == (WorldLocation const &loc) const override
     {
         return (realmid    == loc.realmid
             && mapid       == loc.mapid
             && instance    == loc.instance
-            && (coord_x - loc.coord_x < M_NULL_F)
-            && (coord_y - loc.coord_y < M_NULL_F)
-            && (coord_z - loc.coord_z < M_NULL_F));
+            && (fabs(coord_x - loc.coord_x) < M_NULL_F)
+            && (fabs(coord_y - loc.coord_y) < M_NULL_F)
+            && (fabs(coord_z - loc.coord_z) < M_NULL_F));
     }
 
     bool HasMap() const override
     {
         return mapid >= 0;
     }
+
     Position const& GetPosition() { return *this; };
+
 };
 #endif
