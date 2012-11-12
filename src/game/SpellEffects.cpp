@@ -1031,6 +1031,39 @@ void Spell::EffectSchoolDMG(SpellEffectEntry const* effect)
                     int32 heal = damage * 15 / 100;
                     m_caster->CastCustomSpell(m_caster, 75999, &heal, NULL, NULL, true);
                 }
+                // Mind Spike
+                else if (m_spellInfo->Id == 73510)
+                {
+                    if (!unitTarget)
+                        return;
+
+                    std::set<uint32> toRemoveSpellList;
+                    Unit::SpellAuraHolderMap const& holders = unitTarget->GetSpellAuraHolderMap();
+                    for (Unit::SpellAuraHolderMap::const_iterator itr = holders.begin(); itr != holders.end(); ++itr)
+                    {
+                        if (itr->second->IsPositive() ||
+                            itr->second->IsPassive() ||
+                            itr->second->IsDeathPersistent())
+                            continue;
+
+                        if (itr->second->GetCasterGuid() != m_caster->GetObjectGuid())
+                            continue;
+
+                        SpellEntry const * spellProto = itr->second->GetSpellProto();
+
+                        if ((GetSpellSchoolMask(spellProto) & SPELL_SCHOOL_MASK_SHADOW) == 0)
+                            continue;
+
+                        // Except Shadow Word: Death periodic
+                        if (IsSpellAppliesAura(spellProto, SPELL_AURA_PERIODIC_DAMAGE) && spellProto->Id != 32409 ||
+                            IsSpellAppliesAura(spellProto, SPELL_AURA_PERIODIC_DAMAGE_PERCENT) ||
+                            IsSpellAppliesAura(spellProto, SPELL_AURA_PERIODIC_LEECH))
+                            toRemoveSpellList.insert(spellProto->Id);
+                    }
+
+                    for (std::set<uint32>::iterator i = toRemoveSpellList.begin(); i != toRemoveSpellList.end(); ++i)
+                        unitTarget->RemoveAurasByCasterSpell(*i, m_caster->GetObjectGuid());
+                }
                 break;
             }
             case SPELLFAMILY_DRUID:
