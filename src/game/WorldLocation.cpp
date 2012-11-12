@@ -21,7 +21,7 @@
 #include "World.h"
 
 WorldLocation::WorldLocation(WorldObject const& object)
-    : Position(object.GetPositionX(), object.GetPositionX(), object.GetPositionZ(), object.GetOrientation())
+    : Position(object.GetPositionX(), object.GetPositionX(), object.GetPositionZ(), object.GetOrientation()),
         mapid(object.GetMapId()), instance(object.GetInstanceId()), realmid(sWorld.getConfig(CONFIG_UINT32_REALMID))
 {
 };

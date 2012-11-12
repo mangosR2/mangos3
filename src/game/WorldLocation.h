@@ -20,6 +20,8 @@
 #ifndef _WORLDLOCATION_H
 #define _WORLDLOCATION_H
 
+#include "Common.h"
+
 struct Position
 {
     Position() : x(0.0f), y(0.0f), z(0.0f), o(0.0f) {}
