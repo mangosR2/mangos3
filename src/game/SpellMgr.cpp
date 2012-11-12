@@ -564,6 +564,9 @@ SpellSpecific GetSpellSpecific(uint32 spellId)
                 (interrupts && interrupts->InterruptFlags & SPELL_INTERRUPT_FLAG_AUTOATTACK) &&
                 (spellInfo->GetSpellIconID() == 52 || spellInfo->GetSpellIconID() == 79))
                 return SPELL_WELL_FED;
+            // Inner Fire and Inner Will
+            if (spellId == 588 || spellId == 73413)
+                return SPELL_PRIEST_INNER;
             break;
         }
         case SPELLFAMILY_HUNTER:
@@ -686,6 +689,7 @@ bool IsSingleFromSpellSpecificPerTarget(SpellSpecific spellSpec1,SpellSpecific s
         case SPELL_WELL_FED:
         case SPELL_WARLOCK_BANE:
         case SPELL_MAGE_INTELLECT:
+        case SPELL_PRIEST_INNER:
             return spellSpec1 == spellSpec2;
         case SPELL_BATTLE_ELIXIR:
             return spellSpec2 == SPELL_BATTLE_ELIXIR

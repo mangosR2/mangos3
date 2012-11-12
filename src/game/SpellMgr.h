@@ -76,6 +76,7 @@ enum SpellSpecific
     SPELL_UA_IMMOLATE       = 23,                           // Unstable Affliction and Immolate
     SPELL_WARLOCK_BANE      = 24,
     SPELL_MAGE_INTELLECT    = 25,
+    SPELL_PRIEST_INNER      = 26,
     SPELL_SCROLL            = 30
 };
 
