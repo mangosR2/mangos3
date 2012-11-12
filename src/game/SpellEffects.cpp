@@ -4541,6 +4541,15 @@ void Spell::EffectDummy(SpellEffectEntry const* effect)
 
                 return;
             }
+            // Leap of Faith
+            if (m_spellInfo->Id == 73325)
+            {
+                if (!unitTarget)
+                    return;
+
+                // cast jump spell
+                unitTarget->CastSpell(m_caster, 92832, true, NULL, NULL, m_caster->GetObjectGuid());
+            }
             break;
         }
         case SPELLFAMILY_DRUID:
