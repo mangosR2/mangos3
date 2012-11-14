@@ -46,6 +46,7 @@ void RandomMovementGenerator<Creature>::_setRandomLocation(Creature &creature)
 
     float destX,destY,destZ;
     creature.GetNearPoint(&creature, destX, destY, destZ, creature.GetObjectBoundingRadius(), range, angle);
+    creature.UpdateAllowedPositionZ(destX, destY, destZ);
 
     float dx = i_x - destX;
     float dy = i_y - destY;
