@@ -13835,15 +13835,26 @@ void Unit::ApplyAttackTimePercentMod(WeaponAttackType att,float val, bool apply)
     }
 
     if (GetTypeId() == TYPEID_PLAYER && IsInWorld())
+    {
         ((Player*)this)->CallForAllControlledUnits(ApplyScalingBonusWithHelper(SCALING_TARGET_ATTACKSPEED, 0, false), CONTROLLED_PET | CONTROLLED_GUARDIANS);
+
+        uint32 field = (att == RANGED_ATTACK) ? PLAYER_FIELD_MOD_RANGED_HASTE : PLAYER_FIELD_MOD_HASTE;
+        SetStatFloatValue(field, m_modAttackSpeedPct[att]);
+    }
 }
 
 void Unit::ApplyCastTimePercentMod(float val, bool apply)
 {
     if (val > 0)
+    {
         ApplyPercentModFloatValue(UNIT_MOD_CAST_SPEED, val, !apply);
+        ApplyPercentModFloatValue(UNIT_MOD_CAST_HASTE, val, !apply);
+    }
     else
+    {
         ApplyPercentModFloatValue(UNIT_MOD_CAST_SPEED, -val, apply);
+        ApplyPercentModFloatValue(UNIT_MOD_CAST_HASTE, -val, apply);
+    }
 }
 
 void Unit::UpdateAuraForGroup(uint8 slot)

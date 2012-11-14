@@ -3037,6 +3037,10 @@ void Player::InitStatsForLevel(bool reapplyMods)
     // set default cast time multiplier
     SetFloatValue(UNIT_MOD_CAST_SPEED, 1.0f);
 
+    SetFloatValue(UNIT_MOD_CAST_HASTE, 1.0f);           // spell haste
+    SetFloatValue(PLAYER_FIELD_MOD_HASTE, 1.0f);        // melee haste
+    SetFloatValue(PLAYER_FIELD_MOD_RANGED_HASTE, 1.0f); // ranged haste
+
     // save base values (bonuses already included in stored stats
     for (int i = STAT_STRENGTH; i < MAX_STATS; ++i)
         SetCreateStat(Stats(i), info.stats[i]);
