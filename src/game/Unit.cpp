@@ -5600,6 +5600,8 @@ bool Unit::RemoveNoStackAurasDueToAuraHolder(SpellAuraHolderPtr holder)
                 if (CompareAuraRanks(spellId, i_spellId) < 0)
                     return false;
 
+            DEBUG_LOG("Unit::RemoveNoStackAurasDueToAuraHolder %u will be removed due to single spell specific per  rank %u on unit %s", i_spellId, spellId, GetGuidStr().c_str());
+
             // Its a parent aura (create this aura in ApplyModifier)
             if (is_spellSpecPerTargetPerCaster)
                 RemoveSpellAuraHolder(itr->second);
@@ -5623,6 +5625,8 @@ bool Unit::RemoveNoStackAurasDueToAuraHolder(SpellAuraHolderPtr holder)
             if (CompareAuraRanks(spellId, i_spellId) < 0)
                 return false;
 
+            DEBUG_LOG("Unit::RemoveNoStackAurasDueToAuraHolder %u will be removed due to higher rank %u on unit %s", i_spellId, spellId, GetGuidStr().c_str());
+
             // Its a parent aura (create this aura in ApplyModifier)
             RemoveAurasDueToSpell(i_spellId);
 
@@ -5637,6 +5641,8 @@ bool Unit::RemoveNoStackAurasDueToAuraHolder(SpellAuraHolderPtr holder)
         // non single (per caster) per target spell specific (possible single spell per target at caster)
         if ( !is_spellSpecPerTargetPerCaster && !is_spellSpecPerTarget && sSpellMgr.IsNoStackSpellDueToSpell(spellId, i_spellId) )
         {
+            DEBUG_LOG("Unit::RemoveNoStackAurasDueToAuraHolder %u will be removed due to %u on unit %s", i_spellId, spellId, GetGuidStr().c_str());
+
             // Its a parent aura (create this aura in ApplyModifier)
             // different ranks spells with different casters should also stack
             if (holder->GetCasterGuid() != itr->second->GetCasterGuid() && SpellMgr::IsStackableSpellAuraHolder(spellProto))
@@ -5660,6 +5666,8 @@ bool Unit::RemoveNoStackAurasDueToAuraHolder(SpellAuraHolderPtr holder)
             {
                 if (CompareAuraRanks(spellId, i_spellId) < 0)
                     return false;                       // cannot remove higher rank
+
+                DEBUG_LOG("Unit::RemoveNoStackAurasDueToAuraHolder %u will be removed due to non-stacking with spell %u on unit %s (potions check)", i_spellId, spellId, GetGuidStr().c_str());
 
                 // Its a parent aura (create this aura in ApplyModifier)
                 RemoveAurasDueToSpell(i_spellId);

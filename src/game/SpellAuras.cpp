@@ -3866,6 +3866,17 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                         target->RemoveAurasDueToSpell(69188);
                     return;
                 }
+                case 77487:                             // Shadow Orb
+                {
+                    if (apply)
+                    {
+                        if (GetStackAmount() == GetSpellProto()->GetStackAmount())
+                            target->CastSpell(target, 93683, true);     // Shadow Orb Stack Marker
+                    }
+                    else
+                        target->RemoveAurasDueToSpell(93683);
+                    break;
+                }
             }
             break;
         }
@@ -11644,6 +11655,8 @@ void SpellAuraHolder::SendAuraUpdate(bool remove) const
 
 void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
 {
+    DEBUG_LOG("SpellAuraHolder::HandleSpellSpecificBoosts for %u apply: %u", GetId(), apply);
+
     // it's impossible in theory, but possible at fact...
     if (!GetSpellProto())
         return;

@@ -1064,6 +1064,25 @@ void Spell::EffectSchoolDMG(SpellEffectEntry const* effect)
                     for (std::set<uint32>::iterator i = toRemoveSpellList.begin(); i != toRemoveSpellList.end(); ++i)
                         unitTarget->RemoveAurasByCasterSpell(*i, m_caster->GetObjectGuid());
                 }
+
+                // Mind Blast or Mind Spike
+                if (m_spellInfo->Id == 8092 || m_spellInfo->Id == 73510)
+                {
+                    // Shadow Orb dummy buff
+                    if (SpellAuraHolderPtr orb = m_caster->GetSpellAuraHolder(77487, m_caster->GetObjectGuid()))
+                    {
+                        int32 mod = 10;
+                        if (SpellAuraHolderPtr talent = m_caster->GetSpellAuraHolder(77486, m_caster->GetObjectGuid()))
+                            if (Aura* aur = talent->GetAuraByEffectIndex(EFFECT_INDEX_0))
+                                mod += aur->GetModifier()->m_amount;
+                        // Empowered Shadow
+                        m_caster->CastCustomSpell(m_caster, 95799, &mod, &mod, NULL, true);
+                        mod *= orb->GetStackAmount();
+                        damage = int32(damage * (100.0f + mod) / 100.0f);
+
+                        m_caster->RemoveSpellAuraHolder(orb);
+                    }
+                }
                 break;
             }
             case SPELLFAMILY_DRUID:
