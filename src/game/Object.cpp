@@ -255,7 +255,7 @@ void Object::BuildCreateUpdateBlockForPlayer(UpdateData *data, Player *target) c
 
     //DEBUG_LOG("BuildCreateUpdate: update-type: %u, object-type: %u got updateFlags: %X", updatetype, m_objectTypeId, updateFlags);
 
-    ByteBuffer buf(500);
+    ByteBuffer buf;
     buf << uint8(updatetype);
     buf << GetPackGUID();
     buf << uint8(m_objectTypeId);

@@ -9376,6 +9376,7 @@ Item* Player::GetItemByGuid(ObjectGuid guid) const
                     if (pItem->GetObjectGuid() == guid)
                         return pItem;
 
+
     return NULL;
 }
 
@@ -9393,7 +9394,7 @@ Item* Player::GetItemByPos(uint8 bag, uint8 slot) const
     else if ((bag >= INVENTORY_SLOT_BAG_START && bag < INVENTORY_SLOT_BAG_END)
         || (bag >= BANK_SLOT_BAG_START && bag < BANK_SLOT_BAG_END))
     {
-        Bag *pBag = (Bag*)GetItemByPos(INVENTORY_SLOT_BAG_0, bag);
+        Bag* pBag = (Bag*)GetItemByPos(INVENTORY_SLOT_BAG_0, bag);
         if (pBag)
             return pBag->GetItemByPos(slot);
     }
@@ -11588,7 +11589,7 @@ void Player::RemoveItem(uint8 bag, uint8 slot, bool update)
     // note2: if removeitem is to be used for delinking
     // the item must be removed from the player's updatequeue
 
-    if (Item *pItem = GetItemByPos(bag, slot))
+    if (Item* pItem = GetItemByPos(bag, slot))
     {
         DEBUG_LOG("STORAGE: RemoveItem bag = %u, slot = %u, item = %u", bag, slot, pItem->GetEntry());
 
@@ -11653,9 +11654,12 @@ void Player::RemoveItem(uint8 bag, uint8 slot, bool update)
         }
         else
         {
-            Bag *pBag = (Bag*)GetItemByPos(INVENTORY_SLOT_BAG_0, bag);
+            Bag* pBag = (Bag*)GetItemByPos(INVENTORY_SLOT_BAG_0, bag);
             if (pBag)
+            {
                 pBag->RemoveItem(slot, update);
+                pBag->SetState(ITEM_CHANGED, this);
+            }
         }
         pItem->SetGuidValue(ITEM_FIELD_CONTAINED, ObjectGuid());
         // pItem->SetGuidValue(ITEM_FIELD_OWNER, ObjectGuid()); not clear owner at remove (it will be set at store). This used in mail and auction code
@@ -24767,7 +24771,7 @@ Object* Player::GetDependentObject(ObjectGuid const& guid)
     return (Object*)GetItemByGuid(guid);
 }
 
-void Player::AddUpdateObject(ObjectGuid const& guid) override
+void Player::AddUpdateObject(ObjectGuid const& guid)
 {
     i_objectsToClientUpdate.insert(guid);
 
@@ -24776,7 +24780,7 @@ void Player::AddUpdateObject(ObjectGuid const& guid) override
         GetMap()->AddUpdateObject(GetObjectGuid());
 }
 
-void Player::RemoveUpdateObject(ObjectGuid const& guid) override
+void Player::RemoveUpdateObject(ObjectGuid const& guid)
 {
     // possible required remove player from update queue also.
     i_objectsToClientUpdate.erase(guid);

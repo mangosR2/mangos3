@@ -601,7 +601,7 @@ ItemPrototype const* Item::GetProto() const
 
 Player* Item::GetOwner() const
 {
-    return sObjectMgr.GetPlayer(GetOwnerGuid());
+    return sObjectMgr.GetPlayer(GetOwnerGuid(), false);
 }
 
 uint32 Item::GetSkill()
