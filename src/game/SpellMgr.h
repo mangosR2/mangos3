@@ -589,12 +589,13 @@ inline bool HasAuraWithTriggerEffect(SpellEntry const *spellInfo)
         if(!effectEntry)
             continue;
 
-        switch(effectEntry->Effect)
+        switch (effectEntry->Effect)
         {
             case SPELL_AURA_PERIODIC_TRIGGER_SPELL:
             case SPELL_AURA_PROC_TRIGGER_SPELL:
             case SPELL_AURA_PROC_TRIGGER_DAMAGE:
             case SPELL_AURA_PROC_TRIGGER_SPELL_WITH_VALUE:
+            case SPELL_AURA_PROC_TRIGGER_SPELL_2:
                 return true;
         }
     }
