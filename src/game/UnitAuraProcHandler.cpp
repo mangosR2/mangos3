@@ -1885,8 +1885,8 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, DamageInfo* damageI
                         return SPELL_AURA_PROC_FAILED;
 
                     // Heal amount - Self/Team
-                    int32 team = triggerAmount * damage / 500;
-                    int32 self = triggerAmount * damage / 100 - team;
+                    int32 team = triggerAmount * damage / 200;
+                    int32 self = triggerAmount * damage / 100;
                     CastCustomSpell(this, 15290, &team, &self, NULL, true, castItem, triggeredByAura);
                     return SPELL_AURA_PROC_OK;                                // no hidden cooldown
                 }
