@@ -8809,12 +8809,13 @@ void Player::SendUpdateWorldState(uint32 Field, uint32 Value)
 
 void Player::_SendUpdateWorldState(uint32 Field, uint32 Value)
 {
-    WorldPacket data(SMSG_UPDATE_WORLD_STATE, 8);
-    data << Field;
-    data << Value;
+    if (!IsInWorld() || !GetSession())
+        return;
 
-    if (IsInWorld() && GetSession())
-        GetSession()->SendPacket(&data);
+    WorldPacket data(SMSG_UPDATE_WORLD_STATE, 8);
+    data << uint32(Field);
+    data << uint32(Value);
+    GetSession()->SendPacket(&data);
 }
 
 void Player::UpdateWorldState(uint32 state, uint32 value)
@@ -8832,59 +8833,50 @@ void Player::SendUpdatedWorldStates(bool force)
     if (IsBeingTeleported() || GetLastWorldStateUpdateTime() == time(NULL))
         return;
 
-    WorldStateSet* wsSet = sWorldStateMgr.GetUpdatedWorldStatesFor(this, force ? 0 : GetLastWorldStateUpdateTime());
-
-    if (wsSet && !wsSet->empty())
+    if (WorldStateSet* wsSet = sWorldStateMgr.GetUpdatedWorldStatesFor(this, force ? 0 : GetLastWorldStateUpdateTime()))
     {
-        for (WorldStateSet::const_iterator itr = wsSet->begin(); itr != wsSet->end(); ++itr)
+        for (uint8 i = 0; i < wsSet->count(); ++i)
         {
             //DEBUG_LOG("Player::SendUpdatedWorldStates send state %u instance %u value %u to %s",(*itr)->GetId(), (*itr)->GetInstance(),(*itr)->GetValue(),GetObjectGuid().GetString().c_str());
-            _SendUpdateWorldState((*itr)->GetId(), (*itr)->GetValue());
+            WorldState* ws = (*wsSet)[i];
+            _SendUpdateWorldState(ws->GetId(), ws->GetValue());
         }
+        delete wsSet;
     }
 
     SetLastWorldStateUpdateTime(time(NULL));
-
-    if (wsSet)
-        delete wsSet;
 }
 
 void Player::SendInitWorldStates(uint32 zoneid, uint32 areaid)
 {
     // data depends on zoneid/mapid...
     // Get worldstates (initial set)
-    WorldStateSet* wsSet = sWorldStateMgr.GetInitWorldStates(GetMapId(),GetInstanceId(),zoneid,areaid);
-
-    uint16 count = wsSet ? wsSet->size() : 0;
-
-    if (count == 0)
+    WorldStateSet* wsSet = sWorldStateMgr.GetInitWorldStates(GetMapId(), GetInstanceId(), zoneid, areaid);
+    if (!wsSet)
     {
-        sLog.outError("Player::SendInitWorldStates initial states list for player %s are empty!",GetObjectGuid().GetString().c_str());
-        if (wsSet)
-            delete wsSet;
+        sLog.outError("Player::SendInitWorldStates initial states list for player %s are empty!", GetGuidStr().c_str());
         return;
     }
 
-    DEBUG_LOG("Player::SendInitWorldStates sending SMSG_INIT_WORLD_STATES to Map:%u (instance %u), zone: %u, area %u, WorldStates count %u", GetMapId(), GetInstanceId(), zoneid, areaid, count);
+    DEBUG_LOG("Player::SendInitWorldStates sending SMSG_INIT_WORLD_STATES to Map:%u (instance %u), zone: %u, area %u, WorldStates count %u", GetMapId(), GetInstanceId(), zoneid, areaid, wsSet->count());
 
-    WorldPacket data(SMSG_INIT_WORLD_STATES, (4+4+4+2+count*8));
+    WorldPacket data(SMSG_INIT_WORLD_STATES, (4+4+4+2+wsSet->count()*8));
 
     data << uint32(GetMapId());                             // mapid
     data << uint32(zoneid);                                 // zone id
     data << uint32(areaid);                                 // area id, new 2.1.0
 
-    data << uint16(count);
+    data << uint16(wsSet->count());
 
-    for (WorldStateSet::const_iterator itr = wsSet->begin(); itr != wsSet->end(); ++itr)
+    for (uint8 i = 0; i < wsSet->count(); ++i)
     {
-        data << (*itr)->GetId();
-        data << (*itr)->GetValue();
+        WorldState* ws = (*wsSet)[i];
+        data << uint32(ws->GetId());
+        data << uint32(ws->GetValue());
     }
+    delete wsSet;
 
     GetSession()->SendPacket(&data);
-
-    if (wsSet)
-        delete wsSet;
 }
 
 uint32 Player::GetXPRestBonus(uint32 xp)

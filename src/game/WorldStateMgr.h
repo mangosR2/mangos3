@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2011-2012 /dev/rsa for MangosR2 <http://github.com/mangosR2>
- * 
+ *
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -113,7 +113,7 @@ struct WorldStateTemplate
 {
     // Constructor for use with DB templates data
     WorldStateTemplate(uint32 _stateid, uint32 _type, uint32 _condition, uint32 _flags, uint32 _default, uint32 _linked, uint32 phasemask)
-        : m_stateId(_stateid), m_stateType(_type), m_condition(_condition), m_flags(_flags), m_defaultValue(_default), m_linkedId(_linked), 
+        : m_stateId(_stateid), m_stateType(_type), m_condition(_condition), m_flags(_flags), m_defaultValue(_default), m_linkedId(_linked),
         m_phasemask(phasemask)
     {
     };
@@ -141,21 +141,21 @@ struct WorldStateTemplate
     bool               HasFlag(WorldStateFlags flag) const { return (m_flags & (1 << flag)); };
 };
 
-typedef UNORDERED_MULTIMAP<uint32 /* state id */, WorldStateTemplate>  WorldStateTemplateMap;
+typedef UNORDERED_MULTIMAP<uint32 /* state id */, WorldStateTemplate> WorldStateTemplateMap;
 typedef std::pair<WorldStateTemplateMap::const_iterator,WorldStateTemplateMap::const_iterator> WorldStateTemplateBounds;
 
 struct WorldState
 {
     public:
     // For create new state
-    WorldState(WorldStateTemplate const* _state, uint32 _instance) 
+    WorldState(WorldStateTemplate const* _state, uint32 _instance)
         : m_pState(_state), m_stateId(m_pState->m_stateId), m_instanceId(_instance), m_type(m_pState->m_stateType)
     {
         Initialize();
     }
 
     // For load
-    WorldState(WorldStateTemplate const* _state, uint32 _instance, uint32 _flags, uint32 _value, time_t _renewtime) 
+    WorldState(WorldStateTemplate const* _state, uint32 _instance, uint32 _flags, uint32 _value, time_t _renewtime)
         : m_pState(_state), m_stateId(m_pState->m_stateId), m_instanceId(_instance), m_type(m_pState->m_stateType), m_flags(_flags), m_value(_value), m_renewTime(_renewtime)
     {
         m_linkedGuid.Clear();
@@ -164,14 +164,14 @@ struct WorldState
     }
 
     // For load custom state
-    WorldState(uint32 _stateid, uint32 _instance, uint32 _flags, uint32 _value, time_t _renewtime) 
+    WorldState(uint32 _stateid, uint32 _instance, uint32 _flags, uint32 _value, time_t _renewtime)
         : m_pState(NULL), m_stateId(_stateid), m_instanceId(_instance), m_type(WORLD_STATE_TYPE_CUSTOM), m_flags(_flags), m_value(_value), m_renewTime(_renewtime)
     {
         Initialize();
     }
 
     // For create new custom state
-    WorldState(uint32 _stateid, uint32 _instance, uint32 value) 
+    WorldState(uint32 _stateid, uint32 _instance, uint32 value)
         : m_pState(NULL), m_stateId(_stateid), m_instanceId(_instance), m_type(WORLD_STATE_TYPE_CUSTOM), m_value(value)
     {
         Initialize();
@@ -289,9 +289,35 @@ struct WorldState
     uint32                             m_phasemask;     // Phase mask for this state
 };
 
-typedef UNORDERED_MULTIMAP<uint32 /* state id */, WorldState>   WorldStateMap;
-typedef std::pair<WorldStateMap::const_iterator,WorldStateMap::const_iterator> WorldStateBounds;
-typedef std::vector<WorldState const*> WorldStateSet;
+typedef UNORDERED_MULTIMAP<uint32 /* state id */, WorldState> WorldStateMap;
+typedef std::pair<WorldStateMap::const_iterator, WorldStateMap::const_iterator> WorldStateBounds;
+
+#define MAX_WORD_STATE_SET_COUNT 126
+
+class WorldStateSet
+{
+    private:
+        WorldState* m_states[MAX_WORD_STATE_SET_COUNT];
+        uint8 m_count;
+    public:
+        WorldStateSet(): m_count(0) {}
+
+        void add(WorldState const* wState)
+        {
+            MANGOS_ASSERT(m_count < MAX_WORD_STATE_SET_COUNT);
+            m_states[m_count++] = (WorldState*)wState;
+        }
+        uint8 count() const { return m_count; }
+
+        WorldState* operator[](uint8 idx) const { return m_states[idx]; }
+};
+
+inline void AddToWorldStateSet(WorldStateSet** wss, WorldState const* wState)
+{
+    if (!*wss)
+        *wss = new WorldStateSet;
+    (*wss)->add(wState);
+}
 
 // class MANGOS_DLL_DECL WorldStateMgr : public MaNGOS::Singleton<WorldStateMgr, MaNGOS::ClassLevelLockable<WorldStateMgr, ACE_Thread_Mutex> >
 class MANGOS_DLL_DECL WorldStateMgr
