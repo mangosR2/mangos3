@@ -5840,22 +5840,25 @@ void Unit::RemoveAuraHolderDueToSpellByDispel(uint32 spellId, uint32 stackAmount
     // Vampiric touch (first dummy aura)
     else if (spellEntry->GetSpellFamilyName() == SPELLFAMILY_PRIEST && spellEntry->GetSpellFamilyFlags().test<CF_PRIEST_VAMPIRIC_TOUCH>())
     {
-        Aura *dot = GetAura<SPELL_AURA_PERIODIC_DAMAGE, SPELLFAMILY_PRIEST, CF_PRIEST_VAMPIRIC_TOUCH>(casterGuid);
-        if (dot)
+        if (Unit* caster = GetMap()->GetUnit(casterGuid))
         {
-            if (dot->GetCaster())
+            // Search for Sin and Punishment
+            Unit::AuraList const& auras = caster->GetAurasByType(SPELL_AURA_DUMMY);
+            for (Unit::AuraList::const_iterator i = auras.begin(); i != auras.end(); ++i)
             {
-                // use clean value for initial damage
-                int32 bp0 = dot->GetSpellProto()->CalculateSimpleValue(EFFECT_INDEX_1);
-                bp0 *= 8;
-
-                // Remove spell auras from stack
-                RemoveAuraHolderFromStack(spellId, stackAmount, casterGuid, AURA_REMOVE_BY_DISPEL);
-
-                CastCustomSpell(this, 64085, &bp0, NULL, NULL, true, NULL, NULL, casterGuid);
-                return;
+                if ((*i)->GetSpellProto()->SpellIconID == 1869 && (*i)->GetSpellProto()->GetSpellFamilyName() == SPELLFAMILY_PRIEST)
+                {
+                    // Cast Sin and Punishment
+                    if (roll_chance_i((*i)->GetSpellProto()->CalculateSimpleValue(EFFECT_INDEX_0)))
+                        dispeller->CastSpell(dispeller, 87204, true, NULL, NULL, caster->GetObjectGuid());
+                    break;
+                }
             }
         }
+
+        // Remove spell auras from stack
+        RemoveAuraHolderFromStack(spellId, stackAmount, casterGuid, AURA_REMOVE_BY_DISPEL);
+        return;
     }
     // Necrotic Plague (Lich King)
     // this hack needs correct implementation

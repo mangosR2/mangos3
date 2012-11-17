@@ -1758,8 +1758,18 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, DamageInfo* damageI
                 return SPELL_AURA_PROC_OK;                                // no hidden cooldown
             }
 
-            switch(dummySpell->GetSpellIconID())
+            switch (dummySpell->GetSpellIconID())
             {
+                // Sin and Punishment
+                case 1869:
+                {
+                    if (GetTypeId() != TYPEID_PLAYER)
+                        return SPELL_AURA_PROC_FAILED;
+
+                    // modify Shadowfiend cooldown
+                    ((Player*)this)->SendModifyCooldown(34433, -triggerAmount * IN_MILLISECONDS);
+                    return SPELL_AURA_PROC_OK;
+                }
                 // Divine Aegis
                 case 2820:
                 {
@@ -4174,6 +4184,14 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(Unit *pVictim, DamageIn
             {
                 // proc chance for Mind Flay is 2 times lower, so we have to roll for 50% now
                 if (procSpell->GetSpellIconID() == 548 && roll_chance_i(50))
+                    return SPELL_AURA_PROC_FAILED;
+            }
+            // Masochism
+            else if (auraSpellInfo->SpellIconID == 2211)
+            {
+                // If damage inflicted is less that pct health and not from SWD
+                if (damage * 100 < pVictim->GetMaxHealth() * auraSpellInfo->CalculateSimpleValue(EFFECT_INDEX_1) &&
+                    (!procSpell || procSpell->Id != 32409))
                     return SPELL_AURA_PROC_FAILED;
             }
             break;
