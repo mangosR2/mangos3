@@ -1007,7 +1007,27 @@ void Spell::EffectSchoolDMG(SpellEffectEntry const* effect)
             {
                 // Shadow Word: Death - deals damage equal to damage done to caster
                 if (classOptions && classOptions->SpellFamilyFlags & UI64LIT(0x0000000200000000))
+                {
+                    if (unitTarget->GetHealthPercent() <= 25.0f)
+                    {
+                        // Search Mind Melt
+                        Unit::AuraList const& mindMelt = m_caster->GetAurasByType(SPELL_AURA_DUMMY);
+                        for (Unit::AuraList::const_iterator i = mindMelt.begin(); i != mindMelt.end(); ++i)
+                        {
+                            if ((*i)->GetSpellProto()->GetSpellFamilyName() == SPELLFAMILY_PRIEST &&
+                                ((*i)->GetSpellProto()->SpellIconID == 3139))
+                            {
+                                damage += int32(damage * (*i)->GetModifier()->m_amount / 100.0f);
+                                break;
+                            }
+                        }
+                    }
+
+                    DamageInfo damageInfo = DamageInfo(m_caster, unitTarget, m_spellInfo, damage);
+                    damageInfo.damageType = SPELL_DIRECT_DAMAGE;
+                    m_caster->SpellDamageBonusDone(&damageInfo);
                     m_caster->CastCustomSpell(m_caster, 32409, &damage, 0, 0, true);
+                }
                 // Improved Mind Blast (Mind Blast in shadow form bonus)
                 else if (m_caster->GetShapeshiftForm() == FORM_SHADOW && (classOptions && classOptions->SpellFamilyFlags & UI64LIT(0x00002000)))
                 {
