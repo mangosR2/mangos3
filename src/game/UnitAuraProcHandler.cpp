@@ -1760,16 +1760,6 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, DamageInfo* damageI
 
             switch(dummySpell->GetSpellIconID())
             {
-                // Improved Shadowform
-                case 217:
-                {
-                    if(!roll_chance_i(triggerAmount))
-                        return SPELL_AURA_PROC_FAILED;
-
-                    RemoveSpellsCausingAura(SPELL_AURA_MOD_ROOT);
-                    RemoveSpellsCausingAura(SPELL_AURA_MOD_DECREASE_SPEED);
-                    break;
-                }
                 // Divine Aegis
                 case 2820:
                 {
@@ -1839,6 +1829,16 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, DamageInfo* damageI
                             break;
                     }
                     target = pVictim;
+                    break;
+                }
+                // Phantasm
+                case 2901:
+                {
+                    if(!roll_chance_i(triggerAmount))
+                        return SPELL_AURA_PROC_FAILED;
+
+                    RemoveSpellsCausingAura(SPELL_AURA_MOD_ROOT);
+                    RemoveSpellsCausingAura(SPELL_AURA_MOD_DECREASE_SPEED);
                     break;
                 }
                 // Empowered Renew
