@@ -1560,13 +1560,6 @@ void Creature::Respawn()
 {
     RemoveCorpse();
 
-    // forced recreate creature object at clients
-    UnitVisibility currentVis = GetVisibility();
-    SetVisibility(VISIBILITY_RESPAWN);
-    UpdateObjectVisibility();
-    SetVisibility(currentVis);                              // restore visibility state
-    UpdateObjectVisibility();
-
     if (IsDespawned())
     {
         if (HasStaticDBSpawnData())
@@ -1589,12 +1582,14 @@ void Creature::ForcedDespawn(uint32 timeMSToDespawn)
     if (IsInWorld() && isAlive())
         SetDeathState(JUST_DIED);
 
-    RemoveCorpse();
+    m_corpseDecayTimer = 1;                                 // Properly remove corpse on next tick (also pool system requires Creature::Update call with CORPSE state
+
     if (IsInWorld())
         SetHealth(0);                                           // just for nice GM-mode view
 
     if (IsTemporarySummon())
          ((TemporarySummon*)this)->UnSummon();
+
 }
 
 bool Creature::IsImmuneToSpell(SpellEntry const* spellInfo, bool isFriendly) const
