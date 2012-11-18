@@ -134,7 +134,7 @@ class MANGOS_DLL_SPEC HostileReference : public Reference<Unit, ThreatManager>
 //==============================================================
 class ThreatManager;
 
-typedef ACE_Based::LockedVector<HostileReference*> ThreatList;
+typedef std::list<HostileReference*> ThreatList;
 
 class MANGOS_DLL_SPEC ThreatContainer
 {
