@@ -45,7 +45,7 @@ using G3D::Vector3;
 using G3D::AABox;
 using G3D::Ray;
 
-typedef ACE_Based::LockedVector<uint32> BIHVector;
+typedef std::vector<uint32> BIHVector;
 
 static inline uint32 floatToRawIntBits(float f)
 {
