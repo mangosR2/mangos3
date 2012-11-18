@@ -3964,6 +3964,23 @@ void Spell::cast(bool skipCheck)
                     AddTriggeredSpell(87154);               // Archangel marker
                     break;
                 }
+                case 89485:                                 // Inner Focus
+                {
+                    Unit::AuraList const& vProcAuras = m_caster->GetAurasByType(SPELL_AURA_PROC_TRIGGER_SPELL);
+                    for (Unit::AuraList::const_iterator itr = vProcAuras.begin(); itr != vProcAuras.end(); ++itr)
+                    {
+                        if ((*itr)->GetSpellProto()->GetSpellFamilyName() == SPELLFAMILY_PRIEST &&
+                            (*itr)->GetSpellProto()->SpellIconID == 177)
+                        {
+                            if ((*itr)->GetId() == 89488)       // Strength of Soul (Rank 1)
+                                AddTriggeredSpell(96266);
+                            else if ((*itr)->GetId() == 89489)  // Strength of Soul (Rank 2)
+                                AddTriggeredSpell(96267);
+                            break;
+                        }
+                    }
+                    break;
+                }
                 default:break;
             }
             break;

@@ -28,3 +28,8 @@ INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyMaskC0`, `procEx`) VALUES
 DELETE FROM `spell_proc_event` WHERE `entry` = 88994;
 INSERT INTO `spell_proc_event` (`entry`, `SchoolMask`) VALUES
 (88994, 127);
+
+-- Strength of Soul
+DELETE FROM `spell_proc_event` WHERE `entry` = 89488;
+INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`) VALUES
+(89488, 6, 2048+4096+1024); 
