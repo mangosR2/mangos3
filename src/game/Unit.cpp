@@ -8936,7 +8936,7 @@ bool Unit::IsSpellCrit(Unit *pVictim, SpellEntry const *spellProto, SpellSchoolM
                 crit_chance = 0.0f;
             // For other schools
             else if (GetTypeId() == TYPEID_PLAYER)
-                crit_chance = GetFloatValue( PLAYER_SPELL_CRIT_PERCENTAGE1 + GetFirstSchoolInMask(schoolMask));
+                crit_chance = GetFloatValue(PLAYER_SPELL_CRIT_PERCENTAGE1 + GetFirstSchoolInMask(schoolMask));
             else
             {
                 crit_chance = float(m_baseSpellCritChance);
@@ -8978,11 +8978,6 @@ bool Unit::IsSpellCrit(Unit *pVictim, SpellEntry const *spellProto, SpellSchoolM
                             if (pVictim->HasAuraState(AURA_STATE_HEALTHLESS_35_PERCENT))
                                 crit_chance+=(*i)->GetModifier()->m_amount;
                             break;
-                        case 7997:                          // Renewed Hope
-                        case 7998:
-                            if (pVictim->HasAura(6788))
-                                crit_chance+=(*i)->GetModifier()->m_amount;
-                            break;
                         default:
                             break;
                     }
@@ -9005,6 +9000,7 @@ bool Unit::IsSpellCrit(Unit *pVictim, SpellEntry const *spellProto, SpellSchoolM
                         break;
                     }
                     case SPELLFAMILY_PRIEST:
+                    {
                         // Flash Heal
                         if (spellProto->GetSpellFamilyFlags().test<CF_PRIEST_FLASH_HEAL>())
                         {
@@ -9015,7 +9011,23 @@ bool Unit::IsSpellCrit(Unit *pVictim, SpellEntry const *spellProto, SpellSchoolM
                                     crit_chance += glyph->GetModifier()->m_amount;
                             }
                         }
+
+                        // Search Renewed Hope
+                        AuraList const& mDummyAuras = GetAurasByType(SPELL_AURA_DUMMY);
+                        for (AuraList::const_iterator i = mDummyAuras.begin(); i!= mDummyAuras.end(); ++i)
+                        {
+                            // Renewed Hope
+                            if ((*i)->GetSpellProto()->GetSpellFamilyName() == SPELLFAMILY_PRIEST &&
+                                (*i)->GetSpellProto()->GetSpellIconID() == 329 &&
+                                ((*i)->isAffectedOnSpell(spellProto) || spellProto->IsFitToFamilyMask(UI64LIT(0x0000000000000800))))
+                            {
+                                if (pVictim->HasAura(6788) || pVictim->HasAura(47930) || pVictim->HasAura(77613))
+                                    crit_chance += (*i)->GetModifier()->m_amount;
+                                break;
+                            }
+                        }
                         break;
+                    }
                     case SPELLFAMILY_DRUID:
                         // Improved Insect Swarm (Starfire part)
                         if (spellProto->GetSpellFamilyFlags().test<CF_DRUID_STARFIRE>())
@@ -9260,11 +9272,6 @@ uint32 Unit::SpellHealingBonusDone(Unit *pVictim, SpellEntry const *spellProto, 
             case 4953:
             case 3736: // Hateful Totem of the Third Wind / Increased Lesser Healing Wave / LK Arena (4/5/6) Totem of the Third Wind / Savage Totem of the Third Wind
                 DoneTotal+=(*i)->GetModifier()->m_amount;
-                break;
-            case 7997: // Renewed Hope
-            case 7998:
-                if (pVictim->HasAura(6788))
-                    DoneTotalMod *=((*i)->GetModifier()->m_amount + 100.0f)/100.0f;
                 break;
             case   21: // Test of Faith
             case 6935:
