@@ -14939,6 +14939,25 @@ bool Unit::IsVisibleTargetForSpell(WorldObject const* caster, SpellEntry const* 
     if (caster->GetTypeId() == TYPEID_UNIT && ((Creature*)caster)->IsTotem())
         return isVisibleForOrDetect(static_cast<Unit const*>(caster), caster, true, false, true);
 
+    bool offensive = !caster->IsFriendlyTo(this);
+    // Priest Dispel Magic has dummy effect
+    if (spellInfo->Id == 527)
+    {
+        // check Absolution talent
+        if (!offensive && caster != this && !HasAura(33167))
+            return false;
+
+        spellInfo = sSpellStore.LookupEntry(offensive ? 97691 : 97690);
+    }
+
+    uint32 dispelMask = 0;
+    for (uint8 i = 0; i < MAX_EFFECT_INDEX; ++i)
+    {
+        SpellEffectEntry const * spellEffect = spellInfo->GetSpellEffect(SpellEffectIndex(i));
+        if (!spellEffect)
+            continue;
+    }
+
     // spell can't hit stealth/invisible targets
     if (no_stealth && caster->isType(TYPEMASK_UNIT) && !isVisibleForOrDetect(static_cast<Unit const*>(caster), caster, false, false, true, true))
         return false;

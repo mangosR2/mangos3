@@ -4613,8 +4613,18 @@ void Spell::EffectDummy(SpellEffectEntry const* effect)
 
                 return;
             }
+            // Dispel Magic
+            if (m_spellInfo->Id == 527)
+            {
+                if (!unitTarget)
+                    return;
+
+                uint32 spellId = unitTarget->IsFriendlyTo(m_caster) ? 97690 : 97691;
+                // cast actual dispel spell
+                m_caster->CastSpell(unitTarget, spellId, true);
+            }
             // Leap of Faith
-            if (m_spellInfo->Id == 73325)
+            else if (m_spellInfo->Id == 73325)
             {
                 if (!unitTarget)
                     return;
