@@ -1875,6 +1875,22 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, DamageInfo* damageI
                     RemoveSpellsCausingAura(SPELL_AURA_MOD_DECREASE_SPEED);
                     break;
                 }
+                // Train of Thought
+                case 2942:
+                {
+                    if (!procSpell || GetTypeId() != TYPEID_PLAYER || dummySpell->Id == 92295 && !roll_chance_i(50))
+                        return SPELL_AURA_PROC_FAILED;
+
+                    // Greater Heal
+                    if (procSpell->Id == 2060)
+                        // Inner Focus
+                        ((Player*)this)->SendModifyCooldown(89485, -triggerAmount * IN_MILLISECONDS);
+                    else
+                        // Penance
+                        ((Player*)this)->SendModifyCooldown(47540, -triggerAmount * IN_MILLISECONDS / 10);
+
+                    return SPELL_AURA_PROC_OK;
+                }
                 // Empowered Renew
                 case 3021:
                 {
