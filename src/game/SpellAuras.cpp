@@ -8804,6 +8804,19 @@ void Aura::HandleSchoolAbsorb(bool apply, bool Real)
             uint32 trigger_spell_Id = GetId() == 62274 ? 62277 : 63967;
             target->CastSpell(target, trigger_spell_Id, true);
         }
+        Unit::AuraList const& vDummyAuras = caster->GetAurasByType(SPELL_AURA_DUMMY);
+        for (Unit::AuraList::const_iterator itr = vDummyAuras.begin(); itr != vDummyAuras.end(); ++itr)
+        {
+            SpellEntry const* vSpell = (*itr)->GetSpellProto();
+
+            // Rapture
+            if (vSpell->GetSpellFamilyName() == SPELLFAMILY_PRIEST && vSpell->GetSpellIconID() == 2894 && (*itr)->GetEffIndex() == EFFECT_INDEX_0)
+            {
+                int32 bp = caster->GetMaxPower(POWER_MANA) * (*itr)->GetModifier()->m_amount / 100;
+                caster->CastCustomSpell(caster, 47755, &bp, NULL, NULL, true);
+                break;
+            }
+        }
     }
 
 }
