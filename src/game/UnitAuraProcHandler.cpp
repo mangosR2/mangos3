@@ -3873,6 +3873,15 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(Unit *pVictim, DamageIn
                     target = pVictim;
                     break;
                 //case 45205: break;                        // Copy Offhand Weapon
+                case 45234:                                 // Focused Will
+                case 45243:
+                {
+                    if (damage * 100 >= pVictim->GetMaxHealth() * 10 ||
+                        (procEx & PROC_EX_CRITICAL_HIT) != 0 && (procFlags & PROC_FLAG_ON_TAKE_PERIODIC) == 0)
+                        break;
+
+                    return SPELL_AURA_PROC_FAILED;
+                }
                 //case 45343: break;                        // Dark Flame Aura
                 //case 47300: break;                        // Dark Flame Aura
                 //case 48876: break;                        // Beast's Mark

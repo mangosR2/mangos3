@@ -38,3 +38,8 @@ INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`)
 DELETE FROM `spell_proc_event` WHERE `entry` = 47509;
 INSERT INTO `spell_proc_event` (`entry`, `SchoolMask`) VALUES
 (47509, 127);
+
+-- Focused Will
+DELETE FROM `spell_proc_event` WHERE `entry` = 45234;
+INSERT INTO `spell_proc_event` (`entry`, `SchoolMask`) VALUES
+(45234, 127);
