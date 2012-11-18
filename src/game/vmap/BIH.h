@@ -118,7 +118,7 @@ class BIH
             }
             BIHVector tempTree;
             BuildStats stats;
-            buildHierarchy(tempTree.getSource(), dat, stats);
+            buildHierarchy(tempTree, dat, stats);
             if (printStats)
                 stats.printStats();
 
