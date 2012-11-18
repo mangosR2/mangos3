@@ -8758,7 +8758,24 @@ void Unit::SpellDamageBonusTaken(DamageInfo* damageInfo, uint32 stack)
     TakenTotalMod *= GetTotalAuraMultiplierByMiscMask(SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN, damageInfo->GetSchoolMask());
 
     // .. taken pct: dummy auras
-    TakenTotalMod *= GetTotalAuraScriptedMultiplierForDamageTaken(damageInfo->GetSpellProto());
+    AuraList const& mDummyAuras = GetAurasByType(SPELL_AURA_DUMMY);
+    for (AuraList::const_iterator i = mDummyAuras.begin(); i != mDummyAuras.end(); ++i)
+    {
+        switch((*i)->GetId())
+        {
+            case 14747:                                     // Inner Sanctum
+            case 14770:
+            case 14771:
+                // only with Inner Fire active
+                if (!HasAura(588))
+                    continue;
+
+                TakenTotalMod *= (100.0f - (*i)->GetModifier()->m_amount) / 100.0f;
+                break;
+            default:
+                TakenTotalMod *= GetTotalAuraScriptedMultiplierForDamageTaken(damageInfo->GetSpellProto());
+        }
+    }
 
     // From caster spells
     AuraList const& mOwnerTaken = GetAurasByType(SPELL_AURA_MOD_DAMAGE_FROM_CASTER);
