@@ -2184,7 +2184,7 @@ void Aura::TriggerSpell()
 //            }
 //            case SPELLFAMILY_PRIEST:
 //            {
-//                switch(auraId)
+//                switch (auraId)
 //                {
 //                    // Blue Beam
 //                    case 32930: break;
@@ -2502,6 +2502,21 @@ void Aura::TriggerSpell()
                 triggerTarget->CastCustomSpell(triggerTarget, 71341, &bp0, 0, 0, true);
                 break;
             }
+            // Power Word: Barrier
+            case 81781:
+            {
+                if (GetEffIndex() ==  EFFECT_INDEX_1)
+                {
+                    if (Unit* caster = GetCaster())
+                        if (Unit* owner = caster->GetOwner())
+                            // Glyph of Power Word: Barrier
+                            if (!owner->HasAura(55689))
+                                return;
+                }
+                break;
+            }
+            default:
+                break;
         }
     }
 

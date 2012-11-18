@@ -6992,7 +6992,8 @@ void Spell::EffectSummonType(SpellEffectEntry const* effect)
                     // those are classical totems - effectbasepoints is their hp and not summon ammount!
                     //121: 23035, battlestands
                     //647: 52893, Anti-Magic Zone (npc used)
-                    if (prop_id == 121 || prop_id == 647)
+                    // 3149: 62618, Power Word: Barrier
+                    if (prop_id == 121 || prop_id == 647 || prop_id == 3149)
                         DoSummonTotem(effect);
                    // Snake trap exception
                     else if (effect->EffectMiscValueB == 2301)
