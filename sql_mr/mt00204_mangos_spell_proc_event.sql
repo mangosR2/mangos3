@@ -43,3 +43,8 @@ INSERT INTO `spell_proc_event` (`entry`, `SchoolMask`) VALUES
 DELETE FROM `spell_proc_event` WHERE `entry` = 45234;
 INSERT INTO `spell_proc_event` (`entry`, `SchoolMask`) VALUES
 (45234, 127);
+
+-- Atonement
+DELETE FROM `spell_proc_event` WHERE `entry` = 14523;
+INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`, `procFlags`) VALUES
+(14523, 6, 1048704, 65536);

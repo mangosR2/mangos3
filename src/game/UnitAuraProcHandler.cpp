@@ -1923,6 +1923,14 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, DamageInfo* damageI
                     triggered_spell_id = 63675;
                     break;
                 }
+                // Atonement
+                case 4938:
+                {
+                    basepoints[0] = damage * triggerAmount / 100;
+                    triggered_spell_id = 94472;
+                    target = pVictim;
+                    break;
+                }
             }
 
             switch(dummySpell->Id)

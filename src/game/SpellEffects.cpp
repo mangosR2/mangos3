@@ -6292,6 +6292,15 @@ void Spell::EffectHeal(SpellEffectEntry const* effect)
             if (player->HasSkill(SKILL_ENGINEERING))
                 addhealth += int32(addhealth * 0.25);
         }
+        // Atonement
+        else if (m_spellInfo->Id == 94472)
+        {
+            if (unitTarget == m_caster)
+                addhealth /= 2;
+
+            m_healing += addhealth;
+            return;
+        }
 
         // Chain Healing
         SpellClassOptionsEntry const* chClassOptions = m_spellInfo->GetSpellClassOptions();
