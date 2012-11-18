@@ -1377,6 +1377,25 @@ void Aura::HandleAddModifier(bool apply, bool Real)
         }
     }
 
+    switch (GetId())
+    {
+        // Evangelism
+        case 81661:
+        // Dark Evangelism
+        case 87118:
+        {
+            if (GetEffIndex() == EFFECT_INDEX_0)
+            {
+                Unit* target = GetTarget();
+                if (!apply)
+                    target->RemoveAurasByCasterSpell(87154, GetCasterGuid());
+            }
+            break;
+        }
+        default:
+            break;
+    }
+
     ((Player*)GetTarget())->AddSpellMod(this, apply);
 
     ReapplyAffectedPassiveAuras();

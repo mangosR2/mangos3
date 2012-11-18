@@ -11918,6 +11918,52 @@ void Spell::EffectScriptEffect(SpellEffectEntry const* effect)
                     }
                     return;
                 }
+                case 87151:                                 // Archangel
+                {
+                    if (!unitTarget)
+                        return;
+
+                    // Evangelism
+                    SpellAuraHolderPtr holder = unitTarget->GetSpellAuraHolder(81661, m_caster->GetObjectGuid());
+                    if (!holder)
+                        // Dark Evangelism
+                        holder = unitTarget->GetSpellAuraHolder(87118, m_caster->GetObjectGuid());
+
+                    if (!holder)
+                        return;
+
+                    int32 stackAmt = holder->GetStackAmount();
+
+                    if (holder->GetId() == 81661)
+                    {
+                        // Archangel
+                        // healing done
+                        SpellEntry const* spellProto = sSpellStore.LookupEntry(81700);
+                        int32 bp = stackAmt * spellProto->CalculateSimpleValue(EFFECT_INDEX_0);
+                        m_caster->CastCustomSpell(unitTarget, spellProto, &bp, NULL, NULL, true);
+
+                        // mana regen
+                        spellProto = sSpellStore.LookupEntry(87152);
+                        bp = stackAmt * spellProto->CalculateSimpleValue(EFFECT_INDEX_0);
+                        m_caster->CastCustomSpell(unitTarget, spellProto, &bp, NULL, NULL, true);
+                    }
+                    else
+                    {
+                        // Dark Archangel, shadow damage done
+                        SpellEntry const* spellProto = sSpellStore.LookupEntry(87153);
+                        int32 bp0 = stackAmt * spellProto->CalculateSimpleValue(EFFECT_INDEX_0);
+                        int32 bp1 = stackAmt * spellProto->CalculateSimpleValue(EFFECT_INDEX_1);
+                        m_caster->CastCustomSpell(unitTarget, spellProto, &bp0, &bp1, NULL, true);
+
+                        // mana regen
+                        SpellEntry const* spellProto2 = sSpellStore.LookupEntry(87152);
+                        bp0 = stackAmt * spellProto2->CalculateSimpleValue(EFFECT_INDEX_0) * spellProto->CalculateSimpleValue(EFFECT_INDEX_2);
+                        m_caster->CastCustomSpell(unitTarget, spellProto2, &bp0, NULL, NULL, true);
+                    }
+
+                    unitTarget->RemoveSpellAuraHolder(holder);
+                    return;
+                }
                 default:
                     break;
             }

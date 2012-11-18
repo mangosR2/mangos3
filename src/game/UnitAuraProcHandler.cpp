@@ -1770,6 +1770,26 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, DamageInfo* damageI
                     ((Player*)this)->SendModifyCooldown(34433, -triggerAmount * IN_MILLISECONDS);
                     return SPELL_AURA_PROC_OK;
                 }
+                // Evangelism
+                case 2138:
+                {
+                    // Mind Flay
+                    bool dark = procSpell && procSpell->Id == 15407;
+
+                    // Don't allow proc from Holy Fire periodic and Mind Flay apply
+                    if (dark && (procFlag & PROC_FLAG_ON_DO_PERIODIC) == 0)
+                        return SPELL_AURA_PROC_FAILED;
+                    else if (!dark && (procFlag & PROC_FLAG_ON_DO_PERIODIC) != 0)
+                        return SPELL_AURA_PROC_FAILED;
+
+                    // Rank 1
+                    if (dummySpell->Id == 81659)
+                        triggered_spell_id = dark ? 87117 : 81660;
+                    // Rank 2
+                    else
+                        triggered_spell_id = dark ? 87118 : 81661;
+                    break;
+                }
                 // Divine Aegis
                 case 2820:
                 {
