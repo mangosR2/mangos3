@@ -651,7 +651,7 @@ void PetAI::UpdateAI(const uint32 diff)
                 if (m_creature->IsCrowdControlled() || m_creature->GetCharmerOrOwner()->IsCrowdControlled())
                     currentSpells.push_back(GetSpellType(PET_SPELL_FREEACTION));
                 if (m_creature->GetHealth() < m_creature->GetMaxHealth() ||
-                    m_creature->GetOwner()->GetHealth() < m_creature->GetOwner()->GetMaxHealth())
+                    (m_creature->GetOwner() && m_creature->GetOwner()->GetHealth() < m_creature->GetOwner()->GetMaxHealth()))
                     currentSpells.push_back(GetSpellType(PET_SPELL_HEAL));
                 currentSpells.push_back(GetSpellType(PET_SPELL_BUFF));
                 currentSpells.push_back(GetSpellType(PET_SPELL_RANGED));
