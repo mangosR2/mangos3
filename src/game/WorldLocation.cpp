@@ -16,12 +16,73 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#include "WorldLocation.h"
+#include "GridMap.h"
+#include "MapManager.h"
 #include "Object.h"
 #include "World.h"
+#include "WorldLocation.h"
 
 WorldLocation::WorldLocation(WorldObject const& object)
     : Position(object.GetPositionX(), object.GetPositionX(), object.GetPositionZ(), object.GetOrientation()),
         mapid(object.GetMapId()), instance(object.GetInstanceId()), realmid(sWorld.getConfig(CONFIG_UINT32_REALMID))
 {
 };
+
+bool WorldLocation::IsValidMapCoord(WorldLocation const& loc)
+{
+    if (loc.HasMap())
+        return MapManager::IsValidMapCoord(loc);
+    else
+        return MaNGOS::IsValidMapCoord(loc.coord_x, loc.coord_y, loc.coord_z, loc.orientation);
+}
+
+bool WorldLocation::operator == (WorldLocation const& loc) const
+{
+    return (
+            (realmid == 0 || realmid == loc.realmid)
+        && (!HasMap() || GetMapId()  == loc.GetMapId())
+        && (GetInstanceId() == 0 || GetInstanceId() == loc.GetInstanceId())
+        && ((Position*)this) == ((Position*)&loc));
+}
+
+void WorldLocation::SetMapId(uint32 value)
+{
+    if (MapManager::IsValidMAP(value))
+        mapid = value;
+}
+
+void WorldLocation::SetOrientation(float value)
+{
+    if (fabs(orientation) > 2.0f * M_PI_F)
+        orientation = MapManager::NormalizeOrientation(value);
+    else
+        orientation = value;
+}
+
+WorldLocation& WorldLocation::operator = (WorldLocation const& loc)
+{
+    if (IsValidMapCoord(loc))
+    {
+        SetMapId(loc.GetMapId());
+        SetInstanceId(loc.GetInstanceId() > 0  ? loc.GetInstanceId() : instance);
+        coord_x = loc.coord_x;
+        coord_y = loc.coord_y;
+        coord_z = loc.coord_z;
+        SetOrientation(loc.orientation);
+    }
+    return *this;
+}
+
+uint32 WorldLocation::GetAreaId() const
+{
+    if (!HasMap())
+        return 0;
+    return sTerrainMgr.GetAreaId(GetMapId(), coord_x, coord_y, coord_z);
+}
+
+uint32 WorldLocation::GetZoneId() const
+{
+    if (!HasMap())
+        return 0;
+    return sTerrainMgr.GetZoneId(GetMapId(), coord_x, coord_y, coord_z);
+}
