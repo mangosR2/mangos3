@@ -1852,7 +1852,9 @@ bool Player::TeleportTo(WorldLocation const& loc, uint32 options)
             CombatStop();
 
         InterruptSpell(CURRENT_CHANNELED_SPELL);
-        RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_TELEPORTED);
+
+        if (!IsWithinDist3d(loc.x, loc.y, loc.z, GetMap()->GetVisibilityDistance()))
+            RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_TELEPORTED);
 
         // this will be used instead of the current location in SaveToDB
         m_teleport_dest = loc;
