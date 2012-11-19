@@ -221,7 +221,7 @@ enum LFGDungeonStatus
 };
 
 typedef std::set<LFGDungeonEntry const*> LFGDungeonSet;
-typedef UNORDERED_MAP<LFGDungeonEntry const*, LFGLockStatusType> LFGLockStatusMap;
+typedef std::map<LFGDungeonEntry const*, LFGLockStatusType> LFGLockStatusMap;
 
 /// Stores group data related to proposal to join
 struct LFGProposal
