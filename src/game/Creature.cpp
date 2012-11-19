@@ -203,6 +203,13 @@ void Creature::RemoveCorpse()
     GetRespawnCoord(x, y, z, &o);
     GetMap()->CreatureRelocation(this, x, y, z, o);
     DisableSpline();
+
+    // forced recreate creature object at clients
+    UnitVisibility currentVis = GetVisibility();
+    SetVisibility(VISIBILITY_REMOVE_CORPSE);
+    UpdateObjectVisibility();
+    SetVisibility(currentVis);                              // restore visibility state
+    UpdateObjectVisibility();
 }
 
 /**
