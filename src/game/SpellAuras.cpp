@@ -662,13 +662,15 @@ void Aura::AreaAuraUpdate(uint32 diff)
         if (!caster || !caster->GetMap())
             return;
 
-        if ( !caster->hasUnitState(UNIT_STAT_ISOLATED) )
+        if (!caster->hasUnitState(UNIT_STAT_ISOLATED))
         {
             Unit* owner = caster->GetCharmerOrOwner();
             if (!owner)
                 owner = caster;
 
             GuidSet targets;
+            targets.clear();
+
             Spell::UnitList _targets;
 
             switch(m_areaAuraType)
@@ -800,104 +802,105 @@ void Aura::AreaAuraUpdate(uint32 diff)
             }
 
             if (!_targets.empty())
+            {
                 for (Spell::UnitList::iterator itr = _targets.begin(); itr != _targets.end(); ++itr)
                     if (*itr)
                         targets.insert((*itr)->GetObjectGuid());
+            }
 
-            for (GuidSet::const_iterator tIter = targets.begin(); tIter != targets.end(); tIter++)
+            if (!targets.empty())
             {
-                // flag for selection is need apply aura to current iteration target
-                bool apply = true;
-
-                // we need ignore present caster self applied are auras sometime
-                // in cases if this only auras applied for spell effect
-                Unit* i_target = caster->GetMap()->GetUnit(*tIter);
-                if (!i_target)
-                    continue;
-
-                if (i_target->GetTypeId() == TYPEID_PLAYER && ((Player*)i_target)->IsBeingTeleportedFar())
-                    continue;
-
-                if (GetSpellProto()->HasAttribute(SPELL_ATTR_EX3_TARGET_ONLY_PLAYER) && i_target->GetTypeId() != TYPEID_PLAYER)
-                    continue;
-
-                if (i_target->IsImmuneToSpell(GetSpellProto(), GetAffectiveCaster() ? GetAffectiveCaster()->IsFriendlyTo(i_target) : true))
-                    continue;
-                else
+                for (GuidSet::const_iterator tIter = targets.begin(); tIter != targets.end(); tIter++)
                 {
-                    MAPLOCK_READ(i_target,MAP_LOCK_TYPE_AURAS);
-                    Unit::SpellAuraHolderBounds spair = i_target->GetSpellAuraHolderBounds(GetId());
-                    for(Unit::SpellAuraHolderMap::const_iterator i = spair.first; i != spair.second; ++i)
-                    {
-                        if (!i->second || i->second->IsDeleted())
-                            continue;
+                    // flag for selection is need apply aura to current iteration target
+                    bool apply = true;
 
-                        Aura* aur = i->second->GetAuraByEffectIndex(m_effIndex);
+                    // we need ignore present caster self applied are auras sometime
+                    // in cases if this only auras applied for spell effect
+                    Unit* i_target = caster->GetMap()->GetUnit(*tIter);
+                    if (!i_target)
+                        continue;
 
-                        if (!aur)
-                            continue;
+                    if (i_target->GetTypeId() == TYPEID_PLAYER && ((Player*)i_target)->IsBeingTeleportedFar())
+                        continue;
 
-                        switch(m_areaAuraType)
-                        {
-                            case AREA_AURA_ENEMY:
-                                // non caster self-casted auras (non stacked)
-                                if (aur->GetModifier()->m_auraname != SPELL_AURA_NONE)
-                                    apply = false;
-                                break;
-                            case AREA_AURA_RAID:
-                                // non caster self-casted auras (stacked from diff. casters)
-                                if (aur->GetModifier()->m_auraname != SPELL_AURA_NONE  || i->second->GetCasterGuid() == GetAffectiveCasterGuid())
-                                    apply = false;
-                                break;
-                            default:
-                                // in generic case not allow stacking area auras
-                                apply = false;
-                                break;
-                        }
+                    if (GetSpellProto()->HasAttribute(SPELL_ATTR_EX3_TARGET_ONLY_PLAYER) && i_target->GetTypeId() != TYPEID_PLAYER)
+                        continue;
 
-                        if(!apply)
-                            break;
-                    }
-                }
-
-                if(!apply)
-                    continue;
-
-                if (SpellEntry const *actualSpellInfo = sSpellMgr.SelectAuraRankForLevel(GetSpellProto(), i_target->getLevel()))
-                {
-                    int32 actualBasePoints = m_currentBasePoints;
-                    // recalculate basepoints for lower rank (all AreaAura spell not use custom basepoints?)
-                    if (actualSpellInfo != GetSpellProto())
-                        actualBasePoints = actualSpellInfo->CalculateSimpleValue(m_effIndex);
-
-                    SpellAuraHolderPtr holder = i_target->GetSpellAuraHolder(actualSpellInfo->Id, GetAffectiveCasterGuid());
-
-                    if (!holder || holder->IsDeleted())
-                    {
-                        SpellAuraHolderPtr newholder = CreateSpellAuraHolder(actualSpellInfo, i_target,  GetAffectiveCaster());
-                        newholder->SetAuraDuration(GetAuraDuration());
-                        /*Aura* aura = */newholder->CreateAura(AURA_CLASS_AREA_AURA, m_effIndex, &actualBasePoints, newholder, i_target, GetAffectiveCaster(), NULL);
-                        i_target->AddSpellAuraHolder(newholder);
-                    }
+                    if (i_target->IsImmuneToSpell(GetSpellProto(), GetAffectiveCaster() ? GetAffectiveCaster()->IsFriendlyTo(i_target) : true))
+                        continue;
                     else
                     {
-                        holder->SetAuraDuration(GetAuraDuration());
-                        Aura* aura = holder->GetAuraByEffectIndex(m_effIndex);
-                        if (aura)
+                        MAPLOCK_READ(i_target, MAP_LOCK_TYPE_AURAS);
+                        Unit::SpellAuraHolderBounds spair = i_target->GetSpellAuraHolderBounds(GetId());
+                        for (Unit::SpellAuraHolderMap::const_iterator i = spair.first; i != spair.second; ++i)
                         {
-                            //holder->SetInUse(true);
-                            aura->ApplyModifier(false,true);
-                            aura->GetModifier()->m_amount = actualBasePoints;
-                            aura->ApplyModifier(true,true);
-                            //holder->SetInUse(false);
+                            if (!i->second || i->second->IsDeleted())
+                                continue;
+
+                            Aura* aura = i->second->GetAuraByEffectIndex(m_effIndex);
+
+                            if (!aura)
+                                continue;
+
+                            switch(m_areaAuraType)
+                            {
+                                case AREA_AURA_ENEMY:
+                                    // non caster self-casted auras (non stacked)
+                                    if (aura->GetModifier()->m_auraname != SPELL_AURA_NONE)
+                                        apply = false;
+                                    break;
+                                case AREA_AURA_RAID:
+                                    // non caster self-casted auras (stacked from diff. casters)
+                                    if (aura->GetModifier()->m_auraname != SPELL_AURA_NONE  || i->second->GetCasterGuid() == GetAffectiveCasterGuid())
+                                        apply = false;
+                                    break;
+                                default:
+                                    // in generic case not allow stacking area auras
+                                    apply = false;
+                                    break;
+                            }
+
+                            if(!apply)
+                                break;
+                        }
+                    }
+
+                    if(!apply)
+                        continue;
+
+                    if (SpellEntry const *actualSpellInfo = sSpellMgr.SelectAuraRankForLevel(GetSpellProto(), i_target->getLevel()))
+                    {
+                        int32 actualBasePoints = m_currentBasePoints;
+                        // recalculate basepoints for lower rank (all AreaAura spell not use custom basepoints?)
+                        if (actualSpellInfo != GetSpellProto())
+                            actualBasePoints = actualSpellInfo->CalculateSimpleValue(m_effIndex);
+
+                        SpellAuraHolderPtr holder = i_target->GetSpellAuraHolder(actualSpellInfo->Id, GetAffectiveCasterGuid());
+
+                        if (!holder || holder->IsDeleted())
+                        {
+                            SpellAuraHolderPtr newholder = CreateSpellAuraHolder(actualSpellInfo, i_target,  GetAffectiveCaster());
+                            newholder->SetAuraDuration(GetAuraDuration());
+                            /*Aura* aura = */newholder->CreateAura(AURA_CLASS_AREA_AURA, m_effIndex, &actualBasePoints, newholder, i_target, GetAffectiveCaster(), NULL);
+                            i_target->AddSpellAuraHolder(newholder);
                         }
                         else
                         {
-                            Aura* aura = holder->CreateAura(AURA_CLASS_AREA_AURA, m_effIndex, &actualBasePoints, holder, i_target, GetAffectiveCaster(), NULL);
-                            i_target->AddAuraToModList(aura);
-                            //holder->SetInUse(true);
-                            aura->ApplyModifier(true,true);
-                            //holder->SetInUse(false);
+                            holder->SetAuraDuration(GetAuraDuration());
+                            Aura* aura = holder->GetAuraByEffectIndex(m_effIndex);
+                            if (aura)
+                            {
+                                aura->ApplyModifier(false,true);
+                                aura->GetModifier()->m_amount = actualBasePoints;
+                                aura->ApplyModifier(true,true);
+                            }
+                            else
+                            {
+                                Aura* aura = holder->CreateAura(AURA_CLASS_AREA_AURA, m_effIndex, &actualBasePoints, holder, i_target, GetAffectiveCaster(), NULL);
+                                i_target->AddAuraToModList(aura);
+                                aura->ApplyModifier(true,true);
+                            }
                         }
                     }
                 }
