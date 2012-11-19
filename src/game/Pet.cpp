@@ -2761,6 +2761,7 @@ bool Pet::Summon()
             owner->SetMiniPet(this);
             AIM_Initialize();
             return true;
+            break;
         }
         default:
         {
