@@ -1277,7 +1277,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         typedef std::list<AuraPair> AuraList;
         typedef std::list<DiminishingReturn> Diminishing;
         typedef UNORDERED_SET<ObjectGuid> ComboPointHolderSet;
-        typedef std::map<uint8, SpellAuraHolderPtr> VisibleAuraMap;
+        typedef std::vector<SpellAuraHolderPtr> VisibleAuraMap;
         typedef UNORDERED_MAP<SpellEntry const*, ObjectGuid /*targetGuid*/> TrackedAuraTargetMap;
         typedef UNORDERED_SET<uint32> SpellIdSet;
 
@@ -1920,7 +1920,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         SpellAuraHolderPtr GetVisibleAura(uint8 slot) const;
         void SetVisibleAura(uint8 slot, SpellAuraHolderPtr holder);
         VisibleAuraMap const& GetVisibleAuras() const { return m_visibleAuras; }
-        uint8 GetVisibleAurasCount() const { return m_visibleAuras.size(); }
+        uint8 GetVisibleAurasCount() const;
 
         Aura* GetAura(uint32 spellId, SpellEffectIndex effindex);
         Aura* GetAura(AuraType type, SpellFamily family, ClassFamilyMask const& classMask, ObjectGuid casterGuid = ObjectGuid());

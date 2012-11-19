@@ -6257,18 +6257,32 @@ bool Unit::HasAuraOfDifficulty(uint32 spellId) const
 
 SpellAuraHolderPtr Unit::GetVisibleAura(uint8 slot) const
 {
-    VisibleAuraMap::const_iterator itr = m_visibleAuras.find(slot);
-    if (itr != m_visibleAuras.end())
-        return itr->second;
-    return SpellAuraHolderPtr();
+    if (slot >= m_visibleAuras.size() || slot >= MAX_AURAS)
+        return SpellAuraHolderPtr();
+
+    return m_visibleAuras[(size_t)slot];
 }
 
 void Unit::SetVisibleAura(uint8 slot, SpellAuraHolderPtr holder)
 {
-    if (!holder)
-        m_visibleAuras.erase(slot);
+    if (slot >= MAX_AURAS || slot > m_visibleAuras.size())
+        return;
+    else if (slot == m_visibleAuras.size())
+        m_visibleAuras.push_back(holder);
     else
         m_visibleAuras[slot] = holder;
+}
+
+uint8 Unit::GetVisibleAurasCount() const
+{
+    uint8 result = 0;
+    VisibleAuraMap const& visibleAuras = GetVisibleAuras();
+    for (size_t i = 0; i < MAX_AURAS && i < visibleAuras.size() ; ++i)
+    {
+        if (visibleAuras[i])
+            ++result;
+    }
+    return result;
 }
 
 void Unit::AddDynObject(DynamicObject* dynObj)

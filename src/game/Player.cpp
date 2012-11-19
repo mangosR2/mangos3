@@ -21091,12 +21091,10 @@ void Player::SendAurasForTarget(Unit *target)
     data << target->GetPackGUID();
 
     Unit::VisibleAuraMap const& visibleAuras = target->GetVisibleAuras();
-    for (Unit::VisibleAuraMap::const_iterator itr = visibleAuras.begin(); itr != visibleAuras.end(); ++itr)
+    for (size_t i = 0; i < MAX_AURAS && i < visibleAuras.size() ; ++i)
     {
-        if (!itr->second)
-            continue;
-
-        itr->second->BuildUpdatePacket(data);
+        if (visibleAuras[i])
+            visibleAuras[i]->BuildUpdatePacket(data);
     }
 
     GetSession()->SendPacket(&data);

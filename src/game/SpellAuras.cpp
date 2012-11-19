@@ -10643,10 +10643,9 @@ void SpellAuraHolder::_AddSpellAuraHolder()
     if (m_target->GetVisibleAurasCount() < MAX_AURAS)
     {
         Unit::VisibleAuraMap const& visibleAuras = m_target->GetVisibleAuras();
-        for(uint8 i = 0; i < MAX_AURAS; ++i)
+        for (size_t i = 0; i < MAX_AURAS ; ++i)
         {
-            Unit::VisibleAuraMap::const_iterator itr = visibleAuras.find(i);
-            if (itr == visibleAuras.end())
+            if (i == visibleAuras.size() || !visibleAuras[i])
             {
                 slot = i;
                 // update for out of range group members (on 1 slot use)
