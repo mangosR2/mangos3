@@ -3621,7 +3621,7 @@ SpellMissInfo Unit::SpellResistResult(Unit* pVictim, SpellEntry const* spell)
     // Chance resist debuff
     if (spell->HasAttribute(SPELL_ATTR_EX6_NO_STACK_DEBUFF_MAJOR))
         modResistChance -= pVictim->GetTotalAuraModifierByMiscValue(SPELL_AURA_MOD_DEBUFF_RESISTANCE, int32(spell->Dispel));
-/*
+
     DEBUG_FILTER_LOG(LOG_FILTER_SPELL_CAST, "Unit::SpellResistResult  calculation part 1 (base - binary/hit resist chance): caster %s, target %s, spell %u, base:%i, mechanic:%i mod:%i",
         GetObjectGuid().GetString().c_str(),
         pVictim->GetObjectGuid().GetString().c_str(),
@@ -3630,7 +3630,7 @@ SpellMissInfo Unit::SpellResistResult(Unit* pVictim, SpellEntry const* spell)
         resist_mech,
         modResistChance
         );
-*/
+
     if (modResistChance <  0) 
         modResistChance =  0;
     else if (modResistChance > 100) 
@@ -3663,11 +3663,11 @@ SpellMissInfo Unit::SpellResistResult(Unit* pVictim, SpellEntry const* spell)
 
     uint32 spellPenetration = (GetTypeId() == TYPEID_PLAYER) ? ((Player*)this)->GetSpellPenetrationItemMod() : 0;
 
-    float effectiveRR = targetResistance + std::max(((int)pVictim->GetLevelForTarget(this) - (int)GetLevelForTarget(pVictim))*5, 0) - std::min(targetResistance, spellPenetration);
-    uint32 drp = floor(100.0f * (effectiveRR / (((pVictim->GetLevelForTarget(this) > 80) ? 510.0f : 400.0f) + effectiveRR)));
+    uint32 effectiveRR = targetResistance + std::max(((int)pVictim->GetLevelForTarget(this) - (int)GetLevelForTarget(pVictim)) * 5, 0) - std::min(targetResistance, spellPenetration);
+    uint32 drp = uint32(100.0f * ((float)effectiveRR / (((pVictim->GetLevelForTarget(this) > 80) ? 510.0f : 400.0f) + (float)effectiveRR)));
 
-/*
-    DEBUG_FILTER_LOG(LOG_FILTER_SPELL_CAST, "Unit::SpellResistResult  calculation part 2 (damage reduction percentage): caster %s, target %s, spell %u, targetResistance:%i, penetration:%u, effectiveRR:%i, DRP:%i",
+
+    DEBUG_FILTER_LOG(LOG_FILTER_SPELL_CAST, "Unit::SpellResistResult  calculation part 2 (damage reduction percentage): caster %s, target %s, spell %u, targetResistance:%i, penetration:%u, effectiveRR:%u, DRP:%u",
         GetObjectGuid().GetString().c_str(),
         pVictim->GetObjectGuid().GetString().c_str(),
         spell->Id,
@@ -3675,12 +3675,10 @@ SpellMissInfo Unit::SpellResistResult(Unit* pVictim, SpellEntry const* spell)
         spellPenetration,
         effectiveRR,
         drp);
-*/
+
     // http://www.wowwiki.com/Formulas:Magical_resistance - "Average resistance may be no higher than 75%." 
     if (drp >  75) 
         drp =  75;
-    else if (drp < 0) 
-        drp = 0;
 
     modResistChance = 100 - drp;
 
