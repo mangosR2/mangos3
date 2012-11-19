@@ -43,6 +43,10 @@
 
 #include <cstdlib>
 
+#ifdef _MSC_VER && defined(G3D_64BIT)
+#   include <intrin.h>
+#endif
+
 #ifdef G3D_WIN32
 
 #   include <conio.h>
