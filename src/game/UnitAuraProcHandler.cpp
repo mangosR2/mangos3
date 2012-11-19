@@ -1790,6 +1790,19 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, DamageInfo* damageI
                         triggered_spell_id = dark ? 87118 : 81661;
                     break;
                 }
+                // Body and Soul
+                case 2218:
+                {
+                    // Body and Soul speed aura
+                    if (effIndex == EFFECT_INDEX_0)
+                        triggered_spell_id = dummySpell->Id == 64127 ? 64128 : 65081;
+                    // Body and Soul dispel poison part
+                    else if (pVictim == this && roll_chance_i(triggerAmount))
+                        triggered_spell_id = 64136;
+                    else
+                        return SPELL_AURA_PROC_FAILED;
+                    break;
+                }
                 // Divine Aegis
                 case 2820:
                 {
@@ -2015,6 +2028,16 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, DamageInfo* damageI
                 {
                     triggered_spell_id = 70772;             // Blessed Healing
                     basepoints[0] = int32(triggerAmount * damage / 100) / GetSpellAuraMaxTicks(triggered_spell_id);
+                    break;
+                }
+                // Echo of Light
+                case 77485:
+                {
+                    if (effIndex != EFFECT_INDEX_0)
+                        return SPELL_AURA_PROC_FAILED;
+
+                    triggered_spell_id = 77489;
+                    basepoints[0] = int32(damage * triggerAmount / 100 / GetSpellAuraMaxTicks(triggered_spell_id));
                     break;
                 }
             }
@@ -4250,6 +4273,15 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(Unit *pVictim, DamageIn
                 if (procSpell->GetSpellIconID() == 548 && roll_chance_i(50))
                     return SPELL_AURA_PROC_FAILED;
             }
+            // Blessed Resilience
+            else if (auraSpellInfo->SpellIconID == 2177)
+            {
+                if (damage * 100 >= pVictim->GetMaxHealth() * auraSpellInfo->CalculateSimpleValue(EFFECT_INDEX_1) ||
+                    (procEx & PROC_EX_CRITICAL_HIT) != 0 && (procFlags & PROC_FLAG_ON_TAKE_PERIODIC) == 0)
+                    break;
+
+                return SPELL_AURA_PROC_FAILED;
+            }
             // Masochism
             else if (auraSpellInfo->SpellIconID == 2211)
             {
@@ -5204,8 +5236,15 @@ SpellAuraProcResult Unit::HandleAddFlatModifierAuraProc(Unit* pVictim, DamageInf
                     return SPELL_AURA_PROC_CANT_TRIGGER;
                 break;
         }
-        case 53695:
-        case 53696:                             // Judgements of the Just
+        case SPELLFAMILY_PRIEST:
+        {
+            // Chakra
+            if (spellInfo->Id == 14751)
+                // Chakra: Serenity
+                CastSpell(this, 81208, true);
+            break;
+        }
+        case SPELLFAMILY_PALADIN:
         {
             if (!procSpell)
                 return SPELL_AURA_PROC_FAILED;
@@ -5244,6 +5283,18 @@ SpellAuraProcResult Unit::HandleAddPctModifierAuraProc(Unit* /*pVictim*/, Damage
                 CastSpell(this, 28682, true, castItem, triggeredByAura);
                 return (procEx & PROC_EX_CRITICAL_HIT) ? SPELL_AURA_PROC_OK : SPELL_AURA_PROC_FAILED; // charge update only at crit hits, no hidden cooldowns
             }
+            break;
+        }
+        case SPELLFAMILY_PRIEST:
+        {
+            // Chakra
+            if (spellInfo->Id == 14751)
+                if (triggeredByAura->GetEffIndex() == EFFECT_INDEX_1)
+                    // Chakra: Sanctuary
+                    CastSpell(this, 81206, true);
+                else
+                    // Chakra: Chastice
+                    CastSpell(this, 81209, true);
             break;
         }
         case SPELLFAMILY_PALADIN:

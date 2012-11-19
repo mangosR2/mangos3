@@ -9266,7 +9266,7 @@ uint32 Unit::SpellHealingBonusDone(Unit *pVictim, SpellEntry const *spellProto, 
     Unit *owner = GetOwner();
     if (!owner) owner = this;
     AuraList const& mOverrideClassScript= owner->GetAurasByType(SPELL_AURA_OVERRIDE_CLASS_SCRIPTS);
-    for(AuraList::const_iterator i = mOverrideClassScript.begin(); i != mOverrideClassScript.end(); ++i)
+    for (AuraList::const_iterator i = mOverrideClassScript.begin(); i != mOverrideClassScript.end(); ++i)
     {
         if (!(*i)->isAffectedOnSpell(spellProto))
             continue;
@@ -9280,8 +9280,8 @@ uint32 Unit::SpellHealingBonusDone(Unit *pVictim, SpellEntry const *spellProto, 
             case   21: // Test of Faith
             case 6935:
             case 6918:
-                if (pVictim->GetHealth() < pVictim->GetMaxHealth()/2)
-                    DoneTotalMod *=((*i)->GetModifier()->m_amount + 100.0f)/100.0f;
+                if (pVictim->GetHealth() < pVictim->GetMaxHealth() / 2)
+                    DoneTotalMod *= ((*i)->GetModifier()->m_amount + 100.0f) / 100.0f;
                 break;
             case 7798: // Glyph of Regrowth
             {
@@ -11535,8 +11535,22 @@ int32 Unit::CalculateSpellDamage(Unit const* target, SpellEntry const* spellProt
             if (MountCapabilityEntry const* mountCapability = GetMountCapability(uint32(spellEffect->EffectMiscValueB)))
                 return int32(mountCapability->Id);
             break;
-        default:
+        case SPELL_AURA_OVERRIDE_ACTIONBAR_SPELLS:
+        case SPELL_AURA_OVERRIDE_ACTIONBAR_SPELLS_2:
+        {
+            switch (spellProto->Id)
+            {
+                case 81206:         // Chakra: Sanctuary
+                case 81208:         // Chakra: Serenity
+                {
+                    // Revelations
+                    if (!HasAura(88627))
+                        return 88625;
+                    break;
+                }
+            }
             break;
+        }
     }
 
     Player* unitPlayer = (GetTypeId() == TYPEID_PLAYER) ? (Player*)this : NULL;

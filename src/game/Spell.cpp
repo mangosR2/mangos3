@@ -3964,6 +3964,9 @@ void Spell::cast(bool skipCheck)
                 case 25331: AddTriggeredSpell(25329); break;// Holy Nova, rank 7
                 case 48077: AddTriggeredSpell(48075); break;// Holy Nova, rank 8
                 case 48078: AddTriggeredSpell(48076); break;// Holy Nova, rank 9
+                case 81206:                                 // Chakra: Sanctuary
+                    AddTriggeredSpell(81207);               // Chakra: Sanctuary
+                    break;
                 case 81661:                                 // Evangelism
                 case 87118:                                 // Dark Evangelism
                 {

@@ -1377,6 +1377,13 @@ void Aura::HandleAddModifier(bool apply, bool Real)
             default:
                 break;
         }
+
+        // Chakra
+        if (spellProto->Id == 14751)
+        {
+            const_cast<SpellEffectEntry*>(m_spellEffect)->EffectSpellClassMask.Flags = 0;
+            const_cast<SpellEffectEntry*>(m_spellEffect)->EffectSpellClassMask.Flags2 = 0;
+        }
     }
 
     switch (GetId())
@@ -12211,7 +12218,7 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
                 return;
             }
 
-            switch(GetId())
+            switch (GetId())
             {
                 // Abolish Disease (remove 1 more poison effect with Body and Soul)
                 case 552:

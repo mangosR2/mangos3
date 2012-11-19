@@ -77,6 +77,7 @@ enum SpellSpecific
     SPELL_WARLOCK_BANE      = 24,
     SPELL_MAGE_INTELLECT    = 25,
     SPELL_PRIEST_INNER      = 26,
+    SPELL_PRIEST_CHAKRA     = 27,
     SPELL_SCROLL            = 30
 };
 

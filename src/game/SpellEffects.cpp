@@ -11928,6 +11928,16 @@ void Spell::EffectScriptEffect(SpellEffectEntry const* effect)
                     }
                     return;
                 }
+                case 81585:                                 // Chakra: Serenity
+                {
+                    if (!unitTarget)
+                        return;
+
+                    // Search Renew
+                    if (SpellAuraHolderPtr holder = unitTarget->GetSpellAuraHolder(139, m_caster->GetObjectGuid()))
+                        holder->RefreshHolder();
+                    return;
+                }
                 case 87151:                                 // Archangel
                 {
                     if (!unitTarget)

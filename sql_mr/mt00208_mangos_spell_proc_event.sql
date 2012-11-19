@@ -63,3 +63,18 @@ INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`,
 DELETE FROM `spell_proc_event` WHERE `entry` = 63730;
 INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`, `SpellFamilyMaskB0`) VALUES
 (63730, 6, 2048, 4);
+
+-- Chakra
+DELETE FROM `spell_proc_event` WHERE `entry` = 14751;
+INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`, `SpellFamilyMaskB0`, `SpellFamilyMaskA1`, `SpellFamilyMaskB1`, `SpellFamilyMaskA2`, `SpellFamilyMaskC2`, `procEx`) VALUES
+(14751, 6, 7168, 4, 512, 32, 128, 65536, 524288);
+
+-- Body and Soul
+DELETE FROM `spell_proc_event` WHERE `entry` = 64127;
+INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`, `SpellFamilyMaskB1`, `procFlags`, `CustomChance`) VALUES
+(64127, 6, 1, 1, 16384, 100);
+
+-- Echo of Light
+DELETE FROM `spell_proc_event` WHERE `entry` = 77485;
+INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`, `CustomChance`) VALUES
+(77485, 0, 0, 0);
