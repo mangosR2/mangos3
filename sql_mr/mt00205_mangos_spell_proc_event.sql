@@ -48,3 +48,13 @@ INSERT INTO `spell_proc_event` (`entry`, `SchoolMask`) VALUES
 DELETE FROM `spell_proc_event` WHERE `entry` = 14523;
 INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`, `procFlags`) VALUES
 (14523, 6, 1048704, 65536);
+
+-- Surge of Light
+DELETE FROM `spell_proc_event` WHERE `entry` = 88687;
+INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`, `SpellFamilyMaskB0`, `CustomChance`) VALUES
+(88687, 6, 7296, 4, 0); -- remove 100%
+
+-- Surge of Light (proc)
+DELETE FROM `spell_proc_event` WHERE `entry` = 88688;
+INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`, `procFlags`, `CustomChance`) VALUES
+(88688, 6, 2048, 16384, 100);
