@@ -1891,7 +1891,7 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, DamageInfo* damageI
 
                     return SPELL_AURA_PROC_OK;
                 }
-                // Empowered Renew
+                // Divine Touch
                 case 3021:
                 {
                     if (!procSpell)

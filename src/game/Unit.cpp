@@ -1209,7 +1209,7 @@ uint32 Unit::DealDamage(DamageInfo* damageInfo)
         if (!damageFromSpiritOfRedemtionTalent &&           // not called from SPELL_AURA_SPIRIT_OF_REDEMPTION
                 pVictim->GetTypeId() == TYPEID_PLAYER && pVictim->getClass() == CLASS_PRIEST)
         {
-            AuraList const& vDummyAuras = pVictim->GetAurasByType(SPELL_AURA_DUMMY);
+            AuraList const& vDummyAuras = pVictim->GetAurasByType(SPELL_AURA_SCHOOL_ABSORB);
             for (AuraList::const_iterator itr = vDummyAuras.begin(); itr != vDummyAuras.end(); ++itr)
             {
                 if ((*itr)->GetSpellProto()->GetSpellIconID() == 1654)
@@ -1252,17 +1252,17 @@ uint32 Unit::DealDamage(DamageInfo* damageInfo)
 
             // save value before aura remove
             uint32 ressSpellId = pVictim->GetUInt32Value(PLAYER_SELF_RES_SPELL);
-            if(!ressSpellId)
+            if (!ressSpellId)
                 ressSpellId = ((Player*)pVictim)->GetResurrectionSpellId();
 
             //Remove all expected to remove at death auras (most important negative case like DoT or periodic triggers)
             pVictim->RemoveAllAurasOnDeath();
 
             // restore for use at real death
-            pVictim->SetUInt32Value(PLAYER_SELF_RES_SPELL,ressSpellId);
+            pVictim->SetUInt32Value(PLAYER_SELF_RES_SPELL, ressSpellId);
 
             // FORM_SPIRITOFREDEMPTION and related auras
-            pVictim->CastSpell(pVictim,27827,true,NULL,spiritOfRedemtionTalentReady());
+            pVictim->CastSpell(pVictim, 27827, true, NULL, spiritOfRedemtionTalentReady());
         }
         else if (pVictim->IsInWorld())
             pVictim->SetHealth(0);
@@ -2906,6 +2906,10 @@ void Unit::CalculateDamageAbsorbAndResist(Unit* pCaster, DamageInfo* damageInfo,
                 }
                 case SPELLFAMILY_PRIEST:
                 {
+                    // Spirit of Redemption
+                    if (spellProto->Id == 20711)
+                    continue;
+
                     // Guardian Spirit
                     if (spellProto->GetSpellIconID() == 2873)
                     {
