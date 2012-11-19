@@ -7265,14 +7265,21 @@ void Unit::ModifyAuraState(AuraState flag, bool apply)
             SetFlag(UNIT_FIELD_AURASTATE, 1<<(flag-1));
             if (GetTypeId() == TYPEID_PLAYER)
             {
-                const PlayerSpellMap& sp_list = ((Player*)this)->GetSpellMap();
-                for (PlayerSpellMap::const_iterator itr = sp_list.begin(); itr != sp_list.end(); ++itr)
+                PlayerSpellMap const& sp_list = ((Player*)this)->GetSpellMap();
+                if (!sp_list.empty())
                 {
-                    if (itr->second.state == PLAYERSPELL_REMOVED) continue;
-                    SpellEntry const *spellInfo = sSpellStore.LookupEntry(itr->first);
-                    if (!spellInfo || !IsPassiveSpell(spellInfo)) continue;
-                    if (AuraState(spellInfo->CasterAuraState) == flag)
-                        CastSpell(this, itr->first, true, NULL);
+                    for (PlayerSpellMap::const_iterator itr = sp_list.begin(); itr != sp_list.end(); ++itr)
+                    {
+                        if (itr->second.state == PLAYERSPELL_REMOVED)
+                            continue;
+
+                        SpellEntry const* spellInfo = sSpellStore.LookupEntry(itr->first);
+                        if (!spellInfo || !IsPassiveSpell(spellInfo))
+                            continue;
+
+                        if (AuraState(spellInfo->CasterAuraState) == flag)
+                            CastSpell(this, spellInfo, true, NULL);
+                    }
                 }
             }
         }
@@ -7285,19 +7292,26 @@ void Unit::ModifyAuraState(AuraState flag, bool apply)
 
             if (flag != AURA_STATE_ENRAGE)                  // enrage aura state triggering continues auras
             {
-                Unit::SpellAuraHolderMap& tAuras = GetSpellAuraHolderMap();
-                for (Unit::SpellAuraHolderMap::iterator itr = tAuras.begin(); itr != tAuras.end();)
+                SpellAuraHolderQueue holdersToRemove;
+                Unit::SpellAuraHolderMap const& tAuras = GetSpellAuraHolderMap();
+                for (Unit::SpellAuraHolderMap::const_iterator itr = tAuras.begin(); itr != tAuras.end(); ++itr)
                 {
-                    SpellEntry const* spellProto = (*itr).second->GetSpellProto();
+                    if (!itr->second || itr->second->IsDeleted())
+                        continue;
+
+                    SpellEntry const* spellProto = itr->second->GetSpellProto();
                     if (AuraState(spellProto->CasterAuraState) == flag)
-                    {
-                        RemoveSpellAuraHolder(itr->second);
-                        itr = tAuras.begin();
-                    }
-                    else
-                        ++itr;
+                        holdersToRemove.push(itr->second);
+                }
+
+                while (!holdersToRemove.empty())
+                {
+                    if (holdersToRemove.front() && !holdersToRemove.front()->IsDeleted())
+                        RemoveSpellAuraHolder(holdersToRemove.front());
+                    holdersToRemove.pop();
                 }
             }
+
         }
     }
 }
