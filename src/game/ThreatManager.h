@@ -25,7 +25,6 @@
 #include "UnitEvents.h"
 #include "Timer.h"
 #include "ObjectGuid.h"
-#include "LockedVector.h"
 
 //==============================================================
 

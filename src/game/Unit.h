@@ -36,7 +36,6 @@
 #include "WorldPacket.h"
 #include "SpellAuras.h"
 #include "Timer.h"
-#include "LockedVector.h"
 #include <list>
 #include "StateMgr.h"
 
