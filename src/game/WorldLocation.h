@@ -22,7 +22,7 @@
 
 #include "Common.h"
 
-struct Position
+struct MANGOS_DLL_SPEC Position
 {
     Position() 
         : x(0.0f), y(0.0f), z(0.0f), o(0.0f)
@@ -68,7 +68,7 @@ struct Position
 
 class WorldObject;
 
-struct WorldLocation : public Position
+struct MANGOS_DLL_SPEC WorldLocation : public Position
 {
 
     public:

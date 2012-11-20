@@ -1832,7 +1832,7 @@ void GameObject::DamageTaken(Unit* pDoneBy, int32 damage, uint32 spellId)
 
     if (damage > 0)
     {
-        if (GetHealth() > damage)
+        if (GetHealth() > (uint32)damage)
         {
             m_health -= damage;
             realDamage = damage;

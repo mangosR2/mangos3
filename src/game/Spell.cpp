@@ -1064,8 +1064,10 @@ void Spell::AddTarget(ObjectGuid targetGuid, SpellEffectIndex effIndex)
             sLog.outError("Spell::AddTarget currently this type of targets (%s) supported by another way!", targetGuid.GetString().c_str());
             break;
         }
+/*
         HIGHGUID_INSTANCE:
-        HIGHGUID_GROUP:  
+        HIGHGUID_GROUP:
+*/
         default:
             sLog.outError("Spell::AddTarget unhandled type of spell target (%s)!", targetGuid.GetString().c_str());
             break;
@@ -7179,7 +7181,7 @@ SpellCastResult Spell::CheckPower()
     }
 
     // health as power used - need check health amount
-    if (m_spellInfo->powerType == POWER_HEALTH)
+    if (Powers(m_spellInfo->powerType) == POWER_HEALTH)
     {
         if (m_caster->GetHealth() <= abs(m_powerCost))
             return SPELL_FAILED_CASTER_AURASTATE;

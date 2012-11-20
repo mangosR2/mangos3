@@ -5966,7 +5966,7 @@ void Unit::HandleArenaPreparation(bool apply)
                                                                 // don't remove stances, shadowform, pally/hunter auras
                 !iter->second->IsPassive() &&                   // don't remove passive auras
                 (iter->second->GetAuraMaxDuration() > 0 &&
-                iter->second->GetAuraDuration() <= sWorld.getConfig(CONFIG_UINT32_ARENA_AURAS_DURATION) * IN_MILLISECONDS)) ||
+                iter->second->GetAuraDuration() <= int32(sWorld.getConfig(CONFIG_UINT32_ARENA_AURAS_DURATION) * IN_MILLISECONDS))) ||
                 iter->second->GetSpellProto()->HasAttribute(SPELL_ATTR_EX5_REMOVE_AT_ENTER_ARENA))
             {
                 RemoveSpellAuraHolder(iter->second, AURA_REMOVE_BY_CANCEL);
@@ -14006,7 +14006,7 @@ void Unit::DisableSpline()
 
 uint32 Unit::GetResistance(SpellSchoolMask schoolMask) const
 {
-    uint32 resistance = 0;
+    int32 resistance = 0;
 
     for (int i = SPELL_SCHOOL_NORMAL; i < MAX_SPELL_SCHOOL; ++i)
     {
@@ -14018,7 +14018,7 @@ uint32 Unit::GetResistance(SpellSchoolMask schoolMask) const
                 // by some sources, may be resistance +=, but i not sure (/dev/rsa)
         }
     }
-    return resistance;
+    return (resistance >= 0) ? (uint32)resistance : 0;
 }
 
 void Unit::SendSpellDamageResist(Unit* target, uint32 spellId)
