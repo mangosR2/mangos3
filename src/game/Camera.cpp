@@ -226,15 +226,17 @@ void ViewPoint::CameraCall(void (Camera::*handler)())
     if (!m_cameras.empty())
     {
 
-        for (CameraList::iterator itr = m_cameras.begin(); itr != m_cameras.end();)
+        for (CameraList::iterator itr = m_cameras.begin(), next; itr != m_cameras.end(); itr = next)
         {
+            next = itr;
+            ++next;
             ObjectGuid guid = *itr;
+
             if (m_body.GetTypeId() == TYPEID_PLAYER && guid == m_body.GetObjectGuid())
             {
                 if (Camera* camera = ((Player*)&m_body)->GetCamera())
                     if (camera->IsInitialized())
                         (camera->*handler)();
-                ++itr;
             }
             else if (m_body.GetMap() && guid.IsPlayer())
             {
@@ -243,7 +245,6 @@ void ViewPoint::CameraCall(void (Camera::*handler)())
                     if (Camera* camera = player->GetCamera())
                         if (camera->IsInitialized())
                             (camera->*handler)();
-                    ++itr;
                 }
                 else
                     m_cameras.erase(guid);
