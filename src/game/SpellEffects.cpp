@@ -4594,9 +4594,6 @@ void Spell::EffectDummy(SpellEffectEntry const* effect)
                 switch(m_spellInfo->Id)
                 {
                     case 47540: hurt = 47758; heal = 47757; break;
-                    case 53005: hurt = 53001; heal = 52986; break;
-                    case 53006: hurt = 53002; heal = 52987; break;
-                    case 53007: hurt = 53003; heal = 52988; break;
                     default:
                         sLog.outError("Spell::EffectDummy: Spell %u Penance need set correct heal/damage spell", m_spellInfo->Id);
                         return;

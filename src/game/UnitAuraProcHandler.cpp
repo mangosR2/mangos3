@@ -2036,6 +2036,9 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, DamageInfo* damageI
                     if (effIndex != EFFECT_INDEX_0)
                         return SPELL_AURA_PROC_FAILED;
 
+                    if (effIndex != EFFECT_INDEX_0)
+                        return SPELL_AURA_PROC_FAILED;
+
                     triggered_spell_id = 77489;
                     basepoints[0] = int32(damage * triggerAmount / 100 / GetSpellAuraMaxTicks(triggered_spell_id));
                     break;
@@ -5172,6 +5175,9 @@ SpellAuraProcResult Unit::HandleMendingAuraProc(Unit* /*pVictim*/, DamageInfo* d
                 // when applied to new one)
                 target->AddSpellAuraHolder(new_holder);
             }
+
+            heal += int32(caster->SpellBaseHealingBonusDone(GetSpellSchoolMask(spellProto)) * 1.59f);
+
         }
     }
 
