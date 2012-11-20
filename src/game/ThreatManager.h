@@ -206,6 +206,8 @@ class MANGOS_DLL_SPEC ThreatManager
 
         Unit*  getOwner() const { return iOwner; }
 
+        bool isOwnerOnline() const;
+
         Unit* getHostileTarget();
 
         void tauntApply(Unit* pTaunter);
