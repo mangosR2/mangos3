@@ -4929,6 +4929,18 @@ void Spell::EffectDummy(SpellEffectEntry const* effect)
 
             switch(m_spellInfo->Id)
             {
+                case 19740:                                 // Blessing of Might
+                {
+                    Unit* target = unitTarget;
+                    if (!target)
+                        target = m_caster;
+
+                    if (m_caster->GetTypeId() != TYPEID_PLAYER || target->GetTypeId() != TYPEID_PLAYER)
+                        return;
+
+                    m_caster->CastSpell(target, ((Player*)m_caster)->GetGroup() != ((Player*)target)->GetGroup() ? 79101 : 79102, true);
+                    return;
+                }
                 case 20217:                                 // Blessing of Kings
                 {
                     Unit* target = unitTarget;
