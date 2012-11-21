@@ -11595,6 +11595,7 @@ int32 Unit::CalculateSpellDamage(Unit const* target, SpellEntry const* spellProt
                     return amount;
                 case 79060: // Mark of the Wild
                 case 79062: // Blessing of Kings
+                case 79063: // Blessing of Kings
                     return amount / 2;
             }
             break;
