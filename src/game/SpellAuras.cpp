@@ -2340,8 +2340,6 @@ void Aura::TriggerSpell()
             case 53563:                                     // Beacon of Light
             case 52658:                                     // Static Overload (normal&heroic) (Ionar in Halls of Lightning)
             case 59795:
-            case 63018:                                     // Searing Light (normal&heroic) (XT-002 in Ulduar)
-            case 65121:
                 // original caster must be target
                 target->CastSpell(target, trigger_spell_id, true, NULL, this, target->GetObjectGuid());
                 return;

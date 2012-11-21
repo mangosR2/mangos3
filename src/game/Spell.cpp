@@ -8684,6 +8684,12 @@ bool Spell::FillCustomTargetMap(SpellEffectIndex i, UnitList &targetUnitMap)
             }
             break;
         }
+        case 63023:  // Searing Light (Ulduar: XT-002)
+        case 65120:  // Searing Light (h) (Ulduar: XT-002)
+        {
+            FillAreaTargets(targetUnitMap, radius, PUSH_SELF_CENTER, SPELL_TARGETS_NOT_FRIENDLY);
+            break;
+        }
         case 63025:  // Gravity Bomb (XT-002 in Ulduar) - exclude caster from pull and double damage
         case 64233:
         {
