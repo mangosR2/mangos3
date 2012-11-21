@@ -1,5 +1,6 @@
 -- 4.3.4 15595 spell_bonus_data
 REPLACE INTO `spell_bonus_data` (`entry`, `direct_bonus`, `dot_bonus`, `ap_bonus`, `ap_dot_bonus`, `comments`) VALUES
+(879, 0, 0, 0, 0, 'Paladin - Exorcism'),
 (8092, 1.104, 0, 0, 0, 'Priest - Mind Blast'),
 (33110, 0, 0, 0, 0, 'Priest - Prayer of Mending'),
 (47666, 0.458, 0, 0, 0, 'Priest - Penance Damage'),
