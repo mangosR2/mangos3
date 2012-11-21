@@ -6,4 +6,6 @@ REPLACE INTO `spell_bonus_data` (`entry`, `direct_bonus`, `dot_bonus`, `ap_bonus
 (47750, 0.321, 0, 0, 0, 'Priest - Penance Healing'),
 (73510, 0.836, 0, 0, 0, 'Priest - Mind Spike'),
 (73921, 0.095, 0, 0, 0, 'Shaman - Healing Rain'),
-(81297, 0.017, 0, 0.0027, 0, 'Paladin - Consecration'); -- ap coef is wrong
+(81297, 0.017, 0, 0.0027, 0, 'Paladin - Consecration'), -- ap coef is wrong
+(82327, 0.259, 0, 0, 0, 'Paladin - Holy Radiance'),
+(86452, 0.144/4, 0, 0, 0, 'Paladin - Holy Radiance HoT');

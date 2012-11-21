@@ -10547,6 +10547,12 @@ void Aura::PeriodicDummyTick()
                 }
                 return;
             }
+            // Holy Radiance
+            else if (spell->Id == 82327)
+            {
+                if (Unit* caster = GetCaster())
+                    caster->CastSpell(target, 86452, true);
+            }
             break;
         }
         default:
