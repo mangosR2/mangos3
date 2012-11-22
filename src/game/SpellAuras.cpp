@@ -1371,6 +1371,7 @@ void Aura::HandleAddModifier(bool apply, bool Real)
             case 57761:                                     // Fireball!
             case 64823:                                     // Elune's Wrath (Balance druid t8 set
             case 88688:                                     // Surge of Light
+            case 88819:                                     // Daybreak
             case 89485:                                     // Inner Focus
                 GetHolder()->SetAuraCharges(1);
                 break;

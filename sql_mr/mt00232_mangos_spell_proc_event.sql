@@ -108,3 +108,13 @@ INSERT INTO `spell_proc_event` (`entry`, `SchoolMask`) VALUE
 DELETE FROM `spell_proc_event` WHERE `entry` = 85495;
 INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskC0`) VALUE
 (85495, 10, 256);
+
+-- Daybreak
+DELETE FROM `spell_proc_event` WHERE `entry` = 88819;
+INSERT INTO `spell_proc_event` (`entry`, `procEx`) VALUES
+(88819, 524288);
+
+-- Daybreak
+DELETE FROM `spell_proc_event` WHERE `entry` = 88820;
+INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`, `SpellFamilyMaskC0`) VALUE
+(88820, 10, 3221225472, 1024);
