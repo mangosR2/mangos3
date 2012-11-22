@@ -3067,7 +3067,7 @@ enum DiminishingGroup
     DIMINISHING_CHARGE,
     // Other
     DIMINISHING_TAUNT,
-    // Don't Diminish, but limit duration to 10s
+    // Don't Diminish, but limit duration to 8s
     DIMINISHING_LIMITONLY
 };
 

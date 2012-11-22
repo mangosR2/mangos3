@@ -98,3 +98,8 @@ INSERT INTO `spell_proc_event` (`entry`, `SchoolMask`) VALUE
 DELETE FROM `spell_proc_event` WHERE `entry` = 20911;
 INSERT INTO `spell_proc_event` (`entry`, `SchoolMask`, `procEx`) VALUE
 (20911, 127, 80);
+
+-- Protector of the Innocent
+DELETE FROM `spell_proc_event` WHERE `entry` = 20138;
+INSERT INTO `spell_proc_event` (`entry`, `SchoolMask`) VALUE
+(20138, 127);

@@ -5588,13 +5588,13 @@ DiminishingGroup GetDiminishingReturnsGroupForSpell(SpellEntry const* spellproto
 
 int32 GetDiminishingReturnsLimitDuration(DiminishingGroup group, SpellEntry const* spellproto)
 {
-    if(!IsDiminishingReturnsGroupDurationLimited(group))
+    if (!IsDiminishingReturnsGroupDurationLimited(group))
         return 0;
 
     SpellClassOptionsEntry const* classOptions = spellproto->GetSpellClassOptions();
 
     // Explicit diminishing duration
-    switch(spellproto->GetSpellFamilyName())
+    switch (spellproto->GetSpellFamilyName())
     {
         case SPELLFAMILY_WARLOCK:
         {

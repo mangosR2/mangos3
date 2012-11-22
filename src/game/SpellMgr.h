@@ -207,8 +207,8 @@ inline bool IsSpellLastAuraEffect(SpellEntry const *spellInfo, SpellEffectIndex 
 {
     for(int i = effecIdx+1; i < MAX_EFFECT_INDEX; ++i)
     {
-        if(SpellEffectEntry const* effectEntry = spellInfo->GetSpellEffect(SpellEffectIndex(i)))
-            if(effectEntry->EffectApplyAuraName)
+        if (SpellEffectEntry const* effectEntry = spellInfo->GetSpellEffect(SpellEffectIndex(i)))
+            if (effectEntry->EffectApplyAuraName)
                 return false;
     }
 
@@ -220,8 +220,8 @@ bool IsNoStackAuraDueToAura(uint32 spellId_1, uint32 spellId_2);
 inline bool IsSealSpell(SpellEntry const *spellInfo)
 {
     SpellEffectEntry const* spellEffect = spellInfo->GetSpellEffect(EFFECT_INDEX_0);
-    //Collection of all the seal family flags. No other paladin spell has any of those.
-    return spellInfo->IsFitToFamily(SPELLFAMILY_PALADIN, UI64LIT(0x26000C000A000000)) &&
+    // Collection of all the seal family flags. No other paladin spell has any of those.
+    return spellInfo->IsFitToFamily(SPELLFAMILY_PALADIN, UI64LIT(0xA200080000000000)) &&
         // avoid counting target triggered effect as seal for avoid remove it or seal by it.
         spellEffect && spellEffect->EffectImplicitTargetA == TARGET_SELF;
 }
