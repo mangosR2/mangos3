@@ -353,15 +353,15 @@ class MANGOS_DLL_SPEC Map : public GridRefManager<NGridType>
 
         void SendInitSelf( Player * player );
 
-        void SendInitTransports( Player * player );
-        void SendRemoveTransports( Player * player );
+        void SendInitTransports(Player* player);
+        void SendRemoveTransports(Player* player);
 
-        bool CreatureCellRelocation(Creature *creature, Cell new_cell);
+        bool CreatureCellRelocation(Creature* creature, Cell new_cell);
 
-        bool loaded(const GridPair &) const;
-        void EnsureGridCreated(const GridPair &);
-        bool EnsureGridLoaded(Cell const&);
-        void EnsureGridLoadedAtEnter(Cell const&, Player* player = NULL);
+        bool loaded(GridPair const& p) const;
+        void EnsureGridCreated(GridPair const& p);
+        bool EnsureGridLoaded(Cell const& c);
+        void EnsureGridLoadedAtEnter(Cell const& c, Player* player = NULL);
 
         void buildNGridLinkage(NGridType* pNGridType) { pNGridType->link(this); }
 
@@ -379,8 +379,8 @@ class MANGOS_DLL_SPEC Map : public GridRefManager<NGridType>
         template<class T> void setUnitCell(T* /*obj*/) {}
         void setUnitCell(Creature* obj);
 
-        bool isGridObjectDataLoaded(uint32 x, uint32 y) const { return getNGrid(x,y) ? getNGrid(x,y)->isGridObjectDataLoaded() : false; }
-        void setGridObjectDataLoaded(bool pLoaded, uint32 x, uint32 y) { getNGrid(x,y)->setGridObjectDataLoaded(pLoaded); }
+        bool IsGridObjectDataLoaded(NGridType const* grid) const;
+        void SetGridObjectDataLoaded(bool pLoaded, NGridType* grid);
 
         void setNGrid(NGridType* grid, uint32 x, uint32 y);
         void ScriptsProcess();
