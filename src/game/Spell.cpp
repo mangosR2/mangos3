@@ -1731,6 +1731,13 @@ void Spell::DoSpellHitOnUnit(Unit *unit, uint32 effectMask)
             if (!realCaster->HasAura(54934))
                 effectMask &= ~(1 << 1);
         }
+        // Word of Glory
+        else if (m_spellInfo->Id == 85673)
+        {
+            // Glyph of the Long Word
+            if (!realCaster->HasAura(93466))
+                effectMask &= ~(1 << 1);
+        }
     }
 
     // Recheck immune (only for delayed spells)

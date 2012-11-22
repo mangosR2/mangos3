@@ -6339,6 +6339,12 @@ void Spell::EffectHeal(SpellEffectEntry const* effect)
             if (player->HasSkill(SKILL_ENGINEERING))
                 addhealth += int32(addhealth * 0.25);
         }
+        // Word of Glory
+        else if (m_spellInfo->Id == 85673)
+        {
+            if (m_caster->GetPowerIndex(POWER_HOLY_POWER) != INVALID_POWER_INDEX)
+                damage *= m_caster->GetPower(POWER_HOLY_POWER);
+        }
         // Atonement
         else if (m_spellInfo->Id == 94472)
         {
