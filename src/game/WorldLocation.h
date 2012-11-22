@@ -50,7 +50,7 @@ struct MANGOS_DLL_SPEC Position
 
     virtual bool HasMap() const { return false; };
 
-    bool operator == (Position const& pos) const
+    virtual bool operator == (Position const &pos) const
     {
         return ((fabs(x - pos.x) < M_NULL_F)
             && (fabs(y - pos.y) < M_NULL_F)
@@ -93,12 +93,14 @@ struct MANGOS_DLL_SPEC WorldLocation : public Position
 
     ~WorldLocation() {};
 
-    bool operator == (WorldLocation const& loc) const
+    virtual bool operator == (WorldLocation const &loc) const override
     {
         return (realmid    == loc.realmid
             && mapid       == loc.mapid
             && instance    == loc.instance
-            && ((Position*)this) == ((Position*)&loc));
+            && (fabs(coord_x - loc.coord_x) < M_NULL_F)
+            && (fabs(coord_y - loc.coord_y) < M_NULL_F)
+            && (fabs(coord_z - loc.coord_z) < M_NULL_F));
     }
 
     bool HasMap() const override
