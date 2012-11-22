@@ -4907,15 +4907,9 @@ void Spell::EffectDummy(SpellEffectEntry const* effect)
                     int hurt = 0;
                     int heal = 0;
 
-                    switch(m_spellInfo->Id)
+                    switch (m_spellInfo->Id)
                     {
                         case 20473: hurt = 25912; heal = 25914; break;
-                        case 20929: hurt = 25911; heal = 25913; break;
-                        case 20930: hurt = 25902; heal = 25903; break;
-                        case 27174: hurt = 27176; heal = 27175; break;
-                        case 33072: hurt = 33073; heal = 33074; break;
-                        case 48824: hurt = 48822; heal = 48820; break;
-                        case 48825: hurt = 48823; heal = 48821; break;
                         default:
                             sLog.outError("Spell::EffectDummy: Spell %u not handled in HS",m_spellInfo->Id);
                             return;

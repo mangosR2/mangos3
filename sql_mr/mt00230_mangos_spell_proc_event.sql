@@ -103,3 +103,8 @@ INSERT INTO `spell_proc_event` (`entry`, `SchoolMask`, `procEx`) VALUE
 DELETE FROM `spell_proc_event` WHERE `entry` = 20138;
 INSERT INTO `spell_proc_event` (`entry`, `SchoolMask`) VALUE
 (20138, 127);
+
+-- Speed of Light
+DELETE FROM `spell_proc_event` WHERE `entry` = 85495;
+INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskC0`) VALUE
+(85495, 10, 256);

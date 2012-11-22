@@ -2498,6 +2498,7 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, DamageInfo* damageI
                 basepoints[0] = triggerAmount * damage / 100 / GetSpellAuraMaxTicks(triggered_spell_id);
                 break;
             }
+
             switch(dummySpell->Id)
             {
                 // Judgement of Light
@@ -5185,8 +5186,17 @@ SpellAuraProcResult Unit::HandleMendingAuraProc(Unit* /*pVictim*/, DamageInfo* d
     return SPELL_AURA_PROC_OK;
 }
 
-SpellAuraProcResult Unit::HandleModCastingSpeedNotStackAuraProc(Unit* /*pVictim*/, DamageInfo* damageInfo, Aura const* /*triggeredByAura*/, SpellEntry const* procSpell, uint32 /*procFlag*/, uint32 /*procEx*/, uint32 /*cooldown*/)
+SpellAuraProcResult Unit::HandleModCastingSpeedNotStackAuraProc(Unit* /*pVictim*/, DamageInfo* damageInfo, Aura const* triggeredByAura, SpellEntry const* procSpell, uint32 /*procFlag*/, uint32 /*procEx*/, uint32 /*cooldown*/)
 {
+    SpellEntry const* spellProto = triggeredByAura->GetSpellProto();
+
+    // Speed of Light
+    if (spellProto->GetSpellFamilyName() == SPELLFAMILY_PALADIN && spellProto->SpellIconID == 5062)
+    {
+        int32 bp = triggeredByAura->GetModifier()->m_amount;
+        CastCustomSpell(this, 85497, &bp, NULL, NULL, true);
+    }
+
     // Skip melee hits or instant cast spells
     return !(procSpell == NULL || GetSpellCastTime(procSpell) == 0) ? SPELL_AURA_PROC_OK : SPELL_AURA_PROC_FAILED;
 }
