@@ -1894,7 +1894,7 @@ void GameObject::DamageTaken(Unit* pDoneBy, int32 damage, uint32 spellId)
                     newDisplayId = GetGOInfo()->destructibleBuilding.damagedDisplayId;
             }
 
-            if (pWho && GetGOInfo()->destructibleBuilding.destroyedEvent);
+            if (pWho && GetGOInfo()->destructibleBuilding.destroyedEvent)
                 StartEvents_Event(GetMap(), GetGOInfo()->destructibleBuilding.destroyedEvent, this, pWho);
 
             if (pWho)
@@ -1920,7 +1920,7 @@ void GameObject::DamageTaken(Unit* pDoneBy, int32 damage, uint32 spellId)
             else
                 newDisplayId = GetGOInfo()->destructibleBuilding.damagedDisplayId;
 
-            if (pWho && GetGOInfo()->destructibleBuilding.damageEvent);
+            if (pWho && GetGOInfo()->destructibleBuilding.damageEvent)
                 StartEvents_Event(GetMap(), GetGOInfo()->destructibleBuilding.damageEvent, this, pWho);
 
             // if we have a "dead" display we can "kill" the building after its damaged
@@ -2851,4 +2851,3 @@ bool GameObject::SetTeam(Team team)
     }
     return false;
 }
-
