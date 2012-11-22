@@ -1744,8 +1744,8 @@ void WorldObject::SetMap(Map* map)
     MANGOS_ASSERT(map);
     m_currMap = map;
     //lets save current map's Id/instanceId
-    m_position.SetMapId(map->GetId());
-    m_position.SetInstanceId(map->GetInstanceId());
+    m_position.mapid    = map->GetId();
+    m_position.instance = map->GetInstanceId();
 }
 
 TerrainInfo const* WorldObject::GetTerrain() const

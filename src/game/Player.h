@@ -2291,9 +2291,9 @@ class MANGOS_DLL_SPEC Player : public Unit
         float  m_recallO;
         void   SaveRecallPosition();
 
-        void SetHomebindToLocation(WorldLocation const& loc);
-        void RelocateToHomebind() { SetLocationMapId(m_homebind.GetMapId()); Relocate(m_homebind); }
-        bool TeleportToHomebind(uint32 options = TELE_TO_CHECKED) { return TeleportTo(m_homebind, options); }
+        void SetHomebindToLocation(WorldLocation const& loc, uint32 area_id);
+        void RelocateToHomebind() { SetLocationMapId(m_homebindMapId); Relocate(m_homebindX, m_homebindY, m_homebindZ); }
+        bool TeleportToHomebind(uint32 options = TELE_TO_CHECKED) { return TeleportTo(m_homebindMapId, m_homebindX, m_homebindY, m_homebindZ, GetOrientation(), options); }
 
         Object* GetObjectByTypeMask(ObjectGuid guid, TypeMask typemask);
 
@@ -2760,7 +2760,11 @@ class MANGOS_DLL_SPEC Player : public Unit
         PlayerbotMgr* m_playerbotMgr;
 
         // Homebind coordinates
-        WorldLocation m_homebind;
+        uint32 m_homebindMapId;
+        uint16 m_homebindAreaId;
+        float m_homebindX;
+        float m_homebindY;
+        float m_homebindZ;
 
         uint32 m_lastFallTime;
         float  m_lastFallZ;

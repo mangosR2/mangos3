@@ -497,8 +497,8 @@ class MANGOS_DLL_SPEC WorldObject : public Object
 
         void GetRandomPoint( float x, float y, float z, float distance, float &rand_x, float &rand_y, float &rand_z ) const;
 
-        uint32 GetMapId() const { return m_position.GetMapId(); }
-        uint32 GetInstanceId() const { return m_position.GetInstanceId(); }
+        uint32 GetMapId() const { return m_position.mapid; }
+        uint32 GetInstanceId() const { return m_position.instance; }
 
         virtual void SetPhaseMask(uint32 newPhaseMask, bool update);
         uint32 GetPhaseMask() const { return m_phaseMask; }
@@ -663,8 +663,8 @@ class MANGOS_DLL_SPEC WorldObject : public Object
         //these functions are used mostly for Relocate() and Corpse/Player specific stuff...
         //use them ONLY in LoadFromDB()/Create() funcs and nowhere else!
         //mapId/instanceId should be set in SetMap() function!
-        void SetLocationMapId(uint32 _mapId) { m_position.SetMapId(_mapId); }
-        void SetLocationInstanceId(uint32 _instanceId) { m_position.SetInstanceId(_instanceId); }
+        void SetLocationMapId(uint32 _mapId) { m_position.mapid = _mapId; }
+        void SetLocationInstanceId(uint32 _instanceId) { m_position.instance = _instanceId; }
 
         uint32 m_groupLootTimer;                            // (msecs)timer used for group loot
         uint32 m_groupLootId;                               // used to find group which is looting corpse

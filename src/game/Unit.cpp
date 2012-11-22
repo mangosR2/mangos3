@@ -13871,7 +13871,7 @@ bool Unit::IsVisibleTargetForSpell(WorldObject const* caster, SpellEntry const* 
     {
         DEBUG_FILTER_LOG(LOG_FILTER_SPELL_CAST, "Unit::IsVisibleTargetForSpell check LOS for spell %u, caster %s, location %f %f %f, target %s", 
             spellInfo->Id, caster->GetObjectGuid().GetString().c_str(), location->x, location->y, location->z, GetObjectGuid().GetString().c_str());
-        return ((GetMapId() == location->GetMapId()) && IsWithinLOS(location->x, location->y, location->z));
+        return ((GetMapId() == location->mapid) && IsWithinLOS(location->x, location->y, location->z));
     }
     else
     {
