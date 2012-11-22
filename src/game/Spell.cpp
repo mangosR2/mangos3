@@ -4158,7 +4158,9 @@ void Spell::cast(bool skipCheck)
         ((Player*)m_caster)->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_CAST_SPELL, m_spellInfo->Id);
     }
 
-    if (m_spellState == SPELL_STATE_FINISHED)                // stop cast if spell marked as finish somewhere in FillTargetMap
+    FillTargetMap();
+
+    if (m_spellState == SPELL_STATE_FINISHED)               // stop cast if spell marked as finish somewhere in FillTargetMap
     {
         m_caster->DecreaseCastCounter();
         SetExecutedCurrently(false);
@@ -5455,8 +5457,19 @@ void Spell::TakePower()
     // health as power used
     if (m_spellInfo->GetPowerType() == POWER_HEALTH)
     {
-        m_caster->ModifyHealth( -(int32)m_powerCost );
+        m_caster->ModifyHealth(-(int32)m_powerCost);
         return;
+    }
+
+    if (m_spellInfo->powerType == POWER_HOLY_POWER)
+    {
+        // spells consume all holy power when successfully hit
+        if (hit)
+            m_powerCost = m_caster->GetPower(POWER_HOLY_POWER);
+
+        // Inquisition - does not take power
+        if (m_spellInfo->Id == 84963)
+            return;
     }
 
     if (m_spellInfo->GetPowerType() >= MAX_POWERS)
@@ -5539,7 +5552,7 @@ SpellCastResult Spell::CheckOrTakeRunePower(bool take)
 
     SpellRuneCostEntry const *src = sSpellRuneCostStore.LookupEntry(m_spellInfo->runeCostID);
 
-    if(!src)
+    if (!src)
         return SPELL_CAST_OK;
 
     if (src->NoRuneCost() && (!take || src->NoRunicPowerGain()))
@@ -5551,20 +5564,20 @@ SpellCastResult Spell::CheckOrTakeRunePower(bool take)
     // at this moment for rune cost exist only no cost mods, and no percent mods
     int32 runeCostMod = 10000;
     if (Player* modOwner = plr->GetSpellModOwner())
-        modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_COST, runeCostMod);
+        modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_COST, runeCostMod, this);
 
     if (runeCostMod > 0)
     {
         int32 runeCost[NUM_RUNE_TYPES];                         // blood, frost, unholy, death
 
         // init cost data and apply mods
-        for(uint32 i = 0; i < RUNE_DEATH; ++i)
+        for (uint32 i = 0; i < RUNE_DEATH; ++i)
             runeCost[i] = runeCostMod > 0 ? src->RuneCost[i] : 0;
 
         runeCost[RUNE_DEATH] = 0;                               // calculated later
 
         // scan non-death runes (death rune not used explicitly in rune costs)
-        for(uint32 i = 0; i < MAX_RUNES; ++i)
+        for (uint32 i = 0; i < MAX_RUNES; ++i)
         {
             RuneType rune = plr->GetCurrentRune(i);
             if (runeCost[rune] <= 0)
@@ -5581,14 +5594,14 @@ SpellCastResult Spell::CheckOrTakeRunePower(bool take)
         }
 
         // collect all not counted rune costs to death runes cost
-        for(uint32 i = 0; i < RUNE_DEATH; ++i)
+        for (uint32 i = 0; i < RUNE_DEATH; ++i)
             if (runeCost[i] > 0)
                 runeCost[RUNE_DEATH] += runeCost[i];
 
         // scan death runes
         if (runeCost[RUNE_DEATH] > 0)
         {
-            for(uint32 i = 0; i < MAX_RUNES && runeCost[RUNE_DEATH]; ++i)
+            for (uint32 i = 0; i < MAX_RUNES && runeCost[RUNE_DEATH]; ++i)
             {
                 RuneType rune = plr->GetCurrentRune(i);
                 if (rune != RUNE_DEATH)
@@ -5611,7 +5624,7 @@ SpellCastResult Spell::CheckOrTakeRunePower(bool take)
             }
         }
 
-        if(!take && runeCost[RUNE_DEATH] > 0)
+        if (!take && runeCost[RUNE_DEATH] > 0)
             return SPELL_FAILED_NO_POWER;                       // not sure if result code is correct
     }
 
@@ -7917,12 +7930,12 @@ int32 Spell::CalculatePowerCost(SpellEntry const* spellInfo, Unit* caster, Spell
         }
     }
 
-    SpellSchoolMask schoolMask = spell ? spell->m_spellSchoolMask : GetSpellSchoolMask(spellInfo);
+    SpellSchools spellSchool = GetFirstSchoolInMask(spell ? spell->m_spellSchoolMask : GetSpellSchoolMask(spellInfo));
     // Flat mod from caster auras by spell school
     Unit::AuraList const& pwrCostAuras = caster->GetAurasByType(SPELL_AURA_MOD_POWER_COST_SCHOOL);
     for (Unit::AuraList::const_iterator itr = pwrCostAuras.begin(); itr != pwrCostAuras.end(); ++itr)
     {
-        if (((*itr)->GetModifier()->m_miscvalue & schoolMask) &&
+        if (((*itr)->GetModifier()->m_miscvalue & spellSchool) &&
             (!(*itr)->GetSpellEffect()->EffectMiscValueB || (*itr)->GetSpellEffect()->EffectMiscValueB & (1 << spellInfo->powerType)))
             powerCost += (*itr)->GetModifier()->m_amount;
     }
@@ -7944,7 +7957,7 @@ int32 Spell::CalculatePowerCost(SpellEntry const* spellInfo, Unit* caster, Spell
     Unit::AuraList const& pwrCostPctAuras = caster->GetAurasByType(SPELL_AURA_MOD_POWER_COST_SCHOOL_PCT);
     for (Unit::AuraList::const_iterator itr = pwrCostPctAuras.begin(); itr != pwrCostPctAuras.end(); ++itr)
     {
-        if (((*itr)->GetModifier()->m_miscvalue & schoolMask) &&
+        if (((*itr)->GetModifier()->m_miscvalue & spellSchool) &&
             (!(*itr)->GetSpellEffect()->EffectMiscValueB || (*itr)->GetSpellEffect()->EffectMiscValueB & (1 << spellInfo->powerType)))
             pctCostMultiplier += (*itr)->GetModifier()->m_amount / 100.0f;
     }
