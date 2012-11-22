@@ -9420,6 +9420,12 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     unitTarget->CastSpell(unitTarget, 54522, true);
                     break;
                 }
+                case 52124:                                 // Sky Darkener Assault
+                {
+                    if (unitTarget && unitTarget != m_caster)
+                        m_caster->CastSpell(unitTarget, 52125, false);
+                    break;
+                }
                 case 52357:                                 // Into the realm of shadows
                 {
                     if (!unitTarget)
@@ -9430,18 +9436,23 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                 }
                 case 52479:                                 // The Gift That Keeps On Giving
                 {
-                    if (!m_caster || !unitTarget)
+                    if (m_caster->GetTypeId() != TYPEID_PLAYER || !unitTarget)
                         return;
 
-                    m_caster->CastSpell(m_caster, roll_chance_i(75) ? 52505 : m_spellInfo->CalculateSimpleValue(eff_idx), true);
-                    ((Creature*)unitTarget)->ForcedDespawn();
-                    break;
+                    // Each ghoul casts 52500 onto player, so use number of auras as check
+                    Unit::SpellAuraHolderConstBounds bounds = m_caster->GetSpellAuraHolderBounds(52500);
+                    uint32 summonedGhouls = std::distance(bounds.first, bounds.second);
+
+                    m_caster->CastSpell(unitTarget->GetPositionX(), unitTarget->GetPositionY(), unitTarget->GetPositionZ(), urand(0, 2) || summonedGhouls >= 5 ? 52505 : m_spellInfo->CalculateSimpleValue(eff_idx), true);
+                    return;
                 }
-                case 52124:                                 // Sky Darkener Assault
+                case 52555:                                 // Dispel Scarlet Ghoul Credit Counter
                 {
-                    if (unitTarget && unitTarget != m_caster)
-                        m_caster->CastSpell(unitTarget, 52125, false);
-                    break;
+                    if (!unitTarget)
+                        return;
+
+                    unitTarget->RemoveAurasByCasterSpell(m_spellInfo->CalculateSimpleValue(eff_idx), m_caster->GetObjectGuid());
+                    return;
                 }
                 case 52694:                                 // Recall Eye of Acherus
                 {
