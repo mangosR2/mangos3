@@ -123,3 +123,8 @@ INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`,
 DELETE FROM `spell_proc_event` WHERE `entry` = 84800;
 INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`, `SpellFamilyMaskC0`, `procFlags`, `CustomChance`) VALUE
 (84800, 10, 1073741824, 1024, 16384, 100);
+
+-- Illuminated Healing
+DELETE FROM `spell_proc_event` WHERE `entry` = 76669;
+INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`, `SpellFamilyMaskB0`, `SpellFamilyMaskC0`) VALUE
+(76669, 10, 2147483648+1073741824, 65536, 1024+16384+512);
