@@ -1082,7 +1082,7 @@ void Object::MarkForClientUpdate()
 
 WorldObject::WorldObject()
     : m_groupLootTimer(0), m_groupLootId(0), m_lootGroupRecipientId(0), m_transportInfo(NULL),
-    m_currMap(NULL), m_position(WorldLocation()), m_phaseMask(PHASEMASK_NORMAL), m_viewPoint(*this), m_isActiveObject(false),
+    m_currMap(NULL), m_mapId(0), m_InstanceId(0), m_phaseMask(PHASEMASK_NORMAL), m_viewPoint(*this), m_isActiveObject(false),
     m_LastUpdateTime(WorldTimer::getMSTime())
 {
 }
@@ -1129,33 +1129,31 @@ ObjectLockType& WorldObject::GetLock(MapLockType _lockType)
 
 void WorldObject::Relocate(float x, float y, float z, float orientation)
 {
-    Relocate(WorldLocation(GetMapId(), x, y, z, orientation));
+    m_position.x = x;
+    m_position.y = y;
+    m_position.z = z;
+    m_position.o = orientation;
+
+    if (isType(TYPEMASK_UNIT))
+        ((Unit*)this)->m_movementInfo.ChangePosition(x, y, z, orientation);
 }
 
 void WorldObject::Relocate(float x, float y, float z)
 {
-    Relocate(x, y, z, GetOrientation());
+    m_position.x = x;
+    m_position.y = y;
+    m_position.z = z;
+
+    if (isType(TYPEMASK_UNIT))
+        ((Unit*)this)->m_movementInfo.ChangePosition(x, y, z, GetOrientation());
 }
 
 void WorldObject::SetOrientation(float orientation)
 {
-    Relocate(WorldLocation(GetMapId(), GetPositionX(), GetPositionY(), GetPositionZ(), orientation));
-}
-
-void WorldObject::Relocate(WorldLocation const& location)
-{
-    bool locationChanged    = !bool(location == m_position);
-    bool orientationChanged = bool(fabs(location.o - m_position.o) > M_NULL_F);
-
-    m_position = location;
+    m_position.o = orientation;
 
     if (isType(TYPEMASK_UNIT))
-    {
-        if (locationChanged)
-            ((Unit*)this)->m_movementInfo.ChangePosition(m_position.x, m_position.y, m_position.z, m_position.o);
-        else if (orientationChanged)
-            ((Unit*)this)->m_movementInfo.ChangeOrientation(m_position.o);
-    }
+        ((Unit*)this)->m_movementInfo.ChangeOrientation(orientation);
 }
 
 uint32 WorldObject::GetZoneId() const
@@ -1739,13 +1737,13 @@ void WorldObject::SendGameObjectCustomAnim(ObjectGuid guid, uint32 animId /*= 0*
     SendMessageToSet(&data, true);
 }
 
-void WorldObject::SetMap(Map* map)
+void WorldObject::SetMap(Map * map)
 {
     MANGOS_ASSERT(map);
     m_currMap = map;
     //lets save current map's Id/instanceId
-    m_position.mapid    = map->GetId();
-    m_position.instance = map->GetInstanceId();
+    m_mapId = map->GetId();
+    m_InstanceId = map->GetInstanceId();
 }
 
 TerrainInfo const* WorldObject::GetTerrain() const

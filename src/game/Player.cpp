@@ -15877,7 +15877,7 @@ bool Player::LoadFromDB(ObjectGuid guid, SqlQueryHolder *holder)
             savedLocation.orientation);
         RelocateToHomebind();
 
-        savedLocation = GetPosition();                          // reset saved position to homebind
+        GetPosition(savedLocation);                          // reset saved position to homebind
 
         transGUID = 0;
         m_movementInfo.ClearTransportData();

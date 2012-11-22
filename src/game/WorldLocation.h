@@ -50,11 +50,11 @@ struct MANGOS_DLL_SPEC Position
 
     virtual bool HasMap() const { return false; };
 
-    virtual bool operator == (Position const &pos) const
+    bool operator == (Position const &pos) const
     {
-        return ((fabs(x - pos.x) < M_NULL_F)
-            && (fabs(y - pos.y) < M_NULL_F)
-            && (fabs(z - pos.z) < M_NULL_F));
+        return ((x - pos.x < M_NULL_F)
+            && (y - pos.y < M_NULL_F)
+            && (z - pos.z < M_NULL_F));
     }
 };
 
@@ -89,26 +89,22 @@ struct MANGOS_DLL_SPEC WorldLocation : public Position
         : Position(loc.coord_x, loc.coord_y, loc.coord_z, loc.orientation), mapid(loc.mapid), instance(loc.instance), realmid(loc.realmid)
     {}
 
-    WorldLocation(WorldObject const& object);
-
     ~WorldLocation() {};
 
-    virtual bool operator == (WorldLocation const &loc) const override
+    bool operator == (WorldLocation const &loc) const
     {
         return (realmid    == loc.realmid
             && mapid       == loc.mapid
             && instance    == loc.instance
-            && (fabs(coord_x - loc.coord_x) < M_NULL_F)
-            && (fabs(coord_y - loc.coord_y) < M_NULL_F)
-            && (fabs(coord_z - loc.coord_z) < M_NULL_F));
+            && (coord_x - loc.coord_x < M_NULL_F)
+            && (coord_y - loc.coord_y < M_NULL_F)
+            && (coord_z - loc.coord_z < M_NULL_F));
     }
 
     bool HasMap() const override
     {
         return mapid >= 0;
     }
-
     Position const& GetPosition() { return *this; };
-
 };
 #endif
