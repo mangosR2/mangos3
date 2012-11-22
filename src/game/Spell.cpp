@@ -940,7 +940,8 @@ void Spell::FillTargetMap()
                             SetTargetMap(SpellEffectIndex(i), spellEffect->EffectImplicitTargetA, tmpUnitLists[i /*==effToIndex[i]*/]);
                             SetTargetMap(SpellEffectIndex(i), spellEffect->EffectImplicitTargetB, tmpUnitLists[i /*==effToIndex[i]*/]);
                     }
-                    case TARGET_SELF2:
+                    break;
+                case TARGET_SELF2:
                     switch(spellEffect->EffectImplicitTargetB)
                     {
                         case TARGET_NONE:
@@ -3019,9 +3020,24 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
         case TARGET_LARGE_FRONTAL_CONE:
             FillAreaTargets(targetUnitMap, radius, PUSH_IN_FRONT_90, SPELL_TARGETS_AOE_DAMAGE);
             break;
-        case TARGET_FRIENDLY_FRONTAL_CONE:
-            FillAreaTargets(targetUnitMap, radius, PUSH_IN_FRONT_30, SPELL_TARGETS_FRIENDLY);
+        case TARGET_ALLY_IN_FRONT_OF_CASTER_30:
+        {
+            FillRaidOrPartyTargets(targetUnitMap, m_caster, m_caster, radius, true, false, false);
+
+            PrioritizeHealthUnitQueue healthQueue;
+            for (UnitList::const_iterator itr = targetUnitMap.begin(); itr != targetUnitMap.end(); ++itr)
+                if (!(*itr)->isDead())
+                    healthQueue.push(PrioritizeHealthUnitWraper(*itr));
+
+            targetUnitMap.clear();
+            while (!healthQueue.empty() && targetUnitMap.size() < unMaxTargets)
+            {
+                if (m_caster->isInFront(healthQueue.top().getUnit(), radius, M_PI_F / 4 ))
+                    targetUnitMap.push_back(healthQueue.top().getUnit());
+                healthQueue.pop();
+            }
             break;
+        }
         case TARGET_NARROW_FRONTAL_CONE:
             FillAreaTargets(targetUnitMap, radius, PUSH_IN_FRONT_15, SPELL_TARGETS_AOE_DAMAGE);
             break;
