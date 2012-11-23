@@ -6711,7 +6711,6 @@ void Spell::EffectEnergize(SpellEffectEntry const* effect)
             damage = damage * unitTarget->GetMaxPower(POWER_MANA) / 100;
             break;
         case 20167:                                         // Seal of Insight
-        case 31930:                                         // Judgements of the Wise
         case 63375:                                         // Improved Stormstrike
         case 67545:                                         // Empowered Fire
         case 68082:                                         // Glyph of Seal of Command

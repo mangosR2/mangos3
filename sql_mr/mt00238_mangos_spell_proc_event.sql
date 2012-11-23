@@ -128,3 +128,19 @@ INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`,
 DELETE FROM `spell_proc_event` WHERE `entry` = 76669;
 INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`, `SpellFamilyMaskB0`, `SpellFamilyMaskC0`) VALUE
 (76669, 10, 2147483648+1073741824, 65536, 1024+16384+512);
+
+-- Judgements of the Wise
+DELETE FROM `spell_proc_event` WHERE `entry` = 31878;
+INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`) VALUE
+(31878, 10, 8388608);
+
+-- Divine Purpose
+DELETE FROM `spell_proc_event` WHERE `entry` IN (85117, 86172);
+INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`, `SpellFamilyMaskB0`, `SpellFamilyMaskC0`, `procFlags`, `CustomChance`) VALUE
+(85117, 10, 8388608, 2+131072+2097152+128, 32768+8192, 65536+16+16384, 100),
+(86172, 10, 8388608, 2+131072+2097152+128, 32768+8192, 65536+16+16384, 100);
+
+-- Divine Purpose proc
+DELETE FROM `spell_proc_event` WHERE `entry` = 90174;
+INSERT INTO `spell_proc_event` (`entry`, `procFlags`, `procEx`, `CustomChance`) VALUE
+(90174, 65536+16+16384, 524288, 100);

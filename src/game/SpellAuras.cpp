@@ -1373,6 +1373,7 @@ void Aura::HandleAddModifier(bool apply, bool Real)
             case 88688:                                     // Surge of Light
             case 88819:                                     // Daybreak
             case 89485:                                     // Inner Focus
+            case 90174:                                     // Divine Purpose
                 GetHolder()->SetAuraCharges(1);
                 break;
             default:
@@ -6508,7 +6509,7 @@ void Aura::HandlePeriodicEnergize(bool apply, bool Real)
     if (!Real)
         return;
 
-    Unit *target = GetTarget();
+    Unit* target = GetTarget();
 
     // For prevent double apply bonuses
     bool loading = (target->GetTypeId() == TYPEID_PLAYER && ((Player*)target)->GetSession()->PlayerLoading());
@@ -6520,7 +6521,7 @@ void Aura::HandlePeriodicEnergize(bool apply, bool Real)
             case 54833:                                     // Glyph of Innervate (value%/2 of casters base mana)
             {
                 if (Unit* caster = GetCaster())
-                    m_modifier.m_amount = int32(caster->GetCreateMana() * GetBasePoints() / (200 * GetAuraMaxTicks()));
+                    ChangeAmount(int32(caster->GetCreateMana() * GetBasePoints() / (200 * GetAuraMaxTicks())));
                 break;
 
             }
@@ -6532,18 +6533,23 @@ void Aura::HandlePeriodicEnergize(bool apply, bool Real)
                     if (caster->HasAura(54832))
                         caster->CastSpell(caster,54833,true,NULL,this);
 
-                    m_modifier.m_amount = int32(caster->GetCreateMana() * GetBasePoints() / (100 * GetAuraMaxTicks()));
+                    ChangeAmount(int32(caster->GetCreateMana() * GetBasePoints() / (100 * GetAuraMaxTicks())));
                 }
                 break;
             }
+            case 31930:                                     // Judgements of the Wise
+            {
+                ChangeAmount(target->GetCreateMana() * GetBasePoints() / 100 / GetAuraMaxTicks());
+                break;
+            }
             case 48391:                                     // Owlkin Frenzy 2% base mana
-                m_modifier.m_amount = target->GetCreateMana() * 2 / 100;
+                ChangeAmount(target->GetCreateMana() * 2 / 100);
                 break;
             case 57669:                                     // Replenishment (0.2% from max)
-                m_modifier.m_amount = target->GetMaxPower(POWER_MANA) * 2 / 1000;
+                ChangeAmount(target->GetMaxPower(POWER_MANA) * 2 / 1000);
                 break;
             case 61782:                                     // Infinite Replenishment (0.25% from max)
-                m_modifier.m_amount = target->GetMaxPower(POWER_MANA) * 25 / 10000;
+                ChangeAmount(target->GetMaxPower(POWER_MANA) * 25 / 10000);
                 break;
             default:
                 break;
