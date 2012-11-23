@@ -646,8 +646,8 @@ UPDATE creature_template SET InhabitType=3 WHERE entry=29414;
 REPLACE INTO creature_template_addon (entry,auras) VALUES (29414,'57403');
 
 -- Quest: Defending Wyrmrest Temple (12372)
-DELETE FROM gossip_scripts WHERE id=9568;
-REPLACE INTO gossip_scripts (id,command,datalong,datalong2,comments) VALUES (9568,15,49256,3,'');
+DELETE FROM `dbscripts_on_gossip` WHERE id=9568;
+REPLACE INTO `dbscripts_on_gossip` (id,command,datalong,datalong2,comments) VALUES (9568,15,49256,3,'');
 REPLACE INTO `gossip_menu_option` (`menu_id`, `id`, `option_icon`, `option_text`, `option_id`, `npc_option_npcflag`, `action_menu_id`, `action_poi_id`, `action_script_id`, `box_coded`, `box_money`, `box_text`, `cond_1`, `cond_1_val_1`, `cond_1_val_2`, `cond_2`, `cond_2_val_1`, `cond_2_val_2`, `cond_3`, `cond_3_val_1`, `cond_3_val_2`, `condition_id`) values('9568','0','0','We need to get into the fight. Are you ready?','1','1','-1','0','9568','0','0',NULL,'9','12372','0','0','0','0','0','0','0','0');
 
 UPDATE `creature_template` SET `unit_flags` = 0,`InhabitType` = 3 WHERE `entry` = 27629;
