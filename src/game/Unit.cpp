@@ -3650,10 +3650,7 @@ SpellMissInfo Unit::SpellResistResult(Unit* pVictim, SpellEntry const* spell)
     // Spell hit will not reduce this chance. It is assumed that this percentage is exactly the damage reduction percentage given above."
 
     // Get base resistance values
-    uint32 targetResistance = pVictim->GetObjectGuid().IsPlayerOrPet() ? 
-                                  pVictim->GetResistance(SpellSchoolMask(spell->SchoolMask)) :
-                                  // FIXME - Creatures also have resistances!
-                                  0;
+    uint32 targetResistance = pVictim->GetResistance(SpellSchoolMask(spell->SchoolMask));
 
     uint32 ignoreTargetResistance = GetTotalAuraModifierByMiscMask(SPELL_AURA_MOD_TARGET_RESISTANCE, spell->SchoolMask);
     if (targetResistance < ignoreTargetResistance)
@@ -3665,7 +3662,6 @@ SpellMissInfo Unit::SpellResistResult(Unit* pVictim, SpellEntry const* spell)
 
     uint32 effectiveRR = targetResistance + std::max(((int)pVictim->GetLevelForTarget(this) - (int)GetLevelForTarget(pVictim)) * 5, 0) - std::min(targetResistance, spellPenetration);
     uint32 drp = uint32(100.0f * ((float)effectiveRR / (((pVictim->GetLevelForTarget(this) > 80) ? 510.0f : 400.0f) + (float)effectiveRR)));
-
 
     DEBUG_FILTER_LOG(LOG_FILTER_SPELL_CAST, "Unit::SpellResistResult  calculation part 2 (damage reduction percentage): caster %s, target %s, spell %u, targetResistance:%i, penetration:%u, effectiveRR:%u, DRP:%u",
         GetObjectGuid().GetString().c_str(),
@@ -14012,10 +14008,12 @@ uint32 Unit::GetResistance(SpellSchoolMask schoolMask) const
     {
         if (schoolMask & (1 << i))
         {
-            int32 schoolRes = floor((float)GetResistance(SpellSchools(i)) + GetResistanceBuffMods(SpellSchools(i), true) - GetResistanceBuffMods(SpellSchools(i), false));
+            int32 schoolRes = (GetObjectGuid().IsPlayer() || (GetObjectGuid().IsPet() && GetOwner() && GetOwner()->GetObjectGuid().IsPlayer())) ?
+                              GetResistance(SpellSchools(i)) : 
+                              floor(GetResistanceBuffMods(SpellSchools(i), true) - GetResistanceBuffMods(SpellSchools(i), false));
             if (resistance < schoolRes)
                 resistance = schoolRes;
-                // by some sources, may be resistance +=, but i not sure (/dev/rsa)
+            // Use maximal resistance from mask (not lower then 0)
         }
     }
     return (resistance >= 0) ? (uint32)resistance : 0;
