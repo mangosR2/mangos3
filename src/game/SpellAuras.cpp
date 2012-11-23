@@ -2338,8 +2338,6 @@ void Aura::TriggerSpell()
                 return;
             case 38280:                                     // Static Charge (Lady Vashj in Serpentshrine Cavern)
             case 53563:                                     // Beacon of Light
-            case 52658:                                     // Static Overload (normal&heroic) (Ionar in Halls of Lightning)
-            case 59795:
                 // original caster must be target
                 target->CastSpell(target, trigger_spell_id, true, NULL, this, target->GetObjectGuid());
                 return;
