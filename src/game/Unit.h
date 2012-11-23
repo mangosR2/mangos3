@@ -2132,9 +2132,8 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         void ClearComboPoints();
 
         ///----------Pet responses methods-----------------
-        void SendPetCastFail(uint32 spellid, SpellCastResult msg);
-        void SendPetActionFeedback (uint8 msg);
-        void SendPetTalk (uint32 pettalk);
+        void SendPetActionFeedback(uint8 msg);
+        void SendPetTalk(uint32 pettalk);
         void SendPetAIReaction();
         ///----------End of Pet responses methods----------
         void DoPetAction(Player* owner, uint8 flag, uint32 spellid, ObjectGuid petGuid, ObjectGuid targetGuid);

@@ -754,10 +754,8 @@ void PetAI::UpdateAI(const uint32 diff)
                     default:
                     {
                         Player* owner = (Player*)m_creature->GetOwner();
-                        if (owner && m_creature->HasAuraType(SPELL_AURA_MOD_POSSESS))
-                            Spell::SendCastResult(owner,spellInfo,0,result);
-                        else
-                            m_creature->SendPetCastFail(spellID, result);
+                        if (owner)
+                            Spell::SendCastResult(owner,spellInfo,0,result, true);
 
                         DEBUG_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS,"PetAI::Update cast %s, AI %u Target %s spell %u result %u",
                             m_creature->GetObjectGuid().GetString().c_str(),
