@@ -816,28 +816,6 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, DamageInfo* damageI
                     triggered_spell_id = 34650;
                     break;
                 }
-                // Divine purpose
-                case 31871:
-                case 31872:
-                {
-                    // Roll chance
-                    if (!roll_chance_i(triggerAmount))
-                        return SPELL_AURA_PROC_FAILED;
-
-                    // Remove any stun effect on target
-                    SpellAuraHolderMap& Auras = pVictim->GetSpellAuraHolderMap();
-                    for(SpellAuraHolderMap::const_iterator iter = Auras.begin(); iter != Auras.end();)
-                    {
-                        if (iter->second->HasMechanic(MECHANIC_STUN))
-                        {
-                            pVictim->RemoveAurasDueToSpell(iter->second->GetId());
-                            iter = Auras.begin();
-                        }
-                        else
-                            ++iter;
-                    }
-                    return SPELL_AURA_PROC_OK;
-                }
                 // Mark of Malice
                 case 33493:
                 {

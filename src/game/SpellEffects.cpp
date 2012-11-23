@@ -6353,7 +6353,28 @@ void Spell::EffectHeal(SpellEffectEntry const* effect)
         else if (m_spellInfo->Id == 85222 || m_spellInfo->Id == 85673)
         {
             if (m_caster->GetPowerIndex(POWER_HOLY_POWER) != INVALID_POWER_INDEX)
-                addhealth *= m_powerCost;
+                addhealth *= m_usedHolyPower;
+
+            // World of Glory
+            if (m_spellInfo->Id == 85673)
+            {
+                // Search Eternal Glory
+                Unit::AuraList const& mDummyAuras = m_caster->GetAurasByType(SPELL_AURA_DUMMY);
+                for (Unit::AuraList::const_iterator itr = mDummyAuras.begin(); itr != mDummyAuras.end(); ++itr)
+                {
+                    if ((*itr)->GetSpellProto()->SpellIconID == 2944 &&
+                        (*itr)->GetSpellProto()->GetSpellFamilyName() == SPELLFAMILY_PALADIN)
+                    {
+                        if (roll_chance_i((*itr)->GetModifier()->m_amount))
+                        {
+                            int32 bp = m_usedHolyPower;
+                            // Restore power cost
+                            m_caster->CastCustomSpell(m_caster, 88676, &bp, NULL, NULL, true);
+                        }
+                        break;
+                    }
+                }
+            }
         }
         // Atonement
         else if (m_spellInfo->Id == 94472)

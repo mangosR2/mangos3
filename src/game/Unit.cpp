@@ -11841,7 +11841,7 @@ int32 Unit::CalculateAuraDuration(SpellEntry const* spellProto, uint32 effectMas
                 else if (spellProto->Id == 84963)
                 {
                     if (spell && GetPowerIndex(POWER_HOLY_POWER) != INVALID_POWER_INDEX)
-                        duration *= spell->GetPowerCost();
+                        duration *= spell->GetUsedHolyPower();
                 }
                 break;
             default:

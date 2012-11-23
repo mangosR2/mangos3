@@ -5484,24 +5484,38 @@ void Spell::TakePower()
         return;
     }
 
-    if (m_spellInfo->powerType == POWER_HOLY_POWER)
+    if (m_spellInfo->powerType >= MAX_POWERS)
     {
+        sLog.outError("Spell::TakePower: Unknown power type '%d'", m_spellInfo->powerType);
+        return;
+    }
+
+    Powers powerType = Powers(m_spellInfo->powerType);
+
+    if (powerType == POWER_HOLY_POWER)
+    {
+        m_usedHolyPower = m_powerCost;
+
         // spells consume all holy power when successfully hit
         if (hit)
-            m_powerCost = m_caster->GetPower(POWER_HOLY_POWER);
+        {
+            // Divine Purpose
+            if (m_caster->HasAura(90174))
+            {
+                m_usedHolyPower = m_caster->GetMaxPower(POWER_HOLY_POWER);
+                return;
+            }
+            else
+                m_usedHolyPower = m_caster->GetPower(POWER_HOLY_POWER);
+        }
 
         // Inquisition - does not take power
         if (m_spellInfo->Id == 84963)
             return;
-    }
 
-    if (m_spellInfo->GetPowerType() >= MAX_POWERS)
-    {
-        sLog.outError("Spell::TakePower: Unknown power type '%d'", m_spellInfo->GetPowerType());
+        m_caster->ModifyPower(powerType, -(int32)m_usedHolyPower);
         return;
     }
-
-    Powers powerType = Powers(m_spellInfo->GetPowerType());
 
     if (powerType == POWER_HOLY_POWER)
     {
