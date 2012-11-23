@@ -1255,9 +1255,14 @@ void Spell::EffectSchoolDMG(SpellEffectEntry const* effect)
             }
             case SPELLFAMILY_PALADIN:
             {
+                // Exorcism
+                if (m_spellInfo->Id == 879)
+                {
+                    damage += int32(0.344f * std::max(int32(m_caster->GetTotalAttackPowerValue(BASE_ATTACK)), m_caster->SpellBaseDamageBonusDone(GetSpellSchoolMask(m_spellInfo))));
+                }
                 // Judgement of Righteousness - receive benefit from Spell Damage and Attack power
                 // ${1+0.2*$AP+0.32*$SPH}
-                if (m_spellInfo->Id == 20187)
+                else if (m_spellInfo->Id == 20187)
                 {
                     float ap = m_caster->GetTotalAttackPowerValue(BASE_ATTACK);
                     int32 holy = m_caster->SpellBaseDamageBonusDone(GetSpellSchoolMask(m_spellInfo));

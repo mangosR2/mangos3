@@ -2816,6 +2816,8 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
                     targetUnitMap.resize(unMaxTargets);
                 break;
             }
+            else if (m_spellInfo->Id == 70940)              // Divine Guardian
+                FillRaidOrPartyTargets(targetUnitMap, m_caster, m_caster, radius, true, true, false);
             else
                 FillRaidOrPartyTargets(targetUnitMap, m_caster, m_caster, radius, true, true, IsPositiveSpell(m_spellInfo->Id));
             break;
