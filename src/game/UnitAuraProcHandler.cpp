@@ -1591,6 +1591,12 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, DamageInfo* damageI
                 triggered_spell_id = 26654;
                 break;
             }
+            // Vengeance (warrior)
+            else if (dummySpell->Id == 93098)
+                return HandleVengeanceProc(pVictim, damage, triggerAmount);
+            // Vengeance (death knight)
+            else if (dummySpell->Id == 93099)
+                return HandleVengeanceProc(pVictim, damage, triggerAmount);
             break;
         }
         case SPELLFAMILY_WARLOCK:
@@ -2201,6 +2207,9 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, DamageInfo* damageI
                     basepoints[0] = int32(triggerAmount * damage / 100) / GetSpellAuraMaxTicks(triggered_spell_id);
                     break;
                 }
+                // Vengeance
+                case 84840:
+                    return HandleVengeanceProc(pVictim, damage, triggerAmount);
             }
             // King of the Jungle
             if (dummySpell->GetSpellIconID() == 2850)
@@ -2458,6 +2467,10 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, DamageInfo* damageI
                 basepoints[0] = GetAttackTime(BASE_ATTACK) * int32(ap*0.022f + 0.044f * holy) / 1000;
                 break;
             }
+            // Vengeance (paladin)
+            else if (dummySpell->Id == 84839)
+                return HandleVengeanceProc(pVictim, damage, triggerAmount);
+
             // Righteous Vengeance
             if (dummySpell->GetSpellIconID() == 3025)
             {
@@ -5929,4 +5942,35 @@ SpellAuraProcResult Unit::HandleAuraProcOnPowerAmount(Unit* /*pVictim*/, DamageI
     }
 
     return SPELL_AURA_PROC_OK;
+}
+
+SpellAuraProcResult Unit::HandleVengeanceProc(Unit* pVictim, int32 damage, int32 triggerAmount)
+{
+    // do not proc from damage
+    if (!pVictim || pVictim->GetCharmerOrOwnerPlayerOrPlayerItself())
+        return SPELL_AURA_PROC_FAILED;
+
+    if (int32 basebp = damage)
+    {
+        int32 bp = 0;
+        uint32 triggered_spell_id = 76691;
+        // stack with old buff
+        if (SpellAuraHolderPtr oldHolder = GetSpellAuraHolder(triggered_spell_id, GetObjectGuid()))
+        {
+            basebp = int32(basebp * triggerAmount / 100);
+            if (Aura* oldAura = oldHolder->GetAuraByEffectIndex(EFFECT_INDEX_0))
+                bp += oldAura->GetModifier()->m_amount;
+        }
+        else
+            basebp = int32(basebp * 33 / 100);
+
+        bp += basebp;
+
+        // not more than pct of stamina
+        int32 maxVal = int32((GetCreateHealth() + GetTotalStatValue(STAT_STAMINA)) / 10);
+        if (bp > maxVal)
+            bp = maxVal;
+
+        CastCustomSpell(this, triggered_spell_id, &bp, &bp, &basebp, true);
+    }
 }

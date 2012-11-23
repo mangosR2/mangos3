@@ -2183,6 +2183,8 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         void SetLastManaUse();
         bool IsUnderLastManaUseEffect() const { return bool(m_lastManaUseTimer > 0); }
 
+        SpellAuraProcResult HandleVengeanceProc(Unit* pVictim, int32 damage, int32 triggerAmount);
+
         uint32 GetRegenTimer() const { return m_regenTimer; }
 
         void SetContestedPvP(Player *attackedPlayer = NULL);

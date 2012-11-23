@@ -8378,6 +8378,10 @@ void Aura::HandleShapeshiftBoosts(bool apply)
             if (form == FORM_CAT && ((Player*)target)->HasAura(52610))
                 target->CastSpell(target, 62071, true);
 
+            // remove Vengeance Buff on entering cat form
+            if (form == FORM_CAT)
+                target->RemoveAurasDueToSpell(76691);
+
             // Survival of the Fittest (Armor part)
             if (form == FORM_BEAR)
             {
@@ -10259,7 +10263,50 @@ void Aura::PeriodicDummyTick()
 
                     return;
                 }
-// Exist more after, need add later
+                case 76691:                                 // Vengeance
+                {
+                    if (target->IsInCombat())
+                        return;
+
+                    if (target->GetDamageCounterInPastSecs(2, DAMAGE_TAKEN_COUNTER))
+                        return;
+
+                    int32 bp0 = 0, bp1 = 0, bp2 = GetModifier()->m_amount;
+                    SpellAuraHolderPtr holder = GetHolder();
+                    if (!holder)
+                        return;
+
+                    // Remove damage from last 'stack' from aura amounts
+                    Aura* aura0 = holder->GetAuraByEffectIndex(EFFECT_INDEX_0);
+                    if (aura0)
+                        bp0 = aura0->GetModifier()->m_amount - bp2;
+
+                    Aura* aura1 = holder->GetAuraByEffectIndex(EFFECT_INDEX_1);
+                    if (aura1)
+                        bp1 = aura1->GetModifier()->m_amount - bp2;
+
+                    // If exist expired aura - remove buff
+                    if (bp0 <=0 || bp1 <= 0)
+                        target->RemoveAurasDueToSpell(spell->Id);
+                    else
+                    {
+                        if (aura0)
+                        {
+                            aura0->ApplyModifier(false, true);
+                            aura0->ChangeAmount(bp0, false);
+                            aura0->ApplyModifier(true, true);
+                        }
+                        if (aura1)
+                        {
+                            aura1->ApplyModifier(false, true);
+                            aura1->ChangeAmount(bp1, false);
+                            aura1->ApplyModifier(true, true);
+                        }
+                        holder->SendAuraUpdate(false);
+                    }
+                    break;
+                }
+                // Exist more after, need add later
                 default:
                     break;
             }
@@ -11273,8 +11320,8 @@ void SpellAuraHolder::_AddSpellAuraHolder()
         if (m_spellProto->IsFitToFamily<SPELLFAMILY_ROGUE, CF_ROGUE_DEADLY_POISON>())
             m_target->ModifyAuraState(AURA_STATE_DEADLY_POISON, true);
 
-        // Enrage aura state
-        if (m_spellProto->GetDispel() == DISPEL_ENRAGE)
+        // Enrage aura state (Excluding Vengeance)
+        if (m_spellProto->GetDispel() == DISPEL_ENRAGE && m_spellProto->Id != 76691)
             m_target->ModifyAuraState(AURA_STATE_ENRAGE, true);
 
         // Bleeding aura state
@@ -11359,8 +11406,8 @@ void SpellAuraHolder::_RemoveSpellAuraHolder()
         //*****************************************************
         // Update target aura state flag (at last aura remove)
         //*****************************************************
-        // Enrage aura state
-        if(m_spellProto->GetDispel() == DISPEL_ENRAGE)
+        // Enrage aura state (Excluding Vengeance)
+        if (m_spellProto->GetDispel() == DISPEL_ENRAGE && m_spellProto->Id != 76691)
             m_target->ModifyAuraState(AURA_STATE_ENRAGE, false);
 
         // Bleeding aura state

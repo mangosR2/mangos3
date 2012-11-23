@@ -78,3 +78,14 @@ INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`,
 DELETE FROM `spell_proc_event` WHERE `entry` = 77485;
 INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`, `CustomChance`) VALUES
 (77485, 0, 0, 0);
+
+-- Vengeance
+DELETE FROM `spell_proc_event` WHERE `entry` = 84839;
+INSERT INTO `spell_proc_event` (`entry`, `SchoolMask`) VALUE
+(84839, 127);
+
+-- Vengeance
+DELETE FROM `spell_proc_event` WHERE `entry` = 93098;
+INSERT INTO `spell_proc_event` (`entry`, `SchoolMask`) VALUE
+(93098, 127);
+
