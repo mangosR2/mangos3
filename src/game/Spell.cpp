@@ -5511,8 +5511,8 @@ void Spell::TakePower()
                 m_usedHolyPower = m_caster->GetPower(POWER_HOLY_POWER);
         }
 
-        // Inquisition - does not take power
-        if (m_spellInfo->Id == 84963)
+        // Zealotry - does not take power
+        if (m_spellInfo->Id == 85696)
             return;
 
         m_caster->ModifyPower(powerType, -(int32)m_usedHolyPower);
