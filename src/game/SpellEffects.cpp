@@ -1280,14 +1280,14 @@ void Spell::EffectSchoolDMG(SpellEffectEntry const* effect)
                             // + 20% for each application of Censure on the target
                             damage += damage * stacks * 20 /100;
                 }
-                // Avenger's Shield ($m1+0.07*$SPH+0.07*$AP) - ranged sdb for future
-                else if (classOptions && classOptions->SpellFamilyFlags & UI64LIT(0x0000000000004000))
+                // Avenger's Shield ($m1+0.21*$SPH+0.419*$AP)
+                else if (m_spellInfo->Id == 31935)
                 {
                     float ap = m_caster->GetTotalAttackPowerValue(BASE_ATTACK);
                     int32 holy = m_caster->SpellBaseDamageBonusDone(GetSpellSchoolMask(m_spellInfo));
                     if (holy < 0)
                         holy = 0;
-                    damage += int32(ap * 0.07f) + int32(holy * 7 / 100);
+                    damage += int32(ap * 0.419f) + int32(0.21 * holy);
                 }
                 // Hammer of Wrath ($m1+0.15*$SPH+0.15*$AP) - ranged type sdb future fix
                 else if (classOptions && classOptions->SpellFamilyFlags & UI64LIT(0x0000008000000000))
