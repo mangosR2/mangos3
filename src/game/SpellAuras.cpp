@@ -6297,10 +6297,10 @@ void Aura::HandleAuraModDispelImmunity(bool apply, bool Real)
 
 void Aura::HandleAuraProcTriggerSpell(bool apply, bool Real)
 {
-    if(!Real)
+    if (!Real)
         return;
 
-    Unit *target = GetTarget();
+    Unit* target = GetTarget();
 
     switch (GetId())
     {
@@ -6329,6 +6329,19 @@ void Aura::HandleAuraProcTriggerSpell(bool apply, bool Real)
                 }
             }
             break;
+        case 75806:                                         // Grand Crusader (Rank 1)
+        case 85043:                                         // Grand Crusader (Rank 2)
+        {
+            if (apply)
+            {
+                if (target->GetTypeId() != TYPEID_PLAYER)
+                    break;
+
+                // remove cooldown on Avenger's Shield
+                ((Player*)target)->RemoveSpellCooldown(31935);
+            }
+            break;
+        }
         default:
             break;
     }
@@ -6977,12 +6990,12 @@ void Aura::HandlePeriodicDamage(bool apply, bool Real)
                 // Holy Vengeance / Blood Corruption
                 if (spellProto->GetSpellFamilyFlags().test<CF_PALADIN_SEAL_OF_CORRUPT_VENGE>() && spellProto->GetSpellVisual() == 7902)
                 {
-                    // AP * 0.025 + SPH * 0.013 bonus per tick
+                    // AP * 0.027 + SPH * 0.01 bonus per tick
                     float ap = caster->GetTotalAttackPowerValue(BASE_ATTACK);
                     int32 holy = caster->SpellBaseDamageBonusDone(GetSpellSchoolMask(spellProto));
                     if (holy < 0)
                         holy = 0;
-                    m_modifier.m_amount += int32(GetStackAmount()) * (int32(ap * 0.025f) + int32(holy * 13 / 1000));
+                    m_modifier.m_amount += int32(GetStackAmount()) * (int32(ap * 0.027f) + int32(0.01f * holy));
                 }
                 break;
             }

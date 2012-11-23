@@ -144,3 +144,8 @@ INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`,
 DELETE FROM `spell_proc_event` WHERE `entry` = 90174;
 INSERT INTO `spell_proc_event` (`entry`, `procFlags`, `procEx`, `CustomChance`) VALUE
 (90174, 65536+16+16384, 524288, 100);
+
+-- Grand Crusader
+DELETE FROM `spell_proc_event` WHERE `entry` = 75806;
+INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskB0`) VALUE
+(75806, 10, 262144+32768);
