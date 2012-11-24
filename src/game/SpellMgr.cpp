@@ -3285,16 +3285,10 @@ uint32 SpellMgr::GetSpellTargetsForChainWithCustom(SpellEntry const* spellInfo, 
         }
         case SPELLFAMILY_PALADIN:
         {
-            if (spellInfo->Id == 20424)                   // Seal of Command (2 more target for single targeted spell)
+            if (spellInfo->Id == 20424)                   // Seals of Command (2 more targets for Seal of Righteousness Proc)
             {
-                // overwrite EffectChainTarget for non single target spell
-                if (Spell* currSpell = caster->GetCurrentSpell(CURRENT_GENERIC_SPELL))
-                    if (currSpell->m_spellInfo->GetMaxAffectedTargets() > 0)
-                    /* ||
-                        currSpell->m_spellInfo->EffectChainTarget[EFFECT_INDEX_0] > 0 ||
-                        currSpell->m_spellInfo->EffectChainTarget[EFFECT_INDEX_1] > 0 ||
-                        currSpell->m_spellInfo->EffectChainTarget[EFFECT_INDEX_2] > 0)*/
-                        effectChainTarget = 0;              // no chain targets
+                // Seal of Righteousness
+                effectChainTarget = (caster->HasAura(20154)) ? 3 : 1;
             }
             break;
         }

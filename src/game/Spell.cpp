@@ -1094,6 +1094,15 @@ void Spell::prepareDataForTriggerSystem()
                 // For Judgements (all) / Holy Shock triggers need do it
                 if (m_spellInfo->GetSpellFamilyFlags().test<CF_PALADIN_JUDGEMENT_OF_RIGHT, CF_PALADIN_JUDGEMENT_OF_WISDOM_LIGHT, CF_PALADIN_JUDGEMENT_OF_JUSTICE, CF_PALADIN_HOLY_SHOCK1, CF_PALADIN_JUDGEMENT_ACTIVATE, CF_PALADIN_JUDGEMENT_OF_LIGHT, CF_PALADIN_JUDGEMENT_OF_BLOOD_MARTYR, CF_PALADIN_HOLY_SHOCK>())
                     m_canTrigger = true;
+                // Seal of Righteousness proc
+                else if (m_spellInfo->Id == 25742)
+                    m_canTrigger = true;
+                // Seal of Justice proc
+                else if (m_spellInfo->Id == 20170)
+                    m_canTrigger = true;
+                // Censure
+                else if (m_spellInfo->Id == 31803)
+                    m_canTrigger = true;
                 break;
             case SPELLFAMILY_WARRIOR:
                 break;

@@ -160,3 +160,28 @@ INSERT INTO `spell_proc_event` (`entry`, `SchoolMask`, `CustomChance`) VALUE
 DELETE FROM `spell_proc_event` WHERE `entry` = 26022;
 INSERT INTO `spell_proc_event` (`entry`, `SchoolMask`, `procFlags`, `procEx`, `Cooldown`) VALUE
 (26022, 127, 131072+8192, 65536, 8);
+
+-- Seals of Command
+DELETE FROM `spell_proc_event` WHERE `entry` = 85126;
+INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskB0`, `SpellFamilyMaskC0`, `procEx`) VALUE
+(85126, 10, 536872960, 65536, 0);
+
+-- Seal of Righteousness proc
+DELETE FROM `spell_proc_event` WHERE `entry` = 20154;
+INSERT INTO `spell_proc_event` (`entry`, `SchoolMask`, `procFlags`) VALUE
+(20154, 127, 4);
+
+-- Seal of Justice proc
+DELETE FROM `spell_proc_event` WHERE `entry` = 20164;
+INSERT INTO `spell_proc_event` (`entry`, `SchoolMask`, `ppmRate`, `procFlags`) VALUE
+(20164, 127, 0, 4); -- no ppm rate in cata?
+
+-- Seal of Truth
+DELETE FROM `spell_proc_event` WHERE `entry` = 31801;
+INSERT INTO `spell_proc_event` (`entry`, `SchoolMask`) VALUE
+(31801, 1);
+
+-- Seal of Insight
+DELETE FROM `spell_proc_event` WHERE `entry` = 20165;
+INSERT INTO `spell_proc_event` (`entry`, `SchoolMask`, `ppmRate`) VALUE
+(20165, 127, 20);

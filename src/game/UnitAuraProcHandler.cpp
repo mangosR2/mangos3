@@ -4535,6 +4535,14 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(Unit *pVictim, DamageIn
                 target = pVictim;
                 break;
             }
+            // Seals of Command
+            else if (auraSpellInfo->Id == 85126)
+            {
+                // Do not proc other spells than seal triggers
+                // Seal of Justice, Seal of Righteousness, Censure
+                if (!procSpell || procSpell->Id != 20170 && procSpell->Id != 25742 && procSpell->Id != 31803)
+                    return SPELL_AURA_PROC_FAILED;
+            }
             break;
         }
         case SPELLFAMILY_SHAMAN:

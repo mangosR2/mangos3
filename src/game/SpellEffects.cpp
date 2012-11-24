@@ -6740,7 +6740,6 @@ void Spell::EffectEnergize(SpellEffectEntry const* effect)
         case 20167:                                         // Seal of Insight
         case 63375:                                         // Improved Stormstrike
         case 67545:                                         // Empowered Fire
-        case 68082:                                         // Glyph of Seal of Command
             damage = damage * unitTarget->GetCreateMana() / 100;
             break;
         case 53385:                                         // Divine Storm
