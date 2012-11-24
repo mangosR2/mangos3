@@ -6743,6 +6743,17 @@ void Spell::EffectEnergize(SpellEffectEntry const* effect)
         case 68082:                                         // Glyph of Seal of Command
             damage = damage * unitTarget->GetCreateMana() / 100;
             break;
+        case 53385:                                         // Divine Storm
+        {
+            // Divine Storm grant holy power only if it;s damage part hit 4+ targets
+            uint32 targetCount = 0;
+            for (TargetList::iterator itr = m_UniqueTargetInfo.begin(); itr != m_UniqueTargetInfo.end(); ++itr)
+                if (itr->effectMask & (1 << EFFECT_INDEX_2))
+                    ++targetCount;
+            if (targetCount < 4)
+                return;
+            break;
+        }
         case 67487:                                         // Mana Potion Injector
         case 67490:                                         // Runic Mana Injector
         {
