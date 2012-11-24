@@ -4899,6 +4899,20 @@ void Spell::EffectDummy(SpellEffectEntry const* effect)
                 // Communion
                 if (m_caster->HasAura(31876))
                     m_caster->CastSpell(m_caster, 57669, true); // Replenishment
+
+                // Long Arm of the Law
+                Unit::AuraList const& mDummyAuras = m_caster->GetAurasByType(SPELL_AURA_DUMMY);
+                for (Unit::AuraList::const_iterator itr = mDummyAuras.begin(); itr != mDummyAuras.end(); ++itr)
+                {
+                    if ((*itr)->GetSpellProto()->GetSpellIconID() == 3013 &&
+                        (*itr)->GetSpellProto()->GetSpellFamilyName() == SPELLFAMILY_PALADIN)
+                    {
+                        if (roll_chance_i((*itr)->GetModifier()->m_amount) && m_caster->GetDistance2d(unitTarget) >= 15.0f)
+                            m_caster->CastSpell(m_caster, 87173, true);
+                        break;
+                    }
+                }
+
                 return;
             }
 
