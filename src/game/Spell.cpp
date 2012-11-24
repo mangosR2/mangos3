@@ -5969,9 +5969,9 @@ SpellCastResult Spell::CheckCast(bool strict)
     //}
 
     // caster state requirements
-    if(auraRestrictions && auraRestrictions->CasterAuraState && !m_caster->HasAuraState(AuraState(auraRestrictions->CasterAuraState)))
+    if (auraRestrictions && auraRestrictions->CasterAuraState && !m_caster->HasAuraState(AuraState(auraRestrictions->CasterAuraState)))
         return SPELL_FAILED_CASTER_AURASTATE;
-    if(auraRestrictions && auraRestrictions->CasterAuraStateNot && m_caster->HasAuraState(AuraState(auraRestrictions->CasterAuraStateNot)))
+    if (auraRestrictions && auraRestrictions->CasterAuraStateNot && m_caster->HasAuraState(AuraState(auraRestrictions->CasterAuraStateNot)))
         return SPELL_FAILED_CASTER_AURASTATE;
 
     // Caster aura req check if need
@@ -6069,9 +6069,24 @@ SpellCastResult Spell::CheckCast(bool strict)
         if (non_caster_target)
         {
             // target state requirements (apply to non-self only), to allow cast affects to self like Dirty Deeds
-            if (auraRestrictions && auraRestrictions->TargetAuraState && !target->HasAuraStateForCaster(AuraState(auraRestrictions->TargetAuraState), m_caster->GetObjectGuid()) &&
-                !m_caster->IsIgnoreUnitState(m_spellInfo, auraRestrictions->TargetAuraState == AURA_STATE_FROZEN ? IGNORE_UNIT_TARGET_NON_FROZEN : IGNORE_UNIT_TARGET_STATE))
-                return SPELL_FAILED_TARGET_AURASTATE;
+            if (auraRestrictions && auraRestrictions->TargetAuraState)
+            {
+                if (!target->HasAuraStateForCaster(AuraState(auraRestrictions->TargetAuraState), m_caster->GetObjectGuid()))
+                {
+                    if (auraRestrictions->TargetAuraState == AURA_STATE_FROZEN)
+                    {
+                        if (!m_caster->IsIgnoreUnitState(m_spellInfo, IGNORE_UNIT_TARGET_NON_FROZEN))
+                            return SPELL_FAILED_TARGET_AURASTATE;
+                    }
+                    else if (auraRestrictions->TargetAuraState == AURA_STATE_HEALTHLESS_20_PERCENT)
+                    {
+                        if (!m_caster->IsIgnoreUnitState(m_spellInfo, IGNORE_UNIT_HEALTH_STATE))
+                            return SPELL_FAILED_TARGET_AURASTATE;
+                    }
+                    else if (!m_caster->IsIgnoreUnitState(m_spellInfo, IGNORE_UNIT_TARGET_STATE))
+                        return SPELL_FAILED_TARGET_AURASTATE;
+                }
+            }
 
             // Not allow direct casting on flying player (enable only server-side casts)
             if (target->IsTaxiFlying() && !m_spellInfo->HasAttribute(SPELL_ATTR_HIDE_IN_COMBAT_LOG))

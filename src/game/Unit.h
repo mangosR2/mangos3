@@ -1323,6 +1323,7 @@ enum IgnoreUnitState
     IGNORE_UNIT_TARGET_STATE      = 0,                      // target health, aura states, or combopoints
     IGNORE_UNIT_COMBAT_STATE      = 1,                      // ignore caster in combat state
     IGNORE_UNIT_TARGET_NON_FROZEN = 126,                    // ignore absent of frozen state
+    IGNORE_UNIT_HEALTH_STATE      = 127,                    // ignore unit pct health state
 };
 
 struct SpellCooldown

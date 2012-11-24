@@ -317,8 +317,8 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleUnused,                                    //259 old SPELL_AURA_MOD_PERIODIC_HEAL
     &Aura::HandleNoImmediateEffect,                         //260 SPELL_AURA_SCREEN_EFFECT (miscvalue = id in ScreenEffect.dbc) not required any code
     &Aura::HandlePhase,                                     //261 SPELL_AURA_PHASE undetectable invisibility?     implemented in Unit::isVisibleForOrDetect
-    &Aura::HandleNoImmediateEffect,                         //262 SPELL_AURA_IGNORE_UNIT_STATE                    implemented in Unit::isIgnoreUnitState & Spell::CheckCast
-    &Aura::HandleNoImmediateEffect,                         //263 SPELL_AURA_ALLOW_ONLY_ABILITY                   implemented in Spell::CheckCasterAuras, lool enum IgnoreUnitState for known misc values
+    &Aura::HandleNoImmediateEffect,                         //262 SPELL_AURA_IGNORE_UNIT_STATE Alows some abilities whitch are aviable only in some cases.... implemented in Spell::CheckCast
+    &Aura::HandleNoImmediateEffect,                         //263 SPELL_AURA_ALLOW_ONLY_ABILITY
     &Aura::HandleUnused,                                    //264 1 spell in 4.3.4 Deterrence
     &Aura::HandleUnused,                                    //265 unused (3.0.8a-4.3.4)
     &Aura::HandleUnused,                                    //266 unused (3.0.8a-4.3.4)
@@ -12558,30 +12558,17 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
             }
             if (m_spellProto->Id == 31884)                  // Avenging Wrath
             {
-                if (!apply)
-                    spellId1 = 57318;                       // Sanctified Wrath (triggered)
-                else
+                if (Unit* caster = GetCaster())
                 {
-                    int32 percent = 0;
-                    Unit::AuraList const& dummyAuras = m_target->GetAurasByType(SPELL_AURA_DUMMY);
-                    for(Unit::AuraList::const_iterator itr = dummyAuras.begin(); itr != dummyAuras.end(); ++itr)
-                    {
-                        if ((*itr)->GetSpellProto()->GetSpellIconID() == 3029)
-                        {
-                            percent = (*itr)->GetModifier()->m_amount;
-                            break;
-                        }
-                    }
-
-                    // apply in special way
-                    if (percent)
-                    {
-                        spellId1 = 57318;                    // Sanctified Wrath (triggered)
-                        // prevent aura deletion, specially in multi-boost case
-                        m_target->CastCustomSpell(m_target, spellId1, &percent, &percent, NULL, true, NULL);
-                    }
-                    return;
+                    if (apply && caster->HasAura(70755))    // Item - Paladin T10 Holy 2P Bonus
+                        caster->CastSpell(caster, 71166, true);
+                    else if (!apply)
+                        caster->RemoveAurasDueToSpell(71166);
                 }
+            }
+            else if (m_spellProto->Id == 31884)             // Avenging Wrath
+            {
+                spellId1 = 57318;                           // Sanctified Wrath (triggered)
                 break;
             }
 
