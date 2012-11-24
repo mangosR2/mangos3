@@ -59,7 +59,7 @@ GameObject::GameObject() : WorldObject(),
     m_valuesCount = GAMEOBJECT_END;
     m_respawnTime = 0;
     m_respawnDelayTime = 25;
-    m_lootState = GO_NOT_READY;
+    m_lootState = GO_READY;
     m_spawnedByDefault = true;
     m_useTimes = 0;
     m_spellId = 0;
@@ -177,21 +177,14 @@ bool GameObject::Create(uint32 guidlow, uint32 name_id, Map* map, uint32 phaseMa
     SetGoArtKit(0);                                         // unknown what this is
     SetGoAnimProgress(animprogress);
 
-    // Notify the map's instance data.
-    // Only works if you create the object in it, not if it is moves to that map.
-    // Normally non-players do not teleport to other maps.
-    if (InstanceData* iData = map->GetInstanceData())
-        iData->OnObjectCreate(this);
-
-    // Notify the battleground/OPvP scripts
-    if (map->IsBattleGroundOrArena())
-        ((BattleGroundMap*)map)->GetBG()->HandleGameObjectCreate(this);
-    // Notify the outdoor pvp script
-    else if (OutdoorPvP* outdoorPvP = sOutdoorPvPMgr.GetScript(GetZoneId()))
-        outdoorPvP->HandleGameObjectCreate(this);
-
     switch (goinfo->type)
     {
+        case GAMEOBJECT_TYPE_TRAP:
+        case GAMEOBJECT_TYPE_FISHINGNODE:
+        {
+            m_lootState = GO_NOT_READY;
+            break;
+        }
         case GAMEOBJECT_TYPE_DESTRUCTIBLE_BUILDING:
         {
             m_health = GetMaxHealth();
@@ -226,6 +219,19 @@ bool GameObject::Create(uint32 guidlow, uint32 name_id, Map* map, uint32 phaseMa
             break;
     }
 
+    // Notify the map's instance data.
+    // Only works if you create the object in it, not if it is moves to that map.
+    // Normally non-players do not teleport to other maps.
+    if (InstanceData* iData = map->GetInstanceData())
+        iData->OnObjectCreate(this);
+
+    // Notify the battleground/OPvP scripts
+    if (map->IsBattleGroundOrArena())
+        ((BattleGroundMap*)map)->GetBG()->HandleGameObjectCreate(this);
+    // Notify the outdoor pvp script
+    else if (OutdoorPvP* outdoorPvP = sOutdoorPvPMgr.GetScript(GetZoneId()))
+        outdoorPvP->HandleGameObjectCreate(this);
+
     return true;
 }
 
@@ -244,19 +250,20 @@ void GameObject::Update(uint32 update_diff, uint32 p_time)
         {
             switch (GetGoType())
             {
-                case GAMEOBJECT_TYPE_TRAP:
+                case GAMEOBJECT_TYPE_TRAP:                  // Initialized delayed to be able to use GetOwner()
                 {
                     // Arming Time for GAMEOBJECT_TYPE_TRAP (6)
                     Unit* owner = GetOwner();
-                    if ((owner && ((Player*)owner)->isInCombat())
-                        || GetEntry() == 190752 // SoTA Seaforium Charges
-                        || GetEntry() == 195331 // IoC Huge Seaforium Charges
-                        || GetEntry() == 195235) // IoC Seaforium Charges
+                    if (owner && owner->isInCombat()
+                                                     // FIXME - need remove this hacks on some objects
+                        || GetEntry() == 190752      // SoTA Seaforium Charges
+                        || GetEntry() == 195331      // IoC Huge Seaforium Charges
+                        || GetEntry() == 195235)     // IoC Seaforium Charges
                         m_cooldownTime = time(NULL) + GetGOInfo()->trap.startDelay;
                     m_lootState = GO_READY;
                     break;
                 }
-                case GAMEOBJECT_TYPE_FISHINGNODE:
+                case GAMEOBJECT_TYPE_FISHINGNODE:           // Keep not ready for some delay
                 {
                     // fishing code (bobber ready)
                     if (time(NULL) > m_respawnTime - FISHING_BOBBER_READY_TIME)
@@ -275,13 +282,10 @@ void GameObject::Update(uint32 update_diff, uint32 p_time)
 
                         m_lootState = GO_READY;             // can be successfully open with some chance
                     }
-                    return;
-                }
-                default:
-                    m_lootState = GO_READY;                 // for other GO is same switched without delay to GO_READY
                     break;
+                }
             }
-            // NO BREAK for switch (m_lootState)
+            break;
         }
         /* no break */
         case GO_READY:
