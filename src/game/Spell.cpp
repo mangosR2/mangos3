@@ -7955,6 +7955,11 @@ bool Spell::CheckTarget(Unit* target, SpellEffectIndex eff )
             if (target->GetTypeId() != TYPEID_PLAYER || target->IsInWater())
                 return false;
             break;
+        case 68921:                                         // Soulstorm (FoS), only targets farer than 10 away
+        case 69049:                                         // Soulstorm            - = -
+            if (m_caster->IsWithinDist(target, 10.0f, false))
+                return false;
+            break;
         default:
             break;
     }
