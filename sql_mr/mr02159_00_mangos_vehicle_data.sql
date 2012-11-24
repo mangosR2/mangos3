@@ -770,7 +770,7 @@ INSERT INTO `npc_spellclick_spells` VALUES
 (33782, 63151, 0, 0, 0, 1);
 
 -- Rocket Propelled Warhead (quest 12437)
-UPDATE `creature_template` SET `InhabitType` = 6,`unit_flags` = `unit_flags`|16384,`speed_walk` = 4,`speed_run` = 4, WHERE `entry`= 27593;
+UPDATE `creature_template` SET `InhabitType` = 6, `unit_flags` = `unit_flags`|16384, `speed_walk` = 4, `speed_run` = 4 WHERE `entry` = 27593;
 UPDATE `creature_model_info` SET `bounding_radius` = 0.534723,`combat_reach` = 3.5 WHERE `modelid` = 26611;
 
 DELETE FROM `npc_spellclick_spells` WHERE `npc_entry` = 27593;
