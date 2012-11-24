@@ -155,3 +155,8 @@ DELETE FROM `spell_proc_event` WHERE `entry` = 25988;
 DELETE FROM `spell_proc_event` WHERE `entry` = 9799;
 INSERT INTO `spell_proc_event` (`entry`, `SchoolMask`, `CustomChance`) VALUE
 (9799, 126, 0);
+
+-- Pursuit of Justice
+DELETE FROM `spell_proc_event` WHERE `entry` = 26022;
+INSERT INTO `spell_proc_event` (`entry`, `SchoolMask`, `procFlags`, `procEx`, `Cooldown`) VALUE
+(26022, 127, 131072+8192, 65536, 8);

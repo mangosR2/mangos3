@@ -63,7 +63,7 @@ pAuraProcHandler AuraProcHandler[TOTAL_AURAS]=
     &Unit::HandleNULLProc,                                  // 28 SPELL_AURA_REFLECT_SPELLS
     &Unit::HandleNULLProc,                                  // 29 SPELL_AURA_MOD_STAT
     &Unit::HandleNULLProc,                                  // 30 SPELL_AURA_MOD_SKILL
-    &Unit::HandleNULLProc,                                  // 31 SPELL_AURA_MOD_INCREASE_SPEED
+    &Unit::HandleIncreaseSpeedAuraProc,                     // 31 SPELL_AURA_MOD_INCREASE_SPEED
     &Unit::HandleNULLProc,                                  // 32 SPELL_AURA_MOD_INCREASE_MOUNTED_SPEED
     &Unit::HandleNULLProc,                                  // 33 SPELL_AURA_MOD_DECREASE_SPEED
     &Unit::HandleNULLProc,                                  // 34 SPELL_AURA_MOD_INCREASE_HEALTH
@@ -5966,4 +5966,41 @@ SpellAuraProcResult Unit::HandleVengeanceProc(Unit* pVictim, int32 damage, int32
 
         CastCustomSpell(this, triggered_spell_id, &bp, &bp, &basebp, true);
     }
+}
+
+SpellAuraProcResult Unit::HandleIncreaseSpeedAuraProc(Unit* /*pVictim*/, DamageInfo* /*damageInfo*/, Aura const* triggeredByAura, SpellEntry const *procSpell, uint32 /*procFlag*/, uint32 /*procEx*/, uint32 cooldown)
+{
+    SpellEntry const* spellProto = triggeredByAura->GetSpellProto();
+
+    switch (spellProto->Id)
+    {
+        case 26022:                     // Pursuit of Justice
+        case 26023:
+        {
+            if (!procSpell || GetTypeId() != TYPEID_PLAYER)
+                return SPELL_AURA_PROC_FAILED;
+
+            if (!IsSpellAppliesAura(procSpell))
+                return SPELL_AURA_PROC_FAILED;
+
+            uint32 triggered_spell_id = 89024;
+            uint32 cooldown_spell_id = 89023;
+
+            // Pursuit of Justice shares cooldown with Blessed Life proc
+            if (cooldown && ((Player*)this)->HasSpellCooldown(cooldown_spell_id))
+                return SPELL_AURA_PROC_FAILED;
+
+            if (GetAllSpellMechanicMask(procSpell) & MECHANIC_IMMOBILIZE)
+            {
+                // energize
+                CastSpell(this, triggered_spell_id, true);
+                if (cooldown)
+                    ((Player*)this)->AddSpellCooldown(cooldown_spell_id, 0, time(NULL) + cooldown);
+            }
+
+            return SPELL_AURA_PROC_OK;
+        }
+    }
+
+    return SPELL_AURA_PROC_OK;
 }

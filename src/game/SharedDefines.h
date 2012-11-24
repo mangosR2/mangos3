@@ -1348,6 +1348,12 @@ enum Mechanics
 #define IMMUNE_BY_UNVULNERABILITY_MASK ( \
     (1<<(MECHANIC_SHIELD-1))|(1<<(MECHANIC_INVULNERABILITY-1))|(1<<(MECHANIC_IMMUNE_SHIELD-1)))
 
+#define MECHANIC_IMMOBILIZE ( \
+    (1 << (MECHANIC_DISORIENTED - 1)) | (1 << (MECHANIC_FEAR - 1)) | (1 << (MECHANIC_ROOT - 1)) | \
+    (1 << (MECHANIC_SLEEP - 1)) | (1 << (MECHANIC_STUN - 1)) | (1 << (MECHANIC_FREEZE - 1)) | \
+    (1 << (MECHANIC_POLYMORPH - 1)) | (1 << (MECHANIC_BANISH - 1)) | (1 << (MECHANIC_SHACKLE - 1)) | \
+    (1 << (MECHANIC_TURN - 1)) | (1 << (MECHANIC_SAPPED - 1)))
+
 // Spell dispell type
 enum DispelType
 {
