@@ -49,7 +49,7 @@ const char VehicleAccessorySrcFmt[] = "iiiiffffx";
 const char VehicleAccessoryDstFmt[] = "iiiiffff";
 const char SpellScriptTargetFmt[] = "iiii";
 
-const char CreatureTemplateSpellsFmt[] = "iiiiiiiii";
+const char CreatureTemplateSpellsFmt[] = "iiiiiiiiiii";
 
 SQLStorage sCreatureStorage(CreatureInfosrcfmt, CreatureInfodstfmt, "entry", "creature_template");
 SQLStorage sCreatureDataAddonStorage(CreatureDataAddonInfofmt, "guid", "creature_addon");
