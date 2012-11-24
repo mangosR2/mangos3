@@ -15606,6 +15606,18 @@ void Unit::AddSpellAndCategoryCooldowns(SpellEntry const* spellInfo, uint32 item
                 ((Player*)this)->ApplySpellMod(spellInfo->Id, SPELLMOD_COOLDOWN, categorycooldown);
         }
 
+        // reduce spell cooldowns from haste
+        Unit::AuraList const& mAuras = GetAurasByType(SPELL_AURA_MOD_CD_FROM_HASTE);
+        for (Unit::AuraList::const_iterator itr = mAuras.begin(); itr != mAuras.end(); ++itr)
+        {
+            if ((*itr)->isAffectedOnSpell(spellInfo))
+            {
+                recTime = ceil(recTime * GetFloatValue(UNIT_MOD_CAST_SPEED));
+                catrecTime = ceil(catrecTime * GetFloatValue(UNIT_MOD_CAST_SPEED));
+                break;
+            }
+        }
+
         // replace negative cooldowns by 0
         if (cooldown < 0) cooldown = 0;
         if (categorycooldown < 0) categorycooldown = 0;
