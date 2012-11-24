@@ -6558,8 +6558,8 @@ void Aura::HandlePeriodicEnergize(bool apply, bool Real)
             case 48391:                                     // Owlkin Frenzy 2% base mana
                 ChangeAmount(target->GetCreateMana() * 2 / 100);
                 break;
-            case 57669:                                     // Replenishment (0.2% from max)
-                ChangeAmount(target->GetMaxPower(POWER_MANA) * 2 / 1000);
+            case 57669:                                     // Replenishment (1% from max)
+                ChangeAmount(target->GetMaxPower(POWER_MANA) / 100 / GetAuraMaxTicks());
                 break;
             case 61782:                                     // Infinite Replenishment (0.25% from max)
                 ChangeAmount(target->GetMaxPower(POWER_MANA) * 25 / 10000);

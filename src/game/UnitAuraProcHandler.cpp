@@ -1736,7 +1736,7 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, DamageInfo* damageI
                 if (triggeredByAura->GetCasterGuid() != pVictim->GetObjectGuid())
                     return SPELL_AURA_PROC_FAILED;
 
-                // Energize 0.25% of max. mana
+                // Energize 1% of max. mana per 10 secs
                 pVictim->CastSpell(pVictim, 57669, true, castItem, triggeredByAura);
                 return SPELL_AURA_PROC_OK;                                // no hidden cooldown
             }
