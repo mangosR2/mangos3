@@ -646,7 +646,7 @@ UPDATE creature_template SET InhabitType=3 WHERE entry=29414;
 REPLACE INTO creature_template_addon (entry,auras) VALUES (29414,'57403');
 
 -- Quest: Defending Wyrmrest Temple (12372)
-UPDATE `dbscripts_on_gossip` SET `datalong2` = 3;
+UPDATE `dbscripts_on_gossip` SET `datalong2` = 3 WHERE `id` = 9568;
 
 UPDATE `creature_template` SET `unit_flags` = 0,`InhabitType` = 3 WHERE `entry` = 27629;
 DELETE FROM `creature_spell` WHERE `guid` = 27629;
