@@ -8135,7 +8135,24 @@ int32  Unit::DealHeal(DamageInfo* healInfo, bool critical/* = false*/)
         unit = GetOwner();
 
     // overheal = addhealth - gain
-    unit->SendHealSpellLog(pVictim, spellProto->Id, healInfo->heal, healInfo->heal - gain, critical, healInfo->GetAbsorb());
+    int32 overheal = int32(healInfo->heal) - gain;
+    unit->SendHealSpellLog(pVictim, spellProto->Id, healInfo->heal, overheal, critical, healInfo->GetAbsorb());
+
+    if (overheal > 0)
+    {
+        // Guarded by the Light (Rank 2), paladin talent
+        if (pVictim == this && HasAura(85646))
+        {
+            if (Aura* aura = GetAura(85646, EFFECT_INDEX_0))
+            {
+                if (aura->GetModifier()->m_amount > overheal)
+                    aura->GetHolder()->RefreshHolder();
+                else
+                    // cast absorb
+                    CastCustomSpell(this, 88063, &overheal, NULL, NULL, true);
+            }
+        }
+    }
 
     if (unit->GetTypeId() == TYPEID_PLAYER)
     {

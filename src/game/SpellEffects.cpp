@@ -6363,20 +6363,28 @@ void Spell::EffectHeal(SpellEffectEntry const* effect)
             // World of Glory
             if (m_spellInfo->Id == 85673)
             {
-                // Search Eternal Glory
                 Unit::AuraList const& mDummyAuras = m_caster->GetAurasByType(SPELL_AURA_DUMMY);
                 for (Unit::AuraList::const_iterator itr = mDummyAuras.begin(); itr != mDummyAuras.end(); ++itr)
                 {
-                    if ((*itr)->GetSpellProto()->SpellIconID == 2944 &&
-                        (*itr)->GetSpellProto()->GetSpellFamilyName() == SPELLFAMILY_PALADIN)
+                    if ((*itr)->GetSpellProto()->GetSpellFamilyName() == SPELLFAMILY_PALADIN)
                     {
-                        if (roll_chance_i((*itr)->GetModifier()->m_amount))
+                        // Eternal Glory
+                        if ((*itr)->GetSpellProto()->GetSpellIconID() == 2944)
                         {
-                            int32 bp = m_usedHolyPower;
-                            // Restore power cost
-                            m_caster->CastCustomSpell(m_caster, 88676, &bp, NULL, NULL, true);
+
+                            if (roll_chance_i((*itr)->GetModifier()->m_amount))
+                            {
+                                int32 bp = m_usedHolyPower;
+                                // Restore power cost
+                                m_caster->CastCustomSpell(m_caster, 88676, &bp, NULL, NULL, true);
+                            }
                         }
-                        break;
+                        // Guarded by the Light
+                        else if ((*itr)->GetSpellProto()->GetSpellIconID() == 3026)
+                        {
+                            if (unitTarget == m_caster)
+                                addhealth = int32(addhealth * (100.0f + (*itr)->GetModifier()->m_amount) / 100.0f);
+                        }
                     }
                 }
             }
