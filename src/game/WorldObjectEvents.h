@@ -21,11 +21,13 @@
 
 #include "Utilities/EventProcessor.h"
 #include "ObjectGuid.h"
-#include "BattleGround/BattleGround.h"
+#include "SharedDefines.h"
+#include "WorldLocation.h"
 
 class Spell;
 class Unit;
 class Creature;
+struct WorldLocation;
 
 enum WorldObjectEventType
 {
@@ -41,7 +43,7 @@ typedef std::queue<std::pair<uint64, BasicEvent*> > EventNewQueue;
 class MANGOS_DLL_SPEC WorldObjectEventProcessor : public EventProcessor
 {
     public:
-        WorldObjectEventProcessor() {};
+        WorldObjectEventProcessor();
         ~WorldObjectEventProcessor() {};
 
         void Update(uint32 p_time, bool force = false);
@@ -49,6 +51,9 @@ class MANGOS_DLL_SPEC WorldObjectEventProcessor : public EventProcessor
         void CleanupEventList();
         void AddEvent(BasicEvent* Event, uint64 e_time, bool set_addtime = true);
         void RenewEvents();
+
+        uint32 size(bool withQueue = false)  const { return (withQueue ? (m_events.size() + m_queue.size()) :  m_events.size()); };
+        bool   empty() const { return m_events.empty(); };
 
     protected:
         void _AddEvents();
@@ -151,6 +156,20 @@ class EvadeDelayEvent : public BasicEvent
         EvadeDelayEvent();
         Unit&   m_owner;
         bool    b_force;
+};
+
+// Player events
+class TeleportDelayEvent : public BasicEvent
+{
+    public:
+        explicit TeleportDelayEvent(Player& owner, WorldLocation const& _location, uint32 _options)
+            : BasicEvent(WORLDOBJECT_EVENT_TYPE_UNIQUE), m_owner(owner), m_location(_location), m_options(_options) {};
+        bool Execute(uint64 e_time, uint32 p_time);
+    private:
+        TeleportDelayEvent();
+        Player&         m_owner;
+        WorldLocation   m_location;
+        uint32          m_options;
 };
 
 // BattleGround events

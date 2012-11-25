@@ -19,6 +19,7 @@
 #include "MoveSpline.h"
 #include <sstream>
 #include "Log.h"
+#include "Unit.h"
 
 namespace Movement
 {
@@ -196,12 +197,12 @@ namespace Movement
 
 /// ============================================================================================
 
-    bool MoveSplineInitArgs::Validate() const
+    bool MoveSplineInitArgs::Validate(Unit* unit) const
     {
 #define CHECK(exp) \
     if (!(exp))\
     {\
-        sLog.outError("MoveSplineInitArgs::Validate: expression '%s' failed", #exp);\
+        sLog.outError("MoveSplineInitArgs::Validate expression '%s' failed for %s", #exp, unit ? unit->GetGuidStr().c_str(): "<none>");\
         return false;\
     }
         CHECK(path.size() > 1);
@@ -212,8 +213,8 @@ namespace Movement
 #undef CHECK
     }
 
-// MONSTER_MOVE packet format limitation for not CatmullRom movement:
-// each vertex offset packed into 11 bytes
+    // MONSTER_MOVE packet format limitation for not CatmullRom movement:   
+    // each vertex offset packed into 11 bytes
     bool MoveSplineInitArgs::_checkPathBounds() const
     {
         if (!(flags & MoveSplineFlag::Mask_CatmullRom) && path.size() > 2)

@@ -1334,7 +1334,7 @@ enum Targets
     TARGET_88                               = 88,
     TARGET_DIRECTLY_FORWARD                 = 89,
     TARGET_NONCOMBAT_PET                    = 90,
-    TARGET_91                               = 91,
+    TARGET_DEST_RADIUS                      = 91,
     TARGET_UNIT_CREATOR                     = 92,
     TARGET_93                               = 93,
     TARGET_OWNED_VEHICLE                    = 94,
@@ -2126,9 +2126,14 @@ enum CreatureType
     CREATURE_TYPE_GAS_CLOUD        = 13
 };
 
-uint32 const CREATURE_TYPEMASK_DEMON_OR_UNDEAD = (1 << (CREATURE_TYPE_DEMON-1)) | (1 << (CREATURE_TYPE_UNDEAD-1));
-uint32 const CREATURE_TYPEMASK_HUMANOID_OR_UNDEAD = (1 << (CREATURE_TYPE_HUMANOID-1)) | (1 << (CREATURE_TYPE_UNDEAD-1));
-uint32 const CREATURE_TYPEMASK_MECHANICAL_OR_ELEMENTAL = (1 << (CREATURE_TYPE_MECHANICAL-1)) | (1 << (CREATURE_TYPE_ELEMENTAL-1));
+// Unions of CreatureType
+enum CreatureTypeMask
+{
+    CREATURE_TYPEMASK_NONE                    = 0,                                                                       // In this typemask fits players only
+    CREATURE_TYPEMASK_DEMON_OR_UNDEAD         = (1 << (CREATURE_TYPE_DEMON-1))      | (1 << (CREATURE_TYPE_UNDEAD-1)),
+    CREATURE_TYPEMASK_HUMANOID_OR_UNDEAD      = (1 << (CREATURE_TYPE_HUMANOID-1))   | (1 << (CREATURE_TYPE_UNDEAD-1)),
+    CREATURE_TYPEMASK_MECHANICAL_OR_ELEMENTAL = (1 << (CREATURE_TYPE_MECHANICAL-1)) | (1 << (CREATURE_TYPE_ELEMENTAL-1)),
+};
 
 // CreatureFamily.dbc
 enum CreatureFamily
@@ -2914,6 +2919,23 @@ enum BattleGroundTypeId
 };
 #define MAX_BATTLEGROUND_TYPE_ID 33
 
+// handle the queue types and bg types separately to enable joining queue for different sized arenas at the same time
+enum BattleGroundQueueTypeId
+{
+    BATTLEGROUND_QUEUE_NONE     = 0,
+    BATTLEGROUND_QUEUE_AV       = 1,    // Alterac Vally
+    BATTLEGROUND_QUEUE_WS       = 2,    // Warsong Gulch
+    BATTLEGROUND_QUEUE_AB       = 3,    // Arathi basin
+    BATTLEGROUND_QUEUE_EY       = 4,    // Eye of the Storm
+    BATTLEGROUND_QUEUE_SA       = 5,    // Strand of the Ancients
+    BATTLEGROUND_QUEUE_IC       = 6,    // Isle of Conquest
+    BATTLEGROUND_QUEUE_RB       = 7,
+    BATTLEGROUND_QUEUE_2v2      = 8,
+    BATTLEGROUND_QUEUE_3v3      = 9,
+    BATTLEGROUND_QUEUE_5v5      = 10
+};
+#define MAX_BATTLEGROUND_QUEUE_TYPES 11
+
 enum ArenaType
 {
     ARENA_TYPE_NONE         = 0,                            // used for mark non-arenas or problematic cases
@@ -3094,6 +3116,13 @@ enum AreaLockStatus
 #define DEFAULT_VISIBILITY_INSTANCE 120.0f      // default visible distance in instances, 120 yards
 #define DEFAULT_VISIBILITY_BGARENAS 180.0f      // default visible distance in BG/Arenas, 180 yards
 
+enum PhaseMasks
+{
+    PHASEMASK_NONE     = 0,
+    PHASEMASK_NORMAL   = 0x00000001,
+    PHASEMASK_ANYWHERE = 0xFFFFFFFF
+};
+
 enum ActivateTaxiReply
 {
     ERR_TAXIOK                      = 0,
@@ -3109,6 +3138,15 @@ enum ActivateTaxiReply
     ERR_TAXIPLAYERMOVING            = 10,
     ERR_TAXISAMENODE                = 11,
     ERR_TAXINOTSTANDING             = 12
+};
+
+
+enum TrackedAuraType
+{
+    TRACK_AURA_TYPE_NOT_TRACKED                 = 0,        // relation - caster : target is n:m (usual case)
+    TRACK_AURA_TYPE_SINGLE_TARGET               = 1,        // relation - caster : target is 1:1. Might get stolen
+    TRACK_AURA_TYPE_CONTROL_VEHICLE             = 2,        // relation - caster : target is N:1.
+    MAX_TRACKED_AURA_TYPES
 };
 
 // we need to stick to 1 version or half of the stuff will work for someone

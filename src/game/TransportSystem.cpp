@@ -24,7 +24,7 @@
  * This file contains the code needed for MaNGOS to provide abstract support for transported entities
  * Currently implemented
  * - Calculating between local and global coords
- *
+ * - Abstract storage of passengers (added by BoardPassenger, UnboardPassenger)
  */
 
 #include "TransportSystem.h"
@@ -42,11 +42,6 @@ TransportBase::TransportBase(WorldObject* owner) :
     m_updatePositionsTimer(500)
 {
     MANGOS_ASSERT(m_owner);
-}
-
-TransportBase::~TransportBase()
-{
-    MANGOS_ASSERT(m_passengers.size() == 0);
 }
 
 // Update every now and then (after some change of transporter's position)
@@ -103,9 +98,9 @@ void TransportBase::UpdateGlobalPositionOf(WorldObject* passenger, float lx, flo
         else
             m_owner->GetMap()->CreatureRelocation((Creature*)passenger, gx, gy, gz, go);
 
-        //// If passenger is vehicle
-        //if (((Unit*)passenger)->IsVehicle())
-        //    ((Unit*)passenger)->GetVehicleInfo()->UpdateGlobalPositions();
+        // If passenger is vehicle
+        if (((Unit*)passenger)->IsVehicle())
+            ((Unit*)passenger)->GetVehicleKit()->UpdateGlobalPositions();
     }
     // ToDo: Add gameobject relocation
     // ToDo: Add passenger relocation for MO transports
@@ -134,6 +129,34 @@ void TransportBase::CalculateGlobalPositionOf(float lx, float ly, float lz, floa
 
     gz = lz + m_owner->GetPositionZ();
     go = MapManager::NormalizeOrientation(lo + m_owner->GetOrientation());
+}
+
+void TransportBase::BoardPassenger(WorldObject* passenger, float lx, float ly, float lz, float lo, uint8 seat)
+{
+    TransportInfo* transportInfo = new TransportInfo(passenger, this, lx, ly, lz, lo, seat);
+
+    // Insert our new passenger
+    m_passengers.insert(PassengerMap::value_type(passenger, transportInfo));
+
+    // The passenger needs fast access to transportInfo
+    passenger->SetTransportInfo(transportInfo);
+}
+
+void TransportBase::UnBoardPassenger(WorldObject* passenger)
+{
+    PassengerMap::iterator itr = m_passengers.find(passenger);
+
+    if (itr == m_passengers.end())
+        return;
+
+    // Set passengers transportInfo to NULL
+    passenger->SetTransportInfo(NULL);
+
+    // Delete transportInfo
+    delete itr->second;
+
+    // Unboard finally
+    m_passengers.erase(itr);
 }
 
 /* **************************************** TransportInfo ****************************************/

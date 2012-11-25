@@ -222,6 +222,12 @@ BindIP = "0.0.0.0"
 #        MaxVisitorsInUpdate - count of maximal update diffs for calculation update deadline. Min = 1, default = 9, max = 50.
 #        MaxVisitsInUpdate   - limits count of units in one per-visit update cycle (for maps only) min = 10, default = 20, max = 100.
 #
+#    ObjectLoadingSplitter.MaxAllowedTime
+#        Limitation for time, used per map update cycle, for object loading (in ms)
+#        Default: 10
+#        Min:     5    ( less then 3 - objects not be loaded anyway )
+#        Max:     1000 ( value more may cause false-freeze detection )
+#
 ###################################################################################################################
 
 UseProcessors = 0
@@ -254,6 +260,7 @@ MapUpdate.LoadBalanceHighValue = 0.8
 MapUpdate.LoadBalanceLowValue = 0.2
 MapUpdate.MaxVisitorsInUpdate = 9
 MapUpdate.MaxVisitsInUpdate = 10
+ObjectLoadingSplitter.MaxAllowedTime = 10
 
 ###################################################################################################################
 # SERVER LOGGING
@@ -298,17 +305,17 @@ MapUpdate.MaxVisitsInUpdate = 10
 #    LogFilter_AchievementUpdates
 #    LogFilter_CreatureMoves
 #    LogFilter_TransportMoves
+#    LogFilter_PlayerMoves
 #    LogFilter_VisibilityChanges
 #    LogFilter_Weather
 #    LogFilter_DbStrictedCheck
+#    LogFilter_SQLText
 #    LogFilter_Pathfinding
-#        Log filters (active by default)
+#        Log filters (active by default - meaning: the filter is active, hence the log is not displayed)
 #        Default: 1 - not include with any log level
 #                 0 - include in log if log level permit
 #
 #    LogFilter_PeriodicAffects
-#    LogFilter_PlayerMoves
-#    LogFilter_SQLText
 #    LogFilter_AIAndMovegens
 #    LogFilter_PlayerStats
 #    LogFilter_Damage
@@ -394,8 +401,8 @@ LogFilter_Weather = 1
 LogFilter_DbStrictedCheck = 1
 LogFilter_Pathfinding = 1
 LogFilter_PeriodicAffects = 0
-LogFilter_PlayerMoves = 0
-LogFilter_SQLText = 0
+LogFilter_PlayerMoves = 1
+LogFilter_SQLText = 1
 LogFilter_AIAndMovegens = 0
 LogFilter_PlayerStats = 0
 LogFilter_Damage = 0
@@ -888,6 +895,11 @@ LexicsCutterNoActionOnGM = 1
 #        Default: 0 - default mangos pet AI style
 #                 1 - enable advanced AI usage
 #
+#    PetAdvancedAIWithSlacker
+#        Should only use in combination with PetAdvancedAI
+#        Default: 0 - disable, default mangos pet AI style
+#                 1 - enable, pet returns below 20% life to owner
+#
 #    RaidFlags.Unique
 #        Set raid flags (assistant, main assistant, main tank) unique in raid
 #        Default: 0 - flags not unique
@@ -935,11 +947,19 @@ LexicsCutterNoActionOnGM = 1
 #        enable/disable alternative resilence damage reduction calculation (for Avenger/Sanctified wrath mostly)
 #        Default: 0     (disable, default mangos style)
 #
+#    BlinkAnimationType
+#        enable/disable alternative (fast move, like 2.4.3/3.0.1) animation type for blink-like spells
+#        Default: 0     (disable, default mangos style - teleport)
+#
 #    AllowTransferToCustomMap
 #        Allowing moving to maps, enter for which absent in AraeTrigger.dbc (by custom areatrigger_teleport entryes)
 #        Attention! Changing this option "on-the-fly" required reload areatrigger_teleport table!
 #        Default: 0 - disabled (only GM's may transfer to this maps
 #                 1 - enabled  (any player, fit to custom areatrigger_teleport condition, may transfer to this maps).
+#
+#    FactiomAndRaceChangeWithoutRenaming
+#        Default: 0 - false
+#                 1 - true -> not blizzlike
 #
 ###################################################################################################################
 
@@ -1010,6 +1030,7 @@ OffhandCheckAtTalentsReset = 0
 PetUnsummonAtMount = 1
 PetSaveAllInDB = 0
 PetAdvancedAI = 0
+PetAdvancedAIWithSlacker = 0
 RaidFlags.Unique = 0
 AllowFlightOnOldMaps = 0
 ClientCacheVersion = 0
@@ -1022,6 +1043,8 @@ Raid.MinLevel = 10
 CrowdControlHPBase = 0.1
 AllowTransferToCustomMap = 0
 ResilenceAlternativeCalculation = 0
+BlinkAnimationType = 0
+FactiomAndRaceChangeWithoutRenaming = 0
 
 ###################################################################################################################
 # PLAYER INTERACTION

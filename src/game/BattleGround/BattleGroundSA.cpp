@@ -340,7 +340,7 @@ void BattleGroundSA::RemovePlayer(Player* /*plr*/, ObjectGuid /*guid*/)
 {
 }
 
-void BattleGroundSA::AddPlayer(Player *plr)
+void BattleGroundSA::AddPlayer(Player* plr)
 {
     BattleGround::AddPlayer(plr);
 
@@ -351,20 +351,21 @@ void BattleGroundSA::AddPlayer(Player *plr)
     m_PlayerScores[plr->GetObjectGuid()] = sc;
 }
 
-void BattleGroundSA::HandleAreaTrigger(Player * /*Source*/, uint32 /*Trigger*/)
+void BattleGroundSA::HandleAreaTrigger(Player* /*source*/, uint32 /*trigger*/)
 {
     // this is wrong way to implement these things. On official it done by gameobject spell cast.
     if (GetStatus() != STATUS_IN_PROGRESS)
         return;
 }
 
-void BattleGroundSA::UpdatePlayerScore(Player* Source, uint32 type, uint32 value)
+void BattleGroundSA::UpdatePlayerScore(Player* source, uint32 type, uint32 value)
 {
-    BattleGroundScoreMap::iterator itr = m_PlayerScores.find(Source->GetObjectGuid());
-    if(itr == m_PlayerScores.end())                         // player not found...
+
+    BattleGroundScoreMap::iterator itr = m_PlayerScores.find(source->GetObjectGuid());
+    if (itr == m_PlayerScores.end())                        // player not found...
         return;
 
-    switch(type)
+    switch (type)
     {
         case SCORE_DEMOLISHERS_DESTROYED:
             ((BattleGroundSAScore*)itr->second)->DemolishersDestroyed += value;
@@ -373,7 +374,7 @@ void BattleGroundSA::UpdatePlayerScore(Player* Source, uint32 type, uint32 value
             ((BattleGroundSAScore*)itr->second)->GatesDestroyed += value;
             break;
         default:
-            BattleGround::UpdatePlayerScore(Source,type,value);
+            BattleGround::UpdatePlayerScore(source, type, value);
             break;
     }
 }
@@ -499,6 +500,10 @@ bool BattleGroundSA::SetupShips()
 
     for (uint8 i = BG_SA_BOAT_ONE; i <= BG_SA_BOAT_TWO; ++i)
     {
+        // Remove old ships
+        if (Phase == SA_ROUND_TWO)
+            DelObject(i);
+
         uint32 boatid=0;
         switch (i)
         {
@@ -1062,37 +1067,37 @@ void BattleGroundSA::TeleportPlayerToCorrectLoc(Player *plr, bool resetBattle)
         if (plr->GetTeam() != GetDefender())
         {
             if (urand(0,1))
-                plr->TeleportTo(607, 2682.936f, -830.368f, 15.0f, 2.895f, 0);
+                plr->TeleportTo(607, 2682.936f, -830.368f, 15.0f, 2.895f);
             else
-                plr->TeleportTo(607, 2577.003f, 980.261f, 15.0f, 0.807f, 0);
+                plr->TeleportTo(607, 2577.003f, 980.261f, 15.0f, 0.807f);
 
         }
         else
-            plr->TeleportTo(607, 1209.7f, -65.16f, 70.1f, 0.0f, 0);
+            plr->TeleportTo(607, 1209.7f, -65.16f, 70.1f, 0.0f);
     }
     else if (GetStartTime() < (2 * MINUTE * IN_MILLISECONDS))
     {
         if (plr->GetTeam() != GetDefender())
         {
             if (urand(0,1))
-                plr->TeleportTo(607, 1804.10f, -168.46f, 60.55f, 2.65f, 0);
+                plr->TeleportTo(607, 1804.10f, -168.46f, 60.55f, 2.65f);
             else
-                plr->TeleportTo(607, 1803.71f, 118.61f, 59.83f, 3.56f, 0);
+                plr->TeleportTo(607, 1803.71f, 118.61f, 59.83f, 3.56f);
         }
         else
-            plr->TeleportTo(607, 1209.7f, -65.16f, 70.1f, 0.0f, 0);
+            plr->TeleportTo(607, 1209.7f, -65.16f, 70.1f, 0.0f);
     }
     else
     {
         if (plr->GetTeam() != GetDefender())
         {
             if (urand(0,1))
-                plr->TeleportTo(607, 1597.64f, -106.35f, 8.89f, 4.13f, 0);
+                plr->TeleportTo(607, 1597.64f, -106.35f, 8.89f, 4.13f);
             else
-                plr->TeleportTo(607, 1606.61f, 50.13f, 7.58f, 2.39f, 0);
+                plr->TeleportTo(607, 1606.61f, 50.13f, 7.58f, 2.39f);
         }
         else
-            plr->TeleportTo(607, 1209.7f, -65.16f, 70.1f, 0.0f, 0);
+            plr->TeleportTo(607, 1209.7f, -65.16f, 70.1f, 0.0f);
     }
     // AddPlayer is called before SetupShips, so this check is needed for the 1st round to prevent console spam
     if (shipsSpawned)

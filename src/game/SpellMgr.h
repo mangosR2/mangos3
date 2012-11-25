@@ -170,11 +170,12 @@ inline bool IsPeriodicRegenerateEffect(SpellEntry const *spellInfo, SpellEffectI
 
 bool IsCastEndProcModifierAura(SpellEntry const *spellInfo, SpellEffectIndex effecIdx, SpellEntry const *procSpell);
 
-inline bool IsSpellHaveAura(SpellEntry const *spellInfo, AuraType aura)
+inline bool IsSpellHaveAura(SpellEntry const* spellInfo, AuraType aura, uint32 effectMask = (1 << EFFECT_INDEX_0) | (1 << EFFECT_INDEX_1) | (1 << EFFECT_INDEX_2))
 {
-    for(int i = 0; i < MAX_EFFECT_INDEX; ++i)
-        if (AuraType(spellInfo->EffectApplyAuraName[i])==aura)
-            return true;
+    for (int i = 0; i < MAX_EFFECT_INDEX; ++i)
+        if (effectMask & (1 << i))
+            if (AuraType(spellInfo->EffectApplyAuraName[i]) == aura)
+                return true;
     return false;
 }
 
@@ -334,6 +335,9 @@ inline bool IsSpellWithCasterSourceTargetsOnly(SpellEntry const* spellInfo)
 {
     for(int i = 0; i < MAX_EFFECT_INDEX; ++i)
     {
+        if (spellInfo->Effect[i] == SPELL_EFFECT_NONE)
+            continue;
+
         uint32 targetA = spellInfo->EffectImplicitTargetA[i];
         if (targetA && !IsCasterSourceTarget(targetA))
             return false;
@@ -346,6 +350,58 @@ inline bool IsSpellWithCasterSourceTargetsOnly(SpellEntry const* spellInfo)
             return false;
     }
     return true;
+}
+
+inline bool IsTargetExplicitRequired(uint32 target)
+{
+    switch (target)
+    {
+        case TARGET_NONE:
+        case TARGET_IN_FRONT_OF_CASTER:
+        case TARGET_IN_FRONT_OF_CASTER_30:
+        case TARGET_GO_IN_FRONT_OF_CASTER_90:
+        //case TARGET_AREAEFFECT_INSTANT:
+        //case TARGET_AREAEFFECT_CUSTOM:
+        //case TARGET_INNKEEPER_COORDINATES:
+        //case TARGET_LARGE_FRONTAL_CONE:
+        //case TARGET_LEAP_FORWARD:
+        //case TARGET_NARROW_FRONTAL_CONE:
+        //case TARGET_AREAEFFECT_PARTY_AND_CLASS:
+        //case TARGET_DIRECTLY_FORWARD:
+        //case TARGET_RANDOM_NEARBY_LOC:
+        //case TARGET_RANDOM_CIRCUMFERENCE_POINT:
+        //case TARGET_DEST_RADIUS:
+            return false;
+        default:
+            break;
+    }
+    return true;
+}
+
+inline bool IsEffectRequiresTarget(SpellEntry const* spellInfo, SpellEffectIndex i)
+{
+    switch(spellInfo->Effect[i])
+    {
+        case SPELL_EFFECT_NONE:
+            return false;
+
+        // this - hack for current mangos operate state with spells    
+        case SPELL_EFFECT_DUMMY:
+            break;
+
+        case SPELL_EFFECT_SEND_EVENT:
+        default:
+            return IsTargetExplicitRequired(spellInfo->EffectImplicitTargetA[i]) || IsTargetExplicitRequired(spellInfo->EffectImplicitTargetB[i]);
+    }
+    return true;
+}
+
+inline bool IsSpellRequiresTarget(SpellEntry const* spellInfo)
+{
+    for (int i = 0; i < MAX_EFFECT_INDEX; ++i)
+        if (IsEffectRequiresTarget(spellInfo, SpellEffectIndex(i)))
+            return true;
+    return false;
 }
 
 inline bool IsPointEffectTarget( Targets target )
@@ -482,7 +538,35 @@ inline bool HasInterruptSpellEffect(SpellEntry const *spellInfo)
     return false;
 }
 
-inline bool IsDispelSpell(SpellEntry const *spellInfo)
+inline bool IsOnlySelfTargeting(SpellEntry const* spellInfo)
+{
+    for (int32 i = 0; i < MAX_EFFECT_INDEX; ++i)
+    {
+        if (!spellInfo->Effect[i])
+            return true;
+
+        switch (spellInfo->EffectImplicitTargetA[i])
+        {
+            case TARGET_SELF:
+            case TARGET_SELF2:
+                break;
+            default:
+                return false;
+        }
+        switch (spellInfo->EffectImplicitTargetB[i])
+        {
+            case TARGET_SELF:
+            case TARGET_SELF2:
+            case TARGET_NONE:
+                break;
+            default:
+                return false;
+        }
+    }
+    return true;
+}
+
+inline bool IsDispelSpell(SpellEntry const* spellInfo)
 {
     return IsSpellHaveEffect(spellInfo, SPELL_EFFECT_DISPEL);
 }
@@ -566,6 +650,15 @@ inline Mechanics GetEffectMechanic(SpellEntry const* spellInfo, SpellEffectIndex
         return Mechanics(spellInfo->Mechanic);
     return MECHANIC_NONE;
 }
+
+inline bool IsBinaryResistedSpell(SpellEntry const* spellInfo) 
+{
+    return (GetAllSpellMechanicMask(spellInfo) != 0
+            || IsDispelSpell(spellInfo)
+            || spellInfo->HasAttribute(SPELL_ATTR_EX4_IGNORE_RESISTANCES)
+            || spellInfo->HasAttribute(SPELL_ATTR_EX_BREAKABLE_BY_ANY_DAMAGE)
+            );
+};
 
 inline uint32 GetDispellMask(DispelType dispel)
 {
@@ -837,7 +930,7 @@ struct SpellTargetEntry
     uint32 targetEntry;
 };
 
-typedef std::multimap<uint32,SpellTargetEntry> SpellScriptTarget;
+typedef UNORDERED_MULTIMAP<uint32,SpellTargetEntry> SpellScriptTarget;
 typedef std::pair<SpellScriptTarget::const_iterator,SpellScriptTarget::const_iterator> SpellScriptTargetBounds;
 
 // coordinates for spells (accessed using SpellMgr functions)
@@ -873,13 +966,13 @@ struct SpellLinkedEntry
 {
     uint32 spellId;
     uint32 linkedId;
-    uint32 type;
+    SpellLinkedType type;
     uint32 effectMask;
 };
 
-typedef std::multimap<uint32, SpellLinkedEntry>  SpellLinkedMap;
+typedef UNORDERED_MULTIMAP<uint32, SpellLinkedEntry>  SpellLinkedMap;
 typedef std::pair<SpellLinkedMap::const_iterator,SpellLinkedMap::const_iterator> SpellLinkedMapBounds;
-typedef std::set<uint32>  SpellLinkedSet;
+typedef UNORDERED_SET<uint32>  SpellLinkedSet;
 
 // Spell pet auras
 class PetAura
@@ -951,10 +1044,10 @@ struct SpellArea
     bool IsFitToRequirements(Player const* player, uint32 newZone, uint32 newArea) const;
 };
 
-typedef std::multimap<uint32,SpellArea> SpellAreaMap;
-typedef std::multimap<uint32,SpellArea const*> SpellAreaForQuestMap;
-typedef std::multimap<uint32,SpellArea const*> SpellAreaForAuraMap;
-typedef std::multimap<uint32,SpellArea const*> SpellAreaForAreaMap;
+typedef UNORDERED_MULTIMAP<uint32,SpellArea> SpellAreaMap;
+typedef UNORDERED_MULTIMAP<uint32,SpellArea const*> SpellAreaForQuestMap;
+typedef UNORDERED_MULTIMAP<uint32,SpellArea const*> SpellAreaForAuraMap;
+typedef UNORDERED_MULTIMAP<uint32,SpellArea const*> SpellAreaForAreaMap;
 typedef std::pair<SpellAreaMap::const_iterator,SpellAreaMap::const_iterator> SpellAreaMapBounds;
 typedef std::pair<SpellAreaForQuestMap::const_iterator,SpellAreaForQuestMap::const_iterator> SpellAreaForQuestMapBounds;
 typedef std::pair<SpellAreaForAuraMap::const_iterator, SpellAreaForAuraMap::const_iterator>  SpellAreaForAuraMapBounds;
@@ -982,7 +1075,7 @@ struct SpellLearnSkillNode
     uint16 maxvalue;                                        // 0  - max skill value for player level
 };
 
-typedef std::map<uint32, SpellLearnSkillNode> SpellLearnSkillMap;
+typedef UNORDERED_MAP<uint32, SpellLearnSkillNode> SpellLearnSkillMap;
 
 struct SpellLearnSpellNode
 {
@@ -991,13 +1084,13 @@ struct SpellLearnSpellNode
     bool autoLearned;
 };
 
-typedef std::multimap<uint32, SpellLearnSpellNode> SpellLearnSpellMap;
+typedef UNORDERED_MULTIMAP<uint32, SpellLearnSpellNode> SpellLearnSpellMap;
 typedef std::pair<SpellLearnSpellMap::const_iterator,SpellLearnSpellMap::const_iterator> SpellLearnSpellMapBounds;
 
-typedef std::multimap<uint32, SkillLineAbilityEntry const*> SkillLineAbilityMap;
+typedef UNORDERED_MULTIMAP<uint32, SkillLineAbilityEntry const*> SkillLineAbilityMap;
 typedef std::pair<SkillLineAbilityMap::const_iterator,SkillLineAbilityMap::const_iterator> SkillLineAbilityMapBounds;
 
-typedef std::multimap<uint32, SkillRaceClassInfoEntry const*> SkillRaceClassInfoMap;
+typedef UNORDERED_MULTIMAP<uint32, SkillRaceClassInfoEntry const*> SkillRaceClassInfoMap;
 typedef std::pair<SkillRaceClassInfoMap::const_iterator,SkillRaceClassInfoMap::const_iterator> SkillRaceClassInfoMapBounds;
 
 struct SkillDiscoveryEntry
@@ -1038,10 +1131,14 @@ struct SkillExtraItemEntry
 typedef std::map<uint32,SkillExtraItemEntry> SkillExtraItemMap;
 
 typedef std::multimap<uint32, uint32> PetLevelupSpellSet;
-typedef std::map<uint32, PetLevelupSpellSet> PetLevelupSpellMap;
+typedef UNORDERED_MAP<uint32, PetLevelupSpellSet> PetLevelupSpellMap;
 
 struct PetDefaultSpellsEntry
 {
+    explicit PetDefaultSpellsEntry()
+    {
+        memset(spellid, 0, MAX_CREATURE_SPELL_DATA_SLOT * sizeof(uint32));
+    }
     uint32 spellid[MAX_CREATURE_SPELL_DATA_SLOT];
 };
 

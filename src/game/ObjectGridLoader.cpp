@@ -111,7 +111,7 @@ void LoadHelper(CellGuidSet const& guid_set, CellPair& cell, GridRefManager<T>& 
 {
     for(CellGuidSet::const_iterator i_guid = guid_set.begin(); i_guid != guid_set.end(); ++i_guid)
     {
-        map->AddLoadingObject(LoadingObjectQueue(*i_guid, objectTypeID, grid));
+        map->AddLoadingObject(new LoadingObjectQueueMember(*i_guid, objectTypeID, grid));
         ++count;
     }
 }
@@ -245,19 +245,17 @@ void
 ObjectGridUnloader::Visit(GridRefManager<T> &m)
 {
     // remove all cross-reference before deleting
-    for(typename GridRefManager<T>::iterator iter=m.begin(); iter != m.end(); ++iter)
+    for (typename GridRefManager<T>::iterator iter = m.begin(); iter != m.end(); ++iter)
         iter->getSource()->CleanupsBeforeDelete();
 
-    while(!m.isEmpty())
+    while (!m.isEmpty())
     {
-        T *obj = m.getFirst()->getSource();
+        T* obj = m.getFirst()->getSource();
         // if option set then object already saved at this moment
-        if(!sWorld.getConfig(CONFIG_BOOL_SAVE_RESPAWN_TIME_IMMEDIATELY))
+        if (!sWorld.getConfig(CONFIG_BOOL_SAVE_RESPAWN_TIME_IMMEDIATELY))
             obj->SaveRespawnTime();
         ///- object must be out of world before delete
-        obj->RemoveFromWorld();
-        ///- Prevent double remove
-        obj->RemoveObjectFromRemoveList();
+        obj->RemoveFromWorld(true);
         ///- object will get delinked from the manager when deleted
         delete obj;
     }

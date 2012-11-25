@@ -600,17 +600,15 @@ void ThreatManager::processThreatEvent(ThreatRefStatusChangeEvent* threatRefStat
                     setCurrentVictim(NULL);
                     setDirty(true);
                 }
-                if (getOwner() && getOwner()->IsInWorld() && getOwner()->GetMap())
-                    if (Unit* target = ObjectAccessor::GetUnit(*getOwner(), hostileReference->getUnitGuid()))
-                        if (getOwner()->IsInMap(target))
-                            getOwner()->SendThreatRemove(hostileReference);
+                if (isOwnerOnline())
+                    getOwner()->SendThreatRemove(hostileReference);
                 iThreatContainer.remove(hostileReference);
                 iUpdateNeed = true;
                 iThreatOfflineContainer.addReference(hostileReference);
             }
             else
             {
-                if(getCurrentVictim() && hostileReference->getThreat() > (1.1f * getCurrentVictim()->getThreat()))
+                if (getCurrentVictim() && hostileReference->getThreat() > (1.1f * getCurrentVictim()->getThreat()))
                     setDirty(true);
                 iThreatContainer.addReference(hostileReference);
                 iUpdateNeed = true;
@@ -623,12 +621,11 @@ void ThreatManager::processThreatEvent(ThreatRefStatusChangeEvent* threatRefStat
                 setCurrentVictim(NULL);
                 setDirty(true);
             }
+
             if(hostileReference->isOnline())
             {
-                if (getOwner() && getOwner()->IsInWorld())
-                    if (Unit* target = ObjectAccessor::GetUnit(*getOwner(), hostileReference->getUnitGuid()))
-                        if (getOwner()->IsInMap(target))
-                            getOwner()->SendThreatRemove(hostileReference);
+                if (isOwnerOnline())
+                    getOwner()->SendThreatRemove(hostileReference);
                 iThreatContainer.remove(hostileReference);
                 iUpdateNeed = true;
             }
@@ -650,4 +647,15 @@ void ThreatManager::UpdateForClient(uint32 diff)
         iUpdateTimer.Reset(THREAT_UPDATE_INTERVAL);
         iUpdateNeed = false;
     }
+}
+
+bool ThreatManager::isOwnerOnline() const
+{
+    if (!getOwner() || !getOwner()->IsInWorld())
+        return false;
+
+    if (getOwner()->GetTypeId() == TYPEID_PLAYER)
+        return ((Player*)getOwner())->GetSession() && !((Player*)getOwner())->GetSession()->PlayerLogout();
+
+    return true;
 }

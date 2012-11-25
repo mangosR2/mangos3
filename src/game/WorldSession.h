@@ -214,6 +214,7 @@ class MANGOS_DLL_SPEC WorldSession
         void SendPartyResult(PartyOperation operation, const std::string& member, PartyResult res);
         void SendGroupInvite(Player* player, bool alreadyInGroup = false);
         void SendAreaTriggerMessage(const char* Text, ...) ATTR_PRINTF(2, 3);
+        void SendTransferAborted(uint32 mapid, uint8 reason, uint8 arg = 0);
         void SendSetPhaseShift(uint32 phaseShift);
         void SendQueryTimeResponse();
         void SendRedirectClient(std::string& ip, uint16 port);
@@ -788,7 +789,9 @@ class MANGOS_DLL_SPEC WorldSession
         void HandleSocketOpcode(WorldPacket& recv_data);
 
         void HandleCancelTempEnchantmentOpcode(WorldPacket& recv_data);
+
         void HandleItemRefundInfoRequest(WorldPacket& recv_data);
+        void HandleItemRefund(WorldPacket& recv_data);
 
         void HandleChannelVoiceOnOpcode(WorldPacket & recv_data);
         void HandleVoiceSessionEnableOpcode(WorldPacket& recv_data);
@@ -900,9 +903,6 @@ class MANGOS_DLL_SPEC WorldSession
         uint32 _accountId;
         uint8 m_expansion;
 
-        // Warden
-        WardenBase *m_Warden;
-
         time_t _logoutTime;
         bool m_inQueue;                                     // session wait in auth.queue
         bool m_playerLoading;                               // code processed in LoginPlayer
@@ -917,6 +917,9 @@ class MANGOS_DLL_SPEC WorldSession
         TutorialDataState m_tutorialState;
         AddonsList m_addonsList;
         ACE_Based::LockedQueue<WorldPacket*, ACE_Thread_Mutex> _recvQueue;
+
+        // Warden
+        WardenBase *m_Warden;
 };
 #endif
 /// @}

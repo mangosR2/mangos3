@@ -81,14 +81,14 @@ void VisibleNotifier::Notify()
                 continue;
 
             if (Player* plr = ObjectAccessor::FindPlayer(*iter))
-                plr->UpdateVisibilityOf(plr->GetCamera().GetBody(), &player);
+                plr->UpdateVisibilityOf(plr->GetCamera()->GetBody(), &player);
         }
     }
 
     // Now do operations that required done at object visibility change to visible
 
     // send data at target visibility change (adding to client)
-    for (std::set<WorldObject*>::const_iterator vItr = i_visibleNow.begin(); vItr != i_visibleNow.end(); ++vItr)
+    for (WorldObjectSet::const_iterator vItr = i_visibleNow.begin(); vItr != i_visibleNow.end(); ++vItr)
     {
         // target aura duration for caster show only if target exist at caster client
         if ((*vItr) != &player && (*vItr)->isType(TYPEMASK_UNIT))
@@ -188,9 +188,13 @@ bool RaiseDeadObjectCheck::operator()(Corpse* u)
     // ignore bones
     if(u->GetType() == CORPSE_BONES)
         return false;
-    if (ObjectAccessor::FindPlayer(u->GetOwnerGuid()))
-        return i_fobj->IsWithinDistInMap(u, i_range);
-    else return false;
+
+    Player* owner = ObjectAccessor::FindPlayer(u->GetOwnerGuid());
+
+    if (!owner || !owner->IsInWorld())
+        return false;
+
+    return i_fobj->IsWithinDistInMap(u, i_range);
 }
 
 bool NearestCorpseInObjectRangeCheck::operator()(Corpse* u)
@@ -212,17 +216,19 @@ bool NearestCorpseInObjectRangeCheck::operator()(Corpse* u)
 bool CannibalizeObjectCheck::operator()(Corpse* u)
 {
     // ignore bones
-    if (u->GetType()==CORPSE_BONES)
+    if (!u->IsInWorld() || u->GetType() == CORPSE_BONES)
         return false;
 
     Player* owner = ObjectAccessor::FindPlayer(u->GetOwnerGuid());
 
-    if (!owner || i_fobj->IsFriendlyTo(owner))
+    if (!owner || !owner->IsInWorld() || i_fobj->IsFriendlyTo(owner))
         return false;
 
     if (i_fobj->IsWithinDistInMap(u, i_range))
+    {
+        i_range = i_fobj->GetDistance(u);         // use found unit range as new range limit for next check
         return true;
-
+    }
     return false;
 }
 

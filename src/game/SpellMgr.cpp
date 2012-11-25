@@ -763,9 +763,11 @@ bool IsPositiveEffect(SpellEntry const *spellproto, SpellEffectIndex effIndex)
             switch(spellproto->Id)
             {
                 case 28441:                                 // AB Effect 000
+                case 52748:                                 // Voracious Appetite
+                case 54044:                                 // Carrion Feeder
                     return false;
+                case 18153:                                 // Kodo Kombobulator
                 case 48021:                                 // support for quest 12173
-                    return true;
                 case 49634:                                 // Sergeant's Flare
                 case 54530:                                 // Opening
                 case 62105:                                 // To'kini's Blowgun
@@ -781,6 +783,8 @@ bool IsPositiveEffect(SpellEntry const *spellproto, SpellEffectIndex effIndex)
         case SPELL_EFFECT_HEAL_PCT:
         case SPELL_EFFECT_ENERGIZE_PCT:
         case SPELL_EFFECT_QUEST_COMPLETE:
+        case SPELL_EFFECT_KILL_CREDIT_PERSONAL:
+        case SPELL_EFFECT_KILL_CREDIT_GROUP:
             return true;
 
         case SPELL_EFFECT_SCHOOL_DAMAGE:
@@ -1886,6 +1890,7 @@ void SpellMgr::LoadSpellLinked()
         bar.step();
         uint32 entry       = fields[0].GetUInt32();
         uint32 linkedEntry = fields[1].GetUInt32();
+        uint32 uitype      = fields[2].GetUInt32();
 
         SpellEntry const* spell = sSpellStore.LookupEntry(entry);
         SpellEntry const* spell1 = sSpellStore.LookupEntry(linkedEntry);
@@ -1901,6 +1906,14 @@ void SpellMgr::LoadSpellLinked()
             continue;
         }
 
+        if (uitype >= SPELL_LINKED_TYPE_MAX)
+        {
+            sLog.outErrorDb("Spell %u has no valid type %u", entry, uitype);
+            continue;
+        }
+
+        SpellLinkedType type = SpellLinkedType(uitype);
+
         uint32 first_id = GetFirstSpellInChain(entry);
 
         if ( first_id != entry )
@@ -1912,7 +1925,7 @@ void SpellMgr::LoadSpellLinked()
 
         data.spellId      = entry;
         data.linkedId     = linkedEntry;
-        data.type         = fields[2].GetUInt32();
+        data.type         = type;
         data.effectMask   = fields[3].GetUInt32();
 
         mSpellLinkedMap.insert(SpellLinkedMap::value_type(entry,data));
@@ -2527,17 +2540,22 @@ uint32 SpellMgr::GetSpellMaxTargetsWithCustom(SpellEntry const* spellInfo, Unit 
                 case 804:                                   // Explode Bug
                 case 23138:                                 // Gate of Shazzrah
                 case 28560:                                 // Summon Blizzard
+                case 30541:                                 // Blaze (Magtheridon)
+                case 30572:                                 // Quake (Magtheridon)
                 case 30769:                                 // Pick Red Riding Hood
+                case 30835:                                 // Infernal Relay
                 case 31347:                                 // Doom TODO: exclude top threat target from target selection
                 case 33711:                                 // Murmur's Touch
                 case 38794:                                 // Murmur's Touch (h)
                 case 44869:                                 // Spectral Blast
+                case 45892:                                 // Sinister Reflection (SWP, Kil'jaeden)
                 case 45976:                                 // Open Portal
                 case 47669:                                 // Wakeup Subboss (Utgarde Pinnacle)
                 case 48278:                                 // Paralyze (Utgarde Pinnacle)
                 case 50988:                                 // Glare of the Tribunal (Halls of Stone)
                 case 51146:                                 // Searching Gaze (Halls Of Stone)
                 case 52438:                                 // Summon Skittering Swarmer (Azjol Nerub,  Krik'thir the Gatewatcher)
+                case 52449:                                 // Summon Skittering Infector (Azjol Nerub,  Krik'thir the Gatewatcher)
                 case 53457:                                 // Impale (Azjol Nerub,  Anub'arak)
                 case 54148:                                 // Ritual of the Sword (Utgarde Pinnacle, Svala)
                 case 55479:                                 // Forced Obedience (Naxxramas, Razovius)
@@ -2546,15 +2564,20 @@ uint32 SpellMgr::GetSpellMaxTargetsWithCustom(SpellEntry const* spellInfo, Unit 
                 case 62016:                                 // Charge Orb (Ulduar, Thorim)
                 case 62042:                                 // Stormhammer (Ulduar, Thorim)
                 case 62301:                                 // Cosmic Smash (Ulduar, Algalon)
+                case 62374:                                 // Pursued (Ulduar, Flame Leviathan)
+                case 62400:                                 // Missile Barrage (Ulduar, Flame Leviathan)
                 case 62488:                                 // Activate Construct (Ulduar, Ignis)
                 case 63018:                                 // Searing Light
                 case 63024:                                 // Gravity Bomb (Ulduar, XT-002)
                 case 63387:                                 // Rapid Burst
                 case 63545:                                 // Icicle Hodir(trigger spell from 62227)
                 case 63795:                                 // Psychosis (Ulduar, Yogg-Saron)
+                case 63820:                                 // Summon Scrap Bot Trigger (Ulduar, Mimiron) use for Scrap Bots, hits npc 33856
                 case 64218:                                 // Overcharge
                 case 64234:                                 // Gravity Bomb (h) (Ulduar, XT-002)
+                case 64425:                                 // Summon Scrap Bot Trigger (Ulduar, Mimiron) use for Assault Bots, hits npc 33856
                 case 64531:                                 // Rapid Burst (h)
+                case 64620:                                 // Summon Fire Bot Trigger (Ulduar, Mimiron) hits npc 33856
                 case 65121:                                 // Searing Light (h)
                 case 65301:                                 // Psychosis (Ulduar, Yogg-Saron)
                 case 65872:                                 // Pursuing Spikes
@@ -2575,6 +2598,7 @@ uint32 SpellMgr::GetSpellMaxTargetsWithCustom(SpellEntry const* spellInfo, Unit 
                 case 67470:                                 // Pursuing Spikes
                 case 68950:                                 // Fear (FoS)
                 case 68912:                                 // Wailing Souls (FoS)
+                case 68987:                                 // Pursuit (Pit of Saron, Ick)
                 case 69048:                                 // Mirrored Soul (FoS)
                 case 69140:                                 // Coldflame (ICC, Marrowgar)
                 case 69674:                                 // Mutated Infection (ICC, Rotface)
@@ -2606,8 +2630,11 @@ uint32 SpellMgr::GetSpellMaxTargetsWithCustom(SpellEntry const* spellInfo, Unit 
                     break;
                 case 28796:                                 // Poison Bolt Volley
                 case 29213:                                 // Curse of the Plaguebringer
+                case 30004:                                 // Flame Wreath
                 case 31298:                                 // Sleep
                 case 39992:                                 // Needle Spine Targeting (BT, Warlord Najentus)
+                case 41303:                                 // Soul Drain (BT, Reliquary of Souls)
+                case 41376:                                 // Spite (BT, Reliquary of Souls)
                 case 51904:                                 // Limiting the count of Summoned Ghouls
                 case 54522:
                 case 60936:                                 // Surge of Power (h) (Malygos)
@@ -2619,10 +2646,13 @@ uint32 SpellMgr::GetSpellMaxTargetsWithCustom(SpellEntry const* spellInfo, Unit 
                 case 72095:                                 // Frozen Orb (h) (Vault of Archavon, Toravon)
                     unMaxTargets = 3;
                     break;
+                case 37676:                                 // Insidious Whisper
+                case 38028:                                 // Watery Grave
                 case 67757:                                 // Nerubian Burrower (Mode 3) (ToCrusader, Anub'arak)
                     unMaxTargets = 4;
                     break;
                 case 30843:                                 // Enfeeble
+                case 40243:                                 // Crushing Shadows (BT, Teron Gorefiend)
                 case 42005:                                 // Bloodboil
                 case 45641:                                 // Fire Bloom (SWP, Kil'jaeden)
                 case 55665:                                 // Life Drain (h)
@@ -3806,7 +3836,7 @@ void SpellMgr::LoadPetDefaultSpells()
     uint32 countCreature = 0;
     uint32 countData = 0;
 
-    for(uint32 i = 0; i < sCreatureStorage.MaxEntry; ++i )
+    for (uint32 i = 0; i < sCreatureStorage.GetMaxEntry(); ++i)
     {
         CreatureInfo const* cInfo = sCreatureStorage.LookupEntry<CreatureInfo>(i);
         if(!cInfo)
@@ -3856,10 +3886,19 @@ void SpellMgr::LoadPetDefaultSpells()
                 int32 petSpellsId = cInfo->Entry;
                 if (mPetDefaultSpellsMap.find(cInfo->Entry) != mPetDefaultSpellsMap.end())
                     continue;
-
                 PetDefaultSpellsEntry petDefSpells;
-                for(int j = 0; j < MAX_CREATURE_SPELL_DATA_SLOT; ++j)
-                    petDefSpells.spellid[j] = cInfo->spells[j];
+
+                CreatureSpellsList const* spellList = sObjectMgr.GetCreatureSpells(cInfo->Entry);
+                if (spellList && !spellList->empty())
+                {
+                    for (CreatureSpellsList::const_iterator itr = spellList->begin(); (itr != spellList->end() && itr->first < MAX_CREATURE_SPELL_DATA_SLOT); ++itr)
+                    {
+                        if (itr->second.disabled || !itr->second.spell)
+                            petDefSpells.spellid[itr->first] = 0;
+                        else
+                            petDefSpells.spellid[itr->first] = itr->second.spell;
+                    }
+                }
 
                 if (LoadPetDefaultSpells_helper(cInfo, petDefSpells))
                 {
@@ -5306,10 +5345,13 @@ SpellPreferredTargetType GetPreferredTargetForSpell(SpellEntry const* spellInfo)
         return positive ? SPELL_PREFERRED_TARGET_SELF : SPELL_PREFERRED_TARGET_VICTIM;
 
     uint32 firstTarget = spellInfo->EffectImplicitTargetA[EFFECT_INDEX_0];
+    uint32 firstTargetB = spellInfo->EffectImplicitTargetB[EFFECT_INDEX_0];
+
+    if (firstTarget == TARGET_NONE && firstTargetB == TARGET_NONE)
+        return SPELL_PREFERRED_TARGET_SELF;
 
     if (!IsSpellCauseDamage(spellInfo) && firstTarget == TARGET_DUELVSPLAYER)
         return SPELL_PREFERRED_TARGET_RANDOM;
-
     if (positive)
     {
         switch (firstTarget)
@@ -5346,7 +5388,7 @@ SpellPreferredTargetType GetPreferredTargetForSpell(SpellEntry const* spellInfo)
 
 static char* SPELL_DBC_SPELL      = "reconstructed by spell_dbc spell";
 
-struct SpellDbcLoader : public SQLStorageLoaderBase<SpellDbcLoader>
+struct SpellDbcLoader : public SQLStorageLoaderBase<SpellDbcLoader, SQLHashStorage>
 {
     template<class S, class D>
     void default_fill(uint32 field_pos, S src, D &dst)
@@ -5373,10 +5415,10 @@ void SpellMgr::LoadSpellDbc()
     SpellDbcLoader loader;
     loader.Load(sSpellDbcTemplate);
 
-    sLog.outString(">> Loaded %u spell definitions", sSpellDbcTemplate.RecordCount);
+    sLog.outString(">> Loaded %u spell definitions", sSpellDbcTemplate.GetRecordCount());
     sLog.outString();
 
-    for (uint32 i = 1; i < sSpellDbcTemplate.MaxEntry; ++i)
+    for (uint32 i = 1; i < sSpellDbcTemplate.GetMaxEntry(); ++i)
     {
         // check data correctness
         SpellEntry const* spellEntry = sSpellDbcTemplate.LookupEntry<SpellEntry>(i);
@@ -5389,9 +5431,9 @@ void SpellMgr::LoadSpellDbc()
             sLog.outErrorDb("SpellMgr::LoadSpellDbc Loading Spell Template for spell %u, index out of bounds (max = %u)", i, sSpellStore.GetNumRows());
             continue;
         }
-        else if (SpellEntry const* originalSpellEntry = sSpellStore.LookupEntry(i))
+        else if (/*SpellEntry const* originalSpellEntry = */sSpellStore.LookupEntry(i))
         {
-            sLog.outDetail("SpellMgr::LoadSpellDbc Index %u already exists in SpellStorage! replacing on spell_dbc data fields!", i, spellEntry->Id);
+            sLog.outDetail("SpellMgr::LoadSpellDbc Index %u already exists in SpellStorage! replacing on spell_dbc data fields!", i);
             sSpellStore.EraseEntry(i);
             sSpellStore.InsertEntry(const_cast<SpellEntry*>(spellEntry), i);
         }

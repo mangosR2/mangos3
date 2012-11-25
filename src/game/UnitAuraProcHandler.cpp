@@ -3795,7 +3795,7 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(Unit *pVictim, DamageIn
             break;
         case SPELLFAMILY_WARRIOR:
             // Deep Wounds (replace triggered spells to directly apply DoT), dot spell have familyflags
-            if (auraSpellInfo->SpellFamilyName == SPELLFAMILY_WARRIOR && auraSpellInfo->SpellIconID == 243)
+            if (auraSpellInfo->SpellIconID == 243)
             {
                 bool bOffHand = procFlags & PROC_FLAG_SUCCESSFUL_OFFHAND_HIT;
                 if (bOffHand && !haveOffhandWeapon())
@@ -5395,7 +5395,7 @@ SpellAuraProcResult Unit::HandleRemoveByDamageChanceProc(Unit* pVictim, DamageIn
     if (!spellProto)
         return SPELL_AURA_PROC_FAILED;
 
-    if (spellProto->AuraInterruptFlags & AURA_INTERRUPT_FLAG_DAMAGE || procEx & PROC_EX_IGNORE_CC)
+    if ((spellProto->AuraInterruptFlags & AURA_INTERRUPT_FLAG_DAMAGE) || (procEx & PROC_EX_IGNORE_CC))
         return HandleRemoveByDamageProc(pVictim, damageInfo, triggeredByAura, procSpell, procFlag, procEx, cooldown);
 
     if (const_cast<Aura*>(triggeredByAura)->IsAffectedByCrowdControlEffect(damageInfo->damage + damageInfo->absorb))

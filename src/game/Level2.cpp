@@ -908,6 +908,11 @@ bool ChatHandler::HandleGameObjectTargetCommand(char* args)
         PSendSysMessage(LANG_COMMAND_RAWPAWNTIMES, defRespawnDelayStr.c_str(), curRespawnDelayStr.c_str());
 
         ShowNpcOrGoSpawnInformation<GameObject>(target->GetGUIDLow());
+
+        if (target->GetGoType() == GAMEOBJECT_TYPE_DOOR)
+            PSendSysMessage(LANG_COMMAND_GO_STATUS_DOOR, target->GetGoState(), target->getLootState(), GetOnOffStr(target->CalculateCurrentCollisionState()), goI->door.startOpen ? "open" : "closed");
+        else
+            PSendSysMessage(LANG_COMMAND_GO_STATUS, target->GetGoState(), target->getLootState(), GetOnOffStr(target->CalculateCurrentCollisionState()));
     }
     return true;
 }
@@ -2583,7 +2588,6 @@ bool ChatHandler::HandlePInfoCommand(char* args)
     uint8 race = 0;
     uint8 Class = 0;
     uint32 latency = 0;
-    uint32 realmID = sConfig.GetIntDefault("RealmId", 0);
 
     // get additional information from Player object
     if (target)
@@ -2628,27 +2632,19 @@ bool ChatHandler::HandlePInfoCommand(char* args)
     AccountTypes security = SEC_PLAYER;
     std::string last_login = GetMangosString(LANG_ERROR);
 
-    QueryResult* result = LoginDatabase.PQuery("SELECT a.username, a.gmlevel, a.last_ip, a.last_login, a.email, a_fp.accountid, a_fp.security, a_fp.realmid FROM account AS a LEFT JOIN account_forcepermission AS a_fp on a.id = a_fp.accountid WHERE a.id = '%u' ORDER BY FIELD(a_fp.realmid,'%u') DESC", accId, realmID);
+    QueryResult* result = LoginDatabase.PQuery("SELECT a.id, a.username, aa.gmlevel, a.last_ip, a.last_login, a.email FROM account a LEFT JOIN account_access aa ON (a.id = aa.id) WHERE a.id = '%u'", accId);
+
     if (result)
     {
         Field* fields = result->Fetch();
-        username = fields[0].GetCppString();
-
-        if (fields[5].GetUInt32() != NULL && fields[5].GetUInt32() == accId)                            // checking to see if account has forced perms
-        {
-            if (fields[7].GetUInt32() != NULL && fields[7].GetUInt32() == realmID)                      // if it does, check to see if it has it on the realm
-                security = (AccountTypes)fields[6].GetUInt16();                                         // if it does, apply forced perm
-            else
-                security = (AccountTypes)fields[1].GetUInt32();                                         // if it doesn't for realm, apply regular perms
-        }
-        else
-            security = (AccountTypes)fields[1].GetUInt32();                                             // if it doesn't for account, apply regular perms 
+        username = fields[1].GetCppString();
+        security = AccountTypes(fields[2].GetUInt16());
 
         if (GetAccessLevel() >= security)
         {
-            last_ip = fields[2].GetCppString();
-            last_login = fields[3].GetCppString();
-            email = fields[4].GetCppString();
+            last_ip = fields[3].GetCppString();
+            last_login = fields[4].GetCppString();
+            email = fields[5].GetCppString();
         }
         else
         {
@@ -2664,7 +2660,7 @@ bool ChatHandler::HandlePInfoCommand(char* args)
 
     PSendSysMessage(LANG_PINFO_ACCOUNT, (target?"":GetMangosString(LANG_OFFLINE)), nameLink.c_str(), target_guid.GetCounter(), username.c_str(), accId, email.c_str(), security, last_ip.c_str(), last_login.c_str(), latency);
 
-    std::string race_s = "", Class_s = "";
+    std::string race_s = "<unknown>", Class_s = "<unknown>";
     switch (race)
     {
         case RACE_HUMAN:            race_s = "Human";       break;
@@ -4606,8 +4602,8 @@ bool ChatHandler::HandleLookupAccountEmailCommand(char* args)
 
     std::string email = emailStr;
     LoginDatabase.escape_string(email);
-    //                                                 0   1         2        3        4
-    QueryResult* result = LoginDatabase.PQuery("SELECT id, username, last_ip, gmlevel, expansion FROM account WHERE email " _LIKE_ " " _CONCAT3_("'%%'", "'%s'", "'%%'"), email.c_str());
+    //                                                 0     1           2          3           4
+    QueryResult* result = LoginDatabase.PQuery("SELECT a.id, a.username, a.last_ip, aa.gmlevel, a.expansion FROM account a LEFT JOIN account_access aa ON (a.id = aa.id) WHERE email "_LIKE_" "_CONCAT3_("'%%'", "'%s'", "'%%'"), email.c_str());
 
     return ShowAccountListHelper(result, &limit);
 }
@@ -4625,8 +4621,8 @@ bool ChatHandler::HandleLookupAccountIpCommand(char* args)
     std::string ip = ipStr;
     LoginDatabase.escape_string(ip);
 
-    //                                                 0   1         2        3        4
-    QueryResult* result = LoginDatabase.PQuery("SELECT id, username, last_ip, gmlevel, expansion FROM account WHERE last_ip " _LIKE_ " " _CONCAT3_("'%%'", "'%s'", "'%%'"), ip.c_str());
+    //                                                 0     1           2          3           4
+    QueryResult* result = LoginDatabase.PQuery("SELECT a.id, a.username, a.last_ip, aa.gmlevel, a.expansion FROM account a LEFT JOIN account_access aa ON (a.id = aa.id) WHERE last_ip "_LIKE_" "_CONCAT3_("'%%'", "'%s'", "'%%'"), ip.c_str());
 
     return ShowAccountListHelper(result, &limit);
 }
@@ -4646,8 +4642,8 @@ bool ChatHandler::HandleLookupAccountNameCommand(char* args)
         return false;
 
     LoginDatabase.escape_string(account);
-    //                                                 0   1         2        3        4
-    QueryResult* result = LoginDatabase.PQuery("SELECT id, username, last_ip, gmlevel, expansion FROM account WHERE username " _LIKE_ " " _CONCAT3_("'%%'", "'%s'", "'%%'"), account.c_str());
+    //                                                 0     1           2          3           4
+    QueryResult* result = LoginDatabase.PQuery("SELECT a.id, a.username, a.last_ip, aa.gmlevel, a.expansion FROM account a LEFT JOIN account_access aa ON (a.id = aa.id) WHERE username "_LIKE_" "_CONCAT3_("'%%'", "'%s'", "'%%'"), account.c_str());
 
     return ShowAccountListHelper(result, &limit);
 }
@@ -4934,7 +4930,7 @@ bool ChatHandler::HandlePoolInfoCommand(char* args)
 
     if (pool_id > sPoolMgr.GetMaxPoolId())
     {
-        PSendSysMessage("Pool %u not found", pool_id);
+        PSendSysMessage(LANG_POOL_ENTRY_LOWER_MAX_POOL, pool_id, sPoolMgr.GetMaxPoolId());
         return true;
     }
 
@@ -5692,28 +5688,31 @@ bool ChatHandler::HandleWorldStateCommand(char* args)
 
 bool ChatHandler::HandleWorldStateListCommand(char* args)
 {
-    WorldStateSet wsSet = sWorldStateMgr.GetWorldStatesFor(m_session->GetPlayer());
-
-    if (wsSet.empty())
+    WorldStateSet* wsSet = sWorldStateMgr.GetWorldStatesFor(m_session->GetPlayer());
+    if (!wsSet)
         return false;
 
-    for (WorldStateSet::const_iterator itr = wsSet.begin(); itr != wsSet.end(); ++itr)
+    for (uint8 i = 0; i < wsSet->count(); ++i)
     {
-        PSendSysMessage(LANG_WORLDSTATE_LIST,(*itr)->GetId(), (*itr)->GetType(), (*itr)->GetCondition(), (*itr)->GetInstance(), (*itr)->GetValue());
+        WorldState* ws = (*wsSet)[i];
+		PSendSysMessage(LANG_WORLDSTATE_LIST, ws->GetId(), ws->GetType(), ws->GetCondition(), ws->GetInstance(), ws->GetValue());
     }
+    delete wsSet;
     return true;
 }
 
 bool ChatHandler::HandleWorldStateListAllCommand(char* args)
 {
-    WorldStateSet wsSet = sWorldStateMgr.GetWorldStates(UINT32_MAX);
-    if (wsSet.empty())
+    WorldStateSet* wsSet = sWorldStateMgr.GetWorldStates(UINT32_MAX);
+    if (!wsSet)
         return false;
 
-    for (WorldStateSet::const_iterator itr = wsSet.begin(); itr != wsSet.end(); ++itr)
+    for (uint8 i = 0; i < wsSet->count(); ++i)
     {
-        PSendSysMessage(LANG_WORLDSTATE_LIST_FULL, (*itr)->GetId(), (*itr)->GetType(), (*itr)->GetCondition(), (*itr)->GetInstance(), (*itr)->GetValue());
+        WorldState* ws = (*wsSet)[i];
+        PSendSysMessage(LANG_WORLDSTATE_LIST_FULL, ws->GetId(), ws->GetType(), ws->GetCondition(), ws->GetInstance(), ws->GetValue());
     }
+    delete wsSet;
     return true;
 }
 

@@ -37,12 +37,12 @@
 #include "Language.h"
 #include "MapManager.h"
 #include "BattleGround/BattleGround.h"
-#include "BattleGroundAB.h"
-#include "BattleGroundAV.h"
-#include "BattleGroundEY.h"
-#include "BattleGroundIC.h"
-#include "BattleGroundSA.h"
-#include "BattleGroundWS.h"
+#include "BattleGround/BattleGroundAB.h"
+#include "BattleGround/BattleGroundAV.h"
+#include "BattleGround/BattleGroundEY.h"
+#include "BattleGround/BattleGroundIC.h"
+#include "BattleGround/BattleGroundSA.h"
+#include "BattleGround/BattleGroundWS.h"
 #include "Map.h"
 #include "InstanceData.h"
 #include "DBCStructure.h"
@@ -714,7 +714,7 @@ void AchievementMgr::SendAchievementEarned(AchievementEntry const* achievement)
     WorldPacket data(SMSG_ACHIEVEMENT_EARNED, 8 + 4 + 8);
     data << GetPlayer()->GetPackGUID();
     data << uint32(achievement->ID);
-    data << uint32(secsToTimeBitFields(time(NULL)));
+    data.AppendPackedTime(time(NULL));
     data << uint32(0);
     GetPlayer()->SendMessageToSetInRange(&data, sWorld.getConfig(CONFIG_FLOAT_LISTEN_RANGE_SAY), true);
 }
@@ -730,7 +730,7 @@ void AchievementMgr::SendCriteriaUpdate(uint32 id, CriteriaProgress const* progr
 
     data << GetPlayer()->GetPackGUID();
     data << uint32(progress->timedCriteriaFailed ? 1 : 0);
-    data << uint32(secsToTimeBitFields(now));
+    data.AppendPackedTime(now);
     data << uint32(now - progress->date);                   // timer 1
     data << uint32(now - progress->date);                   // timer 2
     GetPlayer()->SendDirectMessage(&data);
@@ -1206,7 +1206,7 @@ void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, ui
             case ACHIEVEMENT_CRITERIA_TYPE_COMPLETE_QUEST_COUNT:
             {
                 uint32 counter = 0;
-                for (QuestStatusMap::const_iterator itr = GetPlayer()->getQuestStatusMap().begin(); itr != GetPlayer()->getQuestStatusMap().end(); ++itr)
+                for (QuestStatusMap::const_iterator itr = GetPlayer()->GetQuestStatusMap().begin(); itr != GetPlayer()->GetQuestStatusMap().end(); ++itr)
                     if (itr->second.m_rewarded)
                         ++counter;
                 change = counter;
@@ -1231,7 +1231,7 @@ void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, ui
                     continue;
 
                 uint32 counter = 0;
-                for (QuestStatusMap::const_iterator itr = GetPlayer()->getQuestStatusMap().begin(); itr != GetPlayer()->getQuestStatusMap().end(); ++itr)
+                for (QuestStatusMap::const_iterator itr = GetPlayer()->GetQuestStatusMap().begin(); itr != GetPlayer()->GetQuestStatusMap().end(); ++itr)
                 {
                     Quest const* quest = sObjectMgr.GetQuestTemplate(itr->first);
                     if (itr->second.m_rewarded && quest->GetZoneOrSort() >= 0 && uint32(quest->GetZoneOrSort()) == achievementCriteria->complete_quests_in_zone.zoneID)
@@ -1665,11 +1665,8 @@ void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, ui
                     continue;
                 // possible additional requirements
                 AchievementCriteriaRequirementSet const* data = sAchievementMgr.GetCriteriaRequirementSet(achievementCriteria);
-                if (!data)
+                if (data && !data->Meets(GetPlayer(), unit, miscvalue1))
                     continue;
-                if (!data->Meets(GetPlayer(), unit, miscvalue1))
-                    continue;
-
                 change = 1;
                 progressType = PROGRESS_ACCUMULATE;
                 break;
@@ -2902,10 +2899,7 @@ void AchievementMgr::CompletedAchievement(AchievementEntry const* achievement)
     ca.date = time(NULL);
     ca.changed = true;
 
-    // don't insert for ACHIEVEMENT_FLAG_REALM_FIRST_KILL since otherwise only the first group member would reach that achievement
-    // TODO: where do set this instead?
-    if (!(achievement->flags & ACHIEVEMENT_FLAG_REALM_FIRST_KILL))
-        sAchievementMgr.SetRealmCompleted(achievement);
+    sAchievementMgr.SetRealmCompleted(achievement);
 
     UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_COMPLETE_ACHIEVEMENT);
 
@@ -3025,7 +3019,7 @@ void AchievementMgr::BuildAllDataPacket(WorldPacket* data)
             continue;
 
         *data << uint32(iter->first);
-        *data << uint32(secsToTimeBitFields(iter->second.date));
+        data->AppendPackedTime(iter->second.date);
     }
     *data << int32(-1);
 
@@ -3036,7 +3030,7 @@ void AchievementMgr::BuildAllDataPacket(WorldPacket* data)
         data->appendPackGUID(iter->second.counter);
         *data << GetPlayer()->GetPackGUID();
         *data << uint32(iter->second.timedCriteriaFailed ? 1 : 0);
-        *data << uint32(secsToTimeBitFields(now));
+        data->AppendPackedTime(now);
         *data << uint32(now - iter->second.date);
         *data << uint32(now - iter->second.date);
     }
@@ -3090,12 +3084,14 @@ AchievementCriteriaRequirementSet const* AchievementGlobalMgr::GetCriteriaRequir
 
 bool AchievementGlobalMgr::IsRealmCompleted(AchievementEntry const* achievement) const
 {
-    return m_allCompletedAchievements.find(achievement->ID) != m_allCompletedAchievements.end();
+    AllCompletedAchievements::const_iterator itr = m_allCompletedAchievements.find(achievement->ID);
+    return itr != m_allCompletedAchievements.end() && time_t(itr->second + 2) < time(NULL);
 }
 
 void AchievementGlobalMgr::SetRealmCompleted(AchievementEntry const* achievement)
 {
-    m_allCompletedAchievements.insert(achievement->ID);
+    if (m_allCompletedAchievements.find(achievement->ID) == m_allCompletedAchievements.end())
+        m_allCompletedAchievements[achievement->ID] = time(NULL);
 }
 
 void AchievementGlobalMgr::LoadAchievementCriteriaList()
@@ -3315,7 +3311,7 @@ void AchievementGlobalMgr::LoadAchievementCriteriaRequirements()
 
 void AchievementGlobalMgr::LoadCompletedAchievements()
 {
-    QueryResult* result = CharacterDatabase.Query("SELECT achievement FROM character_achievement GROUP BY achievement");
+    QueryResult* result = CharacterDatabase.Query("SELECT `achievement`, `date` FROM `character_achievement` GROUP BY `achievement`");
 
     if (!result)
     {
@@ -3342,7 +3338,7 @@ void AchievementGlobalMgr::LoadCompletedAchievements()
             continue;
         }
 
-        m_allCompletedAchievements.insert(achievement_id);
+        m_allCompletedAchievements[achievement_id] = time_t(fields[1].GetUInt64());
     }
     while (result->NextRow());
 

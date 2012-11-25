@@ -1,9 +1,9 @@
 -- Random Battleground
--- Commit 0525ca144e282cec2478
+--
 
 DROP TABLE IF EXISTS `character_battleground_random`;
 CREATE TABLE `character_battleground_random` (
-    `guid` int(11) unsigned NOT NULL default 0,
+    `guid` int(11) unsigned NOT NULL DEFAULT '0',
     PRIMARY KEY  (`guid`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
@@ -260,3 +260,12 @@ CREATE TABLE IF NOT EXISTS `worldstate_data` (
     `renewtime`        bigint(11) unsigned NOT NULL DEFAULT '0' COMMENT 'Time of last renew of WorldState',
     PRIMARY KEY (`state_id`,`instance`, `type`, `condition`)
 ) DEFAULT CHARSET=utf8 PACK_KEYS=0 COMMENT='WorldState data storage';
+
+DROP TABLE IF EXISTS `item_refund_instance`;
+CREATE TABLE `item_refund_instance` (
+  `itemGuid` int(11) unsigned NOT NULL COMMENT 'Item Guid',
+  `playerGuid` int(11) unsigned NOT NULL COMMENT 'Player Guid',
+  `paidMoney` int(11) unsigned NOT NULL DEFAULT '0',
+  `paidExtendedCost` mediumint(8) unsigned NOT NULL DEFAULT '0',
+  PRIMARY KEY (`itemGuid`,`playerGuid`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Item Refund System';

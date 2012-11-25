@@ -93,6 +93,7 @@ AccountOpResult AccountMgr::DeleteAccount(uint32 accid)
 
     bool res =
         LoginDatabase.PExecute("DELETE FROM account WHERE id='%u'", accid) &&
+        LoginDatabase.PExecute("DELETE FROM account_access WHERE id ='%d'", accid) &&
         LoginDatabase.PExecute("DELETE FROM realmcharacters WHERE acctid='%u'", accid);
 
     LoginDatabase.CommitTransaction();
@@ -165,7 +166,7 @@ uint32 AccountMgr::GetId(std::string username)
 
 AccountTypes AccountMgr::GetSecurity(uint32 acc_id)
 {
-    QueryResult* result = LoginDatabase.PQuery("SELECT gmlevel FROM account WHERE id = '%u'", acc_id);
+    QueryResult* result = LoginDatabase.PQuery("SELECT `gmlevel` FROM `account_access` WHERE `id` = '%u' AND (`RealmID` = '%u' OR `RealmID` = -1)", acc_id, sWorld.getConfig(CONFIG_UINT32_REALMID));
     if (result)
     {
         AccountTypes sec = AccountTypes((*result)[0].GetInt32());
@@ -462,6 +463,7 @@ PlayerDataCache const* AccountMgr::GetPlayerDataCache(ObjectGuid guid, bool forc
 
             WriteGuard Guard(GetLock());
             mPlayerDataCacheMap.insert(PlayerDataCacheMap::value_type(guid, cache));
+            delete result;
         }
     }
 
@@ -499,6 +501,7 @@ PlayerDataCache const* AccountMgr::GetPlayerDataCache(const std::string& name)
 
         WriteGuard Guard(GetLock());
         mPlayerDataCacheMap.insert(PlayerDataCacheMap::value_type(guid, cache));
+        delete result;
     }
 
     {

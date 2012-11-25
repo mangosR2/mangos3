@@ -29,6 +29,8 @@ class MANGOS_DLL_SPEC TargetedMovementGeneratorBase
     public:
         TargetedMovementGeneratorBase(Unit &target) { i_target.link(&target, this); }
         void stopFollowing() { }
+        virtual ~TargetedMovementGeneratorBase() {}
+
     protected:
         FollowerReference i_target;
 };
@@ -38,14 +40,15 @@ class MANGOS_DLL_SPEC TargetedMovementGeneratorMedium
 : public MovementGeneratorMedium< T, D >, public TargetedMovementGeneratorBase
 {
     protected:
-        TargetedMovementGeneratorMedium(Unit &target, float offset, float angle) :
-            TargetedMovementGeneratorBase(target), i_offset(offset), i_angle(angle),
-            i_recalculateTravel(false), i_targetReached(false), i_recheckDistance(0),
-            i_targetSearchingTimer(0),
+        TargetedMovementGeneratorMedium(Unit& target, float offset, float angle) :
+            TargetedMovementGeneratorBase(target),
+            i_recheckDistance(0), i_targetSearchingTimer(0),
+            i_offset(offset), i_angle(angle),
+            m_speedChanged(false), i_targetReached(false),
             i_path(NULL)
         {
         }
-        ~TargetedMovementGeneratorMedium() { delete i_path; }
+        virtual ~TargetedMovementGeneratorMedium() { delete i_path; }
 
     public:
         bool Update(T &, const uint32 &);
@@ -57,19 +60,17 @@ class MANGOS_DLL_SPEC TargetedMovementGeneratorMedium
 
         Unit* GetTarget() const { return i_target.getTarget(); }
 
-        void UnitSpeedChanged() { i_recalculateTravel=true; }
-        void UpdateFinalDistance(float fDistance);
+        void UnitSpeedChanged() { m_speedChanged = true; }
         const char* Name() const { return "<TargetedMedium>"; }
 
-
     protected:
-        void _setTargetLocation(T &);
+        void _setTargetLocation(T&, bool updateDestination);
 
         ShortTimeTracker i_recheckDistance;
         uint32 i_targetSearchingTimer;
         float i_offset;
         float i_angle;
-        bool i_recalculateTravel : 1;
+        bool m_speedChanged : 1;
         bool i_targetReached : 1;
 
         PathFinder* i_path;

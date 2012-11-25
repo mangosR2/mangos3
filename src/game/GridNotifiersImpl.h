@@ -48,6 +48,7 @@ inline void MaNGOS::ObjectUpdater::Visit(CreatureMapType& m)
     uint32  visitorsCount = 0;
     uint8   visitCount = 1;
     std::vector<uint32> lastUpdateTimeList;
+    lastUpdateTimeList.clear();
 
     for (CreatureMapType::iterator iter = m.begin(); iter != m.end(); ++iter)
     {
@@ -208,7 +209,7 @@ inline void MaNGOS::DynamicObjectUpdater::VisitHelper(Unit* target)
     SpellEffectIndex eff_index  = i_dynobject.GetEffIndex();
 
     // Check target immune to spell or aura
-    if (target->IsImmuneToSpell(spellInfo) || target->IsImmuneToSpellEffect(spellInfo, eff_index))
+    if (target->IsImmuneToSpell(spellInfo, true) || target->IsImmuneToSpellEffect(spellInfo, eff_index))
         return;
 
     // Apply PersistentAreaAura on target

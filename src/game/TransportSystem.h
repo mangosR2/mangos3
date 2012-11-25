@@ -49,11 +49,11 @@ typedef UNORDERED_MAP < WorldObject* /*passenger*/, TransportInfo* /*passengerIn
  * - Providing helper for calculating between local and global coordinates
  */
 
-class TransportBase
+class MANGOS_DLL_DECL TransportBase
 {
     public:
         explicit TransportBase(WorldObject* owner);
-        ~TransportBase();
+        virtual ~TransportBase() { MANGOS_ASSERT(m_passengers.size() == 0); };
 
         void Update(uint32 diff);
         void UpdateGlobalPositions();
@@ -68,6 +68,10 @@ class TransportBase
         void CalculateGlobalPositionOf(float lx, float ly, float lz, float lo, float& gx, float& gy, float& gz, float& go) const;
 
     protected:
+        // Helper functions to add/ remove a passenger from the list
+        void BoardPassenger(WorldObject* passenger, float lx, float ly, float lz, float lo, uint8 seat);
+        void UnBoardPassenger(WorldObject* passenger);
+
         WorldObject* m_owner;                               ///< The transporting unit
         PassengerMap m_passengers;                          ///< List of passengers and their transport-information
 
@@ -83,12 +87,14 @@ class TransportBase
  * - Accessors to get the transporter
  */
 
-class TransportInfo
+class MANGOS_DLL_DECL TransportInfo
 {
     public:
         explicit TransportInfo(WorldObject* owner, TransportBase* transport, float lx, float ly, float lz, float lo, uint8 seat);
 
+        // Set local positions
         void SetLocalPosition(float lx, float ly, float lz, float lo);
+        void SetTransportSeat(uint8 seat) { m_seat = seat; }
 
         // Accessors
         WorldObject* GetTransport() const { return m_transport->GetOwner(); }

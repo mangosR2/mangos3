@@ -417,6 +417,7 @@ class Spell
         SpellCastResult CheckPower();
         SpellCastResult CheckOrTakeRunePower(bool take);
         SpellCastResult CheckCasterAuras() const;
+        SpellCastResult CheckCastTargets() const;
 
         int32 CalculateDamage(SpellEffectIndex i, Unit* target) { return m_caster->CalculateSpellDamage(target, m_spellInfo, i, &m_currentBasePoints[i]); }
         static int32 CalculatePowerCost(SpellEntry const* spellInfo, Unit* caster, Spell const* spell = NULL, Item* castItem = NULL);
@@ -449,13 +450,16 @@ class Spell
         void FillRaidOrPartyManaPriorityTargets(UnitList &targetUnitMap, Unit* member, Unit* center, float radius, uint32 count, bool raid, bool withPets, bool withcaster);
         void FillRaidOrPartyHealthPriorityTargets(UnitList &targetUnitMap, Unit* member, Unit* center, float radius, uint32 count, bool raid, bool withPets, bool withcaster);
 
-        template<typename T> WorldObject* FindCorpseUsing();
+        // Returns a target that was filled by SPELL_SCRIPT_TARGET (or selected victim) Can return NULL
+        Unit* GetPrefilledUnitTargetOrUnitTarget(SpellEffectIndex effIndex) const;
+
+        template<typename T> WorldObject* FindCorpseUsing(uint32 corpseTypeMask);
 
         bool CheckTarget( Unit* target, SpellEffectIndex eff );
         bool CheckTargetBeforeLimitation(Unit* target, SpellEffectIndex eff);
         SpellCastResult CanAutoCast(Unit* target);
 
-        static void MANGOS_DLL_SPEC SendCastResult(Player* caster, SpellEntry const* spellInfo, uint8 cast_count, SpellCastResult result);
+        static void MANGOS_DLL_SPEC SendCastResult(Player* caster, SpellEntry const* spellInfo, uint8 cast_count, SpellCastResult result, bool isPetCastResult = false);
         void SendCastResult(SpellCastResult result);
         void SendSpellStart();
         void SendSpellGo();
@@ -503,9 +507,11 @@ class Spell
         bool IsDeletable() const { return !m_referencedFromCurrentSpell && !m_executedCurrently; }
         void SetReferencedFromCurrent(bool yes) { m_referencedFromCurrentSpell = yes; }
         void SetExecutedCurrently(bool yes) { m_executedCurrently = yes; }
+
         uint64 GetDelayStart() const { return m_delayStart; }
         void SetDelayStart(uint64 m_time) { m_delayStart = m_time; }
         uint64 GetDelayMoment() const { return m_delayMoment; }
+        float GetBaseSpellSpeed();
 
         bool IsNeedSendToClient() const;                    // use for hide spell cast for client in case when cast not have client side affect (animation or log entries)
         bool IsTriggeredSpellWithRedundentData() const;     // use for ignore some spell data for triggered spells like cast time, some triggered spells have redundent copy data from main spell for client use purpose
@@ -658,11 +664,12 @@ class Spell
         GOTargetList   m_UniqueGOTargetInfo;
         ItemTargetList m_UniqueItemInfo;
 
+        void AddTarget(ObjectGuid targetGuid, SpellEffectIndex effIndex);
+
         void AddUnitTarget(Unit* target, SpellEffectIndex effIndex);
-        void AddUnitTarget(ObjectGuid unitGuid, SpellEffectIndex effIndex);
         void AddGOTarget(GameObject* target, SpellEffectIndex effIndex);
-        void AddGOTarget(ObjectGuid goGuid, SpellEffectIndex effIndex);
         void AddItemTarget(Item* target, SpellEffectIndex effIndex);
+
         void DoAllEffectOnTarget(TargetInfo *target);
         void HandleDelayedSpellLaunch(TargetInfo *target);
         void InitializeDamageMultipliers();
@@ -741,7 +748,7 @@ namespace MaNGOS
 
     struct MANGOS_DLL_DECL SpellNotifierCreatureAndPlayer
     {
-        Spell::UnitList *i_data;
+        Spell::UnitList* i_data;
         Spell &i_spell;
         SpellNotifyPushType i_push_type;
         float i_radius;
@@ -749,20 +756,21 @@ namespace MaNGOS
         WorldObject* i_originalCaster;
         WorldObject* i_castingObject;
         bool i_playerControlled;
-        float i_centerX;
-        float i_centerY;
-        float i_centerZ;
+        WorldLocation i_center;
 
-        float GetCenterX() const { return i_centerX; }
-        float GetCenterY() const { return i_centerY; }
+        float GetCenterX() const { return i_center.x; }
+        float GetCenterY() const { return i_center.y; }
+        float GetCenterZ() const { return i_center.z; }
 
         SpellNotifierCreatureAndPlayer(Spell &spell, Spell::UnitList &data, float radius, SpellNotifyPushType type,
             SpellTargets TargetType = SPELL_TARGETS_NOT_FRIENDLY, WorldObject* originalCaster = NULL)
             : i_data(&data), i_spell(spell), i_push_type(type), i_radius(radius), i_TargetType(TargetType),
-            i_originalCaster(originalCaster), i_castingObject(i_spell.GetCastingObject())
+            i_originalCaster(originalCaster), i_castingObject(i_spell.GetCastingObject()), i_center(WorldLocation())
         {
             if (!i_originalCaster)
                 i_originalCaster = i_spell.GetAffectiveCasterObject();
+            if (!i_castingObject)
+                i_castingObject = i_spell.m_caster;
             i_playerControlled = i_originalCaster  ? i_originalCaster->IsControlledByPlayer() : false;
 
             switch(i_push_type)
@@ -775,22 +783,28 @@ namespace MaNGOS
                 case PUSH_SELF_CENTER:
                     if (i_castingObject)
                     {
-                        i_centerX = i_castingObject->GetPositionX();
-                        i_centerY = i_castingObject->GetPositionY();
+                        i_center =  WorldLocation(i_castingObject->GetMapId(), i_castingObject->GetPositionX(), i_castingObject->GetPositionY(), i_castingObject->GetPositionZ());
                     }
                     break;
                 case PUSH_DEST_CENTER:
                 {
                     // This hack from Schmoo - need revert in original state after rework spellsystem on separate
                     // per-effect targeting
+                    float i_centerX, i_centerY, i_centerZ;
+
                     if (i_spell.m_targets.m_targetMask & TARGET_FLAG_SOURCE_LOCATION)
                         i_spell.m_targets.getSource(i_centerX, i_centerY, i_centerZ);
                     else
                         i_spell.m_targets.getDestination(i_centerX, i_centerY, i_centerZ);
+
+                    i_center =  WorldLocation(i_castingObject ? i_castingObject->GetMapId() : -1, i_centerX, i_centerY, i_centerZ);
+
                     break;
                 }
                 case PUSH_INHERITED_CENTER:
                 {
+                    float i_centerX, i_centerY, i_centerZ;
+
                     if ((i_spell.m_targets.m_targetMask & TARGET_FLAG_DEST_LOCATION) || (i_spell.m_targets.m_targetMask & TARGET_FLAG_UNIT))
                     {
                         i_centerX = i_spell.m_targets.m_destX;
@@ -809,13 +823,15 @@ namespace MaNGOS
                         i_centerY = i_spell.m_targets.m_destY;
                         i_centerZ = i_spell.m_targets.m_destZ;
                     }
+
+                    i_center =  WorldLocation(i_castingObject ? i_castingObject->GetMapId() : -1, i_centerX, i_centerY, i_centerZ);
+
                     break;
                 }
                 case PUSH_TARGET_CENTER:
                     if (Unit* target = i_spell.m_targets.getUnitTarget())
                     {
-                        i_centerX = target->GetPositionX();
-                        i_centerY = target->GetPositionY();
+                        i_center =  WorldLocation(target->GetMapId(), target->GetPositionX(), target->GetPositionY(), target->GetPositionZ());
                     }
                     break;
                 default:
@@ -860,7 +876,7 @@ namespace MaNGOS
                         break;
                     case SPELL_TARGETS_AOE_DAMAGE:
                     {
-                        if (itr->getSource()->GetTypeId()==TYPEID_UNIT && ((Creature*)itr->getSource())->IsTotem())
+                        if (itr->getSource()->GetTypeId() == TYPEID_UNIT && ((Creature*)itr->getSource())->IsTotem())
                             continue;
 
                         if (i_playerControlled)
@@ -874,7 +890,7 @@ namespace MaNGOS
                                 continue;
                         }
 
-                        if (!itr->getSource()->IsVisibleTargetForSpell(i_originalCaster, i_spell.m_spellInfo))
+                        if (!itr->getSource()->IsVisibleTargetForSpell(i_originalCaster, i_spell.m_spellInfo, &i_center))
                             continue;
                     }
                     break;
@@ -911,7 +927,7 @@ namespace MaNGOS
                             i_data->push_back(itr->getSource());
                         break;
                     case PUSH_DEST_CENTER:
-                        if (itr->getSource()->IsWithinDist3d(i_centerX, i_centerY, i_centerZ, i_radius))
+                        if (itr->getSource()->IsWithinDist3d(GetCenterX(), GetCenterY(), GetCenterZ(), i_radius))
                             i_data->push_back(itr->getSource());
                         break;
                     case PUSH_INHERITED_CENTER:

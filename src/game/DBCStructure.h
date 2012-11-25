@@ -836,6 +836,29 @@ struct CurrencyTypesEntry
     uint32    BitIndex;                                     // 3        m_bitIndex bit index in PLAYER_FIELD_KNOWN_CURRENCIES (1 << (index-1))
 };
 
+struct DestructibleModelDataEntry
+{
+    uint32 m_ID;                                            // 0        m_ID
+    // uint32 unk1;                                         // 1
+    // uint32 unk2;                                         // 2
+    uint32 damagedDisplayId;                                // 3
+    // uint32 unk4;                                         // 4
+    // uint32 unk5;                                         // 5
+    // uint32 unk6;                                         // 6
+    uint32 destroyedDisplayId;                              // 7
+    // uint32 unk8;                                         // 8
+    // uint32 unk9;                                         // 9
+    // uint32 unk10;                                        // 10
+    uint32 rebuildingDisplayId;                             // 11       // Maybe rebuildingDisplayIdWhileDestroyed
+    // uint32 unk12;                                        // 12
+    // uint32 unk13;                                        // 13
+    // uint32 unk14;                                        // 14
+    // uint32 unk15;                                        // 15
+    // uint32 unk16;                                        // 16
+    // uint32 unk17;                                        // 17
+    // uint32 unk18;                                        // 18
+};
+
 struct DungeonEncounterEntry
 {
     uint32 Id;                                              // 0        m_ID
@@ -1371,6 +1394,8 @@ struct MapEntry
 
     bool IsTransport() const
     {
+        if (IsContinent())
+            return false;
         return map_type == MAP_COMMON && mapFlags == MAP_FLAG_INSTANCEABLE;
     }
 };
@@ -1936,6 +1961,8 @@ struct MANGOS_DLL_SPEC SpellEntry;
 struct SpellEffectEntry
 {
     SpellEffectEntry(SpellEntry const* spellEntry, SpellEffectIndex i);
+    SpellEffectEntry() {};
+    SpellEffectEntry(SpellEffectEntry const& effect);
 
     //uint32        Id;                                         // 0        m_ID
     uint32        Effect;                                       // 73-75    m_effect
@@ -1968,9 +1995,6 @@ struct SpellEffectEntry
 
     void Initialize(const SpellEntry* spellEntry, SpellEffectIndex i);
 
-    private:
-        SpellEffectEntry() {};
-        SpellEffectEntry(SpellEffectEntry const&) {};
 };
 
 #define MAX_SPELL_REAGENTS 8
@@ -2098,7 +2122,7 @@ struct SpellEntry
 
     bool IsFitToFamilyMask(uint64 familyFlags, uint32 familyFlags2 = 0) const
     {
-        return SpellFamilyFlags.IsFitToFamilyMask(familyFlags, familyFlags2);
+        return GetSpellFamilyFlags().IsFitToFamilyMask(familyFlags, familyFlags2);
     }
 
     bool IsFitToFamily(SpellFamily family, uint64 familyFlags, uint32 familyFlags2 = 0) const
@@ -2108,7 +2132,7 @@ struct SpellEntry
 
     bool IsFitToFamilyMask(ClassFamilyMask const& mask) const
     {
-        return SpellFamilyFlags.IsFitToFamilyMask(mask);
+        return GetSpellFamilyFlags().IsFitToFamilyMask(mask);
     }
 
     bool IsFitToFamily(SpellFamily family, ClassFamilyMask const& mask) const
@@ -2207,7 +2231,6 @@ struct SpellEntry
         template<typename T>
         bool IsFitToFamilyMask(SpellFamily family, T t) const;
 };
-
 
 // A few fields which are required for automated convertion
 // NOTE that these fields are count by _skipping_ the fields that are unused!
@@ -2642,18 +2665,14 @@ typedef std::map<uint32,TalentSpellPos> TalentSpellPosMap;
 
 struct SpellEffect
 {
-    SpellEffectEntry const* effects[MAX_EFFECT_INDEX];
+    SpellEffectEntry effects[MAX_EFFECT_INDEX];
 
     SpellEffect()
     {
-        for (uint8 i = 0; i < MAX_EFFECT_INDEX; ++i)
-            effects[SpellEffectIndex(i)] = NULL;
     }
 
     ~SpellEffect()
     {
-        for (uint8 i = 0; i < MAX_EFFECT_INDEX; ++i)
-            delete effects[SpellEffectIndex(i)];
     }
 };
 

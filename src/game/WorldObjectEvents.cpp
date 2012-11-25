@@ -33,6 +33,12 @@
 
 // Event processor
 
+WorldObjectEventProcessor::WorldObjectEventProcessor()
+{
+    //m_time = WorldTimer::getMSTime();
+    m_events.clear();
+}
+
 void WorldObjectEventProcessor::Update(uint32 p_time, bool force)
 {
     if (force)
@@ -66,7 +72,7 @@ void WorldObjectEventProcessor::RenewEvents()
         {
             switch (m_queue.front().second->GetType())
             {
-                WORLDOBJECT_EVENT_TYPE_UNIQUE:
+                case WORLDOBJECT_EVENT_TYPE_UNIQUE:
                 {
                     bool needInsert = true;
                     for (EventList::const_iterator i = m_events.begin(); i != m_events.end(); ++i)
@@ -83,9 +89,9 @@ void WorldObjectEventProcessor::RenewEvents()
                         m_events.insert(m_queue.front());
                     break;
                 }
-                WORLDOBJECT_EVENT_TYPE_REPEATABLE:
-                WORLDOBJECT_EVENT_TYPE_DEATH:
-                WORLDOBJECT_EVENT_TYPE_COMMON:
+                case WORLDOBJECT_EVENT_TYPE_REPEATABLE:
+                case WORLDOBJECT_EVENT_TYPE_DEATH:
+                case WORLDOBJECT_EVENT_TYPE_COMMON:
                 default:
                     m_events.insert(m_queue.front());
                     break;
@@ -247,6 +253,7 @@ bool RelocationNotifyEvent::Execute(uint64 /*e_time*/, uint32 /*p_time*/)
 void RelocationNotifyEvent::Abort(uint64)
 {
     m_owner._SetAINotifyScheduled(false);
+    to_Abort = true;
 };
 
 bool ManaUseEvent::Execute(uint64 /*e_time*/, uint32 /*p_time*/)
@@ -259,9 +266,11 @@ bool ManaUseEvent::Execute(uint64 /*e_time*/, uint32 /*p_time*/)
 AssistDelayEvent::AssistDelayEvent(ObjectGuid victim, Unit& owner, std::list<Creature*> const& assistants) : BasicEvent(WORLDOBJECT_EVENT_TYPE_COMMON), m_victimGuid(victim), m_owner(owner)
 {
     // Pushing guids because in delay can happen some creature gets despawned => invalid pointer
-    m_assistantGuids.reserve(assistants.size());
     for (std::list<Creature*>::const_iterator itr = assistants.begin(); itr != assistants.end(); ++itr)
-        m_assistantGuids.push_back((*itr)->GetObjectGuid());
+    {
+        if ((*itr) && (*itr)->IsInWorld())
+            m_assistantGuids.push_back((*itr)->GetObjectGuid());
+    }
 }
 
 bool AssistDelayEvent::Execute(uint64 /*e_time*/, uint32 /*p_time*/)
@@ -358,12 +367,10 @@ bool EvadeDelayEvent::Execute(uint64 /*e_time*/, uint32 /*p_time*/)
             if (c_owner->IsDespawned() || c_owner->isCharmed() || c_owner->hasUnitState(UNIT_STAT_CAN_NOT_REACT_OR_LOST_CONTROL))
                 return true;
 
-            if (c_owner->isAlive())
-                c_owner->GetMotionMaster()->MoveTargetedHome();
-
-            CreatureAI* ai = c_owner->AI();
-            if (ai)
+            c_owner->LockAI(true);
+            if (CreatureAI* ai = c_owner->AI())
                 ai->EnterEvadeMode();
+            c_owner->LockAI(false);
 
             if (InstanceData* mapInstance = c_owner->GetInstanceData())
                 mapInstance->OnCreatureEvade(c_owner);
@@ -375,14 +382,14 @@ bool EvadeDelayEvent::Execute(uint64 /*e_time*/, uint32 /*p_time*/)
             if (!c_owner)
                 return true;
 
+            if (m_owner.GetOwner() && m_owner.GetOwner()->GetTypeId() == TYPEID_UNIT && m_owner.GetOwner()->SelectHostileTarget(false))
+                return true;
+
             if (c_owner->IsAILocked())
                 return false;
 
             if (c_owner->IsDespawned())
                 return true;
-
-            if (c_owner->isAlive())
-                c_owner->GetMotionMaster()->MoveTargetedHome();
 
             Pet* p_owner = (Pet*)(&m_owner);
             if (!p_owner)
@@ -415,13 +422,10 @@ bool EvadeDelayEvent::Execute(uint64 /*e_time*/, uint32 /*p_time*/)
 // Vehicle events
 bool PassengerEjectEvent::Execute(uint64 /*e_time*/, uint32 /*p_time*/)
 {
-    if (!m_vehicle.GetVehicleInfo())
+    if (!m_vehicle.IsVehicle())
         return true;
 
     VehicleKitPtr pVehicle = m_vehicle.GetVehicleKit();
-
-    if (!pVehicle)
-        return true;
 
     Unit* passenger = pVehicle->GetPassenger(m_seatId);
 
@@ -433,9 +437,20 @@ bool PassengerEjectEvent::Execute(uint64 /*e_time*/, uint32 /*p_time*/)
     return true;
 }
 
+// Player events
+bool TeleportDelayEvent::Execute(uint64 /*e_time*/, uint32 /*p_time*/)
+{
+    if (!m_owner.GetSession() || m_owner.GetSession()->PlayerLogout())
+        return true;
+
+    m_owner.SetSemaphoreTeleportDelayEvent(false);
+    m_owner.TeleportTo(m_location, m_options);
+    return true;
+}
+
 // BattleGround events
 BGQueueInviteEvent::BGQueueInviteEvent(ObjectGuid pl_guid, uint32 BgInstanceGUID, BattleGroundTypeId BgTypeId, ArenaType arenaType, uint32 removeTime) :
-    m_PlayerGuid(pl_guid), m_BgInstanceGUID(BgInstanceGUID), m_BgTypeId(BgTypeId), m_ArenaType(arenaType), m_RemoveTime(removeTime), BasicEvent(WORLDOBJECT_EVENT_TYPE_COMMON)
+    BasicEvent(WORLDOBJECT_EVENT_TYPE_COMMON), m_PlayerGuid(pl_guid), m_BgInstanceGUID(BgInstanceGUID), m_BgTypeId(BgTypeId), m_ArenaType(arenaType), m_RemoveTime(removeTime)
 {
 };
 
@@ -483,7 +498,7 @@ void BGQueueInviteEvent::Abort(uint64 /*e_time*/)
     we must remove player in the 5. case even if battleground object doesn't exist!
 */
 BGQueueRemoveEvent::BGQueueRemoveEvent(ObjectGuid plGuid, uint32 bgInstanceGUID, BattleGroundTypeId BgTypeId, BattleGroundQueueTypeId bgQueueTypeId, uint32 removeTime)
-    : m_PlayerGuid(plGuid), m_BgInstanceGUID(bgInstanceGUID), m_RemoveTime(removeTime), m_BgTypeId(BgTypeId), m_BgQueueTypeId(bgQueueTypeId), BasicEvent(WORLDOBJECT_EVENT_TYPE_COMMON)
+    : BasicEvent(WORLDOBJECT_EVENT_TYPE_COMMON), m_PlayerGuid(plGuid), m_BgInstanceGUID(bgInstanceGUID), m_RemoveTime(removeTime), m_BgTypeId(BgTypeId), m_BgQueueTypeId(bgQueueTypeId)
 {
 };
 

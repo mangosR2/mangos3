@@ -481,7 +481,7 @@ void WorldSession::HandleCharCreateOpcode(WorldPacket& recv_data)
     // Player created, save it now
     pNewChar.SaveToDB();
 
-    sAccountMgr.UpdateCharactersCount(GetAccountId(), realmID);
+    sAccountMgr.UpdateCharactersCount(GetAccountId(), sWorld.getConfig(CONFIG_UINT32_REALMID));
 
     data << (uint8)CHAR_CREATE_SUCCESS;
     SendPacket(&data);
@@ -744,15 +744,8 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
         }
     }
 
-    if (!pCurrChar->GetMap()->Add(pCurrChar))
-    {
-        // normal delayed teleport protection not applied (and this correct) for this case (Player object just created)
-        AreaTrigger const* at = sObjectMgr.GetGoBackTrigger(pCurrChar->GetMapId());
-        if (at)
-            pCurrChar->TeleportTo(at->target_mapId, at->target_X, at->target_Y, at->target_Z, pCurrChar->GetOrientation());
-        else
-            pCurrChar->TeleportToHomebind();
-    }
+    if (pCurrChar->NeedGoingToHomebind() || !pCurrChar->GetMap()->Add(pCurrChar))
+        pCurrChar->TeleportToHomebind(TELE_TO_NODELAY | TELE_TO_CHECKED);
 
     sObjectAccessor.AddObject(pCurrChar);
     // DEBUG_LOG("Player %s added to Map.",pCurrChar->GetName());
@@ -770,7 +763,7 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
         static SqlStatementID updAccount;
 
         stmt = LoginDatabase.CreateStatement(updAccount, "UPDATE account SET active_realm_id = ? WHERE id = ?");
-        stmt.PExecute(realmID, GetAccountId());
+        stmt.PExecute(sWorld.getConfig(CONFIG_UINT32_REALMID), GetAccountId());
     }
 
     pCurrChar->SetInGameTime(WorldTimer::getMSTime());
@@ -1226,7 +1219,7 @@ void WorldSession::HandleCharFactionOrRaceChangeOpcode(WorldPacket& recv_data)
     recv_data >> newname;
     recv_data >> gender >> skin >> hairColor >> hairStyle >> facialHair >> face >> race;
 
-    QueryResult* result = CharacterDatabase.PQuery("SELECT at_login FROM characters WHERE guid ='%u'", guid.GetCounter());
+    QueryResult* result = CharacterDatabase.PQuery("SELECT at_login, name FROM characters WHERE guid ='%u'", guid.GetCounter());
     if (!result)
     {
         WorldPacket data(SMSG_CHAR_FACTION_CHANGE, 1);
@@ -1237,6 +1230,7 @@ void WorldSession::HandleCharFactionOrRaceChangeOpcode(WorldPacket& recv_data)
 
     Field* fields = result->Fetch();
     uint32 at_loginFlags = fields[0].GetUInt32();
+    std::string oldname = fields[1].GetCppString();
     uint32 used_loginFlag = recv_data.GetOpcode() == CMSG_CHAR_RACE_CHANGE ? AT_LOGIN_CHANGE_RACE : AT_LOGIN_CHANGE_FACTION;
     delete result;
 
@@ -1248,43 +1242,48 @@ void WorldSession::HandleCharFactionOrRaceChangeOpcode(WorldPacket& recv_data)
         return;
     }
 
-    // prevent character rename to invalid name
-    if (!normalizePlayerName(newname))
+    if (sWorld.getConfig(CONFIG_BOOL_FACTION_AND_RACE_CHANGE_WITHOUT_RENAMING))
+        newname = oldname;
+    else
     {
-        WorldPacket data(SMSG_CHAR_FACTION_CHANGE, 1);
-        data << uint8(CHAR_NAME_NO_NAME);
-        SendPacket(&data);
-        return;
-    }
-
-    uint8 res = ObjectMgr::CheckPlayerName(newname, true);
-    if (res != CHAR_NAME_SUCCESS)
-    {
-        WorldPacket data(SMSG_CHAR_FACTION_CHANGE, 1);
-        data << uint8(res);
-        SendPacket(&data);
-        return;
-    }
-
-    // check name limitations
-    if (GetSecurity() == SEC_PLAYER && sObjectMgr.IsReservedName(newname))
-    {
-        WorldPacket data(SMSG_CHAR_FACTION_CHANGE, 1);
-        data << uint8(CHAR_NAME_RESERVED);
-        SendPacket( &data );
-        return;
-    }
-
-    // character with this name already exist
-    if (sAccountMgr.GetPlayerGuidByName(newname))
-    {
-        ObjectGuid newguid = sAccountMgr.GetPlayerGuidByName(newname);
-        if (newguid != guid)
+        // prevent character rename to invalid name
+        if (!normalizePlayerName(newname))
         {
             WorldPacket data(SMSG_CHAR_FACTION_CHANGE, 1);
-            data << uint8(CHAR_CREATE_NAME_IN_USE);
-            SendPacket( &data );
+            data << uint8(CHAR_NAME_NO_NAME);
+            SendPacket(&data);
             return;
+        }
+
+        uint8 res = ObjectMgr::CheckPlayerName(newname,true);
+        if (res != CHAR_NAME_SUCCESS)
+        {
+            WorldPacket data(SMSG_CHAR_FACTION_CHANGE, 1);
+            data << uint8(res);
+            SendPacket(&data);
+            return;
+        }
+
+        // check name limitations
+        if (GetSecurity() == SEC_PLAYER && sObjectMgr.IsReservedName(newname))
+        {
+            WorldPacket data(SMSG_CHAR_FACTION_CHANGE, 1);
+            data << uint8(CHAR_NAME_RESERVED);
+            SendPacket(&data);
+            return;
+        }
+
+        // character with this name already exist
+        if (sAccountMgr.GetPlayerGuidByName(newname))
+        {
+            ObjectGuid newguid = sAccountMgr.GetPlayerGuidByName(newname);
+            if (newguid != guid)
+            {
+                WorldPacket data(SMSG_CHAR_FACTION_CHANGE, 1);
+                data << uint8(CHAR_CREATE_NAME_IN_USE);
+                SendPacket(&data);
+                return;
+            }
         }
     }
 
@@ -1447,7 +1446,7 @@ void WorldSession::HandleCharFactionOrRaceChangeOpcode(WorldPacket& recv_data)
                 Field *fields2 = result2->Fetch();
                 uint32 reputation_alliance = fields2[0].GetUInt32();
                 uint32 reputation_horde = fields2[1].GetUInt32();
-                CharacterDatabase.PExecute("DELETE FROM character_reputation WHERE faction = '%u' AND guid = '%u'",team == TEAM_INDEX_ALLIANCE ? reputation_horde : reputation_alliance, guid.GetCounter());
+                CharacterDatabase.PExecute("DELETE FROM character_reputation WHERE faction = '%u' AND guid = '%u'", team == TEAM_INDEX_ALLIANCE ? reputation_alliance : reputation_horde, guid.GetCounter());
                 CharacterDatabase.PExecute("UPDATE IGNORE `character_reputation` set faction = '%u' where faction = '%u' AND guid = '%u'",
                     team == TEAM_INDEX_ALLIANCE ? reputation_alliance : reputation_horde, team == TEAM_INDEX_ALLIANCE ? reputation_horde : reputation_alliance, guid.GetCounter());
             }

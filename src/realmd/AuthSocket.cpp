@@ -303,6 +303,7 @@ void AuthSocket::SendProof(Sha1Hash sha)
         case 13623:                                         // 4.0.6a
         case 15050:                                         // 4.3.0
         case 15595:                                         // 4.3.4
+        case 16057:                                         // 5.0.5b
         default:                                            // or later
         {
             sAuthLogonProof_S proof;
@@ -398,7 +399,8 @@ bool AuthSocket::_HandleLogonChallenge()
         ///- Get the account details from the account table
         // No SQL injection (escaped user name)
 
-        qresult = LoginDatabase.PQuery("SELECT sha_pass_hash,id,locked,last_ip,gmlevel,v,s FROM account WHERE username = '%s'",_safelogin.c_str());
+        //qresult = LoginDatabase.PQuery("SELECT sha_pass_hash,id,locked,last_ip,gmlevel,v,s FROM account WHERE username = '%s'",_safelogin.c_str());
+        qresult = LoginDatabase.PQuery("SELECT a.sha_pass_hash,a.id,a.locked,a.last_ip,aa.gmlevel,a.v,a.s FROM account a LEFT JOIN account_access aa ON (a.id = aa.id) WHERE username = '%s'", _safelogin.c_str());
 
         if (qresult)
         {
@@ -1057,6 +1059,7 @@ void AuthSocket::LoadRealmlist(ByteBuffer &pkt, uint32 acctid)
         case 13623:                                         // 4.0.6a
         case 15050:                                         // 4.3.0
         case 15595:                                         // 4.3.4
+        case 16057:                                         // 5.0.5b
         default:                                            // and later
         {
             pkt << uint32(0);                               // unused value
