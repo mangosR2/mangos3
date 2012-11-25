@@ -163,19 +163,19 @@ void VehicleKit::CalculateBoardingPositionOf(float gx, float gy, float gz, float
     lo = MapManager::NormalizeOrientation(go - GetBase()->GetOrientation());
 }
 
-void VehicleKit::CalculateSeatPositionOf(int8 seatId, float &x, float &y, float &z, float &o)
+void VehicleKit::CalculateSeatPositionOf(VehicleSeatEntry const* seatInfo, float &x, float &y, float &z, float &o)
 {
-    SeatMap::iterator seat = m_Seats.find(seatId);
+    MANGOS_ASSERT(seatInfo);
 
-    if (seat == m_Seats.end())
-        return;
+    x = y = z = o = 0.0f;
 
-    VehicleSeatEntry const* seatInfo = seat->second.seatInfo;
-
+// FIXME - requires correct method for calculate seat offset
+/*
     x = seatInfo->m_attachmentOffsetX + m_dst_x;
     y = seatInfo->m_attachmentOffsetY + m_dst_y;
     z = seatInfo->m_attachmentOffsetZ + m_dst_z;
     o = seatInfo->m_passengerYaw      + m_dst_o;
+*/
 }
 
 bool VehicleKit::AddPassenger(Unit* passenger, int8 seatId)
@@ -309,10 +309,10 @@ bool VehicleKit::AddPassenger(Unit* passenger, int8 seatId)
     }
 
     // need correct, position not normalized currently
-    passenger->GetMotionMaster()->MoveBoardVehicle(seatInfo->m_attachmentOffsetX,
-        seatInfo->m_attachmentOffsetY,
-        seatInfo->m_attachmentOffsetZ,
-        seatInfo->m_passengerYaw,
+    // Calculate passenger seat position (FIXME - requires correct calculation!)
+    // float lx, ly, lz, lo; - reuse variable definition from preview calculation
+    CalculateSeatPositionOf(seatInfo, lx, ly, lz, lo);
+    passenger->GetMotionMaster()->MoveBoardVehicle(lx, ly, lz, lo,
         seatInfo->m_enterSpeed < M_NULL_F ? BASE_CHARGE_SPEED : seatInfo->m_enterSpeed,
         0.0f);
 
