@@ -185,3 +185,13 @@ INSERT INTO `spell_proc_event` (`entry`, `SchoolMask`) VALUE
 DELETE FROM `spell_proc_event` WHERE `entry` = 20165;
 INSERT INTO `spell_proc_event` (`entry`, `SchoolMask`, `ppmRate`) VALUE
 (20165, 127, 20);
+
+-- Sacred Shield
+DELETE FROM `spell_proc_event` WHERE `entry` = 85285;
+INSERT INTO `spell_proc_event` (`entry`, `Cooldown`) VALUE
+(85285, 60);
+
+-- Selfless Healer
+DELETE FROM `spell_proc_event` WHERE `entry` = 85803;
+INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskC1`) VALUE
+(85803, 10, 16384);
