@@ -1516,7 +1516,11 @@ bool Item::HasTriggeredByAuraSpell(SpellEntry const* spellInfo) const
 
         for (uint32 j = 0; j < MAX_EFFECT_INDEX; ++j)
         {
-            if (spellproto->EffectTriggerSpell[j] == spellInfo->Id)
+            SpellEffectEntry const* spellEff = spellInfo->GetSpellEffect(SpellEffectIndex(j));
+            if (!spellEff)
+                continue;
+
+            if (spellEff->EffectTriggerSpell == spellInfo->Id)
                 return true;
         }
     }

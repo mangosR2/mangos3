@@ -340,6 +340,19 @@ uint32 SpellEntry::GetCasterAuraState() const
     return aura ? aura->CasterAuraState : 0;
 }
 
+uint32 SpellEntry::GetCasterAuraSpell() const
+{
+    SpellAuraRestrictionsEntry const* aura = GetSpellAuraRestrictions();
+    return aura ? aura->casterAuraSpell : 0;
+}
+
+uint32 SpellEntry::GetTargetAuraSpell() const
+{
+    SpellAuraRestrictionsEntry const* aura = GetSpellAuraRestrictions();
+    return aura ? aura->targetAuraSpell : 0;
+}
+
+
 uint32 SpellEntry::GetTargets() const
 {
     SpellTargetRestrictionsEntry const* target = GetSpellTargetRestrictions();
@@ -350,4 +363,10 @@ uint32 SpellEntry::GetEffectApplyAuraNameByIndex(SpellEffectIndex index) const
 {
     SpellEffectEntry const* effect = GetSpellEffect(index);
     return effect ? effect->EffectApplyAuraName : 0;
+}
+
+ClassFamilyMask SpellEntry::GetSpellFamilyFlags() const
+{
+    SpellClassOptionsEntry const* classOptions = GetSpellClassOptions();
+    return classOptions ? classOptions->SpellFamilyFlags : ClassFamilyMask();
 }

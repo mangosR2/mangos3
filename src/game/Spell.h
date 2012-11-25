@@ -377,9 +377,14 @@ class Spell
         void EffectActivateSpec(SpellEffectEntry const* effect);
         void EffectCancelAura(SpellEffectEntry const* effect);
 
-        void EffectFriendSummon(SpellEffectIndex eff_idx);
-        void EffectServerSide(SpellEffectIndex eff_idx);
-        void EffectKnockBackFromPosition(SpellEffectIndex eff_idx);
+        void EffectFriendSummon(SpellEffectEntry const* effect);
+        void EffectServerSide(SpellEffectEntry const* effect);
+        void EffectKnockBackFromPosition(SpellEffectEntry const* effect);
+        void EffectUntrainTalents(SpellEffectEntry const* effect);
+        void EffectWMODamage(SpellEffectEntry const* effect);
+        void EffectWMORepair(SpellEffectEntry const* effect);
+        void EffectWMOChange(SpellEffectEntry const* effect);
+        void EffectSuspendGravity(SpellEffectEntry const* effect);
 
         Spell(Unit* caster, SpellEntry const *info, bool triggered, ObjectGuid originalCasterGUID = ObjectGuid(), SpellEntry const* triggeredBy = NULL);
         ~Spell();
@@ -422,20 +427,20 @@ class Spell
         void setState(uint32 state) { m_spellState = state; }
 
         void DoCreateItem(SpellEffectEntry const* effect, uint32 itemtype);
-        void DoSummonGroupPets(SpellEffectIndex eff_idx);
-        void DoSummonWild(SpellEffectIndex eff_idx, uint32 forceFaction = 0);
-        void DoSummonGuardian(SpellEffectIndex eff_idx, uint32 forceFaction = 0);
-        void DoSummonTotem(SpellEffectIndex eff_idx, uint8 slot_dbc = 0);
-        void DoSummonCritter(SpellEffectIndex eff_idx, uint32 forceFaction = 0);
-        void DoSummonSnakes(SpellEffectIndex eff_idx);
-        void DoSummonVehicle(SpellEffectIndex eff_idx, uint32 forceFaction = 0);
+        void DoSummonGroupPets(SpellEffectEntry const* effect);
+        void DoSummonWild(SpellEffectEntry const* effect, uint32 forceFaction = 0);
+        void DoSummonGuardian(SpellEffectEntry const* effect, uint32 forceFaction = 0);
+        void DoSummonTotem(SpellEffectEntry const* effect, uint8 slot_dbc = 0);
+        void DoSummonCritter(SpellEffectEntry const* effect, uint32 forceFaction = 0);
+        void DoSummonSnakes(SpellEffectEntry const* effect);
+        void DoSummonVehicle(SpellEffectEntry const* effect, uint32 forceFaction = 0);
 
         void WriteSpellGoTargets(WorldPacket* data);
         void WriteAmmoToPacket(WorldPacket* data);
 
         typedef std::list<Unit*> UnitList;
         void FillTargetMap();
-        bool FillCustomTargetMap(SpellEffectIndex effIndex, UnitList &targetUnitMap);
+        bool FillCustomTargetMap(SpellEffectEntry const* effect, UnitList &targetUnitMap);
         void SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList &targetUnitMap);
 
         void FillAreaTargets(UnitList &targetUnitMap, float radius, SpellNotifyPushType pushType, SpellTargets spellTargets, WorldObject* originalCaster = NULL);
@@ -459,7 +464,7 @@ class Spell
         void SendSpellCooldown();
 
         void SendLogExecute();
-        void SendEffectLogExecute(SpellEffectIndex eff, ObjectGuid targetGuid, uint32 data1 = 0, uint32 data2 = 0, float data3 = 0.0f);
+        void SendEffectLogExecute(SpellEffectEntry const* effect, ObjectGuid targetGuid, uint32 data1 = 0, uint32 data2 = 0, float data3 = 0.0f);
         ByteBuffer m_effectExecuteData[MAX_EFFECT_INDEX];
 
         void SendInterrupted(uint8 result);
@@ -707,7 +712,7 @@ class Spell
             Creature* creature;
         };
         typedef std::vector<CreaturePosition> CreatureSummonPositions;
-
+/*
         // return true IFF further processing required
         bool DoSummonPet(SpellEffectEntry const* effect);
         bool DoSummonTotem(SpellEffectEntry const* effect, uint8 slot_dbc = 0);
@@ -715,6 +720,7 @@ class Spell
         bool DoSummonCritter(CreatureSummonPositions& list, SummonPropertiesEntry const* prop, SpellEffectEntry const* effect, uint32 level);
         bool DoSummonGuardian(CreatureSummonPositions& list, SummonPropertiesEntry const* prop, SpellEffectEntry const* effect, uint32 level);
         bool DoSummonPossessed(CreatureSummonPositions& list, SummonPropertiesEntry const* prop, SpellEffectEntry const* effect, uint32 level);
+*/
 };
 
 enum ReplenishType

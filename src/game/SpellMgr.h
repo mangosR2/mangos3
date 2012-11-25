@@ -413,7 +413,11 @@ inline bool IsTargetExplicitRequired(uint32 target)
 
 inline bool IsEffectRequiresTarget(SpellEntry const* spellInfo, SpellEffectIndex i)
 {
-    switch(spellInfo->Effect[i])
+    SpellEffectEntry const* spellEff = spellInfo->GetSpellEffect(i);
+    if (!spellEff)
+        return false;
+
+    switch(spellEff->Effect)
     {
         case SPELL_EFFECT_NONE:
             return false;
@@ -424,7 +428,7 @@ inline bool IsEffectRequiresTarget(SpellEntry const* spellInfo, SpellEffectIndex
 
         case SPELL_EFFECT_SEND_EVENT:
         default:
-            return IsTargetExplicitRequired(spellInfo->EffectImplicitTargetA[i]) || IsTargetExplicitRequired(spellInfo->EffectImplicitTargetB[i]);
+            return IsTargetExplicitRequired(spellEff->EffectImplicitTargetA) || IsTargetExplicitRequired(spellEff->EffectImplicitTargetB);
     }
     return true;
 }
@@ -573,7 +577,11 @@ inline bool HasInterruptSpellEffect(SpellEntry const *spellInfo)
 {
     for (int32 i = 0; i < MAX_EFFECT_INDEX; ++i)
     {
-        switch(spellInfo->Effect[i])
+        SpellEffectEntry const* spellEff = spellInfo->GetSpellEffect(SpellEffectIndex(i));
+        if (!spellEff)
+            continue;
+
+        switch(spellEff->Effect)
         {
             case SPELL_EFFECT_INTERRUPT_CAST:
                 return true;
@@ -588,10 +596,14 @@ inline bool IsOnlySelfTargeting(SpellEntry const* spellInfo)
 {
     for (int32 i = 0; i < MAX_EFFECT_INDEX; ++i)
     {
-        if (!spellInfo->Effect[i])
+        SpellEffectEntry const* spellEff = spellInfo->GetSpellEffect(SpellEffectIndex(i));
+        if (!spellEff)
+            continue;
+
+        if (!spellEff->Effect)
             return true;
 
-        switch (spellInfo->EffectImplicitTargetA[i])
+        switch (spellEff->EffectImplicitTargetA)
         {
             case TARGET_SELF:
             case TARGET_SELF2:
@@ -599,7 +611,7 @@ inline bool IsOnlySelfTargeting(SpellEntry const* spellInfo)
             default:
                 return false;
         }
-        switch (spellInfo->EffectImplicitTargetB[i])
+        switch (spellEff->EffectImplicitTargetB)
         {
             case TARGET_SELF:
             case TARGET_SELF2:
@@ -736,25 +748,29 @@ inline bool IsSpellReduceThreat(SpellEntry const* spellInfo)
 {
     for (int32 i = 0; i < MAX_EFFECT_INDEX; ++i)
     {
-        if (spellInfo->Effect[i] == SPELL_EFFECT_THREAT)
+        SpellEffectEntry const* spellEff = spellInfo->GetSpellEffect(SpellEffectIndex(i));
+        if (!spellEff)
+            continue;
+
+        if (spellEff->Effect == SPELL_EFFECT_THREAT)
         {
-            if (spellInfo->CalculateSimpleValue(SpellEffectIndex(i)) < 0)
+            if (spellEff->CalculateSimpleValue() < 0)
                 return true;
-            else if (spellInfo->EffectRealPointsPerLevel[i] < 0.0f)
+            else if (spellEff->EffectRealPointsPerLevel < 0.0f)
                 return true;
             else
                 return false;
         }
 
-        if (spellInfo->Effect[i] != SPELL_EFFECT_APPLY_AURA)
+        if (spellEff->Effect != SPELL_EFFECT_APPLY_AURA)
             continue;
 
-        switch(spellInfo->EffectApplyAuraName[i])
+        switch(spellEff->EffectApplyAuraName)
         {
             case SPELL_AURA_MOD_TOTAL_THREAT:
             case SPELL_AURA_MOD_THREAT:
             case SPELL_AURA_MOD_CRITICAL_THREAT:
-                if (spellInfo->CalculateSimpleValue(SpellEffectIndex(i)) < 0)
+                if (spellEff->CalculateSimpleValue() < 0)
                     return true;
                 break;
             default:
@@ -768,7 +784,11 @@ inline bool IsSpellIncreaseThreat(SpellEntry const* spellInfo)
 {
     for (int32 i = 0; i < MAX_EFFECT_INDEX; ++i)
     {
-        switch(spellInfo->Effect[i])
+        SpellEffectEntry const* spellEff = spellInfo->GetSpellEffect(SpellEffectIndex(i));
+        if (!spellEff)
+            continue;
+
+        switch(spellEff->Effect)
         {
             case SPELL_EFFECT_THREAT:
             case SPELL_EFFECT_THREAT_ALL:
@@ -777,15 +797,15 @@ inline bool IsSpellIncreaseThreat(SpellEntry const* spellInfo)
                 break;
         }
 
-        if (spellInfo->Effect[i] != SPELL_EFFECT_APPLY_AURA)
+        if (spellEff->Effect != SPELL_EFFECT_APPLY_AURA)
             continue;
 
-        switch(spellInfo->EffectApplyAuraName[i])
+        switch(spellEff->EffectApplyAuraName)
         {
             case SPELL_AURA_MOD_TOTAL_THREAT:
             case SPELL_AURA_MOD_THREAT:
             case SPELL_AURA_MOD_CRITICAL_THREAT:
-                if (spellInfo->CalculateSimpleValue(SpellEffectIndex(i)) > 0)
+                if (spellEff->CalculateSimpleValue() > 0)
                     return true;
                 break;
             default:

@@ -440,7 +440,7 @@ bool Unit::IsTriggeredAtSpellProcEvent(Unit *pVictim, SpellAuraHolderPtr holder,
     }
 
     // some spells has direct chance modifiers in dummy auras
-    switch(spellProto->SpellFamilyName)
+    switch(spellProto->GetSpellFamilyName())
     {
         case SPELLFAMILY_SHAMAN:
         {
@@ -1352,7 +1352,7 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, DamageInfo* damageI
                                 case 31657:
                                 case 31658:
                                 {
-                                    if (roll_chance_i(int32((*i)->GetSpellProto()->procChance)))
+                                    if (roll_chance_i(int32((*i)->GetSpellProto()->GetProcChance())))
                                     {
                                         caster->CastSpell(caster, 67545, true);
                                         return SPELL_AURA_PROC_OK;
@@ -1606,7 +1606,7 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, DamageInfo* damageI
                     for (AuraList::const_iterator itr = pDummyAuras.begin(); itr != pDummyAuras.end(); ++itr)
                     {
                        SpellEntry const* spellInfo = (*itr)->GetSpellProto();
-                       if (spellInfo->SpellFamilyName != SPELLFAMILY_WARLOCK || (*itr)->GetSpellProto()->SpellIconID != 3176)
+                       if (spellInfo->GetSpellFamilyName() != SPELLFAMILY_WARLOCK || (*itr)->GetSpellProto()->SpellIconID != 3176)
                             continue;
                        if ((*itr)->GetEffIndex() == SpellEffectIndex(0))
                        {
@@ -3359,7 +3359,7 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, DamageInfo* damageI
                     if (!spellInfo)
                         continue;
 
-                    if (spellInfo->SpellFamilyName == SPELLFAMILY_DEATHKNIGHT && spellInfo->GetSpellFamilyFlags().test<CF_DEATHKNIGHT_DEATH_COIL>())
+                    if (spellInfo->GetSpellFamilyName() == SPELLFAMILY_DEATHKNIGHT && spellInfo->GetSpellFamilyFlags().test<CF_DEATHKNIGHT_DEATH_COIL>())
                     {
                         triggered_spell_id = spellInfo->Id;
                         break;
@@ -3459,7 +3459,7 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, DamageInfo* damageI
                     triggered_spell_id = 54445;
                     target = this;
                     if (pVictim)
-                        pVictim->AddThreat(this,procSpell->EffectBasePoints[0] * triggerAmount / 100.0f);
+                        pVictim->AddThreat(this,procSpell->CalculateSimpleValue(EFFECT_INDEX_0) * triggerAmount / 100.0f);
                     break;
                 }
                 // Silverback
@@ -3853,7 +3853,9 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(Unit *pVictim, DamageIn
                 if (!triggerspellInfo || f_damage < M_NULL_F)
                     return SPELL_AURA_PROC_FAILED;
 
-                uint32 tickcount = GetSpellDuration(triggerspellInfo) / triggerspellInfo->EffectAmplitude[EFFECT_INDEX_0];
+                SpellEffectEntry const* spellEff = triggerspellInfo->GetSpellEffect(EFFECT_INDEX_0);
+
+                uint32 tickcount = GetSpellDuration(triggerspellInfo) / spellEff->EffectAmplitude;
 
                 basepoints[0] = floor( f_damage / tickcount);
 
@@ -4472,7 +4474,7 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(Unit *pVictim, DamageIn
             if (Aura const* dummy = GetDummyAura(70832))
             {
               if (SpellAuraHolderPtr aurHolder = GetSpellAuraHolder(53817))
-                if ((aurHolder->GetStackAmount() == aurHolder->GetSpellProto()->StackAmount) && roll_chance_i(dummy->GetBasePoints()))
+                if ((aurHolder->GetStackAmount() == aurHolder->GetSpellProto()->GetStackAmount()) && roll_chance_i(dummy->GetBasePoints()))
                     CastSpell(this,70831,true,castItem,triggeredByAura);
             }
 
@@ -4565,10 +4567,12 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(Unit *pVictim, DamageIn
         case 72445:
         case 72446:
         {
-            float radius = GetSpellRadius(sSpellRadiusStore.LookupEntry(auraSpellInfo->EffectRadiusIndex[EFFECT_INDEX_0]));
+            SpellEffectEntry const* spellEff = auraSpellInfo->GetSpellEffect(EFFECT_INDEX_0);
+
+            float radius = GetSpellRadius(sSpellRadiusStore.LookupEntry(spellEff->EffectRadiusIndex));
             Map::PlayerList const& pList = GetMap()->GetPlayers();
             for (Map::PlayerList::const_iterator itr = pList.begin(); itr != pList.end(); ++itr)
-                if (itr->getSource() && itr->getSource()->IsWithinDistInMap(this,radius) && itr->getSource()->HasAura(triggerEntry->targetAuraSpell))
+                if (itr->getSource() && itr->getSource()->IsWithinDistInMap(this,radius) && itr->getSource()->HasAura(triggerEntry->GetTargetAuraSpell()))
                 {
                     target = itr->getSource();
                     break;
@@ -5056,7 +5060,7 @@ SpellAuraProcResult Unit::HandlePeriodicDummyAuraProc(Unit* /*pVictim*/, DamageI
     if (!spellProto)
         return SPELL_AURA_PROC_FAILED;
 
-    switch (spellProto->SpellFamilyName)
+    switch (spellProto->GetSpellFamilyName())
     {
         case SPELLFAMILY_GENERIC:
         {
@@ -5162,7 +5166,7 @@ SpellAuraProcResult Unit::HandleRemoveByDamageProc(Unit* pVictim, DamageInfo* da
     // Hungering Cold - not break from diseases
     if (spellInfo->SpellIconID == 2797)
     {
-        if (procSpell && procSpell->Dispel == DISPEL_DISEASE)
+        if (procSpell && procSpell->GetDispel() == DISPEL_DISEASE)
             return SPELL_AURA_PROC_FAILED;
     }
 
@@ -5292,11 +5296,9 @@ SpellAuraProcResult Unit::IsTriggeredAtCustomProcEvent(Unit *pVictim, SpellAuraH
 
     for (int32 i = 0; i < MAX_EFFECT_INDEX; ++i)
     {
-        if (holder->GetAuraByEffectIndex(SpellEffectIndex(i)))
+        if (Aura* aura = holder->GetAuraByEffectIndex(SpellEffectIndex(i)))
         {
-            AuraType auraName = AuraType(spellProto->EffectApplyAuraName[i]);
-
-            switch (auraName)
+            switch (aura->GetModifier()->m_auraname)
             {
                 // Removable by damage auras (same rules as for CC auras)
                 case SPELL_AURA_WATER_WALK:
@@ -5308,14 +5310,14 @@ SpellAuraProcResult Unit::IsTriggeredAtCustomProcEvent(Unit *pVictim, SpellAuraH
                 case SPELL_AURA_TRANSFORM:
                 {
                     if ((procFlag & PROC_FLAG_TAKEN_ANY_DAMAGE) &&
-                        ((spellProto->AuraInterruptFlags & AURA_INTERRUPT_FLAG_DAMAGE) ||
+                        ((spellProto->GetAuraInterruptFlags() & AURA_INTERRUPT_FLAG_DAMAGE) ||
                         (spellProto->HasAttribute(SPELL_ATTR_BREAKABLE_BY_DAMAGE))))
                         return SPELL_AURA_PROC_OK;
                     if (((procFlag & PROC_FLAG_TAKEN_ANY_DAMAGE) ||
                         (procExtra & PROC_EX_ABSORB)) &&
                         (spellProto->HasAttribute(SPELL_ATTR_EX_BREAKABLE_BY_ANY_DAMAGE) &&
-                        ((spellProto->AuraInterruptFlags & AURA_INTERRUPT_FLAG_DIRECT_DAMAGE) ||
-                        (spellProto->AuraInterruptFlags & AURA_INTERRUPT_FLAG_DAMAGE) ||
+                        ((spellProto->GetAuraInterruptFlags() & AURA_INTERRUPT_FLAG_DIRECT_DAMAGE) ||
+                        (spellProto->GetAuraInterruptFlags() & AURA_INTERRUPT_FLAG_DAMAGE) ||
                         spellProto->HasAttribute(SPELL_ATTR_BREAKABLE_BY_DAMAGE))))
                         return SPELL_AURA_PROC_OK;
                     else if (EventProcFlag || spellProcEvent)
@@ -5353,7 +5355,7 @@ SpellAuraProcResult Unit::IsTriggeredAtCustomProcEvent(Unit *pVictim, SpellAuraH
                     if (EventProcFlag || spellProcEvent)
                         return SPELL_AURA_PROC_FAILED;
                     else if ((procFlag & PROC_FLAG_TAKEN_ANY_DAMAGE) &&
-                        ((spellProto->AuraInterruptFlags & AURA_INTERRUPT_FLAG_DAMAGE) ||
+                        ((spellProto->GetAuraInterruptFlags() & AURA_INTERRUPT_FLAG_DAMAGE) ||
                         spellProto->HasAttribute(SPELL_ATTR_BREAKABLE_BY_DAMAGE)))
                         return SPELL_AURA_PROC_OK;
                     break;
@@ -5427,7 +5429,7 @@ SpellAuraProcResult Unit::HandleRemoveByDamageChanceProc(Unit* pVictim, DamageIn
     if (!spellProto)
         return SPELL_AURA_PROC_FAILED;
 
-    if ((spellProto->AuraInterruptFlags & AURA_INTERRUPT_FLAG_DAMAGE) || (procEx & PROC_EX_IGNORE_CC))
+    if ((spellProto->GetAuraInterruptFlags() & AURA_INTERRUPT_FLAG_DAMAGE) || (procEx & PROC_EX_IGNORE_CC))
         return HandleRemoveByDamageProc(pVictim, damageInfo, triggeredByAura, procSpell, procFlag, procEx, cooldown);
 
     if (const_cast<Aura*>(triggeredByAura)->IsAffectedByCrowdControlEffect(damageInfo->damage + damageInfo->absorb))
@@ -5445,7 +5447,7 @@ SpellAuraProcResult Unit::HandleRemoveByDamageChanceProc(Unit* pVictim, DamageIn
 
 SpellAuraProcResult Unit::HandleIgnoreUnitStateAuraProc(Unit* /*pVictim*/, DamageInfo* damageInfo, Aura const* triggeredByAura, SpellEntry const * procSpell, uint32 /*procFlag*/, uint32 /*procEx*/, uint32 /*cooldown*/)
 {
-    SpellEntry const *spellInfo = triggeredByAura->GetSpellProto();
+    SpellEntry const* spellInfo = triggeredByAura->GetSpellProto();
     if (spellInfo->Id == 52437 && procSpell && procSpell->Id==20647)   // Sudden Death must proc only from dummy part of Execute
     {
         //Remove only single aura from stack

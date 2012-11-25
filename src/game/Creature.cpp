@@ -2644,9 +2644,9 @@ Unit* Creature::SelectPreferredTargetForSpell(SpellEntry const* spellInfo)
 {
     Unit* target = NULL;
 
-    if (spellInfo->PreventionType == SPELL_PREVENTION_TYPE_SILENCE && HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SILENCED))
+    if (spellInfo->GetPreventionType() == SPELL_PREVENTION_TYPE_SILENCE && HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SILENCED))
         return NULL;
-    if (spellInfo->PreventionType == SPELL_PREVENTION_TYPE_PACIFY && HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PACIFIED))
+    if (spellInfo->GetPreventionType() == SPELL_PREVENTION_TYPE_PACIFY && HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PACIFIED))
         return NULL;
 
     SpellRangeEntry const* srange = sSpellRangeStore.LookupEntry(spellInfo->rangeIndex);
@@ -2702,9 +2702,13 @@ Unit* Creature::SelectPreferredTargetForSpell(SpellEntry const* spellInfo)
     {
         for (int j = 0; j < MAX_EFFECT_INDEX; ++j)
         {
-            if (target && spellInfo->Effect[j] == SPELL_EFFECT_APPLY_AURA)
+            SpellEffectEntry const* spellEff = spellInfo->GetSpellEffect(SpellEffectIndex(j));
+            if (!spellEff)
+                continue;
+
+            if (target && spellEff->Effect == SPELL_EFFECT_APPLY_AURA)
             {
-                if (spellInfo->StackAmount <= 1)
+                if (spellInfo->GetStackAmount() <= 1)
                 {
                     if (target->HasAura(spellInfo->Id, SpellEffectIndex(j)) )
                         target = NULL;
@@ -2712,11 +2716,11 @@ Unit* Creature::SelectPreferredTargetForSpell(SpellEntry const* spellInfo)
                 else
                 {
                     if (Aura* aura = target->GetAura(spellInfo->Id, SpellEffectIndex(j)))
-                        if (aura->GetStackAmount() >= spellInfo->StackAmount)
+                        if (aura->GetStackAmount() >= spellInfo->GetStackAmount())
                             target = NULL;
                 }
             }
-            else if (IsAreaAuraEffect(spellInfo->Effect[j]))
+            else if (IsAreaAuraEffect(spellEff->Effect))
             {
                 if (target->HasAura(spellInfo->Id, SpellEffectIndex(j)) )
                     target = NULL;
