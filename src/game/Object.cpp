@@ -1112,14 +1112,19 @@ void WorldObject::AddToWorld()
 
 void WorldObject::RemoveFromWorld(bool remove)
 {
-    MANGOS_ASSERT(m_currMap);
+    Map* map = GetMap();
+    MANGOS_ASSERT(map);
 
     if (IsInWorld())
         Object::RemoveFromWorld(remove);
 
-    GetMap()->RemoveUpdateObject(GetObjectGuid());
+    map->RemoveUpdateObject(GetObjectGuid());
+
     if (remove)
-        GetMap()->EraseObject(GetObjectGuid());
+    {
+        ResetMap();
+        map->EraseObject(GetObjectGuid());
+    }
 }
 
 ObjectLockType& WorldObject::GetLock(MapLockType _lockType)

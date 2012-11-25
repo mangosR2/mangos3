@@ -651,10 +651,15 @@ void ThreatManager::UpdateForClient(uint32 diff)
 
 bool ThreatManager::isOwnerOnline() const
 {
-    if (!owner.IsInWorld())
+    if (!owner.IsInWorld() || !owner.GetMap())
         return false;
 
-    if (!owner.GetTypeId() == TYPEID_PLAYER)
+    // Check for map valid - some object pointers removed after removing map :)
+    Map* map = sMapMgr.FindMap(owner.GetMapId(), owner.GetInstanceId());
+    if (map != owner.GetMap())
+        return false;
+
+    if (owner.GetTypeId() == TYPEID_PLAYER)
         return ((Player const*)&owner)->GetSession() && !((Player const*)&owner)->GetSession()->PlayerLogout();
 
     return true;
