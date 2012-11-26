@@ -312,10 +312,6 @@ void FollowMovementGenerator<Player>::_updateSpeed(Player& /*u*/)
 template<>
 void FollowMovementGenerator<Creature>::_updateSpeed(Creature& u)
 {
-    // pet only sync speed with owner
-    if (!((Creature&)u).IsPet() || !i_target.isValid() || i_target->GetObjectGuid() != u.GetOwnerGuid())
-        return;
-
     u.UpdateSpeed(MOVE_RUN, true);
     u.UpdateSpeed(MOVE_WALK, true);
     u.UpdateSpeed(MOVE_SWIM, true);
