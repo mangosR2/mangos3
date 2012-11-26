@@ -1847,15 +1847,22 @@ bool Pet::resetTalents()
             continue;
 
         for (int j = 0; j < MAX_TALENT_RANK; j++)
+        {
             if (talentInfo->RankID[j])
             {
                 removeSpell(talentInfo->RankID[j],!IsPassiveSpell(talentInfo->RankID[j]),false);
 
                 SpellEntry const *spellInfo = sSpellStore.LookupEntry(talentInfo->RankID[j]);
                 for (int k = 0; k < MAX_EFFECT_INDEX; ++k)
-                    if (spellInfo->EffectTriggerSpell[k])
-                        removeSpell(spellInfo->EffectTriggerSpell[k], false);
+                {
+                    SpellEffectEntry const* effectEntry = spellInfo->GetSpellEffect(SpellEffectIndex(k));
+                    if (!k)
+                        continue;
+                    if (effectEntry->EffectTriggerSpell)
+                        removeSpell(effectEntry->EffectTriggerSpell, false);
+                }
             }
+        }
     }
 
     UpdateFreeTalentPoints(false);
@@ -3252,19 +3259,19 @@ float Pet::OCTRegenHPPerSpirit()
     uint32 pclass = ((Player*)owner)->getClass();
 
     if (level > GT_MAX_LEVEL) level = GT_MAX_LEVEL;
-
+/*
     GtOCTRegenHPEntry     const *baseRatio = sGtOCTRegenHPStore.LookupEntry((pclass-1)*GT_MAX_LEVEL + level-1);
     GtRegenHPPerSptEntry  const *moreRatio = sGtRegenHPPerSptStore.LookupEntry((pclass-1)*GT_MAX_LEVEL + level-1);
 
     if (baseRatio == NULL || moreRatio == NULL)
         return 0.0f;
-
+*/
     // Formula from PaperDollFrame script
     float spirit = GetStat(STAT_SPIRIT);
     float baseSpirit = spirit;
     if (baseSpirit > 50) baseSpirit = 50;
     float moreSpirit = spirit - baseSpirit;
-    float regen = baseSpirit * baseRatio->ratio + moreSpirit * moreRatio->ratio;
+    float regen = baseSpirit /* baseRatio->ratio*/ + moreSpirit /* moreRatio->ratio*/;
     return regen;
 }
 
@@ -3304,9 +3311,9 @@ Unit* Pet::SelectPreferredTargetForSpell(SpellEntry const* spellInfo)
 {
     Unit* target = NULL;
 
-    if (spellInfo->PreventionType == SPELL_PREVENTION_TYPE_SILENCE && HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SILENCED))
+    if (spellInfo->GetPreventionType() == SPELL_PREVENTION_TYPE_SILENCE && HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SILENCED))
         return NULL;
-    if (spellInfo->PreventionType == SPELL_PREVENTION_TYPE_PACIFY && HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PACIFIED))
+    if (spellInfo->GetPreventionType() == SPELL_PREVENTION_TYPE_PACIFY && HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PACIFIED))
         return NULL;
 
     SpellRangeEntry const* srange = sSpellRangeStore.LookupEntry(spellInfo->rangeIndex);
@@ -3418,9 +3425,12 @@ Unit* Pet::SelectPreferredTargetForSpell(SpellEntry const* spellInfo)
     {
         for (int j = 0; j < MAX_EFFECT_INDEX; ++j)
         {
-            if (target && spellInfo->Effect[j] == SPELL_EFFECT_APPLY_AURA)
+            SpellEffectEntry const* effectEntry = spellInfo->GetSpellEffect(SpellEffectIndex(j));
+            if (!effectEntry)
+                continue;
+            if (target && effectEntry->Effect == SPELL_EFFECT_APPLY_AURA)
             {
-                if (spellInfo->StackAmount <= 1)
+                if (spellInfo->GetStackAmount() <= 1)
                 {
                     if (target->HasAura(spellInfo->Id, SpellEffectIndex(j)) )
                         return NULL;
@@ -3428,11 +3438,11 @@ Unit* Pet::SelectPreferredTargetForSpell(SpellEntry const* spellInfo)
                 else
                 {
                     if (Aura* aura = target->GetAura(spellInfo->Id, SpellEffectIndex(j)))
-                        if (aura->GetStackAmount() >= spellInfo->StackAmount)
+                        if (aura->GetStackAmount() >= spellInfo->GetStackAmount())
                             return NULL;
                 }
             }
-            else if (target && IsAreaAuraEffect(spellInfo->Effect[j]))
+            else if (target && IsAreaAuraEffect(effectEntry->Effect))
             {
                 if (target->HasAura(spellInfo->Id))
                     return NULL;
@@ -3450,9 +3460,9 @@ Unit* Pet::SelectPreferredTargetForSpell(SpellEntry const* spellInfo)
             if (!itr->second || itr->second->IsDeleted())
                 continue;
 
-            if ((1 << itr->second->GetSpellProto()->Dispel) & GetDispellMask(DispelType(spellInfo->EffectMiscValue[EFFECT_INDEX_0])))
+            if ((1 << itr->second->GetSpellProto()->GetDispel()) & GetDispellMask(DispelType(spellInfo->GetSpellEffect(EFFECT_INDEX_0)->EffectMiscValue)))
             {
-                if (itr->second->GetSpellProto()->Dispel == DISPEL_MAGIC)
+                if (itr->second->GetSpellProto()->GetDispel() == DISPEL_MAGIC)
                 {
                     bool positive = true;
                     if (!itr->second->IsPositive())

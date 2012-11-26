@@ -427,13 +427,11 @@ Spell::Spell( Unit* caster, SpellEntry const *info, bool triggered, ObjectGuid o
 
     for (int i = 0; i < MAX_EFFECT_INDEX; ++i)
     {
-        if (m_spellInfo->Effect[i] != SPELL_EFFECT_NONE)
-            m_currentBasePoints[i] = m_spellInfo->CalculateSimpleValue(SpellEffectIndex(i));
+        SpellEffectEntry const* effectEntry = m_spellInfo->GetSpellEffect(SpellEffectIndex(i));
+        if (effectEntry)
+            m_currentBasePoints[i] = effectEntry->CalculateSimpleValue();
         else
-        {
-            // We must make check for use NONE effects in spell.dbc instead of this hack (this - from clean mangos).
-            m_currentBasePoints[i] = m_spellInfo->CalculateSimpleValue(SpellEffectIndex(i));
-        }
+            m_currentBasePoints[i] = 0;
 
         m_effectExecuteData[i].clear();
     }
@@ -471,7 +469,11 @@ Spell::Spell( Unit* caster, SpellEntry const *info, bool triggered, ObjectGuid o
 
     m_spellFlags = SPELL_FLAG_NORMAL;
 
-    if (m_spellInfo->GetDmgClass() == SPELL_DAMAGE_CLASS_MAGIC && !m_spellInfo->HasAttribute(SPELL_ATTR_EX2_CANT_REFLECTED))
+    // AoE spells, spells with non-magic DmgClass or SchoolMask or with SPELL_ATTR_EX2_CANT_REFLECTED cannot be reflected
+    if (m_spellInfo->GetDmgClass() == SPELL_DAMAGE_CLASS_MAGIC &&
+        m_spellInfo->SchoolMask != SPELL_SCHOOL_MASK_NORMAL &&
+        !m_spellInfo->HasAttribute(SPELL_ATTR_EX2_IGNORE_LOS) &&
+        !IsAreaOfEffectSpell(m_spellInfo))
     {
         for(int j = 0; j < MAX_EFFECT_INDEX; ++j)
         {
@@ -487,7 +489,6 @@ Spell::Spell( Unit* caster, SpellEntry const *info, bool triggered, ObjectGuid o
                 m_canReflect = m_spellInfo->HasAttribute(SPELL_ATTR_EX_NEGATIVE);
 
             if(m_canReflect)
-*/
                 continue;
             else
                 m_canReflect = true;
@@ -577,7 +578,7 @@ void Spell::FillTargetMap()
         }
 
         // New target combination and fail custom fill method
-        if (!FillCustomTargetMap(SpellEffectIndex(i),tmpUnitLists[i]) && effToIndex[i] == i)
+        if (!FillCustomTargetMap(spellEffect,tmpUnitLists[i]) && effToIndex[i] == i)
         {
             // TargetA/TargetB dependent from each other, we not switch to full support this dependences
             // but need it support in some know cases
@@ -587,7 +588,7 @@ void Spell::FillTargetMap()
                     switch(spellEffect->EffectImplicitTargetB)
                     {
                         case TARGET_NONE:
-                            if (m_caster->GetObjectGuid().IsPet() && m_spellInfo->TargetCreatureType == CREATURE_TYPEMASK_NONE)
+                            if (m_caster->GetObjectGuid().IsPet() && m_spellInfo->GetTargetCreatureType() == CREATURE_TYPEMASK_NONE)
                                 SetTargetMap(SpellEffectIndex(i), TARGET_SELF, tmpUnitLists[i /*==effToIndex[i]*/]);
                             else
                                 SetTargetMap(SpellEffectIndex(i), TARGET_EFFECT_SELECT, tmpUnitLists[i /*==effToIndex[i]*/]);
@@ -717,7 +718,7 @@ void Spell::FillTargetMap()
                             SetTargetMap(SpellEffectIndex(i), spellEffect->EffectImplicitTargetA, tmpUnitLists[i /*==effToIndex[i]*/]);
                             break;
                         case TARGET_RANDOM_NEARBY_DEST:
-                            SetTargetMap(SpellEffectIndex(i), m_spellInfo->EffectImplicitTargetA[i], tmpUnitLists[i /*==effToIndex[i]*/]);
+                            SetTargetMap(SpellEffectIndex(i), spellEffect->EffectImplicitTargetA, tmpUnitLists[i /*==effToIndex[i]*/]);
                         break;
                         case TARGET_AREAEFFECT_CUSTOM:
                             // triggered spells get dest point from default target set, ignore it
@@ -1232,7 +1233,7 @@ void Spell::DoAllEffectOnTarget(TargetInfo *target)
 
     // recheck for availability/visibility of target
     if (((m_spellInfo->speed > M_NULL_F ||
-        (m_spellInfo->EffectImplicitTargetA[0] == TARGET_CHAIN_DAMAGE &&
+        (m_spellInfo->GetSpellEffect(EFFECT_INDEX_0)->EffectImplicitTargetA == TARGET_CHAIN_DAMAGE &&
         GetSpellCastTime(m_spellInfo, this) > 0)) &&
         (!unit->isVisibleForOrDetect(m_caster, m_caster, false) && !m_IsTriggeredSpell)))
     {
@@ -8764,13 +8765,13 @@ float Spell::GetBaseSpellSpeed()
     return speed_proto;
 }
 
-bool Spell::FillCustomTargetMap(SpellEffectIndex i, UnitList &targetUnitMap)
+bool Spell::FillCustomTargetMap(SpellEffectEntry const* effect, UnitList &targetUnitMap)
 {
     float radius;
     uint32 unMaxTargets = 0;
 
-    if (m_spellInfo->EffectRadiusIndex[i])
-        radius = GetSpellRadius(sSpellRadiusStore.LookupEntry(m_spellInfo->EffectRadiusIndex[i]));
+    if (effect->EffectRadiusIndex)
+        radius = GetSpellRadius(sSpellRadiusStore.LookupEntry(effect->EffectRadiusIndex));
     else
         radius = GetSpellMaxRange(sSpellRangeStore.LookupEntry(m_spellInfo->rangeIndex));
 

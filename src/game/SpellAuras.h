@@ -101,7 +101,7 @@ class MANGOS_DLL_SPEC SpellAuraHolder
 
         ObjectGuid const& GetCasterGuid() const { return m_casterGuid; }
         void SetCasterGuid(ObjectGuid guid) { m_casterGuid = guid; }
-        ObjectGuid const& GetCastItemGuid() const { return m_castItemGuid; }
+        ObjectGuid const& GetCastItemGuid() const;
         Unit* GetCaster() const;
         Unit* GetTarget() const { return m_target; }
         void SetTarget(Unit* target) { m_target = target; }

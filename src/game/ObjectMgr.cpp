@@ -7217,6 +7217,8 @@ void ObjectMgr::LoadNPCSpellClickSpells()
 }
 
 static char* SERVER_SIDE_SPELL      = "MaNGOS server-side spell";
+#define LOADED_SPELLDBC_FIELD_POS_EQUIPPED_ITEM_CLASS 0
+#define LOADED_SPELLDBC_FIELD_POS_SPELLNAME_0 0
 
 struct SQLSpellLoader : public SQLStorageLoaderBase<SQLSpellLoader, SQLHashStorage>
 {

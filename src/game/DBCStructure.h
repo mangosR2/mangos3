@@ -2195,6 +2195,7 @@ struct SpellEffectEntry
     // helpers
 
     int32 CalculateSimpleValue() const { return EffectBasePoints; }
+    SpellEffectIndex  GetIndex() const { return SpellEffectIndex(EffectIndex); }
 };
 
 // SpellEquippedItems.dbc

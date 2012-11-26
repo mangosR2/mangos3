@@ -434,6 +434,7 @@ class Spell
         void DoSummonCritter(SpellEffectEntry const* effect, uint32 forceFaction = 0);
         void DoSummonSnakes(SpellEffectEntry const* effect);
         void DoSummonVehicle(SpellEffectEntry const* effect, uint32 forceFaction = 0);
+        void DoSummonPossessed(SpellEffectEntry const* effect);
 
         void WriteSpellGoTargets(WorldPacket* data);
         void WriteAmmoToPacket(WorldPacket* data);
@@ -712,15 +713,7 @@ class Spell
             Creature* creature;
         };
         typedef std::vector<CreaturePosition> CreatureSummonPositions;
-/*
-        // return true IFF further processing required
-        bool DoSummonPet(SpellEffectEntry const* effect);
-        bool DoSummonTotem(SpellEffectEntry const* effect, uint8 slot_dbc = 0);
-        bool DoSummonWild(CreatureSummonPositions& list, SummonPropertiesEntry const* prop, SpellEffectEntry const* effect, uint32 level);
-        bool DoSummonCritter(CreatureSummonPositions& list, SummonPropertiesEntry const* prop, SpellEffectEntry const* effect, uint32 level);
-        bool DoSummonGuardian(CreatureSummonPositions& list, SummonPropertiesEntry const* prop, SpellEffectEntry const* effect, uint32 level);
-        bool DoSummonPossessed(CreatureSummonPositions& list, SummonPropertiesEntry const* prop, SpellEffectEntry const* effect, uint32 level);
-*/
+
 };
 
 enum ReplenishType

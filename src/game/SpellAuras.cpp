@@ -565,27 +565,34 @@ Unit* Aura::GetTriggerTarget() const
 
 Aura* SpellAuraHolder::CreateAura(SpellEntry const* spellproto, SpellEffectIndex eff, int32* currentBasePoints, SpellAuraHolderPtr holder, Unit *target, Unit *caster, Item* castItem)
 {
+    if (!spellproto || spellproto != m_spellProto)
+        return (Aura*)NULL;
+
     SpellEffectEntry const* effectEntry = spellproto->GetSpellEffect(eff);
+    if (!effectEntry)
+        return (Aura*)NULL;
 
-    if (effectEntry && IsAreaAuraEffect(effectEntry->Effect))
-        return new AreaAura(spellproto, eff, currentBasePoints, holder, target, caster, castItem);
-
-    uint32 triggeredSpellId = effectEntry ? effectEntry->EffectTriggerSpell : 0;
-
-    if(SpellEntry const* triggeredSpellInfo = sSpellStore.LookupEntry(triggeredSpellId))
+    uint32 triggeredSpellId = effectEntry->EffectTriggerSpell;
+    if (IsAreaAuraEffect(effectEntry->Effect))
+    {
+        return CreateAura(AURA_CLASS_AREA_AURA, eff, currentBasePoints, holder, target, caster, castItem);
+    }
+    else if (SpellEntry const* triggeredSpellInfo = sSpellStore.LookupEntry(triggeredSpellId))
     {
         for (int i = 0; i < MAX_EFFECT_INDEX; ++i)
         {
-            SpellEffectEntry const* triggeredeffectEntry = triggeredSpellInfo->GetSpellEffect(SpellEffectIndex(i));
-            if (triggeredeffectEntry && triggeredeffectEntry->EffectImplicitTargetA == TARGET_SINGLE_ENEMY)
+            SpellEffectEntry const* effect = triggeredSpellInfo->GetSpellEffect(SpellEffectIndex(i));
+            if (!effect)
+                continue;
+
+            if (effect->EffectImplicitTargetA == TARGET_SINGLE_ENEMY)
             {
                 return CreateAura(AURA_CLASS_SINGLE_ENEMY_AURA, eff, currentBasePoints, holder, target, caster, castItem);
             }
         }
     }
     // else - normal aura
-        }
-    }
+
     return CreateAura(AURA_CLASS_AURA, eff, currentBasePoints, holder, target, caster, castItem);
 }
 
