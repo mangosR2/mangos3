@@ -200,3 +200,8 @@ INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskC1`)
 DELETE FROM `spell_proc_event` WHERE `entry` = 89901;
 INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`) VALUE
 (89901, 10, 8388608);
+
+-- Hand of Light
+DELETE FROM `spell_proc_event` WHERE `entry` = 76672;
+INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskB0`, `SpellFamilyMaskC0`, `procFlags`) VALUE
+(76672, 10, 131072+32768, 8192, 16+4096);

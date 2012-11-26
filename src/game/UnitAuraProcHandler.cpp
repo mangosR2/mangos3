@@ -4398,42 +4398,6 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(Unit *pVictim, DamageIn
                 trigger_spell_id = 60515;
                 target = this;
             }
-            // Illumination
-            else if (auraSpellInfo->GetSpellIconID()==241)
-            {
-                if(!procSpell)
-                    return SPELL_AURA_PROC_FAILED;
-                // procspell is triggered spell but we need mana cost of original casted spell
-                uint32 originalSpellId = procSpell->Id;
-                // Holy Shock heal
-                if (procSpell->GetSpellFamilyFlags().test<CF_PALADIN_HOLY_SHOCK>())
-                {
-                    switch(procSpell->Id)
-                    {
-                        case 25914: originalSpellId = 20473; break;
-                        case 25913: originalSpellId = 20929; break;
-                        case 25903: originalSpellId = 20930; break;
-                        case 27175: originalSpellId = 27174; break;
-                        case 33074: originalSpellId = 33072; break;
-                        case 48820: originalSpellId = 48824; break;
-                        case 48821: originalSpellId = 48825; break;
-                        default:
-                            sLog.outError("Unit::HandleProcTriggerSpellAuraProc: Spell %u not handled in HShock",procSpell->Id);
-                            return SPELL_AURA_PROC_FAILED;
-                    }
-                }
-                SpellEntry const *originalSpell = sSpellStore.LookupEntry(originalSpellId);
-                if(!originalSpell)
-                {
-                    sLog.outError("Unit::HandleProcTriggerSpellAuraProc: Spell %u unknown but selected as original in Illu",originalSpellId);
-                    return SPELL_AURA_PROC_FAILED;
-                }
-                // percent stored in effect 1 (class scripts) base points
-                int32 cost = originalSpell->GetManaCost() + originalSpell->GetManaCostPercentage() * GetCreateMana() / 100;
-                basepoints[0] = cost*auraSpellInfo->CalculateSimpleValue(EFFECT_INDEX_1)/100;
-                trigger_spell_id = 20272;
-                target = this;
-            }
             // Lightning Capacitor
             else if (auraSpellInfo->Id==37657)
             {
@@ -4506,6 +4470,16 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(Unit *pVictim, DamageIn
                 RemoveAurasDueToSpell(castSpell);
                 trigger_spell_id = castSpell + 1;
                 target = pVictim;
+                break;
+            }
+            // Hand of Light
+            else if (auraSpellInfo->Id == 76672)
+            {
+                if (!procSpell)
+                    return SPELL_AURA_PROC_FAILED;
+
+                basepoints[0] = int32(triggerAmount * damage / 100.0f);
+                trigger_spell_id = 96172;
                 break;
             }
             // Seals of Command
