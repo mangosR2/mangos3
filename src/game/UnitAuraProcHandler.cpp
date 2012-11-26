@@ -2470,13 +2470,6 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, DamageInfo* damageI
                 triggered_spell_id = 90174;
                 break;
             }
-            // Righteous Vengeance
-            if (dummySpell->GetSpellIconID() == 3025)
-            {
-                triggered_spell_id = 61840;
-                basepoints[0] = triggerAmount * damage / 100 / GetSpellAuraMaxTicks(triggered_spell_id);
-                break;
-            }
             // Sheath of Light
             else if (dummySpell->GetSpellIconID() == 3030)
             {
