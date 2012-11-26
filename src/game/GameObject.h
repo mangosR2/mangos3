@@ -765,8 +765,8 @@ class MANGOS_DLL_SPEC GameObject : public WorldObject
         void ResetDoorOrButton();
         void ResetCapturePoint();
 
-        bool IsHostileTo(Unit const* unit) const;
-        bool IsFriendlyTo(Unit const* unit) const;
+        virtual bool IsHostileTo(Unit const* unit) const override;
+        virtual bool IsFriendlyTo(Unit const* unit) const override;
 
         void SummonLinkedTrapIfAny();
         void TriggerLinkedGameObject(Unit* target);

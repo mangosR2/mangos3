@@ -387,12 +387,11 @@ void GameObject::Update(uint32 update_diff, uint32 p_time)
                     }
                     else                                    // Environmental traps
                     {
-                        Player* p_ok = NULL;
-                        // Wrong search. need check all units, unfrendly to this GO (requires implement some methods)
-                        MaNGOS::AnyPlayerInObjectRangeCheck p_check(this, radius);
-                        MaNGOS::PlayerSearcher<MaNGOS::AnyPlayerInObjectRangeCheck> checker(p_ok, p_check);
-                        Cell::VisitWorldObjects(this, checker, radius);
-                        ok = p_ok;
+                        Unit* u_ok = NULL;
+                        MaNGOS::NearestAttackableUnitInObjectRangeCheck u_check(this, radius);
+                        MaNGOS::UnitLastSearcher<MaNGOS::NearestAttackableUnitInObjectRangeCheck> checker(u_ok, u_check);
+                        Cell::VisitAllObjects(this, checker, radius);
+                        ok = u_ok;
                     }
 
                     if (ok)
