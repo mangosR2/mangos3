@@ -3499,8 +3499,8 @@ SpellMissInfo Unit::MagicSpellHitResult(Unit* pVictim, SpellEntry const* spell)
 
     SpellSchoolMask schoolMask = GetSpellSchoolMask(spell);
     // PvP - PvE spell misschances per leveldif > 2
-    int32 lchance = pVictim->GetTypeId() == TYPEID_PLAYER ? 7 : 11;
-    int32 leveldif = int32(pVictim->GetLevelForTarget(this)) - int32(GetLevelForTarget(pVictim));
+    // int32 lchance = pVictim->GetTypeId() == TYPEID_PLAYER ? 7 : 11;
+    // int32 leveldif = int32(pVictim->GetLevelForTarget(this)) - int32(GetLevelForTarget(pVictim));
 
     // Base hit chance from attacker and victim levels
     int32 modHitChance =  CalculateBaseSpellHitChance(pVictim);
@@ -5063,6 +5063,8 @@ bool Unit::AddSpellAuraHolder(SpellAuraHolderPtr holder)
                     // no break here, track other controlled
                 case TRACK_AURA_TYPE_SINGLE_TARGET:         // Register spell holder single target
                     scTargets[aurSpellInfo] = GetObjectGuid();
+                    break;
+                default:
                     break;
             }
         }
@@ -13173,10 +13175,10 @@ void Unit::EnterVehicle(Unit* vehicleBase, int8 seatId)
                 bp[i] = seatId + 1;
             }
             else
-                bp[i] = NULL;
+                bp[i] = 0;
         }
         else
-            bp[i] = NULL;
+            bp[i] = 0;
     }
 
     caster->CastCustomSpell(target,spellInfo,&bp[EFFECT_INDEX_0],&bp[EFFECT_INDEX_1],&bp[EFFECT_INDEX_2],true,NULL,NULL,caster->GetObjectGuid());

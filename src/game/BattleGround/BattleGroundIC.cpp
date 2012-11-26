@@ -610,7 +610,7 @@ void BattleGroundIC::EventPlayerDamageGO(Player *player, GameObject* target_obj,
     if (doneBy == 66672)
         player->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_CAST_SPELL, 68367);
 
-    uint32 type = NULL;
+    uint32 type = 0;
     switch (target_obj->GetEntry())
     {
         case BG_IC_GO_ALLIANCE_GATE_1:

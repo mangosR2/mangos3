@@ -1758,7 +1758,7 @@ bool Player::TeleportTo(WorldLocation const& loc, uint32 options)
     }
     else
     {
-        DEBUG_LOG("Player::TeleportTo %s is being near teleported to map %u", GetName(), loc.mapid, IsBeingTeleportedNear() ? "(stage 2)" : "");
+        DEBUG_LOG("Player::TeleportTo %s is being near teleported to map %u %s", GetName(), loc.mapid, IsBeingTeleportedNear() ? "(stage 2)" : "");
     }
 
     // preparing unsummon pet if lost (we must get pet before teleportation or will not find it later)
@@ -12358,7 +12358,7 @@ void Player::SwapItem(uint16 src, uint16 dst)
     }
 
     // impossible merge/fill, do real swap
-    InventoryResult msg;
+    InventoryResult msg = EQUIP_ERR_OK2;
 
     // check src->dest move possibility
     ItemPosCountVec sDest;
@@ -16685,7 +16685,7 @@ void Player::_LoadInventory(QueryResult* result, uint32 timediff)
         uint8  slot       = fields[3].GetUInt8();
 
         bool success = true;
-        bool arenaitem = false;
+        //bool arenaitem = false;
 
         // the item/bag is not in a bag
         if (!bagLowGuid)
@@ -24242,7 +24242,7 @@ bool Player::CheckTransferPossibility(AreaTrigger const*& at, bool b_onlyMainReq
         // ghost resurrected at enter attempt to dungeon with corpse (including fail enter cases)
         if (!isAlive() && targetMapEntry->IsDungeon())
         {
-            int32 corpseMapId = 0;
+            uint32 corpseMapId = 0;
             if (Corpse* corpse = GetCorpse())
                 corpseMapId = corpse->GetMapId();
 

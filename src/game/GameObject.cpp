@@ -254,7 +254,7 @@ void GameObject::Update(uint32 update_diff, uint32 p_time)
                 {
                     // Arming Time for GAMEOBJECT_TYPE_TRAP (6)
                     Unit* owner = GetOwner();
-                    if (owner && owner->isInCombat()
+                    if ((owner && owner->isInCombat())
                                                      // FIXME - need remove this hacks on some objects
                         || GetEntry() == 190752      // SoTA Seaforium Charges
                         || GetEntry() == 195331      // IoC Huge Seaforium Charges
@@ -284,6 +284,8 @@ void GameObject::Update(uint32 update_diff, uint32 p_time)
                     }
                     break;
                 }
+                default:
+                    break;
             }
             break;
         }
@@ -2221,7 +2223,7 @@ bool GameObject::CalculateCurrentCollisionState() const
         return false;
 
     bool startOpen;
-    bool result;
+    bool result = false;
 
     switch (GetGoType())
     {
