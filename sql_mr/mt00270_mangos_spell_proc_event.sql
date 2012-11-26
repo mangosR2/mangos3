@@ -205,3 +205,11 @@ INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`)
 DELETE FROM `spell_proc_event` WHERE `entry` = 76672;
 INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskB0`, `SpellFamilyMaskC0`, `procFlags`) VALUE
 (76672, 10, 131072+32768, 8192, 16+4096);
+
+
+### WARLOCK ###
+
+-- Aftermath
+DELETE FROM `spell_proc_event` WHERE `entry` = 85113;
+INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`, `SpellFamilyMaskB0`, `procFlags`) VALUE
+(85113, 5, 32, 8388608, 4096+65536);
