@@ -2470,13 +2470,6 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, DamageInfo* damageI
                 triggered_spell_id = 90174;
                 break;
             }
-            // Sheath of Light
-            else if (dummySpell->GetSpellIconID() == 3030)
-            {
-                triggered_spell_id = 54203;
-                basepoints[0] = triggerAmount * damage / 100 / GetSpellAuraMaxTicks(triggered_spell_id);
-                break;
-            }
             // Tower of Radiance, Rank 3
             else if (dummySpell->GetSpellIconID() == 3402)
             {
@@ -2827,6 +2820,15 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, DamageInfo* damageI
                         basepoints[0] = maxAmt;
                     break;
                 }
+                // Judgements of the Bold
+                case 89901:
+                    // triggered only at casted Judgement spells, not at additional Judgement effects
+                    if (!procSpell || procSpell->GetCategory() != 1210)
+                        return SPELL_AURA_PROC_FAILED;
+
+                    target = this;
+                    triggered_spell_id = 89906;
+                    break;
             }
             break;
         }

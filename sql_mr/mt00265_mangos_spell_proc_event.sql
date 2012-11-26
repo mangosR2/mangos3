@@ -195,3 +195,8 @@ INSERT INTO `spell_proc_event` (`entry`, `Cooldown`) VALUE
 DELETE FROM `spell_proc_event` WHERE `entry` = 85803;
 INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskC1`) VALUE
 (85803, 10, 16384);
+
+-- Judgements of the Bold
+DELETE FROM `spell_proc_event` WHERE `entry` = 89901;
+INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`) VALUE
+(89901, 10, 8388608);
