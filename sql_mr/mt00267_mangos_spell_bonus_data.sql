@@ -11,6 +11,7 @@ REPLACE INTO `spell_bonus_data` (`entry`, `direct_bonus`, `dot_bonus`, `ap_bonus
 (81297, 0.017, 0, 0.0027, 0, 'Paladin - Consecration'), -- ap coef is wrong
 (82327, 0.259, 0, 0, 0, 'Paladin - Holy Radiance'),
 (85222, 0.144, 0, 0, 0, 'Paladin - Light of Dawn'),
+(85256, 0.171, 0, 0, 0, 'Paladin - Templar''s Verdict'),
 -- (85673, 0.209, 0, 0.198, 0, 'Paladin - Word of Glory'),
 (85673, 0.627, 0, 0.594, 0, 'Paladin - Word of Glory'),
 (86452, 0.144/4, 0, 0, 0, 'Paladin - Holy Radiance HoT'),

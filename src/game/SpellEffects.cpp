@@ -8573,14 +8573,20 @@ void Spell::EffectWeaponDmg(SpellEffectEntry const* effect)
         }
         case SPELLFAMILY_PALADIN:
         {
-            // Judgement of Command - receive benefit from Spell Damage and Attack Power
-            if(classOptions && classOptions->SpellFamilyFlags & UI64LIT(0x00020000000000))
+            // Templar's Verdict
+            if (m_spellInfo->Id == 85256)
             {
-                float ap = m_caster->GetTotalAttackPowerValue(BASE_ATTACK);
-                int32 holy = m_caster->SpellBaseDamageBonusDone(GetSpellSchoolMask(m_spellInfo));
-                if (holy < 0)
-                    holy = 0;
-                spell_bonus += int32(ap * 0.08f) + int32(holy * 13 / 100);
+                switch (m_usedHolyPower)
+                {
+                    case 2:
+                        totalDamagePercentMod *= 2.0f;
+                        break;
+                    case 3:
+                        totalDamagePercentMod *= 47.0f / 6.0f;
+                        break;
+                    default:
+                        break;
+                }
             }
             break;
         }
