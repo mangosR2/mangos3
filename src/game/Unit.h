@@ -1907,7 +1907,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         void DeleteThreatList();
         bool IsSecondChoiceTarget(Unit* pTarget, bool checkThreatArea) const;
         bool SelectHostileTarget(bool withEvade = true);
-        void TauntApply(Unit* pVictim);
+        bool TauntApply(Unit* pVictim, bool isSingleEffect = false);
         void TauntFadeOut(Unit *taunter);
         ThreatManager& getThreatManager() { return m_ThreatManager; }
         ThreatManager const& getThreatManager() const { return m_ThreatManager; }

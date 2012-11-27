@@ -10419,20 +10419,26 @@ void Unit::DeleteThreatList()
 
 //======================================================================
 
-void Unit::TauntApply(Unit* taunter)
+bool Unit::TauntApply(Unit* taunter, bool isSingleEffect)
 {
     MANGOS_ASSERT(GetTypeId() == TYPEID_UNIT);
 
-    if (!taunter || (taunter->GetTypeId() == TYPEID_PLAYER && ((Player*)taunter)->isGameMaster()))
-        return;
+    if (!taunter 
+        || (taunter->GetTypeId() == TYPEID_PLAYER && ((Player*)taunter)->isGameMaster())
+        || !taunter->isVisibleForOrDetect(this,this,true)
+        || IsFriendlyTo(taunter))
+        return false;
+
+    Unit* target = getVictim();
+    if (target && target == taunter)
+        return false;
 
     if (!CanHaveThreatList())
-        return;
+        return false;
 
-    Unit *target = getVictim();
-
-    if (target && target == taunter)
-        return;
+    // if target immune to taunt don't change threat
+    if (GetDiminishing(DIMINISHING_TAUNT) == DIMINISHING_LEVEL_IMMUNE)
+        return false;
 
     // Only attack taunter if this is a valid target
     if (!hasUnitState(UNIT_STAT_STUNNED | UNIT_STAT_DIED) && !IsSecondChoiceTarget(taunter, true))
@@ -10443,7 +10449,12 @@ void Unit::TauntApply(Unit* taunter)
             ((Creature*)this)->AI()->AttackStart(taunter);
     }
 
-    m_ThreatManager.tauntApply(taunter);
+    if (isSingleEffect)
+        getThreatManager().addThreat(taunter,getThreatManager().getCurrentVictim()->getThreat());
+    else
+        getThreatManager().tauntApply(taunter);
+
+    return true;
 }
 
 //======================================================================
