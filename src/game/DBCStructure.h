@@ -2066,6 +2066,8 @@ struct SpellClassOptionsEntry
     //char*   Description;                                  // 6 4.0.0
 
     // helpers
+    ClassFamilyMask const& GetSpellFamilyFlags() const { return SpellFamilyFlags; };
+    SpellFamily     const  GetSpellFamilyName()  const { return SpellFamily(SpellFamilyName); };
 
     bool IsFitToFamilyMask(uint64 familyFlags, uint32 familyFlags2 = 0) const
     {

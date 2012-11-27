@@ -101,7 +101,7 @@ class MANGOS_DLL_SPEC SpellAuraHolder
 
         ObjectGuid const& GetCasterGuid() const { return m_casterGuid; }
         void SetCasterGuid(ObjectGuid guid) { m_casterGuid = guid; }
-        ObjectGuid const& GetCastItemGuid() const;
+        ObjectGuid const& GetCastItemGuid() const { return m_castItemGuid; }
         Unit* GetCaster() const;
         Unit* GetTarget() const { return m_target; }
         void SetTarget(Unit* target) { m_target = target; }
@@ -431,12 +431,12 @@ class MANGOS_DLL_SPEC Aura
         Modifier const* GetModifier() const { return &m_modifier; }
         int32 GetMiscValue() const { return m_spellEffect ? m_spellEffect->EffectMiscValue : 0; }
         int32 GetMiscBValue() const { return m_spellEffect ? m_spellEffect->EffectMiscValueB : 0; }
-        
+
         SpellEntry const* GetSpellProto() const { return GetHolder()->GetSpellProto(); }
         SpellEffectEntry const* GetSpellEffect() const { return m_spellEffect; }
         uint32 GetId() const{ return GetHolder()->GetSpellProto()->Id; }
-        ObjectGuid const& GetCastItemGuid() const { return GetHolder()->GetCastItemGuid(); }
-        ObjectGuid const& GetCasterGuid() const { return GetHolder()->GetCasterGuid(); }
+        ObjectGuid const& GetCastItemGuid() const;
+        ObjectGuid const& GetCasterGuid() const;
         Unit* GetCaster() const { return GetHolder()->GetCaster(); }
         Unit* GetTarget() const { return GetHolder()->GetTarget(); }
 
