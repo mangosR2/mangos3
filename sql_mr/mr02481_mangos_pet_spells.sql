@@ -26,7 +26,6 @@ INSERT INTO `creature_spell` (`guid`, `spell`, `index`) VALUES
 (31216, 59638, 1);
 
 -- DK Gargoyle
-UPDATE `creature_template` SET `ScriptName` = '' WHERE `entry` = '27829';
 DELETE FROM `creature_spell` WHERE `guid` IN (27829);
 INSERT INTO `creature_spell` (`guid`, `spell`, `index`) VALUES
 (27829, 51963, 0),
