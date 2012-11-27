@@ -2035,5 +2035,11 @@ void InitializeOpcodes()
     OPCODE(CMSG_SEARCH_LFG_JOIN,                         STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleLfrSearchOpcode           );
     OPCODE(CMSG_SEARCH_LFG_LEAVE,                        STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleLfrLeaveOpcode            );
 
+    OPCODE(SMSG_GUILD_ACHIEVEMENT_DATA,                  STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
+    OPCODE(SMSG_GUILD_ACHIEVEMENT_DELETED,               STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
+    OPCODE(SMSG_GUILD_ACHIEVEMENT_EARNED,                STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
+    OPCODE(SMSG_GUILD_CRITERIA_DATA,                     STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
+    OPCODE(SMSG_GUILD_CRITERIA_DELETED,                  STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
+
     OPCODE(NUM_MSG_TYPES,                                STATUS_UNHANDLED,PROCESS_INPLACE,      &WorldSession::Handle_NULL             );
 };

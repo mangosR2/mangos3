@@ -488,6 +488,9 @@ class Guild
         void LogBankEvent(uint8 EventType, uint8 TabId, uint32 PlayerGuidLow, uint32 ItemOrMoney, uint8 ItemStackCount = 0, uint8 DestTabId = 0);
         bool AddGBankItemToDB(uint32 GuildId, uint32 BankTab , uint32 BankTabSlot , uint32 GUIDLow, uint32 Entry);
 
+        AchievementMgr<Guild>& GetAchievementMgr() { return m_achievementMgr; }
+        AchievementMgr<Guild> const& GetAchievementMgr() const { return m_achievementMgr; }
+
     protected:
         void AddRank(const std::string& name, uint32 rights, uint32 money);
 
@@ -526,6 +529,8 @@ class Guild
 
         uint64 m_GuildBankMoney;
         uint8 m_PurchasedTabs;
+        AchievementMgr<Guild> m_achievementMgr;
+
     private:
         void UpdateAccountsNumber() { m_accountsNumber = 0;}// mark for lazy calculation at request in GetAccountsNumber
         void _ChangeRank(ObjectGuid guid, MemberSlot* slot, uint32 newRank);

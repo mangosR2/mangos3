@@ -1457,6 +1457,15 @@ void WorldSession::HandleQueryInspectAchievementsOpcode( WorldPacket & recv_data
         player->GetAchievementMgr().SendRespondInspectAchievements(_player);
 }
 
+void WorldSession::HandleGuildAchievementProgressQuery(WorldPacket& recv_data)
+{
+    uint32 achievementId;
+    recv_data >> achievementId;
+
+    if (Guild* guild = sGuildMgr.GetGuildById(_player->GetGuildId()))
+        guild->GetAchievementMgr().SendRespondInspectAchievements(_player, achievementId);
+}
+
 void WorldSession::HandleUITimeRequestOpcode(WorldPacket& /*recv_data*/)
 {
     // empty opcode

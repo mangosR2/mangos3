@@ -55,7 +55,7 @@ enum AchievementFlags
     ACHIEVEMENT_FLAG_NONE                   = 0x00000000,
     ACHIEVEMENT_FLAG_COUNTER                = 0x00000001,   // ACHIEVEMENT_FLAG_STATISTIC Just count statistic (never stop and complete)
     ACHIEVEMENT_FLAG_HIDDEN                 = 0x00000002,   // ACHIEVEMENT_FLAG_HIDDEN Not show in client
-    ACHIEVEMENT_FLAG_STORE_MAX_VALUE        = 0x00000004,   // ACHIEVEMENT_FLAG_HIDDEN_TILL_AWARDED Store only max value? used only in "Reach level xx"
+    ACHIEVEMENT_FLAG_PLAY_NO_VISUAL         = 0x00000004,   // ACHIEVEMENT_FLAG_HIDDEN_TILL_AWARDED Store only max value? used only in "Reach level xx"
     ACHIEVEMENT_FLAG_SUMM                   = 0x00000008,   // ACHIEVEMENT_FLAG_CUMULATIVE Use summ criteria value from all requirements (and calculate max value)
     ACHIEVEMENT_FLAG_MAX_USED               = 0x00000010,   // ACHIEVEMENT_FLAG_DISPLAY_HIGHEST Show max criteria (and calculate max value ??)
     ACHIEVEMENT_FLAG_REQ_COUNT              = 0x00000020,   // ACHIEVEMENT_FLAG_CRITERIA_COUNT Use not zero req count (and calculate max value)
@@ -66,8 +66,8 @@ enum AchievementFlags
     ACHIEVEMENT_FLAG_REALM_FIRST_RAID_REACH = 0x00000300,   // ACHIEVEMENT_FLAG_SERVER_FIRST_RAID
     ACHIEVEMENT_FLAG_UNK3                   = 0x00000400,   // ACHIEVEMENT_FLAG_HIDE_NAME_IN_TIE
     ACHIEVEMENT_FLAG_REALM_FIRST_GUILD      = 0x00000800,   // first guild on realm done something
-    ACHIEVEMENT_FLAG_UNK4                   = 0x00001000,   // as guild group?
-    ACHIEVEMENT_FLAG_UNK5                   = 0x00002000,   // as guild group?
+    ACHIEVEMENT_FLAG_SHOW_IN_GUILD_NEWS     = 0x00001000,   // Shows in guild news
+    ACHIEVEMENT_FLAG_SHOW_IN_GUILD_HEADER   = 0x00002000,   // Shows in guild news header
     ACHIEVEMENT_FLAG_GUILD                  = 0x00004000,   //
     ACHIEVEMENT_FLAG_SHOW_GUILD_MEMBERS	    = 0x00008000,   //
     ACHIEVEMENT_FLAG_SHOW_CRITERIA_MEMBERS  = 0x00010000,   //

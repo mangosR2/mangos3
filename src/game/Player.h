@@ -2536,8 +2536,8 @@ class MANGOS_DLL_SPEC Player : public Unit
         void AddRunePower(uint8 index);
         void InitRunes();
 
-        AchievementMgr const& GetAchievementMgr() const { return m_achievementMgr; }
-        AchievementMgr& GetAchievementMgr() { return m_achievementMgr; }
+        AchievementMgr<Player> const& GetAchievementMgr() const { return m_achievementMgr; }
+        AchievementMgr<Player>& GetAchievementMgr() { return m_achievementMgr; }
         void UpdateAchievementCriteria(AchievementCriteriaTypes type, uint32 miscvalue1=0, uint32 miscvalue2=0, Unit *unit=NULL, uint32 time=0);
         void CompletedAchievement(AchievementEntry const* entry);
         void CompletedAchievement(uint32 uiAchievementID);
@@ -2914,7 +2914,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         // Temporary removed pet cache
         PetNumberList m_temporaryUnsummonedPetNumber;
 
-        AchievementMgr m_achievementMgr;
+        AchievementMgr<Player> m_achievementMgr;
         ReputationMgr  m_reputationMgr;
 
         uint32 m_timeSyncCounter;

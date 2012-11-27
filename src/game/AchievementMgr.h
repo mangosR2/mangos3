@@ -42,6 +42,7 @@ struct CriteriaProgress
 {
     time_t date;
     uint32 counter;
+    ObjectGuid CompletedGUID;                               // GUID of the player that completed this criteria (guild achievements)
     bool changed;
     bool timedCriteriaFailed;
 };
@@ -244,6 +245,7 @@ typedef std::pair<AchievementRewardLocalesMap::const_iterator, AchievementReward
 struct CompletedAchievementData
 {
     time_t date;
+    std::set<ObjectGuid> guids;
     bool changed;
 };
 
@@ -254,25 +256,26 @@ class Unit;
 class Player;
 class WorldPacket;
 
+template <class T>
 class AchievementMgr
 {
     public:
-        AchievementMgr(Player* pl);
+        AchievementMgr(T* owner);
         ~AchievementMgr();
 
         void Reset();
         static void DeleteFromDB(ObjectGuid guid);
         void LoadFromDB(QueryResult* achievementResult, QueryResult* criteriaResult);
         void SaveToDB();
-        void ResetAchievementCriteria(AchievementCriteriaTypes type, uint32 miscvalue1 = 0, uint32 miscvalue2 = 0);
+        void ResetAchievementCriteria(AchievementCriteriaTypes type, uint32 miscvalue1=0, uint32 miscvalue2=0, Player* referencePlayer = NULL);
         void StartTimedAchievementCriteria(AchievementCriteriaTypes type, uint32 timedRequirementId, time_t startTime = 0);
         void DoFailedTimedAchievementCriterias();
-        void UpdateAchievementCriteria(AchievementCriteriaTypes type, uint32 miscvalue1 = 0, uint32 miscvalue2 = 0, Unit* unit = NULL, uint32 time = 0);
-        void CheckAllAchievementCriteria();
-        void SendAllAchievementData();
-        void SendRespondInspectAchievements(Player* player);
+        void UpdateAchievementCriteria(AchievementCriteriaTypes type, uint32 miscvalue1=0, uint32 miscvalue2=0, Unit *unit=NULL, uint32 time=0, Player* referencePlayer = NULL);
+        void CheckAllAchievementCriteria(Player* referencePlayer);
+        void SendAllAchievementData(Player* receiver);
+        void SendRespondInspectAchievements(Player* player, uint32 achievementId = 0);
 
-        Player* GetPlayer() const { return m_player;}
+        T* GetOwner() const { return m_owner; }
 
         CompletedAchievementData const* GetCompleteData(uint32 achievement_id) const
         {
@@ -289,18 +292,20 @@ class AchievementMgr
 
         // Use PROGRESS_SET only for reset/downgrade criteria progress
         enum ProgressType { PROGRESS_SET, PROGRESS_ACCUMULATE, PROGRESS_HIGHEST };
-        void SetCriteriaProgress(AchievementCriteriaEntry const* criteria, AchievementEntry const* achievement, uint32 changeValue, ProgressType ptype);
+        void SetCriteriaProgress(AchievementCriteriaEntry const* criteria, AchievementEntry const* achievement, uint32 changeValue, Player* referencePlayer, ProgressType ptype);
         void CompletedAchievement(AchievementEntry const* entry);
         bool IsCompletedAchievement(AchievementEntry const* entry);
 
-    private:
         void SendAchievementEarned(AchievementEntry const* achievement);
         void SendCriteriaUpdate(uint32 id, CriteriaProgress const* progress);
-        void CompletedCriteriaFor(AchievementEntry const* achievement);
+        void CompletedCriteriaFor(AchievementEntry const* achievement, Player* referencePlayer);
+        void CompletedAchievement(AchievementEntry const* entry, Player* referencePlayer);
         void IncompletedAchievement(AchievementEntry const* entry);
-        void CompleteAchievementsWithRefs(AchievementEntry const* entry);
+        void SendPacket(WorldPacket* data) const;
+        void SendCriteriaProgressRemove(uint32 criteriaId);
 
-        Player* m_player;
+    private:
+        T* m_owner;
         CriteriaProgressMap m_criteriaProgress;
         CompletedAchievementMap m_completedAchievements;
         AchievementCriteriaFailTimeMap m_criteriaFailTimes;
@@ -309,7 +314,7 @@ class AchievementMgr
 class AchievementGlobalMgr
 {
     public:
-        AchievementCriteriaEntryList const& GetAchievementCriteriaByType(AchievementCriteriaTypes type);
+        AchievementCriteriaEntryList const& GetAchievementCriteriaByType(AchievementCriteriaTypes type, bool guild = false);
         AchievementCriteriaEntryList const* GetAchievementCriteriaByAchievement(uint32 id);
         AchievementEntryList const* GetAchievementByReferencedId(uint32 id) const;
         AchievementReward const* GetAchievementReward(AchievementEntry const* achievement, uint8 gender) const;
@@ -318,6 +323,22 @@ class AchievementGlobalMgr
 
         bool IsRealmCompleted(AchievementEntry const* achievement) const;
         void SetRealmCompleted(AchievementEntry const* achievement);
+
+        bool IsGroupCriteriaType(AchievementCriteriaTypes type) const
+        {
+            switch (type)
+            {
+                case ACHIEVEMENT_CRITERIA_TYPE_KILL_CREATURE:
+                case ACHIEVEMENT_CRITERIA_TYPE_WIN_BG:
+                case ACHIEVEMENT_CRITERIA_TYPE_BE_SPELL_TARGET:         // NYI
+                case ACHIEVEMENT_CRITERIA_TYPE_WIN_RATED_ARENA:
+                case ACHIEVEMENT_CRITERIA_TYPE_BE_SPELL_TARGET2:        // NYI
+                case ACHIEVEMENT_CRITERIA_TYPE_WIN_RATED_BATTLEGROUND:  // NYI
+                    return true;
+            }
+
+            return false;
+        }
 
         void LoadAchievementCriteriaList();
         void LoadAchievementCriteriaRequirements();
@@ -331,6 +352,7 @@ class AchievementGlobalMgr
 
         // store achievement criterias by type to speed up lookup
         AchievementCriteriaEntryList m_AchievementCriteriasByType[ACHIEVEMENT_CRITERIA_TYPE_TOTAL];
+        AchievementCriteriaEntryList m_GuildAchievementCriteriasByType[ACHIEVEMENT_CRITERIA_TYPE_TOTAL];
         // store achievement criterias by achievement to speed up lookup
         AchievementCriteriaListByAchievement m_AchievementCriteriaListByAchievement;
         // store achievements by referenced achievement id to speed up lookup

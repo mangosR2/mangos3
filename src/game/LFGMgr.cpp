@@ -1085,10 +1085,8 @@ void LFGMgr::SendLFGReward(Player* pPlayer, LFGDungeonEntry const* pRandomDungeo
     if (pRandomDungeon->difficulty == DUNGEON_DIFFICULTY_HEROIC)
     {
         if (Group* pGroup = pPlayer->GetGroup())
-        {
             if (GetLFGGroupState(pGroup->GetObjectGuid())->GetRandomPlayersCount())
-                pPlayer->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_USE_LFD_TO_GROUP_WITH_PLAYERS, GetLFGGroupState(pGroup->GetObjectGuid())->GetRandomPlayersCount());
-        }
+                pPlayer->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_USE_LFD_TO_GROUP_WITH_PLAYERS, GetLFGGroupState(pGroup->GetObjectGuid())->GetRandomPlayersCount());
     }
 
     GetLFGPlayerState(pPlayer->GetObjectGuid())->SetState(LFG_STATE_FINISHED_DUNGEON);

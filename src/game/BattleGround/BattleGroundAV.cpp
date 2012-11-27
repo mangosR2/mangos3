@@ -426,8 +426,8 @@ void BattleGroundAV::UpdatePlayerScore(Player* source, uint32 type, uint32 value
             return;
     }
 
-    if (achCriId > 0)
-        source->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_BG_OBJECTIVE_CAPTURE, 1, achCriId);
+    if (achCriId)
+        source->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_BG_OBJECTIVE_CAPTURE, 1, achCriId);
 }
 
 void BattleGroundAV::EventPlayerDestroyedPoint(BG_AV_Nodes node)

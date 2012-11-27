@@ -54,6 +54,8 @@
 #include "CreatureLinkingMgr.h"
 #include "UpdateFieldFlags.h"
 #include "MovementStructures.h"
+#include "Guild.h"
+#include "GuildMgr.h"
 
 #include <math.h>
 #include <stdarg.h>
@@ -1289,9 +1291,9 @@ uint32 Unit::DealDamage(DamageInfo* damageInfo)
             if (player_tap)
                 player_tap->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_SPECIAL_PVP_KILL, 1, 0, pVictim);
             if (GetTypeId() == TYPEID_UNIT)
-                playerVictim->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_KILLED_BY_CREATURE, GetEntry());
+                playerVictim->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_KILLED_BY_CREATURE, GetEntry());
             else if (GetTypeId() == TYPEID_PLAYER && pVictim != this)
-                playerVictim->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_KILLED_BY_PLAYER, 1, playerVictim->GetTeam());
+                playerVictim->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_KILLED_BY_PLAYER, 1, playerVictim->GetTeam());
 
             // 10% durability loss on death
             // only if not player and not controlled by player pet. And not at BG
@@ -1609,6 +1611,11 @@ void Unit::JustKilledCreature(Creature* victim, Player* responsiblePlayer)
                 state->UpdateEncounterState(ENCOUNTER_CREDIT_KILL_CREATURE, victim->GetEntry());
         }
     }
+
+    if (GetTypeId() == TYPEID_PLAYER)
+        if (uint32 guildId = victim->GetMap()->GetOwnerGuildId())
+            if (Guild* guild = sGuildMgr.GetGuildById(guildId))
+                guild->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_KILL_CREATURE, victim->GetEntry(), 1, victim, 0, (Player*)this);
 }
 
 void Unit::PetOwnerKilledUnit(Unit* pVictim)
@@ -8077,15 +8084,15 @@ int32  Unit::DealHeal(DamageInfo* healInfo, bool critical/* = false*/)
 
         // use the actual gain, as the overheal shall not be counted, skip gain 0 (it ignored anyway in to criteria)
         if (gain)
-            ((Player*)unit)->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_HEALING_DONE, gain, 0, pVictim);
+            ((Player*)unit)->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_HEALING_DONE, gain, 0, pVictim);
 
-        ((Player*)unit)->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_HIGHEST_HEAL_CASTED, healInfo->heal);
+        ((Player*)unit)->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_HIGHEST_HEAL_CASTED, healInfo->heal);
     }
 
     if (pVictim->GetTypeId() == TYPEID_PLAYER)
     {
-        ((Player*)pVictim)->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_TOTAL_HEALING_RECEIVED, gain);
-        ((Player*)pVictim)->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_HIGHEST_HEALING_RECEIVED, healInfo->heal);
+        ((Player*)pVictim)->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_TOTAL_HEALING_RECEIVED, gain);
+        ((Player*)pVictim)->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_HIGHEST_HEALING_RECEIVED, healInfo->heal);
     }
 
     // Script Event HealedBy

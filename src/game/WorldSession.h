@@ -867,6 +867,7 @@ class MANGOS_DLL_SPEC WorldSession
         void HandleCharCustomizeOpcode(WorldPacket& recv_data);
         void HandleCharFactionOrRaceChangeOpcode(WorldPacket& recv_data);
         void HandleQueryInspectAchievementsOpcode(WorldPacket& recv_data);
+        void HandleGuildAchievementProgressQuery(WorldPacket& recv_data);
         void HandleEquipmentSetSaveOpcode(WorldPacket& recv_data);
         void HandleEquipmentSetDeleteOpcode(WorldPacket& recv_data);
         void HandleEquipmentSetUseOpcode(WorldPacket& recv_data);

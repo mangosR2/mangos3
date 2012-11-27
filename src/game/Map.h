@@ -430,6 +430,8 @@ class MANGOS_DLL_SPEC Map : public GridRefManager<NGridType>
         void AddEvent(BasicEvent* Event, uint64 e_time, bool set_addtime = true);
 
 
+        virtual uint32 GetOwnerGuildId(Team /*team*/ = TEAM_NONE) const { return 0; }
+
     private:
         void LoadMapAndVMap(int gx, int gy);
 

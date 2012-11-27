@@ -454,6 +454,9 @@ void BattleGroundBG::UpdatePlayerScore(Player* source, uint32 type, uint32 value
             BattleGround::UpdatePlayerScore(source, type, value);
             break;
     }
+
+    if (achCriId)
+        Source->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_BG_OBJECTIVE_CAPTURE, 1, achCriId);
 }
 
 void BattleGroundBG::FillInitialWorldStates(WorldPacket& data, uint32& count)

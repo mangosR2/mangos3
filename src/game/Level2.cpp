@@ -1275,7 +1275,7 @@ void ChatHandler::ShowAchievementListHelper(AchievementEntry const* achEntry, Lo
             {
                 uint32 criteriaMask[4] = {0, 0, 0, 0};
 
-                if (AchievementMgr const* mgr = target ? &target->GetAchievementMgr() : NULL)
+                if (AchievementMgr<Player> const* mgr = target ? &target->GetAchievementMgr() : NULL)
                     if (AchievementCriteriaEntryList const* criteriaList = sAchievementMgr.GetAchievementCriteriaByAchievement(achEntry->ID))
                         for (AchievementCriteriaEntryList::const_iterator itr = criteriaList->begin(); itr != criteriaList->end(); ++itr)
                             if (mgr->IsCompletedCriteria(*itr, achEntry))

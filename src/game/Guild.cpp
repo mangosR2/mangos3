@@ -78,7 +78,7 @@ void MemberSlot::ChangeRank(uint32 newRank)
 
 //// Guild /////////////////////////////////////////////////
 
-Guild::Guild()
+Guild::Guild() : m_achievementMgr(this)
 {
     m_Id = 0;
     m_Level = 1;
