@@ -161,12 +161,10 @@ void PlayerbotHunterAI::DoNextCombatManeuver(Unit *pTarget)
 
     // check if ranged combat is possible (set m_rangedCombat and switch auras
     float dist = m_bot->GetCombatDistance(pTarget);
-    if ((dist <= ATTACK_DISTANCE || !m_bot->GetUInt32Value(PLAYER_AMMO_ID)) && m_rangedCombat)
+    if ((dist <= ATTACK_DISTANCE ) && m_rangedCombat)
     {
         // switch to melee combat (target in melee range, out of ammo)
         m_rangedCombat = false;
-        if (!m_bot->GetUInt32Value(PLAYER_AMMO_ID))
-            ai->TellMaster("Out of ammo!");
         // become monkey (increases dodge chance)...
         (ASPECT_OF_THE_MONKEY > 0 && !m_bot->HasAura(ASPECT_OF_THE_MONKEY, EFFECT_INDEX_0) && ai->CastSpell(ASPECT_OF_THE_MONKEY, *m_bot));
     }

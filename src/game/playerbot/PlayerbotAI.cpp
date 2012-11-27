@@ -214,7 +214,7 @@ uint32 PlayerbotAI::getSpellId(const char* args, bool master) const
             continue;
 
         bool isExactMatch = (name.length() == wnamepart.length()) ? true : false;
-        bool usesNoReagents = (pSpellInfo->Reagent[0] <= 0) ? true : false;
+        bool usesNoReagents = true;/* FIXME!(pSpellInfo->Reagent[0] <= 0) ? true : false;*/
 
         // if we already found a spell
         bool useThisSpell = true;
@@ -278,7 +278,7 @@ uint32 PlayerbotAI::getPetSpellId(const char* args) const
             continue;
 
         bool isExactMatch = (name.length() == wnamepart.length()) ? true : false;
-        bool usesNoReagents = (pSpellInfo->Reagent[0] <= 0) ? true : false;
+        bool usesNoReagents = true; /*(pSpellInfo->Reagent[0] <= 0) ? true : false;*/
 
         // if we already found a spell
         bool useThisSpell = true;
@@ -1020,13 +1020,14 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
                 return;
             if (GetMaster()->IsMounted() && !m_bot->IsMounted())
             {
+/*
                 //Player Part
                 if (!GetMaster()->GetAurasByType(SPELL_AURA_MOUNTED).empty())
                 {
                     int32 master_speed1 = 0;
                     int32 master_speed2 = 0;
-                    master_speed1 = GetMaster()->GetAurasByType(SPELL_AURA_MOUNTED).front()->GetSpellProto()->EffectBasePoints[1];
-                    master_speed2 = GetMaster()->GetAurasByType(SPELL_AURA_MOUNTED).front()->GetSpellProto()->EffectBasePoints[2];
+                    master_speed1 = GetMaster()->GetAurasByType(SPELL_AURA_MOUNTED).front()->GetSpellEffect()->EffectBasePoints;
+                    master_speed2 = GetMaster()->GetAurasByType(SPELL_AURA_MOUNTED).front()->GetSpellEffect()->EffectBasePoints;
 
                     //Bot Part
                     uint32 spellMount = 0;
@@ -1070,7 +1071,7 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
                         }
                     }
                     if (spellMount > 0) m_bot->CastSpell(m_bot, spellMount, false);
-                }
+                }*/
             }
             else if (!GetMaster()->IsMounted() && m_bot->IsMounted())
             {
@@ -1318,7 +1319,7 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
             if (!pSpellInfo)
                 return;
 
-            if (pSpellInfo->AuraInterruptFlags & AURA_INTERRUPT_FLAG_NOT_SEATED)
+            if (pSpellInfo->GetAuraInterruptFlags() & AURA_INTERRUPT_FLAG_NOT_SEATED)
                 return;
 
             m_ignoreAIUpdatesUntilTime = time(0) + (msTime / 1000) + 1;
@@ -3459,13 +3460,13 @@ bool PlayerbotAI::CastSpell(uint32 spellId)
 
     uint32 target_type = TARGET_FLAG_UNIT;
 
-    if (pSpellInfo->Effect[0] == SPELL_EFFECT_OPEN_LOCK)
+    if (pSpellInfo->GetSpellEffect(EFFECT_INDEX_0)->Effect == SPELL_EFFECT_OPEN_LOCK)
         target_type = TARGET_FLAG_OBJECT;
 
     m_CurrentlyCastingSpellId = spellId;
 
-    if (pSpellInfo->Effect[0] == SPELL_EFFECT_OPEN_LOCK ||
-        pSpellInfo->Effect[0] == SPELL_EFFECT_SKINNING)
+    if (pSpellInfo->GetSpellEffect(EFFECT_INDEX_0)->Effect == SPELL_EFFECT_OPEN_LOCK ||
+        pSpellInfo->GetSpellEffect(EFFECT_INDEX_0)->Effect == SPELL_EFFECT_SKINNING)
     {
         if (!m_lootCurrent.IsEmpty())
         {

@@ -4091,11 +4091,12 @@ bool Player::resetTalents(bool no_cost, bool all_specs)
             if (talentInfo->RankID[j])
             {
                 removeSpell(talentInfo->RankID[j],!IsPassiveSpell(talentInfo->RankID[j]),false);
-
+/* FIXME
                 SpellEntry const *spellInfo = sSpellStore.LookupEntry(talentInfo->RankID[j]);
                 for (int k = 0; k < MAX_EFFECT_INDEX; ++k)
                     if (spellInfo->EffectTriggerSpell[k])
                         removeSpell(spellInfo->EffectTriggerSpell[k]);
+*/
             }
 
         iter = m_talents[m_activeSpec].begin();

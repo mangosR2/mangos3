@@ -160,10 +160,11 @@ void DynamicObject::Delay(int32 delaytime)
             bool foundAura = false;
             for (int32 i = m_effIndex + 1; i < MAX_EFFECT_INDEX; ++i)
             {
-                SpellEffectEntry const* effect = holder->GetSpellProto()->GetSpellEffect(SpellEffectIndex(i));
-                if(!effect)
-                    continue;
-                if ((effect->Effect == SPELL_EFFECT_PERSISTENT_AREA_AURA || effect->Effect == SPELL_EFFECT_ADD_FARSIGHT) && holder->m_auras[i])
+                SpellEffectEntry const* effectEntry = holder->GetSpellProto()->GetSpellEffect(SpellEffectIndex(i));
+                if(!effectEntry)
+                   continue;
+
+                if ((effectEntry->Effect == SPELL_EFFECT_PERSISTENT_AREA_AURA || effectEntry->Effect == SPELL_EFFECT_ADD_FARSIGHT) && holder->GetAuraByEffectIndex(SpellEffectIndex(i)))
                 {
                     foundAura = true;
                     break;
