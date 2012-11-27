@@ -8878,24 +8878,24 @@ bool Spell::FillCustomTargetMap(SpellEffectIndex i, UnitList &targetUnitMap)
                     oozesMap.push_back((*iter));
             }
 
-            UnitList::iterator i;
+            UnitList::iterator itr;
 
             // 2 random targets
             if (!oozesMap.empty())
             {
-                i = oozesMap.begin();
-                std::advance(i, urand(0, oozesMap.size() - 1));
+                itr = oozesMap.begin();
+                std::advance(itr, urand(0, oozesMap.size() - 1));
 
                 // first Ooze Flood
-                targetUnitMap.push_back(*i);
-                oozesMap.remove(*i);
+                targetUnitMap.push_back(*itr);
+                oozesMap.remove(*itr);
 
                 // now find the second - closest one
                 if (!oozesMap.empty())
                 {
-                    oozesMap.sort(TargetDistanceOrderNear(*i));
-                    i = oozesMap.begin();
-                    targetUnitMap.push_back(*i);
+                    oozesMap.sort(TargetDistanceOrderNear(*itr));
+                    itr = oozesMap.begin();
+                    targetUnitMap.push_back(*itr);
                 }
 
                 return true;
