@@ -955,49 +955,22 @@ void Spell::EffectSchoolDMG(SpellEffectEntry const* effect)
                     if (counter)
                         damage += (counter * owner->CalculateSpellDamage(unitTarget, m_spellInfo, EFFECT_INDEX_2) * damage) / 100.0f;
                 }
-                // Conflagrate - consumes Immolate or Shadowflame
+                // Conflagrate
                 else if (m_spellInfo->GetTargetAuraState() == AURA_STATE_CONFLAGRATE)
                 {
-                    Aura const* aura = NULL;                // found req. aura for damage calculation
+                    Unit* unitTarget = m_targets.getUnitTarget();
+                    if (!unitTarget)
+                        break;
 
-                    Unit::AuraList const &mPeriodic = unitTarget->GetAurasByType(SPELL_AURA_PERIODIC_DAMAGE);
-                    for(Unit::AuraList::const_iterator i = mPeriodic.begin(); i != mPeriodic.end(); ++i)
+                    // Find Immoplate
+                    SpellAuraHolderPtr im = unitTarget->GetSpellAuraHolder(348, m_caster->GetObjectGuid());
+                    if (!im)
+                        break;
+
+                    // find req. aura for damage calculation
+                    if (Aura* aura = im->GetAuraByEffectIndex(EFFECT_INDEX_2))
                     {
-                        // for caster applied auras only
-                        if ((*i)->GetSpellProto()->GetSpellFamilyName() != SPELLFAMILY_WARLOCK ||
-                            (*i)->GetCasterGuid() != m_caster->GetObjectGuid())
-                            continue;
-
-                        // Immolate
-                        if ((*i)->GetSpellProto()->GetSpellFamilyFlags().test<CF_WARLOCK_IMMOLATE>())
-                        {
-                            aura = (*i)();                      // it selected always if exist
-                            break;
-                        }
-
-                        // Shadowflame
-                        if ((*i)->GetSpellProto()->GetSpellFamilyFlags().test<CF_WARLOCK_SHADOWFLAME2>())
-                            aura = (*i)();                      // remember but wait possible Immolate as primary priority
-                    }
-
-                    // found Immolate or Shadowflame
-                    if (aura)
-                    {
-                        int32 duration = GetSpellDuration(aura->GetSpellProto());
-                        SpellEffectEntry const* spellEff = aura->GetSpellProto()->GetSpellEffect(aura->GetEffIndex());
-
-                        int32 per_time = spellEff->EffectAmplitude;
-                        int32 num_ticks = duration > 0 && per_time > 0 ? duration / per_time : 0;
-                        int32 basepoints = num_ticks * aura->GetModifier()->m_amount;
-
-                        // 60% of the dot aura damage is direct damage, value stored in basepoints of effect 1
-                        damage += basepoints * m_currentBasePoints[EFFECT_INDEX_1] / 100;
-                        // 40% of the dot aura damage is dot damage, value stored in basepoints of effect 2
-                        m_currentBasePoints[EFFECT_INDEX_1] = basepoints * m_currentBasePoints[EFFECT_INDEX_2] / (100 * GetSpellAuraMaxTicks(m_spellInfo));
-
-                        // Glyph of Conflagrate
-                        if (!m_caster->HasAura(56235))
-                            unitTarget->RemoveAurasByCasterSpell(aura->GetId(), m_caster->GetObjectGuid());
+                        damage += int32(aura->GetModifier()->m_amount * aura->GetAuraMaxTicks() * aura->GetSpellProto()->CalculateSimpleValue(EFFECT_INDEX_1) / 100.0f);
                         break;
                     }
                 }

@@ -7730,16 +7730,9 @@ bool Unit::HasAuraStateForCaster(AuraState flag, ObjectGuid casterGuid) const
     // single per-caster aura state
     if (flag == AURA_STATE_CONFLAGRATE)
     {
-        Unit::AuraList const& dotList = GetAurasByType(SPELL_AURA_PERIODIC_DAMAGE);
-        for (Unit::AuraList::const_iterator i = dotList.begin(); i != dotList.end(); ++i)
-        {
-            if ((*i)->GetCasterGuid() == casterGuid &&
-                //  Immolate or Shadowflame
-                (*i)->GetSpellProto()->IsFitToFamily<SPELLFAMILY_WARLOCK, CF_WARLOCK_IMMOLATE, CF_WARLOCK_SHADOWFLAME2>())
-            {
-                return true;
-            }
-        }
+        // Find Immolate
+        if (GetSpellAuraHolder(348, casterGuid))
+            return true;
 
         return false;
     }

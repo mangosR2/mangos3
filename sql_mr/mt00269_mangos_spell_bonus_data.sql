@@ -16,3 +16,7 @@ REPLACE INTO `spell_bonus_data` (`entry`, `direct_bonus`, `dot_bonus`, `ap_bonus
 (85673, 0.627, 0, 0.594, 0, 'Paladin - Word of Glory'),
 (86452, 0.144/4, 0, 0, 0, 'Paladin - Holy Radiance HoT'),
 (88686, 0.047, 0, 0, 0, 'Priest - Holy Word: Sanctuary');
+
+-- Warlock
+REPLACE INTO `spell_bonus_data` (`entry`, `direct_bonus`, `dot_bonus`, `ap_bonus`, `ap_dot_bonus`, `comments`) VALUES
+(17962, 0, 0, 0, 0, 'Warlock - Conflagrate');

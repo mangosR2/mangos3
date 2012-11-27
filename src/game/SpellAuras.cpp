@@ -11339,8 +11339,8 @@ void SpellAuraHolder::_AddSpellAuraHolder()
         if (IsSealSpell(m_spellProto))
             m_target->ModifyAuraState(AURA_STATE_JUDGEMENT, true);
 
-        // Conflagrate aura state on Immolate and Shadowflame
-        if (m_spellProto->IsFitToFamily<SPELLFAMILY_WARLOCK, CF_WARLOCK_IMMOLATE, CF_WARLOCK_SHADOWFLAME2>())
+        // Conflagrate aura state on Immolate
+        if (m_spellProto->Id == 348)
             m_target->ModifyAuraState(AURA_STATE_CONFLAGRATE, true);
 
         // Faerie Fire (druid versions)
@@ -11492,10 +11492,10 @@ void SpellAuraHolder::_RemoveSpellAuraHolder()
                     removeState = AURA_STATE_JUDGEMENT;     // Update Seals information
                 break;
             case SPELLFAMILY_WARLOCK:
-                // Conflagrate aura state on Immolate and Shadowflame,
-                if (m_spellProto->GetSpellFamilyFlags().test<CF_WARLOCK_IMMOLATE, CF_WARLOCK_SHADOWFLAME2>())
+                // Conflagrate aura state on Immolate
+                if (m_spellProto->Id == 348)
                 {
-                    removeFamilyFlag = ClassFamilyMask::create<CF_WARLOCK_IMMOLATE, CF_WARLOCK_SHADOWFLAME2>();
+                    removeFamilyFlag = ClassFamilyMask::create<CF_WARLOCK_IMMOLATE>();
                     removeState = AURA_STATE_CONFLAGRATE;
                 }
                 break;
