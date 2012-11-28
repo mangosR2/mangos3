@@ -24987,11 +24987,23 @@ void Player::SetViewPoint(WorldObject* target, bool immediate, bool update_far_s
             WorldPacket data(SMSG_CLEAR_FAR_SIGHT_IMMEDIATE, 0);
             GetSession()->SendPacket(&data);
         }
+
+        if (target->GetObjectGuid().IsUnit() && target->GetObjectGuid() != GetObjectGuid())
+        {
+            if (((Unit*)target)->IsLevitating() || (target->GetObjectGuid().IsPlayer() && ((Player*)target)->IsFlying()))
+            {
+                WorldPacket data;
+                data.Initialize(SMSG_MOVE_SET_CAN_FLY, 12);
+                data << target->GetPackGUID();
+                data << (uint32)(0);
+                target->SendMessageToSet(&data,false);
+            }
+        }
         GetCamera()->SetView(target, update_far_sight_field);
     }
     else
     {
-        if (immediate &&  HasExternalViewPoint())
+        if (immediate && HasExternalViewPoint())
         {
             WorldPacket data(SMSG_CLEAR_FAR_SIGHT_IMMEDIATE, 0);
             GetSession()->SendPacket(&data);
