@@ -164,8 +164,10 @@ class MANGOS_DLL_SPEC Map : public GridRefManager<NGridType>
         //function for setting up visibility distance for maps on per-type/per-Id basis
         virtual void InitVisibilityDistance();
 
-        void PlayerRelocation(Player *, float x, float y, float z, float angl);
-        void CreatureRelocation(Creature *creature, float x, float y, float z, float orientation);
+        template<class T> void Relocation(T* object, float x, float y, float z, float orientation);
+
+        // FIXME - remove this wrapper after SD2 correct
+        void CreatureRelocation(Creature* object, float x, float y, float z, float orientation);
 
         template<class T, class CONTAINER> void Visit(const Cell& cell, TypeContainerVisitor<T, CONTAINER> &visitor);
 

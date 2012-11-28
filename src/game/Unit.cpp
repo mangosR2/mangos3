@@ -520,9 +520,9 @@ bool Unit::SetPosition(float x, float y, float z, float orientation, bool telepo
         RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_MOVE);
 
         if (GetTypeId() == TYPEID_PLAYER)
-            GetMap()->PlayerRelocation((Player*)this, x, y, z, orientation);
+            GetMap()->Relocation((Player*)this, x, y, z, orientation);
         else
-            GetMap()->CreatureRelocation((Creature*)this, x, y, z, orientation);
+            GetMap()->Relocation((Creature*)this, x, y, z, orientation);
     }
     else if (turn)
         SetOrientation(orientation);
@@ -13051,7 +13051,7 @@ void Unit::NearTeleportTo( float x, float y, float z, float orientation, bool ca
     else
     {
         ExitVehicle(true);
-        GetMap()->CreatureRelocation((Creature*)this, x, y, z, orientation);
+        GetMap()->Relocation((Creature*)this, x, y, z, orientation);
         SendHeartBeat();
     }
 }

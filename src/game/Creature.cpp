@@ -201,7 +201,7 @@ void Creature::RemoveCorpse()
 
     float x, y, z, o;
     GetRespawnCoord(x, y, z, &o);
-    GetMap()->CreatureRelocation(this, x, y, z, o);
+    GetMap()->Relocation(this, x, y, z, o);
     DisableSpline();
 
     // forced recreate creature object at clients

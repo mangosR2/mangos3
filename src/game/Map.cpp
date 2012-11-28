@@ -770,8 +770,15 @@ Map::Remove(T *obj, bool remove)
     }
 }
 
-void
-Map::PlayerRelocation(Player *player, float x, float y, float z, float orientation)
+template<class T>
+void Map::Relocation(T* obj, float x, float y, float z, float orientation)
+{
+    sLog.outError("Map::Relocation unhandled relocation call (object %s)!", obj ? obj->GetObjectGuid().GetString().c_str() : "<none>");
+    MANGOS_ASSERT(false);
+};
+
+template<>
+void Map::Relocation(Player* player, float x, float y, float z, float orientation)
 {
     MANGOS_ASSERT(player);
 
@@ -807,9 +814,10 @@ Map::PlayerRelocation(Player *player, float x, float y, float z, float orientati
         ResetGridExpiry(*newGrid, 0.1f);
         newGrid->SetGridState(GRID_STATE_ACTIVE);
     }
-}
+};
 
-void Map::CreatureRelocation(Creature *creature, float x, float y, float z, float ang)
+template<>
+void Map::Relocation(Creature* creature, float x, float y, float z, float orientation)
 {
     MANGOS_ASSERT(CheckGridIntegrity(creature,false));
 
@@ -820,7 +828,7 @@ void Map::CreatureRelocation(Creature *creature, float x, float y, float z, floa
     if (CreatureCellRelocation(creature,new_cell))
     {
         // update pos
-        creature->Relocate(x, y, z, ang);
+        creature->Relocate(x, y, z, orientation);
         creature->OnRelocated();
     }
     // if creature can't be move in new cell/grid (not loaded) move it to repawn cell/grid
@@ -832,7 +840,49 @@ void Map::CreatureRelocation(Creature *creature, float x, float y, float z, floa
     }
 
     MANGOS_ASSERT(CheckGridIntegrity(creature,true));
-}
+};
+
+template<>
+void Map::Relocation(GameObject* go, float x, float y, float z, float orientation)
+{
+    MANGOS_ASSERT(go);
+
+    CellPair old_val = MaNGOS::ComputeCellPair(go->GetPositionX(), go->GetPositionY());
+    CellPair new_val = MaNGOS::ComputeCellPair(x, y);
+
+    Cell old_cell(old_val);
+    Cell new_cell(new_val);
+    bool same_cell = (new_cell == old_cell);
+
+    go->Relocate(x, y, z, orientation);
+
+    if (old_cell != new_cell)
+    {
+        NGridType* oldGrid = getNGrid(old_cell.GridX(), old_cell.GridY());
+        RemoveFromGrid(go, oldGrid,old_cell);
+        if (!old_cell.DiffGrid(new_cell) )
+            AddToGrid(go, oldGrid, new_cell);
+        else
+            EnsureGridLoadedAtEnter(new_cell);
+
+        NGridType* newGrid = getNGrid(new_cell.GridX(), new_cell.GridY());
+        go->GetViewPoint().Event_GridChanged(&(*newGrid)(new_cell.CellX(),new_cell.CellY()));
+
+        if (newGrid->GetGridState() != GRID_STATE_ACTIVE)
+        {
+            ResetGridExpiry(*newGrid, 0.1f);
+            newGrid->SetGridState(GRID_STATE_ACTIVE);
+        }
+    }
+
+    go->UpdateObjectVisibility();
+    //go->OnRelocated();
+};
+
+void Map::CreatureRelocation(Creature* object, float x, float y, float z, float orientation)
+{
+    Relocation(object, x, y, z, orientation);
+};
 
 bool Map::CreatureCellRelocation(Creature *c, Cell new_cell)
 {
