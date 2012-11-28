@@ -868,29 +868,9 @@ LexicsCutterNoActionOnGM = 1
 #        Default: 0 (not allowed)
 #                 1 (allowed)
 #
-#    Guild.EventLogRecordsCount
-#        Count of guild event log records stored in guild_eventlog table
-#        Increase to store more guild events in table, minimum is 100
-#        You can set it to very high value to prevent oldest guild events to be rewritten by latest guild events - but it can slow down performance
-#        Default: 100
-#
-#    Guild.BankEventLogRecordsCount
-#        Count of guild_bank event log records stored in guild_bank_eventlog table
-#        Increase to store more guild_bank events in table - minimum is 25 (GUILD_BANK_MAX_LOGS) for each guild_bank tab
-#        Useful when you don't want old log events to be overwritten by new, but increasing can slow down performance
-#        Default: 25
-#
 #    Loot.IgnoreChestGroupRulesFromDB
 #        Ignore database setting for loot rules for chests
 #        Default: 0 (disable)
-#
-#    Guild.UndeletableLevel
-#        A level above which guild can't be deleted.
-#        Default: 4
-#
-#    Guild.LevelingEnabled
-#        Allow guild leveling.
-#        Default: 1
 #
 #    TimerBar.Fatigue.GMLevel
 #        Disable/enable fatigue for security level (0..4) or high
@@ -1111,11 +1091,7 @@ Quests.Daily.ResetHour = 6
 Quests.Weekly.ResetWeekDay = 3
 Quests.Weekly.ResetHour = 6
 Quests.IgnoreRaid = 0
-Guild.EventLogRecordsCount = 100
-Guild.BankEventLogRecordsCount = 25
 Loot.IgnoreChestGroupRulesFromDB = 1
-Guild.UndeletableLevel = 4
-Guild.LevelingEnabled = 1
 TimerBar.Fatigue.GMLevel = 4
 TimerBar.Fatigue.Max = 60
 TimerBar.Breath.GMLevel = 4
@@ -1917,6 +1893,61 @@ Arena.StartPersonalRating = -1
 Arena.LoserNoChange = 0
 Arena.LoserHalfChange = 0
 Arena.RemoveAurasWithDurationLess = 30
+
+###################################################################################################################
+# GUILD CONFIG
+#
+#    Guild.LevelingEnabled
+#        Allow guild leveling.
+#        Default: 1
+#
+#    Guild.EventLogRecordsCount
+#        Count of guild event log records stored in guild_eventlog table
+#        Increase to store more guild events in table, minimum is 100
+#        You can set it to very high value to prevent oldest guild events to be rewritten by latest guild events - but it can slow down performance
+#        Default: 100
+#
+#    Guild.BankEventLogRecordsCount
+#        Count of guild_bank event log records stored in guild_bank_eventlog table
+#        Increase to store more guild_bank events in table - minimum is 25 (GUILD_BANK_MAX_LOGS) for each guild_bank tab
+#        Useful when you don't want old log events to be overwritten by new, but increasing can slow down performance
+#        Default: 25
+#
+#    Guild.UndeletableLevel
+#        A level above which guild can't be deleted.
+#        Default: 4
+#
+#    Guild.WeeklyReputationCap
+#        Default: 4375
+#
+#    Guild.ExperienceUncappedLevel
+#        Default: 20
+#
+#    Guild.DailyXPCap
+#        Default: 7807500
+#
+#    Guild.MaxLevel
+#        Default: 25
+#
+#    Guild.SaveInterval
+#        Guilds save interval (in minutes)
+#        Default: 15
+#
+#    Guild.XPModifier
+#        Default: 0.25
+#
+###################################################################################################################
+
+Guild.LevelingEnabled = 1
+Guild.EventLogRecordsCount = 100
+Guild.BankEventLogRecordsCount = 25
+Guild.UndeletableLevel = 4
+Guild.WeeklyReputationCap = 4375
+Guild.ExperienceUncappedLevel = 20
+Guild.DailyXPCap = 7807500
+Guild.MaxLevel = 25
+Guild.SaveInterval = 15
+Guild.XPModifier = 0.25
 
 ###################################################################################################################
 # OUTDOOR PVP CONFIG

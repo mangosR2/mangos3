@@ -326,6 +326,8 @@ ChatCommand* ChatHandler::getCommandTable()
         { "invite",         SEC_GAMEMASTER,     true,  &ChatHandler::HandleGuildInviteCommand,         "", NULL },
         { "uninvite",       SEC_GAMEMASTER,     true,  &ChatHandler::HandleGuildUninviteCommand,       "", NULL },
         { "rank",           SEC_GAMEMASTER,     true,  &ChatHandler::HandleGuildRankCommand,           "", NULL },
+        { "level",          SEC_ADMINISTRATOR,  true,  &ChatHandler::HandleGuildLevelCommand,          "", NULL },
+        { "modxp",          SEC_ADMINISTRATOR,  true,  &ChatHandler::HandleGuildModXPCommand,          "", NULL },
         { NULL,             0,                  false, NULL,                                           "", NULL }
     };
 
@@ -833,6 +835,7 @@ ChatCommand* ChatHandler::getCommandTable()
         { "distance",       SEC_ADMINISTRATOR,  false, &ChatHandler::HandleGetDistanceCommand,         "", NULL },
         { "recall",         SEC_MODERATOR,      false, &ChatHandler::HandleRecallCommand,              "", NULL },
         { "save",           SEC_PLAYER,         false, &ChatHandler::HandleSaveCommand,                "", NULL },
+        { "saveguilds",     SEC_ADMINISTRATOR,  true,  &ChatHandler::HandleSaveGuildsCommand,          "", NULL },
         { "saveall",        SEC_MODERATOR,      true,  &ChatHandler::HandleSaveAllCommand,             "", NULL },
         { "kick",           SEC_GAMEMASTER,     true,  &ChatHandler::HandleKickPlayerCommand,          "", NULL },
         { "ban",            SEC_ADMINISTRATOR,  true,  NULL,                                           "", banCommandTable      },

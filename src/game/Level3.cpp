@@ -3956,6 +3956,79 @@ bool ChatHandler::HandleGuildDeleteCommand(char* args)
     return true;
 }
 
+bool ChatHandler::HandleGuildLevelCommand(char* args)
+{
+     if (!*args)
+        return false;
+
+    char* guildStr = ExtractQuotedArg(&args);
+    if (!guildStr)
+        return false;
+
+    int32 mod;
+    if (!ExtractInt32(&args, mod))
+        return false;
+
+    std::string gld = guildStr;
+    Guild* targetGuild = sGuildMgr.GetGuildByName(gld);
+    if (!targetGuild)
+        return false;
+
+    int32 oldLevel = targetGuild->GetLevel();
+    int32 newLevel = oldLevel + mod;
+
+    if (newLevel <= 0 || newLevel > sWorld.getConfig(CONFIG_UINT32_GUILD_MAX_LEVEL))
+        return false;
+
+    uint64 xp = targetGuild->GetExperience();
+    int64 xpMod = 0;
+
+    if (newLevel > oldLevel)
+    {
+        xpMod -= xp;
+        for (int i = oldLevel; i < newLevel; ++i)
+            xpMod += sGuildMgr.GetXPForGuildLevel(i);
+
+        targetGuild->GiveXP(xpMod, NULL);
+    }
+    else
+    {
+        xpMod += xp;
+        for (int i = oldLevel - 1; i >= newLevel; --i)
+            xpMod += sGuildMgr.GetXPForGuildLevel(i);
+
+        targetGuild->TakeXP(xpMod, NULL);
+    }
+
+    return true;
+}
+
+bool ChatHandler::HandleGuildModXPCommand(char* args)
+{
+     if (!*args)
+        return false;
+
+    char* guildStr = ExtractQuotedArg(&args);
+    if (!guildStr)
+        return false;
+
+    int64 mod;
+    if (!ExtractInt64(&args, mod))
+        return false;
+
+    std::string gld = guildStr;
+    Guild* targetGuild = sGuildMgr.GetGuildByName(gld);
+    if (!targetGuild)
+        return false;
+
+    if (mod >= 0)
+        targetGuild->GiveXP(mod, NULL);
+    else
+        targetGuild->TakeXP(-mod, NULL);
+
+    return true;
+}
+
 bool ChatHandler::HandleGetDistanceCommand(char* args)
 {
     WorldObject* obj = NULL;
@@ -7901,3 +7974,11 @@ bool ChatHandler::HandleTransportStopCommand(char* args)
     transport->Stop();
     return true;
 }
+
+bool ChatHandler::HandleSaveGuildsCommand(char* args)
+{
+    sGuildMgr.SaveGuilds();
+    SendSysMessage("Guilds saved.");
+    return true;
+}
+

@@ -1200,6 +1200,10 @@ void AchievementMgr<T>::UpdateAchievementCriteria(AchievementCriteriaTypes type,
     if (!sWorld.getConfig(CONFIG_BOOL_GM_ALLOW_ACHIEVEMENT_GAINS) && referencePlayer->GetSession()->GetSecurity() > SEC_PLAYER)
         return;
 
+    // Lua_GetGuildLevelEnabled() is checked in achievement UI to display guild tab
+    if (IsGuild<T>() && !sWorld.getConfig(CONFIG_BOOL_GUILD_LEVELING_ENABLED))
+        return;
+
     AchievementCriteriaEntryList const& achievementCriteriaList = sAchievementMgr.GetAchievementCriteriaByType(type, IsGuild<T>());
     for (AchievementCriteriaEntryList::const_iterator itr = achievementCriteriaList.begin(); itr != achievementCriteriaList.end(); ++itr)
     {
@@ -2809,6 +2813,12 @@ void AchievementMgr<T>::UpdateAchievementCriteria(AchievementCriteriaTypes type,
                 progressType = PROGRESS_ACCUMULATE;
                 break;
             }
+            case ACHIEVEMENT_CRITERIA_TYPE_REACH_GUILD_LEVEL:
+            {
+                change = referencePlayer->GetGuildLevel();
+                progressType = PROGRESS_SET;
+                break;
+            }
             // std case: not exist in DBC, not triggered in code as result
             case ACHIEVEMENT_CRITERIA_TYPE_HIGHEST_HEALTH:
             case ACHIEVEMENT_CRITERIA_TYPE_HIGHEST_SPELLPOWER:
@@ -2848,6 +2858,7 @@ uint32 AchievementMgr<T>::GetCriteriaProgressMaxCounter(AchievementCriteriaEntry
             resultValue = achievementCriteria->kill_creature.creatureCount;
             break;
         case ACHIEVEMENT_CRITERIA_TYPE_REACH_LEVEL:
+        case ACHIEVEMENT_CRITERIA_TYPE_REACH_GUILD_LEVEL:
             resultValue = achievementCriteria->reach_level.level;
             break;
         case ACHIEVEMENT_CRITERIA_TYPE_REACH_SKILL_LEVEL:
@@ -3268,13 +3279,20 @@ void AchievementMgr<Player>::CompletedAchievement(AchievementEntry const* achiev
     if (achievement->flags & ACHIEVEMENT_FLAG_COUNTER || m_completedAchievements.find(achievement->ID) != m_completedAchievements.end())
         return;
 
+    if (achievement->flags & ACHIEVEMENT_FLAG_SHOW_IN_GUILD_NEWS)
+        if (Guild* guild = sGuildMgr.GetGuildById(referencePlayer->GetGuildId()))
+            guild->LogNewsEvent(GUILD_NEWS_PLAYER_ACHIEVEMENT, time(NULL), referencePlayer->GetObjectGuid(), achievement->flags & ACHIEVEMENT_FLAG_SHOW_IN_GUILD_HEADER, achievement->ID);
+
     if (!GetOwner()->GetSession()->PlayerLoading())
         SendAchievementEarned(achievement);
     CompletedAchievementData& ca =  m_completedAchievements[achievement->ID];
     ca.date = time(NULL);
     ca.changed = true;
 
-    sAchievementMgr.SetRealmCompleted(achievement);
+    // don't insert for ACHIEVEMENT_FLAG_REALM_FIRST_KILL since otherwise only the first group member would reach that achievement
+    // TODO: where do set this instead?
+    if (!(achievement->flags & ACHIEVEMENT_FLAG_REALM_FIRST_KILL))
+        sAchievementMgr.SetRealmCompleted(achievement);
 
     UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_COMPLETE_ACHIEVEMENT, 0, 0, NULL, 0, referencePlayer);
 
@@ -3383,6 +3401,10 @@ void AchievementMgr<Guild>::CompletedAchievement(AchievementEntry const* achieve
 
     if (achievement->flags & ACHIEVEMENT_FLAG_COUNTER || m_completedAchievements.find(achievement->ID) != m_completedAchievements.end())
         return;
+
+    if (achievement->flags & ACHIEVEMENT_FLAG_SHOW_IN_GUILD_NEWS)
+        if (Guild* guild = sGuildMgr.GetGuildById(referencePlayer->GetGuildId()))
+            guild->LogNewsEvent(GUILD_NEWS_GUILD_ACHIEVEMENT, time(NULL), 0, achievement->flags & ACHIEVEMENT_FLAG_SHOW_IN_GUILD_HEADER, achievement->ID);
 
     SendAchievementEarned(achievement);
     CompletedAchievementData& ca = m_completedAchievements[achievement->ID];

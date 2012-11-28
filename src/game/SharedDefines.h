@@ -2885,6 +2885,7 @@ enum PetDiet
 #define GUILD_BANK_MAX_BOUGHT_TABS  6                       // number of tabs that can be bought through bank interface
 #define GUILD_BANK_MAX_SLOTS        98
 #define GUILD_BANK_MAX_LOGS         25
+#define GUILD_NEWS_MAX_LOGS         25
 #define GUILD_BANK_MONEY_LOGS_TAB   100                     // used for money log in DB
 #define GUILD_EVENTLOG_MAX_RECORDS  100
 #define GUILD_RANKS_MIN_COUNT       2

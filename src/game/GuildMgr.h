@@ -25,11 +25,25 @@
 class Guild;
 class ObjectGuid;
 
+struct GuildReward
+{
+    int32 Racemask;
+    uint64 Price;
+    uint32 AchievementId;
+    uint8 Standing;
+};
+
+typedef std::map<uint32, GuildReward> GuildRewards;
+
 class GuildMgr
 {
         typedef UNORDERED_MAP<uint32, Guild*> GuildMap;
 
         GuildMap m_GuildMap;
+
+        std::vector<uint64> GuildXPperLevel;
+        GuildRewards m_GuildRewards;
+
     public:
         GuildMgr();
         ~GuildMgr();
@@ -45,7 +59,18 @@ class GuildMgr
         std::string GetGuildNameById(uint32 guildId) const;
         std::string GetGuildNameByGuid(ObjectGuid guildGuid) const;
 
+        void LoadGuildXpForLevel();
+        void LoadGuildRewards();
         void LoadGuilds();
+        void SaveGuilds();
+
+        void ResetExperienceCaps();
+        void ResetReputationCaps();
+
+        uint32 GetXPForGuildLevel(uint8 level) const;
+        GuildRewards const& GetGuildRewards() const { return m_GuildRewards; }
+
+        GuildMap const& GetGuildMap() const { return m_GuildMap; }
 };
 
 #define sGuildMgr MaNGOS::Singleton<GuildMgr>::Instance()

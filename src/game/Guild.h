@@ -21,11 +21,13 @@
 
 #define WITHDRAW_MONEY_UNLIMITED    UI64LIT(0xFFFFFFFFFFFFFFFF)
 #define WITHDRAW_SLOT_UNLIMITED     0xFFFFFFFF
+#define GUILD_EXPERIENCE_UNCAPPED_LEVEL 20  ///> Hardcoded in client, starting from this level, guild daily experience gain is unlimited.
 
 #include "Common.h"
 #include "Item.h"
 #include "ObjectAccessor.h"
 #include "SharedDefines.h"
+#include "DBCStores.h"
 
 class Item;
 
@@ -215,6 +217,30 @@ enum GuildMemberFlags
     GUILDMEMBER_STATUS_MOBILE    = 0x0008,
 };
 
+enum GuildNews
+{
+    GUILD_NEWS_GUILD_ACHIEVEMENT      = 0,
+    GUILD_NEWS_PLAYER_ACHIEVEMENT     = 1,
+    GUILD_NEWS_DUNGEON_ENCOUNTER      = 2, // Todo Implement
+    GUILD_NEWS_ITEM_LOOTED            = 3,
+    GUILD_NEWS_ITEM_CRAFTED           = 4,
+    GUILD_NEWS_ITEM_PURCHASED         = 5,
+    GUILD_NEWS_LEVEL_UP               = 6,
+};
+
+struct GuildNewsEventLogEntry
+{
+    GuildNews EventType;
+    time_t Date;
+    uint64 PlayerGuid;
+    uint32 Flags;
+    uint32 Data;
+
+    void WriteData(uint32 guid, WorldPacket* data);
+};
+
+uint32 const MinNewsItemLevel[MAX_CONTENT] = { 61, 90, 200, 353 };
+
 inline uint64 GetGuildBankTabPrice(uint8 Index)
 {
     switch (Index)
@@ -288,6 +314,7 @@ struct MemberSlot
     void SetPNOTE(std::string pnote);
     void SetOFFNOTE(std::string offnote);
     void ChangeRank(uint32 newRank);
+    uint32 GetMaximumWeeklyReputation() const;
 
     ObjectGuid guid;
     uint32 accountId;
@@ -326,6 +353,11 @@ struct RankInfo
 class Guild
 {
     public:
+        /** These are actually ordered lists. The first element is the oldest entry.*/
+        typedef std::list<GuildEventLogEntry> GuildEventLog;
+        typedef std::list<GuildBankEventLogEntry> GuildBankEventLog;
+        typedef std::map<uint32, GuildNewsEventLogEntry> GuildNewsEventLog;
+
         Guild();
         ~Guild();
 
@@ -337,7 +369,6 @@ class Guild
         typedef std::vector<RankInfo> RankList;
 
         uint32 GetId() const { return m_Id; }
-        uint32 GetLevel() const { return m_Level; }
         ObjectGuid GetObjectGuid() const { return ObjectGuid(HIGHGUID_GUILD, 0, m_Id); }
         ObjectGuid GetLeaderGuid() const { return m_LeaderGuid; }
         std::string const& GetName() const { return m_Name; }
@@ -366,6 +397,7 @@ class Guild
         uint32 GetAccountsNumber();
 
         bool LoadGuildFromDB(QueryResult* guildDataResult);
+        void SaveToDB();
         bool CheckGuildStructure();
         bool LoadRanksFromDB(QueryResult* guildRanksResult);
         bool LoadMembersFromDB(QueryResult* guildMembersResult);
@@ -443,51 +475,81 @@ class Guild
         void OnMemberLogin() { ++m_onlineMembers; }
         void OnMemberLogout(Player* pPlayer);
 
+        // News EventLog
+        void LoadGuildNewsEventLogFromDB();
+        void SendNewsEventLog(WorldSession* session);
+        void LogNewsEvent(GuildNews eventType, time_t date, uint64 playerGuid, uint32 flags, uint32 data);
+        GuildNewsEventLogEntry* GetNewsById(uint32 id)
+        {
+            GuildNewsEventLog::iterator itr = m_GuildNewsEventLog.find(id);
+            if (itr != m_GuildNewsEventLog.end())
+                return &itr->second;
+            else
+                return NULL;
+        }
+
         // Guild EventLog
-        void DisplayGuildEventLog(WorldSession* session);
+        void LoadGuildEventLogFromDB();
+        void DisplayGuildEventLog(WorldSession *session);
         void LogGuildEvent(uint8 EventType, ObjectGuid playerGuid1, ObjectGuid playerGuid2 = ObjectGuid(), uint8 newRank = 0);
 
         // ** Guild bank **
         bool IsGuildBankLoaded() const { return m_loadState & GBLS_GUILD_BANK_LOADED; }
 
         // Content & item deposit/withdraw
-        void DisplayGuildBankContent(WorldSession* session, uint8 TabId);
-        void DisplayGuildBankMoneyUpdate(WorldSession* session);
+        void DisplayGuildBankContent(WorldSession *session, uint8 TabId);
+        void DisplayGuildBankMoneyUpdate(WorldSession *session);
 
         void SwapItems(Player* pl, uint8 BankTab, uint8 BankTabSlot, uint8 BankTabDst, uint8 BankTabSlotDst, uint32 SplitedAmount);
         void MoveFromBankToChar(Player* pl, uint8 BankTab, uint8 BankTabSlot, uint8 PlayerBag, uint8 PlayerSlot, uint32 SplitedAmount);
         void MoveFromCharToBank(Player* pl, uint8 PlayerBag, uint8 PlayerSlot, uint8 BankTab, uint8 BankTabSlot, uint32 SplitedAmount);
 
         // Tabs
-        void DisplayGuildBankTabsInfo(WorldSession* session);
+        void DisplayGuildBankTabsInfo(WorldSession *session);
         void CreateNewBankTab();
         void SetGuildBankTabText(uint8 TabId, std::string text);
-        void SendGuildBankTabText(WorldSession* session, uint8 TabId);
+        void SendGuildBankTabText(WorldSession *session, uint8 TabId);
         void SetGuildBankTabInfo(uint8 TabId, std::string name, std::string icon);
-        uint8  GetPurchasedTabs() const { return m_PurchasedTabs; }
+        uint8 GetPurchasedTabs() const { return m_TabListMap.size(); }
         uint32 GetBankRights(uint32 rankId, uint8 TabId) const;
-        bool IsMemberHaveRights(uint32 LowGuid, uint8 TabId, uint32 rights) const;
+        bool IsMemberHaveRights(uint32 LowGuid, uint8 TabId,uint32 rights) const;
         bool CanMemberViewTab(uint32 LowGuid, uint8 TabId) const;
+        // Load
+        void LoadGuildBankFromDB();
         // Money deposit/withdraw
         void SendMoneyInfo(WorldSession* session, uint32 LowGuid);
-        bool MemberMoneyWithdraw(uint32 amount, uint32 LowGuid);
+        bool MemberMoneyWithdraw(uint64 amount, uint32 LowGuid);
         uint64 GetGuildBankMoney() { return m_GuildBankMoney; }
         void SetBankMoney(int64 money);
-        void   HandleCashFlow(uint64 money, Player* player);
+        void HandleCashFlow(uint64 money, Player* player);
         // per days
         bool MemberItemWithdraw(uint8 TabId, uint32 LowGuid);
         uint32 GetMemberSlotWithdrawRem(uint32 LowGuid, uint8 TabId);
-        uint32 GetMemberMoneyWithdrawRem(uint32 LowGuid);
-        void SetBankMoneyPerDay(uint32 rankId, uint32 money);
+        uint64 GetMemberMoneyWithdrawRem(uint32 LowGuid);
+        void SetBankMoneyPerDay(uint32 rankId, uint64 money);
         void SetBankRightsAndSlots(uint32 rankId, uint8 TabId, uint32 right, uint32 SlotPerDay, bool db);
-        uint32 GetBankMoneyPerDay(uint32 rankId);
+        uint64 GetBankMoneyPerDay(uint32 rankId);
         uint32 GetBankSlotPerDay(uint32 rankId, uint8 TabId);
         // rights per day
-        bool LoadBankRightsFromDB(QueryResult* guildBankTabRightsResult);
+        bool LoadBankRightsFromDB(QueryResult *guildBankTabRightsResult);
         // Guild Bank Event Logs
-        void DisplayGuildBankLogs(WorldSession* session, uint8 TabId);
-        void LogBankEvent(uint8 EventType, uint8 TabId, uint32 PlayerGuidLow, uint32 ItemOrMoney, uint8 ItemStackCount = 0, uint8 DestTabId = 0);
-        bool AddGBankItemToDB(uint32 GuildId, uint32 BankTab , uint32 BankTabSlot , uint32 GUIDLow, uint32 Entry);
+        void LoadGuildBankEventLogFromDB();
+        void DisplayGuildBankLogs(WorldSession *session, uint8 TabId);
+        void LogBankEvent(uint8 EventType, uint8 TabId, uint32 PlayerGuidLow, uint32 ItemOrMoney, uint8 ItemStackCount=0, uint8 DestTabId=0);
+        bool AddGBankItemToDB(uint32 GuildId, uint32 BankTab , uint32 BankTabSlot , uint32 GUIDLow, uint32 Entry );
+
+        // Guild leveling
+        uint32 GetLevel() const { return m_Level; }
+        void GiveXP(int64 xp, Player* source);
+        void TakeXP(int64 xp, Player* source);
+        uint64 GetExperience() const { return m_Experience; }
+        uint64 GetTodayExperience() const { return m_TodayExperience; }
+        void SendGuildXP(Player* player);
+        void ResetDailyExperience();
+
+        void HandleGuildPartyRequest(WorldSession* session);
+        void SendReputationWeeklyCap(Player* player);
+        void OnLogin(Player* player);
 
         AchievementMgr<Guild>& GetAchievementMgr() { return m_achievementMgr; }
         AchievementMgr<Guild> const& GetAchievementMgr() const { return m_achievementMgr; }
@@ -496,7 +558,6 @@ class Guild
         void AddRank(const std::string& name, uint32 rights, uint32 money);
 
         uint32 m_Id;
-        uint32 m_Level;
         std::string m_Name;
         ObjectGuid m_LeaderGuid;
         std::string MOTD;
@@ -517,20 +578,24 @@ class Guild
         typedef std::vector<GuildBankTab*> TabListMap;
         TabListMap m_TabListMap;
 
-        /** These are actually ordered lists. The first element is the oldest entry.*/
-        typedef std::list<GuildEventLogEntry> GuildEventLog;
-        typedef std::list<GuildBankEventLogEntry> GuildBankEventLog;
         GuildEventLog m_GuildEventLog;
+        GuildNewsEventLog m_GuildNewsEventLog;
         GuildBankEventLog m_GuildBankEventLog_Money;
         GuildBankEventLog m_GuildBankEventLog_Item[GUILD_BANK_MAX_TABS];
 
         uint32 m_GuildEventLogNextGuid;
+        uint32 m_GuildNewsEventLogNextGuid;
         uint32 m_GuildBankEventLogNextGuid_Money;
         uint32 m_GuildBankEventLogNextGuid_Item[GUILD_BANK_MAX_TABS];
 
         uint64 m_GuildBankMoney;
         uint8 m_PurchasedTabs;
         AchievementMgr<Guild> m_achievementMgr;
+
+        // Guild leveling
+        uint32 m_Level;
+        uint64 m_Experience;
+        uint64 m_TodayExperience;
 
     private:
         void UpdateAccountsNumber() { m_accountsNumber = 0;}// mark for lazy calculation at request in GetAccountsNumber
@@ -557,13 +622,10 @@ class Guild
             GBLS_EVENT_LOG_LOADED  = 2
         };
 
-        void LoadGuildBankFromDB();
         void UnloadGuildBank(bool deleteItemsInDB = false);
 
-        void LoadGuildBankEventLogFromDB();
         void UnloadGuildBankEventLog();
 
-        void LoadGuildEventLogFromDB();
         void UnloadGuildEventLog();
 
         bool IsEventLogLoaded() const { return m_loadState & GBLS_EVENT_LOG_LOADED; }

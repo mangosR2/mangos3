@@ -1479,3 +1479,116 @@ void WorldSession::HandleGuildAutoDeclineToggleOpcode(WorldPacket& recv_data)
 
     GetPlayer()->ApplyModFlag(PLAYER_FLAGS, PLAYER_FLAGS_AUTO_DECLINE_GUILDS, apply);
 }
+
+void WorldSession::HandleGuildRequestMaxDailyXP(WorldPacket& recvPacket)
+{
+    ObjectGuid guid;
+    recvPacket.ReadGuidMask<0, 3, 5, 1, 4, 6, 7, 2>(guid);
+    recvPacket.ReadGuidBytes<7, 4, 3, 5, 1, 2, 6, 0>(guid);
+
+    DEBUG_LOG("WORLD: Received CMSG_GUILD_REQUEST_MAX_DAILY_XP");
+
+    if (Guild* guild = sGuildMgr.GetGuildByGuid(guid))
+    {
+        if (guild->GetMemberSlot(_player->GetObjectGuid()))
+        {
+            WorldPacket data(SMSG_GUILD_MAX_DAILY_XP, 8);
+            data << uint64(sWorld.getConfig(CONFIG_UINT32_GUILD_DAILY_XP_CAP));
+            SendPacket(&data);
+        }
+    }
+}
+
+void WorldSession::HandleGuildRewardsQueryOpcode(WorldPacket& recv_data)
+{
+    uint32 unk;
+    recv_data >> unk;
+
+    DEBUG_LOG("WORLD: Received CMSG_QUERY_GUILD_REWARDS unk %u", unk);
+
+    if (Guild* guild = sGuildMgr.GetGuildById(_player->GetGuildId()))
+    {
+        GuildRewards const& rewards = sGuildMgr.GetGuildRewards();
+        WorldPacket data(SMSG_GUILD_REWARDS_LIST, 3 + rewards.size() * (4 + 4 + 4 + 8 + 4 + 4));
+        data.WriteBits(rewards.size(), 21);
+
+        for (GuildRewards::const_iterator i = rewards.begin(); i != rewards.end(); ++i)
+        {
+            data << uint32(i->second.Standing);
+            data << int32(i->second.Racemask);
+            data << uint32(i->first);
+            data << uint64(i->second.Price);
+            data << uint32(0);  // faction standing?
+            data << uint32(i->second.AchievementId);
+        }
+        data << uint32(time(NULL));
+        SendPacket(&data);
+    }
+}
+
+void WorldSession::HandleGuildRequestPartyState(WorldPacket& recv_data)
+{
+    DEBUG_LOG("WORLD: Received CMSG_GUILD_REQUEST_PARTY_STATE");
+
+    ObjectGuid guildGuid;
+    recv_data.ReadGuidMask<0, 6, 7, 3, 5, 1, 2, 4>(guildGuid);
+    recv_data.ReadGuidBytes<6, 3, 2, 1, 5, 0, 7, 4>(guildGuid);
+
+    if (Guild* guild = sGuildMgr.GetGuildByGuid(guildGuid))
+        guild->HandleGuildPartyRequest(this);
+}
+
+void WorldSession::HandleGuildQueryXPOpcode(WorldPacket& recv_packet)
+{
+    sLog.outDebug("WORLD: Received CMSG_QUERY_GUILD_XP");
+
+    ObjectGuid guildGuid;
+    recv_packet.ReadGuidMask<2, 1, 0, 5, 4, 7, 6, 3>(guildGuid);
+    recv_packet.ReadGuidBytes<7, 2, 3, 6, 1, 5, 0, 4>(guildGuid);
+
+    if (Guild* guild = sGuildMgr.GetGuildByGuid(guildGuid))
+        if (guild->GetMemberSlot(_player->GetObjectGuid()))
+            guild->SendGuildXP(_player);
+}
+
+void WorldSession::HandleGuildQueryNewsOpcode(WorldPacket& recvPacket)
+{
+    uint32 unk;
+    recvPacket >> unk;
+
+    DEBUG_LOG("WORLD: Received CMSG_GUILD_QUERY_NEWS unk %u", unk);
+
+    if (Guild* guild = sGuildMgr.GetGuildById(_player->GetGuildId()))
+        guild->SendNewsEventLog(this);
+}
+
+void WorldSession::HandleGuildNewsUpdateStickyOpcode(WorldPacket& recvPacket)
+{
+    uint32 newsId;
+    bool sticky;
+    ObjectGuid guid;
+
+    recvPacket >> newsId;
+
+    recvPacket.ReadGuidMask<2, 4, 3, 0>(guid);
+    sticky = recvPacket.ReadBit();
+    recvPacket.ReadGuidMask<6, 7, 1, 5>(guid);
+    recvPacket.ReadGuidBytes<6, 2, 1, 0, 5, 3, 7, 4>(guid);
+
+    DEBUG_LOG("WORLD: Received CMSG_GUILD_NEWS_UPDATE_STICKY guild %s newsId %u", guid.GetString().c_str(), newsId);
+
+    if (Guild* guild = sGuildMgr.GetGuildById(_player->GetGuildId()))
+    {
+        if (GuildNewsEventLogEntry* entry = guild->GetNewsById(newsId))
+        {
+            if (sticky)
+                entry->Flags |= 1;
+            else
+                entry->Flags &= ~1;
+
+            WorldPacket data;
+            entry->WriteData(newsId, &data);
+            SendPacket(&data);
+        }
+    }
+}

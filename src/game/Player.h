@@ -1860,6 +1860,7 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         void SetInGuild(uint32 GuildId);
         void SetGuildLevel(uint32 level) { SetUInt32Value(PLAYER_GUILDLEVEL, level); }
+        uint32 GetGuildLevel() const { return GetUInt32Value(PLAYER_GUILDLEVEL); }
         void SetRank(uint32 rankId){ SetUInt32Value(PLAYER_GUILDRANK, rankId); }
         void SetGuildInvited(uint32 GuildId, ObjectGuid inviter = ObjectGuid()) { m_GuildIdInvited = GuildId; m_GuildInviterGuid = inviter; }
         uint32 GetGuildId() const { return GetGuildGuid().GetCounter(); }

@@ -2040,6 +2040,20 @@ void InitializeOpcodes()
     OPCODE(SMSG_GUILD_ACHIEVEMENT_EARNED,                STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
     OPCODE(SMSG_GUILD_CRITERIA_DATA,                     STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
     OPCODE(SMSG_GUILD_CRITERIA_DELETED,                  STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
+    OPCODE(CMSG_GUILD_REQUEST_PARTY_STATE,               STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleGuildRequestPartyState    );
+    OPCODE(CMSG_GUILD_REQUEST_MAX_DAILY_XP,              STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleGuildRequestMaxDailyXP    );
+    OPCODE(SMSG_GUILD_MAX_DAILY_XP,                      STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
+    OPCODE(SMSG_GUILD_REWARDS_LIST,                      STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
+    OPCODE(SMSG_GUILD_PARTY_STATE_RESPONSE,              STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
+    OPCODE(SMSG_GUILD_MEMBER_DAILY_RESET,                STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
+    OPCODE(SMSG_GUILD_REPUTATION_WEEKLY_CAP,             STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
+    OPCODE(SMSG_GUILD_XP,                                STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
+    OPCODE(SMSG_GUILD_XP_GAIN,                           STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
+    OPCODE(SMSG_GUILD_NEWS_UPDATE,                       STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
+    OPCODE(CMSG_QUERY_GUILD_REWARDS,                     STATUS_LOGGEDIN, PROCESS_INPLACE,      &WorldSession::HandleGuildRewardsQueryOpcode   );
+    OPCODE(CMSG_GUILD_QUERY_NEWS,                        STATUS_LOGGEDIN, PROCESS_INPLACE,      &WorldSession::HandleGuildQueryNewsOpcode      );
+    OPCODE(CMSG_GUILD_NEWS_UPDATE_STICKY,                STATUS_LOGGEDIN, PROCESS_INPLACE,      &WorldSession::HandleGuildNewsUpdateStickyOpcode);
+    OPCODE(CMSG_QUERY_GUILD_XP,                          STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleGuildQueryXPOpcode        ); // STATUS_AUTHED
 
     OPCODE(NUM_MSG_TYPES,                                STATUS_UNHANDLED,PROCESS_INPLACE,      &WorldSession::Handle_NULL             );
 };

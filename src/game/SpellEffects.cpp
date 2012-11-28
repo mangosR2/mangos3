@@ -58,6 +58,8 @@
 #include "GridNotifiersImpl.h"
 #include "CellImpl.h"
 #include "SQLStorages.h"
+#include "Guild.h"
+#include "GuildMgr.h"
 
 pEffect SpellEffects[TOTAL_SPELL_EFFECTS]=
 {
@@ -6373,6 +6375,10 @@ void Spell::DoCreateItem(SpellEffectEntry const* effect, uint32 itemtype)
         // send info to the client
         if (pItem)
             player->SendNewItem(pItem, num_to_add, true, !bg_mark);
+
+        if (pProto->Quality > ITEM_QUALITY_EPIC || (pProto->Quality == ITEM_QUALITY_EPIC && pProto->ItemLevel >= MinNewsItemLevel[sWorld.getConfig(CONFIG_UINT32_EXPANSION)]))
+            if (Guild* guild = sGuildMgr.GetGuildById(player->GetGuildId()))
+                guild->LogNewsEvent(GUILD_NEWS_ITEM_CRAFTED, time(NULL), player->GetObjectGuid(), 0, pProto->ItemId);
 
         // we succeeded in creating at least one item, so a levelup is possible
         if (!bg_mark)

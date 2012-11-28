@@ -753,21 +753,8 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
 
     if (pCurrChar->GetGuildId() != 0)
     {
-        Guild* guild = sGuildMgr.GetGuildById(pCurrChar->GetGuildId());
-        if (guild)
-        {
-            pCurrChar->SetGuildLevel(guild->GetLevel());
-
-            data.Initialize(SMSG_GUILD_EVENT, (1 + 1 + guild->GetMOTD().size() + 1));
-            data << uint8(GE_MOTD);
-            data << uint8(1);
-            data << guild->GetMOTD();
-            SendPacket(&data);
-            DEBUG_LOG("WORLD: Sent guild-motd (SMSG_GUILD_EVENT)");
-
-            guild->OnMemberLogin();
-            guild->BroadcastEvent(GE_SIGNED_ON, pCurrChar->GetObjectGuid(), pCurrChar->GetName());
-        }
+        if (Guild* guild = sGuildMgr.GetGuildById(pCurrChar->GetGuildId()))
+            guild->OnLogin(pCurrChar);
         else
         {
             // remove wrong guild data

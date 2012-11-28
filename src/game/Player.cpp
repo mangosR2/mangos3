@@ -7044,7 +7044,6 @@ bool Player::RewardHonor(Unit* uVictim, uint32 groupsize, float honor)
     if (uVictim != NULL)
     {
         honor *= sWorld.getConfig(CONFIG_FLOAT_RATE_HONOR);
-        honor *= (GetMaxPositiveAuraModifier(SPELL_AURA_MOD_HONOR_GAIN) + 100.0f) / 100.0f;
 
         if (groupsize > 1)
             honor /= groupsize;
@@ -13975,6 +13974,9 @@ void Player::RewardQuest(Quest const* pQuest, uint32 reward, Object* questGiver,
     {
         GiveXP(xp , NULL);
 
+        if (Guild* guild = sGuildMgr.GetGuildById(GetGuildId()))
+            guild->GiveXP(uint32(xp * sWorld.getConfig(CONFIG_FLOAT_RATE_GUILD_XP_MODIFIER)), this);
+
         // Give player extra money (for max level already included in pQuest->GetRewMoneyMaxLevel())
         if (pQuest->GetRewOrReqMoney() > 0)
         {
@@ -17072,8 +17074,20 @@ void Player::_LoadMonthlyQuestStatus(QueryResult *result)
 
 void Player::_LoadSpells(QueryResult *result)
 {
-    //QueryResult *result = CharacterDatabase.PQuery("SELECT spell,active,disabled FROM character_spell WHERE guid = '%u'",GetGUIDLow());
+    typedef std::map<uint32, uint32> PerksMap;
+    PerksMap perksMap;
+    for (uint32 i = 0; i < sGuildPerkSpellsStore.GetNumRows(); ++i)
+        if (GuildPerkSpellsEntry const* entry = sGuildPerkSpellsStore.LookupEntry(i))
+            perksMap[entry->SpellId] = entry->Level;
 
+    uint32 guildLevel = 0;
+    if (uint32 guildId = GetGuildId())
+    {
+        if (Guild* guild = sGuildMgr.GetGuildById(GetGuildId()))
+            guildLevel = guild->GetLevel();
+    }
+
+    //QueryResult *result = CharacterDatabase.PQuery("SELECT spell,active,disabled FROM character_spell WHERE guid = '%u'",GetGUIDLow());
     if (result)
     {
         do
@@ -17089,6 +17103,19 @@ void Player::_LoadSpells(QueryResult *result)
                     GetGuidStr().c_str(), spell_id);
                 CharacterDatabase.PExecute("DELETE FROM character_spell WHERE spell = %u", spell_id);
                 continue;
+            }
+
+            // check guild perks
+            PerksMap::const_iterator itr = perksMap.find(spell_id);
+            if (itr != perksMap.end())
+            {
+                if (!guildLevel || itr->second > guildLevel)
+                {
+                    sLog.outError("Player::_LoadSpells: %s has guild perk spell %u in character_spell, but no guild or not enough level, removing it.",
+                        GetGuidStr().c_str(), spell_id);
+                    CharacterDatabase.PExecute("DELETE FROM character_spell WHERE spell = '%u' AND guid = '%u'", spell_id, GetObjectGuid().GetCounter());
+                    continue;
+                }
             }
 
             addSpell(spell_id, fields[1].GetBool(), false, false, fields[2].GetBool());
@@ -19942,6 +19969,10 @@ bool Player::BuyItemFromVendorSlot(ObjectGuid vendorGuid, uint32 vendorslot, uin
     GetSession()->SendPacket(&data);
 
     SendNewItem(pItem, totalCount, true, false, false);
+
+    if (pProto->Quality > ITEM_QUALITY_EPIC || (pProto->Quality == ITEM_QUALITY_EPIC && pProto->ItemLevel >= MinNewsItemLevel[sWorld.getConfig(CONFIG_UINT32_EXPANSION)]))
+        if (Guild* guild = sGuildMgr.GetGuildById(GetGuildId()))
+            guild->LogNewsEvent(GUILD_NEWS_ITEM_PURCHASED, time(NULL), GetObjectGuid(), 0, item);
 
     return crItem->maxcount != 0;
 }

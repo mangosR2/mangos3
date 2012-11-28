@@ -16,6 +16,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+#include "ObjectMgr.h"
 #include "GuildMgr.h"
 #include "Guild.h"
 #include "Log.h"
@@ -112,10 +113,10 @@ void GuildMgr::LoadGuilds()
     uint32 count = 0;
 
     //                                                    0             1          2          3           4           5           6
-    QueryResult* result = CharacterDatabase.Query("SELECT guild.guildid,guild.name,leaderguid,EmblemStyle,EmblemColor,BorderStyle,BorderColor,"
-                          //   7               8    9    10         11        12
-                          "BackgroundColor,info,motd,createdate,BankMoney,(SELECT COUNT(guild_bank_tab.guildid) FROM guild_bank_tab WHERE guild_bank_tab.guildid = guild.guildid) "
-                          "FROM guild ORDER BY guildid ASC");
+    QueryResult *result = CharacterDatabase.PQuery("SELECT guild.guildid,guild.name,leaderguid,EmblemStyle,EmblemColor,BorderStyle,BorderColor,"
+    //   7               8    9    10         11        12    13         14              15
+        "BackgroundColor,info,motd,createdate,BankMoney,level,experience,todayExperience,(SELECT COUNT(guild_bank_tab.guildid) FROM guild_bank_tab WHERE guild_bank_tab.guildid = guild.guildid) "
+        "FROM guild ORDER BY guildid ASC");
 
     if (!result)
     {
@@ -168,6 +169,7 @@ void GuildMgr::LoadGuilds()
             continue;
         }
 
+        newGuild->LoadGuildNewsEventLogFromDB();
         QueryResult* achievementResult = CharacterDatabase.PQuery("SELECT achievement, date, guids FROM guild_achievement WHERE guildId = %u", newGuild->GetId());
         QueryResult* criteriaResult = CharacterDatabase.PQuery("SELECT criteria, counter, date, completedGuid FROM guild_achievement_progress WHERE guildId = %u", newGuild->GetId());
         newGuild->GetAchievementMgr().LoadFromDB(achievementResult, criteriaResult);
@@ -183,9 +185,137 @@ void GuildMgr::LoadGuilds()
 
     // delete unused LogGuid records in guild_eventlog and guild_bank_eventlog table
     // you can comment these lines if you don't plan to change CONFIG_UINT32_GUILD_EVENT_LOG_COUNT and CONFIG_UINT32_GUILD_BANK_EVENT_LOG_COUNT
+    CharacterDatabase.PExecute("DELETE FROM guild_news_eventlog WHERE LogGuid > '%u'", GUILD_NEWS_MAX_LOGS);
     CharacterDatabase.PExecute("DELETE FROM guild_eventlog WHERE LogGuid > '%u'", sWorld.getConfig(CONFIG_UINT32_GUILD_EVENT_LOG_COUNT));
     CharacterDatabase.PExecute("DELETE FROM guild_bank_eventlog WHERE LogGuid > '%u'", sWorld.getConfig(CONFIG_UINT32_GUILD_BANK_EVENT_LOG_COUNT));
 
     sLog.outString();
     sLog.outString(">> Loaded %u guild definitions", count);
+}
+
+uint32 GuildMgr::GetXPForGuildLevel(uint8 level) const
+{
+    if (level < GuildXPperLevel.size())
+        return GuildXPperLevel[level];
+    return 0;
+}
+
+void GuildMgr::ResetExperienceCaps()
+{
+    CharacterDatabase.BeginTransaction();
+    CharacterDatabase.Execute("UPDATE guild SET todayExperience = 0");
+
+    for (GuildMap::iterator itr = m_GuildMap.begin(); itr != m_GuildMap.end(); ++itr)
+        itr->second->ResetDailyExperience();
+
+    CharacterDatabase.CommitTransaction();
+}
+
+void GuildMgr::ResetReputationCaps()
+{
+    /// @TODO: Implement
+}
+
+void GuildMgr::SaveGuilds()
+{
+    for (GuildMap::iterator itr = m_GuildMap.begin(); itr != m_GuildMap.end(); ++itr)
+        if (Guild* guild = itr->second)
+            guild->SaveToDB();
+}
+
+void GuildMgr::LoadGuildXpForLevel()
+{
+    GuildXPperLevel.resize(sWorld.getConfig(CONFIG_UINT32_GUILD_MAX_LEVEL));
+    for (uint8 level = 0; level < sWorld.getConfig(CONFIG_UINT32_GUILD_MAX_LEVEL); ++level)
+        GuildXPperLevel[level] = 0;
+
+    //                                                 0    1
+    QueryResult* result  = WorldDatabase.Query("SELECT lvl, xp_for_next_level FROM guild_xp_for_level");
+
+    if (!result)
+    {
+        sLog.outError(">> Loaded 0 xp for guild level definitions. DB table `guild_xp_for_level` is empty.");
+        return;
+    }
+
+    uint32 count = 0;
+
+    do
+    {
+        Field* fields = result->Fetch();
+
+        uint32 level        = fields[0].GetUInt8();
+        uint32 requiredXP   = fields[1].GetUInt64();
+
+        if (level >= sWorld.getConfig(CONFIG_UINT32_GUILD_MAX_LEVEL))
+        {
+            sLog.outError("Unused (> Guild.MaxLevel in mangosd.conf) level %u in `guild_xp_for_level` table, ignoring.", uint32(level));
+            continue;
+        }
+
+        GuildXPperLevel[level] = requiredXP;
+        ++count;
+    } while (result->NextRow());
+    delete result;
+
+    // fill level gaps
+    for (uint8 level = 1; level < sWorld.getConfig(CONFIG_UINT32_GUILD_MAX_LEVEL); ++level)
+    {
+        if (!GuildXPperLevel[level])
+        {
+            sLog.outError("Level %i does not have XP for guild level data. Using data of level [%i] + 1660000.", level+1, level);
+            GuildXPperLevel[level] = GuildXPperLevel[level - 1] + 1660000;
+        }
+    }
+
+    sLog.outString(">> Loaded %u xp for guild level definitions.", count);
+}
+
+void GuildMgr::LoadGuildRewards()
+{
+    //                                                 0      1         2         3      4
+    QueryResult* result  = WorldDatabase.Query("SELECT entry, standing, racemask, price, achievement FROM guild_rewards");
+
+    if (!result)
+    {
+        sLog.outError(">> Loaded 0 guild reward definitions. DB table `guild_rewards` is empty.");
+        return;
+    }
+
+    uint32 count = 0;
+
+    do
+    {
+        GuildReward reward;
+        Field* fields = result->Fetch();
+        uint32 Entry         = fields[0].GetUInt32();
+        reward.Standing      = fields[1].GetUInt8();
+        reward.Racemask      = fields[2].GetInt32();
+        reward.Price         = fields[3].GetUInt64();
+        reward.AchievementId = fields[4].GetUInt32();
+
+        if (!sObjectMgr.GetItemPrototype(Entry))
+        {
+            sLog.outError("Guild rewards constains not existing item entry %u", Entry);
+            continue;
+        }
+
+        if (reward.AchievementId != 0 && (!sAchievementStore.LookupEntry(reward.AchievementId)))
+        {
+            sLog.outError("Guild rewards constains not existing achievement entry %u", reward.AchievementId);
+            continue;
+        }
+
+        if (reward.Standing >= MAX_REPUTATION_RANK)
+        {
+            sLog.outError("Guild rewards contains wrong reputation standing %u, max is %u", uint32(reward.Standing), MAX_REPUTATION_RANK - 1);
+            continue;
+        }
+
+        m_GuildRewards[Entry] = reward;
+        ++count;
+    } while (result->NextRow());
+    delete result;
+
+    sLog.outString(">> Loaded %u guild reward definitions", count);
 }

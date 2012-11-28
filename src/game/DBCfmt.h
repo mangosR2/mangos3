@@ -70,6 +70,7 @@ const char GtRegenMPPerSptfmt[] = "xf";
 const char GtSpellScalingfmt[] = "df";
 const char GtOCTBaseHPByClassfmt[] = "df";
 const char GtOCTBaseMPByClassfmt[] = "df";
+const char GuildPerkSpellsfmt[]="dii";
 const char Holidaysfmt[] = "nxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
 const char ItemClassfmt[] = "nixxxs";
 const char ItemArmorQualityfmt[] = "nfffffffi";

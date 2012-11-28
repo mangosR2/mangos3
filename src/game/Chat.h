@@ -296,6 +296,8 @@ class MANGOS_DLL_SPEC ChatHandler
         bool HandleGuildUninviteCommand(char* args);
         bool HandleGuildRankCommand(char* args);
         bool HandleGuildDeleteCommand(char* args);
+        bool HandleGuildLevelCommand(char* args);
+        bool HandleGuildModXPCommand(char* args);
 
         bool HandleHonorAddCommand(char* args);
         bool HandleHonorAddKillCommand(char* args);
@@ -399,6 +401,8 @@ class MANGOS_DLL_SPEC ChatHandler
         bool HandleNpcUnFollowCommand(char* args);
         bool HandleNpcWhisperCommand(char* args);
         bool HandleNpcYellCommand(char* args);
+
+        bool HandleSaveGuildsCommand(char* args);
 
         // TODO: NpcCommands that needs to be fixed :
         bool HandleNpcAddWeaponCommand(char* args);
