@@ -1511,6 +1511,9 @@ void World::SetInitialWorldSettings()
     sLog.outString( "Loading the max pet number..." );
     sObjectMgr.LoadPetNumber();
 
+    sLog.outString("Loading max void storage item id...");
+    sObjectMgr.LoadVoidStorageItemId();
+
     sLog.outString( "Loading pet level stats..." );
     sObjectMgr.LoadPetLevelInfo();
 

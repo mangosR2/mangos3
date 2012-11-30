@@ -16,11 +16,11 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#include "ObjectMgr.h"
 #include "GuildMgr.h"
 #include "Guild.h"
 #include "Log.h"
 #include "ObjectGuid.h"
+#include "ObjectMgr.h"
 #include "Database/DatabaseEnv.h"
 #include "Policies/Singleton.h"
 #include "ProgressBar.h"

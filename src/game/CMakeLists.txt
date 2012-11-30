@@ -263,6 +263,7 @@ Vehicle.cpp
 Vehicle.h
 VehicleHandler.cpp
 VoiceChatHandler.cpp
+VoidStorageHandler.cpp
 WaypointManager.cpp
 WaypointManager.h
 Weather.cpp

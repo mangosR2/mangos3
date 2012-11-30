@@ -417,6 +417,15 @@ class MANGOS_DLL_SPEC Item : public Object
         bool LoadSoulboundTradeableDataFromDB(Player* owner);
         bool CheckSoulboundTradeExpire(Player* owner);
 
+        bool FitsToVoidStorage() const;
+
+        uint32 GetVisibleEntry() const
+        {
+            if (uint32 transmogrification = GetEnchantmentId(TRANSMOGRIFY_ENCHANTMENT_SLOT))
+                return transmogrification;
+            return GetEntry();
+        }
+
     private:
         void GetDataValuesStr(std::ostringstream& ss);
 

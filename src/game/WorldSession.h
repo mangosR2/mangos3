@@ -946,6 +946,13 @@ class MANGOS_DLL_SPEC WorldSession
         void HandleSaveCUFProfiles(WorldPacket& recv_data);
         void SendLoadCUFProfiles();
 
+        // Void Storage
+        void SendVoidStorageTransferResult(VoidTransferError result);
+        void HandleVoidStorageUnlock(WorldPacket& recvData);
+        void HandleVoidStorageQuery(WorldPacket& recvData);
+        void HandleVoidStorageTransfer(WorldPacket& recvData);
+        void HandleVoidSwapItem(WorldPacket& recvData);
+
     private:
         // private trade methods
         void moveItems(Item* myItems[], Item* hisItems[]);

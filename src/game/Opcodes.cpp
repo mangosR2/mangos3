@@ -2054,7 +2054,16 @@ void InitializeOpcodes()
     OPCODE(CMSG_QUERY_GUILD_REWARDS,                     STATUS_LOGGEDIN, PROCESS_INPLACE,      &WorldSession::HandleGuildRewardsQueryOpcode   );
     OPCODE(CMSG_GUILD_QUERY_NEWS,                        STATUS_LOGGEDIN, PROCESS_INPLACE,      &WorldSession::HandleGuildQueryNewsOpcode      );
     OPCODE(CMSG_GUILD_NEWS_UPDATE_STICKY,                STATUS_LOGGEDIN, PROCESS_INPLACE,      &WorldSession::HandleGuildNewsUpdateStickyOpcode);
-    OPCODE(CMSG_QUERY_GUILD_XP,                          STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleGuildQueryXPOpcode        ); // STATUS_AUTHED
+    OPCODE(CMSG_QUERY_GUILD_XP,                          STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleGuildQueryXPOpcode        );
+    OPCODE(CMSG_VOID_STORAGE_QUERY,                      STATUS_LOGGEDIN, PROCESS_INPLACE,      &WorldSession::HandleVoidStorageQuery          );
+    OPCODE(CMSG_VOID_STORAGE_TRANSFER,                   STATUS_LOGGEDIN, PROCESS_INPLACE,      &WorldSession::HandleVoidStorageTransfer       );
+    OPCODE(CMSG_VOID_STORAGE_UNLOCK,                     STATUS_LOGGEDIN, PROCESS_INPLACE,      &WorldSession::HandleVoidStorageUnlock         );
+    OPCODE(CMSG_VOID_SWAP_ITEM,                          STATUS_LOGGEDIN, PROCESS_INPLACE,      &WorldSession::HandleVoidSwapItem              );
+    OPCODE(SMSG_VOID_ITEM_SWAP_RESPONSE,                 STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
+    OPCODE(SMSG_VOID_STORAGE_CONTENTS,                   STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
+    OPCODE(SMSG_VOID_STORAGE_FAILED,                     STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
+    OPCODE(SMSG_VOID_STORAGE_TRANSFER_CHANGES,           STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
+    OPCODE(SMSG_VOID_TRANSFER_RESULT,                    STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
 
     OPCODE(NUM_MSG_TYPES,                                STATUS_UNHANDLED,PROCESS_INPLACE,      &WorldSession::Handle_NULL             );
 };
