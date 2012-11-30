@@ -1134,7 +1134,7 @@ void BattleGroundSA::SendTransportsRemove(Player * player)
     }
 }
 
-Team BattleGroundSA::GetSpawnTeamFor(ObjectGuid const& guid) const override
+Team BattleGroundSA::GetSpawnTeamFor(ObjectGuid const& guid) const
 {
     if (guid.IsEmpty() || !guid.HasEntry())
         return TEAM_NONE;

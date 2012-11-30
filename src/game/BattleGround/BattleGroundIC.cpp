@@ -861,7 +861,7 @@ void BattleGroundIC::HandleBuffs()
     }
 }
 
-Team BattleGroundIC::GetSpawnTeamFor(ObjectGuid const& guid) const override
+Team BattleGroundIC::GetSpawnTeamFor(ObjectGuid const& guid) const
 {
     if (guid.IsEmpty() || !guid.HasEntry())
         return TEAM_NONE;
