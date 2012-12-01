@@ -234,3 +234,9 @@ INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`,
 DELETE FROM `spell_proc_event` WHERE `entry` = 30293;
 INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`, `SpellFamilyMaskB0`, `procEx`) VALUE
 (30293, 5, 128, 128+131072, 3);
+
+-- Nether Protection
+DELETE FROM `spell_proc_event` WHERE `entry` IN (30299, 30301);
+INSERT INTO `spell_proc_event` (`entry`, `SchoolMask`, `procFlags`, `procEx`, `CustomChance`) VALUE
+(30299, 127, 664232, 1024, 100),
+(30301, 127, 664232, 1024, 100);

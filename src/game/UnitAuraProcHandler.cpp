@@ -1621,8 +1621,29 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, DamageInfo* damageI
                 mod->m_amount-=damage;
                 return SPELL_AURA_PROC_OK;
             }
+            // Nether Protection
+            if (dummySpell->GetSpellIconID() == 1985)
+            {
+                if (!procSpell)
+                    return SPELL_AURA_PROC_FAILED;
+
+                basepoints[0] = -triggerAmount;
+                switch (GetFirstSchoolInMask(GetSpellSchoolMask(procSpell)))
+                {
+                    case SPELL_SCHOOL_NORMAL:
+                        return SPELL_AURA_PROC_FAILED;                   // ignore
+                    case SPELL_SCHOOL_HOLY:   triggered_spell_id = 54370; break;
+                    case SPELL_SCHOOL_FIRE:   triggered_spell_id = 54371; break;
+                    case SPELL_SCHOOL_NATURE: triggered_spell_id = 54375; break;
+                    case SPELL_SCHOOL_FROST:  triggered_spell_id = 54372; break;
+                    case SPELL_SCHOOL_SHADOW: triggered_spell_id = 54374; break;
+                    case SPELL_SCHOOL_ARCANE: triggered_spell_id = 54373; break;
+                    default:
+                        return SPELL_AURA_PROC_FAILED;
+                }
+            }
             // Fel Synergy
-            if (dummySpell->GetSpellIconID() == 3222)
+            else if (dummySpell->GetSpellIconID() == 3222)
             {
                 target = GetPet();
 
@@ -1643,6 +1664,7 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, DamageInfo* damageI
                 basepoints[0] = int32(triggerAmount * damage / 100.0f / 7);
                 break;
             }
+
             switch (dummySpell->Id)
             {
                 // Nightfall & Glyph of Corruption
@@ -4144,25 +4166,6 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(Unit *pVictim, DamageIn
                 Aura* heal = triggeredByAura->GetHolder()->GetAuraByEffectIndex(EFFECT_INDEX_0);
                 if (!heal || heal->GetAuraTicks() > 1)
                     return SPELL_AURA_PROC_FAILED;
-            }
-            // Nether Protection
-            else if (auraSpellInfo->GetSpellIconID() == 1985)
-            {
-                if (!procSpell)
-                    return SPELL_AURA_PROC_FAILED;
-                switch(GetFirstSchoolInMask(GetSpellSchoolMask(procSpell)))
-                {
-                    case SPELL_SCHOOL_NORMAL:
-                        return SPELL_AURA_PROC_FAILED;                   // ignore
-                    case SPELL_SCHOOL_HOLY:   trigger_spell_id = 54370; break;
-                    case SPELL_SCHOOL_FIRE:   trigger_spell_id = 54371; break;
-                    case SPELL_SCHOOL_NATURE: trigger_spell_id = 54375; break;
-                    case SPELL_SCHOOL_FROST:  trigger_spell_id = 54372; break;
-                    case SPELL_SCHOOL_SHADOW: trigger_spell_id = 54374; break;
-                    case SPELL_SCHOOL_ARCANE: trigger_spell_id = 54373; break;
-                    default:
-                        return SPELL_AURA_PROC_FAILED;
-                }
             }
             // Soul Leech
             else if (auraSpellInfo->SpellIconID == 2027)
