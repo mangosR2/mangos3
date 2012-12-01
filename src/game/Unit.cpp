@@ -11646,6 +11646,32 @@ int32 Unit::CalculateSpellDamage(Unit const* target, SpellEntry const* spellProt
             if (MountCapabilityEntry const* mountCapability = GetMountCapability(uint32(spellEffect->EffectMiscValueB)))
                 return int32(mountCapability->Id);
             break;
+        case SPELL_AURA_OVERRIDE_ACTIONBAR_SPELLS:
+        case SPELL_AURA_OVERRIDE_ACTIONBAR_SPELLS_2:
+        {
+            switch (spellProto->Id)
+            {
+                case 687:           // Demon Armor
+                case 28176:         // Fel Armor
+                {
+                    if (HasAura(91713)) // Nether Ward talent
+                        return 91711;   // Nether Ward
+                    else
+                        return 6229;    // Shadow Ward
+                    break;
+                }
+                case 81206:         // Chakra: Sanctuary
+                case 81208:         // Chakra: Serenity
+                {
+                    // Revelations
+                    if (!HasAura(88627))
+                        // do not change Holy Word: Chastice
+                        return 88625;
+                    break;
+                }
+            }
+            break;
+        }
         case SPELL_AURA_MOD_INCREASE_MOUNTED_SPEED:
         {
             if (spellProto->Id == 68768 || spellProto->Id == 68769) // Little White Stallion & Little Ivory Raptor
@@ -11677,22 +11703,6 @@ int32 Unit::CalculateSpellDamage(Unit const* target, SpellEntry const* spellProt
                 case 79062: // Blessing of Kings
                 case 79063: // Blessing of Kings
                     return amount / 2;
-            }
-            break;
-        }
-        case SPELL_AURA_OVERRIDE_ACTIONBAR_SPELLS:
-        case SPELL_AURA_OVERRIDE_ACTIONBAR_SPELLS_2:
-        {
-            switch (spellProto->Id)
-            {
-                case 81206:         // Chakra: Sanctuary
-                case 81208:         // Chakra: Serenity
-                {
-                    // Revelations
-                    if (!HasAura(88627))
-                        return 88625;
-                    break;
-                }
             }
             break;
         }

@@ -22,4 +22,5 @@ REPLACE INTO `spell_bonus_data` (`entry`, `direct_bonus`, `dot_bonus`, `ap_bonus
 (5676, 0.423, 0, 0, 0, 'Warlock - Searing Pain'),
 (17877, 1.056, 0, 0, 0, 'Warlock - Shadowburn'),
 (17962, 0, 0, 0, 0, 'Warlock - Conflagrate'),
-(29722, 0.676, 0, 0, 0, 'Warlock - Incinerate');
+(29722, 0.676, 0, 0, 0, 'Warlock - Incinerate'),
+(91711, 0, 0, 0, 0, 'Warlock - Nether Ward');
