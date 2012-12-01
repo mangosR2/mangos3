@@ -3943,6 +3943,17 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                         target->CastCustomSpell(caster, 48210, &bp0, NULL, NULL, true, NULL, this);
                 }
             }
+            // Shadowburn
+            else if (GetId() == 29341)
+            {
+                if (m_removeMode == AURA_REMOVE_BY_DEATH)
+                {
+                    if (Unit* caster = GetCaster())
+                        if (caster->GetTypeId() == TYPEID_PLAYER && ((Player*)caster)->isHonorOrXPTarget(target))
+                            // Soul Shard Energize
+                            caster->CastSpell(caster, 95810, true);
+                }
+            }
             break;
         }
         case SPELLFAMILY_DRUID:
