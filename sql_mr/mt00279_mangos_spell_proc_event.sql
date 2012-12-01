@@ -240,3 +240,13 @@ DELETE FROM `spell_proc_event` WHERE `entry` IN (30299, 30301);
 INSERT INTO `spell_proc_event` (`entry`, `SchoolMask`, `procFlags`, `procEx`, `CustomChance`) VALUE
 (30299, 127, 664232, 1024, 100),
 (30301, 127, 664232, 1024, 100);
+
+-- Empowered Imp (passive)
+DELETE FROM `spell_proc_event` WHERE `entry` = 54278;
+INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`) VALUE
+(54278, 5, 4096);
+
+-- Empowered Imp (proc)
+DELETE FROM `spell_proc_event` WHERE `entry` = 47283;
+INSERT INTO `spell_proc_event` (`entry`, `procFlags`, `procEx`, `CustomChance`) VALUE
+(47283, 65536, 524288, 100);

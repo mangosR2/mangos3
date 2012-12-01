@@ -8626,43 +8626,31 @@ void Unit::SpellDamageBonusDone(DamageInfo* damageInfo, uint32 stack)
                 if (pVictim->GetHealth() * 100 / pVictim->GetMaxHealth() <= 25)
                     DoneTotalMod *= 4;
             }
-            break;
-        }
-        case SPELLFAMILY_PRIEST:
-        {
-            // Mind Flay
-            if (damageInfo->GetSpellProto()->GetSpellFamilyFlags().test<CF_PRIEST_MIND_FLAY1>())
+            // Fire and Brimstone: Chaos Bolt and Incinerate damage bonus
+            if (classOptions && classOptions->SpellFamilyFlags & UI64LIT(0x0002004000000000) && pVictim->GetAura(SPELL_AURA_PERIODIC_DAMAGE, SPELLFAMILY_WARLOCK, UI64LIT(0x00000000000004), 0, GetObjectGuid()))
             {
-                // Shadow Word: Pain
-                if (pVictim->GetAura<SPELL_AURA_PERIODIC_DAMAGE, SPELLFAMILY_PRIEST, CF_PRIEST_SHADOW_WORD_PAIN>())
+                Unit::AuraList const& mDummyAuras = GetAurasByType(SPELL_AURA_DUMMY);
+                for(Unit::AuraList::const_iterator i = mDummyAuras.begin(); i != mDummyAuras.end(); ++i)
                 {
-                    // Glyph of Mind Flay
-                    if (Aura *aur = GetAura(55687, EFFECT_INDEX_0))
-                        DoneTotalMod *= (aur->GetModifier()->m_amount+100.0f) / 100.0f;
-
-                    // Twisted Faith
-                    Unit::AuraList const& tf = GetAurasByType(SPELL_AURA_OVERRIDE_CLASS_SCRIPTS);
-                    for(Unit::AuraList::const_iterator i = tf.begin(); i != tf.end(); ++i)
-                    {
-                        if ((*i)->GetSpellProto()->GetSpellIconID() == 2848 && (*i)->GetEffIndex() == 1)
-                        {
-                            DoneTotalMod *= ((*i)->GetModifier()->m_amount + 100.0f) / 100.0f;
-                            break;
-                        }
-                    }
+                     if ((*i)->GetSpellProto()->GetSpellFamilyName() == SPELLFAMILY_WARLOCK && (*i)->GetSpellProto()->GetSpellIconID() == 3173)
+                     {
+                        DoneTotalMod *= ((*i)->GetModifier()->m_amount + 100.0f) / 100.0f;
+                        break;
+                     }
                 }
             }
-            // Conflagate
+            // Conflagate Aura-related
             if (pVictim->HasAuraState(AURA_STATE_CONFLAGRATE))
             {
                 // Incinerate Rank 1, 2, 3, 4
-                if ((classOptions && classOptions->SpellFamilyFlags & UI64LIT(0x00004000000000)) && spellProto->GetSpellIconID() == 2128)
+                if ((classOptions && classOptions->SpellFamilyFlags & UI64LIT(0x00004000000000)) && damageInfo->GetSpellProto()->GetSpellIconID() == 2128)
                 {
                     // Incinerate does more dmg (dmg/6) if the target have Immolate debuff.
                     // Check aura state for speed but aura state set not only for Immolate spell
                     if (pVictim->HasAuraState(AURA_STATE_CONFLAGRATE))
                     {
-                        if ((*i)->GetSpellProto()->GetSpellIconID() == 2848 && (*i)->GetEffIndex() == 1)
+                        Unit::AuraList const& RejorRegr = pVictim->GetAurasByType(SPELL_AURA_PERIODIC_DAMAGE);
+                        for (Unit::AuraList::const_iterator i = RejorRegr.begin(); i != RejorRegr.end(); ++i)
                         {
                             if ((*i)->GetCasterGuid() != GetObjectGuid())
                                 continue;
@@ -8677,6 +8665,36 @@ void Unit::SpellDamageBonusDone(DamageInfo* damageInfo, uint32 stack)
                                     break;
                                 }
                             }
+                        }
+                    }
+                }
+            }
+
+            break;
+        }
+        case SPELLFAMILY_PRIEST:
+        {
+            // Mind Flay
+            if (damageInfo->GetSpellProto()->GetSpellFamilyFlags().test<CF_PRIEST_MIND_FLAY1>())
+            {
+                // Shadow Word: Pain
+                if (pVictim->GetAura<SPELL_AURA_PERIODIC_DAMAGE, SPELLFAMILY_PRIEST, CF_PRIEST_SHADOW_WORD_PAIN>())
+                {
+                    // Glyph of Mind Flay
+                    if (Aura *aur = GetAura(55687, EFFECT_INDEX_0))
+                    {
+                        DoneTotalMod *= (aur->GetModifier()->m_amount+100.0f) / 100.0f;
+                        break;
+                    }
+
+                    // Twisted Faith
+                    Unit::AuraList const& tf = GetAurasByType(SPELL_AURA_OVERRIDE_CLASS_SCRIPTS);
+                    for(Unit::AuraList::const_iterator i = tf.begin(); i != tf.end(); ++i)
+                    {
+                        if ((*i)->GetSpellProto()->GetSpellIconID() == 2848 && (*i)->GetEffIndex() == 1)
+                        {
+                            DoneTotalMod *= ((*i)->GetModifier()->m_amount + 100.0f) / 100.0f;
+                            break;
                         }
                     }
                 }
