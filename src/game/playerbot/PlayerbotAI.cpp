@@ -3626,14 +3626,14 @@ bool PlayerbotAI::Buff(uint32 spellId, Unit* target, void (*beforeCast)(Player *
     bool willBenefitFromSpell = false;
     for (uint8 i = 0; i < MAX_EFFECT_INDEX; ++i)
     {
-        if (spellProto->EffectApplyAuraName[i] == SPELL_AURA_NONE)
+        if (spellProto->GetSpellEffect(SpellEffectIndex(i))->EffectApplyAuraName == SPELL_AURA_NONE)
             break;
 
         bool sameOrBetterAuraFound = false;
         int32 bonus = m_bot->CalculateSpellDamage(target, spellProto, SpellEffectIndex(i));
-        Unit::AuraList const& auras = target->GetAurasByType(AuraType(spellProto->EffectApplyAuraName[i]));
+        Unit::AuraList const& auras = target->GetAurasByType(AuraType(spellProto->GetSpellEffect(SpellEffectIndex(i))->EffectApplyAuraName));
         for (Unit::AuraList::const_iterator it = auras.begin(); it != auras.end(); ++it)
-            if ((*it)->GetModifier()->m_miscvalue == spellProto->EffectMiscValue[i] && (*it)->GetModifier()->m_amount >= bonus)
+            if ((*it)->GetModifier()->m_miscvalue == spellProto->GetSpellEffect(SpellEffectIndex(i))->EffectMiscValue && (*it)->GetModifier()->m_amount >= bonus)
             {
                 sameOrBetterAuraFound = true;
                 break;
@@ -3835,16 +3835,20 @@ bool PlayerbotAI::HasSpellReagents(uint32 spellId)
     if (m_bot->CanNoReagentCast(pSpellInfo))
         return true;
 
-    for (uint32 i = 0; i < MAX_SPELL_REAGENTS; ++i)
+    SpellReagentsEntry const* spellReagents = pSpellInfo->GetSpellReagents();
+    if(spellReagents)
     {
-        if (pSpellInfo->Reagent[i] <= 0)
-            continue;
+        for(int j = 0; j < MAX_SPELL_REAGENTS; ++j)
+        {
+            if (spellReagents->Reagent[j] > 0 && ObjectMgr::GetItemPrototype(spellReagents->Reagent[j]))
+            {
+                uint32 itemid = spellReagents->Reagent[j];
+                uint32 count = spellReagents->ReagentCount[j];
 
-        uint32 itemid = pSpellInfo->Reagent[i];
-        uint32 count = pSpellInfo->ReagentCount[i];
-
-        if (!m_bot->HasItemCount(itemid, count))
-            return false;
+                if (!m_bot->HasItemCount(itemid, count))
+                    return false;
+            }
+        }
     }
 
     return true;
@@ -6624,7 +6628,7 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
                         if (!spellInfo)
                             continue;
 
-                        if (skillLine->skillId == *it && spellInfo->Effect[0] == SPELL_EFFECT_WEAPON)
+                        if (skillLine->skillId == *it && spellInfo->GetSpellEffect(EFFECT_INDEX_0)->Effect == SPELL_EFFECT_WEAPON)
                             MakeWeaponSkillLink(spellInfo,msg,*it);
                     }
                 }

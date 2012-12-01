@@ -732,63 +732,6 @@ void ScriptMgr::LoadEventScripts()
     std::set<uint32> eventIds;                              // Store possible event ids
     CollectPossibleEventIds(eventIds);
 
-    // Load all possible script entries from gameobjects
-    for (uint32 i = 1; i < sGOStorage.MaxEntry; ++i)
-    {
-        if (GameObjectInfo const* goInfo = sGOStorage.LookupEntry<GameObjectInfo>(i))
-        {
-            if (uint32 eventId = goInfo->GetEventScriptId())
-                evt_scripts.insert(eventId);
-
-            if (goInfo->type == GAMEOBJECT_TYPE_CAPTURE_POINT)
-            {
-                evt_scripts.insert(goInfo->capturePoint.neutralEventID1);
-                evt_scripts.insert(goInfo->capturePoint.neutralEventID2);
-                evt_scripts.insert(goInfo->capturePoint.contestedEventID1);
-                evt_scripts.insert(goInfo->capturePoint.contestedEventID2);
-                evt_scripts.insert(goInfo->capturePoint.progressEventID1);
-                evt_scripts.insert(goInfo->capturePoint.progressEventID2);
-                evt_scripts.insert(goInfo->capturePoint.winEventID1);
-                evt_scripts.insert(goInfo->capturePoint.winEventID2);
-            }
-        }
-    }
-
-    // Load all possible script entries from spells
-    for (uint32 i = 1; i < sSpellStore.GetNumRows(); ++i)
-    {
-        SpellEntry const* spell = sSpellStore.LookupEntry(i);
-        if (spell)
-        {
-            for (int j = 0; j < MAX_EFFECT_INDEX; ++j)
-            {
-                SpellEffectEntry const* spellEffect = spell->GetSpellEffect(SpellEffectIndex(j));
-                if (!spellEffect)
-                    continue;
-
-                if (spellEffect->Effect == SPELL_EFFECT_SEND_EVENT)
-                {
-                    if (spellEffect->EffectMiscValue)
-                        evt_scripts.insert(spellEffect->EffectMiscValue);
-                }
-            }
-        }
-    }
-
-    for (size_t path_idx = 0; path_idx < sTaxiPathNodesByPath.size(); ++path_idx)
-    {
-        for (size_t node_idx = 0; node_idx < sTaxiPathNodesByPath[path_idx].size(); ++node_idx)
-        {
-            TaxiPathNodeEntry const& node = sTaxiPathNodesByPath[path_idx][node_idx];
-
-            if (node.arrivalEventID)
-                evt_scripts.insert(node.arrivalEventID);
-
-            if (node.departureEventID)
-                evt_scripts.insert(node.departureEventID);
-        }
-    }
-
     // Then check if all scripts are in above list of possible script entries
     for(ScriptMapMap::const_iterator itr = sEventScripts.second.begin(); itr != sEventScripts.second.end(); ++itr)
     {
