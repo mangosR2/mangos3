@@ -531,12 +531,11 @@ void VehicleKit::Dismount(Unit* passenger, VehicleSeatEntry const* seatInfo)
     if (!passenger || !passenger->IsInWorld() || !GetBase()->IsInWorld())
         return;
 
-    float ox, oy, oz, oo;
+    float ox, oy, oz/*, oo*/;
 
     Unit* base = GetBase()->GetVehicle() ? GetBase()->GetVehicle()->GetBase() : GetBase();
     base->GetPosition(ox, oy, oz);
-    oo = base->GetOrientation();
-//    passenger->Relocate(ox,oy,oz,oo);
+    // oo = base->GetOrientation();
 
     if (b_dstSet)
     {

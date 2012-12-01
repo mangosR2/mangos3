@@ -1698,64 +1698,6 @@ void ScriptMgr::LoadEventIdScripts()
     std::set<uint32> eventIds;                              // Store possible event ids
     CollectPossibleEventIds(eventIds);
 
-    // Load all possible event entries from gameobjects
-    for (uint32 i = 1; i < sGOStorage.MaxEntry; ++i)
-    {
-        if (GameObjectInfo const* goInfo = sGOStorage.LookupEntry<GameObjectInfo>(i))
-        {
-            if (uint32 eventId = goInfo->GetEventScriptId())
-                evt_scripts.insert(eventId);
-
-            if (goInfo->type == GAMEOBJECT_TYPE_CAPTURE_POINT)
-            {
-                evt_scripts.insert(goInfo->capturePoint.neutralEventID1);
-                evt_scripts.insert(goInfo->capturePoint.neutralEventID2);
-                evt_scripts.insert(goInfo->capturePoint.contestedEventID1);
-                evt_scripts.insert(goInfo->capturePoint.contestedEventID2);
-                evt_scripts.insert(goInfo->capturePoint.progressEventID1);
-                evt_scripts.insert(goInfo->capturePoint.progressEventID2);
-                evt_scripts.insert(goInfo->capturePoint.winEventID1);
-                evt_scripts.insert(goInfo->capturePoint.winEventID2);
-            }
-        }
-    }
-
-    // Load all possible event entries from spells
-    for (uint32 i = 1; i < sSpellStore.GetNumRows(); ++i)
-    {
-        SpellEntry const* spell = sSpellStore.LookupEntry(i);
-        if (spell)
-        {
-            for (int j = 0; j < MAX_EFFECT_INDEX; ++j)
-            {
-                SpellEffectEntry const* spellEffect = spell->GetSpellEffect(SpellEffectIndex(j));
-                if (!spellEffect)
-                    continue;
-
-                if (spellEffect->Effect == SPELL_EFFECT_SEND_EVENT)
-                {
-                    if (spellEffect->EffectMiscValue)
-                        evt_scripts.insert(spellEffect->EffectMiscValue);
-                }
-            }
-        }
-    }
-
-    // Load all possible event entries from taxi path nodes
-    for (size_t path_idx = 0; path_idx < sTaxiPathNodesByPath.size(); ++path_idx)
-    {
-        for (size_t node_idx = 0; node_idx < sTaxiPathNodesByPath[path_idx].size(); ++node_idx)
-        {
-            TaxiPathNodeEntry const& node = sTaxiPathNodesByPath[path_idx][node_idx];
-
-            if (node.arrivalEventID)
-                evt_scripts.insert(node.arrivalEventID);
-
-            if (node.departureEventID)
-                evt_scripts.insert(node.departureEventID);
-        }
-    }
-
     do
     {
         ++count;
@@ -2146,10 +2088,15 @@ void ScriptMgr::CollectPossibleEventIds(std::set<uint32>& eventIds)
         {
             for (int j = 0; j < MAX_EFFECT_INDEX; ++j)
             {
-                if (spell->Effect[j] == SPELL_EFFECT_SEND_EVENT)
+                SpellEffectEntry const* spellEffect = spell->GetSpellEffect(SpellEffectIndex(j));
+
+                if(!spellEffect)
+                    continue;
+
+                if (spellEffect->Effect == SPELL_EFFECT_SEND_EVENT)
                 {
-                    if (spell->EffectMiscValue[j])
-                        eventIds.insert(spell->EffectMiscValue[j]);
+                    if (spellEffect->EffectMiscValue)
+                        eventIds.insert(spellEffect->EffectMiscValue);
                 }
             }
         }

@@ -1088,6 +1088,9 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         virtual void CleanupsBeforeDelete() override;
 
+        static UpdateMask updateVisualBits;
+        static void InitVisibleBits();
+
         void AddToWorld();
         virtual void RemoveFromWorld(bool remove) override;
 
@@ -2582,6 +2585,9 @@ class MANGOS_DLL_SPEC Player : public Unit
         void _SaveGlyphs();
         void _SaveTalents();
         void _SaveStats();
+
+        void _SetCreateBits(UpdateMask* updateMask, Player* target) const override;
+        void _SetUpdateBits(UpdateMask* updateMask, Player* target) const override;
 
         /*********************************************************/
         /***              ENVIRONMENTAL SYSTEM                 ***/

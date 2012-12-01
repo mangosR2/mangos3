@@ -1218,7 +1218,7 @@ void Spell::DoAllEffectOnTarget(TargetInfo *target)
     }
 
     // Speed possible inherited from triggering spell
-    float speed_proto = GetBaseSpellSpeed();
+    // float speed_proto = GetBaseSpellSpeed();
 
     if (m_spellInfo->speed > M_NULL_F || GetDelayStart())
     {
@@ -1450,7 +1450,7 @@ void Spell::DoSpellHitOnUnit(Unit *unit, uint32 effectMask)
     Unit* realCaster = GetAffectiveCaster();
 
     // Speed possible inherited from triggering spell
-    float speed_proto = GetBaseSpellSpeed();
+    // float speed_proto = GetBaseSpellSpeed();
 
     // Recheck effect immune (only for delayed spells)
     if (m_spellInfo->speed > M_NULL_F)
@@ -8903,18 +8903,6 @@ bool Spell::FillCustomTargetMap(SpellEffectEntry const* effect, UnitList &target
             for (UnitList::const_iterator itr = tmpUnitMap.begin(); itr != tmpUnitMap.end(); ++itr)
             {
                 if (*itr && (*itr)->GetTypeId() == TYPEID_PLAYER && !(*itr)->m_movementInfo.HasMovementFlag(MovementFlags(MOVEFLAG_FALLING)))
-                    targetUnitMap.push_back(*itr);
-            }
-            break;
-        }
-        case 68921: // Soulstorm (Forge of Souls - Bronjahm)
-        case 69049:
-        {
-            UnitList tmpUnitMap;
-            FillAreaTargets(tmpUnitMap, radius, PUSH_DEST_CENTER, SPELL_TARGETS_AOE_DAMAGE);
-            for (UnitList::const_iterator itr = tmpUnitMap.begin(); itr != tmpUnitMap.end(); ++itr)
-            {
-                if (*itr && !(*itr)->IsWithinDistInMap(m_caster, 10.0f))
                     targetUnitMap.push_back(*itr);
             }
             break;

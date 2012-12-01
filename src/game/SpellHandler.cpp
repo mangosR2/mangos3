@@ -705,10 +705,13 @@ void WorldSession::HandleUpdateProjectilePosition(WorldPacket& recvPacket)
     data << m_targetZ;
     SendPacket(&data);
 
-    for(int i = 0; i < 3; ++i)
+    for (int i = 0; i < MAX_EFFECT_INDEX; ++i)
     {
-        if(spellInfo->EffectTriggerSpell[i])
-            if (SpellEntry const* spellInfoT = sSpellStore.LookupEntry(spellInfo->EffectTriggerSpell[i]))
+        SpellEffectEntry const* spellEffect = spellInfo->GetSpellEffect(SpellEffectIndex(i));
+        if(!spellEffect)
+            continue;
+        if (spellEffect->EffectTriggerSpell)
+            if (SpellEntry const* spellInfoT = sSpellStore.LookupEntry(spellEffect->EffectTriggerSpell))
                 pCaster->CastSpell(m_targetX, m_targetY, m_targetZ, spellInfoT, true);
     }
 }

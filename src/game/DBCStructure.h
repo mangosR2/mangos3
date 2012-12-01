@@ -544,7 +544,7 @@ struct AreaTableEntry
     int32   area_level;                                     // 10       m_ExplorationLevel
     DBCString area_name;                                    // 11       m_AreaName_lang
     uint32  team;                                           // 12       m_factionGroupMask
-                                                            // 13-16    m_liquidTypeID[4]
+    uint32  LiquidTypeOverride[4];                          // 13-16    m_liquidTypeID[4]
                                                             // 17       m_minElevation
                                                             // 18       m_ambient_multiplier
                                                             // 19       m_lightid
@@ -754,7 +754,7 @@ struct CinematicSequencesEntry
 struct CreatureDisplayInfoEntry
 {
     uint32      Displayid;                                  // 0        m_ID
-                                                            // 1        m_modelID
+    uint32      ModelId;                                    // 1        m_modelID
                                                             // 2        m_soundID
     uint32      ExtendedDisplayInfoID;                      // 3        m_extendedDisplayInfoID -> CreatureDisplayInfoExtraEntry::DisplayExtraId
     float       scale;                                      // 4        m_creatureModelScale
@@ -1434,7 +1434,7 @@ struct MapDifficultyEntry
     //uint32      Id;                                       // 0        m_ID
     uint32      MapId;                                      // 1        m_mapID
     uint32      Difficulty;                                 // 2        m_difficulty (for arenas: arena slot)
-    //char*       areaTriggerText;                          // 3        m_message_lang (text showed when transfer to map failed)
+    char*       areaTriggerText;                            // 3        m_message_lang (text showed when transfer to map failed)
     uint32      resetTime;                                  // 4,       m_raidDuration in secs, 0 if no fixed reset time
     uint32      maxPlayers;                                 // 5,       m_maxPlayers some heroic versions have 0 when expected same amount as in normal version
     //char*       difficultyString;                         // 6        m_difficultystring

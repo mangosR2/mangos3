@@ -21,7 +21,7 @@
 
 const char Achievementfmt[]="niixsxiixixxii";
 const char AchievementCriteriafmt[]="niiiiiiiixsiiiiixxxxxxx";
-const char AreaTableEntryfmt[]="iiinixxxxxisixxxxxxxxxxxxx";
+const char AreaTableEntryfmt[]="iiinixxxxxisiiiiixxxxxxxxx";
 const char AreaGroupEntryfmt[]="niiiiiii";
 const char AreaTriggerEntryfmt[]="nifffxxxfffff";
 const char ArmorLocationfmt[]="nfffff";
@@ -37,7 +37,7 @@ const char ChrClassesEntryfmt[]="nixsxxxixiixxx";
 const char ChrRacesEntryfmt[]="nxixiixixxxxixsxxxxxixxx";
 const char ChrClassesXPowerTypesfmt[]="nii";
 const char CinematicSequencesEntryfmt[]="nxxxxxxxxx";
-const char CreatureDisplayInfofmt[]="nxxifxxxxxxxxxxxx";
+const char CreatureDisplayInfofmt[]="nixifxxxxxxxxxxxx";
 const char CreatureDisplayInfoExtrafmt[]="nixxxxxxxxxxxxxxxxxxx";
 const char CreatureFamilyfmt[]="nfifiiiiixsx";
 const char CreatureSpellDatafmt[]="niiiixxxx";
@@ -81,7 +81,7 @@ const char ItemSetEntryfmt[]="dsxxxxxxxxxxxxxxxxxiiiiiiiiiiiiiiiiii";
 const char LockEntryfmt[]="niiiiiiiiiiiiiiiiiiiiiiiixxxxxxxx";
 const char MailTemplateEntryfmt[]="nxs";
 const char MapEntryfmt[]="nxixxxsixxixiffxixxi";
-const char MapDifficultyEntryfmt[]="diixiix";
+const char MapDifficultyEntryfmt[]="diisiix";
 const char MovieEntryfmt[]="nxxx";
 const char OverrideSpellDatafmt[]="niiiiiiiiiixx";
 const char QuestFactionRewardfmt[]="niiiiiiiiii";

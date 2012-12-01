@@ -1779,7 +1779,7 @@ bool Player::TeleportTo(WorldLocation const& loc, uint32 options)
     }
     else
     {
-        DEBUG_LOG("Player::TeleportTo %s is being near teleported to map %u", GetName(), loc.mapid, IsBeingTeleportedNear() ? "(stage 2)" : "");
+        DEBUG_LOG("Player::TeleportTo %s is being near teleported to map %u %s", GetName(), loc.mapid, IsBeingTeleportedNear() ? "(stage 2)" : "");
     }
 
     // preparing unsummon pet if lost (we must get pet before teleportation or will not find it later)
@@ -4165,7 +4165,7 @@ Mail* Player::GetMail(uint32 id)
     return NULL;
 }
 
-void Player::BuildCreateUpdateBlockForPlayer(UpdateData *data, Player *target) const
+void Player::_SetCreateBits(UpdateMask* updateMask, Player* target) const
 {
     if (target == this)
     {
@@ -5874,9 +5874,9 @@ bool Player::UpdateSkillPro(uint16 SkillId, int32 Chance, uint32 step)
                      SpellItemEnchantmentEntry const *pEnchant = sSpellItemEnchantmentStore.LookupEntry(enchant_id);
                      if (!pEnchant)
                          continue;
-                     if (pEnchant->requiredSkill != SkillId)
-                         continue;
-                     if (SkillValue < pEnchant->requiredSkillValue && new_value >= pEnchant->requiredSkillValue)
+//                     if (pEnchant->requiredSkill != SkillId)
+//                         continue;
+//                     if (SkillValue < pEnchant->requiredSkillValue && new_value >= pEnchant->requiredSkillValue)
                          ApplyEnchantment(pItem, EnchantmentSlot(slot), true);
                 }
             }
@@ -6074,8 +6074,8 @@ void Player::SetSkill(uint16 id, uint16 currVal, uint16 maxVal, uint16 step /*=0
                          SpellItemEnchantmentEntry const *pEnchant = sSpellItemEnchantmentStore.LookupEntry(enchant_id);
                          if (!pEnchant)
                              continue;
-                         if (pEnchant->requiredSkill != id)
-                             continue;
+//                         if (pEnchant->requiredSkill != id)
+//                             continue;
                          ApplyEnchantment(pItem, EnchantmentSlot(slot), false);
                     }
                 }
@@ -6104,8 +6104,8 @@ void Player::SetSkill(uint16 id, uint16 currVal, uint16 maxVal, uint16 step /*=0
                          SpellItemEnchantmentEntry const *pEnchant = sSpellItemEnchantmentStore.LookupEntry(enchant_id);
                          if (!pEnchant)
                              continue;
-                         if (pEnchant->requiredSkill != id)
-                             continue;
+//                         if (pEnchant->requiredSkill != id)
+//                             continue;
                          ApplyEnchantment(pItem, EnchantmentSlot(slot), true);
                     }
                 }
@@ -6128,8 +6128,8 @@ void Player::SetSkill(uint16 id, uint16 currVal, uint16 maxVal, uint16 step /*=0
                          SpellItemEnchantmentEntry const *pEnchant = sSpellItemEnchantmentStore.LookupEntry(enchant_id);
                          if (!pEnchant)
                              continue;
-                         if (pEnchant->requiredSkill != id)
-                             continue;
+//                         if (pEnchant->requiredSkill != id)
+//                             continue;
                          ApplyEnchantment(pItem, EnchantmentSlot(slot), false);
                     }
                 }
@@ -12514,7 +12514,7 @@ void Player::SwapItem(uint16 src, uint16 dst)
     }
 
     // impossible merge/fill, do real swap
-    InventoryResult msg;
+    InventoryResult msg = EQUIP_ERR_OK2;
 
     // check src->dest move possibility
     ItemPosCountVec sDest;
@@ -13010,7 +13010,7 @@ void Player::ApplyEnchantment(Item *item, EnchantmentSlot slot, bool apply, bool
 
     if (!ignore_condition && pEnchant->EnchantmentCondition && !EnchantmentFitsRequirements(pEnchant->EnchantmentCondition, -1))
         return;
-
+/*
     if (pEnchant->requiredLevel > getLevel())
         return;
 
@@ -13019,7 +13019,7 @@ void Player::ApplyEnchantment(Item *item, EnchantmentSlot slot, bool apply, bool
        if (pEnchant->requiredSkillValue > GetSkillValue(pEnchant->requiredSkill))
         return;
     }
-
+*/
     if (!item->IsBroken())
     {
         for (int s = 0; s < 3; ++s)
@@ -16846,7 +16846,7 @@ void Player::_LoadInventory(QueryResult* result, uint32 timediff)
         uint8  slot       = fields[3].GetUInt8();
 
         bool success = true;
-        bool arenaitem = false;
+        //bool arenaitem = false;
 
         // the item/bag is not in a bag
         if (!bagLowGuid)
@@ -19995,8 +19995,8 @@ bool Player::_StoreOrEquipNewItem(uint32 vendorSlot, uint32 item, uint8 count, u
 
     ModifyMoney(-int32(price));
 
-    if (crItem->ExtendedCost)
-        TakeExtendedCost(crItem->ExtendedCost, count);
+//    if (crItem->ExtendedCost)
+//        TakeExtendedCost(crItem->ExtendedCost, count);
 
     Item* newItem = store ? StoreNewItem(dest, item, true) : EquipNewItem(pos, item, true);
 
@@ -20161,9 +20161,15 @@ bool Player::BuyItemFromVendorSlot(ObjectGuid vendorGuid, uint32 vendorslot, uin
         return false;
     }
 
+    Item* pItem = NULL;
+
     if ((bag == NULL_BAG && slot == NULL_SLOT) || IsInventoryPos(bag, slot))
     {
-        if (!_StoreOrEquipNewItem(vendorslot, item, count, bag, slot, price, pProto, pVendor, crItem, true))
+        ItemPosCountVec dest;
+        InventoryResult msg = CanStoreNewItem(bag, slot, dest, item, totalCount);
+        if (msg != EQUIP_ERR_OK)
+        {
+            SendEquipError(msg, NULL, NULL, item);
             return false;
         }
 
@@ -20182,7 +20188,11 @@ bool Player::BuyItemFromVendorSlot(ObjectGuid vendorGuid, uint32 vendorslot, uin
             return false;
         }
 
-        if (!_StoreOrEquipNewItem(vendorslot, item, count, bag, slot, price, pProto, pVendor, crItem, false))
+        uint16 dest;
+        InventoryResult msg = CanEquipNewItem(slot, dest, item, false);
+        if (msg != EQUIP_ERR_OK)
+        {
+            SendEquipError(msg, NULL, NULL, item);
             return false;
         }
 
@@ -23694,24 +23704,34 @@ void Player::ActivateSpec(uint8 specNum)
             TalentEntry const *talentInfo = talent.talentEntry;
 
             for (int r = 0; r < MAX_TALENT_RANK; ++r)
+            {
                 if (talentInfo->RankID[r])
                 {
                     removeSpell(talentInfo->RankID[r],!IsPassiveSpell(talentInfo->RankID[r]),false);
 
                     SpellEntry const* spellInfo = sSpellStore.LookupEntry(talentInfo->RankID[r]);
                     for (int k = 0; k < MAX_EFFECT_INDEX; ++k)
-                        if (spellInfo->EffectTriggerSpell[k])
-                            removeSpell(spellInfo->EffectTriggerSpell[k]);
+                    {
+                        SpellEffectEntry const* spellEffect = spellInfo->GetSpellEffect(SpellEffectIndex(k));
+                        if (!spellEffect)
+                            continue;
+
+                        if (spellEffect->EffectTriggerSpell)
+                            removeSpell(spellEffect->EffectTriggerSpell);
+                    }
 
                     // if spell is a buff, remove it from group members
                     // TODO: this should affect all players, not only group members?
-                    if (SpellEntry const *spellInfo = sSpellStore.LookupEntry(talentInfo->RankID[r]))
+                    if (SpellEntry const* spellInfo = sSpellStore.LookupEntry(talentInfo->RankID[r]))
                     {
                         bool bRemoveAura = false;
                         for (int i = 0; i < MAX_EFFECT_INDEX; ++i)
                         {
-                            if ((spellInfo->Effect[i] == SPELL_EFFECT_APPLY_AURA ||
-                                spellInfo->Effect[i] == SPELL_EFFECT_APPLY_AREA_AURA_RAID) &&
+                            SpellEffectEntry const* spellEffect = spellInfo->GetSpellEffect(SpellEffectIndex(i));
+                            if (!spellEffect)
+                                continue;
+                            if ((spellEffect->Effect == SPELL_EFFECT_APPLY_AURA ||
+                                spellEffect->Effect == SPELL_EFFECT_APPLY_AREA_AURA_RAID) &&
                                 IsPositiveEffect(spellInfo, SpellEffectIndex(i)))
                             {
                                 bRemoveAura = true;
@@ -23737,6 +23757,7 @@ void Player::ActivateSpec(uint8 specNum)
                         }
                     }
                 }
+            }
 
             specIter = m_talents[m_activeSpec].begin();
         }
@@ -23946,13 +23967,6 @@ bool Player::IsImmuneToSpellEffect(SpellEntry const* spellInfo, SpellEffectIndex
             default:
                 break;
         }
-    }
-    switch(spellInfo->EffectApplyAuraName[index])
-    {
-        case SPELL_AURA_MOD_TAUNT:
-            return true;
-        default:
-            break;
     }
     return Unit::IsImmuneToSpellEffect(spellInfo, index);
 }
@@ -24436,7 +24450,7 @@ bool Player::CheckTransferPossibility(AreaTrigger const*& at, bool b_onlyMainReq
         // ghost resurrected at enter attempt to dungeon with corpse (including fail enter cases)
         if (!isAlive() && targetMapEntry->IsDungeon())
         {
-            int32 corpseMapId = 0;
+            uint32 corpseMapId = 0;
             if (Corpse* corpse = GetCorpse())
                 corpseMapId = corpse->GetMapId();
 
@@ -24519,7 +24533,7 @@ bool Player::CheckTransferPossibility(AreaTrigger const*& at, bool b_onlyMainReq
         case AREA_LOCKSTATUS_MISSING_ITEM:
             {
                 MapDifficultyEntry const* mapDiff = GetMapDifficultyData(targetMapEntry->MapID,GetDifficulty(targetMapEntry->IsRaid()));
-                if (mapDiff && (mapDiff->mapDifficultyFlags & MAP_DIFFICULTY_FLAG_CONDITION))
+                if (mapDiff/* && (mapDiff->mapDifficultyFlags & MAP_DIFFICULTY_FLAG_CONDITION)*/)
                 {
                     GetSession()->SendAreaTriggerMessage("%s", mapDiff->areaTriggerText[GetSession()->GetSessionDbcLocale()]);
                 }
@@ -25035,7 +25049,7 @@ void Player::SendRefundInfo(Item* item)
         item->SetNotRefundable(this);
         return;
     }
-
+/*
     ItemExtendedCostEntry const* iece = sItemExtendedCostStore.LookupEntry(item->GetPaidExtendedCost());
     if (!iece)
     {
@@ -25056,6 +25070,7 @@ void Player::SendRefundInfo(Item* item)
     data << uint32(0);
     data << uint32(item->GetUInt32Value(ITEM_FIELD_CREATE_PLAYED_TIME));
     GetSession()->SendPacket(&data);
+*/
 }
 
 void Player::RefundItem(Item* item)
@@ -25081,7 +25096,7 @@ void Player::RefundItem(Item* item)
         item->SetNotRefundable(this);
         return;
     }
-
+/*
     ItemExtendedCostEntry const* iece = sItemExtendedCostStore.LookupEntry(item->GetPaidExtendedCost());
     if (!iece)
     {
@@ -25170,6 +25185,7 @@ void Player::RefundItem(Item* item)
     SaveInventoryAndGoldToDB();
 
     CharacterDatabase.CommitTransaction();
+*/
 }
 
 void Player::SetViewPoint(WorldObject* target, bool immediate, bool update_far_sight_field)
@@ -25181,11 +25197,23 @@ void Player::SetViewPoint(WorldObject* target, bool immediate, bool update_far_s
             WorldPacket data(SMSG_CLEAR_FAR_SIGHT_IMMEDIATE, 0);
             GetSession()->SendPacket(&data);
         }
+
+        if (target->GetObjectGuid().IsUnit() && target->GetObjectGuid() != GetObjectGuid())
+        {
+            if (((Unit*)target)->IsLevitating() || (target->GetObjectGuid().IsPlayer() && ((Player*)target)->IsFlying()))
+            {
+                WorldPacket data;
+                data.Initialize(SMSG_MOVE_SET_CAN_FLY, 12);
+                data << target->GetPackGUID();
+                data << (uint32)(0);
+                target->SendMessageToSet(&data,false);
+            }
+        }
         GetCamera()->SetView(target, update_far_sight_field);
     }
     else
     {
-        if (immediate &&  HasExternalViewPoint())
+        if (immediate && HasExternalViewPoint())
         {
             WorldPacket data(SMSG_CLEAR_FAR_SIGHT_IMMEDIATE, 0);
             GetSession()->SendPacket(&data);

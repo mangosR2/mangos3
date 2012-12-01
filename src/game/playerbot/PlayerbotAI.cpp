@@ -3019,7 +3019,7 @@ void PlayerbotAI::MovementReset()
         if (m_bot->isInCombat())
             return;
 
-        Player* pTarget;                            // target is player
+        Player* pTarget = NULL;                            // target is player
         if (m_followTarget->GetTypeId() == TYPEID_PLAYER)
             pTarget = ((Player*) m_followTarget);
 
