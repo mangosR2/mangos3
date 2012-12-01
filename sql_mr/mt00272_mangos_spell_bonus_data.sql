@@ -19,5 +19,6 @@ REPLACE INTO `spell_bonus_data` (`entry`, `direct_bonus`, `dot_bonus`, `ap_bonus
 
 -- Warlock
 REPLACE INTO `spell_bonus_data` (`entry`, `direct_bonus`, `dot_bonus`, `ap_bonus`, `ap_dot_bonus`, `comments`) VALUES
+(5676, 0.423, 0, 0, 0, 'Warlock - Searing Pain'),
 (17962, 0, 0, 0, 0, 'Warlock - Conflagrate'),
 (29722, 0.676, 0, 0, 0, 'Warlock - Incinerate');
