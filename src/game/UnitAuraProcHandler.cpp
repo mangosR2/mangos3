@@ -1662,38 +1662,6 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, DamageInfo* damageI
                     triggered_spell_id = 85383;
                     break;
                 }
-                //Soul Leech
-                case 30293:
-                case 30295:
-                case 30296:
-                {
-                    // health
-                    basepoints[0] = int32(damage*triggerAmount/100);
-                    target = this;
-                    triggered_spell_id = 30294;
-
-                    // check for Improved Soul Leech
-                    AuraList const& pDummyAuras = GetAurasByType(SPELL_AURA_DUMMY);
-                    for (AuraList::const_iterator itr = pDummyAuras.begin(); itr != pDummyAuras.end(); ++itr)
-                    {
-                       SpellEntry const* spellInfo = (*itr)->GetSpellProto();
-                       if (spellInfo->GetSpellFamilyName() != SPELLFAMILY_WARLOCK || (*itr)->GetSpellProto()->GetSpellIconID() != 3176)
-                            continue;
-                       if ((*itr)->GetEffIndex() == SpellEffectIndex(0))
-                       {
-                           // energize Proc pet (implicit target is pet)
-                           CastCustomSpell(this, 59118, &((*itr)->GetModifier()->m_amount), NULL, NULL, true, NULL, (*itr)());
-                           // energize Proc master
-                           CastCustomSpell(this, 59117, &((*itr)->GetModifier()->m_amount), NULL, NULL, true, NULL, (*itr)());
-                       }
-                       else if (roll_chance_i((*itr)->GetModifier()->m_amount))
-                       {
-                            // Replenishment proc
-                            CastSpell(this, 57669, true, NULL, (*itr)());
-                        }
-                    }
-                    break;
-                }
                 // Shadowflame (Voidheart Raiment set bonus)
                 case 37377:
                 {
@@ -4195,6 +4163,16 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(Unit *pVictim, DamageIn
                     default:
                         return SPELL_AURA_PROC_FAILED;
                 }
+            }
+            // Soul Leech
+            else if (auraSpellInfo->SpellIconID == 2027)
+            {
+                basepoints[0] = triggerAmount;
+                basepoints[1] = triggerAmount;
+
+                // Replenishment proc
+                CastSpell(this, 57669, true, NULL, triggeredByAura);
+                break;
             }
             // Cheat Death
             else if (auraSpellInfo->Id == 28845)

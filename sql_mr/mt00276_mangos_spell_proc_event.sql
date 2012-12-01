@@ -229,3 +229,8 @@ INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskB0`,
 DELETE FROM `spell_proc_event` WHERE `entry` = 91986;
 INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`, `SpellFamilyMaskB0`) VALUE
 (91986, 5, 4096, 128);
+
+-- Soul Leech
+DELETE FROM `spell_proc_event` WHERE `entry` = 30293;
+INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`, `SpellFamilyMaskB0`, `procEx`) VALUE
+(30293, 5, 128, 128+131072, 3);
