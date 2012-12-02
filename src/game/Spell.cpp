@@ -7938,6 +7938,43 @@ CurrentSpellTypes Spell::GetCurrentContainer()
 
 bool Spell::CheckTargetBeforeLimitation(Unit* target, SpellEffectIndex eff)
 {
+    if (!target)
+        return false;
+
+    SpellEffectEntry const* spellEffect = m_spellInfo->GetSpellEffect(eff);
+    if(!spellEffect)
+        return false;
+
+    // check right target                                                                                       // should activ for spells 72034, 72096
+    if (!target->isAlive() && !IsSpellAllowDeadTarget(m_spellInfo))
+        return false;
+
+    if (m_spellInfo->HasAttribute(SPELL_ATTR_EX3_TARGET_ONLY_PLAYER) && target->GetTypeId() != TYPEID_PLAYER &&
+        spellEffect->EffectImplicitTargetA != TARGET_SCRIPT && spellEffect->EffectImplicitTargetA != TARGET_SELF)
+    {
+        return false;
+    }
+
+    // Check Aura spell req (need for AoE spells)
+    SpellAuraRestrictionsEntry const* auraRestrictions = m_spellInfo->GetSpellAuraRestrictions();
+    if(auraRestrictions)
+    {
+        if (auraRestrictions->targetAuraSpell && !target->HasAura(auraRestrictions->targetAuraSpell))
+            return false;
+        if (auraRestrictions->excludeTargetAuraSpell && target->HasAura(auraRestrictions->excludeTargetAuraSpell))
+            return false;
+        if (auraRestrictions->TargetAuraStateNot && target->HasAura(auraRestrictions->TargetAuraStateNot))
+            return false;
+    }
+
+    return true;
+}
+
+bool Spell::CheckTarget(Unit* target, SpellEffectIndex eff )
+{
+    if (!target)
+        return false;
+
     SpellEffectEntry const* spellEffect = m_spellInfo->GetSpellEffect(eff);
     if(!spellEffect)
         return false;

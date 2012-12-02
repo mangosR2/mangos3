@@ -36,8 +36,10 @@ const char WorldTemplatesrcfmt[] = "is";
 const char WorldTemplatedstfmt[] = "ii";
 const char ConditionsSrcFmt[] = "iiii";
 const char ConditionsDstFmt[] = "iiii";
-const char SpellTemplatesrcfmt[] = "iiiiiiiiiix";
-
+const char SpellTemplatesrcfmt[] = "iiiiiiiiiiix";
+//                                  0         10        20        30        40        50        60        70        80        90        100       110       120       130       140       150       160     170       180  185
+const char SpellTemplatedstfmt[] = "ixxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxiixxxxixxxxxxFxxxxxxxxxxxxxxxxxxxxxxixxxxxFFFxxxxxxixxxxxixxixxxxxFFFxxxxxxixxixxixxFFFxxxxxxxxxxxxxppppppppppppppppppppppppppppppppxxxxxxxxxxxFFFxxxxxFFFx";
+//                                Id                              proc  DurationIndex                 Effect0        tarA0    effectAura0          triggerSpell0      SpellName[16]   Rank[16]
 //                                     0         10        20        30        40        50        60        70        80        90        100       110       120
 const char SpellDbcTemplatesrcfmt[] = "iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiifiiiiiiiiiifffiiiiiiiiiiiiiiiiiiiiifffiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiifffiiix";
 const char SpellDbcTemplatedstfmt[] = "iiiiiiiiiiiiiiixixiiiiiiiiiiiiixiiiiiiiiiiiiifixxxxxxxxxxxxxxxxxxiiiiiiiiifffiiiiiiiiiiiiiiiiiiiiifffxxxiixiiiiiiiiiFFFiiiiiiiiixxixppppppppppppppppppppppppppppppppiiiiiiiiiiifffxxiiiFFFx";
@@ -55,3 +57,11 @@ SQLStorage sPageTextStore(PageTextfmt, "entry", "page_text");
 SQLStorage sInstanceTemplate(InstanceTemplatesrcfmt, InstanceTemplatedstfmt, "map", "instance_template");
 SQLStorage sWorldTemplate(WorldTemplatesrcfmt, WorldTemplatedstfmt, "map", "world_template");
 SQLStorage sConditionStorage(ConditionsSrcFmt, ConditionsDstFmt, "condition_entry", "conditions");
+
+SQLHashStorage sGameObjectDataAddonStorage(GameObjectInfoAddonInfofmt, "guid", "gameobject_addon");
+SQLHashStorage sSpellDbcTemplate(SpellDbcTemplatesrcfmt, SpellDbcTemplatedstfmt, "Id", "spell_dbc");
+SQLMultiStorage sVehicleAccessoryStorage(VehicleAccessorySrcFmt, VehicleAccessoryDstFmt, "entry", "vehicle_accessory");
+SQLHashStorage sGOStorage(GameObjectInfosrcfmt, GameObjectInfodstfmt, "entry", "gameobject_template");
+SQLHashStorage sSpellTemplate(SpellTemplatesrcfmt, SpellTemplatedstfmt, "id", "spell_template");
+//SQLHashStorage sCreatureTemplateSpellsStorage(CreatureTemplateSpellsFmt, "entry", "creature_template_spells");
+

@@ -819,7 +819,7 @@ struct CreatureModelDataEntry
     //float CollisionWidth;                                 // 15
     float CollisionHeight;                                  // 16
     float MountHeight;                                      // 17 Used in calculation of unit collision data when mounted
-    //float Unks[11]                                        // 18-28
+    //float Unks[14]                                        // 18-31
 };
 
 #define MAX_CREATURE_SPELL_DATA_SLOT 4
@@ -863,24 +863,29 @@ struct CreatureTypeEntry
 struct DestructibleModelDataEntry
 {
     uint32 m_ID;                                            // 0        m_ID
-    // uint32 unk1;                                         // 1
+    uint32 defaultDisplayId;                                // 1
     // uint32 unk2;                                         // 2
-    uint32 damagedDisplayId;                                // 3
+    // uint32 unk3;                                         // 3
     // uint32 unk4;                                         // 4
-    // uint32 unk5;                                         // 5
+    uint32 damagedDisplayId;                                // 5
     // uint32 unk6;                                         // 6
-    uint32 destroyedDisplayId;                              // 7
+    // uint32 unk7;                                         // 7
     // uint32 unk8;                                         // 8
     // uint32 unk9;                                         // 9
-    // uint32 unk10;                                        // 10
-    uint32 rebuildingDisplayId;                             // 11       // Maybe rebuildingDisplayIdWhileDestroyed
+    uint32 destroyedDisplayId;                              // 10
+    // uint32 unk11;                                        // 11
     // uint32 unk12;                                        // 12
     // uint32 unk13;                                        // 13
     // uint32 unk14;                                        // 14
-    // uint32 unk15;                                        // 15
+    uint32 rebuildingDisplayId;                             // 15       // Maybe rebuildingDisplayIdWhileDestroyed
     // uint32 unk16;                                        // 16
     // uint32 unk17;                                        // 17
     // uint32 unk18;                                        // 18
+    // uint32 unk19;                                        // 19
+    uint32 specialDisplayId;                                // 20
+    // uint32 unk21;                                        // 21
+    // uint32 unk22;                                        // 22
+    // uint32 unk23;                                        // 23
 };
 
 struct DungeonEncounterEntry
@@ -1255,23 +1260,27 @@ struct ItemSetEntry
 struct LFGDungeonEntry
 {
     uint32  ID;                                             // 0     m_ID
-    //char*   name[16];                                     // 1-17  m_name_lang
-    uint32  minlevel;                                       // 18    m_minLevel
-    uint32  maxlevel;                                       // 19    m_maxLevel
-    uint32  reclevel;                                       // 20    m_target_level
-    uint32  recminlevel;                                    // 21    m_target_level_min
-    uint32  recmaxlevel;                                    // 22    m_target_level_max
-    uint32  map;                                            // 23    m_mapID
-    uint32  difficulty;                                     // 24    m_difficulty
-    uint32  flags;                                          // 25    m_flags
-    uint32  type;                                           // 26    m_typeID
-    uint32  faction;                                        // 27    m_faction
-    //char*   unk3;                                         // 28    m_textureFilename
-    uint32  expansion;                                      // 29    m_expansionLevel
-    uint32  index;                                          // 30    m_order_index
-    uint32  grouptype;                                      // 31    m_group_id
-    //char*   desc[16];                                     // 32-47 m_description_lang
-    //uint32 unk5                                           // 48 language flags?
+    //char*   name;                                         // 1     m_name
+    uint32  minlevel;                                       // 2     m_minLevel
+    uint32  maxlevel;                                       // 3     m_maxLevel
+    uint32  reclevel;                                       // 4     m_target_level
+    uint32  recminlevel;                                    // 5     m_target_level_min
+    uint32  recmaxlevel;                                    // 6     m_target_level_max
+    uint32  map;                                            // 7     m_mapID
+    uint32  difficulty;                                     // 8     m_difficulty
+    uint32  flags;                                          // 9     m_flags
+    uint32  type;                                           // 10    m_typeID
+    uint32  faction;                                        // 11    m_faction
+    //char*   unk3;                                         // 12    m_textureFilename
+    uint32  expansion;                                      // 13    m_expansionLevel
+    uint32  index;                                          // 14    m_order_index
+    uint32  grouptype;                                      // 15    m_group_id
+    //char*   desc[16];                                     // 16    m_description_lang
+    uint32  randomEntry;                                    // 17
+    //uint32 unk18;                                         // 18
+    //uint32 unk19;                                         // 19
+    //uint32 unk20;                                         // 20
+
     // Helpers
     uint32 Entry() const { return ID + (type << 24); }
 };
@@ -1318,18 +1327,6 @@ struct LFGDungeonExpansionEntry
     m_order_index
     m_parent_group_id
     m_typeid
-};*/
-
-/*struct LfgDungeonExpansionEntry
-{
-    m_ID
-    m_lfg_id
-    m_expansion_level
-    m_random_id
-    m_hard_level_min
-    m_hard_level_max
-    m_target_level_min
-    m_target_level_max
 };*/
 
 struct LiquidTypeEntry
