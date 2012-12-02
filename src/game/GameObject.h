@@ -395,10 +395,11 @@ struct GameObjectInfo
         // not use for specific field access (only for output with loop by all filed), also this determinate max union size
         struct
         {
-            uint32 data[24];
+            uint32 data[32];
         } raw;
     };
 
+    uint32 unk2;
     uint32 MinMoneyLoot;
     uint32 MaxMoneyLoot;
     uint32 ScriptId;
@@ -644,7 +645,7 @@ class MANGOS_DLL_SPEC GameObject : public WorldObject
         int64 GetPackedWorldRotation() const { return m_packedRotation; }
 
         // overwrite WorldObject function for proper name localization
-        const char* GetNameForLocaleIdx(int32 locale_idx) const;
+        const char* GetNameForLocaleIdx(int32 locale_idx) const override;
 
         void SaveToDB();
         void SaveToDB(uint32 mapid, uint8 spawnMask, uint32 phaseMask);
@@ -716,7 +717,7 @@ class MANGOS_DLL_SPEC GameObject : public WorldObject
         void EnableCollision(bool enable);
         bool CalculateCurrentCollisionState() const;
 
-        float GetObjectBoundingRadius() const;              // overwrite WorldObject version
+        float GetObjectBoundingRadius() const override;     // overwrite WorldObject version
 
         void Use(Unit* user);
 
@@ -741,12 +742,12 @@ class MANGOS_DLL_SPEC GameObject : public WorldObject
         uint32 GetUniqueUseCount() const { return m_UniqueUsers.size(); }
         uint32 GetCapturePointTicks() const { return m_captureTicks; }
 
-        void SaveRespawnTime();
+        void SaveRespawnTime() override;
 
         // Loot System
         Loot loot;
         void getFishLoot(Loot* loot, Player* loot_owner);
-        void StartGroupLoot(Group* group, uint32 timer);
+        void StartGroupLoot(Group* group, uint32 timer) override;
 
         ObjectGuid GetLootRecipientGuid() const { return m_lootRecipientGuid; }
         uint32 GetLootGroupRecipientId() const { return m_lootGroupRecipientId; }
@@ -757,8 +758,8 @@ class MANGOS_DLL_SPEC GameObject : public WorldObject
         void SetLootRecipient(Unit* pUnit);
         Player* GetOriginalLootRecipient() const;           // ignore group changes/etc, not for looting
 
-        bool HasQuest(uint32 quest_id) const;
-        bool HasInvolvedQuest(uint32 quest_id) const;
+        bool HasQuest(uint32 quest_id) const override;
+        bool HasInvolvedQuest(uint32 quest_id) const override;
         bool ActivateToQuest(Player* pTarget) const;
         void UseDoorOrButton(uint32 time_to_restore = 0, bool alternative = false);
         // 0 = use `gameobject`.`spawntimesecs`
@@ -771,7 +772,7 @@ class MANGOS_DLL_SPEC GameObject : public WorldObject
         void SummonLinkedTrapIfAny();
         void TriggerLinkedGameObject(Unit* target);
 
-        bool isVisibleForInState(Player const* u, WorldObject const* viewPoint, bool inVisibleList) const;
+        bool isVisibleForInState(Player const* u, WorldObject const* viewPoint, bool inVisibleList) const override;
 
         GameObject* LookupFishingHoleAround(float range);
 
@@ -808,7 +809,7 @@ class MANGOS_DLL_SPEC GameObject : public WorldObject
         // For traps/goober this: spell casting cooldown, for doors/buttons: reset time.
 
         uint32      m_captureTimer;                         // (msecs) timer used for capture points
-        float       m_captureSlider;
+        float       m_captureSlider;                        // capture point slider value in range of [0..100]
         CapturePointState m_captureState;
 
         GuidSet m_SkillupSet;                               // players that already have skill-up at GO use
@@ -827,7 +828,7 @@ class MANGOS_DLL_SPEC GameObject : public WorldObject
         // Loot System
         uint32 m_groupLootTimer;                            // (msecs)timer used for group loot
         uint32 m_groupLootId;                               // used to find group which is looting
-        void StopGroupLoot();
+        void StopGroupLoot() override;
         ObjectGuid m_lootRecipientGuid;                     // player who will have rights for looting if m_lootGroupRecipient==0 or group disbanded
         uint32 m_lootGroupRecipientId;                      // group who will have rights for looting if set and exist
 

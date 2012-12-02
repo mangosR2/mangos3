@@ -47,7 +47,8 @@ struct CriteriaProgress
 };
 
 enum AchievementCriteriaRequirementType
-{                                                           // value1         value2        comment
+{
+    // value1         value2        comment
     ACHIEVEMENT_CRITERIA_REQUIRE_NONE                = 0,   // 0              0
     ACHIEVEMENT_CRITERIA_REQUIRE_T_CREATURE          = 1,   // creature_id    0
     ACHIEVEMENT_CRITERIA_REQUIRE_T_PLAYER_CLASS_RACE = 2,   // class_id       race_id
@@ -298,7 +299,6 @@ class AchievementMgr
         void CompletedCriteriaFor(AchievementEntry const* achievement);
         void IncompletedAchievement(AchievementEntry const* entry);
         void CompleteAchievementsWithRefs(AchievementEntry const* entry);
-        void BuildAllDataPacket(WorldPacket* data);
 
         Player* m_player;
         CriteriaProgressMap m_criteriaProgress;

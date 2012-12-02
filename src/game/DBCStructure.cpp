@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2011-2012 /dev/rsa for MangosR2 <http://github.com/MangosR2>
+ * Copyright (C) 2005-2012 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -351,7 +352,6 @@ uint32 SpellEntry::GetTargetAuraSpell() const
     SpellAuraRestrictionsEntry const* aura = GetSpellAuraRestrictions();
     return aura ? aura->targetAuraSpell : 0;
 }
-
 
 uint32 SpellEntry::GetTargets() const
 {

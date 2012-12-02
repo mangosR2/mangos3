@@ -120,13 +120,8 @@ bool GridMap::loadData(char* filename)
 
 void GridMap::unloadData()
 {
-    if (m_area_map)
         delete[] m_area_map;
-
-    if (m_V9)
         delete[] m_V9;
-
-    if (m_V8)
         delete[] m_V8;
 
     if (m_liquidEntry)

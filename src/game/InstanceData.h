@@ -114,4 +114,5 @@ class MANGOS_DLL_SPEC InstanceData
         virtual void SendSpecialEncounterState(ObjectGuid linkedGuid);
 
 };
+
 #endif

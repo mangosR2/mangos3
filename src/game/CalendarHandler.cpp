@@ -98,13 +98,13 @@ void WorldSession::HandleCalendarGetCalendar(WorldPacket& /*recv_data*/)
         data << uint32(0);                                  // Holidays.dbc priority
         data << uint32(0);                                  // Holidays.dbc calendarFilterType
 
-        for(uint32 j = 0; j < 26; j++)
+            for(uint32 j = 0; j < 26; ++j)
             data << uint32(0);                              // Holidays.dbc date
 
-        for(uint32 j = 0; j < 10; j++)
+            for(uint32 j = 0; j < 10; ++j)
             data << uint32(0);                              // Holidays.dbc duration
 
-        for(uint32 j = 0; j < 10; j++)
+            for(uint32 j = 0; j < 10; ++j)
             data << uint32(0);                              // Holidays.dbc calendarFlags
 
         data << "";                                         // Holidays.dbc textureFilename

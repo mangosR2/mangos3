@@ -53,9 +53,10 @@ enum ContentLevels
 {
     CONTENT_1_60 = 0,
     CONTENT_61_70,
-    CONTENT_71_80
+    CONTENT_71_80,
+    CONTENT_81_85,
 };
-ContentLevels GetContentLevelsForMapAndZone(uint32 mapid, uint32 zoneId);
+ContentLevels GetContentLevelsForMap(uint32 mapid);
 
 ChatChannelsEntry const* GetChannelEntryFor(uint32 channel_id);
 
@@ -90,6 +91,8 @@ inline Difficulty GetPrevDifficulty(Difficulty diff, bool isRaid)
 }
 
 uint32 const* /*[3]*/ GetTalentTabPages(uint32 cls);
+std::vector<uint32> const* GetTalentTreeMasterySpells(uint32 talentTree);
+std::vector<uint32> const* GetTalentTreePrimarySpells(uint32 talentTree);
 
 bool IsPointInAreaTriggerZone(AreaTriggerEntry const* atEntry, uint32 mapid, float x, float y, float z, float delta = 0.0f);
 
@@ -113,6 +116,8 @@ extern DBCStorage <CharStartOutfitEntry>         sCharStartOutfitStore;
 extern DBCStorage <CharTitlesEntry>              sCharTitlesStore;
 extern DBCStorage <ChrClassesEntry>              sChrClassesStore;
 extern DBCStorage <ChrPowerTypesEntry>           sChrPowerTypesStore;
+extern uint32 sChrClassXPowerTypesStore[MAX_CLASSES][MAX_POWERS];
+extern uint32 sChrClassXPowerIndexStore[MAX_CLASSES][MAX_STORED_POWERS];
 extern DBCStorage <ChrRacesEntry>                sChrRacesStore;
 extern DBCStorage <CinematicSequencesEntry>      sCinematicSequencesStore;
 extern DBCStorage <CreatureDisplayInfoEntry>     sCreatureDisplayInfoStore;
@@ -146,6 +151,9 @@ extern DBCStorage <GtOCTClassCombatRatingScalarEntry> sGtOCTClassCombatRatingSca
 // extern DBCStorage <GtOCTRegenMPEntry>            sGtOCTRegenMPStore; -- not used currently
 // extern DBCStorage <GtRegenHPPerSptEntry>         sGtRegenHPPerSptStore;
 extern DBCStorage <GtRegenMPPerSptEntry>         sGtRegenMPPerSptStore;
+extern DBCStorage <GtSpellScalingEntry>          sGtSpellScalingStore;
+extern DBCStorage <GtOCTBaseHPByClassEntry>      sGtOCTBaseHPByClassStore;
+extern DBCStorage <GtOCTBaseMPByClassEntry>      sGtOCTBaseMPByClassStore;
 extern DBCStorage <HolidaysEntry>                sHolidaysStore;
 extern DBCStorage <ItemArmorQualityEntry>        sItemArmorQualityStore;
 extern DBCStorage <ItemArmorShieldEntry>         sItemArmorShieldStore;
@@ -175,6 +183,7 @@ extern DBCStorage <MapEntry>                     sMapStore;
 // extern DBCStorage <MapDifficultyEntry>           sMapDifficultyStore; -- use GetMapDifficultyData insteed
 extern MapDifficultyMap                          sMapDifficultyMap;
 extern DBCStorage <MovieEntry>                   sMovieStore;
+extern DBCStorage <NumTalentsAtLevelEntry>       sNumTalentsAtLevelStore;
 extern DBCStorage <OverrideSpellDataEntry>       sOverrideSpellDataStore;
 extern DBCStorage <QuestFactionRewardEntry>      sQuestFactionRewardStore;
 extern DBCStorage <QuestSortEntry>               sQuestSortStore;
@@ -225,6 +234,9 @@ extern DBCStorage <TaxiNodesEntry>               sTaxiNodesStore;
 extern DBCStorage <TaxiPathEntry>                sTaxiPathStore;
 extern TaxiMask                                  sTaxiNodesMask;
 extern TaxiMask                                  sOldContinentsNodesMask;
+extern TaxiMask                                  sHordeTaxiNodesMask;
+extern TaxiMask                                  sAllianceTaxiNodesMask;
+extern TaxiMask                                  sDeathKnightTaxiNodesMask;
 extern TaxiPathSetBySource                       sTaxiPathSetBySource;
 extern TaxiPathNodesByPath                       sTaxiPathNodesByPath;
 extern DBCStorage <TotemCategoryEntry>           sTotemCategoryStore;
@@ -235,6 +247,7 @@ extern DBCStorage <WMOAreaTableEntry>            sWMOAreaTableStore;
 extern DBCStorage <WorldMapOverlayEntry>         sWorldMapOverlayStore;
 extern DBCStorage <WorldSafeLocsEntry>           sWorldSafeLocsStore;
 extern DBCStorage <WorldStateEntry>              sWorldStateStore;
+extern DBCStorage <WorldPvPAreaEntry>            sWorldPvPAreaStore;
 
 void LoadDBCStores(const std::string& dataPath);
 

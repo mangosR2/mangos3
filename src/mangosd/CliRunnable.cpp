@@ -143,7 +143,8 @@ bool ChatHandler::GetDeletedCharacterInfoList(DeletedInfoList& foundList, std::s
             info.deleteDate = time_t(fields[3].GetUInt64());
 
             foundList.push_back(info);
-        } while (resultChar->NextRow());
+        }
+        while (resultChar->NextRow());
 
         delete resultChar;
     }
@@ -624,7 +625,7 @@ void CliRunnable::run()
         char *command_str = fgets(commandbuf,sizeof(commandbuf),stdin);
         if (command_str != NULL)
         {
-            for(int x=0;command_str[x];x++)
+            for (int x = 0; command_str[x]; ++x)
                 if(command_str[x]=='\r'||command_str[x]=='\n')
             {
                 command_str[x]=0;

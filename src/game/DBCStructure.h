@@ -2933,11 +2933,16 @@ struct SpellEffect
 {
     SpellEffect()
     {
-        effects[0] = NULL;
-        effects[1] = NULL;
-        effects[2] = NULL;
+        for (uint8 i = 0; i < MAX_EFFECT_INDEX; ++i)
+            effects[SpellEffectIndex(i)] = NULL;
     }
-    SpellEffectEntry const* effects[3];
+
+    ~SpellEffect()
+    {
+        //for (uint8 i = 0; i < MAX_EFFECT_INDEX; ++i)
+        //    delete effects[SpellEffectIndex(i)];
+    }
+    SpellEffectEntry const* effects[MAX_EFFECT_INDEX];
 };
 
 typedef std::map<uint32, SpellEffect> SpellEffectMap;

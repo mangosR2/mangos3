@@ -39,6 +39,7 @@
 #include "Object.h"
 #include "BattleGround/BattleGround.h"
 #include "OutdoorPvP/OutdoorPvP.h"
+#include "Guild.h"
 #include "Pet.h"
 #include "SocialMgr.h"
 #include "DBCEnums.h"
@@ -934,55 +935,28 @@ void WorldSession::HandleFeatherFallAck(WorldPacket &recv_data)
 {
     DEBUG_LOG("WORLD: CMSG_MOVE_FEATHER_FALL_ACK");
 
-    // no used
-    recv_data.rpos(recv_data.wpos());                       // prevent warnings spam
+    // not used
+    recv_data.rfinish();                                    // prevent warnings spam
+    /*
+        bitsream packet
+    */
 }
 
 void WorldSession::HandleMoveUnRootAck(WorldPacket& recv_data)
 {
-    // no used
-    recv_data.rpos(recv_data.wpos());                       // prevent warnings spam
+    // not used
+    recv_data.rfinish();                                    // prevent warnings spam
 /*
-    ObjectGuid guid;
-    recv_data >> guid;
-
-    // now can skip not our packet
-    if(_player->GetObjectGuid() != guid)
-    {
-        recv_data.rpos(recv_data.wpos());                   // prevent warnings spam
-        return;
-    }
-
-    DEBUG_LOG( "WORLD: CMSG_FORCE_MOVE_UNROOT_ACK" );
-
-    recv_data.read_skip<uint32>();                          // unk
-
-    MovementInfo movementInfo;
-    ReadMovementInfo(recv_data, &movementInfo);
+        bitsream packet
 */
 }
 
 void WorldSession::HandleMoveRootAck(WorldPacket& recv_data)
 {
-    // no used
-    recv_data.rpos(recv_data.wpos());                       // prevent warnings spam
+    // not used
+    recv_data.rfinish();                                    // prevent warnings spam
 /*
-    ObjectGuid guid;
-    recv_data >> guid;
-
-    // now can skip not our packet
-    if(_player->GetObjectGuid() != guid)
-    {
-        recv_data.rpos(recv_data.wpos());                   // prevent warnings spam
-        return;
-    }
-
-    DEBUG_LOG( "WORLD: CMSG_FORCE_MOVE_ROOT_ACK" );
-
-    recv_data.read_skip<uint32>();                          // unk
-
-    MovementInfo movementInfo;
-    ReadMovementInfo(recv_data, &movementInfo);
+        bitsream packet
 */
 }
 
@@ -1027,7 +1001,7 @@ void WorldSession::HandleInspectOpcode(WorldPacket& recv_data)
         return;
 
     WorldPacket data(SMSG_INSPECT_RESULTS, 50);
-    data << plr->GetPackGUID();
+    data << plr->GetObjectGuid();
 
     if(sWorld.getConfig(CONFIG_BOOL_TALENTS_INSPECTING) || _player->isGameMaster())
         plr->BuildPlayerTalentsInfoData(&data);
@@ -1039,6 +1013,13 @@ void WorldSession::HandleInspectOpcode(WorldPacket& recv_data)
     }
 
     plr->BuildEnchantmentsInfoData(&data);
+    if (Guild* guild = sGuildMgr.GetGuildById(plr->GetGuildId()))
+    {
+        data << uint64(0/*guild->GetGUID()*/);
+        data << uint32(0/*guild->GetLevel()*/);
+        data << uint64(0/*guild->GetXP()*/);
+        data << uint32(0/*guild->GetMembersCount()*/); // number of members
+    }
 
     SendPacket(&data);
 }
@@ -1046,23 +1027,25 @@ void WorldSession::HandleInspectOpcode(WorldPacket& recv_data)
 void WorldSession::HandleInspectHonorStatsOpcode(WorldPacket& recv_data)
 {
     ObjectGuid guid;
-    recv_data >> guid;
+    recv_data.ReadGuidMask<1, 5, 7, 3, 2, 4, 0, 6>(guid);
+    recv_data.ReadGuidBytes<4, 7, 0, 5, 1, 6, 2, 3>(guid);
 
     Player *player = sObjectMgr.GetPlayer(guid);
-
     if(!player)
     {
         sLog.outError("InspectHonorStats: WTF, player not found...");
         return;
     }
 
-    WorldPacket data(MSG_INSPECT_HONOR_STATS, 8+1+4*4);
-    data << player->GetObjectGuid();
-    data << uint8(player->GetHonorPoints());
-    data << uint32(player->GetUInt32Value(PLAYER_FIELD_KILLS));
-    //data << uint32(player->GetUInt32Value(PLAYER_FIELD_TODAY_CONTRIBUTION));
-    //data << uint32(player->GetUInt32Value(PLAYER_FIELD_YESTERDAY_CONTRIBUTION));
+    WorldPacket data(SMSG_INSPECT_HONOR_STATS, 18);
+    data.WriteGuidMask<4, 3, 6, 2, 5, 0, 7, 1>(player->GetObjectGuid());
+    data << uint8(0);                                                   // rank
+    data << uint16(player->GetUInt16Value(PLAYER_FIELD_KILLS, 1));      // yesterday kills
+    data << uint16(player->GetUInt16Value(PLAYER_FIELD_KILLS, 0));      // today kills
+    data.WriteGuidBytes<2, 0, 6, 3, 4, 1, 5>(player->GetObjectGuid());
     data << uint32(player->GetUInt32Value(PLAYER_FIELD_LIFETIME_HONORBALE_KILLS));
+    data.WriteGuidBytes<7>(player->GetObjectGuid());
+
     SendPacket(&data);
 }
 
@@ -1384,7 +1367,7 @@ void WorldSession::HandleSetRaidDifficultyOpcode( WorldPacket & recv_data )
         if (pGroup->IsLeader(_player->GetObjectGuid()))
         {
             // the difficulty is set even if the instances can't be reset
-            //_player->SendDungeonDifficulty(true);
+            _player->SendDungeonDifficulty(true);
             pGroup->ResetInstances(INSTANCE_RESET_CHANGE_DIFFICULTY, true, _player);
             pGroup->SetRaidDifficulty(Difficulty(mode));
         }
@@ -1421,15 +1404,9 @@ void WorldSession::HandleMoveSetCanFlyAckOpcode( WorldPacket & recv_data )
 {
     // fly mode on/off
     DEBUG_LOG("WORLD: CMSG_MOVE_SET_CAN_FLY_ACK");
-    //recv_data.hexlike();
 
-    ObjectGuid guid;
     MovementInfo movementInfo;
-
-    recv_data >> guid.ReadAsPacked();
-    recv_data >> Unused<uint32>();                          // unk
     recv_data >> movementInfo;
-    recv_data >> Unused<float>();                           // unk2
 
     Unit * target;
 

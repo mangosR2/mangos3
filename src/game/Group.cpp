@@ -29,7 +29,6 @@
 #include "Formulas.h"
 #include "ObjectAccessor.h"
 #include "BattleGround/BattleGround.h"
-#include "BattleGround/BattleGroundMgr.h"
 #include "MapManager.h"
 #include "MapPersistentStateMgr.h"
 #include "Util.h"
@@ -117,7 +116,6 @@ Group::~Group()
             itr2->second.state->RemoveGroup(this);
 
     // Sub group counters clean up
-    if (m_subGroupsCounts)
         delete[] m_subGroupsCounts;
 
     if (m_LFGState)

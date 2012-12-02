@@ -61,6 +61,7 @@ class MANGOS_DLL_SPEC TargetedMovementGeneratorMedium
         Unit* GetTarget() const { return i_target.getTarget(); }
 
         void UnitSpeedChanged() { m_speedChanged = true; }
+
         const char* Name() const { return "<TargetedMedium>"; }
 
     protected:
@@ -86,7 +87,7 @@ class MANGOS_DLL_SPEC ChaseMovementGenerator : public TargetedMovementGeneratorM
             : TargetedMovementGeneratorMedium<T, ChaseMovementGenerator<T> >(target, offset, angle) {}
         ~ChaseMovementGenerator() {}
 
-        MovementGeneratorType GetMovementGeneratorType() const { return CHASE_MOTION_TYPE; }
+        MovementGeneratorType GetMovementGeneratorType() const override { return CHASE_MOTION_TYPE; }
 
         void Initialize(T &);
         void Finalize(T &);
@@ -111,7 +112,7 @@ class MANGOS_DLL_SPEC FollowMovementGenerator : public TargetedMovementGenerator
             : TargetedMovementGeneratorMedium<T, FollowMovementGenerator<T> >(target, offset, angle) {}
         ~FollowMovementGenerator() {}
 
-        MovementGeneratorType GetMovementGeneratorType() const { return FOLLOW_MOTION_TYPE; }
+        MovementGeneratorType GetMovementGeneratorType() const override { return FOLLOW_MOTION_TYPE; }
 
         void Initialize(T &);
         void Finalize(T &);

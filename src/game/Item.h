@@ -384,8 +384,8 @@ class MANGOS_DLL_SPEC Item : public Object
         uint16 GetQueuePos() const { return m_queuePos; }
         void FSetState(ItemUpdateState state) { m_state = state; } // forced
 
-        bool HasQuest(uint32 quest_id) const { return GetProto()->StartQuest == quest_id; }
-        bool HasInvolvedQuest(uint32 /*quest_id*/) const { return false; }
+        bool HasQuest(uint32 quest_id) const override { return GetProto()->StartQuest == quest_id; }
+        bool HasInvolvedQuest(uint32 /*quest_id*/) const override { return false; }
         bool IsPotion() const { return GetProto()->IsPotion(); }
         bool IsConjuredConsumable() const { return GetProto()->IsConjuredConsumable(); }
 
@@ -410,6 +410,7 @@ class MANGOS_DLL_SPEC Item : public Object
 
         bool LoadSoulboundTradeableDataFromDB(Player* owner);
         bool CheckSoulboundTradeExpire(Player* owner);
+
     private:
         bool IsRefundOrSoulboundTradeExpired(Player* owner) const;
 

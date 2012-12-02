@@ -333,10 +333,9 @@ bool Pet::LoadPetFromDB(Player* owner, uint32 petentry, uint32 petnumber, bool c
 
         if(result)
         {
-            if(m_declinedname)
                 delete m_declinedname;
-
             m_declinedname = new DeclinedName;
+
             Field *fields2 = result->Fetch();
             for(int i = 0; i < MAX_DECLINED_NAME_CASES; ++i)
                 m_declinedname->name[i] = fields2[i].GetCppString();
@@ -439,7 +438,6 @@ void Pet::SavePetToDB(PetSaveMode mode)
         savePet.addUInt32(uint32(HasByteFlag(UNIT_FIELD_BYTES_2, 2, UNIT_CAN_BE_RENAMED) ? 0 : 1));
         savePet.addUInt32(curhealth < 1 ? (getPetType() == HUNTER_PET ? 0 : 1) : curhealth);
         savePet.addUInt32(curmana);
-        savePet.addUInt32(GetPower(POWER_HAPPINESS));
 
         std::ostringstream ss;
         for(uint32 i = ACTION_BAR_INDEX_START; i < ACTION_BAR_INDEX_END; ++i)
@@ -692,6 +690,44 @@ HappinessState Pet::GetHappinessState()
         return CONTENT;
 }
 
+
+void Pet::Regenerate(Powers power)
+{
+    uint32 curValue = GetPower(power);
+    uint32 maxValue = GetMaxPower(power);
+
+    if (curValue >= maxValue)
+        return;
+
+    float addvalue = 0.0f;
+
+    switch (power)
+    {
+        case POWER_FOCUS:
+        {
+            // For hunter pets.
+            addvalue = 24 * sWorld.getConfig(CONFIG_FLOAT_RATE_POWER_FOCUS);
+            break;
+        }
+        case POWER_ENERGY:
+        {
+            // For deathknight's ghoul.
+            addvalue = 20;
+            break;
+        }
+        default:
+            return;
+    }
+
+    // Apply modifiers (if any).
+    AuraList const& ModPowerRegenPCTAuras = GetAurasByType(SPELL_AURA_MOD_POWER_REGEN_PERCENT);
+    for (AuraList::const_iterator i = ModPowerRegenPCTAuras.begin(); i != ModPowerRegenPCTAuras.end(); ++i)
+        if ((*i)->GetModifier()->m_miscvalue == int32(power))
+            addvalue *= ((*i)->GetModifier()->m_amount + 100) / 100.0f;
+
+    ModifyPower(power, (int32)addvalue);
+}
+
 bool Pet::CanTakeMoreActiveSpells(uint32 spellid)
 {
     uint8  activecount = 1;
@@ -714,7 +750,7 @@ bool Pet::CanTakeMoreActiveSpells(uint32 spellid)
 
         uint8 x;
 
-        for(x = 0; x < activecount; x++)
+        for (x = 0; x < activecount; ++x)
         {
             if(chainstart == chainstartstore[x])
                 break;
@@ -764,7 +800,7 @@ void Pet::Unsummon(PetSaveMode mode, Unit* owner /*= NULL*/)
             {
                 // returning of reagents only for players, so best done here
                 uint32 spellId = GetUInt32Value(UNIT_CREATED_BY_SPELL);
-                SpellEntry const *spellInfo = sSpellStore.LookupEntry(spellId);
+                SpellEntry const* spellInfo = sSpellStore.LookupEntry(spellId);
                 SpellReagentsEntry const* spellReagents = spellInfo ? spellInfo->GetSpellReagents() : NULL;
 
                 if (spellReagents)
@@ -2032,7 +2068,7 @@ void Pet::ToggleAutocast(uint32 spellid, bool apply)
     else
     {
         AutoSpellList::iterator itr2 = m_autospells.begin();
-        for (i = 0; i < m_autospells.size() && m_autospells[i] != spellid; ++i, itr2++)
+        for (i = 0; i < m_autospells.size() && m_autospells[i] != spellid; ++i, ++itr2)
             ;                                               // just search
 
         if (i < m_autospells.size())

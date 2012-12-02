@@ -25,18 +25,18 @@
 class MANGOS_DLL_SPEC MapReference : public Reference<Map, Player>
 {
     protected:
-        void targetObjectBuildLink()
+        void targetObjectBuildLink() override
         {
             // called from link()
             getTarget()->m_mapRefManager.insertFirst(this);
             getTarget()->m_mapRefManager.incSize();
         }
-        void targetObjectDestroyLink()
+        void targetObjectDestroyLink() override
         {
             // called from unlink()
-            if(isValid()) getTarget()->m_mapRefManager.decSize();
+            if (isValid()) getTarget()->m_mapRefManager.decSize();
         }
-        void sourceObjectDestroyLink()
+        void sourceObjectDestroyLink() override
         {
             // called from invalidate()
             getTarget()->m_mapRefManager.decSize();
@@ -44,9 +44,9 @@ class MANGOS_DLL_SPEC MapReference : public Reference<Map, Player>
     public:
         MapReference() : Reference<Map, Player>() {}
         ~MapReference() { unlink(); }
-        MapReference *next() { return (MapReference*)Reference<Map, Player>::next(); }
-        MapReference const *next() const { return (MapReference const*)Reference<Map, Player>::next(); }
-        MapReference *nockeck_prev() { return (MapReference*)Reference<Map, Player>::nocheck_prev(); }
-        MapReference const *nocheck_prev() const { return (MapReference const*)Reference<Map, Player>::nocheck_prev(); }
+        MapReference* next() { return (MapReference*)Reference<Map, Player>::next(); }
+        MapReference const* next() const { return (MapReference const*)Reference<Map, Player>::next(); }
+        MapReference* nockeck_prev() { return (MapReference*)Reference<Map, Player>::nocheck_prev(); }
+        MapReference const* nocheck_prev() const { return (MapReference const*)Reference<Map, Player>::nocheck_prev(); }
 };
 #endif

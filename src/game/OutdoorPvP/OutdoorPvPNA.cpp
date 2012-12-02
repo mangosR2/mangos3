@@ -18,12 +18,12 @@
 
 #include "OutdoorPvPNA.h"
 #include "WorldPacket.h"
-#include "../World.h"
-#include "../ObjectMgr.h"
-#include "../Object.h"
-#include "../Creature.h"
-#include "../GameObject.h"
-#include "../Player.h"
+#include "World.h"
+#include "ObjectMgr.h"
+#include "Object.h"
+#include "Creature.h"
+#include "GameObject.h"
+#include "Player.h"
 
 OutdoorPvPNA::OutdoorPvPNA() : OutdoorPvP(),
     m_zoneOwner(TEAM_NONE),
@@ -187,6 +187,8 @@ void OutdoorPvPNA::HandleCreatureDeath(Creature* creature)
 
 void OutdoorPvPNA::HandleGameObjectCreate(GameObject* go)
 {
+    OutdoorPvP::HandleGameObjectCreate(go);
+
     switch (go->GetEntry())
     {
         case GO_HALAA_BANNER:
@@ -521,7 +523,7 @@ void OutdoorPvPNA::Update(uint32 diff)
 // Handle soldiers respawn on timer - this will summon a replacement for the dead soldier
 void OutdoorPvPNA::RespawnSoldier()
 {
-    for (GuidZoneMap::iterator itr = m_zonePlayers.begin(); itr != m_zonePlayers.end(); ++itr)
+    for (GuidZoneMap::const_iterator itr = m_zonePlayers.begin(); itr != m_zonePlayers.end(); ++itr)
     {
         // Find player who is in main zone (Nagrand) to get correct map reference
         if (!itr->second)

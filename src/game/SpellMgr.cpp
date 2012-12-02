@@ -117,13 +117,43 @@ uint32 GetSpellCastTime(SpellEntry const* spellInfo, Spell const* spell)
                         return 0;
     }
 
-    SpellCastTimesEntry const *spellCastTimeEntry = sSpellCastTimesStore.LookupEntry(spellInfo->CastingTimeIndex);
+    int32 castTime = 0;
+    SpellScalingEntry const* spellScalingEntry = spellInfo->GetSpellScaling();
+    if (spell && spellScalingEntry && (spell->GetCaster()->GetTypeId() == TYPEID_PLAYER || spell->GetCaster()->GetObjectGuid().IsPet()))
+    {
+        uint32 level = spell->GetCaster()->getLevel();
+        if (level == 1)
+            castTime = int32(spellScalingEntry->castTimeMin);
+        else if (level < spellScalingEntry->castScalingMaxLevel)
+            castTime = int32(spellScalingEntry->castTimeMin + float(level - 1) *
+                (spellScalingEntry->castTimeMax - spellScalingEntry->castTimeMin) / (spellScalingEntry->castScalingMaxLevel - 1));
+        else
+            castTime = int32(spellScalingEntry->castTimeMax);
+    }
+    else if (SpellCastTimesEntry const* spellCastTimeEntry = sSpellCastTimesStore.LookupEntry(spellInfo->CastingTimeIndex))
+    {
+        if (spell)
+        {
+            uint32 level = spell->GetCaster()->getLevel();
+            if (SpellLevelsEntry const* levelsEntry = spellInfo->GetSpellLevels())
+            {
+                if (levelsEntry->maxLevel)
+                    level = std::min(level, levelsEntry->maxLevel);
+                level = std::max(level, levelsEntry->baseLevel) - levelsEntry->baseLevel;
+            }
 
+            // currently only profession spells have CastTimePerLevel data filled, always negative
+            castTime = spellCastTimeEntry->CastTime + spellCastTimeEntry->CastTimePerLevel * level;
+        }
+        else
+            castTime = spellCastTimeEntry->CastTime;
+
+        if (castTime < spellCastTimeEntry->MinCastTime)
+            castTime = spellCastTimeEntry->MinCastTime;
+    }
+    else
     // not all spells have cast time index and this is all is pasiive abilities
-    if (!spellCastTimeEntry)
         return 0;
-
-    int32 castTime = spellCastTimeEntry->CastTime;
 
     if (spell)
     {
@@ -1077,7 +1107,7 @@ bool IsPositiveEffect(SpellEntry const* spellproto, SpellEffectIndex effIndex)
     }
 
     // non-positive targets
-    if(!IsPositiveTarget(spellEffect->EffectImplicitTargetA,spellEffect->EffectImplicitTargetB))
+    if (spellEffect && !IsPositiveTarget(spellEffect->EffectImplicitTargetA,spellEffect->EffectImplicitTargetB))
         return false;
 
     // AttributesEx check
@@ -1320,7 +1350,8 @@ void SpellMgr::LoadSpellTargetPositions()
         mSpellTargetPositions[Spell_ID] = st;
         ++count;
 
-    } while( result->NextRow() );
+    }
+    while (result->NextRow());
 
     delete result;
 
@@ -1557,7 +1588,8 @@ void SpellMgr::LoadSpellProcEvents()
 
         rankHelper.RecordRank(spe, entry);
 
-    } while (result->NextRow());
+    }
+    while (result->NextRow());
 
     rankHelper.FillHigherRanks();
 
@@ -1631,7 +1663,8 @@ void SpellMgr::LoadSpellProcItemEnchant()
         doForHighRanks(entry, worker);
 
         ++count;
-    } while( result->NextRow() );
+    }
+    while (result->NextRow());
 
     delete result;
 
@@ -1932,7 +1965,8 @@ void SpellMgr::LoadSpellBonuses()
 
         ++count;
 
-    } while( result->NextRow() );
+    }
+    while (result->NextRow());
 
     delete result;
 
@@ -2136,7 +2170,8 @@ void SpellMgr::LoadSpellElixirs()
         mSpellElixirs[entry] = mask;
 
         ++count;
-    } while( result->NextRow() );
+    }
+    while (result->NextRow());
 
     delete result;
 
@@ -2233,7 +2268,8 @@ void SpellMgr::LoadSpellThreats()
 
         rankHelper.RecordRank(ste, entry);
 
-    } while( result->NextRow() );
+    }
+    while (result->NextRow());
 
     rankHelper.FillHigherRanks();
 
@@ -2319,6 +2355,7 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
 
     // Specific spell family spells
     // also some SpellIconID exceptions related to late checks (isModifier)
+
     switch(spellInfo_1->GetSpellFamilyName())
     {
         case SPELLFAMILY_GENERIC:
@@ -2391,7 +2428,6 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
                 if (spellInfo_1->Id == 20066 && spellInfo_2->Id == 61840)
                     return true;
             }
-
             // Blessing of Forgotten Kings and (Greater) Blessing of Kings
             if (spellInfo_1->GetSpellFamilyFlags().test<CF_PALADIN_BLESSING_OF_KINGS>())
             {
@@ -2436,10 +2472,58 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
             break;
     }
 
+    // more generic checks
+    if (spellInfo_1->SpellIconID == spellInfo_2->SpellIconID &&
+            spellInfo_1->SpellIconID != 0 && spellInfo_2->SpellIconID != 0)
+    {
+        bool isModifier = false;
+        for (int i = 0; i < MAX_EFFECT_INDEX; ++i)
+        {
+            SpellEffectEntry const* spellEffect1 = spellInfo_1->GetSpellEffect(SpellEffectIndex(i));
+            SpellEffectEntry const* spellEffect2 = spellInfo_2->GetSpellEffect(SpellEffectIndex(i));
+            if(!spellEffect1 || !spellEffect2)
+                continue;
+            if (spellEffect1->EffectApplyAuraName == SPELL_AURA_ADD_FLAT_MODIFIER ||
+                spellEffect1->EffectApplyAuraName == SPELL_AURA_ADD_PCT_MODIFIER  ||
+                spellEffect2->EffectApplyAuraName == SPELL_AURA_ADD_FLAT_MODIFIER ||
+                spellEffect2->EffectApplyAuraName == SPELL_AURA_ADD_PCT_MODIFIER )
+                isModifier = true;
+        }
+
+        if (!isModifier)
+            return true;
+    }
+
     if (IsRankSpellDueToSpell(spellInfo_1, spellId_2))
         return true;
 
+    if ((classOptions1 && classOptions1->SpellFamilyName == 0) || (classOptions2 && classOptions2->SpellFamilyName == 0))
+        return false;
+
+    if (classOptions1 && classOptions2 && classOptions1->SpellFamilyName != classOptions2->SpellFamilyName)
+        return false;
+
+    bool dummy_only = true;
+    for (int i = 0; i < MAX_EFFECT_INDEX; ++i)
+    {
+        SpellEffectEntry const* spellEffect1 = spellInfo_1->GetSpellEffect(SpellEffectIndex(i));
+        SpellEffectEntry const* spellEffect2 = spellInfo_2->GetSpellEffect(SpellEffectIndex(i));
+        if(!spellEffect1 || !spellEffect2)
+            continue;
+        if (spellEffect1->Effect != spellEffect2->Effect ||
+        spellEffect1->EffectItemType != spellEffect2->EffectItemType ||
+        spellEffect1->EffectMiscValue != spellEffect2->EffectMiscValue ||
+        spellEffect1->EffectApplyAuraName != spellEffect2->EffectApplyAuraName)
+            return false;
+
+        // ignore dummy only spells
+        if(spellEffect1->Effect && spellEffect1->Effect != SPELL_EFFECT_DUMMY && spellEffect1->EffectApplyAuraName != SPELL_AURA_DUMMY)
+            dummy_only = false;
+    }
+    if (dummy_only)
     return false;
+
+    return true;
 }
 
 
@@ -2488,7 +2572,8 @@ bool SpellMgr::IsPrimaryProfessionSpell(uint32 spellId)
 uint32 SpellMgr::GetProfessionSpellMinLevel(uint32 spellId)
 {
     uint32 s2l[8][3] =
-    {   // 0 - gather 1 - non-gather 2 - fish
+    {
+        // 0 - gather 1 - non-gather 2 - fish
         /*0*/ { 0,   5,  5 },
         /*1*/ { 0,   5,  5 },
         /*2*/ { 0,  10, 10 },
@@ -3121,7 +3206,7 @@ void SpellMgr::LoadSpellChains()
         if (!talentInfo->RankID[1])
             continue;
 
-        for (int j = 0; j < MAX_TALENT_RANK; j++)
+        for (int j = 0; j < MAX_TALENT_RANK; ++j)
         {
             uint32 spell_id = talentInfo->RankID[j];
             if (!spell_id)
@@ -3391,7 +3476,8 @@ void SpellMgr::LoadSpellChains()
         mSpellChains[spell_id] = node;
 
         ++new_count;
-    } while( result->NextRow() );
+    }
+    while (result->NextRow());
 
     delete result;
 
@@ -3569,7 +3655,8 @@ void SpellMgr::LoadSpellLearnSpells()
         mSpellLearnSpells.insert(SpellLearnSpellMap::value_type(spell_id,node));
 
         ++count;
-    } while (result->NextRow());
+    }
+    while (result->NextRow());
 
     delete result;
 
@@ -3684,6 +3771,8 @@ void SpellMgr::LoadSpellScriptTarget()
                 spellEffect->EffectImplicitTargetB == TARGET_AREAEFFECT_INSTANT ||
                 spellEffect->EffectImplicitTargetA == TARGET_AREAEFFECT_CUSTOM ||
                 spellEffect->EffectImplicitTargetB == TARGET_AREAEFFECT_CUSTOM ||
+                spellEffect->EffectImplicitTargetA == TARGET_AREAEFFECT_GO_AROUND_SOURCE ||
+                spellEffect->EffectImplicitTargetB == TARGET_AREAEFFECT_GO_AROUND_SOURCE ||
                 spellEffect->EffectImplicitTargetA == TARGET_AREAEFFECT_GO_AROUND_DEST ||
                 spellEffect->EffectImplicitTargetB == TARGET_AREAEFFECT_GO_AROUND_DEST)
             {
@@ -3743,7 +3832,8 @@ void SpellMgr::LoadSpellScriptTarget()
         mSpellScriptTarget.insert(SpellScriptTarget::value_type(spellId,SpellTargetEntry(SpellTargetType(type),targetEntry)));
 
         ++count;
-    } while (result->NextRow());
+    }
+    while (result->NextRow());
 
     delete result;
 
@@ -3858,7 +3948,8 @@ void SpellMgr::LoadSpellPetAuras()
         }
 
         ++count;
-    } while( result->NextRow() );
+    }
+    while (result->NextRow());
 
     delete result;
 
@@ -4358,7 +4449,8 @@ void SpellMgr::LoadSpellAreas()
             mSpellAreaForAuraMap.insert(SpellAreaForAuraMap::value_type(abs(spellArea.auraSpell),sa));
 
         ++count;
-    } while (result->NextRow());
+    }
+    while (result->NextRow());
 
     delete result;
 
@@ -5098,7 +5190,8 @@ void SpellMgr::CheckUsedSpells(char const* table)
             }
         }
 
-    } while( result->NextRow() );
+    }
+    while (result->NextRow());
 
     delete result;
 
@@ -5373,7 +5466,7 @@ bool SpellArea::IsFitToRequirements(Player const* player, uint32 newZone, uint32
     if (player && raceMask)
     {
         // not in expected race
-        if (!(raceMask & player->getRaceMask()))
+        if (!player || !(raceMask & player->getRaceMask()))
             return false;
     }
 

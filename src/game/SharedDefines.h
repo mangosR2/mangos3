@@ -148,16 +148,21 @@ enum Powers
     POWER_RAGE                          = 1,
     POWER_FOCUS                         = 2,
     POWER_ENERGY                        = 3,
-    POWER_HAPPINESS                     = 4,
+    POWER_HAPPINESS                     = 4,  //unused 4.x.x
     POWER_RUNE                          = 5,
     POWER_RUNIC_POWER                   = 6,
     POWER_SOUL_SHARDS                   = 7,
     POWER_ECLIPSE                       = 8,
     POWER_HOLY_POWER                    = 9,
+    POWER_ALTERNATIVE                   = 10,
+    MAX_POWERS                          = 11,
     POWER_HEALTH                        = 0xFFFFFFFE    // (-2 as signed value)
 };
 
-#define MAX_POWERS                        10
+#define MAX_STORED_POWERS               5
+// Setting this value to something high helps debugging
+#define INVALID_POWER_INDEX             10000
+#define INVALID_POWER                   MAX_POWERS
 
 enum EnergyType
 {
@@ -225,12 +230,14 @@ enum ItemQualities
     ITEM_QUALITY_EPIC                  = 4,                 //PURPLE
     ITEM_QUALITY_LEGENDARY             = 5,                 //ORANGE
     ITEM_QUALITY_ARTIFACT              = 6,                 //LIGHT YELLOW
-    ITEM_QUALITY_HEIRLOOM              = 7
+    ITEM_QUALITY_HEIRLOOM              = 7,
+    ITEM_QUALITY_UNKNOWN               = 10,
 };
 
 #define MAX_ITEM_QUALITY                 8
 
-const uint32 ItemQualityColors[MAX_ITEM_QUALITY] = {
+const uint32 ItemQualityColors[MAX_ITEM_QUALITY] =
+{
     0xff9d9d9d,        //GREY
     0xffffffff,        //WHITE
     0xff1eff00,        //GREEN
@@ -308,7 +315,7 @@ enum SpellAttributesEx
     SPELL_ATTR_EX_UNK19                        = 0x00080000,            // 19
     SPELL_ATTR_EX_REQ_TARGET_COMBO_POINTS      = 0x00100000,            // 20 Req combo points on target
     SPELL_ATTR_EX_UNK21                        = 0x00200000,            // 21
-    SPELL_ATTR_EX_REQ_COMBO_POINTS             = 0x00400000,            // 22 Use combo points (in 4.x not required combo point target selected)
+    SPELL_ATTR_EX_REQ_COMBO_POINTS             = 0x00400000,// 22 Use combo points
     SPELL_ATTR_EX_UNK23                        = 0x00800000,            // 23
     SPELL_ATTR_EX_UNK24                        = 0x01000000,            // 24 Req fishing pole??
     SPELL_ATTR_EX_UNK25                        = 0x02000000,            // 25
@@ -536,9 +543,117 @@ enum SpellAttributesEx7
     SPELL_ATTR_EX7_UNK31                       = 0x80000000,            // 31
 };
 
+enum SpellAttributesEx8
+{
+    SPELL_ATTR_EX8_UNK0                        = 0x00000001,// 0
+    SPELL_ATTR_EX8_UNK1                        = 0x00000002,// 1 Single spell Summon Fire (94655)
+    SPELL_ATTR_EX8_UNK2                        = 0x00000004,// 2 Luck of the Draw and Whirling Blades
+    SPELL_ATTR_EX8_UNK3                        = 0x00000008,// 3
+    SPELL_ATTR_EX8_UNK4                        = 0x00000010,// 4
+    SPELL_ATTR_EX8_UNK5                        = 0x00000020,// 5
+    SPELL_ATTR_EX8_UNK6                        = 0x00000040,// 6 Rune Strike, [DND] Falling, Altered Form
+    SPELL_ATTR_EX8_UNK7                        = 0x00000080,// 7
+    SPELL_ATTR_EX8_UNK8                        = 0x00000100,// 8 some raid-wide buffs
+    SPELL_ATTR_EX8_UNK9                        = 0x00000200,// 9 some dot/hot spells
+    SPELL_ATTR_EX8_UNK10                       = 0x00000400,// 10 some transformation spells
+    SPELL_ATTR_EX8_UNK11                       = 0x00000800,// 11 Phase 2 Intro Aura (80224)
+    SPELL_ATTR_EX8_AURA_SENDS_AMOUNT           = 0x00001000,// 12
+    SPELL_ATTR_EX8_UNK13                       = 0x00002000,// 13
+    SPELL_ATTR_EX8_UNK14                       = 0x00004000,// 14 Focus Magic, Honor Among Thieves, Turn the Tables
+    SPELL_ATTR_EX8_UNK15                       = 0x00008000,// 15 River Boat (76203)
+    SPELL_ATTR_EX8_UNK16                       = 0x00010000,// 16
+    SPELL_ATTR_EX8_UNK17                       = 0x00020000,// 17
+    SPELL_ATTR_EX8_UNK18                       = 0x00040000,// 18 Dark Simulacrum, Soul Swap
+    SPELL_ATTR_EX8_IGNORE_TARGET_FOR_COMBO_POINTS = 0x00080000,// 19 Slice and Dice, Savage Roar, Recuperate
+    SPELL_ATTR_EX8_ARMOR_SPECIALIZATION        = 0x00100000,// 20
+    SPELL_ATTR_EX8_UNK21                       = 0x00200000,// 21 some spells that summon smth
+    SPELL_ATTR_EX8_UNK22                       = 0x00400000,// 22 some health-affecting spells
+    SPELL_ATTR_EX8_UNK23                       = 0x00800000,// 23 spells that show revive player and show messagebox
+    SPELL_ATTR_EX8_UNK24                       = 0x01000000,// 24 some healing spells
+    SPELL_ATTR_EX8_UNK25                       = 0x02000000,// 25 mostly druid and mostly feral spells
+    SPELL_ATTR_EX8_RAID_MARKER                 = 0x04000000,// 26 probably spell doesn't need to be learned to cast. Raid markers + Juggle Torch (Catch)
+    SPELL_ATTR_EX8_UNK27                       = 0x08000000,// 27
+    SPELL_ATTR_EX8_GUILD_PERKS                 = 0x10000000,// 28
+    SPELL_ATTR_EX8_MASTERY                     = 0x20000000,// 29
+    SPELL_ATTR_EX8_UNK30                       = 0x40000000,// 30
+    SPELL_ATTR_EX8_UNK31                       = 0x80000000,// 31
+};
+
+enum SpellAttributesEx9
+{
+    SPELL_ATTR_EX9_UNK0                        = 0x00000001,// 0
+    SPELL_ATTR_EX9_UNK1                        = 0x00000002,// 1
+    SPELL_ATTR_EX9_UNK2                        = 0x00000004,// 2 some sort of invisibility
+    SPELL_ATTR_EX9_UNK3                        = 0x00000008,// 3
+    SPELL_ATTR_EX9_UNK4                        = 0x00000010,// 4
+    SPELL_ATTR_EX9_UNK5                        = 0x00000020,// 5 some totem spells
+    SPELL_ATTR_EX9_UNK6                        = 0x00000040,// 6
+    SPELL_ATTR_EX9_UNK7                        = 0x00000080,// 7
+    SPELL_ATTR_EX9_UNK8                        = 0x00000100,// 8 Aimed Shot (19434) and Aimed Shot! (82928)
+    SPELL_ATTR_EX9_UNK9                        = 0x00000200,// 9
+    SPELL_ATTR_EX9_UNK10                       = 0x00000400,// 10 Ice Storm 88239
+    SPELL_ATTR_EX9_UNK11                       = 0x00000800,// 11
+    SPELL_ATTR_EX9_UNK12                       = 0x00001000,// 12 Feral Charge 49376
+    SPELL_ATTR_EX9_UNK13                       = 0x00002000,// 13 Slam 1464, used in cast time calculation
+    SPELL_ATTR_EX9_UNK14                       = 0x00004000,// 14
+    SPELL_ATTR_EX9_UNK15                       = 0x00008000,// 15 not used
+    SPELL_ATTR_EX9_UNK16                       = 0x00010000,// 16 Aimed Shot 19434, Steady Shot 56641, Cobra Shot 77767
+    SPELL_ATTR_EX9_UNK17                       = 0x00020000,// 17 not used
+    SPELL_ATTR_EX9_UNK18                       = 0x00040000,// 18
+    SPELL_ATTR_EX9_UNK19                       = 0x00080000,// 19
+    SPELL_ATTR_EX9_UNK20                       = 0x00100000,// 20
+    SPELL_ATTR_EX9_UNK21                       = 0x00200000,// 21
+    SPELL_ATTR_EX9_UNK22                       = 0x00400000,// 22
+    SPELL_ATTR_EX9_UNK23                       = 0x00800000,// 23 Asira Dismount 103720
+    SPELL_ATTR_EX9_UNK24                       = 0x01000000,// 24 not used
+    SPELL_ATTR_EX9_UNK25                       = 0x02000000,// 25 not used
+    SPELL_ATTR_EX9_UNK26                       = 0x04000000,// 26 Item - Mage T12 4P Bonus 99064
+    SPELL_ATTR_EX9_UNK27                       = 0x08000000,// 27 20707 Soulstone Resurrection, Quest Invis 9 102370
+    SPELL_ATTR_EX9_UNK28                       = 0x10000000,// 28 Decimate, Unholy Frenzy, Spirit Link: all aoe reduce health
+    SPELL_ATTR_EX9_UNK29                       = 0x20000000,// 29 passive raid-wide auras
+    SPELL_ATTR_EX9_UNK30                       = 0x40000000,// 30
+    SPELL_ATTR_EX9_UNK31                       = 0x80000000,// 31 In Chains 88791
+};
+
+enum SpellAttributesEx10
+{
+    SPELL_ATTR_EX10_UNK0                       = 0x00000001,// 0 Deep Wounds, Ignite, Blood Plague, Frost Fever, Ebon Plague, Scarlet Fever, Brittle Bones, Asira Dismount
+    SPELL_ATTR_EX10_UNK1                       = 0x00000002,// 1 Combustion, Hemorrhage
+    SPELL_ATTR_EX10_UNK2                       = 0x00000004,// 2 Throw Spear, Unholy Shot, Crack Shot!, Throw Knife, Ice Arrow
+    SPELL_ATTR_EX10_UNK3                       = 0x00000008,// 3 Spirit Bond, Fel Armor
+    SPELL_ATTR_EX10_UNK4                       = 0x00000010,// 4 Water Spout 58873
+    SPELL_ATTR_EX10_UNK5                       = 0x00000020,// 5 Immolate, Concussive Stomp
+    SPELL_ATTR_EX10_UNK6                       = 0x00000040,// 6 Teleport Player, Teleport Player to NEXUS LEGENDARY
+    SPELL_ATTR_EX10_UNK7                       = 0x00000080,// 7
+    SPELL_ATTR_EX10_UNK8                       = 0x00000100,// 8 Shadowflame, Furious Swipe
+    SPELL_ATTR_EX10_UNK9                       = 0x00000200,// 9 relocation spells
+    SPELL_ATTR_EX10_UNK10                      = 0x00000400,// 10 Omar's Seal of Approval, Spellweaving
+    SPELL_ATTR_EX10_UNK11                      = 0x00000800,// 11 Herb Gathering, Mining
+    SPELL_ATTR_EX10_UNK12                      = 0x00001000,// 12 not used
+    SPELL_ATTR_EX10_UNK13                      = 0x00002000,// 13 not used
+    SPELL_ATTR_EX10_UNK14                      = 0x00004000,// 14 not used
+    SPELL_ATTR_EX10_UNK15                      = 0x00008000,// 15 not used
+    SPELL_ATTR_EX10_UNK16                      = 0x00010000,// 16 not used
+    SPELL_ATTR_EX10_UNK17                      = 0x00020000,// 17 not used
+    SPELL_ATTR_EX10_UNK18                      = 0x00040000,// 18 not used
+    SPELL_ATTR_EX10_UNK19                      = 0x00080000,// 19 not used
+    SPELL_ATTR_EX10_UNK20                      = 0x00100000,// 20 not used
+    SPELL_ATTR_EX10_UNK21                      = 0x00200000,// 21 not used
+    SPELL_ATTR_EX10_UNK22                      = 0x00400000,// 22 not used
+    SPELL_ATTR_EX10_UNK23                      = 0x00800000,// 23 not used
+    SPELL_ATTR_EX10_UNK24                      = 0x01000000,// 24 not used
+    SPELL_ATTR_EX10_UNK25                      = 0x02000000,// 25 not used
+    SPELL_ATTR_EX10_UNK26                      = 0x04000000,// 26 not used
+    SPELL_ATTR_EX10_UNK27                      = 0x08000000,// 27 not used
+    SPELL_ATTR_EX10_UNK28                      = 0x10000000,// 28 not used
+    SPELL_ATTR_EX10_UNK29                      = 0x20000000,// 29 not used
+    SPELL_ATTR_EX10_UNK30                      = 0x40000000,// 30 not used
+    SPELL_ATTR_EX10_UNK31                      = 0x80000000,// 31 not used
+};
 
 #define MAX_TALENT_SPEC_COUNT   2
-#define MAX_GLYPH_SLOT_INDEX    6
+#define MAX_GLYPH_SLOT_INDEX    9
+#define REQ_PRIMARY_TREE_TALENTS 31
 
 enum SheathTypes
 {
@@ -793,7 +908,25 @@ enum SpellEffects
     SPELL_EFFECT_TALENT_SPEC_SELECT        = 162,
     SPELL_EFFECT_163                       = 163,
     SPELL_EFFECT_CANCEL_AURA               = 164,
-    TOTAL_SPELL_EFFECTS                    = 165
+    SPELL_EFFECT_165                       = 165,
+    SPELL_EFFECT_166                       = 166,
+    SPELL_EFFECT_167                       = 167,
+    SPELL_EFFECT_168                       = 168,
+    SPELL_EFFECT_169                       = 169,
+    SPELL_EFFECT_170                       = 170,
+    SPELL_EFFECT_171                       = 171,
+    SPELL_EFFECT_MASS_RESSURECTION         = 172,
+    SPELL_EFFECT_BUY_GUILD_BANKSLOT        = 173,
+    SPELL_EFFECT_174                       = 174,
+    SPELL_EFFECT_175                       = 175,
+    SPELL_EFFECT_176                       = 176,
+    SPELL_EFFECT_177                       = 177,
+    SPELL_EFFECT_178                       = 178,
+    SPELL_EFFECT_179                       = 179,
+    SPELL_EFFECT_180                       = 180,
+    SPELL_EFFECT_181                       = 181,
+    SPELL_EFFECT_182                       = 182,
+    TOTAL_SPELL_EFFECTS                    = 183,
 };
 
 enum SpellCastResult
@@ -952,7 +1085,7 @@ enum SpellCastResult
     SPELL_FAILED_PLAY_TIME = 151,
     SPELL_FAILED_REPUTATION = 152,
     SPELL_FAILED_MIN_SKILL = 153,
-    SPELL_FAILED_NOT_IN_ARENA = 154,
+    SPELL_FAILED_NOT_IN_RATED_BG = 154,
     SPELL_FAILED_NOT_ON_SHAPESHIFT = 155,
     SPELL_FAILED_NOT_ON_STEALTHED = 156,
     SPELL_FAILED_NOT_ON_DAMAGE_IMMUNE = 157,
@@ -997,7 +1130,11 @@ enum SpellCastResult
     SPELL_FAILED_ONLY_NOT_SWIMMING = 196,
     SPELL_FAILED_BY_NOT_MOVING = 197,
     SPELL_FAILED_IN_COMBAT_RES_LIMIT_REACHED = 198,
-    SPELL_FAILED_UNKNOWN = 199,                             // Value not used
+    SPELL_FAILED_NOT_IN_ARENA = 199,
+    SPELL_FAILED_TARGET_NOT_ON_GROUND = 200,
+    SPELL_FAILED_NOT_IN_LFG_DUNGEON = 202,
+    SPELL_FAILED_EXCEEDED_WEEKLY_USAGE = 201,
+    SPELL_FAILED_UNKNOWN = 203,
 
     SPELL_CAST_OK = 255                                     // custom value, don't must be send to client
 };
@@ -1109,7 +1246,8 @@ enum SpellCastResultCustom
 
 // Spell aura states
 enum AuraState
-{   // (C) used in caster aura state     (T) used in target aura state
+{
+    // (C) used in caster aura state     (T) used in target aura state
     // (c) used in caster aura state-not (t) used in target aura state-not
     AURA_STATE_DEFENSE                      = 1,            // C   |
     AURA_STATE_HEALTHLESS_20_PERCENT        = 2,            // CcT |
@@ -1265,14 +1403,14 @@ enum Targets
     TARGET_SELF                             = 1,
     TARGET_RANDOM_ENEMY_CHAIN_IN_AREA       = 2,                 // only one spell has that, but regardless, it's a target type after all
     TARGET_RANDOM_FRIEND_CHAIN_IN_AREA      = 3,
-    TARGET_4                                = 4,
+    TARGET_4                                = 4,                 // some plague spells that are infectious - maybe targets not-infected friends inrange
     TARGET_PET                              = 5,
     TARGET_CHAIN_DAMAGE                     = 6,
     TARGET_AREAEFFECT_INSTANT               = 7,                 // targets around provided destination point
     TARGET_AREAEFFECT_CUSTOM                = 8,
     TARGET_INNKEEPER_COORDINATES            = 9,                 // uses in teleport to innkeeper spells
     TARGET_10                               = 10,
-    TARGET_11                               = 11,
+    TARGET_11                               = 11,                // used by spell 4 'Word of Recall Other'
     TARGET_12                               = 12,
     TARGET_13                               = 13,
     TARGET_14                               = 14,
@@ -1370,11 +1508,28 @@ enum Targets
     TARGET_106                              = 106,
     TARGET_107                              = 107,
     TARGET_GO_IN_FRONT_OF_CASTER_90         = 108,
-    TARGET_109                              = 109,
-    TARGET_110                              = 110,
+    TARGET_109                              = 109,   // spell 89008
+    TARGET_110                              = 110,   // front enemy aoe
+    TARGET_111                              = 111,   // not used
+    TARGET_112                              = 112,   // spell 89549
+    TARGET_113                              = 113,   // not used
+    TARGET_114                              = 114,   // not used
+    TARGET_115                              = 115,   // not used
+    TARGET_116                              = 116,   // not used
+    TARGET_117                              = 117,   // test spell 83658
+    TARGET_118                              = 118,   // test spell 79579
+    TARGET_119                              = 119,   // mass ressurection 83968
+    TARGET_120                              = 120,
+    TARGET_121                              = 121,   // spell 95750
+    TARGET_122                              = 122,   // spell 100661
+    TARGET_123                              = 123,
+    TARGET_124                              = 124,
+    TARGET_125                              = 125,
+    TARGET_126                              = 126,
+    TARGET_127                              = 127,
 };
 
-#define MAX_SPELL_TARGET               111
+#define MAX_SPELL_TARGET               128
 
 enum SpellMissInfo
 {
@@ -2273,7 +2428,13 @@ enum HolidayIds
     HOLIDAY_PILGRIMS_BOUNTY          = 404,
     HOLIDAY_WOTLK_LAUNCH             = 406,
     HOLIDAY_DAY_OF_DEAD              = 409,
-    HOLIDAY_CALL_TO_ARMS_ISLE_OF_C   = 420
+    HOLIDAY_CALL_TO_ARMS_IC          = 420,
+    HOLIDAY_CALL_TO_ARMS_BG          = 435,
+    HOLIDAY_CALL_TO_ARMS_TP          = 436,
+    HOLIDAY_CALL_TO_ARMS_RBG_15v15   = 442,
+    HOLIDAY_CALL_TO_ARMS_RBG_25v25   = 443,
+    HOLIDAY_WOW_7TH_ANNIVERSARY      = 467,
+    HOLIDAY_WOW_8TH_ANNIVERSARY      = 484,
 };
 
 // values based at QuestSort.dbc
@@ -2677,11 +2838,13 @@ enum ChatMsg
 
 enum ChatLinkColors
 {
+    CHAT_LINK_COLOR_CURRENCY    = 0xff00aa00,   // green
+    CHAT_LINK_COLOR_INSTANCELOCK= 0xffff8000,   // orange
     CHAT_LINK_COLOR_TRADE       = 0xffffd000,   // orange
     CHAT_LINK_COLOR_TALENT      = 0xff4e96f7,   // blue
     CHAT_LINK_COLOR_SPELL       = 0xff71d5ff,   // bright blue
     CHAT_LINK_COLOR_ENCHANT     = 0xffffd000,   // orange
-    CHAT_LINK_COLOR_ACHIEVEMENT = 0xffffff00,
+    CHAT_LINK_COLOR_ACHIEVEMENT = 0xffffff00,   // yellow
     CHAT_LINK_COLOR_GLYPH       = 0xff66bbff
 };
 
@@ -2778,7 +2941,6 @@ enum ShapeshiftForm
     FORM_BEAR               = 0x05,
     FORM_AMBIENT            = 0x06,
     FORM_GHOUL              = 0x07,
-    FORM_DIREBEAR           = 0x08,
     FORM_STEVES_GHOUL       = 0x09,
     FORM_THARONJA_SKELETON  = 0x0A,
     FORM_TEST_OF_STRENGTH   = 0x0B,
@@ -2953,28 +3115,17 @@ enum BattleGroundTypeId
     BATTLEGROUND_RV            = 11,
     BATTLEGROUND_IC            = 30,
     BATTLEGROUND_RB            = 32,                        // random battleground
+    BATTLEGROUND_RBG_10v10     = 100,                       // rated battleground 10v10
+    BATTLEGROUND_RBG_15v15     = 101,                       // rated battleground 15v15
+    BATTLEGROUND_RBG_5v5       = 102,                       // rated battleground 5v5
     BATTLEGROUND_TP            = 108,                       // 4.0.0
-    BATTLEGROUND_BG            = 118                        // 4.0.0
+    BATTLEGROUND_BG            = 120,                       // 4.3.4
+    //BATTLEGROUND_UNK1          = 441,                     // icecrown citadel
+    //BATTLEGROUND_UNK2          = 443,                     // ruby sanctum
+    //BATTLEGROUND_UNK3          = 656,                     // rated eye of the storm
 };
 
-#define MAX_BATTLEGROUND_TYPE_ID 119
-
-// handle the queue types and bg types separately to enable joining queue for different sized arenas at the same time
-enum BattleGroundQueueTypeId
-{
-    BATTLEGROUND_QUEUE_NONE     = 0,
-    BATTLEGROUND_QUEUE_AV       = 1,    // Alterac Vally
-    BATTLEGROUND_QUEUE_WS       = 2,    // Warsong Gulch
-    BATTLEGROUND_QUEUE_AB       = 3,    // Arathi basin
-    BATTLEGROUND_QUEUE_EY       = 4,    // Eye of the Storm
-    BATTLEGROUND_QUEUE_SA       = 5,    // Strand of the Ancients
-    BATTLEGROUND_QUEUE_IC       = 6,    // Isle of Conquest
-    BATTLEGROUND_QUEUE_RB       = 7,
-    BATTLEGROUND_QUEUE_2v2      = 8,
-    BATTLEGROUND_QUEUE_3v3      = 9,
-    BATTLEGROUND_QUEUE_5v5      = 10
-};
-#define MAX_BATTLEGROUND_QUEUE_TYPES 11
+#define MAX_BATTLEGROUND_TYPE_ID 121
 
 enum ArenaType
 {
@@ -3086,30 +3237,31 @@ enum TotemSlot
 
 enum TradeStatus
 {
-    TRADE_STATUS_BUSY           = 0,
-    TRADE_STATUS_BEGIN_TRADE    = 1,
-    TRADE_STATUS_OPEN_WINDOW    = 2,
-    TRADE_STATUS_TRADE_CANCELED = 3,
-    TRADE_STATUS_TRADE_ACCEPT   = 4,
-    TRADE_STATUS_BUSY_2         = 5,
-    TRADE_STATUS_NO_TARGET      = 6,
-    TRADE_STATUS_BACK_TO_TRADE  = 7,
-    TRADE_STATUS_TRADE_COMPLETE = 8,
-    // 9?
-    TRADE_STATUS_TARGET_TO_FAR  = 10,
-    TRADE_STATUS_WRONG_FACTION  = 11,
-    TRADE_STATUS_CLOSE_WINDOW   = 12,
-    // 13?
-    TRADE_STATUS_IGNORE_YOU     = 14,
-    TRADE_STATUS_YOU_STUNNED    = 15,
-    TRADE_STATUS_TARGET_STUNNED = 16,
-    TRADE_STATUS_YOU_DEAD       = 17,
-    TRADE_STATUS_TARGET_DEAD    = 18,
-    TRADE_STATUS_YOU_LOGOUT     = 19,
-    TRADE_STATUS_TARGET_LOGOUT  = 20,
-    TRADE_STATUS_TRIAL_ACCOUNT  = 21,                       // Trial accounts can not perform that action
-    TRADE_STATUS_ONLY_CONJURED  = 22,                       // You can only trade conjured items... (cross realm BG related).
-    TRADE_STATUS_NOT_ELIGIBLE   = 23                        // Related to trading soulbound loot items
+    TRADE_STATUS_OPEN_WINDOW                = 0,
+    //TRADE_STATUS_TRADE_CANCELED_NO_REPORT = 1,
+    TRADE_STATUS_NOT_ON_TAPLIST             = 2,    // You may only trade bound items to players that were originally eligible to loot them
+    TRADE_STATUS_YOU_LOGOUT                 = 3,
+    TRADE_STATUS_IGNORE_YOU                 = 4,
+    TRADE_STATUS_TARGET_DEAD                = 5,
+    TRADE_STATUS_TRADE_ACCEPT               = 6,
+    TRADE_STATUS_TARGET_LOGOUT              = 7,
+    TRADE_STATUS_TRADE_COMPLETE             = 9,
+    //TRADE_STATUS_TRIAL_ACCOUNT            = 10,   // Trial accounts can not perform that action
+    TRADE_STATUS_BEGIN_TRADE                = 12,
+    TRADE_STATUS_YOU_DEAD                   = 13,
+    TRADE_STATUS_TARGET_TO_FAR              = 16,
+    TRADE_STATUS_NO_TARGET                  = 17,
+    //TRADE_STATUS_BUSY_2                   = 18,
+    TRADE_STATUS_CURRENCY_NOT_TRADEABLE     = 19,   // guessed
+    TRADE_STATUS_WRONG_FACTION              = 20,
+    TRADE_STATUS_BUSY                       = 21,
+    TRADE_STATUS_TRADE_CANCELED             = 23,
+    TRADE_STATUS_CLOSE_WINDOW               = 24,   // guessed
+    TRADE_STATUS_BACK_TO_TRADE              = 25,
+    TRADE_STATUS_ONLY_CONJURED              = 26,   // You can only trade conjured items to players from other realms
+    TRADE_STATUS_YOU_STUNNED                = 27,
+    TRADE_STATUS_TARGET_STUNNED             = 29,
+    // item related                         = 31    // closes trade
 };
 
 enum EncounterCreditType
@@ -3163,6 +3315,12 @@ enum PhaseMasks
     PHASEMASK_ANYWHERE = 0xFFFFFFFF
 };
 
+enum WorldStateType
+{
+    WORLD_STATE_REMOVE              = 0,
+    WORLD_STATE_ADD                 = 1
+};
+
 enum ActivateTaxiReply
 {
     ERR_TAXIOK                      = 0,
@@ -3191,9 +3349,9 @@ enum TrackedAuraType
 
 // we need to stick to 1 version or half of the stuff will work for someone
 // others will not and opposite
-// will only support WoW, WoW:TBC and WoW:WotLK 3.3.5a client build 12340...
+// will only support WoW, WoW:TBC, WoW:WotLK and WoW:Cataclysm 4.3.4 client build 15595...
 
-#define EXPECTED_MANGOSD_CLIENT_BUILD        {12340, 0}
+#define EXPECTED_MANGOSD_CLIENT_BUILD        {15595, 0}
 
 // max supported expansion level in mangosd
 // NOTE: not set it more that supported by targeted client version with all expansions installed

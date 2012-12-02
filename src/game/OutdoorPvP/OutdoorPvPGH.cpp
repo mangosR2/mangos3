@@ -17,10 +17,10 @@
  */
 
 #include "OutdoorPvPGH.h"
-#include "../Map.h"
-#include "../Object.h"
-#include "../Creature.h"
-#include "../GameObject.h"
+#include "Map.h"
+#include "Object.h"
+#include "Creature.h"
+#include "GameObject.h"
 
 OutdoorPvPGH::OutdoorPvPGH() : OutdoorPvP(),
     m_zoneOwner(TEAM_NONE)
@@ -63,6 +63,8 @@ void OutdoorPvPGH::HandleCreatureDeath(Creature* creature)
 
 void OutdoorPvPGH::HandleGameObjectCreate(GameObject* go)
 {
+    OutdoorPvP::HandleGameObjectCreate(go);
+
     if (go->GetEntry() == GO_VENTURE_BAY_LIGHTHOUSE)
     {
         m_capturePoint = go->GetObjectGuid();

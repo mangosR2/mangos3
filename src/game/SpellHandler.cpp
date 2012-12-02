@@ -36,13 +36,13 @@ using G3D::Vector3;
 void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
 {
     uint8 bagIndex, slot;
-    uint8 unk_flags;                                        // flags (if 0x02 - some additional data are received)
+    uint8 cast_flags;                                       // flags (if 0x02 - some additional data are received)
     uint8 cast_count;                                       // next cast if exists (single or not)
     ObjectGuid itemGuid;
     uint32 glyphIndex;                                      // something to do with glyphs?
     uint32 spellid;                                         // casted spell id
 
-    recvPacket >> bagIndex >> slot >> cast_count >> spellid >> itemGuid >> glyphIndex >> unk_flags;
+    recvPacket >> bagIndex >> slot >> cast_count >> spellid >> itemGuid >> glyphIndex >> cast_flags;
 
     // TODO: add targets.read() check
     Player* pUser = _player;
@@ -77,7 +77,7 @@ void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
         return;
     }
 
-    DETAIL_LOG("WORLD: CMSG_USE_ITEM packet, bagIndex: %u, slot: %u, cast_count: %u, spellid: %u, Item: %u, glyphIndex: %u, unk_flags: %u, data length = %i", bagIndex, slot, cast_count, spellid, pItem->GetEntry(), glyphIndex, unk_flags, (uint32)recvPacket.size());
+    DETAIL_LOG("WORLD: CMSG_USE_ITEM packet, bagIndex: %u, slot: %u, cast_count: %u, spellid: %u, Item: %u, glyphIndex: %u, unk_flags: %u, data length = " SIZEFMTD, bagIndex, slot, cast_count, spellid, pItem->GetEntry(), glyphIndex, cast_flags, recvPacket.size());
 
     ItemPrototype const *proto = pItem->GetProto();
     if (!proto)
@@ -173,6 +173,8 @@ void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
 
     targets.Update(pUser);
 
+    targets.ReadAdditionalData(recvPacket, cast_flags);
+
     if (!pItem->IsTargetValidForItemUse(targets.getUnitTarget()))
     {
         // free gray item after use fail
@@ -209,7 +211,7 @@ void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
 
 void WorldSession::HandleOpenItemOpcode(WorldPacket& recvPacket)
 {
-    DETAIL_LOG("WORLD: CMSG_OPEN_ITEM packet, data length = %i",(uint32)recvPacket.size());
+    DETAIL_LOG("WORLD: CMSG_OPEN_ITEM packet, data length = " SIZEFMTD, recvPacket.size());
 
     uint8 bagIndex, slot;
 
@@ -353,11 +355,11 @@ void WorldSession::HandleGameobjectReportUse(WorldPacket& recvPacket)
 
 void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
 {
-    uint32 spellId;
-    uint8  cast_count, unk_flags;
+    uint32 spellId, glyphIndex;
+    uint8  cast_count, cast_flags;
     recvPacket >> cast_count;
-    recvPacket >> spellId;
-    recvPacket >> unk_flags;                                // flags (if 0x02 - some additional data are received)
+    recvPacket >> spellId >> glyphIndex;
+    recvPacket >> cast_flags;                           // flags (if 0x02 - some additional data are received)
 
     // ignore for remote control state (for player case)
     Unit* _mover = GetPlayer()->GetMover();
@@ -367,8 +369,8 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
         return;
     }
 
-    DEBUG_LOG("WORLD: got cast spell packet, spellId - %u, cast_count: %u, unk_flags %u, data length = %i",
-        spellId, cast_count, unk_flags, (uint32)recvPacket.size());
+    DEBUG_LOG("WORLD: got cast spell packet, spellId - %u, cast_count: %u, cast_flags %u, data length = " SIZEFMTD,
+              spellId, cast_count, cast_flags, recvPacket.size());
 
     /* process anticheat check */
     if (!GetPlayer()->GetAntiCheat()->DoAntiCheatCheck(CHECK_SPELL, spellId, CMSG_CAST_SPELL))
@@ -443,9 +445,7 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
 
     recvPacket >> targets.ReadForCaster(mover);
 
-    // some spell cast packet including more data (for projectiles?)
-    if (unk_flags & 0x02)
-        targets.ReadAdditionalData(recvPacket);
+    targets.ReadAdditionalData(recvPacket, cast_flags);
 
     // auto-selection buff level base at target level (in spellInfo)
     if (Unit* target = targets.getUnitTarget())
@@ -457,6 +457,7 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
 
     Spell *spell = new Spell(mover, spellInfo, triggered, mover->GetObjectGuid(), triggeredBy);
     spell->m_cast_count = cast_count;                       // set count of casts
+    spell->m_glyphIndex = glyphIndex;
     spell->prepare(&targets, triggeredByAura);
 }
 
@@ -612,7 +613,7 @@ void WorldSession::HandleTotemDestroyed( WorldPacket& recvPacket)
 {
     uint8 slotId;
 
-    recvPacket >> slotId;
+    recvPacket >> slotId >> Unused<uint64>();
 
     // ignore for remote control state
     if (!_player->IsSelfMover())

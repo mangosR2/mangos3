@@ -181,7 +181,8 @@ void WorldSession::HandlePetitionBuyOpcode(WorldPacket & recv_data)
     }
 
     if(_player->GetMoney() < cost)
-    {                                                       //player hasn't got enough money
+    {
+        // player hasn't got enough money
         _player->SendBuyError(BUY_ERR_NOT_ENOUGHT_MONEY, pCreature, charterid, 0);
         return;
     }
@@ -217,7 +218,8 @@ void WorldSession::HandlePetitionBuyOpcode(WorldPacket & recv_data)
         {
             Field *fields = result->Fetch();
             ssInvalidPetitionGUIDs << "'" << fields[0].GetUInt32() << "' , ";
-        } while (result->NextRow());
+        }
+        while (result->NextRow());
 
         delete result;
     }

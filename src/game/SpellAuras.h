@@ -171,7 +171,7 @@ class MANGOS_DLL_SPEC SpellAuraHolder
             if (m_procCharges == 0)
                 return false;
 
-            m_procCharges--;
+            --m_procCharges;
             SendAuraUpdate(false);
             return m_procCharges == 0;
         }
@@ -198,7 +198,6 @@ class MANGOS_DLL_SPEC SpellAuraHolder
 
     private:
         void AddAura(Aura const& aura, SpellEffectIndex index);
-
         SpellEntry const* m_spellProto;
 
         Unit* m_target;
@@ -526,7 +525,7 @@ class MANGOS_DLL_SPEC Aura
         void ReapplyAffectedPassiveAuras();
 
         Modifier m_modifier;
-        //SpellModifier* m_spellmod;
+        SpellModifier *m_spellmod;
 
         SpellEffectEntry const* m_spellEffect;
         time_t m_applyTime;

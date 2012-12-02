@@ -257,7 +257,7 @@ enum MangosStrings
     LANG_COMMAND_TARGETOBJNOTFOUND      = 266,
     LANG_COMMAND_GOOBJNOTFOUND          = 267,
     LANG_COMMAND_GOCREATNOTFOUND        = 268,
-    //                                    269, not used
+    LANG_CURRENCY_NOT_FOUND             = 269,
     LANG_COMMAND_DELCREATMESSAGE        = 270,
     LANG_COMMAND_CREATUREMOVED          = 271,
     LANG_COMMAND_CREATUREATSAMEMAP      = 272,
@@ -271,7 +271,7 @@ enum MangosStrings
     LANG_COMMAND_ADDVENDORITEMITEMS     = 280,
     LANG_COMMAND_KICKSELF               = 281,
     LANG_COMMAND_KICKMESSAGE            = 282,
-    //                                    283, not used
+    LANG_VENDOR_META_CURRENCY_NOT_ALLOWED = 283,
     LANG_COMMAND_WHISPERACCEPTING       = 284,
     LANG_COMMAND_WHISPERON              = 285,
     LANG_COMMAND_WHISPEROFF             = 286,
@@ -287,7 +287,7 @@ enum MangosStrings
     LANG_COMMAND_TICKETDEL              = 296,
     LANG_COMMAND_SPAWNDIST              = 297,
     LANG_COMMAND_SPAWNTIME              = 298,
-    LANG_COMMAND_MODIFY_HONOR           = 299,
+    LANG_COMMAND_MODIFY_CURRENCY        = 299,
 
     LANG_YOUR_CHAT_DISABLED             = 300,
     LANG_YOU_DISABLE_CHAT               = 301,
@@ -296,7 +296,7 @@ enum MangosStrings
     LANG_YOU_ENABLE_CHAT                = 304,
 
     LANG_COMMAND_MODIFY_REP             = 305,
-    LANG_COMMAND_MODIFY_ARENA           = 306,
+    LANG_CURRENCY_AMOUNT                = 306,
     LANG_COMMAND_FACTION_NOTFOUND       = 307,
     LANG_COMMAND_FACTION_UNKNOWN        = 308,
     LANG_COMMAND_FACTION_INVPARAM       = 309,
@@ -452,7 +452,7 @@ enum MangosStrings
     LANG_COMMAND_GRAVEYARDALRLINKED     = 450,
     LANG_COMMAND_GRAVEYARDLINKED        = 451,
     LANG_COMMAND_GRAVEYARDWRONGZONE     = 452,
-    //                                  = 453,
+    LANG_COMMAND_NOCURRENCYFOUND        = 453,
     LANG_COMMAND_GRAVEYARDERROR         = 454,
     LANG_COMMAND_GRAVEYARD_NOTEAM       = 455,
     LANG_COMMAND_GRAVEYARD_ANY          = 456,
@@ -736,12 +736,12 @@ enum MangosStrings
     LANG_DEBUG_ARENA_OFF                = 738,
     LANG_DEBUG_BG_ON                    = 739,
     LANG_DEBUG_BG_OFF                   = 740,
-    LANG_DIST_ARENA_POINTS_START        = 741,
-    LANG_DIST_ARENA_POINTS_ONLINE_START = 742,
-    LANG_DIST_ARENA_POINTS_ONLINE_END   = 743,
-    LANG_DIST_ARENA_POINTS_TEAM_START   = 744,
-    LANG_DIST_ARENA_POINTS_TEAM_END     = 745,
-    LANG_DIST_ARENA_POINTS_END          = 746,
+//                                      = 741, not used
+//                                      = 742, not used
+//                                      = 743, not used
+//                                      = 744, not used
+//                                      = 745, not used
+//                                      = 746, not used
 //                                      = 747, not used
 //                                      = 748, not used
 //                                      = 749, not used
@@ -971,8 +971,10 @@ enum MangosStrings
     LANG_NPC_EVENTAI_PHASE              = 1506,
     LANG_NPC_EVENTAI_MOVE               = 1507,
     LANG_NPC_EVENTAI_COMBAT             = 1508,
-    LANG_POOL_ENTRY_LOWER_MAX_POOL      = 1509,
-    // Room for more Level 2              1510-1599 not used
+
+    LANG_VENDOR_WRONG_ITEM_TYPE         = 1510,
+    LANG_VENDOR_WRONG_CURRENCY_MAXCOUNT = 1511,
+    // Room for more Level 2              1512-1549 not used
 
     // Level 2 (worldstate operations)
     LANG_WORLDSTATE_LIST                = 1550,
@@ -983,6 +985,7 @@ enum MangosStrings
     LANG_WORLDSTATE_RELOAD              = 1555,
     LANG_WORLDSTATE_ERROR               = 1556,
     LANG_WORLDSTATE_SETTINGS            = 1557,
+
     // Room for more Level 2              1559-1599 not used
 
     // Outdoor PvP
@@ -1032,6 +1035,9 @@ enum MangosStrings
     // FREE IDS                           1700-9999
 
     // Use for not-in-official-sources patches
+    //                                    10000-10999
+
+    LANG_INVALID_REALMID                = 11001,
 
     // Use for custom patches             11000-11999
     LANG_INVALID_REALMID                = 11001,

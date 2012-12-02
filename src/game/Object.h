@@ -177,7 +177,6 @@ class MANGOS_DLL_SPEC Object
 
         void BuildValuesUpdateBlockForPlayer( UpdateData *data, Player *target ) const;
         void BuildOutOfRangeUpdateBlock( UpdateData *data ) const;
-        void BuildMovementUpdateBlock( UpdateData * data, uint16 flags = 0 ) const;
 
         virtual void DestroyForPlayer( Player *target, bool anim = false ) const;
 
@@ -453,6 +452,10 @@ class MANGOS_DLL_SPEC WorldObject : public Object
 
         void AddToWorld();
         virtual void RemoveFromWorld(bool remove) override;
+
+        TransportInfo* GetTransportInfo() const { return m_transportInfo; }
+        bool IsBoarded() const { return m_transportInfo != NULL; }
+        void SetTransportInfo(TransportInfo* transportInfo) { m_transportInfo = transportInfo; }
 
         TransportInfo* GetTransportInfo() const { return m_transportInfo; }
         bool IsBoarded() const { return m_transportInfo != NULL; }

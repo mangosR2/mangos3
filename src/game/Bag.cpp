@@ -35,7 +35,6 @@ Bag::Bag(): Item()
 Bag::~Bag()
 {
     for (int i = 0; i < MAX_BAG_SIZE; ++i)
-        if (m_bagslot[i])
             delete m_bagslot[i];
 }
 
@@ -103,12 +102,10 @@ bool Bag::LoadFromDB(uint32 guidLow, Field* fields, ObjectGuid ownerGuid)
     for (int i = 0; i < MAX_BAG_SIZE; ++i)
     {
         SetGuidValue(CONTAINER_FIELD_SLOT_1 + (i * 2), ObjectGuid());
-        if (m_bagslot[i])
-        {
+
             delete m_bagslot[i];
             m_bagslot[i] = NULL;
         }
-    }
 
     return true;
 }

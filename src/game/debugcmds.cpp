@@ -670,8 +670,12 @@ bool ChatHandler::HandleDebugSendSetPhaseShiftCommand(char* args)
     if (!*args)
         return false;
 
-    uint32 PhaseShift = atoi(args);
-    m_session->SendSetPhaseShift(PhaseShift);
+    char* m = strtok((char*)args, " ");
+    char* p = strtok(NULL, " ");
+
+    uint16 MapId = atoi(m);
+    uint32 PhaseShift = atoi(p);
+    m_session->SendSetPhaseShift(PhaseShift, MapId);
     return true;
 }
 
@@ -1147,8 +1151,10 @@ bool ChatHandler::HandleDebugSpellModsCommand(char* args)
             opcode == SMSG_SET_FLAT_SPELL_MODIFIER ? "flat" : "pct", spellmodop, value, effidx);
 
     WorldPacket data(opcode, (1+1+2+2));
-    data << uint8(effidx);
+    data << uint32(1);
+    data << uint32(1);
     data << uint8(spellmodop);
+    data << uint8(effidx);
     data << int32(value);
     chr->GetSession()->SendPacket(&data);
 

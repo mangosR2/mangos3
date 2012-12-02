@@ -170,11 +170,11 @@ class MANGOS_DLL_SPEC Pet : public Creature
         void Unsummon(PetSaveMode mode, Unit* owner = NULL);
         static void DeleteFromDB(uint32 guidlow, bool separate_transaction = true);
 
-        void SetDeathState(DeathState s);                   // overwrite virtual Creature::SetDeathState and Unit::SetDeathState
+        void SetDeathState(DeathState s) override;          // overwrite virtual Creature::SetDeathState and Unit::SetDeathState
         void Update(uint32 update_diff, uint32 diff) override;  // overwrite virtual Creature::Update and Unit::Update
 
         uint8 GetPetAutoSpellSize() const { return m_autospells.size(); }
-        uint32 GetPetAutoSpellOnPos(uint8 pos) const
+        uint32 GetPetAutoSpellOnPos(uint8 pos) const override
         {
             if (pos >= m_autospells.size())
                 return 0;
@@ -209,7 +209,7 @@ class MANGOS_DLL_SPEC Pet : public Creature
         bool CanTakeMoreActiveSpells(uint32 SpellIconID);
         void ToggleAutocast(uint32 spellid, bool apply);
 
-        bool HasSpell(uint32 spell) const;
+        bool HasSpell(uint32 spell) const override;
 
         void LearnPetPassives();
         void CastPetAuras(bool current);
@@ -293,7 +293,6 @@ class MANGOS_DLL_SPEC Pet : public Creature
         bool    m_removed;                                  // prevent overwrite pet state in DB at next Pet::Update if pet already removed(saved)
         bool    m_updated;                                  // pet updated now
     protected:
-        uint32  m_happinessTimer;
         PetType m_petType;
         int32   m_duration;                                 // time until unsummon (used mostly for summoned guardians and not used for controlled pets)
         uint64  m_auraUpdateMask;
@@ -314,7 +313,7 @@ class MANGOS_DLL_SPEC Pet : public Creature
         {
             MANGOS_ASSERT(false);
         }
-        void DeleteFromDB()                                 // overwrited of Creature::DeleteFromDB - don't must be called
+        void DeleteFromDB() override                        // overwrite of Creature::DeleteFromDB - don't must be called
         {
             MANGOS_ASSERT(false);
         }

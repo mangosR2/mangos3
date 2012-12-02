@@ -59,12 +59,12 @@ class DynamicObject : public WorldObject
         virtual bool IsHostileTo(Unit const* unit) const override;
         virtual bool IsFriendlyTo(Unit const* unit) const override;
 
-        float GetObjectBoundingRadius() const               // overwrite WorldObject version
+        float GetObjectBoundingRadius() const override      // overwrite WorldObject version
         {
             return 0.0f;                                    // dynamic object not have real interact size
         }
 
-        bool isVisibleForInState(Player const* u, WorldObject const* viewPoint, bool inVisibleList) const;
+        bool isVisibleForInState(Player const* u, WorldObject const* viewPoint, bool inVisibleList) const override;
 
         GridReference<DynamicObject>& GetGridRef() { return m_gridRef; }
 

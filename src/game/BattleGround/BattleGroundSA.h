@@ -200,10 +200,8 @@ struct BG_SA_RoundScore
 class BattleGroundSAScore : public BattleGroundScore
 {
     public:
-        BattleGroundSAScore(): DemolishersDestroyed(0), GatesDestroyed(0) {};
+        BattleGroundSAScore() {};
         virtual ~BattleGroundSAScore() {};
-        uint32 DemolishersDestroyed;
-        uint32 GatesDestroyed;
 };
 
 class BattleGroundSA : public BattleGround
@@ -213,40 +211,17 @@ class BattleGroundSA : public BattleGround
     public:
         BattleGroundSA();
         ~BattleGroundSA();
-        void Update(uint32 diff);
+        void Update(uint32 diff) override;
 
         /* inherited from BattlegroundClass */
-        virtual void AddPlayer(Player* plr);
-        virtual void StartingEventCloseDoors();
-        virtual void StartingEventOpenDoors();
-        virtual void EventPlayerDamageGO(Player *player, GameObject* target_obj, uint32 eventId, uint32 doneBy = 0);
-        virtual void FillInitialWorldStates();
-        virtual void EventPlayerClickedOnFlag(Player *source, GameObject* target_obj);
-        virtual void HandleKillUnit(Creature* unit, Player* killer);
-        virtual void HandleKillPlayer(Player* player, Player* killer);
-        virtual WorldSafeLocsEntry const* GetClosestGraveYard(Player* player);
-        virtual void Reset();
+        virtual void AddPlayer(Player* plr) override;
+        virtual void StartingEventCloseDoors() override;
+        virtual void StartingEventOpenDoors() override;
 
-        Team GetDefender() const { return defender; }
-        uint8 GetGydController(uint8 gyd) const { return m_Gyd[gyd]; }
-        int32 GetGateStatus(int32 Type) const { return GateStatus[Type]; }
-        void RemovePlayer(Player *plr, ObjectGuid guid);
-        void HandleAreaTrigger(Player *Source, uint32 Trigger);
-        void EndBattleGround(Team winner);
-        void ResetBattle(uint32 winner, Team teamDefending);
-        bool SetupBattleGround();
-        void SendMessageSA(Player *player, uint32 type, uint32 name);
-        void UpdateTimer();
-        void UpdatePhase();
-        uint32 Phase;
-        Team defender;
-        uint32 Round_timer;
-        uint32 TimeST2Round;
-        bool shipsStarted;
-        bool shipsSpawned;
-        bool relicGateDestroyed;
-        uint32 shipsTimer;
-        uint32 pillarOpenTimer;
+        void RemovePlayer(Player* plr, ObjectGuid guid) override;
+        void HandleAreaTrigger(Player* source, uint32 trigger) override;
+        // bool SetupBattleGround() override;
+
         /* Scorekeeping */
         void UpdatePlayerScore(Player* Source, uint32 type, uint32 value);
         /* For boats */

@@ -83,7 +83,7 @@ fi
 cd ../../..
 ################################################################################################
 # Make extractor
-cd contrib/vmap_extractor_v3
+cd contrib/vmap_extractor_v4
 make clean
 if [ ! -d ./$PLATFORM ]; then
     mkdir $PLATFORM

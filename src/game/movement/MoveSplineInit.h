@@ -20,7 +20,7 @@
 #define MANGOSSERVER_MOVESPLINEINIT_H
 
 #include "MoveSplineInitArgs.h"
-#include "../PathFinder.h"
+#include "PathFinder.h"
 
 class Unit;
 
@@ -133,7 +133,7 @@ namespace Movement
             Unit&  unit;
     };
 
-    inline void MoveSplineInit::SetFly() { args.flags.EnableFlying();}
+    inline void MoveSplineInit::SetFly() { args.flags.flying = true; }
     inline void MoveSplineInit::SetWalk(bool enable) { args.flags.walkmode = enable;}
     inline void MoveSplineInit::SetSmooth() { args.flags.EnableCatmullRom();}
     inline void MoveSplineInit::SetCyclic() { args.flags.cyclic = true;}

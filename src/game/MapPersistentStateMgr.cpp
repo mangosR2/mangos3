@@ -586,7 +586,8 @@ void DungeonResetScheduler::LoadResetTimes()
                 CharacterDatabase.DirectPExecute("UPDATE instance_reset SET resettime = '"UI64FMTD"' WHERE mapid = '%u' AND difficulty = '%u'", (uint64)newresettime, mapid, difficulty);
 
             SetResetTimeFor(mapid,difficulty,newresettime);
-        } while(result->NextRow());
+        }
+        while (result->NextRow());
         delete result;
     }
 
@@ -876,14 +877,15 @@ void MapPersistentStateManager::_DelHelper(DatabaseType &db, const char *fields,
         {
             Field *fields = result->Fetch();
             std::ostringstream ss;
-            for(size_t i = 0; i < fieldTokens.size(); i++)
+            for (size_t i = 0; i < fieldTokens.size(); ++i)
             {
                 std::string fieldValue = fields[i].GetCppString();
                 db.escape_string(fieldValue);
                 ss << (i != 0 ? " AND " : "") << fieldTokens[i] << " = '" << fieldValue << "'";
             }
             db.PExecute("DELETE FROM %s WHERE %s", table, ss.str().c_str());
-        } while (result->NextRow());
+        }
+        while (result->NextRow());
         delete result;
     }
 }
@@ -1154,7 +1156,8 @@ void MapPersistentStateManager::LoadCreatureRespawnTimes()
 
         ++count;
 
-    } while (result->NextRow());
+    }
+    while (result->NextRow());
 
     delete result;
 
@@ -1220,7 +1223,8 @@ void MapPersistentStateManager::LoadGameobjectRespawnTimes()
 
         ++count;
 
-    } while (result->NextRow());
+    }
+    while (result->NextRow());
 
     delete result;
 

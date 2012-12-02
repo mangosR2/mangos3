@@ -317,7 +317,9 @@ class MANGOS_DLL_SPEC SqlPreparedStatement
 
     protected:
         SqlPreparedStatement(const std::string& fmt, SqlConnection& conn):
-            m_nParams(0), m_nColumns(0), m_bIsQuery(false), m_bPrepared(false), m_szFmt(fmt), m_pConn(conn) {}
+            m_nParams(0), m_nColumns(0), m_bIsQuery(false),
+            m_bPrepared(false), m_szFmt(fmt), m_pConn(conn)
+        {}
 
         uint32 m_nParams;
         uint32 m_nColumns;
@@ -335,12 +337,12 @@ class MANGOS_DLL_SPEC SqlPlainPreparedStatement : public SqlPreparedStatement
         ~SqlPlainPreparedStatement() {}
 
         //this statement is always prepared
-        virtual bool prepare() { return true; }
+        virtual bool prepare() override { return true; }
 
         //we should replace all '?' symbols with substrings with proper format
-        virtual void bind(const SqlStmtParameters& holder);
+        virtual void bind(const SqlStmtParameters& holder) override;
 
-        virtual bool execute();
+        virtual bool execute() override;
 
     protected:
         void DataToString(const SqlStmtFieldData& data, std::ostringstream& fmt);

@@ -26,8 +26,6 @@
 #include "SharedDefines.h"
 #include "SpellAuraDefines.h"
 #include "DBCStructure.h"
-#include "DBCStores.h"
-#include "SQLStorages.h"
 
 #include "Utilities/UnorderedMapSet.h"
 
@@ -657,7 +655,7 @@ inline bool IsNeedCastSpellAtFormApply(SpellEntry const* spellInfo, ShapeshiftFo
         return false;
 
     SpellShapeshiftEntry const* shapeShift = spellInfo->GetSpellShapeshift();
-    if (shapeShift)
+    if (!shapeShift)
         return false;
 
     // passive spells with SPELL_ATTR_EX2_NOT_NEED_SHAPESHIFT are already active without shapeshift, do no recast!
@@ -885,11 +883,21 @@ enum ProcFlags
     PROC_FLAG_TAKEN_OFFHAND_HIT             = 0x00400000,   // 22 Taken off-hand melee attacks(not used)
     PROC_FLAG_SUCCESSFUL_OFFHAND_HIT        = 0x00800000,   // 23 Successful off-hand melee attacks
 
-    PROC_FLAG_ON_DEATH                      = 0x01000000,   // 24 On caster's death
+    PROC_FLAG_ON_DEATH                      = 0x01000000,   // 24 On death
+    PROC_FLAG_ON_JUMP                       = 0x02000000,   // 25 On jump
 
     // Custom proc flag system (must be used for write proc-like effects over procsystem)
     PROC_FLAG_ON_AURA_APPLY                 = 0x04000000,   // 26 On apply aura (require SpellClassMask and custom proc ex flags)
     PROC_FLAG_ON_AURA_FADE                  = 0x08000000,   // 27 On fade aura  (require SpellClassMask and custom proc ex flags)
+
+    PROC_FLAG_UNK26                         = 0x04000000,   // 26 not used
+    PROC_FLAG_UNK27                         = 0x08000000,   // 27 not used
+
+    PROC_FLAG_UNK28                         = 0x10000000,   // 28 not used
+    PROC_FLAG_UNK29                         = 0x20000000,   // 29 not used
+
+    PROC_FLAG_UNK30                         = 0x40000000,   // 30 not used
+    PROC_FLAG_UNK31                         = 0x80000000,   // 31 not used
 };
 
 #define MELEE_BASED_TRIGGER_MASK (PROC_FLAG_SUCCESSFUL_MELEE_HIT        | \

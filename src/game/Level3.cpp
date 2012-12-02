@@ -1175,6 +1175,7 @@ bool ChatHandler::HandleAccountSetGmLevelCommand(char* args)
         return false;
 
     int32 gm;
+        uint32 gmRealmID = realmID;
     if (!ExtractInt32(&args, gm))
         return false;
 
@@ -1200,6 +1201,13 @@ bool ChatHandler::HandleAccountSetGmLevelCommand(char* args)
         SetSentErrorMessage(true);
         return false;
     }
+    /// check if provided realmID is not current realmID, or isn't -1
+    if (gmRealmID != realmID && gmRealmID != -1)
+    {
+        SendSysMessage(LANG_INVALID_REALMID);
+        SetSentErrorMessage(true);
+        return false;
+    }
 
     /*
     // Check if provided realmID is not current realmID, or isn't -1
@@ -1218,8 +1226,9 @@ bool ChatHandler::HandleAccountSetGmLevelCommand(char* args)
     }
 
     PSendSysMessage(LANG_YOU_CHANGE_SECURITY, targetAccountName.c_str(), gm);
+    //LoginDatabase.PExecute("UPDATE account_access SET gmlevel = '%i' WHERE id = '%u'", gm, targetAccountId);
 
-    // If gmRealmID is -1, delete all values for the account id, else, insert values for the specific realmID
+    /// If gmRealmID is -1, delete all values for the account id, else, insert values for the specific realmID
     if (gmRealmID == -1)
     {
         LoginDatabase.PExecute("DELETE FROM account_access WHERE id = '%u'", targetAccountId);
@@ -1629,7 +1638,7 @@ bool ChatHandler::HandleSetSkillCommand(char* args)
     if (level <= 0 || level > maxskill || maxskill <= 0)
         return false;
 
-    target->SetSkill(skill, level, maxskill);
+    target->SetSkill(skill, level, maxskill, target->GetSkillStep(skill));
     PSendSysMessage(LANG_SET_SKILL, skill, sl->name[GetSessionDbcLocale()], tNameLink.c_str(), level, maxskill);
 
     return true;
@@ -3344,6 +3353,32 @@ bool ChatHandler::HandleLookupSkillCommand(char* args)
     return true;
 }
 
+void ChatHandler::ShowCurrencyListHelper(Player* target, CurrencyTypesEntry const* currency, LocaleConstant loc)
+{
+    uint32 id = currency->ID;
+
+    uint32 count = target ? target->GetCurrencyCount(id) : 0;
+
+    uint32 talentCost = GetTalentSpellCost(id);
+
+    // send spell in "id - [name] (Amount: x)" format
+    std::ostringstream ss;
+    if (m_session)
+        ss << id << " - |cff00aa00|Hcurrency:" << id << "|h[" << currency->name[loc];
+    else
+        ss << id << " - " << currency->name[loc];
+
+    if (m_session)
+        ss << " " << localeNames[loc] << "]|h|r";
+    else
+        ss << " " << localeNames[loc];
+
+    if (target)
+        ss << " (" << GetMangosString(LANG_CURRENCY_AMOUNT) << ": " << count << ")";
+
+    SendSysMessage(ss.str().c_str());
+}
+
 void ChatHandler::ShowSpellListHelper(Player* target, SpellEntry const* spellInfo, LocaleConstant loc)
 {
     uint32 id = spellInfo->Id;
@@ -3390,6 +3425,65 @@ void ChatHandler::ShowSpellListHelper(Player* target, SpellEntry const* spellInf
         ss << GetMangosString(LANG_ACTIVE);
 
     SendSysMessage(ss.str().c_str());
+}
+
+bool ChatHandler::HandleLookupCurrencyCommand(char* args)
+{
+    if (!*args)
+        return false;
+
+    // can be NULL at console call
+    Player* target = getSelectedPlayer();
+
+    std::string namepart = args;
+    std::wstring wnamepart;
+
+    if (!Utf8toWStr(namepart, wnamepart))
+        return false;
+
+    // converting string that we try to find to lower case
+    wstrToLower(wnamepart);
+
+    uint32 counter = 0;                                     // Counter for figure out that we found smth.
+
+    // Search in CurrencyTypes.dbc
+    for (uint32 id = 0; id < sCurrencyTypesStore.GetNumRows(); ++id)
+    {
+        CurrencyTypesEntry const* currency = sCurrencyTypesStore.LookupEntry(id);
+        if (currency)
+        {
+            int loc = GetSessionDbcLocale();
+            std::string name = currency->name[loc];
+            if (name.empty())
+                continue;
+
+            if (!Utf8FitTo(name, wnamepart))
+            {
+                loc = 0;
+                for (; loc < MAX_LOCALE; ++loc)
+                {
+                    if (loc == GetSessionDbcLocale())
+                        continue;
+
+                    name = currency->name[loc];
+                    if (name.empty())
+                        continue;
+
+                    if (Utf8FitTo(name, wnamepart))
+                        break;
+                }
+            }
+
+            if (loc < MAX_LOCALE)
+            {
+                ShowCurrencyListHelper(target, currency, LocaleConstant(loc));
+                ++counter;
+            }
+        }
+    }
+    if (counter == 0)                                       // if counter == 0 then we found nth
+        SendSysMessage(LANG_COMMAND_NOCURRENCYFOUND);
+    return true;
 }
 
 bool ChatHandler::HandleLookupSpellCommand(char* args)
@@ -3987,9 +4081,21 @@ bool ChatHandler::HandleDamageCommand(char* args)
     return true;
 }
 
-bool ChatHandler::HandleModifyArenaCommand(char* args)
+bool ChatHandler::HandleModifyCurrencyCommand(char* args)
 {
     if (!*args)
+        return false;
+
+    uint32 currencyId;
+    if (!ExtractUint32KeyFromLink(&args, "Hcurrency", currencyId))
+        return false;
+
+    CurrencyTypesEntry const * entry = sCurrencyTypesStore.LookupEntry(currencyId);
+    if (!entry)
+        return false;
+
+    int32 amount;
+    if (!ExtractInt32(&args, amount))
         return false;
 
     Player* target = getSelectedPlayer();
@@ -4000,11 +4106,9 @@ bool ChatHandler::HandleModifyArenaCommand(char* args)
         return false;
     }
 
-    int32 amount = (int32)atoi(args);
+    target->ModifyCurrencyCount(currencyId, amount, false, false);
 
-    target->ModifyArenaPoints(amount);
-
-    PSendSysMessage(LANG_COMMAND_MODIFY_ARENA, GetNameLink(target).c_str(), target->GetArenaPoints());
+    PSendSysMessage(LANG_COMMAND_MODIFY_CURRENCY, currencyId, GetNameLink(target).c_str(), target->GetCurrencyCount(currencyId));
 
     return true;
 }
@@ -5031,7 +5135,7 @@ bool ChatHandler::HandleResetHonorCommand(char* args)
     if (!ExtractPlayerTarget(&args, &target))
         return false;
 
-    target->SetHonorPoints(0);
+    target->SetCurrencyCount(CURRENCY_HONOR_POINTS, 0);
     target->SetUInt32Value(PLAYER_FIELD_KILLS, 0);
     target->SetUInt32Value(PLAYER_FIELD_LIFETIME_HONORBALE_KILLS, 0);
     //target->SetUInt32Value(PLAYER_FIELD_TODAY_CONTRIBUTION, 0);
@@ -6069,10 +6173,8 @@ bool ChatHandler::HandleGMFlyCommand(char* args)
     if (!target)
         target = m_session->GetPlayer();
 
-    WorldPacket data(12);
-    data.SetOpcode(value ? SMSG_MOVE_SET_CAN_FLY : SMSG_MOVE_UNSET_CAN_FLY);
-    data << target->GetPackGUID();
-    data << uint32(0);                                      // unknown
+    WorldPacket data;
+    target->BuildMoveSetCanFlyPacket(&data, value, 0);
     target->SendMessageToSet(&data, true);
     PSendSysMessage(LANG_COMMAND_FLYMODE_STATUS, GetNameLink(target).c_str(), args);
     return true;
@@ -7131,12 +7233,6 @@ bool ChatHandler::HandleSendMessageCommand(char* args)
     return true;
 }
 
-bool ChatHandler::HandleFlushArenaPointsCommand(char* /*args*/)
-{
-    sBattleGroundMgr.DistributeArenaPoints();
-    return true;
-}
-
 bool ChatHandler::HandleModifyGenderCommand(char* args)
 {
     if (!*args)
@@ -7373,7 +7469,7 @@ bool ChatHandler::HandleMmapTestArea(char* args)
 
     if (!creatureList.empty())
     {
-        PSendSysMessage("Found %i Creatures.", creatureList.size());
+        PSendSysMessage("Found " SIZEFMTD " Creatures.", creatureList.size());
 
         uint32 paths = 0;
         uint32 uStartTime = WorldTimer::getMSTime();

@@ -34,12 +34,12 @@ class BattleGroundBE : public BattleGround
     public:
         BattleGroundBE();
         ~BattleGroundBE();
-        void Update(uint32 diff);
+        void Update(uint32 diff) override;
 
         /* inherited from BattlegroundClass */
-        virtual void AddPlayer(Player* plr);
-        virtual void StartingEventCloseDoors();
-        virtual void StartingEventOpenDoors();
+        virtual void AddPlayer(Player* plr) override;
+        virtual void StartingEventCloseDoors() override;
+        virtual void StartingEventOpenDoors() override;
 
         void RemovePlayer(Player* plr, ObjectGuid guid);
         void HandleAreaTrigger(Player* source, uint32 trigger);

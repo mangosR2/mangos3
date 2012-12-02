@@ -72,7 +72,7 @@ static bool findtoknth(std::string &str, int n, std::string::size_type &s, std::
 {
     int i; s = e = 0;
     std::string::size_type size = str.size();
-    for(i = 1; s < size && i < n; s++) if(str[s] == ' ') ++i;
+    for (i = 1; s < size && i < n; ++s) if (str[s] == ' ') ++i;
     if (i < n)
         return false;
 
@@ -101,7 +101,8 @@ bool findnth(std::string &str, int n, std::string::size_type &s, std::string::si
         e = str.find("'",s);
         if (e == std::string::npos)
             return false;
-    } while(str[e-1] == '\\');
+    }
+    while (str[e - 1] == '\\');
 
     for(int i = 1; i < n; ++i)
     {
@@ -111,7 +112,8 @@ bool findnth(std::string &str, int n, std::string::size_type &s, std::string::si
             e = str.find("'",s);
             if (e == std::string::npos)
                 return false;
-        } while (str[e-1] == '\\');
+        }
+        while (str[e - 1] == '\\');
     }
     return true;
 }

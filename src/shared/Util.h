@@ -32,6 +32,8 @@ struct Tokens: public std::vector<char*>
     char* m_str;
 };
 
+float NormalizeOrientation(float o);
+
 void stripLineInvisibleChars(std::string &src);
 
 std::string secsToTimeString(time_t timeInSecs, bool shortText = false, bool hoursOnly = false);

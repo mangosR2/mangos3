@@ -18,12 +18,12 @@
 
 #include "OutdoorPvPTF.h"
 #include "WorldPacket.h"
-#include "../World.h"
-#include "../ObjectMgr.h"
-#include "../Object.h"
-#include "../Creature.h"
-#include "../GameObject.h"
-#include "../Player.h"
+#include "World.h"
+#include "ObjectMgr.h"
+#include "Object.h"
+#include "Creature.h"
+#include "GameObject.h"
+#include "Player.h"
 
 OutdoorPvPTF::OutdoorPvPTF() : OutdoorPvP(),
     m_zoneWorldState(WORLD_STATE_TF_TOWERS_CONTROLLED),
@@ -83,6 +83,8 @@ void OutdoorPvPTF::HandlePlayerLeaveZone(Player* player, bool isMainZone)
 
 void OutdoorPvPTF::HandleGameObjectCreate(GameObject* go)
 {
+    OutdoorPvP::HandleGameObjectCreate(go);
+
     switch (go->GetEntry())
     {
         case GO_TOWER_BANNER_WEST:
@@ -283,7 +285,7 @@ void OutdoorPvPTF::UnlockZone()
     SendUpdateWorldState(WORLD_STATE_TF_TOWER_COUNT_A, m_towersAlliance);
     SendUpdateWorldState(WORLD_STATE_TF_TOWER_COUNT_H, m_towersHorde);
 
-    for (GuidZoneMap::iterator itr = m_zonePlayers.begin(); itr != m_zonePlayers.end(); ++itr)
+    for (GuidZoneMap::const_iterator itr = m_zonePlayers.begin(); itr != m_zonePlayers.end(); ++itr)
     {
         // Find player who is in main zone (Terokkar Forest) to get correct map reference
         if (!itr->second)

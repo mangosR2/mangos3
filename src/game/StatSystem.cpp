@@ -132,7 +132,7 @@ bool Player::UpdateAllStats()
     UpdateAttackPowerAndDamage(true);
     UpdateMaxHealth();
 
-    for(int i = POWER_MANA; i < MAX_POWERS; ++i)
+    for (uint32 i = POWER_MANA; i < MAX_POWERS; ++i)
         UpdateMaxPower(Powers(i));
 
     UpdateAllRatings();
@@ -224,6 +224,8 @@ void Player::UpdateMaxHealth()
 
 void Player::UpdateMaxPower(Powers power)
 {
+    MANGOS_ASSERT(power < MAX_POWERS);
+
     UnitMods unitMod = UnitMods(UNIT_MOD_POWER_START + power);
 
     uint32 create_power = GetCreatePowers(power);
@@ -272,7 +274,6 @@ void Player::UpdateAttackPowerAndDamage(bool ranged )
                 {
                     case FORM_CAT:
                     case FORM_BEAR:
-                    case FORM_DIREBEAR:
                         val2 = 0.0f; break;
                     default:
                         val2 = GetStat(STAT_AGILITY) - 10.0f; break;
@@ -301,7 +302,6 @@ void Player::UpdateAttackPowerAndDamage(bool ranged )
                 {
                     case FORM_CAT:
                     case FORM_BEAR:
-                    case FORM_DIREBEAR:
                     case FORM_MOONKIN:
                     {
                         Unit::AuraList const& mDummy = GetAurasByType(SPELL_AURA_DUMMY);
@@ -330,7 +330,6 @@ void Player::UpdateAttackPowerAndDamage(bool ranged )
                     case FORM_CAT:
                         val2 = GetStat(STAT_STRENGTH)*2.0f + GetStat(STAT_AGILITY) - 20.0f + mLevelBonus + m_baseFeralAP + mBonusWeaponAtt; break;
                     case FORM_BEAR:
-                    case FORM_DIREBEAR:
                         val2 = GetStat(STAT_STRENGTH)*2.0f - 20.0f + mLevelBonus + m_baseFeralAP + mBonusWeaponAtt; break;
                     case FORM_MOONKIN:
                         val2 = GetStat(STAT_STRENGTH)*2.0f - 20.0f + m_baseFeralAP + mBonusWeaponAtt; break;
@@ -844,7 +843,7 @@ bool Creature::UpdateAllStats()
     UpdateMaxHealth();
     UpdateAttackPowerAndDamage();
 
-    for(int i = POWER_MANA; i < MAX_POWERS; ++i)
+    for (uint32 i = POWER_MANA; i < MAX_POWERS; ++i)
         UpdateMaxPower(Powers(i));
 
     for(int i = SPELL_SCHOOL_NORMAL; i < MAX_SPELL_SCHOOL; ++i)
@@ -878,6 +877,8 @@ void Creature::UpdateMaxHealth()
 
 void Creature::UpdateMaxPower(Powers power)
 {
+    MANGOS_ASSERT(power < MAX_POWERS);
+
     UnitMods unitMod = UnitMods(UNIT_MOD_POWER_START + power);
 
     float value  = GetTotalAuraModValue(unitMod);
@@ -982,7 +983,7 @@ bool Pet::UpdateAllStats()
     for (int i = STAT_STRENGTH; i < MAX_STATS; ++i)
         UpdateStats(Stats(i));
 
-    for(int i = POWER_MANA; i < MAX_POWERS; ++i)
+    for (uint32 i = POWER_MANA; i < MAX_POWERS; ++i)
         UpdateMaxPower(Powers(i));
 
     for (int i = SPELL_SCHOOL_NORMAL; i < MAX_SPELL_SCHOOL; ++i)
@@ -1040,6 +1041,8 @@ void Pet::UpdateMaxPower(Powers power)
 {
     if (!CanModifyStats())
         return;
+
+    MANGOS_ASSERT(power < MAX_POWERS);
 
     UnitMods unitMod = UnitMods(UNIT_MOD_POWER_START + power);
 

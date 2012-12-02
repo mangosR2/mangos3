@@ -142,6 +142,21 @@ Tokens::Tokens(const std::string &src, const char sep, uint32 vectorReserve)
     }
 }
 
+// modulos a radian orientation to the range of 0..2PI
+float NormalizeOrientation(float o)
+{
+    // fmod only supports positive numbers. Thus we have
+    // to emulate negative numbers
+    if (o < 0)
+    {
+        float mod = o * -1;
+        mod = fmod(mod, 2.0f * M_PI_F);
+        mod = -mod + 2.0f * M_PI_F;
+        return mod;
+    }
+    return fmod(o, 2.0f * M_PI_F);
+}
+
 void stripLineInvisibleChars(std::string &str)
 {
     static std::string invChars = " \t\7\n";
@@ -420,7 +435,8 @@ std::wstring GetMainPartOfName(std::wstring wname, uint32 declension)
     static wchar_t const soft_End[] = { wchar_t(1), wchar_t(0x044C),wchar_t(0x0000)};
     static wchar_t const j_End[]    = { wchar_t(1), wchar_t(0x0439),wchar_t(0x0000)};
 
-    static wchar_t const* const dropEnds[6][8] = {
+    static wchar_t const* const dropEnds[6][8] =
+    {
         { &a_End[1],  &o_End[1],    &ya_End[1],   &ie_End[1],  &soft_End[1], &j_End[1],    NULL,       NULL },
         { &a_End[1],  &ya_End[1],   &yeru_End[1], &i_End[1],   NULL,         NULL,         NULL,       NULL },
         { &ie_End[1], &u_End[1],    &yu_End[1],   &i_End[1],   NULL,         NULL,         NULL,       NULL },

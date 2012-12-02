@@ -124,7 +124,8 @@ void MapManager::LoadTransports()
         map->InsertObject(t);
 
         ++count;
-    } while(result->NextRow());
+    }
+    while (result->NextRow());
     delete result;
 
     sLog.outString();
@@ -168,7 +169,7 @@ Transport* MapManager::GetTransportByGOMapId(uint32 mapid)
 
 Transport::Transport() : GameObject()
 {
-    m_updateFlag = (UPDATEFLAG_TRANSPORT | UPDATEFLAG_HIGHGUID | UPDATEFLAG_HAS_POSITION | UPDATEFLAG_ROTATION);
+    m_updateFlag = UPDATEFLAG_TRANSPORT | UPDATEFLAG_HAS_POSITION | UPDATEFLAG_ROTATION;
 }
 
 bool Transport::Create(uint32 guidlow, uint32 mapid, float x, float y, float z, float ang, uint8 animprogress, uint16 dynamicHighValue)
@@ -310,7 +311,7 @@ bool Transport::GenerateWaypoints(uint32 pathid, std::set<uint32> &mapids)
         keyFrames[j].distSinceStop = tmpDist;
     }
 
-    for (int i = int(keyFrames.size()) - 1; i >= 0; i--)
+    for (int i = int(keyFrames.size()) - 1; i >= 0; --i)
     {
         int j = (i + (firstStop+1)) % keyFrames.size();
         tmpDist += keyFrames[(j + 1) % keyFrames.size()].distFromPrev;
@@ -578,24 +579,37 @@ void Transport::UpdateForMap(Map const* targetMap)
         {
             if(this != itr->getSource()->GetTransport())
             {
-                UpdateData transData;
+                UpdateData transData(itr->getSource()->GetMapId());
                 BuildCreateUpdateBlockForPlayer(&transData, itr->getSource());
                 WorldPacket packet;
                 transData.BuildPacket(&packet);
+
+                // Prevent sending transport maps in player update object
+                if (packet.ReadUInt16() != itr->getSource()->GetMapId())
+                    return;
+
                 itr->getSource()->SendDirectMessage(&packet);
             }
         }
     }
     else
     {
-        UpdateData transData;
+        UpdateData transData(GetMapId());
         BuildOutOfRangeUpdateBlock(&transData);
         WorldPacket out_packet;
         transData.BuildPacket(&out_packet);
 
         for(Map::PlayerList::const_iterator itr = pl.begin(); itr != pl.end(); ++itr)
+        {
             if(this != itr->getSource()->GetTransport())
+            {
+                // Prevent sending transport maps in player update object
+                if (out_packet.ReadUInt16() != itr->getSource()->GetMapId())
+                    return;
+
                 itr->getSource()->SendDirectMessage(&out_packet);
+    }
+}
     }
 }
 
