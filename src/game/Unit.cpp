@@ -4948,24 +4948,8 @@ bool Unit::AddSpellAuraHolder(SpellAuraHolderPtr holder)
                     }
                 }
 
-                // can be only single
-                RemoveSpellAuraHolder(foundHolder, AURA_REMOVE_BY_STACK);
-                break;
-            }
-
-            bool stop = false;
-
-            for (int32 i = 0; i < MAX_EFFECT_INDEX && !stop; ++i)
-            {
-                // no need to check non stacking auras that weren't/won't be applied on this target
-                if (!foundHolder->m_auras[i] || !holder->m_auras[i])
-                    continue;
-
-                // m_auraname can be modified to SPELL_AURA_NONE for area auras, use original
-                SpellEffectEntry const* spellEffect = aurSpellInfo->GetSpellEffect(SpellEffectIndex(i));
-                AuraType aurNameReal = AuraType(spellEffect ? spellEffect->EffectApplyAuraName : SPELL_AURA_NONE);
-
-                switch (aurNameReal)
+                // only one holder per caster on same target
+                if (iter->second->GetCasterGuid() == holder->GetCasterGuid())
                 {
                     holdersToRemove.push(iter->second);
                     break;
@@ -5536,7 +5520,7 @@ void Unit::RemoveAurasDueToSpellBySteal(uint32 spellId, ObjectGuid casterGuid, U
 
             if (Unit* caster = dotAura->GetCaster())
             {
-                int32 returnmana = (spellProto->ManaCostPercentage * caster->GetCreateMana() / 100) * dotAura->GetStackAmount() / 2;
+                int32 returnmana = (spellProto->GetManaCostPercentage() * caster->GetCreateMana() / 100) * dotAura->GetStackAmount() / 2;
                 caster->CastCustomSpell(caster, 64372, &returnmana, NULL, NULL, true, NULL, dotAura, casterGuid);
             }
         }
@@ -5604,13 +5588,14 @@ void Unit::RemoveAurasWithDispelType(DispelType type, ObjectGuid casterGuid)
     // Dispel all existing auras vs current dispel type
     SpellIdSet spellsToRemove;
     {
-        SpellEntry const* spell = itr->second->GetSpellProto();
-        if (((1<<spell->GetDispel()) & dispelMask) && (!casterGuid || casterGuid == itr->second->GetCasterGuid()))
+        MAPLOCK_READ(this,MAP_LOCK_TYPE_AURAS);
+        SpellAuraHolderMap const& holdersMap = GetSpellAuraHolderMap();
+        for (SpellAuraHolderMap::const_iterator iter = holdersMap.begin(); iter != holdersMap.end(); ++iter)
         {
             if (!iter->second || iter->second->IsDeleted())
                 continue;
 
-            if (((1 << iter->second->GetSpellProto()->Dispel) & dispelMask) && (!casterGuid || casterGuid == iter->second->GetCasterGuid()))
+            if (((1 << iter->second->GetSpellProto()->GetDispel()) & dispelMask) && (!casterGuid || casterGuid == iter->second->GetCasterGuid()))
                 spellsToRemove.insert(iter->first);
         }
     }
@@ -5682,12 +5667,14 @@ void Unit::RemoveAurasWithInterruptFlags(uint32 flags)
 {
     SpellIdSet spellsToRemove;
     {
-        if (iter->second->GetSpellProto()->GetAuraInterruptFlags() & flags)
+        MAPLOCK_READ(this,MAP_LOCK_TYPE_AURAS);
+        SpellAuraHolderMap const& holdersMap = GetSpellAuraHolderMap();
+        for (SpellAuraHolderMap::const_iterator iter = holdersMap.begin(); iter != holdersMap.end(); ++iter)
         {
             if (!iter->second || iter->second->IsDeleted() || !iter->second->GetSpellProto())
                 continue;
 
-            if (iter->second->GetSpellProto()->AuraInterruptFlags & flags)
+            if (iter->second->GetSpellProto()->GetAuraInterruptFlags() & flags)
                 spellsToRemove.insert(iter->first);
         }
     }
@@ -6199,7 +6186,7 @@ Aura const* Unit::GetTriggeredByClientAura(uint32 spellId)
                     continue;
 
                 if ((*itr)->GetHolder()->GetCasterGuid() == GetObjectGuid() &&
-                    (*itr)->GetHolder()->GetSpellProto()->EffectTriggerSpell[(*itr)->GetEffIndex()] == spellId)
+                    (*itr)->GetSpellEffect()->EffectTriggerSpell == spellId)
                     return (*itr)();
             }
         }
@@ -7291,11 +7278,18 @@ void Unit::ModifyAuraState(AuraState flag, bool apply)
                 PlayerSpellMap const& sp_list = ((Player*)this)->GetSpellMap();
                 if (!sp_list.empty())
                 {
-                    if (itr->second.state == PLAYERSPELL_REMOVED) continue;
-                    SpellEntry const* spellInfo = sSpellStore.LookupEntry(itr->first);
-                    if (!spellInfo || !IsPassiveSpell(spellInfo)) continue;
-                    if (AuraState(spellInfo->GetCasterAuraState()) == flag)
-                        CastSpell(this, itr->first, true, NULL);
+                    for (PlayerSpellMap::const_iterator itr = sp_list.begin(); itr != sp_list.end(); ++itr)
+                    {
+                        if (itr->second.state == PLAYERSPELL_REMOVED)
+                            continue;
+
+                        SpellEntry const* spellInfo = sSpellStore.LookupEntry(itr->first);
+                        if (!spellInfo || !IsPassiveSpell(spellInfo))
+                            continue;
+
+                        if (AuraState(spellInfo->GetCasterAuraState()) == flag)
+                            CastSpell(this, spellInfo, true, NULL);
+                    }
                 }
             }
         }
@@ -7850,12 +7844,23 @@ void Unit::SpellDamageBonusDone(DamageInfo* damageInfo, uint32 stack)
     AuraList const& mModDamagePercentDone = GetAurasByType(SPELL_AURA_MOD_DAMAGE_PERCENT_DONE);
     for(AuraList::const_iterator i = mModDamagePercentDone.begin(); i != mModDamagePercentDone.end(); ++i)
     {
+        if (i->IsEmpty() || !(*i)->GetModifier() || !((*i)->GetModifier()->m_miscvalue & damageInfo->SchoolMask()))
+            continue;
+
+        SpellAuraHolderPtr holder = i->GetHolder();
+
+        int32 calculatedBonus = (*i)->GetModifier()->m_amount;
+
         SpellEquippedItemsEntry const* spellEquip = (*i)->GetSpellProto()->GetSpellEquippedItems();
-        if( ((*i)->GetModifier()->m_miscvalue & GetSpellSchoolMask(spellProto)) &&
-            spellEquip && spellEquip->EquippedItemClass == -1 &&
+
+        if (spellEquip->EquippedItemClass != -1 ||
                                                             // -1 == any item class (not wand then)
-            spellEquip->EquippedItemInventoryTypeMask == 0 )
+            spellEquip->EquippedItemInventoryTypeMask != 0)
                                                             // 0 == any inventory type (not wand then)
+            continue;
+
+        // bonus stored in another auras basepoints
+        if (calculatedBonus == 0)
         {
             // Clearcasting - bonus from Elemental Oath
             if ((*i)->GetSpellProto()->Id == 16246)
@@ -7865,7 +7870,7 @@ void Unit::SpellDamageBonusDone(DamageInfo* damageInfo, uint32 stack)
                 {
                     if ((*itr)->GetSpellProto()->SpellIconID == 3053)
                     {
-                        calculatedBonus = (*itr)->GetSpellProto()->CalculateSimpleValue(EFFECT_INDEX_1);
+                        calculatedBonus = (*itr)->GetSpellProto()->GetSpellEffect(EFFECT_INDEX_1)->CalculateSimpleValue();
                         break;
                     }
                 }
@@ -8027,22 +8032,7 @@ void Unit::SpellDamageBonusDone(DamageInfo* damageInfo, uint32 stack)
         }
     }
 
-    SpellClassOptionsEntry const* classOptions = spellProto->GetSpellClassOptions();
-
-     // Custom scripted damage
-    switch(spellProto->GetSpellFamilyName())
-    {
-        SpellEntry const *spell = (*i)->GetSpellProto();
-        //Fire and Brimstone
-        if (spell->GetSpellFamilyName() == SPELLFAMILY_WARLOCK && spell->SpellIconID == 3173)
-        {
-            if (pVictim->HasAuraState(AURA_STATE_CONFLAGRATE) && (damageInfo->GetSpellProto()->GetSpellFamilyName() == SPELLFAMILY_WARLOCK && damageInfo->GetSpellProto()->GetSpellFamilyFlags().test<CF_WARLOCK_INCINERATE, CF_WARLOCK_CHAOS_BOLT>()))
-            {
-                DoneTotalMod *= ((*i)->GetModifier()->m_amount+100.0f) / 100.0f;
-                break;
-            }
-        }
-    }
+    SpellClassOptionsEntry const* classOptions = damageInfo->GetSpellProto()->GetSpellClassOptions();
 
      // Custom scripted damage
     switch(damageInfo->GetSpellProto()->GetSpellFamilyName())
@@ -9049,10 +9039,18 @@ void Unit::MeleeDamageBonusDone(DamageInfo* damageInfo, uint32 stack)
         AuraList const& mModDamageDone = GetAurasByType(SPELL_AURA_MOD_DAMAGE_DONE);
         for(AuraList::const_iterator i = mModDamageDone.begin(); i != mModDamageDone.end(); ++i)
         {
-            if (((*i)->GetModifier()->m_miscvalue & schoolMask &&                        // schoolmask has to fit with the intrinsic spell school
-                (*i)->GetModifier()->m_miscvalue & GetMeleeDamageSchoolMask() &&         // AND schoolmask has to fit with weapon damage school (essential for non-physical spells)
-                ((*i)->GetSpellProto()->GetEquippedItemClass() == -1) ||                 // general, weapon independent
-                (pWeapon && pWeapon->IsFitToSpellRequirements((*i)->GetSpellProto()))))  // OR used weapon fits aura requirements
+            if (i->IsEmpty())
+                continue;
+
+            SpellAuraHolderPtr holder = i->GetHolder();  // lock holder
+
+            if ((((*i)->GetModifier()->m_miscvalue & damageInfo->SchoolMask()) ||                          // schoolmask has to fit with the intrinsic spell school
+                (*i)->GetSpellProto()->HasAttribute(SPELL_ATTR_EX4_PET_SCALING_AURA)) &&   // completely schoolmask-independend: pet scaling auras
+                                                                                           // Those auras have SPELL_SCHOOL_MASK_MAGIC, but anyway should also affect
+                                                                                           // physical damage from non-weapon-damage-based spells (claw, swipe etc.)
+                ((*i)->GetModifier()->m_miscvalue & GetMeleeDamageSchoolMask()) &&           // AND schoolmask has to fit with weapon damage school (essential for non-physical spells)
+                ((holder->GetSpellProto()->GetEquippedItemClass() == -1) ||                     // general, weapon independent
+                (pWeapon && pWeapon->IsFitToSpellRequirements(holder->GetSpellProto()))))  // OR used weapon fits aura requirements
             {
                 DoneFlat += (*i)->GetModifier()->m_amount;
             }
@@ -9084,10 +9082,15 @@ void Unit::MeleeDamageBonusDone(DamageInfo* damageInfo, uint32 stack)
         AuraList const& mModDamagePercentDone = GetAurasByType(SPELL_AURA_MOD_DAMAGE_PERCENT_DONE);
         for(AuraList::const_iterator i = mModDamagePercentDone.begin(); i != mModDamagePercentDone.end(); ++i)
         {
-            if (((*i)->GetModifier()->m_miscvalue & schoolMask &&                        // schoolmask has to fit with the intrinsic spell school
-                (*i)->GetModifier()->m_miscvalue & GetMeleeDamageSchoolMask() &&         // AND schoolmask has to fit with weapon damage school (essential for non-physical spells)
-                ((*i)->GetSpellProto()->GetEquippedItemClass()) == -1 ||                 // general, weapon independent
-                (pWeapon && pWeapon->IsFitToSpellRequirements((*i)->GetSpellProto()))))  // OR used weapon fits aura requirements
+            if (i->IsEmpty())
+                continue;
+
+            SpellAuraHolderPtr holder = i->GetHolder();  // lock holder
+
+            if (((*i)->GetModifier()->m_miscvalue & damageInfo->SchoolMask()) &&                         // schoolmask has to fit with the intrinsic spell school
+                ((*i)->GetModifier()->m_miscvalue & GetMeleeDamageSchoolMask()) &&         // AND schoolmask has to fit with weapon damage school (essential for non-physical spells)
+                ((holder->GetSpellProto()->GetEquippedItemClass() == -1) ||                     // general, weapon independent
+                (pWeapon && pWeapon->IsFitToSpellRequirements(holder->GetSpellProto()))))  // OR used weapon fits aura requirements
             {
                 DonePercent *= ((*i)->GetModifier()->m_amount+100.0f) / 100.0f;
             }
@@ -9205,10 +9208,9 @@ void Unit::MeleeDamageBonusDone(DamageInfo* damageInfo, uint32 stack)
 
     if (damageInfo->GetSpellProto())
     {
-        SpellClassOptionsEntry const* classOptions = spellProto->GetSpellClassOptions();
-
+        SpellClassOptionsEntry const* classOptions = damageInfo->GetSpellProto()->GetSpellClassOptions();
         // Frost Strike
-        if (classOptions && classOptions->IsFitToFamily(SPELLFAMILY_DEATHKNIGHT, UI64LIT(0x0000000400000000)))
+        if (damageInfo->GetSpellProto()->GetSpellFamilyName() == SPELLFAMILY_DEATHKNIGHT && damageInfo->GetSpellProto()->GetSpellFamilyFlags().test<CF_DEATHKNIGHT_FROST_STRIKE>())
         {
             // search disease
             bool found = false;
@@ -9228,7 +9230,7 @@ void Unit::MeleeDamageBonusDone(DamageInfo* damageInfo, uint32 stack)
                 Unit::AuraList const& dummyAuras = GetAurasByType(SPELL_AURA_DUMMY);
                 for(Unit::AuraList::const_iterator i = dummyAuras.begin(); i != dummyAuras.end(); ++i)
                 {
-                    if ((*i)->GetSpellProto()->GetEffectMiscValue((*i)->GetEffIndex()) == 7244)
+                    if ((*i)->GetSpellEffect()->EffectMiscValue == 7244)
                     {
                         DonePercent *= ((*i)->GetModifier()->m_amount+100.0f) / 100.0f;
                         break;
@@ -9237,7 +9239,7 @@ void Unit::MeleeDamageBonusDone(DamageInfo* damageInfo, uint32 stack)
             }
         }
         // Glyph of Steady Shot (Steady Shot check)
-        else if (classOptions && classOptions->IsFitToFamily(SPELLFAMILY_HUNTER, UI64LIT(0x0000000100000000)))
+        else if (damageInfo->GetSpellProto()->GetSpellFamilyName() == SPELLFAMILY_HUNTER && damageInfo->GetSpellProto()->GetSpellFamilyFlags().test<CF_HUNTER_STEADY_SHOT>())
         {
             // search for glyph dummy aura
             if (Aura const* aur = GetDummyAura(56826))
@@ -9328,9 +9330,9 @@ void Unit::MeleeDamageBonusTaken(DamageInfo* damageInfo, uint32 stack)
     bool isWeaponDamageBasedSpell = !(damageInfo->GetSpellProto() && (damageInfo->damageType == DOT || IsSpellHaveEffect(damageInfo->GetSpellProto(), SPELL_EFFECT_SCHOOL_DAMAGE)));
     uint32 mechanicMask           = damageInfo->GetSpellProto() ? GetAllSpellMechanicMask(damageInfo->GetSpellProto()) : 0;
 
-    // Shred also have bonus as MECHANIC_BLEED damages
-    SpellClassOptionsEntry const* classOptions = spellProto ? spellProto->GetSpellClassOptions() : NULL;
-    if (classOptions && classOptions->GetSpellFamilyName()==SPELLFAMILY_DRUID && classOptions->SpellFamilyFlags & UI64LIT(0x00008000))
+    // Shred and maul also have bonus as MECHANIC_BLEED damages
+    SpellClassOptionsEntry const* classOptions = damageInfo->GetSpellProto() ? damageInfo->GetSpellProto()->GetSpellClassOptions() : NULL;
+    if (damageInfo->GetSpellProto() && damageInfo->GetSpellProto()->GetSpellFamilyName() == SPELLFAMILY_DRUID && damageInfo->GetSpellProto()->GetSpellFamilyFlags().test<CF_DRUID_MAUL, CF_DRUID_SHRED>())
         mechanicMask |= (1 << (MECHANIC_BLEED-1));
 
     // FLAT damage bonus auras
@@ -12203,7 +12205,7 @@ void Unit::ProcDamageAndSpellFor(bool isVictim, DamageInfo* damageInfo)
             if (!triggeredByAura || triggeredByAura->IsDeleted())
                 continue;
 
-            SpellEffectEntry const* spellEffect = triggeredByHolder->GetSpellProto()->GetSpellEffect(SpellEffectIndex(i));
+            SpellEffectEntry const* spellEffect = triggeredByAura->GetSpellEffect();
             if (!spellEffect)
                 continue;
 
@@ -12235,7 +12237,10 @@ void Unit::ProcDamageAndSpellFor(bool isVictim, DamageInfo* damageInfo)
                     continue;
             }
 
-            SpellAuraProcResult procResult = (*this.*AuraProcHandler[spellEffect->EffectApplyAuraName])(pTarget, damage, triggeredByAura, procSpell, procFlag, procExtra, cooldown);
+            itr->first->SetInUse(true);
+            SpellAuraProcResult procResult = (*this.*AuraProcHandler[spellEffect->EffectApplyAuraName])(pTarget, damageInfo, triggeredByAura, procSpell, procFlag, procExtra, cooldown);
+            itr->first->SetInUse(false);
+
             switch (procResult)
             {
                 case SPELL_AURA_PROC_CANT_TRIGGER:
@@ -12941,9 +12946,13 @@ void Unit::RemoveAurasAtMechanicImmunity(uint32 mechMask, uint32 exceptSpellId, 
 
                 for (int32 i = 0; i < MAX_EFFECT_INDEX; i++)
                 {
-                    uint8 mechanic  = iter->second->GetSpellProto()->EffectMechanic[SpellEffectIndex(i)] ?
-                                      iter->second->GetSpellProto()->EffectMechanic[SpellEffectIndex(i)] :
-                                      iter->second->GetSpellProto()->Mechanic;
+                    SpellEffectEntry const* spellEffect = iter->second->GetSpellProto()->GetSpellEffect(SpellEffectIndex(i));
+                    if (!spellEffect)
+                        continue;
+
+                    uint8 mechanic  = spellEffect->EffectMechanic ?
+                                      spellEffect->EffectMechanic :
+                                      iter->second->GetSpellProto()->GetMechanic();
 
                     if ((1 << (mechanic - 1)) & mechMask)
                     {
@@ -12995,7 +13004,7 @@ void Unit::RemoveAurasBySpellMechanic(uint32 mechMask)
     {
         if (!iter->second || iter->second->IsDeleted() || !iter->second->IsPositive())
             ++iter;
-        else if (iter->second->GetSpellProto()->Mechanic & mechMask)
+        else if (iter->second->GetSpellProto()->GetMechanic() & mechMask)
         {
             RemoveAurasDueToSpell(iter->second->GetId());
 
@@ -13144,8 +13153,10 @@ void Unit::EnterVehicle(Unit* vehicleBase, int8 seatId)
                     for (uint32 i = 0; i < MAX_EFFECT_INDEX; ++i)
                     {
                         if (IsAuraApplyEffect(spellInfo, SpellEffectIndex(i)))
-                            if (spellInfo->EffectApplyAuraName[i] == SPELL_AURA_CONTROL_VEHICLE)
+                        {
+                            if (spellInfo->GetSpellEffect(SpellEffectIndex(i))->EffectApplyAuraName == SPELL_AURA_CONTROL_VEHICLE)
                                 b_controlAura = true;
+                        }
                     }
 
                     if (b_controlAura)
@@ -13179,7 +13190,7 @@ void Unit::EnterVehicle(Unit* vehicleBase, int8 seatId)
     {
         if (IsAuraApplyEffect(spellInfo, SpellEffectIndex(i)))
         {
-            if (spellInfo->EffectApplyAuraName[i] == SPELL_AURA_CONTROL_VEHICLE)
+            if (spellInfo->GetSpellEffect(SpellEffectIndex(i))->EffectApplyAuraName == SPELL_AURA_CONTROL_VEHICLE)
             {
                 bp[i] = seatId + 1;
             }
@@ -13613,11 +13624,16 @@ void Unit::_AddAura(uint32 spellID, uint32 duration)
 
             for(uint8 i = 0; i < MAX_EFFECT_INDEX; ++i)
             {
-                if (spellInfo->Effect[i] >= TOTAL_SPELL_EFFECTS)
+                SpellEffectEntry const* spellEffect = spellInfo->GetSpellEffect(SpellEffectIndex(i));
+                if(!spellEffect)
                     continue;
-                if ( IsAreaAuraEffect(spellInfo->Effect[i])           ||
-                    spellInfo->Effect[i] == SPELL_EFFECT_APPLY_AURA  ||
-                    spellInfo->Effect[i] == SPELL_EFFECT_PERSISTENT_AREA_AURA )
+
+                if (spellEffect->Effect >= TOTAL_SPELL_EFFECTS)
+                    continue;
+
+                if (IsAreaAuraEffect(spellEffect->Effect)           ||
+                    spellEffect->Effect == SPELL_EFFECT_APPLY_AURA  ||
+                    spellEffect->Effect == SPELL_EFFECT_PERSISTENT_AREA_AURA )
                 {
                     /*Aura *aura = */holder->CreateAura(spellInfo, SpellEffectIndex(i), NULL, holder, this, NULL, NULL);
                     holder->SetAuraDuration(duration);
@@ -13888,15 +13904,19 @@ bool Unit::HasMorePoweredBuff(uint32 spellId)
 
     for (uint8 i = 0; i < MAX_EFFECT_INDEX; ++i)
     {
-        if ( spellInfo->Effect[i] != SPELL_EFFECT_APPLY_AURA  &&
-             spellInfo->Effect[i] != SPELL_EFFECT_APPLY_AREA_AURA_PARTY &&
-             spellInfo->Effect[i] != SPELL_EFFECT_APPLY_AREA_AURA_RAID
+        SpellEffectEntry const* spellEffect = spellInfo->GetSpellEffect(SpellEffectIndex(i));
+        if(!spellEffect)
+            continue;
+
+        if ( spellEffect->Effect != SPELL_EFFECT_APPLY_AURA  &&
+             spellEffect->Effect != SPELL_EFFECT_APPLY_AREA_AURA_PARTY &&
+             spellEffect->Effect != SPELL_EFFECT_APPLY_AREA_AURA_RAID
             )
             continue;
 
         MAPLOCK_READ(this,MAP_LOCK_TYPE_AURAS);
 
-        AuraType auraType = AuraType(spellInfo->EffectApplyAuraName[SpellEffectIndex(i)]);
+        AuraType auraType = AuraType(spellEffect->EffectApplyAuraName);
 
         if (!auraType || auraType >= TOTAL_AURAS)
             continue;
@@ -13922,22 +13942,26 @@ bool Unit::HasMorePoweredBuff(uint32 spellId)
 
             for (uint8 j = 0; j < MAX_EFFECT_INDEX; ++j)
             {
-                if ( foundSpellInfo->Effect[j] != SPELL_EFFECT_APPLY_AURA  &&
-                     foundSpellInfo->Effect[j] != SPELL_EFFECT_APPLY_AREA_AURA_PARTY &&
-                     foundSpellInfo->Effect[j] != SPELL_EFFECT_APPLY_AREA_AURA_RAID
+                SpellEffectEntry const* foundSpellEffect = foundSpellInfo->GetSpellEffect(SpellEffectIndex(j));
+                if(!foundSpellEffect)
+                    continue;
+
+                if ( foundSpellEffect->Effect != SPELL_EFFECT_APPLY_AURA  &&
+                     foundSpellEffect->Effect != SPELL_EFFECT_APPLY_AREA_AURA_PARTY &&
+                     foundSpellEffect->Effect != SPELL_EFFECT_APPLY_AREA_AURA_RAID
                     )
                     continue;
 
-                if (foundSpellInfo->Effect[j] != spellInfo->Effect[i])
+                if (foundSpellEffect->Effect != spellEffect->Effect)
                     continue;
 
-                if (foundSpellInfo->EffectApplyAuraName[j] != spellInfo->EffectApplyAuraName[i])
+                if (foundSpellEffect->EffectApplyAuraName != spellEffect->EffectApplyAuraName)
                     continue;
 
-                if (foundSpellInfo->EffectMiscValue[j] != spellInfo->EffectMiscValue[i])
+                if (foundSpellEffect->EffectMiscValue != spellEffect->EffectMiscValue)
                     continue;
 
-                if (spellInfo->CalculateSimpleValue(SpellEffectIndex(i)) < foundSpellInfo->CalculateSimpleValue(SpellEffectIndex(j)))
+                if (spellEffect->CalculateSimpleValue() < foundSpellEffect->CalculateSimpleValue())
                     return true;
                 else
                     return false;
