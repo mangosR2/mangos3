@@ -2736,8 +2736,7 @@ void ObjectMgr::LoadPetLevelInfo()
         if(!pInfo || pInfo[0].health == 0 || pInfo[sWorld.getConfig(CONFIG_UINT32_MAX_PLAYER_LEVEL)-1].health == 0 )
         {
             sLog.outErrorDb("Creature %u does not have pet stats data for Levels 1 or %u! Must be exist!",itr->first, sWorld.getConfig(CONFIG_UINT32_MAX_PLAYER_LEVEL));
-            Log::WaitBeforeContinueIfNeed();
-            exit(1);
+            continue;
         }
 
         // fill level gaps
