@@ -1495,6 +1495,16 @@ void WorldSession::HandleHearthandResurrect(WorldPacket & /*recv_data*/)
     if(!atEntry || !(atEntry->flags & AREA_FLAG_CAN_HEARTH_AND_RES))
         return;
 
+//    bool ok = false;
+//    if (OutdoorPvP* opvp = sOutdoorPvPMgr.GetScript(_player->GetCachedZoneId()))
+//    {
+//        if (opvp->IsBattleField() && (ok = opvp->IsMember(_player->GetObjectGuid())))
+//        {
+//            SendBfLeaveMessage(((BattleField*)opvp)->GetBattlefieldGuid(), BATTLEFIELD_LEAVE_REASON_EXITED);
+//            ((BattleField*)opvp)->RemovePlayerFromRaid(_player->GetObjectGuid());
+//        }
+//    }
+
     // Can't use in flight
     if (_player->IsTaxiFlying())
         return;
