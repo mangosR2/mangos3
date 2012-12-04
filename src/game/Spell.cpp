@@ -8642,7 +8642,6 @@ bool Spell::FillCustomTargetMap(SpellEffectIndex i, UnitList &targetUnitMap)
             break;
         }
         case 62166: // Stone Grip (Kologarn)
-        case 63342: // Focused Eyebeam Summon Trigger (Kologarn)
         case 63981: // Stone Grip (Kologarn)
         {
             if (m_caster->getVictim())
