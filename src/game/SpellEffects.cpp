@@ -7760,6 +7760,9 @@ void Spell::DoSummonWild(SpellEffectEntry const* effect, uint32 forceFaction)
             // UNIT_FIELD_CREATEDBY are not set for these kind of spells.
             // Does exceptions exist? If so, what are they?
             summon->SetCreatorGuid(m_caster->GetObjectGuid());
+            
+            if (m_caster->GetTypeId() == TYPEID_PLAYER)
+                ((Player *) m_caster)->AddSummonUnit(summon);
 
             if (forceFaction)
                 summon->setFaction(forceFaction);

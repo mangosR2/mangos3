@@ -2175,6 +2175,21 @@ void Aura::TriggerSpell()
                     case 66:                                // Invisibility
                         // Here need periodic trigger reducing threat spell (or do it manually)
                         return;
+                    case 82676:                             // Ring of Frost
+                    {
+                        if (Unit* caster = GetCaster())
+                        {
+                            if (caster->GetTypeId() == TYPEID_PLAYER)
+                            {
+                                if (Unit* ring = ((Player *) GetCaster())->GetSummonUnit(auraId))
+                                {
+                                    trigger_spell_id = 82691;
+                                    triggerTarget = ring;
+                                }
+                            }
+                        }
+                        break;
+                    }
                     default:
                         break;
                 }
@@ -5628,6 +5643,13 @@ void Aura::HandleAuraModStun(bool apply, bool Real)
             caster->CastSpell(target, spell_id, true, NULL, this);
             return;
         }
+        // Ring of Frost
+        else if (GetId() == 82691)
+        {
+            if (!apply)
+                if (Unit* caster = GetCaster())
+                    caster->CastSpell(target, 91264, true); // 3sec immune spell
+        }
     }
 }
 
@@ -6521,6 +6543,8 @@ void Aura::HandlePeriodicTriggerSpell(bool apply, bool /*Real*/)
             }
             break;
         }
+        default:
+            break;
     }
 }
 

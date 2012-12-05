@@ -12644,6 +12644,13 @@ void Unit::RemoveFromWorld(bool remove)
             MAPLOCK_WRITE(this,MAP_LOCK_TYPE_AURAS);
             CleanupDeletedHolders(true);
         }
+        
+        if (GetUInt32Value(UNIT_CREATED_BY_SPELL))
+        {
+            Unit *creator = GetCreator();
+            if (creator && creator->GetTypeId() == TYPEID_PLAYER)
+                ((Player *) creator)->RemoveSummonUnit(this);
+        }
     }
     GetViewPoint().Event_RemovedFromWorld();
 

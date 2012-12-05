@@ -1263,6 +1263,13 @@ class MANGOS_DLL_SPEC Player : public Unit
         ChatTagFlags GetChatTag() const;
         std::string autoReplyMsg;
 
+        typedef std::list<Unit*> SummonUnitList;
+        SummonUnitList m_summonList;
+        void AddSummonUnit(Unit* summon);
+        void RemoveSummonUnit(uint32 spellid);
+        void RemoveSummonUnit(Unit* summon); 
+        Unit* GetSummonUnit(uint32 spellId) const;
+
         uint32 GetBarberShopCost(uint8 newhairstyle, uint8 newhaircolor, uint8 newfacialhair, uint32 newskintone);
 
         PlayerSocial *GetSocial() { return m_social; }

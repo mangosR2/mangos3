@@ -256,3 +256,11 @@ DELETE FROM `spell_proc_event` WHERE `entry` IN (85466, 85468);
 INSERT INTO `spell_proc_event` (`entry`, `SchoolMask`, `procFlags`) VALUE
 (85466, 127, 332116),
 (85468, 127, 332116);
+
+
+### Mage ###
+
+-- Ring of Frost
+DELETE FROM `creature_template_addon` WHERE `entry` = 44199;
+INSERT INTO `creature_template_addon` (`entry`, `b2_0_sheath`, `auras`) VALUE
+(44199, 1, '91264');

@@ -51,6 +51,7 @@
 #include "Vehicle.h"
 #include "GuildMgr.h"
 #include "Guild.h"
+#include "TemporarySummon.h"
 
 extern pEffect SpellEffects[TOTAL_SPELL_EFFECTS];
 
@@ -9091,6 +9092,33 @@ bool Spell::FillCustomTargetMap(SpellEffectEntry const* effect, UnitList& target
     // Resulting effect depends on spell that we want to cast
     switch (m_spellInfo->Id)
     {
+        case 82691: // Ring of Frost trigger spell
+        {
+            Unit* target = m_targets.getUnitTarget();
+            if (!target)
+                return false;
+
+            // Need to trigger this only when ring is fully deployed...
+            if (target->HasAura(91264))
+                return true;
+
+            if (!m_triggeredByAuraSpell || m_triggeredByAuraSpell->Id != 82676)
+                return  false;
+
+            radius = m_triggeredByAuraSpell->CalculateSimpleValue(EFFECT_INDEX_1);
+
+            FillAreaTargets(targetUnitMap, radius, PUSH_DEST_CENTER, SPELL_TARGETS_NOT_FRIENDLY);
+            for (UnitList::iterator itr = targetUnitMap.begin(); itr != targetUnitMap.end();)
+            {
+                // already frozen of has 3 sec immune to freeze
+                if ((*itr)->HasAura(m_spellInfo->Id) || (*itr)->GetSpellAuraHolder(91264, m_caster->GetObjectGuid()))
+                    itr = targetUnitMap.erase(itr);
+                else
+                    ++itr;
+            }
+
+            return true;
+        }
         case 19185: // Entrapment
         case 64803:
         case 64804:
