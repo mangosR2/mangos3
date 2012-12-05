@@ -131,6 +131,10 @@ SpellCastTargets::~SpellCastTargets()
 
 void SpellCastTargets::setUnitTarget(Unit* target)
 {
+
+    if (target && !(target->isType(TYPEMASK_UNIT)))
+        return;
+
     if (target && !(m_targetMask & TARGET_FLAG_DEST_LOCATION))
     {
         m_destX = target->GetPositionX();
@@ -1159,7 +1163,7 @@ void Spell::AddItemTarget(Item* pitem, SpellEffectIndex effIndex)
     m_UniqueItemInfo.push_back(target);
 }
 
-void Spell::DoAllEffectOnTarget(TargetInfo *target)
+void Spell::DoAllEffectOnTarget(TargetInfo* target)
 {
     if (!target || target->processed)                       // Check target
         return;
@@ -1169,7 +1173,10 @@ void Spell::DoAllEffectOnTarget(TargetInfo *target)
     // Get mask of effects for target
     uint32 mask = target->effectMask;
 
-    Unit* unit = m_caster->GetObjectGuid() == target->targetGUID ? m_caster : ObjectAccessor::GetUnit(*m_caster, target->targetGUID);
+    Unit* unit = (m_caster->GetObjectGuid() == target->targetGUID) ? 
+                    m_caster : 
+                    m_caster->GetMap()->GetUnit(target->targetGUID);
+
     if (!unit)
         return;
 
@@ -1421,9 +1428,9 @@ void Spell::DoAllEffectOnTarget(TargetInfo *target)
         ((Creature*)real_caster)->AI()->SpellHitTarget(unit, m_spellInfo);
 }
 
-void Spell::DoSpellHitOnUnit(Unit *unit, uint32 effectMask)
+void Spell::DoSpellHitOnUnit(Unit* unit, uint32 effectMask)
 {
-    if (!unit || (!effectMask && !damage))
+    if (!unit || !unit->isType(TYPEMASK_UNIT) || (!effectMask && !damage))
         return;
 
     Unit* realCaster = GetAffectiveCaster();
@@ -3766,7 +3773,7 @@ void Spell::cast(bool skipCheck)
 
     InitializeDamageMultipliers();
 
-    Unit *procTarget = m_targets.getUnitTarget();
+    Unit* procTarget = m_targets.getUnitTarget();
     if (!procTarget)
         procTarget = m_caster;
 
