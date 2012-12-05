@@ -399,7 +399,7 @@ void Unit::Update( uint32 update_diff, uint32 p_time )
         setAttackTimer(OFF_ATTACK, (update_diff >= base_att ? 0 : base_att - update_diff) );
     }
 
-    if (IsVehicle())
+    if (IsVehicle() && !IsInEvadeMode())
     {
         // Initialize vehicle if not done
         if (isAlive() && !GetVehicleKit()->IsInitialized())
