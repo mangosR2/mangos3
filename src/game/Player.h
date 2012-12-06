@@ -153,36 +153,6 @@ typedef UNORDERED_MAP<uint32, PlayerCurrency> PlayerCurrenciesMap;
 typedef UNORDERED_MAP<uint32, PlayerSpell> PlayerSpellMap;
 typedef UNORDERED_MAP<uint32, PlayerTalent> PlayerTalentMap;
 
-// Spell modifier (used for modify other spells)
-struct SpellModifier
-{
-    SpellModifier() : charges(0), lastAffected(NULL) {}
-
-    SpellModifier(SpellModOp _op, SpellModType _type, int32 _value, uint32 _spellId, uint64 _mask, uint32 _mask2 = 0, int16 _charges = 0)
-        : op(_op), type(_type), charges(_charges), value(_value), mask(_mask, _mask2), spellId(_spellId), lastAffected(NULL)
-    {}
-
-    SpellModifier(SpellModOp _op, SpellModType _type, int32 _value, uint32 _spellId, ClassFamilyMask _mask, int16 _charges = 0)
-        : op(_op), type(_type), charges(_charges), value(_value), mask(_mask), spellId(_spellId), lastAffected(NULL)
-    {}
-
-    SpellModifier(SpellModOp _op, SpellModType _type, int32 _value, SpellEntry const* spellEntry, SpellEffectIndex eff, int16 _charges = 0);
-
-    SpellModifier(SpellModOp _op, SpellModType _type, int32 _value, Aura const* aura, int16 _charges = 0);
-
-    bool isAffectedOnSpell(SpellEntry const *spell) const;
-
-    SpellModOp   op   : 8;
-    SpellModType type : 8;
-    int16 charges     : 16;
-    int32 value;
-    ClassFamilyMask mask;
-    uint32 spellId;
-    Spell const* lastAffected;
-};
-
-typedef std::list<SpellModifier*> SpellModList;
-
 struct SpellCooldown
 {
     time_t end;

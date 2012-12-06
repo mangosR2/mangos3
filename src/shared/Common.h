@@ -232,7 +232,7 @@ inline char * mangos_strdup(const char * source)
     char * dest = new char[strlen(source) + 1];
     strcpy(dest, source);
     return dest;
-}
+};
 
 // we always use stdlibc++ std::max/std::min, undefine some not C++ standard defines (Win API and some pother platforms)
 #ifdef max

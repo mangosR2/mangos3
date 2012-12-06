@@ -525,7 +525,6 @@ class MANGOS_DLL_SPEC Aura
         void ReapplyAffectedPassiveAuras();
 
         Modifier m_modifier;
-        SpellModifier *m_spellmod;
 
         SpellEffectEntry const* m_spellEffect;
         time_t m_applyTime;

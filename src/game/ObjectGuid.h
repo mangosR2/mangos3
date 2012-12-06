@@ -72,9 +72,11 @@ enum HighGuid
     HIGHGUID_VEHICLE        = 0xF15,                        // blizz F15/F55
     HIGHGUID_DYNAMICOBJECT  = 0xF10,                        // blizz F10/F50
     HIGHGUID_CORPSE         = 0xF50,                        // blizz F10/F50 used second variant to resolve conflict with HIGHGUID_DYNAMICOBJECT
+    HIGHGUID_BATTLEGROUND   = 0x1F1,                        // blizz 1F1, used for battlegrounds
     HIGHGUID_MO_TRANSPORT   = 0x1FC,                        // blizz 1FC (for GAMEOBJECT_TYPE_MO_TRANSPORT)
     HIGHGUID_INSTANCE       = 0x1F4,                        // blizz 1F4
     HIGHGUID_GROUP          = 0x1F5,                        // blizz 1F5
+    HIGHGUID_GUILD          = 0x1FF7,                       // blizz 1FF7
 };
 
 class ObjectGuid;
@@ -145,6 +147,8 @@ class MANGOS_DLL_SPEC ObjectGuid
         bool IsInstance()          const { return GetHigh() == HIGHGUID_INSTANCE;             }
         bool IsGroup()             const { return GetHigh() == HIGHGUID_GROUP;                }
         bool IsPlayerOrPet()       const { return !IsEmpty() && (GetHigh() == HIGHGUID_PLAYER || GetHigh() == HIGHGUID_PET); }
+        bool IsBattleGround()      const { return GetHigh() == HIGHGUID_BATTLEGROUND;         }
+        bool IsGuild()             const { return GetHigh() == HIGHGUID_GUILD;                }
 
         static TypeID GetTypeId(HighGuid high)
         {

@@ -3127,6 +3127,25 @@ enum BattleGroundTypeId
 
 #define MAX_BATTLEGROUND_TYPE_ID 121
 
+// handle the queue types and bg types separately to enable joining queue for different sized arenas at the same time
+enum BattleGroundQueueTypeId
+{
+    BATTLEGROUND_QUEUE_NONE     = 0,
+    BATTLEGROUND_QUEUE_AV       = 1,
+    BATTLEGROUND_QUEUE_WS       = 2,
+    BATTLEGROUND_QUEUE_AB       = 3,
+    BATTLEGROUND_QUEUE_EY       = 4,
+    BATTLEGROUND_QUEUE_SA       = 5,
+    BATTLEGROUND_QUEUE_IC       = 6,
+    BATTLEGROUND_QUEUE_TP       = 7,
+    BATTLEGROUND_QUEUE_BG       = 8,
+    BATTLEGROUND_QUEUE_2v2      = 9,
+    BATTLEGROUND_QUEUE_3v3      = 10,
+    BATTLEGROUND_QUEUE_5v5      = 11,
+};
+
+#define MAX_BATTLEGROUND_QUEUE_TYPES 12
+
 enum ArenaType
 {
     ARENA_TYPE_NONE         = 0,                            // used for mark non-arenas or problematic cases
@@ -3313,12 +3332,6 @@ enum PhaseMasks
     PHASEMASK_NONE     = 0,
     PHASEMASK_NORMAL   = 0x00000001,
     PHASEMASK_ANYWHERE = 0xFFFFFFFF
-};
-
-enum WorldStateType
-{
-    WORLD_STATE_REMOVE              = 0,
-    WORLD_STATE_ADD                 = 1
 };
 
 enum ActivateTaxiReply

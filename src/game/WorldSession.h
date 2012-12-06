@@ -371,7 +371,6 @@ class MANGOS_DLL_SPEC WorldSession
         bool LookingForGroup_auto_add;
 
         // Misc
-        void SendKnockBack(float angle, float horizontalSpeed, float verticalSpeed);
         void SendPlaySpellVisual(ObjectGuid guid, uint32 spellArtKit);
         void SendItemPageInfo(ItemPrototype* itemProto);
 

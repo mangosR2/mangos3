@@ -1101,27 +1101,32 @@ struct GtOCTClassCombatRatingScalarEntry
     float    ratio;
 };
 
-/*struct GtOCTRegenHPEntry
+struct GtOCTHpPerStaminaEntry
 {
     //uint32 level;
     float    ratio;
-};*/
-
-//struct GtOCTRegenMPEntry
-//{
-//    float    ratio;
-//};
-
-/*struct GtRegenHPPerSptEntry
-{
-    //uint32 level;
-    float    ratio;
-};*/
+};
 
 struct GtRegenMPPerSptEntry
 {
     //uint32 level;
     float    ratio;
+};
+
+struct GtSpellScalingEntry
+{
+    //uint32 id;
+    float value;
+};
+
+struct GtOCTBaseHPByClassEntry
+{
+    float ratio;
+};
+
+struct GtOCTBaseMPByClassEntry
+{
+    float ratio;
 };
 
 /*struct HolidayDescriptionsEntry
@@ -1299,27 +1304,6 @@ struct LFGDungeonExpansionEntry
     bool IsRandom() const { return randomEntry == 0; }
 };
 
-/*struct LfgDungeonsEntry
-{
-    m_ID
-    m_name_lang
-    m_minLevel
-    m_maxLevel
-    m_target_level
-    m_target_level_min
-    m_target_level_max
-    m_mapID
-    m_difficulty
-    m_flags
-    m_typeID
-    m_faction
-    m_textureFilename
-    m_expansionLevel
-    m_order_index
-    m_group_id
-    m_description_lang
-};*/
-
 /*struct LfgDungeonGroupEntry
 {
     m_ID
@@ -1439,11 +1423,11 @@ struct MapDifficultyEntry
 
 // Additional 335 fields to MapDifficulty
 /*
-	//char*       areaTriggerText[16];                      // 3-18     m_message_lang (text showed when transfer to map failed)
+    //char*       areaTriggerText[16];                      // 3-18     m_message_lang (text showed when transfer to map failed)
     //uint32      textFlags;                                // 19
     uint32      resetTime;                                  // 20       m_raidDuration in secs, 0 if no fixed reset time
     uint32      maxPlayers;                                 // 21       m_maxPlayers some heroic versions have 0 when expected same amount as in normal version
-    //char*       difficultyString;                         // 22    
+    //char*       difficultyString;                         // 22
 */
 
 struct MovieEntry
@@ -1452,6 +1436,12 @@ struct MovieEntry
     //char*       filename;                                 // 1        m_filename
     //uint32      unk1;                                     // 2        m_volume
     //uint32      unk2;                                     // 3 4.0.0
+};
+
+struct NumTalentsAtLevelEntry
+{
+    //uint32 Level;                                         // 0 index
+    float Talents;                                          // 1 talent count
 };
 
 #define MAX_OVERRIDE_SPELLS     10
@@ -2874,26 +2864,36 @@ struct WorldSafeLocsEntry
     //char*   name;                                         // 5        m_AreaName_lang
 };
 
+struct WorldPvPAreaEntry
+{
+    uint32      Id;                                         // 0 m_battlefieldId
+    uint32      ZoneId;                                     // 1 m_zoneId
+    uint32      NoWarTimeState;                             // 2 m_noWarTimeState
+    uint32      WarTimeState;                               // 3 m_warTimeState
+    uint32      ukn1;                                       // 4 m_unk1 not known yet, both 900
+    uint32      minLevel;                                   // 5 m_minLevel
+    uint32      ukn2;                                       // 6 m_unk2
+};
+
 struct WorldStateEntry
 {
-    uint32    ID;                                           // 0        m_ID
-    uint32    map_id;                                       // 1        WorldState bind map
-    uint32    m_zone;                                       // 2        WorldState bind zone (0 - on battlegrounds)
+    uint32    ID;                                           // 0      m_ID
+    uint32    map_id;                                       // 1      WorldState bind map
+    uint32    m_zone;                                       // 2      WorldState bind zone (0 - on battlegrounds)
     uint32    m_flags;                                      // 3
-//    char*     m_uiIcon;                                   // 4
-    char*     m_uiMessage1[16];                             // 5-20
-//    uint32    m_flags1;                                   // 21       string flags
-//    char*     m_uiMessage2[16]                            // 22-37
-//    uint32    m_flags2;                                   // 38       string flags
-    uint32    m_state;                                      // 39       WorldState ID (not unique!) 0 - for battleground states.
-//    char*     m_uiIcon1;                                  // 40
-//    char*     m_uiIcon2;                                  // 41
-//    char*     m_uiMessage3[16]                            // 42-57
-//    uint32    m_flags3;                                   // 58       string flags
-    char*     m_uiType;                                     // 59       only CAPTUREPOINT type, or NULL
-    uint32    m_linked1;                                    // 60
-    uint32    m_linked2;                                    // 61
-//    uint32    m_unk62;                                    // 62       only 0
+//    uint32    unk4                                        // 4      ? event ID?
+//    uint32    unk5                                        // 5
+//    char*     m_uiIcon;                                   // 6
+    char*     m_uiMessage1;                                 // 7
+    char*     m_uiMessage2;                                 // 8
+    uint32    m_state;                                      // 9      WorldState ID (not unique!) 0 - for battleground states.
+    uint32    m_flags2;                                     // 10     string flags
+//    char*     m_uiIcon2;                                  // 11
+    char*     m_uiMessage3;                                 // 12
+    char*     m_uiType;                                     // 13     only CAPTUREPOINT type, or NULL
+    uint32    m_linked1;                                    // 14
+    uint32    m_linked2;                                    // 15
+//    uint32    m_unk62;                                    // 16     only 0
 };
 
 // GCC have alternative #pragma pack() syntax and old gcc version not support pack(pop), also any gcc version not support it at some platform

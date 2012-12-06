@@ -832,8 +832,6 @@ class MovementInfo
         MovementInfo& operator=(const MovementInfo &targetInfo)
         {
             uint32 moveFlagsTmp = targetInfo.moveFlags;
-            if (moveFlags & MOVEFLAG_ONTRANSPORT)
-                moveFlagsTmp |= MOVEFLAG_ONTRANSPORT;
 
             moveFlags  = moveFlagsTmp;
             splineElevation     = targetInfo.splineElevation;

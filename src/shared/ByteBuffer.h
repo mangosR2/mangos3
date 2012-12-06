@@ -20,8 +20,8 @@
 #define _BYTEBUFFER_H
 
 #include "Common.h"
+#include "Log.h"
 #include "Utilities/ByteConverter.h"
-#include "ace/Stack_Trace.h"
 
 #define BITS_1 uint8 _1
 #define BITS_2 BITS_1, uint8 _2
@@ -52,8 +52,23 @@ class ByteBufferException
             PrintPosError();
         }
 
-        void PrintPosError() const;
+        void PrintPosError() const
+        {
+            char const* traceStr;
 
+#ifdef HAVE_ACE_STACK_TRACE_H
+            ACE_Stack_Trace trace;
+            traceStr = trace.c_str();
+#else
+            traceStr = NULL;
+#endif
+
+            sLog.outError(
+                "Attempted to %s in ByteBuffer (pos: " SIZEFMTD " size: "SIZEFMTD") "
+                "value with size: " SIZEFMTD "%s%s",
+                (add ? "put" : "get"), pos, size, esize,
+                traceStr ? "\n" : "", traceStr ? traceStr : "");
+        }
     private:
         bool add;
         size_t pos;
@@ -116,6 +131,7 @@ class ByteBuffer
         // constructor
         ByteBuffer(): _rpos(0), _wpos(0), _bitpos(8), _curbitval(0)
         {
+            _storage.reserve(DEFAULT_SIZE);
         }
 
         // constructor
@@ -134,6 +150,8 @@ class ByteBuffer
         {
             _storage.clear();
             _rpos = _wpos = 0;
+            _curbitval = 0;
+            _bitpos = 8;
         }
 
         template <typename T> ByteBuffer& append(T value)
@@ -295,10 +313,10 @@ class ByteBuffer
         template<BITS_8>
             void WriteGuidBytes(ObjectGuid guid);
 
-        template <typename T> void put(size_t pos,T value)
+        template <typename T> void put(size_t pos, T value)
         {
             EndianConvert(value);
-            put(pos,(uint8 *)&value,sizeof(value));
+            put(pos, (uint8 *)&value, sizeof(value));
         }
 
         ByteBuffer &operator<<(uint8 value)
@@ -562,14 +580,98 @@ class ByteBuffer
             return guid;
         }
 
-        uint32 ReadPackedTime();
-
-        ByteBuffer& ReadPackedTime(uint32& time)
+        uint8 ReadUInt8()
         {
-            time = ReadPackedTime();
-            return *this;
+            uint8 u = 0;
+            (*this) >> u;
+            return u;
         }
 
+        uint16 ReadUInt16()
+        {
+            uint16 u = 0;
+            (*this) >> u;
+            return u;
+        }
+
+        uint32 ReadUInt32()
+        {
+            uint32 u = 0;
+            (*this) >> u;
+            return u;
+        }
+
+        uint64 ReadUInt64()
+        {
+            uint64 u = 0;
+            (*this) >> u;
+            return u;
+        }
+
+        int8 ReadInt8()
+        {
+            int8 u = 0;
+            (*this) >> u;
+            return u;
+        }
+
+        int16 ReadInt16()
+        {
+            int16 u = 0;
+            (*this) >> u;
+            return u;
+        }
+
+        int32 ReadInt32()
+        {
+            uint32 u = 0;
+            (*this) >> u;
+            return u;
+        }
+
+        int64 ReadInt64()
+        {
+            int64 u = 0;
+            (*this) >> u;
+            return u;
+        }
+
+        std::string ReadString()
+        {
+            std::string s = 0;
+            (*this) >> s;
+            return s;
+        }
+
+        std::string ReadString(uint32 count)
+        {
+            std::string out;
+            uint32 start = rpos();
+            while (rpos() < size() && rpos() < start + count)       // prevent crash at wrong string format in packet
+                out += read<char>();
+
+            return out;
+        }
+
+        ByteBuffer& WriteStringData(const std::string& str)
+        {
+            FlushBits();
+            return append((uint8 const*)str.c_str(), str.size());
+        }
+
+        bool ReadBoolean()
+        {
+            uint8 b = 0;
+            (*this) >> b;
+            return b > 0 ? true : false;
+        }
+
+        float ReadSingle()
+        {
+            float f = 0;
+            (*this) >> f;
+            return f;
+        }
 
         const uint8 *contents() const { return &_storage[0]; }
 
@@ -655,11 +757,8 @@ class ByteBuffer
 
                 guid >>= 8;
             }
-
             return append(packGUID, size);
         }
-
-        void AppendPackedTime(time_t time);
 
         void put(size_t pos, const uint8 *src, size_t cnt)
         {
@@ -668,16 +767,72 @@ class ByteBuffer
             memcpy(&_storage[pos], src, cnt);
         }
 
-        void print_storage() const;
-        void textlike() const;
-        void hexlike() const;
-
-    private:
-        // limited for internal use because can "append" any unexpected type (like pointer and etc) with hard detection problem
-        template <typename T> ByteBuffer& append(T value)
+        void print_storage() const
         {
-            EndianConvert(value);
-            return append((uint8*)&value, sizeof(value));
+            sLog.outDebug("STORAGE_SIZE: %lu", (unsigned long)size() );
+            for (uint32 i = 0; i < size(); ++i)
+                sLog.outDebug("%u - ", read<uint8>(i) );
+            sLog.outDebug(" ");
+        }
+
+        void textlike() const
+        {
+            sLog.outDebug("STORAGE_SIZE: %lu", (unsigned long)size() );
+            for (uint32 i = 0; i < size(); ++i)
+                sLog.outDebug("%c", read<uint8>(i) );
+            sLog.outDebug(" ");
+        }
+
+        void hexlike() const
+        {
+            uint32 j = 1, k = 1;
+            sLog.outDebug("STORAGE_SIZE: %lu", (unsigned long)size() );
+
+            for (uint32 i = 0; i < size(); ++i)
+            {
+                if ((i == (j * 8)) && ((i != (k * 16))))
+                {
+                    if (read<uint8>(i) < 0x10)
+                    {
+                        sLog.outDebug("| 0%X ", read<uint8>(i) );
+                    }
+                    else
+                    {
+                        sLog.outDebug("| %X ", read<uint8>(i) );
+                    }
+                    ++j;
+                }
+                else if (i == (k * 16))
+                {
+                    if (read<uint8>(i) < 0x10)
+                    {
+                        sLog.outDebug("\n");
+
+                        sLog.outDebug("0%X ", read<uint8>(i) );
+                    }
+                    else
+                    {
+                        sLog.outDebug("\n");
+
+                        sLog.outDebug("%X ", read<uint8>(i) );
+                    }
+
+                    ++k;
+                    ++j;
+                }
+                else
+                {
+                    if (read<uint8>(i) < 0x10)
+                    {
+                        sLog.outDebug("0%X ", read<uint8>(i) );
+                    }
+                    else
+                    {
+                        sLog.outDebug("%X ", read<uint8>(i) );
+                    }
+                }
+            }
+            sLog.outDebug("\n");
         }
 
     protected:
@@ -703,7 +858,7 @@ inline ByteBuffer &operator>>(ByteBuffer &b, std::vector<T> &v)
     uint32 vsize;
     b >> vsize;
     v.clear();
-    while(vsize--)
+    while (vsize--)
     {
         T t;
         b >> t;
@@ -729,7 +884,7 @@ inline ByteBuffer &operator>>(ByteBuffer &b, std::list<T> &v)
     uint32 vsize;
     b >> vsize;
     v.clear();
-    while(vsize--)
+    while (vsize--)
     {
         T t;
         b >> t;
@@ -755,7 +910,7 @@ inline ByteBuffer &operator>>(ByteBuffer &b, std::map<K, V> &m)
     uint32 msize;
     b >> msize;
     m.clear();
-    while(msize--)
+    while (msize--)
     {
         K k;
         V v;
@@ -815,6 +970,22 @@ class BitConverter
         static uint64 ToUInt64(ByteBuffer const& buff, size_t start = 0)
         {
             return buff.read<uint64>(start);
-}
+        }
+
+        static int16 ToInt16(ByteBuffer const& buff, size_t start = 0)
+        {
+            return buff.read<int16>(start);
+        }
+
+        static int32 ToInt32(ByteBuffer const& buff, size_t start = 0)
+        {
+            return buff.read<int32>(start);
+        }
+
+        static int64 ToInt64(ByteBuffer const& buff, size_t start = 0)
+        {
+            return buff.read<int64>(start);
+        }
+};
 
 #endif
