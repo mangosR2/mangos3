@@ -482,6 +482,20 @@ void VehicleKit::InstallAccessory(VehicleAccessory const* accessory)
         sLog.outError("Vehicle::InstallAccessory cannot summon creature id %u (seat %u of %s)",accessory->passengerEntry, accessory->seatId,GetBase()->GetObjectGuid().GetString().c_str());
 }
 
+void VehicleKit::InstallAccessory(int8 seatID)
+{
+    SQLMultiStorage::SQLMSIteratorBounds<VehicleAccessory> const& bounds = sVehicleAccessoryStorage.getBounds<VehicleAccessory>(GetBase()->GetEntry());
+    for (SQLMultiStorage::SQLMultiSIterator<VehicleAccessory> itr = bounds.first; itr != bounds.second; ++itr)
+    {
+        if ((*itr)->seatId == seatID)
+        {
+            InstallAccessory(*itr);
+            return;
+        }
+    }
+    sLog.outError("Vehicle::InstallAccessory can not find accessory for seat %i of %s", seatID, GetBase()->GetObjectGuid().GetString().c_str());
+}
+
 void VehicleKit::UpdateFreeSeatCount()
 {
     m_uiNumFreeSeats = 0;

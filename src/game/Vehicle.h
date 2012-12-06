@@ -77,6 +77,7 @@ class MANGOS_DLL_SPEC VehicleKit : public TransportBase
         bool IsInitialized() const { return m_isInitialized; }
 
         void Reset();
+        void InstallAccessory(int8 seatID);
 
         bool HasEmptySeat(int8 seatId) const;
         int8 GetNextEmptySeatWithFlag(int8 seatId, bool next = true, uint32 VehicleSeatFlag = 0) const;
