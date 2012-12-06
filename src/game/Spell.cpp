@@ -6499,9 +6499,9 @@ SpellCastResult Spell::CheckCast(bool strict)
             case SPELL_EFFECT_SUMMON_OBJECT_SLOT3:
             case SPELL_EFFECT_SUMMON_OBJECT_SLOT4:
             {
-//                if (m_caster->GetTypeId() == TYPEID_PLAYER)
-//                    if (((Player*)m_caster)->HasMovementFlag(MOVEFLAG_ONTRANSPORT))
-//                        return SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW;
+                if (m_caster->GetTypeId() == TYPEID_PLAYER)
+                    if (m_caster->IsOnTransport())
+                        return SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW;
 
                 break;
             }
@@ -6609,8 +6609,8 @@ SpellCastResult Spell::CheckCast(bool strict)
                         if (bg->GetStatus() != STATUS_IN_PROGRESS)
                             return SPELL_FAILED_TRY_AGAIN;
 
-//                    if(((Player*)m_caster)->HasMovementFlag(MOVEFLAG_ONTRANSPORT))
-//                        return SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW;
+                    if (m_caster->IsOnTransport())
+                        return SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW;
                 }
                 break;
             }

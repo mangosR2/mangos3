@@ -75,3 +75,8 @@ void BitStream::Print()
     sLog.outDebug(ss.str().c_str());
 }
 
+void ByteBuffer::AppendPackedTime(time_t time)
+{
+    tm* _localtime = localtime(&time);
+    append<uint32>((_localtime->tm_year - 100) << 24 | _localtime->tm_mon  << 20 | (_localtime->tm_mday - 1) << 14 | _localtime->tm_wday << 11 | _localtime->tm_hour << 6 | _localtime->tm_min);
+}

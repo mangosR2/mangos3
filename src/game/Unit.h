@@ -2215,6 +2215,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         float GetTransOffsetO() const { return m_movementInfo.GetTransportPos()->o; }
         uint32 GetTransTime() const { return m_movementInfo.GetTransportTime(); }
         int8 GetTransSeat() const { return m_movementInfo.GetTransportSeat(); }
+        bool IsOnTranport() const { return !m_movementInfo.GetTransportGuid().IsEmpty(); }
 
         // Vehicle system (over-aura operation)
         void EnterVehicle(Unit* base, int8 seatId = -1);

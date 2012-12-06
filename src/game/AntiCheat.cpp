@@ -387,7 +387,7 @@ bool AntiCheat::CheckNeeded(AntiCheatCheck checktype)
             break;
         case CHECK_MOVEMENT:
             if (   GetPlayer()->GetTransport()
-                || GetPlayer()->HasMovementFlag(MOVEFLAG_ONTRANSPORT)
+                || GetPlayer()->IsOnTransport()
                 || GetPlayer()->IsInUnitState(UNIT_ACTION_CONFUSED)
                 || GetPlayer()->IsTaxiFlying())
                 return false;

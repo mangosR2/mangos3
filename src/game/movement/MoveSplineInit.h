@@ -141,8 +141,8 @@ namespace Movement
     inline void MoveSplineInit::SetVelocity(float vel) {  args.velocity = vel;}
     inline void MoveSplineInit::SetOrientationInversed() { args.flags.orientationInversed = true;}
     inline void MoveSplineInit::SetOrientationFixed(bool enable) { args.flags.orientationFixed = enable;}
-    inline void MoveSplineInit::SetBoardVehicle() { args.flags.EnableBoardVehicle(); }
-    inline void MoveSplineInit::SetExitVehicle() { args.flags.EnableExitVehicle(); }
+    inline void MoveSplineInit::SetBoardVehicle() { args.flags.EnableTransportEnter(); }
+    inline void MoveSplineInit::SetExitVehicle() { args.flags.EnableTransportExit(); }
 
     inline void MoveSplineInit::MovebyPath(const PointsArray& controls, int32 path_offset)
     {

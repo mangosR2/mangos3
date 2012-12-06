@@ -918,13 +918,6 @@ enum PlayerRestState
     REST_STATE_RAF_LINKED   = 0x04                          // Exact use unknown
 };
 
-enum PlayerRestState
-{
-    REST_STATE_RESTED       = 0x01,
-    REST_STATE_NORMAL       = 0x02,
-    REST_STATE_RAF_LINKED   = 0x04                          // Exact use unknown
-};
-
 class MANGOS_DLL_SPEC PlayerTaxi
 {
     public:
@@ -2043,12 +2036,6 @@ class MANGOS_DLL_SPEC Player : public Unit
         /*********************************************************/
         void UpdateHonorKills();
         bool RewardHonor(Unit *pVictim, uint32 groupsize, float honor = -1);
-        uint32 GetHonorPoints() { return m_honorPoints; }
-        uint32 GetArenaPoints() { return m_arenaPoints; }
-        void SetHonorPoints(uint32 honor);
-        void SetArenaPoints(uint32 arena);
-        void ModifyHonorPoints( int32 value );
-        void ModifyArenaPoints( int32 value );
 
         void SendPvPRewards();
         void SendRatedBGStats();

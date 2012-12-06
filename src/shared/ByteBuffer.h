@@ -760,6 +760,8 @@ class ByteBuffer
             return append(packGUID, size);
         }
 
+        void AppendPackedTime(time_t time);
+
         void put(size_t pos, const uint8 *src, size_t cnt)
         {
             if(pos + cnt > size())

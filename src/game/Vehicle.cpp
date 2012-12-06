@@ -220,7 +220,6 @@ bool VehicleKit::AddPassenger(Unit* passenger, int8 seatId)
     BoardPassenger(passenger, lx, ly, lz, lo, seat->first);        // Use TransportBase to store the passenger
 
     passenger->m_movementInfo.ClearTransportData();
-    passenger->m_movementInfo.AddMovementFlag(MOVEFLAG_ONTRANSPORT);
     passenger->m_movementInfo.SetTransportData(GetBase()->GetObjectGuid(), lx, ly, lz, lo, WorldTimer::getMSTime(), seat->first, seatInfo);
 
     if (passenger->GetTypeId() == TYPEID_PLAYER)
@@ -365,7 +364,6 @@ void VehicleKit::RemovePassenger(Unit* passenger, bool dismount)
     UnBoardPassenger(passenger);                            // Use TransportBase to remove the passenger from storage list
 
     passenger->m_movementInfo.ClearTransportData();
-    passenger->m_movementInfo.RemoveMovementFlag(MOVEFLAG_ONTRANSPORT);
 
     if (seat->second.IsProtectPassenger())
         if (passenger->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE))

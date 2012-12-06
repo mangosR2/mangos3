@@ -2497,10 +2497,10 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
     if (IsRankSpellDueToSpell(spellInfo_1, spellId_2))
         return true;
 
-    if ((classOptions1 && classOptions1->SpellFamilyName == 0) || (classOptions2 && classOptions2->SpellFamilyName == 0))
+    if ((classOptions_1 && classOptions_1->SpellFamilyName == 0) || (classOptions_2 && classOptions_2->SpellFamilyName == 0))
         return false;
 
-    if (classOptions1 && classOptions2 && classOptions1->SpellFamilyName != classOptions2->SpellFamilyName)
+    if (classOptions_1 && classOptions_2 && classOptions_1->SpellFamilyName != classOptions_2->SpellFamilyName)
         return false;
 
     bool dummy_only = true;

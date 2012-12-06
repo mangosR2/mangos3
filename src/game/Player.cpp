@@ -2037,7 +2037,7 @@ bool Player::TeleportTo(WorldLocation const& loc, uint32 options)
             float final_z = loc.coord_z;
             float final_o = loc.orientation;
 
-            if (m_movementInfo.HasMovementFlag(MOVEFLAG_ONTRANSPORT))
+            if (IsOnTransport())
             {
                 final_x += m_movementInfo.GetTransportPos()->x;
                 final_y += m_movementInfo.GetTransportPos()->y;
@@ -7126,46 +7126,6 @@ bool Player::RewardHonor(Unit *uVictim, uint32 groupsize, float honor)
 
     // FIXME 4x ApplyModUInt32Value(PLAYER_FIELD_TODAY_CONTRIBUTION, uint32(honor), true);
     return true;
-}
-
-void Player::SetHonorPoints(uint32 value)
-{
-    if (value > sWorld.getConfig(CONFIG_UINT32_MAX_HONOR_POINTS))
-        value = sWorld.getConfig(CONFIG_UINT32_MAX_HONOR_POINTS);
-
-    // FIXME 4x SetUInt32Value(PLAYER_FIELD_HONOR_CURRENCY, value);
-    // must be recalculated to new honor points items and removed
-    m_honorPoints = value;
-}
-
-void Player::SetArenaPoints(uint32 value)
-{
-    if (value > sWorld.getConfig(CONFIG_UINT32_MAX_ARENA_POINTS))
-        value = sWorld.getConfig(CONFIG_UINT32_MAX_ARENA_POINTS);
-
-    // FIXME 4x SetUInt32Value(PLAYER_FIELD_ARENA_CURRENCY, value);
-    // must be recalculated to new honor points items and removed
-    m_arenaPoints = value;
-}
-
-void Player::ModifyHonorPoints(int32 value)
-{
-    int32 newValue = (int32)GetHonorPoints() + value;
-
-    if (newValue < 0)
-        newValue = 0;
-
-    SetHonorPoints(newValue);
-}
-
-void Player::ModifyArenaPoints(int32 value)
-{
-    int32 newValue = (int32)GetArenaPoints() + value;
-
-    if (newValue < 0)
-        newValue = 0;
-
-    SetArenaPoints(newValue);
 }
 
 uint32 Player::GetGuildIdFromDB(ObjectGuid guid)
@@ -18452,8 +18412,8 @@ void Player::_SaveStats()
     stmt.addUInt32(GetMoney());
     stmt.addUInt32(m_Played_time[PLAYED_TIME_TOTAL]);
     stmt.addUInt32(IsInWorld() ? 1 : 0);
-    stmt.addUInt32(GetArenaPoints());
-    stmt.addUInt32(GetHonorPoints());
+//    stmt.addUInt32(GetArenaPoints());
+//    stmt.addUInt32(GetHonorPoints());
     stmt.addUInt32(GetUInt32Value(PLAYER_FIELD_LIFETIME_HONORBALE_KILLS));
 
     std::ostringstream ss; // duh

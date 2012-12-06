@@ -1049,7 +1049,7 @@ void BattleGroundQueue::Update(BattleGroundTypeId bgTypeId, BattleGroundBracketI
 /***            BATTLEGROUND MANAGER                   ***/
 /*********************************************************/
 
-BattleGroundMgr::BattleGroundMgr() : m_AutoDistributionTimeChecker(0), m_ArenaTesting(false)
+BattleGroundMgr::BattleGroundMgr() : m_ArenaTesting(false)
 {
     for (uint8 i = BATTLEGROUND_TYPE_NONE; i < MAX_BATTLEGROUND_TYPE_ID; ++i)
         m_BattleGrounds[i].clear();
@@ -1121,21 +1121,6 @@ void BattleGroundMgr::Update(uint32 diff)
         }
         else
             m_NextRatingDiscardUpdate -= diff;
-    }
-    if (sWorld.getConfig(CONFIG_BOOL_ARENA_AUTO_DISTRIBUTE_POINTS))
-    {
-        if (m_AutoDistributionTimeChecker < diff)
-        {
-            if (sWorld.GetGameTime() > m_NextAutoDistributionTime)
-            {
-                DistributeArenaPoints();
-                m_NextAutoDistributionTime = time_t(m_NextAutoDistributionTime + BATTLEGROUND_ARENA_POINT_DISTRIBUTION_DAY * sWorld.getConfig(CONFIG_UINT32_ARENA_AUTO_DISTRIBUTE_INTERVAL_DAYS));
-                CharacterDatabase.PExecute("UPDATE saved_variables SET NextArenaPointDistributionTime = '" UI64FMTD "'", uint64(m_NextAutoDistributionTime));
-            }
-            m_AutoDistributionTimeChecker = 600000; // check 10 minutes
-        }
-        else
-            m_AutoDistributionTimeChecker -= diff;
     }
 }
 
@@ -1717,11 +1702,11 @@ void BattleGroundMgr::DistributeArenaPoints()
     for (std::map<uint32, uint32>::iterator plr_itr = PlayerPoints.begin(); plr_itr != PlayerPoints.end(); ++plr_itr)
     {
         // update to database
-        CharacterDatabase.PExecute("UPDATE characters SET arenaPoints = arenaPoints + '%u' WHERE guid = '%u'", plr_itr->second, plr_itr->first);
+//        CharacterDatabase.PExecute("UPDATE characters SET arenaPoints = arenaPoints + '%u' WHERE guid = '%u'", plr_itr->second, plr_itr->first);
         // add points if player is online
         Player* pl = sObjectMgr.GetPlayer(ObjectGuid(HIGHGUID_PLAYER, plr_itr->first));
         if (pl)
-            pl->ModifyArenaPoints(plr_itr->second);
+//            pl->ModifyArenaPoints(plr_itr->second);
     }
 
     PlayerPoints.clear();
@@ -1744,69 +1729,55 @@ void BattleGroundMgr::DistributeArenaPoints()
     sWorld.SendWorldText(LANG_DIST_ARENA_POINTS_END);
 }
 
-void BattleGroundMgr::BuildBattleGroundListPacket(WorldPacket* data, ObjectGuid guid, Player* plr, BattleGroundTypeId bgTypeId, uint8 fromWhere)
+void BattleGroundMgr::BuildBattleGroundListPacket(WorldPacket* data, ObjectGuid guid, Player* plr, BattleGroundTypeId bgTypeId)
 {
     if (!plr)
         return;
 
-    uint32 win_kills = plr->GetRandomWinner() ? BG_REWARD_WINNER_HONOR_LAST : BG_REWARD_WINNER_HONOR_FIRST;
-    uint32 win_arena = plr->GetRandomWinner() ? BG_REWARD_WINNER_ARENA_LAST : BG_REWARD_WINNER_ARENA_FIRST;
-    uint32 loos_kills = plr->GetRandomWinner() ? BG_REWARD_LOOSER_HONOR_LAST : BG_REWARD_LOOSER_HONOR_FIRST;
-
-    win_kills = (uint32)MaNGOS::Honor::hk_honor_at_level(plr->getLevel(), win_kills*4);
-    loos_kills = (uint32)MaNGOS::Honor::hk_honor_at_level(plr->getLevel(), loos_kills*4);
+    BattleGround* bgTemplate = sBattleGroundMgr.GetBattleGroundTemplate(bgTypeId);
 
     data->Initialize(SMSG_BATTLEFIELD_LIST);
-    *data << guid;                                          // battlemaster guid
-    *data << uint8(fromWhere);                              // from where you joined
-    *data << uint32(bgTypeId);                              // battleground id
-    *data << uint8(0);                                      // unk
-    *data << uint8(0);                                      // unk
+    *data << uint32(0);                     // 4.3.4 winConquest weekend
+    *data << uint32(0);                     // 4.3.4 winConquest random
+    *data << uint32(0);                     // 4.3.4 lossHonor weekend
+    *data << uint32(bgTypeId);              // battleground id
+    *data << uint32(0);                     // 4.3.4 lossHonor random
+    *data << uint32(0);                     // 4.3.4 winHonor random
+    *data << uint32(0);                     // 4.3.4 winHonor weekend
+    *data << uint8(0);                      // max level
+    *data << uint8(0);                      // min level
+    data->WriteGuidMask<0, 1, 7>(guid);
+    data->WriteBit(false);                  // has holiday bg currency bonus ??
+    data->WriteBit(false);                  // has random bg currency bonus ??
 
-    // Rewards
-    *data << uint8( plr->GetRandomWinner() );               // 3.3.3 hasWin
-    *data << uint32( win_kills );                           // 3.3.3 winHonor
-    *data << uint32( win_arena );                           // 3.3.3 winArena
-    *data << uint32( loos_kills );                          // 3.3.3 lossHonor
-
-    uint8 isRandom = bgTypeId == BATTLEGROUND_RB;
-    *data << uint8(isRandom);                               // 3.3.3 isRandom
-    if (isRandom)
+    uint32 count = 0;
+    ByteBuffer buf;
+    if (bgTemplate)
     {
-        // Rewards (random)
-        *data << uint8( plr->GetRandomWinner() );           // 3.3.3 hasWin_Random
-        *data << uint32( win_kills );                       // 3.3.3 winHonor_Random
-        *data << uint32( win_arena );                       // 3.3.3 winArena_Random
-        *data << uint32( loos_kills );                      // 3.3.3 lossHonor_Random
-    }
-
-    if (bgTypeId == BATTLEGROUND_AA)                         // arena
-    {
-        *data << uint32(0);                                 // arena - no instances showed
-    }
-    else                                                    // battleground
-    {
-        size_t count_pos = data->wpos();
-        uint32 count = 0;
-        *data << uint32(0);                                 // number of bg instances
-
-        BattleGround* bgTemplate = sBattleGroundMgr.GetBattleGroundTemplate(bgTypeId);
-        if (bgTemplate)
+        // expected bracket entry
+        if (PvPDifficultyEntry const* bracketEntry = GetBattlegroundBracketByLevel(bgTemplate->GetMapId(), plr->getLevel()))
         {
-            // expected bracket entry
-            if (PvPDifficultyEntry const* bracketEntry = GetBattlegroundBracketByLevel(bgTemplate->GetMapId(), plr->getLevel()))
+            BattleGroundBracketId bracketId = bracketEntry->GetBracketId();
+            ClientBattleGroundIdSet const& ids = m_ClientBattleGroundIds[bgTypeId][bracketId];
+            for (ClientBattleGroundIdSet::const_iterator itr = ids.begin(); itr != ids.end(); ++itr)
             {
-                BattleGroundBracketId bracketId = bracketEntry->GetBracketId();
-                ClientBattleGroundIdSet const& ids = m_ClientBattleGroundIds[bgTypeId][bracketId];
-                for (ClientBattleGroundIdSet::const_iterator itr = ids.begin(); itr != ids.end(); ++itr)
-                {
-                    *data << uint32(*itr);
-                    ++count;
-                }
-                data->put<uint32>(count_pos , count);
+                buf << uint32(*itr);
+                ++count;
             }
         }
     }
+
+    data->WriteBits(count, 24);
+    data->WriteGuidMask<6, 4, 2, 3>(guid);
+    data->WriteBit(true);                   // unk
+    data->WriteGuidMask<5>(guid);
+    data->WriteBit(true);                   // signals EVENT_PVPQUEUE_ANYWHERE_SHOW if set
+
+    data->WriteGuidBytes<6, 1, 7, 5>(guid);
+    data->FlushBits();
+    if (count)
+        data->append(buf);
+    data->WriteGuidBytes<0, 2, 4, 3>(guid);
 }
 
 void BattleGroundMgr::SendToBattleGround(Player* pl, uint32 instanceId, BattleGroundTypeId bgTypeId)

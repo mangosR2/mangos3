@@ -1039,9 +1039,6 @@ enum MangosStrings
 
     LANG_INVALID_REALMID                = 11001,
 
-    // Use for custom patches             11000-11999
-    LANG_INVALID_REALMID                = 11001,
-
     LANG_COMMAND_FRIEND                 = 11133,
     LANG_COMMAND_FRIEND_ERROR           = 11134,
     LANG_SYSTEMMESSAGE_MODERATOR        = 12000,

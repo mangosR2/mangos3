@@ -302,7 +302,7 @@ void WorldSession::HandleTrainerBuySpellOpcode( WorldPacket & recv_data )
     }
     else
     {
-    _player->ModifyMoney( -int32(nSpellCost) );
+        _player->ModifyMoney( -int32(nSpellCost) );
 
         // visual effect on trainer
         WorldPacket data;
@@ -311,14 +311,13 @@ void WorldSession::HandleTrainerBuySpellOpcode( WorldPacket & recv_data )
 
         // visual effect on player
         _player->BuildSendPlayVisualPacket(&data, 0x016A, true);
-    SendPacket(&data);
-    }
+        SendPacket(&data);
 
-    // learn explicitly or cast explicitly
-    if(trainer_spell->IsCastable())
-        _player->CastSpell(_player, trainer_spell->spell, true);
-    else
-        _player->learnSpell(spellId, false);
+        // learn explicitly or cast explicitly
+        if(trainer_spell->IsCastable())
+            _player->CastSpell(_player, trainer_spell->spell, true);
+        else
+            _player->learnSpell(spellId, false);
 
         sendData << ObjectGuid(guid);
         sendData << uint32(spellId);                                // should be same as in packet from client

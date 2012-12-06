@@ -13893,7 +13893,6 @@ void Unit::_ExitVehicle(bool forceDismount)
     else
     {
         m_movementInfo.ClearTransportData();
-        m_movementInfo.RemoveMovementFlag(MOVEFLAG_ONTRANSPORT);
     }
 
     m_pVehicle = VehicleKitPtr(NULL);

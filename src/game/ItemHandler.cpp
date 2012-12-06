@@ -644,7 +644,7 @@ void WorldSession::SendListInventory(ObjectGuid vendorguid)
                 maxCount = crItem->maxcount <= 0 ? -1 : int32(pCreature->GetVendorItemCurrentCount(crItem));
                 buyCount = pProto->BuyCount;
 
-        }
+            }
             else if (crItem->type == VENDOR_ITEM_TYPE_CURRENCY)
             {
                 CurrencyTypesEntry const * pCurrency = sCurrencyTypesStore.LookupEntry(crItem->item);
@@ -663,7 +663,7 @@ void WorldSession::SendListInventory(ObjectGuid vendorguid)
                 displayId = 0;
                 maxCount = -1;
                 buyCount = crItem->maxcount;
-    }
+            }
             else
                 continue;
 

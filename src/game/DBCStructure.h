@@ -844,21 +844,24 @@ struct CreatureTypeEntry
     uint32    Unk1;                                         // 1        m_flags 0 for known categories and 3 for unknown one (3.0.9)
     char*   Name;                                           // 2        m_name_lang
 };*/
-
-/*struct CurrencyTypesEntry
+struct CurrencyTypesEntry
 {
-    //uint32    ID;                                         // 0        m_ID
-    //uint32    Category;                                   // 1        m_categoryID
-    //char *name;                                           // 2
-    //char *iconName;                                       // 3
-    //uint32                                                // 4
-    //uint32                                                // 5
-    //uint32                                                // 6
-    //uint32                                                // 7
-    //uint32                                                // 8
-    //uint32                                                // 9
-    //char* description;                                    // 10
-};*/
+    uint32  ID;                                             // 0
+    uint32 Category;                                        // 1
+    DBCString name;                                         // 2
+    //char* iconName;                                       // 3
+    //char* iconName2;                                      // 4
+    //uint32 unk5;                                          // 5
+    //uint32 unk6;                                          // 6
+    uint32 TotalCap;                                        // 7
+    uint32 WeekCap;                                         // 8
+    uint32 Flags;                                           // 9
+    //DBCString description;                                // 10
+
+    bool HasPrecision() const   { return Flags & CURRENCY_FLAG_HAS_PRECISION; }
+    bool HasSeasonCount() const { return Flags & CURRENCY_FLAG_HAS_SEASON_COUNT; }
+    float GetPrecision() const  { return HasPrecision() ? CURRENCY_PRECISION : 1.0f; }
+};
 
 struct DestructibleModelDataEntry
 {
@@ -2506,8 +2509,8 @@ struct SpellCastTimesEntry
 {
     uint32    ID;                                           // 0        m_ID
     int32     CastTime;                                     // 1        m_base
-    //float     CastTimePerLevel;                           // 2        m_perLevel
-    //int32     MinCastTime;                                // 3        m_minimum
+    float     CastTimePerLevel;                             // 2        m_perLevel
+    int32     MinCastTime;                                  // 3        m_minimum
 };
 
 struct SpellFocusObjectEntry

@@ -1408,17 +1408,17 @@ void WorldSession::HandleMoveSetCanFlyAckOpcode( WorldPacket & recv_data )
     MovementInfo movementInfo;
     recv_data >> movementInfo;
 
-    Unit * target;
+    Unit* target;
 
-    if (GetPlayer()->GetObjectGuid() == guid)
+    if (GetPlayer()->GetObjectGuid() == movementInfo.GetGuid())
         target = GetPlayer();
-    else if (!GetPlayer()->IsSelfMover() && GetPlayer()->GetMover()->GetObjectGuid() == guid)
+    else if (!GetPlayer()->IsSelfMover() && GetPlayer()->GetMover()->GetObjectGuid() == movementInfo.GetGuid())
         target = GetPlayer()->GetMover();
     else
     {
         DEBUG_LOG("WorldSession::HandleMoveSetCanFlyAckOpcode: player %s, "
             "mover %s, received %s", _player->GetGuidStr().c_str(),
-            GetPlayer()->GetMover()->GetGuidStr().c_str(), guid.GetString().c_str());
+            GetPlayer()->GetMover()->GetGuidStr().c_str(), movementInfo.GetGuid().GetString().c_str());
         return;
     }
 

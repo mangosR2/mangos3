@@ -204,7 +204,7 @@ enum BG_AV_WorldStates
 };
 
 // alliance_control horde_control neutral_control
-const uint32 BG_AV_MineWorldStates[2][BG_AV_TEAMS_COUNT] =
+const uint32 BG_AV_MineWorldStates[2][3] =
 {
     {1358, 1359, 1360},
     {1355, 1356, 1357}

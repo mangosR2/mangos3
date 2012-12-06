@@ -180,7 +180,7 @@ void WorldStateMgr::LoadTemplatesFromDBC()
         }
 
         // parse linked worldstates here
-        std::string message = wsEntry->m_uiMessage1[sWorld.GetDefaultDbcLocale()];
+        std::string message = wsEntry->m_uiMessage1;
         if (!message.empty())
         {
             std::string::size_type pos1, pos2;
