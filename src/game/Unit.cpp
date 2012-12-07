@@ -1669,7 +1669,7 @@ void Unit::CalculateSpellDamage(DamageInfo* damageInfo, float DamageMultiplier)
     if (damageInfo->damage > 0)
     {
         // physical damage => armor
-        if (damageInfo->SchoolMask() & SPELL_SCHOOL_MASK_NORMAL)
+        if ((damageInfo->SchoolMask() & SPELL_SCHOOL_MASK_NORMAL) && !damageInfo->GetSpellProto()->HasAttribute(SPELL_ATTR_EX3_CANT_MISS))
         {
             uint32 armor_affected_damage = CalcNotIgnoreDamageReduction(damageInfo);
             damageInfo->damage = damageInfo->damage - armor_affected_damage + CalcArmorReducedDamage(damageInfo->target, armor_affected_damage);
