@@ -118,6 +118,7 @@ void BattleGroundIC::SendTransportInit(Player* player)
     if (!gunshipAlliance || !gunshipHorde)
         return;
 
+/*
     UpdateData transData;
 
     gunshipAlliance->BuildCreateUpdateBlockForPlayer(&transData, player);
@@ -127,6 +128,7 @@ void BattleGroundIC::SendTransportInit(Player* player)
 
     transData.BuildPacket(&packet);
     player->GetSession()->SendPacket(&packet);
+*/
 }
 
 void BattleGroundIC::UpdateScore(TeamIndex teamIdx, int32 points )

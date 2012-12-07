@@ -3056,7 +3056,8 @@ void AchievementMgr::SendAllAchievementData()
         data.WriteGuidBytes<7>(counter);
 
         data << uint32(now - iter->second.date);               // Timer 1
-        data << uint32(secsToTimeBitFields(now));
+        data.AppendPackedTime(now);
+        //data << uint32(secsToTimeBitFields(now));
 
         data.WriteGuidBytes<1>(guid);
     }
@@ -3064,7 +3065,8 @@ void AchievementMgr::SendAllAchievementData()
     for (CompletedAchievementMap::const_iterator iter = m_completedAchievements.begin(); iter != m_completedAchievements.end(); ++iter)
     {
         data << uint32(iter->first);
-        data << uint32(secsToTimeBitFields(iter->second.date));
+        // data << uint32(secsToTimeBitFields(iter->second.date));
+        data.AppendPackedTime(iter->second.date);
     }
 
     GetPlayer()->GetSession()->SendPacket(&data);
@@ -3123,7 +3125,8 @@ void AchievementMgr::SendRespondInspectAchievements(Player* player)
 
         data.WriteGuidBytes<1>(counter);
 
-        data << uint32(secsToTimeBitFields(now));
+        //data << uint32(secsToTimeBitFields(now));
+        data.AppendPackedTime(now);
 
         data.WriteGuidBytes<3, 7>(guid);
         data.WriteGuidBytes<5>(counter);
@@ -3144,7 +3147,8 @@ void AchievementMgr::SendRespondInspectAchievements(Player* player)
     for (CompletedAchievementMap::const_iterator iter = m_completedAchievements.begin(); iter != m_completedAchievements.end(); ++iter)
     {
         data << uint32(iter->first);
-        data << uint32(secsToTimeBitFields(iter->second.date));
+        //data << uint32(secsToTimeBitFields(iter->second.date));
+        data.AppendPackedTime(iter->second.date);
     }
 
     data.WriteGuidBytes<7, 4, 5>(targetGuid);

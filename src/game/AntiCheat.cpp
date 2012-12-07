@@ -670,7 +670,7 @@ bool AntiCheat::CheckFly()
 
 bool AntiCheat::CheckAirJump()
 {
-    if (m_currentOpcode != MSG_MOVE_JUMP)
+    if (m_currentOpcode != CMSG_MOVE_JUMP)
         return true;
     if (!m_currentmovementInfo->HasMovementFlag(MOVEFLAG_FALLING) || !GetMover()->m_movementInfo.HasMovementFlag(MOVEFLAG_FALLING))
         return true;

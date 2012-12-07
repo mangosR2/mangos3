@@ -681,33 +681,6 @@ bool ArenaTeam::HaveMember(ObjectGuid guid) const
     return false;
 }
 
-uint32 ArenaTeam::GetPoints(uint32 MemberRating)
-{
-    // returns how many points would be awarded with this team type with this rating
-    float points;
-
-    uint32 rating = MemberRating + 150 < m_stats.rating ? MemberRating : m_stats.rating;
-
-    if (rating <= 1500)
-    {
-        // As of Season 6 and later, all teams below 1500 rating will earn points as if they were a 1500 rated team
-        if (sWorldStateMgr.GetWorldStateValue(ARENA_SEASON_ID) >= 6)
-            rating = 1500;
-
-        points = (float)rating * 0.22f + 14.0f;
-    }
-    else
-        points = 1511.26f / (1.0f + 1639.28f * exp(-0.00412f * (float)rating));
-
-    // type penalties for <5v5 teams
-    if (m_Type == ARENA_TYPE_2v2)
-        points *= 0.76f;
-    else if (m_Type == ARENA_TYPE_3v3)
-        points *= 0.88f;
-
-    return (uint32) points;
-}
-
 float ArenaTeam::GetChanceAgainst(uint32 own_rating, uint32 enemy_rating)
 {
     // returns the chance to win against a team with the given rating, used in the rating adjustment calculation

@@ -58,7 +58,7 @@ PostgreSQLConnection::~PostgreSQLConnection()
 
 bool PostgreSQLConnection::Initialize(const char* infoString)
 {
-    Tokens tokens = StrSplit(infoString, ";");
+    Tokens tokens = Tokens(infoString, ";");
 
     Tokens::iterator iter;
 

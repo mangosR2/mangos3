@@ -429,7 +429,6 @@ bool Unit::IsTriggeredAtSpellProcEvent(Unit *pVictim, SpellAuraHolderPtr holder,
     // Get EventProcFlag
     uint32 EventProcFlag = GetProcFlag(spellProto);
 
-    uint32 EventProcFlag;
     if (spellProcEvent && spellProcEvent->procFlags)        // if exist get custom spellProcEvent->procFlags
         EventProcFlag = spellProcEvent->procFlags;
     else

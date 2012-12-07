@@ -61,7 +61,12 @@ enum SpellCastFlags
     CAST_FLAG_VISUAL_CHAIN      = 0x00080000,               // wotlk
     CAST_FLAG_UNKNOWN21         = 0x00100000,
     CAST_FLAG_PREDICTED_RUNES   = 0x00200000,               // wotlk, rune cooldown list
-    CAST_FLAG_IMMUNITY          = 0x04000000                // spell cast school imminity info
+    CAST_FLAG_IMMUNITY          = 0x04000000,               // spell cast school imminity info
+    CAST_FLAG_UNKNOWN24         = 0x08000000,
+    CAST_FLAG_UNKNOWN25         = 0x10000000,
+    CAST_FLAG_UNKNOWN26         = 0x20000000,
+    CAST_FLAG_HEAL_PREDICTION   = 0x40000000,               // heal prediction
+    CAST_FLAG_UNKNOWN28         = 0x80000000,
 };
 
 enum SpellFlags
@@ -113,7 +118,7 @@ class SpellCastTargets
 
         SpellCastTargetsReader ReadForCaster(Unit* caster) { return SpellCastTargetsReader(*this,caster); }
 
-        void ReadAdditionalData(ByteBuffer& data);
+        void ReadAdditionalData(WorldPacket& data, uint8& cast_flags);
 
         SpellCastTargets& operator=(const SpellCastTargets &target)
         {
@@ -472,7 +477,7 @@ class Spell
         void SendChannelUpdate(uint32 time);
         void SendChannelStart(uint32 duration);
         void SendResurrectRequest(Player* target);
-
+        void SendPlaySpellVisual(uint32 SpellID);
 
         void HandleEffects(Unit *pUnitTarget, Item *pItemTarget, GameObject *pGOTarget, SpellEffectIndex i);
         void HandleThreatSpells();

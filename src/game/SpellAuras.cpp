@@ -1090,7 +1090,7 @@ bool Aura::isAffectedOnSpell(SpellEntry const *spell) const
     return spell->IsFitToFamily(GetSpellProto()->GetSpellFamilyName(), GetAuraSpellClassMask());
 }
 
-bool Aura::CanProcFrom(SpellEntry const* spell, uint32 /*procFlag*/, uint32 EventProcEx, uint32 procEx, bool active, bool useClassMask) const
+bool Aura::CanProcFrom(SpellEntry const* spell, uint32 procFlag, uint32 EventProcEx, uint32 procEx, bool active, bool useClassMask) const
 {
     // Check EffectClassMask
     ClassFamilyMask const& mask  = GetAuraSpellClassMask();
@@ -1377,19 +1377,6 @@ void Aura::HandleAddModifier(bool apply, bool Real)
                 break;
             default:
                 break;
-        }
-
-        // Everlasting Affliction, overwrite wrong data, if will need more better restore support of spell_affect table
-        if (spellProto->GetSpellFamilyName() == SPELLFAMILY_WARLOCK && spellProto->SpellIconID == 3169)
-        {
-            // Corruption and Unstable Affliction
-            m_spellmod->mask = ClassFamilyMask(UI64LIT(0x0000010000000002));
-        }
-        // Improved Flametongue Weapon, overwrite wrong data, maybe time re-add table
-        else if (spellProto->Id == 37212)
-        {
-            // Flametongue Weapon (Passive)
-            m_spellmod->mask = ClassFamilyMask(UI64LIT(0x0000000000200000));
         }
     }
 
@@ -5391,13 +5378,14 @@ void Aura::HandleAuraModStun(bool apply, bool Real)
 
         target->GetUnitStateMgr().DropAction(UNIT_ACTION_STUN);
 
-        if(!target->hasUnitState(UNIT_STAT_ROOT | UNIT_STAT_ON_VEHICLE))       // prevent allow move if have also root effect
+        if (!target->hasUnitState(UNIT_STAT_ROOT | UNIT_STAT_ON_VEHICLE))       // prevent allow move if have also root effect
         {
             if (target->getVictim() && target->isAlive())
                 target->SetTargetGuid(target->getVictim()->GetObjectGuid());
+        }
 
         // Wyvern Sting
-        if (GetSpellProto()->SpellFamilyName == SPELLFAMILY_HUNTER && GetSpellProto()->GetSpellFamilyFlags().test<CF_HUNTER_WYVERN_STING2>())
+        if (GetSpellProto()->GetSpellFamilyName() == SPELLFAMILY_HUNTER && GetSpellProto()->GetSpellFamilyFlags().test<CF_HUNTER_WYVERN_STING2>())
         {
             Unit* caster = GetCaster();
             if ( !caster || caster->GetTypeId()!=TYPEID_PLAYER )
@@ -6569,6 +6557,8 @@ void Aura::HandleAuraPeriodicDummy(bool apply, bool Real)
                 m_modifier.m_amount += int32(caster->GetTotalAttackPowerValue(RANGED_ATTACK) * 14 / 100);
             break;
         }
+        default:
+            break;
     }
 
     m_isPeriodic = apply;
@@ -8227,7 +8217,7 @@ void Aura::HandleShapeshiftBoosts(bool apply)
                     if ((*i)->GetSpellProto()->SpellIconID == 240 && (*i)->GetModifier()->m_miscvalue == 3)
                     {
                         int32 HotWMod = (*i)->GetModifier()->m_amount;
-                        if (GetModifier()->m_miscvalue == FORM_CAT  || GetModifier()->m_miscvalue == FORM_BEAR || GetModifier()->m_miscvalue == FORM_DIREBEAR)
+                        if (GetModifier()->m_miscvalue == FORM_CAT  || GetModifier()->m_miscvalue == FORM_BEAR)
                             HotWMod /= 2;
 
                         target->CastCustomSpell(target, HotWSpellId, &HotWMod, NULL, NULL, true, NULL, this);
@@ -8644,7 +8634,7 @@ void Aura::PeriodicTick()
             if (!pCaster)
                 return;
 
-            if( spellProto->GetSpellEffect()->Effect == SPELL_EFFECT_PERSISTENT_AREA_AURA &&
+            if (GetSpellEffect()->Effect == SPELL_EFFECT_PERSISTENT_AREA_AURA &&
                 pCaster->SpellHitResult(target, spellProto, false) != SPELL_MISS_NONE)
                 return;
 
@@ -8827,13 +8817,13 @@ void Aura::PeriodicTick()
             {
                 damageInfo.hitOutCome = MELEE_HIT_CRIT;
                 // Resilience - reduce crit damage
-                damageInfo.damage -= target->GetSpellCritDamageReduction(damageInfo.damage);
+                // damageInfo.damage -= target->GetSpellCritDamageReduction(damageInfo.damage);
             }
 
             // only from players
             // FIXME: need use SpellDamageBonus instead?
-            if (pCaster->GetTypeId() == TYPEID_PLAYER)
-                damageInfo.damage -= target->GetSpellDamageReduction(damageInfo.damage);
+            //if (pCaster->GetTypeId() == TYPEID_PLAYER)
+            //    damageInfo.damage -= target->GetSpellDamageReduction(damageInfo.damage);
 
             if (GetSpellProto()->Id == 50344) // Dream Funnel Oculus drake spell
                 damageInfo.damage = uint32(pCaster->GetMaxHealth()*0.05f);
@@ -8927,13 +8917,13 @@ void Aura::PeriodicTick()
             {
                 damageInfo.hitOutCome = MELEE_HIT_CRIT;
                 // Resilience - reduce crit damage
-                damageInfo.damage -= target->GetSpellCritDamageReduction(damageInfo.damage);
+//                damageInfo.damage -= target->GetSpellCritDamageReduction(damageInfo.damage);
             }
 
             // only from players
             // FIXME: need use SpellDamageBonus instead?
-            if (GetAffectiveCasterGuid().IsPlayer())
-                damageInfo.damage -= target->GetSpellDamageReduction(damageInfo.damage);
+//            if (GetAffectiveCasterGuid().IsPlayer())
+//                damageInfo.damage -= target->GetSpellDamageReduction(damageInfo.damage);
 
             target->CalculateDamageAbsorbAndResist(pCaster, &damageInfo, !spellProto->HasAttribute(SPELL_ATTR_EX_CANT_REFLECTED));
 
@@ -9150,8 +9140,8 @@ void Aura::PeriodicTick()
             int32 drain_amount = target->GetPower(power) > pdamage ? pdamage : target->GetPower(power);
 
             // resilience reduce mana draining effect at spell crit damage reduction (added in 2.4)
-            if (power == POWER_MANA)
-                drain_amount -= target->GetCritDamageReduction(drain_amount);
+//            if (power == POWER_MANA)
+//                drain_amount -= target->GetCritDamageReduction(drain_amount);
 
             target->ModifyPower(power, -drain_amount);
 
@@ -9319,8 +9309,8 @@ void Aura::PeriodicTick()
                 return;
 
             // resilience reduce mana draining effect at spell crit damage reduction (added in 2.4)
-            if (powerType == POWER_MANA)
-                damageInfo.damage -= target->GetSpellCritDamageReduction(damageInfo.damage);
+//            if (powerType == POWER_MANA)
+//                damageInfo.damage -= target->GetSpellCritDamageReduction(damageInfo.damage);
             damageInfo.cleanDamage = abs(target->ModifyPower(powerType, -damageInfo.damage));
 
             damageInfo.damage = uint32(damageInfo.cleanDamage * GetSpellEffect()->EffectMultipleValue);
@@ -9712,7 +9702,7 @@ void Aura::PeriodicDummyTick()
                     return;
                 case 54798: // FLAMING Arrow Triggered Effect
                 {
-                    Unit * caster = GetCaster();
+                    Unit* caster = GetCaster();
                     if (!caster)
                         return;
 
@@ -9757,6 +9747,10 @@ void Aura::PeriodicDummyTick()
                 case 62038: // Biting Cold (Ulduar: Hodir)
                 {
                     if (target->GetTypeId() != TYPEID_PLAYER)
+                        return;
+
+                    Unit* caster = GetCaster();
+                    if (!caster)
                         return;
 
                     if (!target->HasAura(62821))     // Toasty Fire
@@ -9810,7 +9804,7 @@ void Aura::PeriodicDummyTick()
                 case 63276:                                   // Mark of the Faceless (General Vezax - Ulduar)
                 {
 
-                    Unit *caster = GetCaster();
+                    Unit* caster = GetCaster();
 
                     if (caster && target)
                         caster->CastCustomSpell(target, 63278, 0, &(spell->GetSpellEffect(EFFECT_INDEX_0)->EffectBasePoints), 0, false, 0, 0, caster->GetObjectGuid() , spell);
@@ -9863,6 +9857,10 @@ void Aura::PeriodicDummyTick()
                     if (lifeLeeched < 250)
                         lifeLeeched = 250;
 
+                    Unit* caster = GetCaster();
+                    if (!caster)
+                        return;
+
                     // Leeching swarm damage
                     caster->CastCustomSpell(target, 66240, &lifeLeeched, NULL, NULL, true, NULL, this);
 
@@ -9878,14 +9876,6 @@ void Aura::PeriodicDummyTick()
                     float newAngle = target->GetOrientation() + (spell->Id == 68875 ? 0.09f : 2*M_PI_F - 0.09f);
 
                     newAngle = MapManager::NormalizeOrientation(newAngle);
-
-                    float newAngle = target->GetOrientation();
-                    if (spell->Id == 68875)
-                        newAngle += 0.09f;
-                    else
-                        newAngle -= 0.09f;
-
-                    NormalizeOrientation(newAngle);
 
                     target->SetFacingTo(newAngle);
 
@@ -11299,7 +11289,7 @@ void SpellAuraHolder::BuildUpdatePacket(WorldPacket& data) const
     {
         for (uint8 i = 0; i < MAX_EFFECT_INDEX; ++i)
             if (auraFlags & (1 << i))
-                if (Aura const* aura = m_auras[i])
+                if (Aura const* aura = GetAura(SpellEffectIndex(i)))
                     data << int32(aura->GetModifier()->m_amount);
                 else
                     data << int32(0);
@@ -11343,7 +11333,7 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
 
     // Linked spells (boost chain)
     SpellLinkedSet linkedSet = sSpellMgr.GetSpellLinked(GetId(), SPELL_LINKED_TYPE_BOOST);
-    switch(m_spellProto->GetSpellFamilyName())
+    if (linkedSet.size() > 0)
     {
         for (SpellLinkedSet::const_iterator itr = linkedSet.begin(); itr != linkedSet.end(); ++itr)
         {
@@ -11388,7 +11378,7 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
 
     SpellClassOptionsEntry const* classOptions = m_spellProto->GetSpellClassOptions();
 
-    switch(GetSpellProto()->GetSpellFamilyName())
+    switch (GetSpellProto()->GetSpellFamilyName())
     {
         case SPELLFAMILY_GENERIC:
         {
@@ -11807,7 +11797,7 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
                     return;
             }
             // Power Word: Shield
-            else if (apply && m_spellProto->GetSpellFamilyFlags().test<CF_PRIEST_POWER_WORD_SHIELD>() && m_spellProto->Mechanic == MECHANIC_SHIELD)
+            else if (apply && m_spellProto->GetSpellFamilyFlags().test<CF_PRIEST_POWER_WORD_SHIELD>() && m_spellProto->GetMechanic() == MECHANIC_SHIELD)
             {
                 Unit* caster = GetCaster();
                 if (!caster)

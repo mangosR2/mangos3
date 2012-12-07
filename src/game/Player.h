@@ -1200,6 +1200,7 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         void SetVirtualItemSlot(uint8 i, Item* item);
         void SetSheath(SheathState sheathed) override;      // overwrite Unit version
+        bool GetSlotsForInventoryType(uint8 invType, uint8* slots, uint32 subClass = 0) const;
         uint8 FindEquipSlot(ItemPrototype const* proto, uint32 slot, bool swap) const;
         uint32 GetItemCount(uint32 item, bool inBankAlso = false, Item* skipItem = NULL) const;
         uint32 GetItemCountWithLimitCategory(uint32 limitCategory, Item* skipItem = NULL) const;
@@ -1302,7 +1303,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         Item* GetItemFromBuyBackSlot(uint32 slot);
         void RemoveItemFromBuyBackSlot(uint32 slot, bool del);
 
-        //void TakeExtendedCost(uint32 extendedCostId, uint32 count);
+        void TakeExtendedCost(uint32 extendedCostId, uint32 count);
 
         void SendEquipError(InventoryResult msg, Item* pItem, Item *pItem2 = NULL, uint32 itemid = 0) const;
         void SendBuyError(BuyResult msg, Creature* pCreature, uint32 item, uint32 param);
@@ -1693,7 +1694,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         SpellEntry const* GetKnownTalentRankById(int32 talentId) const;
 
         void AddSpellMod(Aura* aura, bool apply);
-        template <class T> T ApplySpellMod(uint32 spellId, SpellModOp op, T &basevalue);
+        template <class T> T ApplySpellMod(uint32 spellId, SpellModOp op, T &basevalue, Spell const* spell = NULL);
 
         static uint32 const infinityCooldownDelay = MONTH;  // used for set "infinity cooldowns" for spells and check
         static uint32 const infinityCooldownDelayCheck = MONTH/2;
@@ -1748,8 +1749,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         static bool IsActionButtonDataValid(uint8 button, uint32 action, uint8 type, Player* player, bool msg = true);
         ActionButton* addActionButton(uint8 spec, uint8 button, uint32 action, uint8 type);
         void removeActionButton(uint8 spec, uint8 button);
-        void SendActionButtons(uint32 state) const;
-        void SendInitialActionButtons() const { SendActionButtons(1); }
+        void SendInitialActionButtons() const;
         void SendLockActionButtons() const;
         ActionButton const* GetActionButton(uint8 button);
 
@@ -1801,6 +1801,8 @@ class MANGOS_DLL_SPEC Player : public Unit
         static uint32 GetRankFromDB(ObjectGuid guid);
         int GetGuildIdInvited() { return m_GuildIdInvited; }
         static void RemovePetitionsAndSigns(ObjectGuid guid, uint32 type);
+        void SendPetitionSignResult(ObjectGuid petitionGuid, Player* player, uint32 result);
+        void SendPetitionTurnInResult(uint32 result);
 
         // Arena Team
         void SetInArenaTeam(uint32 ArenaTeamId, uint8 slot, ArenaType type)
@@ -1887,6 +1889,9 @@ class MANGOS_DLL_SPEC Player : public Unit
         void ApplyManaRegenBonus(int32 amount, bool apply);
         void UpdateManaRegen();
         void ApplyHealthRegenBonus(int32 amount, bool apply);
+        void UpdateMasteryAuras();
+        void UpdateArmorSpecializations();
+        bool FitArmorSpecializationRules(SpellEntry const * spellProto) const;
 
         ObjectGuid const& GetLootGuid() const { return m_lootGuid; }
         void SetLootGuid(ObjectGuid const& guid) { m_lootGuid = guid; }
@@ -1899,7 +1904,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void BuildCreateUpdateBlockForPlayer(UpdateData* data, Player* target) const override;
         void SetPhaseAndMap(Player* target) const;
         void DestroyForPlayer(Player* target, bool anim = false) const override;
-        void SendLogXPGain(uint32 GivenXP, Unit* victim, uint32 RestXP);
+        void SendLogXPGain(uint32 GivenXP, Unit* victim, uint32 RestXP, bool ReferAFriend);
 
         uint8 LastSwingErrorMsg() const { return m_swingErrorMsg; }
         void SwingErrorMsg(uint8 val) { m_swingErrorMsg = val; }
@@ -2617,6 +2622,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         uint32 m_speakCount;
 
         uint32 m_Difficulty;                             // contains both dungeon (first byte) and raid (second byte) difficultyes of player. bytes 2,3 not used.
+        time_t m_lastHonorKillsUpdateTime;
 
         uint32 m_atLoginFlags;
 

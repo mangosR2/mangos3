@@ -860,3 +860,28 @@ void WorldSession::HandleReportPvPAFK(WorldPacket& recv_data)
 
     reportedPlayer->ReportedAfkBy(_player);
 }
+
+void WorldSession::HandleRequestRatedBGStatsOpcode(WorldPacket& recv_data)
+{
+    // null packet
+
+    GetPlayer()->SendRatedBGStats();
+}
+
+void WorldSession::HandleRequestPvPOptionsEnabledOpcode(WorldPacket& recv_data)
+{
+    // null packet
+
+    WorldPacket data(SMSG_PVP_OPTIONS_ENABLED, 1);
+    for (int i = 0; i < 5; ++i)
+        data.WriteBit(true);
+
+    SendPacket(&data);
+}
+
+void WorldSession::HandleRequestPvPRewardsOpcode(WorldPacket& recv_data)
+{
+    // null packet
+
+    GetPlayer()->SendPvPRewards();
+}

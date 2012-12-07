@@ -134,6 +134,13 @@ struct AchievementCriteriaEntry
             uint32  questCount;                             // 4
         } complete_quests_in_zone;
 
+        // ACHIEVEMENT_CRITERIA_TYPE_CURRENCY_EARNED         = 12
+        struct
+        {
+            uint32 currencyId;                              // 3
+            uint32 count;                                   // 4
+        } currencyEarned;
+
         // ACHIEVEMENT_CRITERIA_TYPE_COMPLETE_DAILY_QUEST   = 14
         struct
         {
@@ -2243,16 +2250,18 @@ struct SpellReagentsEntry
 // SpellScaling.dbc
 struct SpellScalingEntry
 {
-    //uint32    Id;                                           // 0        m_ID
+    //uint32    Id;                                         // 0        m_ID
     uint32    castTimeMin;                                  // 1
     uint32    castTimeMax;                                  // 2
     uint32    castScalingMaxLevel;                          // 3
-    uint32    playerClass;                                  // 4        (index * 100) + charLevel => gtSpellScaling.dbc
+    int32     playerClass;                                  // 4        (index * 100) + charLevel => gtSpellScaling.dbc
     float     coeff1[3];                                    // 5-7
     float     coeff2[3];                                    // 8-10
     float     coeff3[3];                                    // 11-13
-    float     unkMult;                                      // 14        some coefficient, mostly 1.0f
-    uint32    unkLevel;                                     // 15        some level
+    float     coefBase;                                     // 14       some coefficient, mostly 1.0f
+    uint32    coefLevelBase;                                // 15       some level
+
+    bool IsScalableEffect(SpellEffectIndex i) const { return coeff1[i] != 0.0f; };
 };
 
 // SpellShapeshift.dbc
@@ -2298,8 +2307,8 @@ struct SpellEntry
     uint32    AttributesEx6;                                // 7        m_attributesExF
     uint32    AttributesEx7;                                // 8        m_attributesExG (0x20 - totems, 0x4 - paladin auras, etc...)
     uint32    AttributesEx8;                                // 9        m_attributesExH
-    // uint32 unk_400_1;                                    // 10       4.0.0
-    // uint32 unk_420;                                      // 11       4.0.0
+    uint32    AttributesEx9;                                // 10       m_attributesExI
+    uint32    AttributesEx10;                               // 11       m_attributesExJ
     uint32    CastingTimeIndex;                             // 12       m_castingTimeIndex
     uint32    DurationIndex;                                // 13       m_durationIndex
     uint32    powerType;                                    // 14       m_powerType
@@ -2495,6 +2504,9 @@ struct SpellEntry
     inline bool HasAttribute(SpellAttributesEx5 attribute) const { return AttributesEx5 & attribute; }
     inline bool HasAttribute(SpellAttributesEx6 attribute) const { return AttributesEx6 & attribute; }
     inline bool HasAttribute(SpellAttributesEx7 attribute) const { return AttributesEx7 & attribute; }
+    inline bool HasAttribute(SpellAttributesEx8 attribute) const { return AttributesEx8 & attribute; }
+    inline bool HasAttribute(SpellAttributesEx9 attribute) const { return AttributesEx9 & attribute; }
+    inline bool HasAttribute(SpellAttributesEx10 attribute) const { return AttributesEx10 & attribute; }
 
     private:
         // prevent creating custom entries (copy data from original in fact)
@@ -2623,6 +2635,7 @@ struct SummonPropertiesEntry
 
 #define MAX_TALENT_RANK 3
 #define MAX_PET_TALENT_RANK 3                               // use in calculations, expected <= MAX_TALENT_RANK
+#define MAX_TALENT_TABS 3
 
 struct TalentEntry
 {
@@ -2648,8 +2661,16 @@ struct TalentTabEntry
     uint32  tabpage;                                        // 5        m_orderIndex
     //char* internalname;                                   // 6        m_backgroundFile
     //char* description;                                    // 7
-    //uint32 rolesMask;                                     // 8 4.0.0
-    //uint32 spellIds[2];                                   // 9-10 passive mastery bonus spells?
+    uint32 rolesMask;                                       // 8 4.0.0
+    uint32 masterySpells[MAX_MASTERY_SPELLS];               // 9-10 passive mastery bonus spells?
+};
+
+struct TalentTreePrimarySpellsEntry
+{
+    //uint32 Id;                                            // 0 index
+    uint32 TalentTree;                                      // 1 entry from TalentTab.dbc
+    uint32 SpellId;                                         // 2 spell id to learn
+    //uint32 Flags;                                         // 3 some kind of flags
 };
 
 struct TaxiNodesEntry

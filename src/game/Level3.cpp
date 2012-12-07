@@ -1175,7 +1175,6 @@ bool ChatHandler::HandleAccountSetGmLevelCommand(char* args)
         return false;
 
     int32 gm;
-        uint32 gmRealmID = realmID;
     if (!ExtractInt32(&args, gm))
         return false;
 
@@ -1201,6 +1200,7 @@ bool ChatHandler::HandleAccountSetGmLevelCommand(char* args)
         SetSentErrorMessage(true);
         return false;
     }
+/*
     /// check if provided realmID is not current realmID, or isn't -1
     if (gmRealmID != realmID && gmRealmID != -1)
     {
@@ -1208,7 +1208,7 @@ bool ChatHandler::HandleAccountSetGmLevelCommand(char* args)
         SetSentErrorMessage(true);
         return false;
     }
-
+*/
     if (targetPlayer)
     {
         ChatHandler(targetPlayer).PSendSysMessage(LANG_YOURS_SECURITY_CHANGED, GetNameLink().c_str(), gm);

@@ -32,7 +32,7 @@
 Pet::Pet(PetType type) :
 Creature(CREATURE_SUBTYPE_PET),
 m_usedTalentCount(0),
-m_removed(false), m_updated(false), m_happinessTimer(7500), m_petType(type), m_duration(0),
+m_removed(false), m_updated(false), m_petType(type), m_duration(0),
 m_auraUpdateMask(0), m_loading(true), m_needSave(true), m_petFollowAngle(PET_FOLLOW_ANGLE),
 m_petCounter(0), m_PetScalingData(NULL), m_createSpellID(0),m_HappinessState(0),
 m_declinedname(NULL)
@@ -688,44 +688,6 @@ HappinessState Pet::GetHappinessState()
         return HAPPY;
     else
         return CONTENT;
-}
-
-
-void Pet::Regenerate(Powers power)
-{
-    uint32 curValue = GetPower(power);
-    uint32 maxValue = GetMaxPower(power);
-
-    if (curValue >= maxValue)
-        return;
-
-    float addvalue = 0.0f;
-
-    switch (power)
-    {
-        case POWER_FOCUS:
-        {
-            // For hunter pets.
-            addvalue = 24 * sWorld.getConfig(CONFIG_FLOAT_RATE_POWER_FOCUS);
-            break;
-        }
-        case POWER_ENERGY:
-        {
-            // For deathknight's ghoul.
-            addvalue = 20;
-            break;
-        }
-        default:
-            return;
-    }
-
-    // Apply modifiers (if any).
-    AuraList const& ModPowerRegenPCTAuras = GetAurasByType(SPELL_AURA_MOD_POWER_REGEN_PERCENT);
-    for (AuraList::const_iterator i = ModPowerRegenPCTAuras.begin(); i != ModPowerRegenPCTAuras.end(); ++i)
-        if ((*i)->GetModifier()->m_miscvalue == int32(power))
-            addvalue *= ((*i)->GetModifier()->m_amount + 100) / 100.0f;
-
-    ModifyPower(power, (int32)addvalue);
 }
 
 bool Pet::CanTakeMoreActiveSpells(uint32 spellid)

@@ -744,6 +744,15 @@ class ObjectMgr
             return NULL;
         }
 
+        QuestPhaseMapsVector const* GetQuestPhaseMapVector(uint32 questId)
+        {
+            QuestPhaseMapsMap::const_iterator itr = mQuestPhaseMap.find(questId);
+            if(itr != mQuestPhaseMap.end())
+                return &itr->second;
+
+            return NULL;
+        }
+
         // Static wrappers for various accessors
         static GameObjectInfo const* GetGameObjectInfo(uint32 id);                  ///< Wrapper for sGOStorage.LookupEntry
         static Player* GetPlayer(const char* name);                                 ///< Wrapper for ObjectAccessor::FindPlayerByName
@@ -835,6 +844,8 @@ class ObjectMgr
 
         void LoadWeatherZoneChances();
         void LoadGameTele();
+
+        void LoadNpcGossips();
 
         void LoadGossipMenus();
 

@@ -1152,6 +1152,10 @@ void Spell::AddGOTarget(GameObject* pVictim, SpellEffectIndex effIndex)
     // Speed possible inherited from triggering spell
     float speed_proto = GetBaseSpellSpeed();
 
+    // Spell have trajectory - need calculate incoming time
+    if (affectiveObject && m_targets.GetSpeed() > M_NULL_F)
+    {
+        float dist = 5.0f;
         if (m_targets.m_targetMask & TARGET_FLAG_DEST_LOCATION)
             dist = affectiveObject->GetDistance(m_targets.m_destX, m_targets.m_destY, m_targets.m_destZ);
         else
@@ -1162,6 +1166,7 @@ void Spell::AddGOTarget(GameObject* pVictim, SpellEffectIndex effIndex)
         target.timeDelay = (uint64) floor(dist / speed * 1000.0f);
     }
     // Spell have speed - need calculate incoming time
+    else if (speed_proto > M_NULL_F && affectiveObject && pVictim != affectiveObject)
     {
         // calculate spell incoming interval
         float dist = affectiveObject->GetDistance(pVictim->GetPositionX(), pVictim->GetPositionY(), pVictim->GetPositionZ());
@@ -3636,7 +3641,7 @@ void Spell::cast(bool skipCheck)
         case SPELLFAMILY_WARRIOR:
         {
             // Shield Slam
-            if (m_spellInfo->GetSpellFamilyFlags().test<CF_WARRIOR_SHIELD_SLAM>() && m_spellInfo->Category==1209)
+            if (m_spellInfo->GetSpellFamilyFlags().test<CF_WARRIOR_SHIELD_SLAM>() && m_spellInfo->GetCategory() == 1209)
             {
                 if (m_caster->HasAura(58375))               // Glyph of Blocking
                     AddTriggeredSpell(58374);               // Glyph of Blocking
@@ -3670,8 +3675,6 @@ void Spell::cast(bool skipCheck)
             if (m_spellInfo->GetMechanic() == MECHANIC_SHIELD &&
                 m_spellInfo->GetSpellFamilyFlags().test<CF_PRIEST_POWER_WORD_SHIELD>())
                 AddPrecastSpell(6788);                      // Weakened Soul
-            // Prayer of Mending (jump animation), we need formal caster instead original for correct animation
-            else if (classOpt && classOpt->SpellFamilyFlags & UI64LIT(0x0000002000000000))
             // Prayer of Mending (jump animation), we need formal caster instead original for correct animation
             else if (m_spellInfo->GetSpellFamilyFlags().test<CF_PRIEST_PRAYER_OF_MENDING>())
                 AddTriggeredSpell(41637);
@@ -4004,7 +4007,7 @@ void Spell::_handle_immediate_phase()
     for(int j = 0; j < MAX_EFFECT_INDEX; ++j)
     {
         SpellEffectEntry const* spellEffect = m_spellInfo->GetSpellEffect(SpellEffectIndex(j));
-        if(!spellEffect || spellEffect->Effect == EFFECT_NONE)
+        if(!spellEffect || spellEffect->Effect == SPELL_EFFECT_NONE)
             continue;
 
         // apply Send Event effect to ground in case empty target lists
@@ -4463,7 +4466,7 @@ void Spell::SendSpellStart()
     Unit *caster = m_triggeredByAuraSpell && IsChanneledSpell(m_triggeredByAuraSpell) ? GetAffectiveCaster() : m_caster;
 
     if ((m_caster->GetTypeId() == TYPEID_PLAYER ||
-        m_caster->GetTypeId() == TYPEID_UNIT && ((Creature*)m_caster)->IsPet()) &&
+        (m_caster->GetTypeId() == TYPEID_UNIT && ((Creature*)m_caster)->IsPet())) &&
         m_spellInfo->powerType != POWER_HEALTH)
         castFlags |= CAST_FLAG_PREDICTED_POWER;
 
@@ -7720,8 +7723,8 @@ SpellCastResult Spell::CheckItems()
                 }
                 else
                     TotemCategory -= 1;
-*/
             }
+*/
         }
     }
 

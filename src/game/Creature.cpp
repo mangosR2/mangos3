@@ -134,17 +134,14 @@ bool CreatureCreatePos::Relocate(Creature* cr) const
     return true;
 }
 
-Creature::Creature(CreatureSubtype subtype) : Unit(),
-    i_AI(NULL),
+Creature::Creature(CreatureSubtype subtype) :
+Unit(), i_AI(NULL),
 lootForPickPocketed(false), lootForBody(false), lootForSkin(false),m_lootMoney(0),
-    m_groupLootTimer(0), m_groupLootId(0),
-    m_lootMoney(0), m_lootGroupRecipientId(0),
 m_corpseDecayTimer(0), m_respawnTime(0), m_respawnDelay(25), m_corpseDelay(60), m_respawnradius(5.0f),
 m_subtype(subtype), m_defaultMovementType(IDLE_MOTION_TYPE), m_equipmentId(0),
 m_AlreadyCallAssistance(false), m_AlreadySearchedAssistance(false),
 m_regenHealth(true), m_AI_locked(false), m_isDeadByDefault(false),
-    m_temporaryFactionFlags(TEMPFACTION_NONE),
-    m_meleeDamageSchoolMask(SPELL_SCHOOL_MASK_NORMAL), m_originalEntry(0),
+m_temporaryFactionFlags(TEMPFACTION_NONE), m_meleeDamageSchoolMask(SPELL_SCHOOL_MASK_NORMAL), m_originalEntry(0),
 m_creatureInfo(NULL)
 {
     m_regenTimer = 200;
@@ -2224,10 +2221,10 @@ bool Creature::IsInEvadeMode() const
     return IsInUnitState(UNIT_ACTION_HOME);
 }
 
-bool Creature::HasSpell(uint32 spellID)
+bool Creature::HasSpell(uint32 spellID) const
 {
-    for (uint8 i = 0; i <= GetSpellMaxIndex(); ++i)
-        if (spellID == GetSpell(i))
+    for (uint8 i = 0; i <= const_cast<Creature*>(this)->GetSpellMaxIndex(); ++i)
+        if (spellID == const_cast<Creature*>(this)->GetSpell(i))
             return true;
     return false;
 }
@@ -2637,7 +2634,6 @@ void Creature::SetWalk(bool enable, bool asDefault)
         SendMessageToSet(&data, true);
     }
 }
-}
 
 void Creature::SetLevitate(bool enable, float altitude)
 {
@@ -2654,7 +2650,7 @@ void Creature::SetLevitate(bool enable, float altitude)
 
     if (IsInWorld())
     {
-    WorldPacket data(enable ? SMSG_SPLINE_MOVE_GRAVITY_DISABLE : SMSG_SPLINE_MOVE_GRAVITY_ENABLE, 9);
+        WorldPacket data(enable ? SMSG_SPLINE_MOVE_GRAVITY_DISABLE : SMSG_SPLINE_MOVE_GRAVITY_ENABLE, 9);
         if (enable)
         {
             data.WriteGuidMask<7, 3, 4, 2, 5, 1, 0, 6>(GetObjectGuid());
@@ -2690,8 +2686,8 @@ void Creature::SetRoot(bool enable)
             data.WriteGuidMask<0, 1, 6, 5, 3, 2, 7, 4>(GetObjectGuid());
             data.WriteGuidBytes<6, 3, 1, 5, 2, 0, 7, 4>(GetObjectGuid());
         }
-
-    SendMessageToSet(&data, true);
+        SendMessageToSet(&data, true);
+    }
 }
 
 Unit* Creature::SelectPreferredTargetForSpell(SpellEntry const* spellInfo)
@@ -2783,18 +2779,6 @@ Unit* Creature::SelectPreferredTargetForSpell(SpellEntry const* spellInfo)
     }
 
     return target;
-}
-
-void Creature::SetRoot(bool enable)
-{
-    if (enable)
-        m_movementInfo.AddMovementFlag(MOVEFLAG_ROOT);
-    else
-        m_movementInfo.RemoveMovementFlag(MOVEFLAG_ROOT);
-
-    WorldPacket data(enable ? SMSG_SPLINE_MOVE_ROOT : SMSG_SPLINE_MOVE_UNROOT, 9);
-    data << GetPackGUID();
-    SendMessageToSet(&data, true);
 }
 
 void Creature::SetWaterWalk(bool enable)

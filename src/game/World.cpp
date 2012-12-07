@@ -1992,13 +1992,6 @@ void World::SendServerMessage(ServerMessageType type, const char* text /*=""*/, 
         SendGlobalMessage(&data);
 }
 
-/// Sends a server message to the specified or all players
-void World::SendServerMessage(ServerMessageType type, const char* text /*=""*/, Player* player /*= NULL*/)
-{
-    WorldPacket data(SMSG_SERVER_MESSAGE, 50);              // guess size
-    data << uint32(type);
-    data << text;
-
 /// Sends a zone under attack message to all players not in an instance
 void World::SendZoneUnderAttackMessage(uint32 zoneId, Team team)
 {
@@ -2032,47 +2025,6 @@ void World::SendDefenseMessage(uint32 zoneId, int32 textId)
                 itr->second->GetPlayer()->IsInWorld() &&
                 !itr->second->GetPlayer()->GetMap()->Instanceable())
         {
-            char const* message = itr->second->GetMangosString(textId);
-            uint32 messageLength = strlen(message) + 1;
-
-            WorldPacket data(SMSG_DEFENSE_MESSAGE, 4 + 4 + messageLength);
-            data << uint32(zoneId);
-            data << uint32(messageLength);
-            data << message;
-            itr->second->SendPacket(&data);
-        }
-    }
-}
-
-/// Sends a zone under attack message to all players not in an instance
-void World::SendZoneUnderAttackMessage(uint32 zoneId, Team team)
-{
-    WorldPacket data(SMSG_ZONE_UNDER_ATTACK, 4);
-    data << uint32(zoneId);
-
-    for (SessionMap::const_iterator itr = m_sessions.begin(); itr != m_sessions.end(); ++itr)
-    {
-        if (itr->second &&
-            itr->second->GetPlayer() &&
-            itr->second->GetPlayer()->IsInWorld() &&
-                itr->second->GetPlayer()->GetTeam() == team &&
-                !itr->second->GetPlayer()->GetMap()->Instanceable())
-        {
-            itr->second->SendPacket(&data);
-        }
-    }
-}
-
-/// Sends a world defense message to all players not in an instance
-void World::SendDefenseMessage(uint32 zoneId, int32 textId)
-{
-    for (SessionMap::const_iterator itr = m_sessions.begin(); itr != m_sessions.end(); ++itr)
-    {
-        if (itr->second &&
-                itr->second->GetPlayer() &&
-                itr->second->GetPlayer()->IsInWorld() &&
-                !itr->second->GetPlayer()->GetMap()->Instanceable())
-{
             char const* message = itr->second->GetMangosString(textId);
             uint32 messageLength = strlen(message) + 1;
 

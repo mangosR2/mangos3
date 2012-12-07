@@ -141,11 +141,13 @@ void BattleGroundSA::StartShips()
             Player* p = sObjectMgr.GetPlayer(itr->first);
             if (p)
             {
-                UpdateData data;
+
+                UpdateData data(GetMapId());
                 WorldPacket pkt;
                 GetBGObject(i)->BuildValuesUpdateBlockForPlayer(&data, p);
                 data.BuildPacket(&pkt);
                 p->GetSession()->SendPacket(&pkt);
+
             }
         }
     }
@@ -1108,6 +1110,7 @@ void BattleGroundSA::SendTransportInit(Player *player)
 {
     if (GetBGObject(BG_SA_BOAT_ONE) || GetBGObject(BG_SA_BOAT_TWO))
     {
+/*
         UpdateData transData;
         if (GetBGObject(BG_SA_BOAT_ONE))
             GetBGObject(BG_SA_BOAT_ONE)->BuildCreateUpdateBlockForPlayer(&transData, player);
@@ -1116,6 +1119,7 @@ void BattleGroundSA::SendTransportInit(Player *player)
         WorldPacket packet;
         transData.BuildPacket(&packet);
         player->GetSession()->SendPacket(&packet);
+        */
     }
 }
 
@@ -1123,6 +1127,7 @@ void BattleGroundSA::SendTransportsRemove(Player * player)
 {
     if (GetBGObject(BG_SA_BOAT_ONE) || GetBGObject(BG_SA_BOAT_TWO))
     {
+/*
         UpdateData transData;
         if (GetBGObject(BG_SA_BOAT_ONE))
             GetBGObject(BG_SA_BOAT_ONE)->BuildOutOfRangeUpdateBlock(&transData);
@@ -1131,6 +1136,7 @@ void BattleGroundSA::SendTransportsRemove(Player * player)
         WorldPacket packet;
         transData.BuildPacket(&packet);
         player->GetSession()->SendPacket(&packet);
+        */
     }
 }
 

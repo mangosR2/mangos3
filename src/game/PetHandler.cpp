@@ -482,9 +482,7 @@ void WorldSession::HandlePetCastSpellOpcode(WorldPacket& recvPacket)
     SpellCastTargets targets;
     recvPacket >> targets.ReadForCaster(pet);
 
-    // some spell cast packet including more data (for projectiles?)
-    if (unk_flags & 0x02)
-        targets.ReadAdditionalData(recvPacket);
+    targets.ReadAdditionalData(recvPacket, cast_flags);
 
     SpellEntry const* spellInfo = sSpellStore.LookupEntry(spellid);
     if (!spellInfo)

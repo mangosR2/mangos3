@@ -88,6 +88,8 @@ struct PackedGuidReader
     ObjectGuid* m_guidPtr;
 };
 
+#define NUM_GUID_BYTES sizeof(uint64)
+
 class MANGOS_DLL_SPEC ObjectGuid
 {
     public:                                                 // constructors
@@ -178,6 +180,28 @@ class MANGOS_DLL_SPEC ObjectGuid
         bool operator!= (ObjectGuid const& guid) const { return GetRawValue() != guid.GetRawValue(); }
         bool operator< (ObjectGuid const& guid) const { return GetRawValue() < guid.GetRawValue(); }
 
+        uint8& operator[] (uint8 index)
+        {
+            MANGOS_ASSERT(index < NUM_GUID_BYTES);
+
+#if MANGOS_ENDIAN == MANGOS_LITTLEENDIAN
+            return m_guidBytes[index];
+#else
+            return m_guidBytes[NUM_GUID_BYTES - 1 - index];
+#endif
+        }
+
+        uint8 const& operator[] (uint8 index) const
+        {
+            MANGOS_ASSERT(index < NUM_GUID_BYTES);
+
+#if MANGOS_ENDIAN == MANGOS_LITTLEENDIAN
+            return m_guidBytes[index];
+#else
+            return m_guidBytes[NUM_GUID_BYTES - 1 - index];
+#endif
+        }
+
     public:                                                 // accessors - for debug
         static char const* GetTypeName(HighGuid high);
         char const* GetTypeName() const { return !IsEmpty() ? GetTypeName(GetHigh()) : "None"; }
@@ -206,8 +230,25 @@ class MANGOS_DLL_SPEC ObjectGuid
             }
         }
 
+        static bool IsLargeHigh(HighGuid high)
+        {
+            switch(high)
+            {
+                case HIGHGUID_GUILD:
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
+        bool IsLargeHigh() const { return IsLargeHigh(GetHigh()); }
+
     private:                                                // fields
-        uint64 m_guid;
+        union
+        {
+            uint64 m_guid;
+            uint8 m_guidBytes[NUM_GUID_BYTES];
+        };
 
     public:
         bool HasEntry() const { return HasEntry(GetHigh()); }

@@ -548,3 +548,20 @@ void hexEncodeByteArray(uint8* bytes, uint32 arrayLen, std::string& result)
     }
     result = ss.str();
 }
+
+uint32 GetUInt32ValueFromArray(Tokens const& data, uint16 index)
+{
+    if (index >= data.size())
+        return 0;
+
+    return (uint32)atoi(data[index]);
+}
+
+float GetFloatValueFromArray(Tokens const& data, uint16 index)
+{
+    float result;
+    uint32 temp = GetUInt32ValueFromArray(data, index);
+    memcpy(&result, &temp, sizeof(result));
+
+    return result;
+}

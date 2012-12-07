@@ -1170,10 +1170,10 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
                     buf += GetMaster()->GetName();
                     buf += ".";
                     SendWhisper(buf, *inviter);
-                    m_bot->GetSession()->HandleGroupDeclineOpcode(p); // packet not used
+                    //m_bot->GetSession()->HandleGroupDeclineOpcode(p); // packet not used
                 }
-                else
-                    m_bot->GetSession()->HandleGroupAcceptOpcode(p);  // packet not used
+//                else
+//                    m_bot->GetSession()->HandleGroupAcceptOpcode(p);  // packet not used
             }
             return;
         }
@@ -3805,17 +3805,17 @@ bool PlayerbotAI::HasTool(uint32 TC)
     {
         case TC_MINING_PICK:
 
-            if (m_bot->HasItemTotemCategory(TC))
-                return true;
-            else
+//            if (m_bot->HasItemTotemCategory(TC))
+//                return true;
+//            else
                 out << "|cffffffffI do not have a pick!";
             break;
 
         case TC_SKINNING_KNIFE:
 
-            if (m_bot->HasItemTotemCategory(TC))
-                return true;
-            else
+//            if (m_bot->HasItemTotemCategory(TC))
+//                return true;
+//            else
                 out << "|cffffffffI do not have a skinning knife!";
             break;
         default:
@@ -4804,11 +4804,13 @@ void PlayerbotAI::HandleTeleportAck()
     m_bot->GetMotionMaster()->Clear(true);
     if (m_bot->IsBeingTeleportedNear())
     {
+/*
         WorldPacket p = WorldPacket(MSG_MOVE_TELEPORT_ACK, 8 + 4 + 4);
         p.appendPackGUID(m_bot->GetObjectGuid());
         p << (uint32) 0; // supposed to be flags? not used currently
         p << (uint32) time(0); // time - not currently used
         m_bot->GetSession()->HandleMoveTeleportAckOpcode(p);
+        */
     }
     else if (m_bot->IsBeingTeleportedFar())
         m_bot->GetSession()->HandleMoveWorldportAckOpcode();
@@ -6433,18 +6435,19 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
                         data << ObjectGuid(fromPlayer.GetSelectionGuid());
                         data << uint32(0xB3);                                   // index from SpellVisualKit.dbc
                         GetMaster()->GetSession()->SendPacket(&data);
-
+/*
                         data.Initialize(SMSG_PLAY_SPELL_IMPACT, 12);            // visual effect on player
                         data << m_bot->GetObjectGuid();
                         data << uint32(0x016A);                                 // index from SpellVisualKit.dbc
                         GetMaster()->GetSession()->SendPacket(&data);
+                        */
                     }
-
+/*
                     WorldPacket data(SMSG_TRAINER_BUY_SUCCEEDED, 12);
                     data << ObjectGuid(fromPlayer.GetSelectionGuid());
                     data << uint32(spellId);                                // should be same as in packet from client
                     GetMaster()->GetSession()->SendPacket(&data);
-
+*/
                     MakeSpellLink(pSpellInfo, msg);
                     uint32 gold = uint32(cost / 10000);
                     cost -= (gold * 10000);

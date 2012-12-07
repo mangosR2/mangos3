@@ -476,9 +476,8 @@ Unit::Unit() :
     m_charmInfo(NULL),
     i_motionMaster(this),
     m_ThreatManager(this),
-    m_stateMgr(this)
-    m_vehicleInfo(NULL),
-    m_HostileRefManager(this)
+    m_stateMgr(this),
+    m_HostileRefManager(new HostileRefManager(this))
 {
     m_objectType |= TYPEMASK_UNIT;
     m_objectTypeId = TYPEID_UNIT;
@@ -1890,11 +1889,12 @@ void Unit::CalculateSpellDamage(DamageInfo* damageInfo, float DamageMultiplier)
                 uint32 reduction_affected_damage = sWorld.getConfig(CONFIG_BOOL_RESILENCE_ALTERNATIVE_CALCULATION) ?
                                                    damageInfo->damage :
                                                    CalcNotIgnoreDamageReduction(damageInfo);
+/*
                 uint32 damageCritReduction = (damageInfo->attackType != RANGED_ATTACK) ?
                                                 damageInfo->target->GetMeleeCritDamageReduction(reduction_affected_damage) :
                                                 damageInfo->target->GetRangedCritDamageReduction(reduction_affected_damage);
 
-                damageInfo->damage -= damageCritReduction;
+                damageInfo->damage -= damageCritReduction;*/
             }
             else
             {
@@ -1919,11 +1919,11 @@ void Unit::CalculateSpellDamage(DamageInfo* damageInfo, float DamageMultiplier)
                 damageInfo->damage = SpellCriticalDamageBonus(damageInfo->GetSpellProto(), damageInfo->damage, damageInfo->target);
 
                 // Resilience - reduce crit damage (full or reduced)
-                uint32 reduction_affected_damage = sWorld.getConfig(CONFIG_BOOL_RESILENCE_ALTERNATIVE_CALCULATION) ?
+/*                uint32 reduction_affected_damage = sWorld.getConfig(CONFIG_BOOL_RESILENCE_ALTERNATIVE_CALCULATION) ?
                                                    damageInfo->damage :
                                                    CalcNotIgnoreDamageReduction(damageInfo);
 
-                damageInfo->damage -= damageInfo->target->GetSpellCritDamageReduction(reduction_affected_damage);
+                damageInfo->damage -= damageInfo->target->GetSpellCritDamageReduction(reduction_affected_damage);*/
             }
             else
             {
@@ -1940,7 +1940,7 @@ void Unit::CalculateSpellDamage(DamageInfo* damageInfo, float DamageMultiplier)
     uint32 reduction_affected_damage = sWorld.getConfig(CONFIG_BOOL_RESILENCE_ALTERNATIVE_CALCULATION) ?
                                        damageInfo->damage :
                                        CalcNotIgnoreDamageReduction(damageInfo);
-    damageInfo->damage -= damageInfo->target->GetSpellDamageReduction(reduction_affected_damage);
+//    damageInfo->damage -= damageInfo->target->GetSpellDamageReduction(reduction_affected_damage);
 
     // damage mitigation
     if (damageInfo->damage > 0)
@@ -2109,11 +2109,12 @@ void Unit::CalculateMeleeDamage(DamageInfo* damageInfo)
             // Resilience - reduce crit damage
             uint32 reduction_affected_damage = CalcNotIgnoreDamageReduction(damageInfo);
             uint32 resilienceReduction;
+/*
             if (damageInfo->attackType != RANGED_ATTACK)
                 resilienceReduction = pVictim->GetMeleeCritDamageReduction(reduction_affected_damage);
             else
                 resilienceReduction = pVictim->GetRangedCritDamageReduction(reduction_affected_damage);
-
+*/
             damageInfo->damage      -= resilienceReduction;
             damageInfo->cleanDamage += resilienceReduction;
             break;
@@ -2231,11 +2232,13 @@ void Unit::CalculateMeleeDamage(DamageInfo* damageInfo)
     if (damageInfo->damage > 0 && (GetTypeId() == TYPEID_PLAYER || (GetObjectGuid().IsPet() && GetOwner() && GetOwner()->GetTypeId() == TYPEID_PLAYER)))
     {
         uint32 reduction_affected_damage = CalcNotIgnoreDamageReduction(damageInfo);
-        uint32 resilienceReduction;
+        uint32 resilienceReduction = reduction_affected_damage;
+/*
         if (damageInfo->attackType != RANGED_ATTACK)
             resilienceReduction = pVictim->GetMeleeDamageReduction(reduction_affected_damage);
         else
             resilienceReduction = pVictim->GetRangedDamageReduction(reduction_affected_damage);
+*/
         damageInfo->damage      -= resilienceReduction;
         damageInfo->cleanDamage += resilienceReduction;
     }
@@ -7605,7 +7608,7 @@ void Unit::SetOwnerGuid(ObjectGuid ownerGuid)
 
     SetFieldNotifyFlag(UF_FLAG_OWNER);
 
-    UpdateData data;
+    UpdateData data(pPlayer->GetMapId());
     WorldPacket packet;
     BuildValuesUpdateBlockForPlayer(&data, pPlayer);
     data.BuildPacket(&packet);
@@ -8219,7 +8222,7 @@ void Unit::SpellDamageBonusDone(DamageInfo* damageInfo, uint32 stack)
                     // CF_WARLOCK_LIFE_TAP, CF_WARLOCK_SLOWING_CURSES, CF_WARLOCK_MISC_DEBUFFS, CF_WARLOCK_SIPHON_LIFE, CF_WARLOCK_CURSE_OF_DOOM,
                     // CF_WARLOCK_HOWL_OF_TERROR, CF_WARLOCK_SEED_OF_CORRUPTION1, CF_WARLOCK_UNSTABLE_AFFLICTION, CF_WARLOCK_CURSE_OF_THE_ELEMENTS,
                     // CF_WARLOCK_FEAR, CF_WARLOCK_HAUNT
-                    if (m_spell->SpellFamilyName != SPELLFAMILY_WARLOCK || !(m_spell->GetSpellFamilyFlags() & UI64LIT(0x0004071B8044C402)))
+                    if (m_spell->GetSpellFamilyName() != SPELLFAMILY_WARLOCK || !(m_spell->GetSpellFamilyFlags() & UI64LIT(0x0004071B8044C402)))
                         continue;
 
                     modPercent += stepPercent * itr->second->GetStackAmount();
@@ -8304,8 +8307,6 @@ void Unit::SpellDamageBonusDone(DamageInfo* damageInfo, uint32 stack)
     }
 
     SpellClassOptionsEntry const* classOptions = damageInfo->GetSpellProto()->GetSpellClassOptions();
-
-    SpellClassOptionsEntry const* classOptions = spellProto->GetSpellClassOptions();
 
      // Custom scripted damage
     switch(damageInfo->GetSpellProto()->GetSpellFamilyName())
@@ -11064,8 +11065,24 @@ int32 Unit::CalculateSpellDamage(Unit const* target, SpellEntry const* spellProt
         return 0;
 
     Player* unitPlayer = (GetTypeId() == TYPEID_PLAYER) ? (Player*)this : NULL;
+    uint32 level = getLevel();
 
-    uint8 comboPoints = GetComboPoints();
+    // calculate basepoints dependent on mastery
+    if (unitPlayer && spellProto->HasAttribute(SPELL_ATTR_EX8_MASTERY) && !spellProto->CalculateSimpleValue(effect_index))
+    {
+        if (int32 masteryCoef = GetMasteryCoefficient(spellProto))
+            return int32(GetFloatValue(PLAYER_MASTERY) * masteryCoef / 100.0f);
+    }
+
+    // calculate basepoints for armor specialization spells
+    if (unitPlayer && spellProto->HasAttribute(SPELL_ATTR_EX8_ARMOR_SPECIALIZATION))
+    {
+        // check spells not valid for current talent tree or insufficient equipped items
+        if (!unitPlayer->FitArmorSpecializationRules(spellProto))
+            return 0;
+    }
+
+    uint8 comboPoints = unitPlayer ? unitPlayer->GetComboPoints() : 0;
 
     int32 basePoints = 0;
     uint32 spellLevel = 0;
@@ -11073,28 +11090,36 @@ int32 Unit::CalculateSpellDamage(Unit const* target, SpellEntry const* spellProt
 
     SpellScalingEntry const* scalingEntry = spellProto->GetSpellScaling();
     GtSpellScalingEntry const* gtScalingEntry = NULL;
-    if (scalingEntry)
+    if (scalingEntry && scalingEntry->IsScalableEffect(effect_index))
     {
-        uint32 gtSpellScalingId = getLevel() - 1;
+        if (target && IsAuraApplyEffect(spellProto, effect_index) && IsPositiveEffect(spellProto, effect_index))
+            level = target->getLevel();
+
+        uint32 gtSpellScalingId = level - 1;
         if (scalingEntry->playerClass == -1)
-            gtSpellScalingId += 11 * 100;
+            gtSpellScalingId += (MAX_CLASSES - 1) * GT_MAX_LEVEL;
         else
-            gtSpellScalingId += (scalingEntry->playerClass - 1) * 100;
+            gtSpellScalingId += (scalingEntry->playerClass - 1) * GT_MAX_LEVEL;
 
         gtScalingEntry = sGtSpellScalingStore.LookupEntry(gtSpellScalingId);
     }
 
     if (gtScalingEntry)
     {
-        basePoints = int32(scalingEntry->coeff1[effect_index] * gtScalingEntry->value);
-        int32 randomPoints = int32(scalingEntry->coeff1[effect_index] * gtScalingEntry->value * scalingEntry->coeff2[effect_index]);
+        float scale = gtScalingEntry->value;
+        if (scalingEntry->castTimeMax > 0 && scalingEntry->castScalingMaxLevel > level)
+            scale *= float(scalingEntry->castTimeMin + float(level - 1) * (scalingEntry->castTimeMax - scalingEntry->castTimeMin) / (scalingEntry->castScalingMaxLevel - 1)) / float(scalingEntry->castTimeMax);
+        if (scalingEntry->coefLevelBase > level)
+            scale *= (1.0f - scalingEntry->coefBase) * (level - 1) / (scalingEntry->coefLevelBase - 1) + scalingEntry->coefBase;
+
+        basePoints = int32(scalingEntry->coeff1[effect_index] * scale);
+        int32 randomPoints = int32(scalingEntry->coeff1[effect_index] * scale * scalingEntry->coeff2[effect_index]);
         basePoints += irand(-randomPoints, randomPoints) / 2;
-        comboDamage = uint32(scalingEntry->coeff3[effect_index] * gtScalingEntry->value);
+        comboDamage = uint32(scalingEntry->coeff3[effect_index] * scale);
     }
     else
     {
         spellLevel = spellProto->GetSpellLevel();
-        uint32 level = getLevel();
         uint32 maxLevel = spellProto->GetMaxLevel();
         uint32 baseLevel = spellProto->GetBaseLevel();
 
@@ -11108,46 +11133,36 @@ int32 Unit::CalculateSpellDamage(Unit const* target, SpellEntry const* spellProt
         basePoints += int32(level * basePointsPerLevel);
         int32 randomPoints = int32(spellEffect->EffectDieSides);
         comboDamage = spellEffect->EffectPointsPerComboPoint;
-    }
 
-    switch(randomPoints)
-    {
-        case 0:                                             // not used
-        case 1: basePoints += 1; break;                     // range 1..1
-        default:
+        switch (randomPoints)
         {
-            // range can have positive (1..rand) and negative (rand..1) values, so order its for irand
-            int32 randvalue = (randomPoints >= 1)
-                ? irand(1, randomPoints)
-                : irand(randomPoints, 1);
+            case 0:                                             // not used
+            case 1: basePoints += 1; break;                     // range 1..1
+            default:
+            {
+                // range can have positive (1..rand) and negative (rand..1) values, so order its for irand
+                int32 randvalue = (randomPoints >= 1)
+                                  ? irand(1, randomPoints)
+                                  : irand(randomPoints, 1);
 
-            basePoints += randvalue;
-            break;
+                basePoints += randvalue;
+                break;
+            }
         }
-    }
     }
 
     int32 value = basePoints;
-
-    // Life Burst (Malygos) hack
-    if (spellProto->Id == 57143)
-    {
-        value /= 2;
-        comboDamage = value;
-    }
 
     // random damage
     if (comboDamage != 0 && unitPlayer &&
         (target && target->GetObjectGuid() == unitPlayer->GetComboTargetGuid() || spellProto->HasAttribute(SPELL_ATTR_EX8_IGNORE_TARGET_FOR_COMBO_POINTS)))
         value += (int32)(comboDamage * comboPoints);
 
-    Player* modOwner = GetSpellModOwner();
-
-    if (modOwner && IsSpellAffectedBySpellMods(spellProto))
+    if (Player* modOwner = GetSpellModOwner())
     {
         modOwner->ApplySpellMod(spellProto->Id, SPELLMOD_ALL_EFFECTS, value);
 
-        switch(effect_index)
+        switch (effect_index)
         {
             case EFFECT_INDEX_0:
                 modOwner->ApplySpellMod(spellProto->Id, SPELLMOD_EFFECT1, value);
@@ -11158,8 +11173,6 @@ int32 Unit::CalculateSpellDamage(Unit const* target, SpellEntry const* spellProt
             case EFFECT_INDEX_2:
                 modOwner->ApplySpellMod(spellProto->Id, SPELLMOD_EFFECT3, value);
                 break;
-            default:
-                break;
         }
     }
 
@@ -11167,7 +11180,7 @@ int32 Unit::CalculateSpellDamage(Unit const* target, SpellEntry const* spellProt
             spellEffect->Effect != SPELL_EFFECT_WEAPON_PERCENT_DAMAGE &&
             spellEffect->Effect != SPELL_EFFECT_KNOCK_BACK &&
             (spellEffect->Effect != SPELL_EFFECT_APPLY_AURA || spellEffect->EffectApplyAuraName != SPELL_AURA_MOD_DECREASE_SPEED))
-        value = int32(value*0.25f*exp(getLevel()*(70-spellLevel)/1000.0f));
+        value = int32(value * 0.25f * exp(level * (70 - spellLevel) / 1000.0f));
 
     return value;
 }
@@ -11207,8 +11220,8 @@ int32 Unit::CalculateAuraDuration(SpellEntry const* spellProto, uint32 effectMas
     if (isAffectedByModifier)
     {
         // This aura modifiers possible stacks. need more research (/dev/rsa)
-        dispelMod   = GetTotalAuraModifierByMiscValue(SPELL_AURA_MOD_DURATION_OF_EFFECTS_BY_DISPEL, spellProto->Dispel);
-        dmgClassMod = GetTotalAuraModifierByMiscValue(SPELL_AURA_MOD_DURATION_OF_MAGIC_EFFECTS,     spellProto->Dispel);
+        dispelMod   = GetTotalAuraModifierByMiscValue(SPELL_AURA_MOD_DURATION_OF_EFFECTS_BY_DISPEL, spellProto->GetDispel());
+        dmgClassMod = GetTotalAuraModifierByMiscValue(SPELL_AURA_MOD_DURATION_OF_MAGIC_EFFECTS,     spellProto->GetDispel());
     }
 
     int32 durationMod = std::min(mechanicMod, std::min(dispelMod, dmgClassMod));
@@ -14596,13 +14609,14 @@ void Unit::SendSpellDamageImmune(Unit* target, uint32 spellId)
 {
     if (!target)
         return;
-
+/*
     WorldPacket data(SMSG_SPELLORDAMAGE_IMMUNE, 8+8+4+1);
     data << GetObjectGuid();
     data << target->GetObjectGuid();
     data << uint32(spellId);
     data << uint8(0);                 // bool - log format: 0-default, 1-debug
     SendMessageToSet(&data, true);
+*/
 }
 
 void DamageInfo::Reset(uint32 _damage)

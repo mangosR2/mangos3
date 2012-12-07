@@ -560,17 +560,6 @@ void WorldSession::HandleCharDeleteOpcode(WorldPacket& recv_data)
 
 void WorldSession::HandlePlayerLoginOpcode(WorldPacket& recv_data)
 {
-    ObjectGuid playerGuid;
-    recv_data >> playerGuid;
-
-    // check if character is currently a playerbot, if so then logout
-    Player *checkChar = sObjectMgr.GetPlayer(playerGuid);
-    if (checkChar && checkChar->GetPlayerbotAI())
-    {
-        checkChar->GetPlayerbotAI()->GetManager()->LogoutPlayerBot(playerGuid);
-        --checkChar->GetPlayerbotAI()->GetManager()->m_botCount;
-    }
-
     if (PlayerLoading() || GetPlayer() != NULL)
     {
         sLog.outError("Player tryes to login again, AccountId = %d", GetAccountId());
@@ -585,6 +574,14 @@ void WorldSession::HandlePlayerLoginOpcode(WorldPacket& recv_data)
     recv_data.ReadGuidBytes<2, 7, 0, 3, 5, 6, 1, 4>(playerGuid);
 
     DEBUG_LOG("WORLD: Recvd Player Logon Message from %s", playerGuid.GetString().c_str());
+
+    // check if character is currently a playerbot, if so then logout
+    Player *checkChar = sObjectMgr.GetPlayer(playerGuid);
+    if (checkChar && checkChar->GetPlayerbotAI())
+    {
+        checkChar->GetPlayerbotAI()->GetManager()->LogoutPlayerBot(playerGuid);
+        --checkChar->GetPlayerbotAI()->GetManager()->m_botCount;
+    }
 
     LoginQueryHolder* holder = new LoginQueryHolder(GetAccountId(), playerGuid);
     if (!holder->Initialize())

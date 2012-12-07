@@ -168,12 +168,9 @@ void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
     recvPacket >> targets.ReadForCaster(pUser);
 
     // some spell cast packet including more data (for projectiles?)
-    if (unk_flags & 0x02)
-        targets.ReadAdditionalData(recvPacket);
+    targets.ReadAdditionalData(recvPacket, cast_flags);
 
     targets.Update(pUser);
-
-    targets.ReadAdditionalData(recvPacket, cast_flags);
 
     if (!pItem->IsTargetValidForItemUse(targets.getUnitTarget()))
     {

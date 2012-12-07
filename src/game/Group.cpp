@@ -29,6 +29,7 @@
 #include "Formulas.h"
 #include "ObjectAccessor.h"
 #include "BattleGround/BattleGround.h"
+#include "BattleGround/BattleGroundMgr.h"
 #include "MapManager.h"
 #include "MapPersistentStateMgr.h"
 #include "Util.h"
@@ -369,7 +370,7 @@ bool Group::AddMember(ObjectGuid guid, const char* name)
         // Broadcast new player group member fields to rest of the group
         player->SetFieldNotifyFlag(UF_FLAG_PARTY_MEMBER);
 
-        UpdateData data;
+        UpdateData data(player->GetMapId());
         WorldPacket packet;
 
         // Broadcast group members' fields to player
@@ -389,7 +390,7 @@ bool Group::AddMember(ObjectGuid guid, const char* name)
 
                 if (member->HaveAtClient(player))
                 {
-                    UpdateData mdata;
+                    UpdateData mdata(player->GetMapId());
                     WorldPacket mpacket;
                     player->BuildValuesUpdateBlockForPlayer(&mdata, member);
                     if (mdata.HasData())

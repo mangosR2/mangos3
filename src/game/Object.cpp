@@ -1158,7 +1158,14 @@ void Object::BuildUpdateDataForPlayer(Player* player, UpdateDataMapType& update_
     if (!player)
         return;
 
-    UpdateData& data = update_players[player->GetObjectGuid()];
+    UpdateDataMapType::iterator iter = update_players.find(player->GetObjectGuid());
+    if (iter == update_players.end())
+    {
+        update_players.insert(UpdateDataMapType::value_type(player->GetObjectGuid(), UpdateData(player->GetMapId())));
+        iter = update_players.find(player->GetObjectGuid());
+    }
+
+    UpdateData& data = iter->second;
 
     BuildValuesUpdateBlockForPlayer(&data, player);
 }
@@ -1193,10 +1200,10 @@ void Object::MarkForClientUpdate()
     }
 }
 
-WorldObject::WorldObject() :
-    m_transportInfo(NULL), m_currMap(NULL),
-    m_mapId(0), m_InstanceId(0), m_phaseMask(PHASEMASK_NORMAL),
-    m_isActiveObject(false)
+WorldObject::WorldObject()
+    : m_groupLootTimer(0), m_groupLootId(0), m_lootGroupRecipientId(0), m_transportInfo(NULL),
+    m_currMap(NULL), m_position(WorldLocation()), m_phaseMask(PHASEMASK_NORMAL), m_viewPoint(*this), m_isActiveObject(false),
+    m_LastUpdateTime(WorldTimer::getMSTime())
 {
 }
 
