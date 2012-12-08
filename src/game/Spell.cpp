@@ -8649,18 +8649,16 @@ bool Spell::FillCustomTargetMap(SpellEffectIndex i, UnitList &targetUnitMap)
             break;
         }
         case 62166: // Stone Grip (Kologarn)
-        case 63981: // Stone Grip (Kologarn)
+        case 63981: // Stone Grip (Kologarn) H
         {
+            FillAreaTargets(targetUnitMap, radius, PUSH_SELF_CENTER, SPELL_TARGETS_PLAYER);
             if (m_caster->getVictim())
-                targetUnitMap.push_back(m_caster->getVictim());
+                targetUnitMap.remove(m_caster->getVictim());
+
+            if (m_spellInfo->Id == 63981)
+                unMaxTargets = 3;
             else
-            {
-                FillAreaTargets(targetUnitMap, radius, PUSH_DEST_CENTER, SPELL_TARGETS_AOE_DAMAGE);
-                targetUnitMap.sort(TargetDistanceOrderNear(m_caster));
-                targetUnitMap.resize(1);
-            }
-            if (!targetUnitMap.empty())
-                return true;
+                unMaxTargets = 1;
             break;
         }
         case 62343: // Heat (remove all except active iron constructs)
