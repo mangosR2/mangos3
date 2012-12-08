@@ -245,6 +245,7 @@ enum SpellTargets
     SPELL_TARGETS_NOT_HOSTILE,
     SPELL_TARGETS_FRIENDLY,
     SPELL_TARGETS_AOE_DAMAGE,
+    SPELL_TARGETS_PLAYER,
     SPELL_TARGETS_ALL
 };
 
@@ -892,8 +893,12 @@ namespace MaNGOS
 
                         if (!itr->getSource()->IsVisibleTargetForSpell(i_originalCaster, i_spell.m_spellInfo, &i_center))
                             continue;
+                        break;
                     }
-                    break;
+                    case SPELL_TARGETS_PLAYER:
+                        if (itr->getSource()->GetTypeId() != TYPEID_PLAYER)
+                            continue;
+                        break;
                     case SPELL_TARGETS_ALL:
                         break;
                     default: continue;
