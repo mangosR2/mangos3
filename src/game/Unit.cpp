@@ -13224,7 +13224,7 @@ void Unit::ExitVehicle(bool forceDismount)
 
     if (vehicleBase->GetObjectGuid().IsAnyTypeCreature())
     {
-        if (!(vehicleBase->GetVehicleInfo()->m_flags & (VEHICLE_FLAG_NOT_DISMISS | VEHICLE_FLAG_ACCESSORY))
+        if (!vehicleBase->GetVehicle() && !(vehicleBase->GetVehicleInfo()->m_flags & VEHICLE_FLAG_NOT_DISMISS)
             && ((Creature*)vehicleBase)->IsTemporarySummon())
             dismiss = true;
     }
