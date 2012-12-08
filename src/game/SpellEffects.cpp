@@ -56,6 +56,7 @@
 #include "GridNotifiers.h"
 #include "GridNotifiersImpl.h"
 #include "CellImpl.h"
+#include "SQLStorages.h"
 
 pEffect SpellEffects[TOTAL_SPELL_EFFECTS]=
 {
