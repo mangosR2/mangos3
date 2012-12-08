@@ -4111,7 +4111,7 @@ void SpellMgr::LoadPetDefaultSpells()
                 if (mPetDefaultSpellsMap.find(cInfo->Entry) != mPetDefaultSpellsMap.end())
                     continue;
                 PetDefaultSpellsEntry petDefSpells;
-/*
+
                 CreatureSpellsList const* spellList = sObjectMgr.GetCreatureSpells(cInfo->Entry);
                 if (spellList && !spellList->empty())
                 {
@@ -4123,10 +4123,6 @@ void SpellMgr::LoadPetDefaultSpells()
                             petDefSpells.spellid[itr->first] = itr->second.spell;
                     }
                 }
-*/
-                if (CreatureTemplateSpells const* templateSpells = sCreatureTemplateSpellsStorage.LookupEntry<CreatureTemplateSpells>(cInfo->Entry))
-                    for (int j = 0; j < MAX_CREATURE_SPELL_DATA_SLOT; ++j)
-                        petDefSpells.spellid[j] = templateSpells->spells[j];
 
                 if (LoadPetDefaultSpells_helper(cInfo, petDefSpells))
                 {
@@ -5733,3 +5729,62 @@ int32 GetMasteryCoefficient(SpellEntry const * spellProto)
     return coef;
 }
 
+static char* SERVER_SIDE_SPELL      = "MaNGOS server-side spell";
+#define LOADED_SPELLDBC_FIELD_POS_EQUIPPED_ITEM_CLASS 0
+#define LOADED_SPELLDBC_FIELD_POS_SPELLNAME_0 0
+
+struct SQLSpellLoader : public SQLStorageLoaderBase<SQLSpellLoader, SQLHashStorage>
+{
+    template<class S, class D>
+    void default_fill(uint32 field_pos, S src, D &dst)
+    {
+        if (field_pos == LOADED_SPELLDBC_FIELD_POS_EQUIPPED_ITEM_CLASS)
+            dst = D(-1);
+        else
+            dst = D(src);
+    }
+
+    void default_fill_to_str(uint32 field_pos, char const* /*src*/, char * & dst)
+    {
+        if (field_pos == LOADED_SPELLDBC_FIELD_POS_SPELLNAME_0)
+        {
+            dst = SERVER_SIDE_SPELL;
+        }
+        else
+        {
+            dst = new char[1];
+            *dst = 0;
+        }
+    }
+};
+
+void SpellMgr::LoadSpellTemplate()
+{
+    SQLSpellLoader loader;
+    loader.Load(sSpellTemplate);
+
+    sLog.outString(">> Loaded %u spell definitions", sSpellTemplate.GetRecordCount());
+    sLog.outString();
+
+    for (uint32 i = 1; i < sSpellTemplate.GetMaxEntry(); ++i)
+    {
+        // check data correctness
+        SpellEntry const* spellEntry = sSpellTemplate.LookupEntry<SpellEntry>(i);
+        if (!spellEntry)
+            continue;
+
+        // insert serverside spell data
+        if (sSpellStore.GetNumRows() <= i)
+        {
+            sLog.outErrorDb("Loading Spell Template for spell %u, index out of bounds (max = %u)", i, sSpellStore.GetNumRows());
+            continue;
+        }
+        else if (/*SpellEntry const* originalSpellEntry = */sSpellStore.LookupEntry(i))
+        {
+            sLog.outErrorDb("Loading Spell Template for spell %u failed, index already handled (possible in spell_dbc)", i);
+            continue;
+        }
+        else
+            sSpellStore.InsertEntry(const_cast<SpellEntry*>(spellEntry), i);
+    }
+}

@@ -576,7 +576,7 @@ void Loot::FillNotNormalLootFor(Player* pl)
 
 QuestItemList* Loot::FillCurrencyLoot(Player* player)
 {
-    QuestItemList* ql = new QuestItemList();
+    QuestItemList* ql = &m_playerCurrencies[player->GetGUIDLow()];
 
     for (uint8 i = 0; i < items.size(); ++i)
     {
@@ -593,7 +593,6 @@ QuestItemList* Loot::FillCurrencyLoot(Player* player)
         return NULL;
     }
 
-    m_playerCurrencies[player->GetGUIDLow()] = ql;
     return ql;
 }
 
@@ -652,7 +651,7 @@ QuestItemList* Loot::FillQuestLoot(Player* player)
 
 QuestItemList* Loot::FillNonQuestNonFFANonCurrencyConditionalLoot(Player* player)
 {
-    QuestItemList* ql = &m_playerNonQuestNonFFAConditionalItems[player->GetGUIDLow()];
+    QuestItemList* ql = &m_playerNonQuestNonFFANonCurrencyConditionalItems[player->GetGUIDLow()];
 
     ql->clear();
 
@@ -660,20 +659,18 @@ QuestItemList* Loot::FillNonQuestNonFFANonCurrencyConditionalLoot(Player* player
     {
         LootItem& item = items[i];
         if (!item.is_looted && !item.freeforall && !item.currency && item.conditionId && item.AllowedForPlayer(player))
+        {
+            ql->push_back(QuestItem(i));
+            if (!item.is_counted)
             {
-                ql->push_back(QuestItem(i));
-                if (!item.is_counted)
-                {
-                    ++unlootedCount;
-                    item.is_counted = true;
-                }
+                ++unlootedCount;
+                item.is_counted = true;
             }
         }
     }
     if (ql->empty())
         return NULL;
 
-    m_playerNonQuestNonFFANonCurrencyConditionalItems[player->GetGUIDLow()] = ql;
     return ql;
 }
 
@@ -783,7 +780,7 @@ LootItem* Loot::LootItemInSlot(uint32 lootSlot, Player* player, QuestItem** qite
             QuestItemMap::const_iterator itr = m_playerCurrencies.find(player->GetGUIDLow());
             if (itr != m_playerCurrencies.end())
             {
-                for (QuestItemList::const_iterator iter = itr->second->begin(); iter != itr->second->end(); ++iter)
+                for (QuestItemList::const_iterator iter = itr->second.begin(); iter != itr->second.end(); ++iter)
                 {
                     if (iter->index == lootSlot)
                     {
@@ -957,8 +954,8 @@ ByteBuffer& operator<<(ByteBuffer& b, LootView const& lv)
     QuestItemMap::const_iterator currency_itr = lootPlayerCurrencies.find(lv.viewer->GetGUIDLow());
     if (currency_itr != lootPlayerCurrencies.end())
     {
-        QuestItemList* currency_list = currency_itr->second;
-        for (QuestItemList::const_iterator ci = currency_list->begin() ; ci != currency_list->end(); ++ci)
+        QuestItemList const& currency_list = currency_itr->second;
+        for (QuestItemList::const_iterator ci = currency_list.begin() ; ci != currency_list.end(); ++ci)
         {
             LootItem& item = l.items[ci->index];
             if (!ci->is_looted && !item.is_looted)

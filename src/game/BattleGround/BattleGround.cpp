@@ -533,30 +533,10 @@ void BattleGround::Update(uint32 diff)
             // remove preparation
             if (isArena())
             {
-                //TODO : add arena sound PlaySoundToAll(SOUND_ARENA_START);
-
-                // remove auras with duration lower than 30s and arena preparation
                 for (BattleGroundPlayerMap::const_iterator itr = m_Players.begin(); itr != m_Players.end(); ++itr)
                 {
-                    Player* plr = sObjectMgr.GetPlayer(itr->first);
-                    if (plr)
-                    {
-                        // BG Status packet
-                        WorldPacket status;
-                        BattleGroundQueueTypeId bgQueueTypeId = BattleGroundMgr::BGQueueTypeId(m_TypeID, GetArenaType());
-                        uint32 queueSlot = plr->GetBattleGroundQueueIndex(bgQueueTypeId);
-                        sBattleGroundMgr.BuildBattleGroundStatusPacket(&status, this, queueSlot, GetStatus(), 0, GetStartTime(), GetArenaType());
-                        plr->GetSession()->SendPacket(&status);
-
-                        plr->RemoveAurasDueToSpell(SPELL_ARENA_PREPARATION);
-                        plr->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_PLAY_ARENA, plr->GetMapId(), GetArenaType());
-                    }
-                }
-
-                //Announce Arena starting
-                if (sWorld.getConfig(CONFIG_BOOL_ARENA_QUEUE_ANNOUNCER_START))
-                {
-                    sWorld.SendWorldText(LANG_ARENA_STARTED_ANNOUNCE_WORLD, GetArenaType(), GetArenaType(), GetName());
+                    if (Player* player = sObjectMgr.GetPlayer(itr->first))
+                        player->RemoveAurasDueToSpell(SPELL_ARENA_PREPARATION);
                 }
 
                 CheckArenaWinConditions();
@@ -567,11 +547,8 @@ void BattleGround::Update(uint32 diff)
                 PlaySoundToAll(SOUND_BG_START);
 
                 for (BattleGroundPlayerMap::const_iterator itr = m_Players.begin(); itr != m_Players.end(); ++itr)
-                {
-                    Player* plr = sObjectMgr.GetPlayer(itr->first);
-                    if (plr)
+                    if (Player* plr = sObjectMgr.GetPlayer(itr->first))
                         plr->RemoveAurasDueToSpell(SPELL_PREPARATION);
-                }
                 // Announce BG starting
                 if (sWorld.getConfig(CONFIG_BOOL_BATTLEGROUND_QUEUE_ANNOUNCER_START))
                 {

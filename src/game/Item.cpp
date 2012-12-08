@@ -651,9 +651,9 @@ void Item::LoadLootFromDB(Field* fields)
     int32  item_propid = fields[4].GetInt32();
 
     // money value special case
-    if (!itemId)
+    if (item_id == 0)
     {
-        loot.gold = itemAmount;
+        loot.gold = item_amount;
         SetLootState(ITEM_LOOT_UNCHANGED);
         return;
     }
@@ -664,8 +664,8 @@ void Item::LoadLootFromDB(Field* fields)
         ItemPrototype const* proto = ObjectMgr::GetItemPrototype(item_id);
         if (!proto)
         {
-            DeleteLootFromDB(GetGUIDLow(), itemId);
-            sLog.outError("Item::LoadLootFromDB: %s has an unknown item (id: %u) in item_loot, deleted.", GetGuidStr().c_str(), itemId);
+            DeleteLootFromDB(GetGUIDLow(), item_id);
+            sLog.outError("Item::LoadLootFromDB: %s has an unknown item (id: %u) in item_loot, deleted.", GetGuidStr().c_str(), item_id);
             return;
         }
         loot.items.push_back(LootItem(item_id, type, item_amount, item_suffix, item_propid));

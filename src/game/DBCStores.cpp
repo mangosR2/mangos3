@@ -841,6 +841,7 @@ void LoadDBCStores(const std::string& dataPath)
             if (i == 315)
                (const_cast<TaxiNodesEntry*>(node))->MountCreatureID[1] = node->MountCreatureID[0];
         }
+    }
 
     LoadDBC(availableDbcLocales,bar,bad_dbc_files,sTotemCategoryStore,       dbcPath,"TotemCategory.dbc");
     LoadDBC(availableDbcLocales,bar,bad_dbc_files,sVehicleStore,             dbcPath,"Vehicle.dbc");

@@ -729,11 +729,6 @@ void Player::ApplyManaRegenBonus(int32 amount, bool apply)
     UpdateManaRegen();
 }
 
-void Player::ApplyHealthRegenBonus(int32 amount, bool apply)
-{
-    m_baseHealthRegen += apply ? amount : -amount;
-}
-
 void Player::UpdateManaRegen()
 {
     float base_regen = GetCreateMana() * 0.01f;
@@ -759,7 +754,8 @@ void Player::UpdateManaRegen()
     if (modManaRegenInterrupt > 100)
         modManaRegenInterrupt = 100;
 
-    SetStatFloatValue(UNIT_FIELD_POWER_REGEN_FLAT_MODIFIER, power_regen_mp5 + power_regen);
+    SetStatFloatValue(UNIT_FIELD_POWER_REGEN_INTERRUPTED_FLAT_MODIFIER, base_regen + power_regen_mp5 + spirit_regen * modManaRegenInterrupt / 100.0f);
+    SetStatFloatValue(UNIT_FIELD_POWER_REGEN_FLAT_MODIFIER, base_regen + 0.001f + power_regen_mp5 + spirit_regen);
 
     if (IsInWorld())
         CallForAllControlledUnits(ApplyScalingBonusWithHelper(SCALING_TARGET_POWERREGEN, 0, false),CONTROLLED_PET|CONTROLLED_GUARDIANS);
@@ -782,7 +778,7 @@ void Player::UpdateMasteryAuras()
 
     for (uint32 i = 0; i < masterySpells->size(); ++i)
     {
-        SpellAuraHolder* holder = GetSpellAuraHolder(masterySpells->at(i));
+        SpellAuraHolderPtr holder = GetSpellAuraHolder(masterySpells->at(i));
         if (!holder)
             continue;
 

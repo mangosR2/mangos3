@@ -371,6 +371,7 @@ enum BaseModGroup
     RANGED_CRIT_PERCENTAGE,
     OFFHAND_CRIT_PERCENTAGE,
     SHIELD_BLOCK_DAMAGE_VALUE,
+    NONSTACKING_CRIT_PERCENTAGE,
     BASEMOD_END
 };
 
@@ -2296,6 +2297,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
 
         uint32 m_reactiveTimer[MAX_REACTIVE];
         uint32 m_regenTimer;
+        uint32 m_lastManaUseTimer;
         uint32 m_holyPowerRegenTimer;
 
         // Frozen Mod

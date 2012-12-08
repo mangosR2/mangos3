@@ -179,7 +179,6 @@ bool TargetedMovementGeneratorMedium<T, D>::Update(T& owner, const uint32& time_
 
     bool targetMoved = false;
 
-    bool targetMoved = false;
     i_recheckDistance.Update(time_diff);
     if (i_recheckDistance.Passed())
     {

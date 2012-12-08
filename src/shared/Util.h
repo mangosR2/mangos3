@@ -42,8 +42,6 @@ std::string secsToTimeString(time_t timeInSecs, bool shortText = false, bool hou
 uint32 TimeStringToSecs(const std::string& timestring);
 std::string TimeToTimestampStr(time_t t);
 
-inline time_t timeBitFieldsToTimeStamp(uint32 bits)
-
 std::string MoneyToString(uint64 money);
 
 /* Return a random number in the range min..max; (max-min) must be smaller than 32768. */

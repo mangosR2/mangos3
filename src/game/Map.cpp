@@ -1373,21 +1373,6 @@ void DungeonMap::InitVisibilityDistance()
 }
 
 /*
-    Do map specific checks to see if the player can enter
-*/
-bool DungeonMap::CanEnter(Player *player)
-{
-    if(player->GetMapRef().getTarget() == this)
-    {
-        sLog.outError("DungeonMap::CanEnter - player %s(%u) already in map %d,%d,%d!", player->GetName(), player->GetGUIDLow(), GetId(), GetInstanceId(), GetSpawnMode());
-        MANGOS_ASSERT(false);
-        return false;
-    }
-
-    return Map::CanEnter(player);
-}
-
-/*
     Do map specific checks and add the player to the map if successful.
 */
 bool DungeonMap::Add(Player *player)

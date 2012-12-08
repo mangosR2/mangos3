@@ -1597,6 +1597,7 @@ class SpellMgr
         void LoadPetDefaultSpells();
         void LoadSpellAreas();
         void LoadSkillDiscoveryTable();
+        void LoadSpellTemplate();
         void LoadSpellDbc();
 
     private:

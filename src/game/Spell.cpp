@@ -971,7 +971,7 @@ void Spell::AddUnitTarget(Unit* pVictim, SpellEffectIndex effIndex)
         return;
 
     // Check for effect immune skip if immuned
-    bool immuned = pVictim->IsImmuneToSpellEffect(m_spellInfo, effIndex, pVictim == m_caster);
+    bool immuned = pVictim->IsImmuneToSpellEffect(m_spellInfo, effIndex);
 
     if (pVictim->GetTypeId() == TYPEID_UNIT && ((Creature*)pVictim)->IsTotem() && (m_spellFlags & SPELL_FLAG_REDIRECTED))
         immuned = false;
@@ -2771,8 +2771,6 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
                     if (Unit* pUnitTarget = m_caster->SelectMagnetTarget(target, this, effIndex))
                     {
                         if (target != pUnitTarget)
-                    {
-                        if (m_targets.getUnitTarget() != pUnitTarget)
                         {
                             m_targets.setUnitTarget(pUnitTarget);
                             m_spellFlags |= SPELL_FLAG_REDIRECTED;
@@ -6801,34 +6799,6 @@ SpellCastResult Spell::CheckCast(bool strict)
                     break;
 
                 if (expectedTarget->getPowerType() != POWER_MANA)
-                    return SPELL_FAILED_BAD_TARGETS;
-
-                break;
-            }
-            case SPELL_AURA_CONTROL_VEHICLE:
-            {
-                if (m_caster->HasAuraType(SPELL_AURA_MOUNTED))
-                    return SPELL_FAILED_NOT_MOUNTED;
-
-                Unit* pTarget = m_targets.getUnitTarget();
-
-                if (!pTarget->IsVehicle())
-                    return SPELL_FAILED_BAD_TARGETS;
-
-                // It is possible to change between vehicles that are boarded on each other
-                if (m_caster->IsBoarded() && m_caster->GetTransportInfo()->IsOnVehicle())
-                {
-                    // Check if trying to board a vehicle that is boarded on current transport
-                    bool boardedOnEachOther = m_caster->GetTransportInfo()->HasOnBoard(pTarget);
-                    // Check if trying to board a vehicle that has the current transport on board
-                    if (!boardedOnEachOther && pTarget->IsBoarded())
-                        boardedOnEachOther = pTarget->GetTransportInfo()->HasOnBoard(m_caster);
-
-                    if (!boardedOnEachOther)
-                        return SPELL_FAILED_NOT_ON_TRANSPORT;
-                }
-
-                if (!pTarget->GetVehicleInfo()->CanBoard(m_caster))
                     return SPELL_FAILED_BAD_TARGETS;
 
                 break;

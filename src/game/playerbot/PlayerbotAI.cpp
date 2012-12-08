@@ -2493,12 +2493,14 @@ void PlayerbotAI::DoLoot()
                         else
                             skillFailed = true;
                         break;
+/*
                     case SKILL_LOCKPICKING:
                         if (CastSpell(PICK_LOCK_1))
                             return;
                         else
                             skillFailed = true;
                         break;
+*/
                     case SKILL_NONE:
                         if (CastSpell(3365)) //Spell 3365 = Opening?
                             return;
@@ -2525,49 +2527,6 @@ void PlayerbotAI::DoLoot()
             skillFailed = true;
         }
 
-        if (go) // only go's can be forced
-        {
-            // if pickable, check if a forcible item is available for the bot
-            if (skillId == SKILL_LOCKPICKING && (m_bot->HasSkill(SKILL_BLACKSMITHING) ||
-                m_bot->HasSkill(SKILL_ENGINEERING)))
-            {
-                // check for skeleton keys appropriate for lock value
-                if (m_bot->HasSkill(SKILL_BLACKSMITHING))
-                {
-                    Item *kItem = FindKeyForLockValue(reqSkillValue);
-                    if (kItem)
-                    {
-                        TellMaster("I have a skeleton key that can open it!");
-                        UseItem(kItem, TARGET_FLAG_OBJECT, m_lootCurrent);
-                        return;
-                    }
-                    else
-                    {
-                        TellMaster("I have no skeleton keys that can open that lock.");
-                        forceFailed = true;
-                    }
-                }
-
-                // check for a charge that can blast it open
-                if (m_bot->HasSkill(SKILL_ENGINEERING))
-                {
-                    Item *bItem = FindBombForLockValue(reqSkillValue);
-                    if (bItem)
-                    {
-                        TellMaster("I can blast it open!");
-                        UseItem(bItem, TARGET_FLAG_OBJECT, m_lootCurrent);
-                        return;
-                    }
-                    else
-                    {
-                        TellMaster("I have nothing to blast it open with.");
-                        forceFailed = true;
-                    }
-                }
-            }
-            else
-                forceFailed = true;
-        }
 
         // if all attempts failed in some way then clear because it won't get SMSG_LOOT_RESPONSE
         if (keyFailed && skillFailed && forceFailed)

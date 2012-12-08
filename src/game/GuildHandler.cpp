@@ -36,11 +36,13 @@ void WorldSession::HandleGuildQueryOpcode(WorldPacket& recvPacket)
     ObjectGuid guildGuid, playerGuid;
     recvPacket >> guildGuid >> playerGuid;
 
-    Guild* guild = sGuildMgr.GetGuildById(guildId);
-    if (guild)
+    if (Guild* guild = sGuildMgr.GetGuildByGuid(guildGuid))
     {
-        guild->Query(this);
-        return;
+        if (guild->GetMemberSlot(playerGuid))
+        {
+            guild->Query(this);
+            return;
+        }
     }
 
     SendGuildCommandResult(GUILD_CREATE_S, "", ERR_GUILD_PLAYER_NOT_IN_GUILD);
@@ -199,7 +201,7 @@ void WorldSession::HandleGuildRemoveOpcode(WorldPacket& recvPacket)
         return;
     }
 
-    if (!sObjectMgr.GetPlayerNameByGUID(targetGuid, plName))
+    if (!sAccountMgr.GetPlayerNameByGUID(targetGuid, plName))
         return;
 
     MemberSlot* slot = guild->GetMemberSlot(targetGuid);
@@ -354,7 +356,7 @@ void WorldSession::HandleGuildPromoteOpcode(WorldPacket& recvPacket)
         return;
     }
 
-    if (!sObjectMgr.GetPlayerNameByGUID(targetGuid, plName))
+    if (!sAccountMgr.GetPlayerNameByGUID(targetGuid, plName))
         return;
 
     MemberSlot* slot = guild->GetMemberSlot(targetGuid);
@@ -411,7 +413,7 @@ void WorldSession::HandleGuildDemoteOpcode(WorldPacket& recvPacket)
         return;
     }
 
-    if (!sObjectMgr.GetPlayerNameByGUID(targetGuid, plName))
+    if (!sAccountMgr.GetPlayerNameByGUID(targetGuid, plName))
         return;
 
     MemberSlot* slot = guild->GetMemberSlot(targetGuid);
@@ -485,7 +487,7 @@ void WorldSession::HandleGuildSetRankOpcode(WorldPacket& recvPacket)
         return;
     }
 
-    if (!sObjectMgr.GetPlayerNameByGUID(targetGuid, plName))
+    if (!sAccountMgr.GetPlayerNameByGUID(targetGuid, plName))
         return;
 
     MemberSlot* slot = guild->GetMemberSlot(targetGuid);
@@ -748,7 +750,7 @@ void WorldSession::HandleGuildSetNoteOpcode(WorldPacket& recvPacket)
         return;
     }
 
-    if (!sObjectMgr.GetPlayerNameByGUID(targetGuid, name))
+    if (!sAccountMgr.GetPlayerNameByGUID(targetGuid, name))
         return;
 
     MemberSlot* slot = guild->GetMemberSlot(targetGuid);

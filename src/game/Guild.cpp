@@ -884,7 +884,7 @@ void Guild::Roster(WorldSession* session /*= NULL*/)
 
     data << uint32(m_accountsNumber);
     data << uint32(0);                                      // weekly rep cap
-    data << secsToTimeBitFields(m_CreatedDate);
+    data.AppendPackedTime(m_CreatedDate);
     data << uint32(0);
 
     if (session)

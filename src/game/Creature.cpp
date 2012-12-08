@@ -1600,22 +1600,27 @@ void Creature::ForcedDespawn(uint32 timeMSToDespawn)
 
 bool Creature::IsImmuneToSpell(SpellEntry const* spellInfo, bool isFriendly) const
 {
+    // No immune to melee attack by default
     if (!spellInfo)
         return false;
 
-    if (!castOnSelf && GetCreatureInfo()->MechanicImmuneMask & (1 << (spellInfo->GetMechanic() - 1)))
+    if (GetCreatureInfo()->MechanicImmuneMask & (1 << (spellInfo->GetMechanic() - 1)))
         return true;
 
     return Unit::IsImmuneToSpell(spellInfo, isFriendly);
 }
 
-bool Creature::IsImmuneToSpellEffect(SpellEntry const* spellInfo, SpellEffectIndex index, bool castOnSelf) const
+bool Creature::IsImmuneToSpellEffect(SpellEntry const* spellInfo, SpellEffectIndex index) const
 {
-    SpellEffectEntry const* spellEffect = spellInfo->GetSpellEffect(index);
-    if (!spellEffect)
+    // No immune to melee attack by default
+    if (!spellInfo)
         return false;
 
-    if (!castOnSelf && GetCreatureInfo()->MechanicImmuneMask & (1 << (spellEffect->EffectMechanic - 1)))
+    SpellEffectEntry const* spellEffect = spellInfo->GetSpellEffect(SpellEffectIndex(index));
+    if(!spellEffect)
+        return false;
+
+    if (GetCreatureInfo()->MechanicImmuneMask & (1 << (spellEffect->EffectMechanic - 1)))
         return true;
 
     // Taunt immunity special flag check
@@ -1632,7 +1637,7 @@ bool Creature::IsImmuneToSpellEffect(SpellEntry const* spellInfo, SpellEffectInd
             return true;
     }
 
-    return Unit::IsImmuneToSpellEffect(spellInfo, index, castOnSelf);
+    return Unit::IsImmuneToSpellEffect(spellInfo, index);
 }
 
 SpellEntry const* Creature::ReachWithSpellAttack(Unit* pVictim)

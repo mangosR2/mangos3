@@ -2701,13 +2701,7 @@ void Unit::CalculateDamageAbsorbAndResist(Unit *pCaster, DamageInfo* damageInfo,
                             // Cast healing spell, completely avoid damage
                             RemainingDamage = 0;
 
-                            uint32 defenseSkillValue = GetDefenseSkillValue();
-                            // Max heal when defense skill denies critical hits from raid bosses
-                            // Formula: max defense at level + 140 (raiting from gear)
-                            uint32 reqDefForMaxHeal  = getLevel() * 5 + 140;
-                            float pctFromDefense = (defenseSkillValue >= reqDefForMaxHeal)
-                                ? 1.0f
-                                : float(defenseSkillValue) / float(reqDefForMaxHeal);
+                            float pctFromDefense =  1.0f;
 
                             int32 healAmount = GetMaxHealth() * ((*i)->GetSpellProto()->GetSpellEffect(EFFECT_INDEX_1)->EffectBasePoints + 1) / 100.0f * pctFromDefense;
                             CastSpell(this, 66233, true);
@@ -9192,17 +9186,25 @@ bool Unit::IsImmuneToSpell(SpellEntry const* spellInfo, bool isFriendly) const
     return false;
 }
 
-bool Unit::IsImmuneToSpellEffect(SpellEntry const* spellInfo, SpellEffectIndex index, bool castOnSelf) const
+bool Unit::IsImmuneToSpellEffect(SpellEntry const* spellInfo, SpellEffectIndex index) const
 {
+    if (!spellInfo)
+        return false;
+
+    if (spellInfo->HasAttribute(SPELL_ATTR_UNAFFECTED_BY_INVULNERABILITY))
+        return false;
+
     //If m_immuneToEffect type contain this effect type, IMMUNE effect.
     SpellEffectEntry const* spellEffect = spellInfo->GetSpellEffect(index);
     if(!spellEffect)
         return false;
 
-    uint32 effect = spellEffect->Effect;
+    if (spellEffect->Effect == SPELL_EFFECT_NONE)
+        return true;
+
     SpellImmuneList const& effectList = m_spellImmune[IMMUNITY_EFFECT];
     for (SpellImmuneList::const_iterator itr = effectList.begin(); itr != effectList.end(); ++itr)
-        if (itr->type == effect)
+        if (itr->type == spellEffect->Effect)
             return true;
 
     if(uint32 mechanic = spellEffect->EffectMechanic)

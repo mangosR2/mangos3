@@ -4037,12 +4037,12 @@ void Aura::HandleAuraMounted(bool apply, bool Real)
         target->Unmount(true);
 
         CreatureInfo const* ci = ObjectMgr::GetCreatureTemplate(m_modifier.m_miscvalue);
-        if (ci && target->IsVehicle() && ci->vehicleId == target->GetVehicleInfo()->GetVehicleEntry()->m_ID)
+        if (ci && target->IsVehicle() && ci->vehicleId == target->GetVehicleKit()->GetEntry()->m_ID)
         {
             if (target->GetTypeId() == TYPEID_PLAYER)
                 target->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_PLAYER_VEHICLE);
 
-            target->SetVehicleId(0, 0);
+            target->SetVehicleId(0);
         }
     }
 }
@@ -7165,7 +7165,7 @@ void Aura::HandleModTotalPercentStat(bool apply, bool /*Real*/)
     }
 
     //recalculate current HP/MP after applying aura modifications (only for spells with 0x10 flag)
-    if ((miscValueB & (1 << STAT_STAMINA)) && maxHPValue > 0 && GetSpellProto()->HasAttribute(SPELL_ATTR_UNK4))
+    if ((miscValueB & (1 << STAT_STAMINA)) && maxHPValue > 0 && GetSpellProto()->HasAttribute(SPELL_ATTR_ABILITY))
     {
         uint32 newHPValue = uint32(float(target->GetMaxHealth()) / maxHPValue * curHPValue);
         target->SetHealth(newHPValue);
@@ -12955,3 +12955,5 @@ void Aura::HandleInitializeImages(bool apply, bool real)
             return;
         }
         target->SetName(cinfo->Name);
+    }
+}

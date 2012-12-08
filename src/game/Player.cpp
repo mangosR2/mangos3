@@ -198,7 +198,7 @@ void PlayerTaxi::LoadTaxiMask(const char* data)
         (index < TaxiMaskSize) && (iter != tokens.end()); ++iter, ++index)
     {
         // load and set bits only for existing taxi nodes
-        m_taximask[index] = sTaxiNodesMask[index] & uint8(atol((*iter).c_str()));
+        m_taximask[index] = sTaxiNodesMask[index] & uint8(atol((*iter)));
     }
 }
 
@@ -1798,9 +1798,6 @@ bool Player::TeleportTo(WorldLocation const& loc, uint32 options)
                     TeleportToHomebind();
 
                 DEBUG_LOG("Player::TeleportTo %s is NOT teleported to map %u (requirements check failed)", GetName(), loc.mapid);
-
-            SendTransferAbortedByLockStatus(mEntry, lockStatus, miscRequirement);
-            return false;
             }
             else
                 options |= TELE_TO_CHECKED;
@@ -2012,7 +2009,7 @@ bool Player::TeleportTo(WorldLocation const& loc, uint32 options)
 
             // remove vehicle accessories on map change
             if (IsVehicle())
-                GetVehicleInfo()->RemoveAccessoriesFromMap();
+                GetVehicleKit()->Reset();
 
             // remove all dyn objects
             RemoveAllDynObjects();
@@ -5449,17 +5446,8 @@ void Player::HandleBaseModValue(BaseModGroup modGroup, BaseModType modType, floa
             if (amount <= -100.0f)
                 amount = -200.0f;
 
-            // Shield Block Value PCT_MODs should be added, not multiplied
-            if (modGroup == SHIELD_BLOCK_VALUE)
-            {
-                val = amount / 100.0f;
-                m_auraBaseMod[modGroup][modType] += apply ? val : -val;
-            }
-            else
-            {
-                val = (100.0f + amount) / 100.0f;
-                m_auraBaseMod[modGroup][modType] *= apply ? val : (1.0f/val);
-            }
+            val = (100.0f + amount) / 100.0f;
+            m_auraBaseMod[modGroup][modType] *= apply ? val : (1.0f/val);
             break;
     }
 
@@ -16022,13 +16010,13 @@ bool Player::LoadFromDB(ObjectGuid guid, SqlQueryHolder *holder)
     m_specsCount = fields[52].GetUInt8();
     m_activeSpec = fields[53].GetUInt8();
 
-    Tokens talentTrees = StrSplit(fields[26].GetString(), " ");
+    Tokens talentTrees = Tokens(fields[26].GetString(), ' ');
     for (uint8 i = 0; i < MAX_TALENT_SPEC_COUNT; ++i)
     {
         if (i >= talentTrees.size())
             break;
 
-        uint32 talentTree = atol(talentTrees[i].c_str());
+        uint32 talentTree = atol(talentTrees[i]);
         if (!talentTree || sTalentTabStore.LookupEntry(talentTree))
             m_talentsPrimaryTree[i] = talentTree;
         else if (i == m_activeSpec)
@@ -20950,7 +20938,7 @@ void Player::SendUpdateToOutOfRangeGroupMembers()
         pet->ResetAuraUpdateMask();
 }
 
-void Player::SendTransferAbortedByLockStatus(MapEntry const* mapEntry, AreaLockStatus lockStatus, uint32 miscRequirement)
+void Player::SendTransferAborted(uint32 mapid, uint8 reason, uint8 arg)
 {
     if (GetSession())
         GetSession()->SendTransferAborted(mapid, reason, arg);

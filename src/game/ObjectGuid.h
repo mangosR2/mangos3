@@ -252,7 +252,6 @@ class MANGOS_DLL_SPEC ObjectGuid
                 case HIGHGUID_INSTANCE:
                 case HIGHGUID_GROUP:
 
-                case HIGHGUID_BATTLEGROUND:
                 case HIGHGUID_GUILD:
 
                 case HIGHGUID_AREATRIGGER:
@@ -275,19 +274,6 @@ class MANGOS_DLL_SPEC ObjectGuid
                     return true;
             }
         }
-
-        static bool IsLargeHigh(HighGuid high)
-        {
-            switch(high)
-            {
-                case HIGHGUID_GUILD:
-                    return true;
-                default:
-                    return false;
-            }
-        }
-
-        bool IsLargeHigh() const { return IsLargeHigh(GetHigh()); }
 
         static bool IsLargeHigh(HighGuid high)
         {

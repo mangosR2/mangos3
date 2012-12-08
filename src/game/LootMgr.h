@@ -271,15 +271,9 @@ struct Loot
         // void clear();
         void clear()
         {
-            for (QuestItemMap::const_iterator itr = m_playerCurrencies.begin(); itr != m_playerCurrencies.end(); ++itr)
-                delete itr->second;
-            m_playerCurrencies.clear();
-
-            for (QuestItemMap::const_iterator itr = m_playerQuestItems.begin(); itr != m_playerQuestItems.end(); ++itr)
-                delete itr->second;
             m_playerQuestItems.clear();
             m_playerFFAItems.clear();
-            m_playerNonQuestNonFFAConditionalItems.clear();
+            m_playerNonQuestNonFFANonCurrencyConditionalItems.clear();
             m_playersLooting.clear();
             items.clear();
             m_questItems.clear();

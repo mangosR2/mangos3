@@ -213,7 +213,7 @@ void Totem::SetTypeBySummonSpell(SpellEntry const * spellProto)
 
 }
 
-bool Totem::IsImmuneToSpellEffect(SpellEntry const* spellInfo, SpellEffectIndex index, bool castOnSelf) const
+bool Totem::IsImmuneToSpellEffect(SpellEntry const* spellInfo, SpellEffectIndex index) const
 {
     SpellEffectEntry const* spellEffect = spellInfo->GetSpellEffect(index);
     if (spellEffect)
@@ -239,5 +239,5 @@ bool Totem::IsImmuneToSpellEffect(SpellEntry const* spellInfo, SpellEffectIndex 
         }
     }
 
-    return Creature::IsImmuneToSpellEffect(spellInfo, index, castOnSelf);
+    return Creature::IsImmuneToSpellEffect(spellInfo, index);
 }

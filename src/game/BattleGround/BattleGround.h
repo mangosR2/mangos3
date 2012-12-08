@@ -202,6 +202,7 @@ enum BattleGroundType
     TYPE_ARENA            = 4
 };
 
+#define BG_TEAMS_COUNT  2
 
 enum BattleGroundSpawnFactions
 {

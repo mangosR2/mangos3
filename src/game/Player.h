@@ -1107,6 +1107,7 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         void SendInitialPacketsBeforeAddToMap();
         void SendInitialPacketsAfterAddToMap();
+        void SendTransferAborted(uint32 mapid, uint8 reason, uint8 arg = 0);
         void SendInstanceResetWarning(uint32 mapid, Difficulty difficulty, uint32 time);
 
         Creature* GetNPCIfCanInteractWith(ObjectGuid guid, uint32 npcflagmask);

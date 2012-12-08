@@ -144,37 +144,13 @@ void WorldSession::HandleBattlemasterJoinOpcode(WorldPacket& recv_data)
             _player->GetSession()->SendPacket(&data);
             return;
         }
-
-        if (_player->GetBattleGroundQueueIndex(bgQueueTypeIdRandom) < PLAYER_MAX_BATTLEGROUND_QUEUES)
-        {
-            //player is already in random queue
-            WorldPacket data;
-            sBattleGroundMgr.BuildGroupJoinedBattlegroundPacket(&data, ERR_IN_RANDOM_BG);
-            _player->GetSession()->SendPacket(&data);
-            return;
-        }
-
-        if(_player->InBattleGroundQueue() && bgTypeId == BATTLEGROUND_RB)
-        {
-            //player is already in queue, can't start random queue
-            WorldPacket data;
-            sBattleGroundMgr.BuildGroupJoinedBattlegroundPacket(&data, ERR_IN_NON_RANDOM_BG);
-            _player->GetSession()->SendPacket(&data);
-            return;
-        }
-
         // check if already in queue
         if (_player->GetBattleGroundQueueIndex(bgQueueTypeId) < PLAYER_MAX_BATTLEGROUND_QUEUES)
             // player is already in this queue
             return;
         // check if has free queue slots
         if (!_player->HasFreeBattleGroundQueueId())
-        {
-            WorldPacket data;
-            sBattleGroundMgr.BuildGroupJoinedBattlegroundPacket(&data, ERR_BATTLEGROUND_TOO_MANY_QUEUES);
-            _player->GetSession()->SendPacket(&data);
             return;
-        }
     }
     else
     {
@@ -184,27 +160,9 @@ void WorldSession::HandleBattlemasterJoinOpcode(WorldPacket& recv_data)
             return;
         if (grp->GetLeaderGuid() != _player->GetObjectGuid())
             return;
-
-        bool have_bots = false;
-        for (GroupReference* itr = grp->GetFirstMember(); itr != NULL; itr = itr->next())
-        {
-            Player* member = itr->getSource();
-            if (!member)
-                continue;                                   // this should never happen
-            if (member->GetPlayerbotAI())
-            {
-                ChatHandler(_player).PSendSysMessage("|cffff0000You cannot get in battleground queue as premade because you have bots in your group. Adding you in queue as single player.");
-                have_bots = true;
-                joinAsGroup = false;
-                break;
-            }
-        }
-        if (!have_bots)
-        {
-            err = grp->CanJoinBattleGroundQueue(bg, bgQueueTypeId, 0, bg->GetMaxPlayersPerTeam(), false, 0);
-            isPremade = sWorld.getConfig(CONFIG_UINT32_BATTLEGROUND_PREMADE_GROUP_WAIT_FOR_MATCH) &&
+        err = grp->CanJoinBattleGroundQueue(bg, bgQueueTypeId, 0, bg->GetMaxPlayersPerTeam(), false, 0);
+        isPremade = sWorld.getConfig(CONFIG_UINT32_BATTLEGROUND_PREMADE_GROUP_WAIT_FOR_MATCH) &&
                     (grp->GetMembersCount() >= bg->GetMinPlayersPerTeam());
-        }
     }
     // if we're here, then the conditions to join a bg are met. We can proceed in joining.
 
@@ -221,9 +179,9 @@ void WorldSession::HandleBattlemasterJoinOpcode(WorldPacket& recv_data)
         GroupQueueInfo* ginfo = NULL;
         uint32 avgTime = 0;
 
-            DEBUG_LOG("Battleground: the following players are joining as group:");
-            ginfo = bgQueue.AddGroup(_player, grp, bgTypeId, bracketEntry, ARENA_TYPE_NONE, false, isPremade, 0);
-            avgTime = bgQueue.GetAverageQueueWaitTime(ginfo, bracketEntry->GetBracketId());
+        DEBUG_LOG("Battleground: the following players are joining as group:");
+        ginfo = bgQueue.AddGroup(_player, grp, bgTypeId, bracketEntry, ARENA_TYPE_NONE, false, isPremade, 0);
+        avgTime = bgQueue.GetAverageQueueWaitTime(ginfo, bracketEntry->GetBracketId());
 
         for (GroupReference* itr = grp->GetFirstMember(); itr != NULL; itr = itr->next())
         {

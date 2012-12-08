@@ -2004,23 +2004,6 @@ void Spell::EffectDummy(SpellEffectEntry const* effect)
                     unitTarget->CastSpell(unitTarget, 42630, true);
                     return;
                 }
-                case 42628:                                 // Fire Bomb (throw)
-                {
-                    if (!unitTarget)
-                        return;
-
-                    unitTarget->CastSpell(unitTarget, 42629, true);
-                    return;
-                }
-                case 42631:                                 // Fire Bomb (explode)
-                {
-                    if (!unitTarget)
-                        return;
-
-                    unitTarget->RemoveAurasDueToSpell(42629);
-                    unitTarget->CastSpell(unitTarget, 42630, true);
-                    return;
-                }
                 case 42793:                                 // Burn Body
                 {
                     if (!unitTarget || unitTarget->GetTypeId() != TYPEID_UNIT || m_caster->GetTypeId() != TYPEID_PLAYER)
@@ -6206,10 +6189,6 @@ void Spell::EffectSummonType(SpellEffectEntry const* effect)
                 case UNITNAME_SUMMON_TITLE_MOUNT:
                 case UNITNAME_SUMMON_TITLE_LIGHTWELL:
                 case UNITNAME_SUMMON_TITLE_BUTLER:
-                case UNITNAME_SUMMON_TITLE_MOUNT:
-                    DoSummonWild(effect, summon_prop->FactionId);
-                    break;
-                case UNITNAME_SUMMON_TITLE_VEHICLE:
                     DoSummonWild(effect, summon_prop->FactionId);
                     break;
                 default:

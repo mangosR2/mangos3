@@ -53,7 +53,7 @@ class MANGOS_DLL_DECL TransportBase
 {
     public:
         explicit TransportBase(WorldObject* owner);
-        virtual ~TransportBase();
+        virtual ~TransportBase() { MANGOS_ASSERT(m_passengers.size() == 0); };
 
         void Update(uint32 diff);
         void UpdateGlobalPositions();
@@ -66,9 +66,6 @@ class MANGOS_DLL_DECL TransportBase
         void NormalizeRotatedPosition(float rx, float ry, float& lx, float& ly) const;
 
         void CalculateGlobalPositionOf(float lx, float ly, float lz, float lo, float& gx, float& gy, float& gz, float& go) const;
-
-        // Helper function to check if a unit is boarded onto this transporter (or a transporter boarded onto this)*
-        bool HasOnBoard(WorldObject const* passenger) const;
 
     protected:
         // Helper functions to add/ remove a passenger from the list
@@ -105,9 +102,6 @@ class MANGOS_DLL_DECL TransportInfo
 
         // Required for chain-updating (passenger on transporter on transporter)
         bool IsOnVehicle() const { return m_transport->GetOwner()->GetTypeId() == TYPEID_PLAYER || m_transport->GetOwner()->GetTypeId() == TYPEID_UNIT; }
-
-        // Helper function if a passenger is already boarded somewhere onto the boarded transports
-        bool HasOnBoard(WorldObject const* passenger) const { return m_transport->HasOnBoard(passenger); }
 
         // Get local position and seat
         uint8 GetTransportSeat() const { return m_seat; }
