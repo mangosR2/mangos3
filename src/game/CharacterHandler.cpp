@@ -716,6 +716,7 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
     else if (pCurrChar->GetGuildId())                       // clear guild related fields in case wrong data about nonexistent membership
     {
         pCurrChar->SetInGuild(0);
+        pCurrChar->SetGuildLevel(0);
         pCurrChar->SetRank(0);
     }
 
@@ -724,6 +725,8 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
         Guild* guild = sGuildMgr.GetGuildById(pCurrChar->GetGuildId());
         if (guild)
         {
+            pCurrChar->SetGuildLevel(guild->GetLevel());
+
             data.Initialize(SMSG_GUILD_EVENT, (1 + 1 + guild->GetMOTD().size() + 1));
             data << uint8(GE_MOTD);
             data << uint8(1);
@@ -740,6 +743,7 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
             // remove wrong guild data
             sLog.outError("Player %s (GUID: %u) marked as member of nonexistent guild (id: %u), removing guild membership for player.", pCurrChar->GetName(), pCurrChar->GetGUIDLow(), pCurrChar->GetGuildId());
             pCurrChar->SetInGuild(0);
+            pCurrChar->SetGuildLevel(0);
         }
     }
 
@@ -1196,7 +1200,7 @@ void WorldSession::HandleAlterAppearanceOpcode(WorldPacket& recv_data)
         SendPacket(&data);
     }
 
-    _player->ModifyMoney(-int32(Cost));                     // it isn't free
+    _player->ModifyMoney(-int64(Cost));                     // it isn't free
     _player->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_GOLD_SPENT_AT_BARBER, Cost);
 
     _player->SetByteValue(PLAYER_BYTES, 2, uint8(bs_hair->hair_id));

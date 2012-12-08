@@ -418,7 +418,7 @@ void PlayerMenu::SendQuestGiverQuestList(QEmote eEmote, const std::string& Title
     DEBUG_LOG("WORLD: Sent SMSG_QUESTGIVER_QUEST_LIST NPC Guid = %s", npcGUID.GetString().c_str());
 }
 
-void PlayerMenu::SendQuestGiverStatus(uint8 questStatus, ObjectGuid npcGUID)
+void PlayerMenu::SendQuestGiverStatus(uint32 questStatus, ObjectGuid npcGUID)
 {
     WorldPacket data(SMSG_QUESTGIVER_STATUS, 12);
     data << npcGUID;
@@ -433,10 +433,10 @@ void PlayerMenu::SendQuestGiverQuestDetails(Quest const* pQuest, ObjectGuid guid
     std::string Title      = pQuest->GetTitle();
     std::string Details    = pQuest->GetDetails();
     std::string Objectives = pQuest->GetObjectives();
-    std::string PortraitGiverText = pQuest->GetPortraitGiverText();
     std::string PortraitGiverName = pQuest->GetPortraitGiverName();
-    std::string PortraitTurnInText = pQuest->GetPortraitTurnInText();
+    std::string PortraitGiverText = pQuest->GetPortraitGiverText();
     std::string PortraitTurnInName = pQuest->GetPortraitTurnInName();
+    std::string PortraitTurnInText = pQuest->GetPortraitTurnInText();
 
     int loc_idx = GetMenuSession()->GetSessionDbLocaleIndex();
     if (loc_idx >= 0)
@@ -449,7 +449,14 @@ void PlayerMenu::SendQuestGiverQuestDetails(Quest const* pQuest, ObjectGuid guid
                 Details = ql->Details[loc_idx];
             if (ql->Objectives.size() > (size_t)loc_idx && !ql->Objectives[loc_idx].empty())
                 Objectives = ql->Objectives[loc_idx];
-            // TODO: locales for PortraitGiver and PortraitTurnIn
+            if (ql->PortraitGiverName.size() > (size_t)loc_idx && !ql->PortraitGiverName[loc_idx].empty())
+                PortraitGiverName = ql->PortraitGiverName[loc_idx];
+            if (ql->PortraitGiverText.size() > (size_t)loc_idx && !ql->PortraitGiverText[loc_idx].empty())
+                PortraitGiverText = ql->PortraitGiverText[loc_idx];
+            if (ql->PortraitTurnInName.size() > (size_t)loc_idx && !ql->PortraitTurnInName[loc_idx].empty())
+                PortraitTurnInName = ql->PortraitTurnInName[loc_idx];
+            if (ql->PortraitTurnInText.size() > (size_t)loc_idx && !ql->PortraitTurnInText[loc_idx].empty())
+                PortraitTurnInText = ql->PortraitTurnInText[loc_idx];
         }
     }
 
@@ -571,10 +578,10 @@ void PlayerMenu::SendQuestQueryResponse(Quest const* pQuest)
     Objectives = pQuest->GetObjectives();
     EndText = pQuest->GetEndText();
     CompletedText = pQuest->GetCompletedText();
-    PortraitGiverText = pQuest->GetPortraitGiverText();
     PortraitGiverName = pQuest->GetPortraitGiverName();
-    PortraitTurnInText = pQuest->GetPortraitTurnInText();
+    PortraitGiverText = pQuest->GetPortraitGiverText();
     PortraitTurnInName = pQuest->GetPortraitTurnInName();
+    PortraitTurnInText = pQuest->GetPortraitTurnInText();
 
     for (int i = 0; i < QUEST_OBJECTIVES_COUNT; ++i)
         ObjectiveText[i] = pQuest->ObjectiveText[i];
@@ -594,7 +601,14 @@ void PlayerMenu::SendQuestQueryResponse(Quest const* pQuest)
                 EndText = ql->EndText[loc_idx];
             if (ql->CompletedText.size() > (size_t)loc_idx && !ql->CompletedText[loc_idx].empty())
                 CompletedText = ql->CompletedText[loc_idx];
-            // TODO: locales for PortraitGiver and PortraitTurnIn
+            if (ql->PortraitGiverName.size() > (size_t)loc_idx && !ql->PortraitGiverName[loc_idx].empty())
+                PortraitGiverName = ql->PortraitGiverName[loc_idx];
+            if (ql->PortraitGiverText.size() > (size_t)loc_idx && !ql->PortraitGiverText[loc_idx].empty())
+                PortraitGiverText = ql->PortraitGiverText[loc_idx];
+            if (ql->PortraitTurnInName.size() > (size_t)loc_idx && !ql->PortraitTurnInName[loc_idx].empty())
+                PortraitTurnInName = ql->PortraitTurnInName[loc_idx];
+            if (ql->PortraitTurnInText.size() > (size_t)loc_idx && !ql->PortraitTurnInText[loc_idx].empty())
+                PortraitTurnInText = ql->PortraitTurnInText[loc_idx];
 
             for (int i = 0; i < QUEST_OBJECTIVES_COUNT; ++i)
                 if (ql->ObjectiveText[i].size() > (size_t)loc_idx && !ql->ObjectiveText[i][loc_idx].empty())
@@ -752,10 +766,10 @@ void PlayerMenu::SendQuestGiverOfferReward(Quest const* pQuest, ObjectGuid npcGU
 {
     std::string Title = pQuest->GetTitle();
     std::string OfferRewardText = pQuest->GetOfferRewardText();
-    std::string PortraitGiverText = pQuest->GetPortraitGiverText();
     std::string PortraitGiverName = pQuest->GetPortraitGiverName();
-    std::string PortraitTurnInText = pQuest->GetPortraitTurnInText();
+    std::string PortraitGiverText = pQuest->GetPortraitGiverText();
     std::string PortraitTurnInName = pQuest->GetPortraitTurnInName();
+    std::string PortraitTurnInText = pQuest->GetPortraitTurnInText();
 
     int loc_idx = GetMenuSession()->GetSessionDbLocaleIndex();
     if (loc_idx >= 0)
@@ -766,7 +780,14 @@ void PlayerMenu::SendQuestGiverOfferReward(Quest const* pQuest, ObjectGuid npcGU
                 Title = ql->Title[loc_idx];
             if (ql->OfferRewardText.size() > (size_t)loc_idx && !ql->OfferRewardText[loc_idx].empty())
                 OfferRewardText = ql->OfferRewardText[loc_idx];
-            // TODO: locales for PortraitGiver and PortraitTurnIn
+            if (ql->PortraitGiverName.size() > (size_t)loc_idx && !ql->PortraitGiverName[loc_idx].empty())
+                PortraitGiverName = ql->PortraitGiverName[loc_idx];
+            if (ql->PortraitGiverText.size() > (size_t)loc_idx && !ql->PortraitGiverText[loc_idx].empty())
+                PortraitGiverText = ql->PortraitGiverText[loc_idx];
+            if (ql->PortraitTurnInName.size() > (size_t)loc_idx && !ql->PortraitTurnInName[loc_idx].empty())
+                PortraitTurnInName = ql->PortraitTurnInName[loc_idx];
+            if (ql->PortraitTurnInText.size() > (size_t)loc_idx && !ql->PortraitTurnInText[loc_idx].empty())
+                PortraitTurnInText = ql->PortraitTurnInText[loc_idx];
         }
     }
 
@@ -872,6 +893,12 @@ void PlayerMenu::SendQuestGiverRequestItems(Quest const* pQuest, ObjectGuid npcG
     // We can always call to RequestItems, but this packet only goes out if there are actually
     // items.  Otherwise, we'll skip straight to the OfferReward
 
+    if (!pQuest->GetReqItemsCount() && !pQuest->GetReqCurrencyCount() && Completable)
+    {
+        SendQuestGiverOfferReward(pQuest, npcGUID, true);
+        return;
+    }
+
     std::string Title = pQuest->GetTitle();
     std::string RequestItemsText = pQuest->GetRequestItemsText();
 
@@ -885,12 +912,6 @@ void PlayerMenu::SendQuestGiverRequestItems(Quest const* pQuest, ObjectGuid npcG
             if (ql->RequestItemsText.size() > (size_t)loc_idx && !ql->RequestItemsText[loc_idx].empty())
                 RequestItemsText = ql->RequestItemsText[loc_idx];
         }
-    }
-
-    if (!pQuest->GetReqItemsCount() && Completable)
-    {
-        SendQuestGiverOfferReward(pQuest, npcGUID, true);
-        return;
     }
 
     WorldPacket data(SMSG_QUESTGIVER_REQUEST_ITEMS, 50);    // guess size

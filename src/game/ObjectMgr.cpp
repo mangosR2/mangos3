@@ -648,7 +648,7 @@ void ObjectMgr::LoadCreatureTemplates()
 
         if(cInfo->npcflag & UNIT_NPC_FLAG_SPELLCLICK)
         {
-            sLog.outErrorDb("Creature (Entry: %u) has dynamic flag UNIT_NPC_FLAG_SPELLCLICK (%u) set, it expect to be set by code base at `npc_spellclick_spells` content.",cInfo->Entry,UNIT_NPC_FLAG_SPELLCLICK);
+            sLog.outDebug("Creature (Entry: %u) has dynamic flag UNIT_NPC_FLAG_SPELLCLICK (%u) set, but it is expected to be set in run-time based at `npc_spellclick_spells` contents.", cInfo->Entry, UNIT_NPC_FLAG_SPELLCLICK);
             const_cast<CreatureInfo*>(cInfo)->npcflag &= ~UNIT_NPC_FLAG_SPELLCLICK;
         }
 
@@ -3892,7 +3892,7 @@ void ObjectMgr::LoadQuests()
     //   139          140
                           "StartScript, CompleteScript, "
                           //   141          142            143             144                145                146                 147
-                          "ReqSpellLearned, PortraitGiver, PortraitTurnIn, PortraitGiverText, PortraitGiverName, PortraitTurnInText, PortraitTurnInName, "
+                          "ReqSpellLearned, PortraitGiver, PortraitTurnIn, PortraitGiverName, PortraitGiverText, PortraitTurnInName, PortraitTurnInText, "
                           //   148         149             150             151             152                153                154                155
                           "ReqCurrencyId1, ReqCurrencyId2, ReqCurrencyId3, ReqCurrencyId4, ReqCurrencyCount1, ReqCurrencyCount2, ReqCurrencyCount3, ReqCurrencyCount4, "
                           //   156         157             158             159             160                161                162                163
@@ -4542,6 +4542,8 @@ void ObjectMgr::LoadQuests()
         {
             if (qinfo->ReqCurrencyId[j])
             {
+                qinfo->SetSpecialFlag(QUEST_SPECIAL_FLAG_DELIVER);
+
                 CurrencyTypesEntry const * currencyEntry = sCurrencyTypesStore.LookupEntry(qinfo->ReqCurrencyId[j]);
                 if (!currencyEntry)
                 {
@@ -4565,7 +4567,6 @@ void ObjectMgr::LoadQuests()
                         qinfo->ReqCurrencyCount[j] = currencyEntry->TotalCap;
                     }
                 }
-
             }
             else if (qinfo->ReqCurrencyCount[j])
             {
@@ -4682,14 +4683,15 @@ void ObjectMgr::LoadQuestLocales()
     mQuestLocaleMap.clear();                                // need for reload case
 
     QueryResult *result = WorldDatabase.Query("SELECT entry,"
-        "Title_loc1,Details_loc1,Objectives_loc1,OfferRewardText_loc1,RequestItemsText_loc1,EndText_loc1,CompletedText_loc1,ObjectiveText1_loc1,ObjectiveText2_loc1,ObjectiveText3_loc1,ObjectiveText4_loc1,"
-        "Title_loc2,Details_loc2,Objectives_loc2,OfferRewardText_loc2,RequestItemsText_loc2,EndText_loc2,CompletedText_loc2,ObjectiveText1_loc2,ObjectiveText2_loc2,ObjectiveText3_loc2,ObjectiveText4_loc2,"
-        "Title_loc3,Details_loc3,Objectives_loc3,OfferRewardText_loc3,RequestItemsText_loc3,EndText_loc3,CompletedText_loc3,ObjectiveText1_loc3,ObjectiveText2_loc3,ObjectiveText3_loc3,ObjectiveText4_loc3,"
-        "Title_loc4,Details_loc4,Objectives_loc4,OfferRewardText_loc4,RequestItemsText_loc4,EndText_loc4,CompletedText_loc4,ObjectiveText1_loc4,ObjectiveText2_loc4,ObjectiveText3_loc4,ObjectiveText4_loc4,"
-        "Title_loc5,Details_loc5,Objectives_loc5,OfferRewardText_loc5,RequestItemsText_loc5,EndText_loc5,CompletedText_loc5,ObjectiveText1_loc5,ObjectiveText2_loc5,ObjectiveText3_loc5,ObjectiveText4_loc5,"
-        "Title_loc6,Details_loc6,Objectives_loc6,OfferRewardText_loc6,RequestItemsText_loc6,EndText_loc6,CompletedText_loc6,ObjectiveText1_loc6,ObjectiveText2_loc6,ObjectiveText3_loc6,ObjectiveText4_loc6,"
-        "Title_loc7,Details_loc7,Objectives_loc7,OfferRewardText_loc7,RequestItemsText_loc7,EndText_loc7,CompletedText_loc7,ObjectiveText1_loc7,ObjectiveText2_loc7,ObjectiveText3_loc7,ObjectiveText4_loc7,"
-        "Title_loc8,Details_loc8,Objectives_loc8,OfferRewardText_loc8,RequestItemsText_loc8,EndText_loc8,CompletedText_loc8,ObjectiveText1_loc8,ObjectiveText2_loc8,ObjectiveText3_loc8,ObjectiveText4_loc8"
+    //                     1          2            3               4                    5                     6            7                  8                   9                   10                  11                  12                     13                     14                      15
+                          "Title_loc1,Details_loc1,Objectives_loc1,OfferRewardText_loc1,RequestItemsText_loc1,EndText_loc1,CompletedText_loc1,ObjectiveText1_loc1,ObjectiveText2_loc1,ObjectiveText3_loc1,ObjectiveText4_loc1,PortraitGiverName_loc1,PortraitGiverText_loc1,PortraitTurnInName_loc1,PortraitTurnInText_loc1,"
+                          "Title_loc2,Details_loc2,Objectives_loc2,OfferRewardText_loc2,RequestItemsText_loc2,EndText_loc2,CompletedText_loc2,ObjectiveText1_loc2,ObjectiveText2_loc2,ObjectiveText3_loc2,ObjectiveText4_loc2,PortraitGiverName_loc2,PortraitGiverText_loc2,PortraitTurnInName_loc2,PortraitTurnInText_loc2,"
+                          "Title_loc3,Details_loc3,Objectives_loc3,OfferRewardText_loc3,RequestItemsText_loc3,EndText_loc3,CompletedText_loc3,ObjectiveText1_loc3,ObjectiveText2_loc3,ObjectiveText3_loc3,ObjectiveText4_loc3,PortraitGiverName_loc3,PortraitGiverText_loc3,PortraitTurnInName_loc3,PortraitTurnInText_loc3,"
+                          "Title_loc4,Details_loc4,Objectives_loc4,OfferRewardText_loc4,RequestItemsText_loc4,EndText_loc4,CompletedText_loc4,ObjectiveText1_loc4,ObjectiveText2_loc4,ObjectiveText3_loc4,ObjectiveText4_loc4,PortraitGiverName_loc4,PortraitGiverText_loc4,PortraitTurnInName_loc4,PortraitTurnInText_loc4,"
+                          "Title_loc5,Details_loc5,Objectives_loc5,OfferRewardText_loc5,RequestItemsText_loc5,EndText_loc5,CompletedText_loc5,ObjectiveText1_loc5,ObjectiveText2_loc5,ObjectiveText3_loc5,ObjectiveText4_loc5,PortraitGiverName_loc5,PortraitGiverText_loc5,PortraitTurnInName_loc5,PortraitTurnInText_loc5,"
+                          "Title_loc6,Details_loc6,Objectives_loc6,OfferRewardText_loc6,RequestItemsText_loc6,EndText_loc6,CompletedText_loc6,ObjectiveText1_loc6,ObjectiveText2_loc6,ObjectiveText3_loc6,ObjectiveText4_loc6,PortraitGiverName_loc6,PortraitGiverText_loc6,PortraitTurnInName_loc6,PortraitTurnInText_loc6,"
+                          "Title_loc7,Details_loc7,Objectives_loc7,OfferRewardText_loc7,RequestItemsText_loc7,EndText_loc7,CompletedText_loc7,ObjectiveText1_loc7,ObjectiveText2_loc7,ObjectiveText3_loc7,ObjectiveText4_loc7,PortraitGiverName_loc7,PortraitGiverText_loc7,PortraitTurnInName_loc7,PortraitTurnInText_loc7,"
+                          "Title_loc8,Details_loc8,Objectives_loc8,OfferRewardText_loc8,RequestItemsText_loc8,EndText_loc8,CompletedText_loc8,ObjectiveText1_loc8,ObjectiveText2_loc8,ObjectiveText3_loc8,ObjectiveText4_loc8,PortraitGiverName_loc8,PortraitGiverText_loc8,PortraitTurnInName_loc8,PortraitTurnInText_loc8"
         " FROM locales_quest"
         );
 
@@ -4723,7 +4725,7 @@ void ObjectMgr::LoadQuestLocales()
 
         for(int i = 1; i < MAX_LOCALE; ++i)
         {
-            std::string str = fields[1+11*(i-1)].GetCppString();
+            std::string str = fields[1 + 15 * (i - 1)].GetCppString();
             if(!str.empty())
             {
                 int idx = GetOrNewIndexForLocale(LocaleConstant(i));
@@ -4735,7 +4737,7 @@ void ObjectMgr::LoadQuestLocales()
                     data.Title[idx] = str;
                 }
             }
-            str = fields[1+11*(i-1)+1].GetCppString();
+            str = fields[1 + 15 * (i - 1) + 1].GetCppString();
             if(!str.empty())
             {
                 int idx = GetOrNewIndexForLocale(LocaleConstant(i));
@@ -4747,7 +4749,7 @@ void ObjectMgr::LoadQuestLocales()
                     data.Details[idx] = str;
                 }
             }
-            str = fields[1+11*(i-1)+2].GetCppString();
+            str = fields[1 + 15 * (i - 1) + 2].GetCppString();
             if(!str.empty())
             {
                 int idx = GetOrNewIndexForLocale(LocaleConstant(i));
@@ -4759,7 +4761,7 @@ void ObjectMgr::LoadQuestLocales()
                     data.Objectives[idx] = str;
                 }
             }
-            str = fields[1+11*(i-1)+3].GetCppString();
+            str = fields[1 + 15 * (i - 1) + 3].GetCppString();
             if(!str.empty())
             {
                 int idx = GetOrNewIndexForLocale(LocaleConstant(i));
@@ -4771,7 +4773,7 @@ void ObjectMgr::LoadQuestLocales()
                     data.OfferRewardText[idx] = str;
                 }
             }
-            str = fields[1+11*(i-1)+4].GetCppString();
+            str = fields[1 + 15 * (i - 1) + 4].GetCppString();
             if(!str.empty())
             {
                 int idx = GetOrNewIndexForLocale(LocaleConstant(i));
@@ -4783,7 +4785,7 @@ void ObjectMgr::LoadQuestLocales()
                     data.RequestItemsText[idx] = str;
                 }
             }
-            str = fields[1+11*(i-1)+5].GetCppString();
+            str = fields[1 + 15 * (i - 1) + 5].GetCppString();
             if(!str.empty())
             {
                 int idx = GetOrNewIndexForLocale(LocaleConstant(i));
@@ -4795,7 +4797,7 @@ void ObjectMgr::LoadQuestLocales()
                     data.EndText[idx] = str;
                 }
             }
-            str = fields[1+11*(i-1)+6].GetCppString();
+            str = fields[1 + 15 * (i - 1) + 6].GetCppString();
             if(!str.empty())
             {
                 int idx = GetOrNewIndexForLocale(LocaleConstant(i));
@@ -4809,7 +4811,7 @@ void ObjectMgr::LoadQuestLocales()
             }
             for(int k = 0; k < 4; ++k)
             {
-                str = fields[1+11*(i-1)+7+k].GetCppString();
+                str = fields[1 + 15 * (i - 1) + 7 + k].GetCppString();
                 if(!str.empty())
                 {
                     int idx = GetOrNewIndexForLocale(LocaleConstant(i));
@@ -4820,6 +4822,54 @@ void ObjectMgr::LoadQuestLocales()
 
                         data.ObjectiveText[k][idx] = str;
                     }
+                }
+            }
+            str = fields[1 + 15 * (i - 1) + 11].GetCppString();
+            if (!str.empty())
+            {
+                int idx = GetOrNewIndexForLocale(LocaleConstant(i));
+                if (idx >= 0)
+                {
+                    if ((int32)data.PortraitGiverName.size() <= idx)
+                        data.PortraitGiverName.resize(idx + 1);
+
+                    data.PortraitGiverName[idx] = str;
+                }
+            }
+            str = fields[1 + 15 * (i - 1) + 12].GetCppString();
+            if (!str.empty())
+            {
+                int idx = GetOrNewIndexForLocale(LocaleConstant(i));
+                if (idx >= 0)
+                {
+                    if ((int32)data.PortraitGiverText.size() <= idx)
+                        data.PortraitGiverText.resize(idx + 1);
+
+                    data.PortraitGiverText[idx] = str;
+                }
+            }
+            str = fields[1 + 15 * (i - 1) + 13].GetCppString();
+            if (!str.empty())
+            {
+                int idx = GetOrNewIndexForLocale(LocaleConstant(i));
+                if (idx >= 0)
+                {
+                    if ((int32)data.PortraitTurnInName.size() <= idx)
+                        data.PortraitTurnInName.resize(idx + 1);
+
+                    data.PortraitTurnInName[idx] = str;
+                }
+            }
+            str = fields[1 + 15 * (i - 1) + 14].GetCppString();
+            if (!str.empty())
+            {
+                int idx = GetOrNewIndexForLocale(LocaleConstant(i));
+                if (idx >= 0)
+                {
+                    if ((int32)data.PortraitTurnInText.size() <= idx)
+                        data.PortraitTurnInText.resize(idx + 1);
+
+                    data.PortraitTurnInText[idx] = str;
                 }
             }
         }
@@ -5518,8 +5568,8 @@ uint32 ObjectMgr::GetNearestTaxiNode( float x, float y, float z, uint32 mapid, T
         if(!node || node->map_id != mapid || !node->MountCreatureID[team == ALLIANCE ? 1 : 0])
             continue;
 
-        uint8  field   = (uint8)((i - 1) / 32);
-        uint32 submask = 1<<((i-1)%32);
+        uint8 field   = (uint8)((i - 1) / 8);
+        uint8 submask = 1 << ((i - 1) % 8);
 
         // skip not taxi network nodes
         if((sTaxiNodesMask[field] & submask)==0)
@@ -5902,6 +5952,7 @@ void ObjectMgr::LoadAreaTriggerTeleports()
     " target_map, target_position_x, target_position_y, target_position_z, target_orientation, achiev_id_0, achiev_id_1, combat_mode "
     //
     "FROM areatrigger_teleport");
+
     if (!result)
     {
 
@@ -8775,18 +8826,13 @@ SkillRangeType GetSkillRangeType(SkillLineEntry const *pSkill, bool racial)
 {
     switch(pSkill->categoryId)
     {
-        case SKILL_CATEGORY_LANGUAGES: return SKILL_RANGE_LANGUAGE;
+        case SKILL_CATEGORY_LANGUAGES:
+            return SKILL_RANGE_LANGUAGE;
         case SKILL_CATEGORY_WEAPON:
-            if(pSkill->id!=SKILL_FIST_WEAPONS)
                 return SKILL_RANGE_LEVEL;
-            else
-                return SKILL_RANGE_MONO;
         case SKILL_CATEGORY_ARMOR:
         case SKILL_CATEGORY_CLASS:
-            if(pSkill->id != SKILL_LOCKPICKING)
                 return SKILL_RANGE_MONO;
-            else
-                return SKILL_RANGE_LEVEL;
         case SKILL_CATEGORY_SECONDARY:
         case SKILL_CATEGORY_PROFESSION:
             // not set skills for professions and racial abilities
@@ -9922,6 +9968,31 @@ bool LoadMangosStrings(DatabaseType& db, char const* table,int32 start_value, in
     }
 
     return sObjectMgr.LoadMangosStrings(db,table,start_value,end_value);
+}
+
+void ObjectMgr::LoadCreatureTemplateSpells()
+{
+    sCreatureTemplateSpellsStorage.Load();
+
+    sLog.outString(">> Loaded %u creature_template_spells definitions", sCreatureTemplateSpellsStorage.GetRecordCount());
+    sLog.outString();
+
+    for (SQLStorageBase::SQLSIterator<CreatureTemplateSpells> itr = sCreatureTemplateSpellsStorage.getDataBegin<CreatureTemplateSpells>(); itr < sCreatureTemplateSpellsStorage.getDataEnd<CreatureTemplateSpells>(); ++itr)
+    {
+        if (!sCreatureStorage.LookupEntry<CreatureInfo>(itr->entry))
+        {
+            sLog.outErrorDb("LoadCreatureTemplateSpells: Spells found for creature entry %u, but creature does not exist, skipping", itr->entry);
+            sCreatureTemplateSpellsStorage.EraseEntry(itr->entry);
+        }
+        for (uint8 i = 0; i < CREATURE_MAX_SPELLS; ++i)
+        {
+            if (itr->spells[i] && !sSpellStore.LookupEntry(itr->spells[i]))
+            {
+                sLog.outErrorDb("LoadCreatureTemplateSpells: Spells found for creature entry %u, assigned spell %u does not exist, set to 0", itr->entry, itr->spells[i]);
+                const_cast<CreatureTemplateSpells*>(*itr)->spells[i] = 0;
+            }
+        }
+    }
 }
 
 CreatureInfo const* GetCreatureTemplateStore(uint32 entry)

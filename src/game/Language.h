@@ -150,7 +150,7 @@ enum MangosStrings
     LANG_YOU_GIVE_MOUNT                 = 150,
     LANG_MOUNT_GIVED                    = 151,
 
-    LANG_CURRENT_MONEY                  = 152,
+    //                                    152 not used
     LANG_YOU_TAKE_ALL_MONEY             = 153,
     LANG_YOURS_ALL_MONEY_GONE           = 154,
     LANG_YOU_TAKE_MONEY                 = 155,
@@ -158,8 +158,7 @@ enum MangosStrings
     LANG_YOU_GIVE_MONEY                 = 157,
     LANG_YOURS_MONEY_GIVEN              = 158,
     LANG_YOU_HEAR_SOUND                 = 159,
-
-    LANG_NEW_MONEY                      = 160,              // Log
+    //                                    160 not used
 
     LANG_REMOVE_BIT                     = 161,
     LANG_SET_BIT                        = 162,
@@ -167,7 +166,7 @@ enum MangosStrings
     LANG_COMMAND_TELE_NOTFOUND          = 164,
     LANG_COMMAND_TELE_PARAMETER         = 165,
     LANG_COMMAND_TELE_NOLOCATION        = 166,
-    //                                    167               // not used
+    LANG_YOURS_HOLY_POWER_CHANGED       = 167,
     LANG_COMMAND_TELE_LOCATION          = 168,
 
     LANG_MAIL_SENT                      = 169,
@@ -177,7 +176,8 @@ enum MangosStrings
     LANG_YOU_CHANGE_RUNIC_POWER         = 173,
     LANG_YOURS_RUNIC_POWER_CHANGED      = 174,
     LANG_LIQUID_STATUS                  = 175,
-    // Room for more level 1              176-199 not used
+    LANG_YOU_CHANGE_HOLY_POWER          = 176,
+    // Room for more level 1              177-199 not used
 
     // level 2 chat
     LANG_NO_SELECTION                   = 200,

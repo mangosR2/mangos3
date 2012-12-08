@@ -551,7 +551,6 @@ Unit::Unit() :
     m_baseSpellCritChance = 5;
 
     m_CombatTimer = 0;
-    m_lastManaUseTimer = 0;
 
     //m_victimThreat = 0.0f;
     for (int i = 0; i < MAX_SPELL_SCHOOL; ++i)
@@ -640,14 +639,6 @@ void Unit::Update( uint32 update_diff, uint32 p_time )
     {
         MAPLOCK_WRITE(this,MAP_LOCK_TYPE_AURAS);
         CleanupDeletedHolders(false);
-    }
-
-    if (m_lastManaUseTimer)
-    {
-        if (update_diff >= m_lastManaUseTimer)
-            m_lastManaUseTimer = 0;
-        else
-            m_lastManaUseTimer -= update_diff;
     }
 
     if (CanHaveThreatList())
@@ -894,7 +885,7 @@ void Unit::RemoveSpellsCausingAura(AuraType auraType, ObjectGuid casterGuid)
     {
         if ((*iter)->GetCasterGuid() == casterGuid)
         {
-            RemoveAuraHolderFromStack((*iter)->GetId(), 1, casterGuid);
+            RemoveSpellAuraHolder((*iter)->GetHolder());
             iter = m_modAuras[auraType].begin();
         }
         else
@@ -1044,7 +1035,6 @@ uint32 Unit::DealDamage(DamageInfo* damageInfo)
         // Critter may not die of damage taken, instead expect it to run away (no fighting back)
         // If (this) is TYPEID_PLAYER, (this) will enter combat w/victim, but after some time, automatically leave combat.
         // It is unclear how it should work for other cases.
-
         DEBUG_FILTER_LOG(LOG_FILTER_DAMAGE, "Unit::DealDamage %s strike critter, critter %s dies", GetObjectGuid().GetString().c_str(), pVictim->GetObjectGuid().GetString().c_str());
 
         ((Creature*)pVictim)->SetLootRecipient(this);
@@ -2142,7 +2132,7 @@ void Unit::CalculateMeleeDamage(DamageInfo* damageInfo)
             damageInfo->TargetState = VICTIMSTATE_NORMAL;
             damageInfo->HitInfo    |= HITINFO_BLOCK;
             damageInfo->procEx     |= PROC_EX_BLOCK;
-            damageInfo->blocked     = damageInfo->target->GetShieldBlockValue();
+            damageInfo->blocked     = damageInfo->target->GetShieldBlockDamageValue() * damageInfo->damage / 100.0f;
 
             // Target has a chance to double the blocked amount if it has SPELL_AURA_MOD_BLOCK_CRIT_CHANCE
             if (roll_chance_i(pVictim->GetTotalAuraModifier(SPELL_AURA_MOD_BLOCK_CRIT_CHANCE)))
@@ -2196,7 +2186,7 @@ void Unit::CalculateMeleeDamage(DamageInfo* damageInfo)
             }
 
             // calculate values
-            int32 diff = damageInfo->target->GetDefenseSkillValue() - GetWeaponSkillValue(damageInfo->attackType);
+            int32 diff = damageInfo->target->GetMaxSkillValueForLevel() - GetMaxSkillValueForLevel();
             float lowEnd  = baseLowEnd - ( 0.05f * diff );
             float highEnd = baseHighEnd - ( 0.03f * diff );
 
@@ -2338,8 +2328,8 @@ void Unit::DealMeleeDamage(DamageInfo* damageInfo, bool durabilityLoss)
         if ( pVictim->getLevel() < 30 )
             Probability = 0.65f*pVictim->getLevel()+0.5f;
 
-        uint32 VictimDefense=pVictim->GetDefenseSkillValue();
-        uint32 AttackerMeleeSkill=GetUnitMeleeSkill();
+        uint32 VictimDefense = pVictim->GetMaxSkillValueForLevel(this);
+        uint32 AttackerMeleeSkill = GetMaxSkillValueForLevel();
 
         Probability *= AttackerMeleeSkill/(float)VictimDefense;
 
@@ -2362,6 +2352,7 @@ void Unit::DealMeleeDamage(DamageInfo* damageInfo, bool durabilityLoss)
 
 void Unit::HandleEmoteCommand(uint32 emote_id)
 {
+    DEBUG_LOG("SMSG_EMOTE %u");
     WorldPacket data( SMSG_EMOTE, 4 + 8 );
     data << uint32(emote_id);
     data << GetObjectGuid();
@@ -3128,7 +3119,7 @@ void Unit::CalculateAbsorbResistBlock(Unit *pCaster, DamageInfo *damageInfo, Spe
 
     if (blocked)
     {
-        damageInfo->blocked = GetShieldBlockValue();
+        damageInfo->blocked = uint32(damageInfo->damage * GetShieldBlockDamageValue() / 100.0f);
         if (damageInfo->damage < damageInfo->blocked)
             damageInfo->blocked = damageInfo->damage;
         damageInfo->damage-=damageInfo->blocked;
@@ -3299,11 +3290,8 @@ MeleeHitOutcome Unit::RollMeleeOutcomeAgainst (const Unit *pVictim, WeaponAttack
     int32 attackerMaxSkillValueForLevel = GetMaxSkillValueForLevel(pVictim);
     int32 victimMaxSkillValueForLevel = pVictim->GetMaxSkillValueForLevel(this);
 
-    int32 attackerWeaponSkill = GetWeaponSkillValue(attType,pVictim);
-    int32 victimDefenseSkill = pVictim->GetDefenseSkillValue(this);
-
     // bonus from skills is 0.04%
-    int32    skillBonus  = 4 * ( attackerWeaponSkill - victimMaxSkillValueForLevel );
+    int32    skillBonus  = 4 * (attackerMaxSkillValueForLevel - victimMaxSkillValueForLevel);
     int32    sum = 0, tmp = 0;
     int32    roll = urand (0, 10000);
 
@@ -3388,11 +3376,9 @@ MeleeHitOutcome Unit::RollMeleeOutcomeAgainst (const Unit *pVictim, WeaponAttack
         getLevel() < pVictim->GetLevelForTarget(this) )
     {
         // cap possible value (with bonuses > max skill)
-        int32 skill = attackerWeaponSkill;
-        int32 maxskill = attackerMaxSkillValueForLevel;
-        skill = (skill > maxskill) ? maxskill : skill;
+        int32 skill = attackerMaxSkillValueForLevel;
 
-        tmp = (10 + victimDefenseSkill - skill) * 100;
+        tmp = (10 + (victimMaxSkillValueForLevel - skill)) * 100;
         tmp = tmp > 4000 ? 4000 : tmp;
         if (roll < (sum += tmp))
         {
@@ -3435,10 +3421,7 @@ MeleeHitOutcome Unit::RollMeleeOutcomeAgainst (const Unit *pVictim, WeaponAttack
         (GetTypeId()==TYPEID_PLAYER && GetCharmerOrOwnerGuid())))
     {
         // when their weapon skill is 15 or more above victim's defense skill
-        tmp = victimDefenseSkill;
-        int32 tmpmax = victimMaxSkillValueForLevel;
-        // having defense above your maximum (from items, talents etc.) has no effect
-        tmp = tmp > tmpmax ? tmpmax : tmp;
+        tmp = victimMaxSkillValueForLevel;
         // tmp = mob's level * 5 - player's current defense skill
         tmp = attackerMaxSkillValueForLevel - tmp;
         if (tmp >= 15)
@@ -3500,7 +3483,7 @@ uint32 Unit::CalculateDamage(WeaponAttackType attType, bool normalized)
 float Unit::CalculateLevelPenalty(SpellEntry const* spellProto) const
 {
     uint32 spellLevel = spellProto->GetSpellLevel();
-    if(spellLevel <= 0)
+    if (spellLevel <= 0 || spellLevel > spellProto->GetMaxLevel())
         return 1.0f;
 
     if (spellProto->GetMaxLevel() <= 0)
@@ -3579,7 +3562,11 @@ bool Unit::IsSpellBlocked(Unit *pCaster, SpellEntry const *spellEntry, WeaponAtt
     }
 
     float blockChance = GetUnitBlockChance();
-    blockChance += (int32(pCaster->GetWeaponSkillValue(attackType)) - int32(GetMaxSkillValueForLevel()))*0.04f;
+    // For each point of difference between the attacker's level and the defender's level,
+    // the block chance is modified by 0.5% if the target is a mob and 0.2% if the target is a player.
+    blockChance += (getLevel() - pCaster->GetLevelForTarget(this)) * (pCaster->GetTypeId() == TYPEID_PLAYER ? 0.2f : 0.5f);
+    if (blockChance < 0.0f)
+        blockChance = 0.0f;
 
     return roll_chance_f(blockChance);
 }
@@ -3641,13 +3628,12 @@ SpellMissInfo Unit::MeleeSpellHitResult(Unit *pVictim, SpellEntry const *spell)
         return SPELL_MISS_NONE;
 
     // bonus from skills is 0.04% per skill Diff
-    int32 attackerWeaponSkill = (spell->GetEquippedItemClass() == ITEM_CLASS_WEAPON) ? int32(GetWeaponSkillValue(attType,pVictim)) : GetMaxSkillValueForLevel();
+    int32 attackerWeaponSkill = GetMaxSkillValueForLevel();
     int32 skillDiff = attackerWeaponSkill - int32(pVictim->GetMaxSkillValueForLevel(this));
-    int32 fullSkillDiff = attackerWeaponSkill - int32(pVictim->GetDefenseSkillValue(this));
 
     uint32 roll = urand (0, 10000);
 
-    uint32 missChance = uint32(MeleeSpellMissChance(pVictim, attType, fullSkillDiff, spell)*100.0f);
+    uint32 missChance = uint32(MeleeSpellMissChance(pVictim, attType, skillDiff, spell) * 100.0f);
     // Roll miss
     uint32 tmp = spell->HasAttribute(SPELL_ATTR_EX3_CANT_MISS) ? 0 : missChance;
     if (roll < tmp)
@@ -4113,7 +4099,7 @@ float Unit::MeleeMissChanceCalc(const Unit *pVictim, WeaponAttackType attType) c
             missChance += 19.0f;
     }
 
-    int32 skillDiff = int32(GetWeaponSkillValue(attType, pVictim)) - int32(pVictim->GetDefenseSkillValue(this));
+    int32 skillDiff = int32(GetMaxSkillValueForLevel(pVictim)) - int32(pVictim->GetMaxSkillValueForLevel(this));
 
     // PvP - PvE melee chances
     // TODO: implement diminishing returns for defense from player's defense rating
@@ -4144,21 +4130,6 @@ float Unit::MeleeMissChanceCalc(const Unit *pVictim, WeaponAttackType attType) c
         return 60.0f;
 
     return missChance;
-}
-
-uint32 Unit::GetDefenseSkillValue(Unit const* target) const
-{
-    if (GetTypeId() == TYPEID_PLAYER)
-    {
-        // in PvP use full skill instead current skill value
-        uint32 value = (target && target->GetTypeId() == TYPEID_PLAYER)
-            ? ((Player*)this)->GetMaxSkillValue(SKILL_DEFENSE)
-            : ((Player*)this)->GetSkillValue(SKILL_DEFENSE);
-        value += uint32(((Player*)this)->GetRatingBonusValue(CR_DEFENSE_SKILL));
-        return value;
-    }
-    else
-        return GetUnitMeleeSkill(target);
 }
 
 float Unit::GetUnitDodgeChance() const
@@ -4236,7 +4207,7 @@ float Unit::GetUnitBlockChance() const
         else
         {
             float block = 5.0f;
-            block += GetTotalAuraModifier(SPELL_AURA_MOD_BLOCK_PERCENT);
+            block += GetTotalAuraModifier(SPELL_AURA_MOD_BLOCK_CHANCE_PERCENT);
             return block > 0.0f ? block : 0.0f;
         }
     }
@@ -4279,15 +4250,12 @@ float Unit::GetUnitCriticalChance(WeaponAttackType attackType, const Unit *pVict
 
     crit += pVictim->GetTotalAuraModifier(SPELL_AURA_MOD_ATTACKER_SPELL_AND_WEAPON_CRIT_CHANCE);
 
-
-    // Apply crit chance from defence skill
-    crit += (int32(GetMaxSkillValueForLevel(pVictim)) - int32(pVictim->GetDefenseSkillValue(this))) * 0.04f;
-
     if (crit < 0.0f)
         crit = 0.0f;
     return crit;
 }
 
+/*
 uint32 Unit::GetWeaponSkillValue (WeaponAttackType attType, Unit const* target) const
 {
     uint32 value = 0;
@@ -4323,6 +4291,7 @@ uint32 Unit::GetWeaponSkillValue (WeaponAttackType attType, Unit const* target) 
         value = GetUnitMeleeSkill(target);
    return value;
 }
+*/
 
 void Unit::_UpdateSpells( uint32 time )
 {
@@ -5175,6 +5144,8 @@ bool Unit::AddSpellAuraHolder(SpellAuraHolderPtr holder)
                 case 74323:
                     bIsSpellStackingCustom = true;
                     break;
+                default:
+                    break;
             }
 
             if (iter->second && !iter->second->IsDeleted() &&
@@ -5278,7 +5249,6 @@ bool Unit::AddSpellAuraHolder(SpellAuraHolderPtr holder)
                     ++itr;
                     continue;
                 }
-
                 bool removed = false;
                 switch (trackedType)
                 {
@@ -5608,7 +5578,6 @@ void Unit::RemoveAura(uint32 spellId, SpellEffectIndex effindex, Aura* except)
             ++iter;
     }
 }
-
 void Unit::RemoveAurasByCasterSpell(uint32 spellId, ObjectGuid casterGuid, AuraRemoveMode mode /*=AURA_REMOVE_BY_DEFAULT*/)
 {
     SpellAuraHolderBounds spair = GetSpellAuraHolderBounds(spellId);
@@ -5981,17 +5950,15 @@ void Unit::RemoveAurasWithAttribute(uint32 flags)
 
 void Unit::RemoveNotOwnTrackedTargetAuras(uint32 newPhase)
 {
-    // single target auras from other casters
+    // tracked aura targets from other casters are removed if the phase does no more fit
     for (SpellAuraHolderMap::iterator iter = m_spellAuraHolders.begin(); iter != m_spellAuraHolders.end(); )
     {
-
         TrackedAuraType trackedType = iter->second->GetTrackedAuraType();
         if (!trackedType)
         {
             ++iter;
             continue;
         }
-
 
         if (trackedType == TRACK_AURA_TYPE_CONTROL_VEHICLE || iter->second->GetCasterGuid() != GetObjectGuid())
         {
@@ -8597,6 +8564,9 @@ int32 Unit::SpellBaseDamageBonusDone(SpellSchoolMask schoolMask)
         // Base value
         DoneAdvertisedBenefit +=((Player*)this)->GetBaseSpellPowerBonus();
 
+        if (GetPowerIndex(POWER_MANA) != INVALID_POWER_INDEX)
+            DoneAdvertisedBenefit += std::max(0, int32(GetStat(STAT_INTELLECT)) - 10);  // spellpower from intellect
+
         // Damage bonus from stats
         AuraList const& mDamageDoneOfStatPercent = GetAurasByType(SPELL_AURA_MOD_SPELL_DAMAGE_OF_STAT_PERCENT);
         for(AuraList::const_iterator i = mDamageDoneOfStatPercent.begin();i != mDamageDoneOfStatPercent.end(); ++i)
@@ -9112,6 +9082,9 @@ int32 Unit::SpellBaseHealingBonusDone(SpellSchoolMask schoolMask)
         // Base value
         AdvertisedBenefit +=((Player*)this)->GetBaseSpellPowerBonus();
 
+        if (GetPowerIndex(POWER_MANA) != INVALID_POWER_INDEX)
+            AdvertisedBenefit += std::max(0, int32(GetStat(STAT_INTELLECT)) - 10);  // spellpower from intellect
+
         // Healing bonus from stats
         AuraList const& mHealingDoneOfStatPercent = GetAurasByType(SPELL_AURA_MOD_SPELL_HEALING_OF_STAT_PERCENT);
         for(AuraList::const_iterator i = mHealingDoneOfStatPercent.begin();i != mHealingDoneOfStatPercent.end(); ++i)
@@ -9219,7 +9192,7 @@ bool Unit::IsImmuneToSpell(SpellEntry const* spellInfo, bool isFriendly) const
     return false;
 }
 
-bool Unit::IsImmuneToSpellEffect(SpellEntry const* spellInfo, SpellEffectIndex index) const
+bool Unit::IsImmuneToSpellEffect(SpellEntry const* spellInfo, SpellEffectIndex index, bool castOnSelf) const
 {
     //If m_immuneToEffect type contain this effect type, IMMUNE effect.
     SpellEffectEntry const* spellEffect = spellInfo->GetSpellEffect(index);
@@ -11787,14 +11760,15 @@ void Unit::SetPowerByIndex(uint32 powerIndex, int32 val)
     MANGOS_ASSERT(powerIndex < MAX_STORED_POWERS);
     SetInt32Value(UNIT_FIELD_POWER1 + powerIndex, val);
 
-    if (IsInWorld())
-    {
         Powers power = getPowerType(powerIndex);
         MANGOS_ASSERT(power != INVALID_POWER);
 
+    if (IsInWorld())
+    {
         WorldPacket data(SMSG_POWER_UPDATE);
         data << GetPackGUID();
         data << uint32(1); // iteration count
+        // for (int i = 0; i < count; ++i)
         data << uint8(power);
         data << uint32(val);
         SendMessageToSet(&data, true);
@@ -11816,6 +11790,10 @@ void Unit::SetPowerByIndex(uint32 powerIndex, int32 val)
                 ((Player*)owner)->SetGroupUpdateFlag(GROUP_UPDATE_FLAG_PET_CUR_POWER);
         }
     }
+
+    // modifying holy power resets it's fade timer
+    if (power == POWER_HOLY_POWER)
+        ResetHolyPowerRegenTimer();
 }
 
 void Unit::SetMaxPower(Powers power, int32 val)
@@ -11923,11 +11901,26 @@ uint32 Unit::GetCreatePowers( Powers power ) const
                 return 100;
             return (GetTypeId() == TYPEID_PLAYER || !((Creature const*)this)->IsPet() || ((Pet const*)this)->getPetType() != HUNTER_PET ? 0 : 100);
         case POWER_ENERGY:      return 100;
-        case POWER_RUNE:        return (GetTypeId() == TYPEID_PLAYER && ((Player const*)this)->getClass() == CLASS_DEATH_KNIGHT ? 8 : 0);
-        case POWER_RUNIC_POWER: return (GetTypeId() == TYPEID_PLAYER && ((Player const*)this)->getClass() == CLASS_DEATH_KNIGHT ? 1000 : 0);
-        case POWER_SOUL_SHARDS: return 0;                   // TODO: fix me
+        case POWER_RUNE:        return GetTypeId() == TYPEID_PLAYER && ((Player const*)this)->getClass() == CLASS_DEATH_KNIGHT ? 8 : 0;
+        case POWER_RUNIC_POWER: return GetTypeId() == TYPEID_PLAYER && ((Player const*)this)->getClass() == CLASS_DEATH_KNIGHT ? 1000 : 0;
+        case POWER_SOUL_SHARDS: return 0;
         case POWER_ECLIPSE:     return 0;                   // TODO: fix me
         case POWER_HOLY_POWER:  return 0;
+    }
+
+    return 0;
+}
+
+uint32 Unit::GetCreateMaxPowers(Powers power) const
+{
+    switch (power)
+    {
+        case POWER_HOLY_POWER:
+            return GetTypeId() == TYPEID_PLAYER && ((Player const*)this)->getClass() == CLASS_PALADIN ? 3 : 0;
+        case POWER_SOUL_SHARDS:
+            return GetTypeId() == TYPEID_PLAYER && ((Player const*)this)->getClass() == CLASS_WARLOCK ? 3 : 0;
+        default:
+            return GetCreatePowers(power);
     }
 
     return 0;
@@ -12039,7 +12032,6 @@ bool CharmInfo::HasState(CharmStateType type, uint8 value)
 
 void CharmInfo::InitEmptyActionBar()
 {
-    SetActionBar(ACTION_BAR_INDEX_START,COMMAND_ATTACK,ACT_COMMAND);
     for(uint32 x = ACTION_BAR_INDEX_START+1; x < ACTION_BAR_INDEX_END; ++x)
         SetActionBar(x,0,ACT_PASSIVE);
 }
@@ -12655,6 +12647,7 @@ void Unit::ProcDamageAndSpellFor(bool isVictim, DamageInfo* damageInfo)
     // For melee/ranged based attack need update skills and set some Aura states
     if (!(procExtra & PROC_EX_CAST_END) && (procFlag & MELEE_BASED_TRIGGER_MASK))
     {
+/*
         // Update skills here for players
         if (GetTypeId() == TYPEID_PLAYER)
         {
@@ -12668,6 +12661,7 @@ void Unit::ProcDamageAndSpellFor(bool isVictim, DamageInfo* damageInfo)
             if (isVictim && (procExtra & (PROC_EX_DODGE|PROC_EX_PARRY|PROC_EX_BLOCK)))
                 ((Player*)this)->UpdateDefense();
         }
+*/
         // If exist crit/parry/dodge/block need update aura state (for victim and attacker)
         if (procExtra & (PROC_EX_CRITICAL_HIT|PROC_EX_PARRY|PROC_EX_DODGE|PROC_EX_BLOCK))
         {
@@ -14772,6 +14766,27 @@ void Unit::BuildMoveWaterWalkPacket(WorldPacket* data, bool apply, uint32 value)
         data->WriteGuidMask<5, 1, 6, 2, 3, 4, 0, 7>(GetObjectGuid());
         data->WriteGuidBytes<6, 1, 7, 5, 4, 0, 3, 2>(GetObjectGuid());
         *data << uint32(value);
+    }
+}
+
+void Unit::BuildMoveFeatherFallPacket(WorldPacket* data, bool apply, uint32 value)
+{
+    ObjectGuid guid = GetObjectGuid();
+
+    if (apply)
+    {
+        data->Initialize(SMSG_MOVE_FEATHER_FALL, 1 + 4 + 8);
+        data->WriteGuidMask<3, 1, 7, 0, 4, 2, 5, 6>(guid);
+        data->WriteGuidBytes<5, 7, 2>(guid);
+        *data << uint32(value);
+        data->WriteGuidBytes<0, 3, 4, 1, 6>(guid);
+    }
+    else
+    {
+        data->Initialize(SMSG_MOVE_NORMAL_FALL, 1 + 4 + 8);
+        *data << uint32(value);
+        data->WriteGuidMask<3, 0, 1, 5, 7, 4, 6, 2>(guid);
+        data->WriteGuidBytes<2, 7, 1, 4, 5, 0, 3, 6>(guid);
     }
 }
 

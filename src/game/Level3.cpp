@@ -3502,6 +3502,7 @@ bool ChatHandler::HandleLookupSpellCommand(char* args)
         if (spellInfo)
         {
             int loc = GetSessionDbcLocale();
+            DEBUG_LOG("Spellid %u locale %u", id, loc);
             std::string name = spellInfo->SpellName[loc];
             if (name.empty())
                 continue;
@@ -5641,6 +5642,15 @@ bool ChatHandler::HandleQuestCompleteCommand(char* args)
     int32 ReqOrRewMoney = pQuest->GetRewOrReqMoney();
     if (ReqOrRewMoney < 0)
         player->ModifyMoney(-ReqOrRewMoney);
+
+    for (int i = 0; i < QUEST_REQUIRED_CURRENCY_COUNT; ++i)
+    {
+        if (pQuest->ReqCurrencyId[i])
+            player->ModifyCurrencyCount(pQuest->ReqCurrencyId[i], int32(pQuest->ReqCurrencyCount[i] * GetCurrencyPrecision(pQuest->ReqCurrencyId[i])));
+    }
+
+    if (uint32 spell = pQuest->GetReqSpellLearned())
+        player->learnSpell(spell, false);
 
     player->CompleteQuest(entry);
     return true;

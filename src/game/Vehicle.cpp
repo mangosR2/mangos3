@@ -17,9 +17,29 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+/**
+ * @addtogroup TransportSystem
+ * @{
+ *
+ * @file Vehicle.cpp
+ * This file contains the code needed for CMaNGOS to support vehicles
+ * Currently implemented
+ * - Board to board a passenger onto a vehicle (includes checks)
+ * - Unboard to unboard a passenger from the vehicle
+ * - SwitchSeat to switch to another seat of the same vehicle
+ * - CanBoard to check if a passenger can board a vehicle
+ * - Internal helper to set the controlling and spells for a vehicle's seat
+ * - Internal helper to control the available seats of a vehicle
+ */
+
 #include "Common.h"
+#include "SharedDefines.h"
+#include "ObjectGuid.h"
 #include "Log.h"
+#include "Unit.h"
+#include "Creature.h"
 #include "ObjectMgr.h"
+#include "SQLStorages.h"
 #include "Vehicle.h"
 #include "Unit.h"
 #include "CreatureAI.h"

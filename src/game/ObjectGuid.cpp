@@ -42,6 +42,7 @@ char const* ObjectGuid::GetTypeName(HighGuid high)
         case HIGHGUID_MO_TRANSPORT: return "MoTransport";
         case HIGHGUID_INSTANCE:     return "InstanceID";
         case HIGHGUID_GROUP:        return "Group";
+        case HIGHGUID_BATTLEGROUND: return "Battleground";
         default:
             return "<unknown>";
     }

@@ -685,42 +685,42 @@ void WorldSession::HandleAreaTriggerOpcode(WorldPacket & recv_data)
 
     recv_data >> Trigger_ID;
     DEBUG_LOG("Trigger ID: %u", Trigger_ID);
+    Player* player = GetPlayer();
 
-    if(GetPlayer()->IsTaxiFlying())
+    if (player->IsTaxiFlying())
     {
-        DEBUG_LOG("Player '%s' (GUID: %u) in flight, ignore Area Trigger ID: %u", GetPlayer()->GetName(), GetPlayer()->GetGUIDLow(), Trigger_ID);
+        DEBUG_LOG("Player '%s' (GUID: %u) in flight, ignore Area Trigger ID: %u", player->GetName(), player->GetGUIDLow(), Trigger_ID);
         return;
     }
 
     AreaTriggerEntry const* atEntry = sAreaTriggerStore.LookupEntry(Trigger_ID);
     if(!atEntry)
     {
-        DEBUG_LOG("Player '%s' (GUID: %u) send unknown (by DBC) Area Trigger ID: %u", GetPlayer()->GetName(), GetPlayer()->GetGUIDLow(), Trigger_ID);
+        DEBUG_LOG("Player '%s' (GUID: %u) send unknown (by DBC) Area Trigger ID: %u", player->GetName(), player->GetGUIDLow(), Trigger_ID);
         return;
     }
 
     // delta is safe radius
     const float delta = 5.0f;
-    // check if player in the range of areatrigger
-    Player* pl = GetPlayer();
 
-    if (!IsPointInAreaTriggerZone(atEntry, pl->GetMapId(), pl->GetPositionX(), pl->GetPositionY(), pl->GetPositionZ(), delta))
+    // check if player in the range of areatrigger
+    if (!IsPointInAreaTriggerZone(atEntry, player->GetMapId(), player->GetPositionX(), player->GetPositionY(), player->GetPositionZ(), delta))
     {
-        DEBUG_LOG("Player '%s' (GUID: %u) too far, ignore Area Trigger ID: %u", pl->GetName(), pl->GetGUIDLow(), Trigger_ID);
+        DEBUG_LOG("Player '%s' (GUID: %u) too far, ignore Area Trigger ID: %u", player->GetName(), player->GetGUIDLow(), Trigger_ID);
         return;
     }
 
-    if (sScriptMgr.OnAreaTrigger(pl, atEntry))
+    if (sScriptMgr.OnAreaTrigger(player, atEntry))
         return;
 
     uint32 quest_id = sObjectMgr.GetQuestForAreaTrigger( Trigger_ID );
-    if ( quest_id && pl->isAlive() && pl->IsActiveQuest(quest_id) )
+    if (quest_id && player->isAlive() && player->IsActiveQuest(quest_id))
     {
         Quest const* pQuest = sObjectMgr.GetQuestTemplate(quest_id);
         if( pQuest )
         {
-            if(pl->GetQuestStatus(quest_id) == QUEST_STATUS_INCOMPLETE)
-                pl->AreaExploredOrEventHappens( quest_id );
+            if (player->GetQuestStatus(quest_id) == QUEST_STATUS_INCOMPLETE)
+                player->AreaExploredOrEventHappens(quest_id);
         }
     }
 
@@ -728,19 +728,19 @@ void WorldSession::HandleAreaTriggerOpcode(WorldPacket & recv_data)
     if (sObjectMgr.IsTavernAreaTrigger(Trigger_ID))
     {
         // set resting flag we are in the inn
-        if (pl->GetRestType() != REST_TYPE_IN_CITY)
-            pl->SetRestType(REST_TYPE_IN_TAVERN, Trigger_ID);
+        if (player->GetRestType() != REST_TYPE_IN_CITY)
+            player->SetRestType(REST_TYPE_IN_TAVERN, Trigger_ID);
         return;
     }
 
-    if (BattleGround* bg = pl->GetBattleGround())
+    if (BattleGround* bg = player->GetBattleGround())
     {
-        bg->HandleAreaTrigger(pl, Trigger_ID);
+        bg->HandleAreaTrigger(player, Trigger_ID);
         return;
     }
-    else if (OutdoorPvP* outdoorPvP = sOutdoorPvPMgr.GetScript(pl->GetCachedZoneId()))
+    else if (OutdoorPvP* outdoorPvP = sOutdoorPvPMgr.GetScript(player->GetCachedZoneId()))
     {
-        if (outdoorPvP->HandleAreaTrigger(pl, Trigger_ID))
+        if (outdoorPvP->HandleAreaTrigger(player, Trigger_ID))
             return;
     }
 
@@ -904,13 +904,13 @@ void WorldSession::HandleNextCinematicCamera( WorldPacket & /*recv_data*/ )
 void WorldSession::HandleMoveTimeSkippedOpcode( WorldPacket & recv_data )
 {
     /*  WorldSession::Update( WorldTimer::getMSTime() );*/
-//    DEBUG_LOG( "WORLD: Time Lag/Synchronization Resent/Update" );
 
     ObjectGuid guid;
     uint32 time_skipped;
 
-    recv_data >> guid.ReadAsPacked();
     recv_data >> time_skipped;
+    recv_data.ReadGuidMask<5, 1, 3, 7, 6, 0, 4, 2>(guid);
+    recv_data.ReadGuidBytes<7, 1, 2, 4, 3, 6, 0, 5>(guid);
 
     DEBUG_LOG( "WORLD: Time Lag/Synchronization Resent/Update, data = %d", time_skipped);
 
@@ -1015,10 +1015,10 @@ void WorldSession::HandleInspectOpcode(WorldPacket& recv_data)
     plr->BuildEnchantmentsInfoData(&data);
     if (Guild* guild = sGuildMgr.GetGuildById(plr->GetGuildId()))
     {
-        data << uint64(0/*guild->GetGUID()*/);
-        data << uint32(0/*guild->GetLevel()*/);
+        data << guild->GetObjectGuid();
+        data << uint32(guild->GetLevel());
         data << uint64(0/*guild->GetXP()*/);
-        data << uint32(0/*guild->GetMembersCount()*/); // number of members
+        data << uint32(guild->GetMemberSize());             // number of members
     }
 
     SendPacket(&data);
@@ -1315,7 +1315,8 @@ void WorldSession::HandleSetDungeonDifficultyOpcode( WorldPacket & recv_data )
         return;
     }
 
-    if (_player->getLevel() < LEVELREQUIREMENT_HEROIC)
+    // Exception to set mode to normal for low-level players
+    if (_player->getLevel() < LEVELREQUIREMENT_HEROIC && mode > REGULAR_DIFFICULTY)
         return;
 
     if (Group *pGroup = _player->GetGroup())
@@ -1359,7 +1360,8 @@ void WorldSession::HandleSetRaidDifficultyOpcode( WorldPacket & recv_data )
         return;
     }
 
-    if (_player->getLevel() < LEVELREQUIREMENT_HEROIC)
+    // Exception to set mode to normal for low-level players
+    if (_player->getLevel() < LEVELREQUIREMENT_HEROIC && mode > REGULAR_DIFFICULTY)
         return;
 
     if (Group *pGroup = _player->GetGroup())

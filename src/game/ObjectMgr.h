@@ -840,7 +840,7 @@ class ObjectMgr
         void LoadQuestPhaseMaps();
 
         void LoadNPCSpellClickSpells();
-        void LoadSpellTemplate();
+        void LoadCreatureTemplateSpells();
 
         void LoadWeatherZoneChances();
         void LoadGameTele();
@@ -1083,8 +1083,8 @@ class ObjectMgr
             return result;
         }
 
-        int GetIndexForLocale(LocaleConstant loc);
-        LocaleConstant GetLocaleForIndex(int i);
+//        int GetIndexForLocale(LocaleConstant loc);
+//        LocaleConstant GetLocaleForIndex(int i);
 
         // Check if a player meets condition conditionId
         bool IsPlayerMeetToCondition(Player const* pPlayer, uint16 conditionId) const;

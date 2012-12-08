@@ -23,6 +23,7 @@
 #include "ObjectMgr.h"
 #include "ScriptMgr.h"
 #include "ObjectGuid.h"
+#include "SQLStorages.h"
 #include "SpellMgr.h"
 #include "QuestDef.h"
 #include "GossipDef.h"
@@ -145,6 +146,7 @@ m_temporaryFactionFlags(TEMPFACTION_NONE), m_meleeDamageSchoolMask(SPELL_SCHOOL_
 m_creatureInfo(NULL)
 {
     m_regenTimer = 200;
+    m_holyPowerRegenTimer = REGEN_TIME_HOLY_POWER;
     m_valuesCount = UNIT_END;
 
     m_CreatureSpellCooldowns.clear();
@@ -626,14 +628,11 @@ void Creature::Regenerate(Powers power)
             // Combat and any controlled creature
             if (isInCombat() || !GetCharmerOrOwnerGuid().IsEmpty())
             {
-                if(!IsUnderLastManaUseEffect())
-                {
                     float ManaIncreaseRate = sWorld.getConfig(CONFIG_FLOAT_RATE_POWER_MANA);
                     float Spirit = GetStat(STAT_SPIRIT);
 
                     addvalue = int32((Spirit / 5.0f + 17.0f) * ManaIncreaseRate);
                 }
-            }
             else
                 addvalue = maxValue / 3;
             break;
@@ -1604,34 +1603,36 @@ bool Creature::IsImmuneToSpell(SpellEntry const* spellInfo, bool isFriendly) con
     if (!spellInfo)
         return false;
 
-    if (GetCreatureInfo()->MechanicImmuneMask & (1 << (spellInfo->GetMechanic() - 1)))
+    if (!castOnSelf && GetCreatureInfo()->MechanicImmuneMask & (1 << (spellInfo->GetMechanic() - 1)))
         return true;
 
     return Unit::IsImmuneToSpell(spellInfo, isFriendly);
 }
 
-bool Creature::IsImmuneToSpellEffect(SpellEntry const* spellInfo, SpellEffectIndex index) const
+bool Creature::IsImmuneToSpellEffect(SpellEntry const* spellInfo, SpellEffectIndex index, bool castOnSelf) const
 {
     SpellEffectEntry const* spellEffect = spellInfo->GetSpellEffect(index);
+    if (!spellEffect)
+        return false;
 
-    if (spellEffect && GetCreatureInfo()->MechanicImmuneMask & (1 << (spellEffect->EffectMechanic - 1)))
+    if (!castOnSelf && GetCreatureInfo()->MechanicImmuneMask & (1 << (spellEffect->EffectMechanic - 1)))
         return true;
 
     // Taunt immunity special flag check
     if (GetCreatureInfo()->flags_extra & CREATURE_FLAG_EXTRA_NOT_TAUNTABLE)
     {
         // Taunt aura apply check
-        if (spellEffect && spellEffect->Effect == SPELL_EFFECT_APPLY_AURA)
+        if (spellEffect->Effect == SPELL_EFFECT_APPLY_AURA)
         {
-            if (spellEffect && spellEffect->EffectApplyAuraName == SPELL_AURA_MOD_TAUNT)
+            if (spellEffect->EffectApplyAuraName == SPELL_AURA_MOD_TAUNT)
                 return true;
         }
         // Spell effect taunt check
-        else if (spellEffect && spellEffect->Effect == SPELL_EFFECT_ATTACK_ME)
+        else if (spellEffect->Effect == SPELL_EFFECT_ATTACK_ME)
             return true;
     }
 
-    return Unit::IsImmuneToSpellEffect(spellInfo, index);
+    return Unit::IsImmuneToSpellEffect(spellInfo, index, castOnSelf);
 }
 
 SpellEntry const* Creature::ReachWithSpellAttack(Unit* pVictim)
@@ -1719,12 +1720,13 @@ SpellEntry const* Creature::ReachWithSpellCure(Unit* pVictim)
         for (int j = 0; j < MAX_EFFECT_INDEX; ++j)
         {
             SpellEffectEntry const* spellEffect = spellInfo->GetSpellEffect(SpellEffectIndex(j));
-            if( spellEffect && (spellEffect->Effect == SPELL_EFFECT_HEAL) )
+            if (spellEffect && spellEffect->Effect == SPELL_EFFECT_HEAL)
             {
                 bcontinue = false;
                 break;
             }
         }
+
         if (bcontinue)
             continue;
 

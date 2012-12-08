@@ -701,9 +701,9 @@ struct ChrClassesEntry
     //uint32 flags2;                                        // 8        m_flags (0x08 HasRelicSlot)
     uint32  CinematicSequence;                              // 9        m_cinematicSequenceID
     uint32  expansion;                                      // 10       m_required_expansion
-    //uint32                                                // 11
-    //uint32                                                // 12
-    //uint32                                                // 13
+    uint32  apPerStr;                                       // 11       attack power per strength
+    uint32  apPerAgi;                                       // 12       attack power per agility
+    uint32  rapPerAgi;                                      // 13       ranged attack power per agility
 };
 
 struct ChrRacesEntry
@@ -1608,13 +1608,6 @@ struct ScalingStatValuesEntry
     {
         if (mask & 0x00008000)
             return spellBonus;
-        return 0;
-    }
-
-    uint32 getFeralBonus(uint32 mask) const                 // removed in 3.2.x?
-    {
-        if (mask & 0x00010000)                              // not used?
-            return 0;
         return 0;
     }
 };
@@ -2662,7 +2655,7 @@ struct TalentTabEntry
     //char* internalname;                                   // 6        m_backgroundFile
     //char* description;                                    // 7
     uint32 rolesMask;                                       // 8 4.0.0
-    uint32 masterySpells[MAX_MASTERY_SPELLS];               // 9-10 passive mastery bonus spells?
+    uint32 masterySpells[MAX_MASTERY_SPELLS];               // 9-10     passive mastery bonus spells
 };
 
 struct TalentTreePrimarySpellsEntry
@@ -2933,15 +2926,6 @@ typedef std::set<uint32> PetFamilySpellsSet;
 typedef std::map<uint32,PetFamilySpellsSet > PetFamilySpellsStore;
 
 // Structures not used for casting to loaded DBC data and not required then packing
-struct MapDifficulty
-{
-    MapDifficulty() : resetTime(0), maxPlayers(0) {}
-    MapDifficulty(uint32 _resetTime, uint32 _maxPlayers) : resetTime(_resetTime), maxPlayers(_maxPlayers) {}
-
-    uint32 resetTime;                                       // in secs, 0 if no fixed reset time
-    uint32 maxPlayers;                                      // some heroic dungeons have 0 when expect same value as in normal dificulty case
-};
-
 struct TalentSpellPos
 {
     TalentSpellPos() : talent_id(0), rank(0) {}
@@ -2995,6 +2979,6 @@ struct TaxiPathNodePtr
 typedef Path<TaxiPathNodePtr,TaxiPathNodeEntry const> TaxiPathNodeList;
 typedef std::vector<TaxiPathNodeList> TaxiPathNodesByPath;
 
-#define TaxiMaskSize 14
-typedef uint32 TaxiMask[TaxiMaskSize];
+#define TaxiMaskSize 114
+typedef uint8 TaxiMask[TaxiMaskSize];
 #endif

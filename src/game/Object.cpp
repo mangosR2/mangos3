@@ -527,10 +527,8 @@ void Object::BuildMovementUpdate(ByteBuffer * data, uint16 updateFlags) const
 
     if (updateFlags & UPDATEFLAG_VEHICLE)
     {
-        *data << uint32(((Unit*)this)->GetVehicleInfo()->m_ID); // vehicle id
-        *data << float(((WorldObject*)this)->GetOrientation());
-//        *data << float(NormalizeOrientation(((WorldObject*)this)->GetOrientation()));
-//        *data << uint32(((Unit*)this)->GetVehicleInfo()->GetEntry()->m_ID); // vehicle id
+        *data << float(NormalizeOrientation(((WorldObject*)this)->GetOrientation()));
+        *data << uint32(((Unit*)this)->GetVehicleInfo()->GetVehicleEntry()->m_ID); // vehicle id
     }
 
     // used only with GO's, placeholder
@@ -2157,6 +2155,7 @@ void WorldObject::PlayDistanceSound( uint32 sound_id, Player* target /*= NULL*/ 
 {
     WorldPacket data(SMSG_PLAY_OBJECT_SOUND,4+8);
     data << uint32(sound_id);
+    data << GetObjectGuid();
     data << GetObjectGuid();
     if (target)
         target->SendDirectMessage( &data );

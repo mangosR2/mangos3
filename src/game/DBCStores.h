@@ -93,6 +93,7 @@ inline Difficulty GetPrevDifficulty(Difficulty diff, bool isRaid)
 uint32 const* /*[3]*/ GetTalentTabPages(uint32 cls);
 std::vector<uint32> const* GetTalentTreeMasterySpells(uint32 talentTree);
 std::vector<uint32> const* GetTalentTreePrimarySpells(uint32 talentTree);
+uint32 GetTalentTreeRolesMask(uint32 talentTree);
 
 bool IsPointInAreaTriggerZone(AreaTriggerEntry const* atEntry, uint32 mapid, float x, float y, float z, float delta = 0.0f);
 
@@ -100,6 +101,8 @@ PvPDifficultyEntry const* GetBattlegroundBracketByLevel(uint32 mapid, uint32 lev
 PvPDifficultyEntry const* GetBattlegroundBracketById(uint32 mapid, BattleGroundBracketId id);
 
 MANGOS_DLL_SPEC uint32 GetCreatureModelRace(uint32 model_id);
+
+float GetCurrencyPrecision(uint32 currencyId);
 
 extern DBCStorage <AchievementEntry>             sAchievementStore;
 extern DBCStorage <AchievementCriteriaEntry>     sAchievementCriteriaStore;
@@ -147,9 +150,8 @@ extern DBCStorage <GtChanceToMeleeCritEntry>     sGtChanceToMeleeCritStore;
 extern DBCStorage <GtChanceToSpellCritBaseEntry> sGtChanceToSpellCritBaseStore;
 extern DBCStorage <GtChanceToSpellCritEntry>     sGtChanceToSpellCritStore;
 extern DBCStorage <GtOCTClassCombatRatingScalarEntry> sGtOCTClassCombatRatingScalarStore;
-// extern DBCStorage <GtOCTRegenHPEntry>            sGtOCTRegenHPStore;
 // extern DBCStorage <GtOCTRegenMPEntry>            sGtOCTRegenMPStore; -- not used currently
-// extern DBCStorage <GtRegenHPPerSptEntry>         sGtRegenHPPerSptStore;
+extern DBCStorage <GtOCTHpPerStaminaEntry>       sGtOCTHpPerStaminaStore;
 extern DBCStorage <GtRegenMPPerSptEntry>         sGtRegenMPPerSptStore;
 extern DBCStorage <GtSpellScalingEntry>          sGtSpellScalingStore;
 extern DBCStorage <GtOCTBaseHPByClassEntry>      sGtOCTBaseHPByClassStore;

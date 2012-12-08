@@ -62,18 +62,13 @@ class Item;
 struct AreaTrigger;
 class OutdoorPvP;
 
+struct AreaTrigger;
+
 typedef std::deque<Mail*> PlayerMails;
 
 #define PLAYER_MAX_SKILLS           128
 #define PLAYER_MAX_DAILY_QUESTS     25
 #define PLAYER_EXPLORED_ZONES_SIZE  156
-
-// Note: SPELLMOD_* values is aura types in fact
-enum SpellModType
-{
-    SPELLMOD_FLAT         = 107,                            // SPELL_AURA_ADD_FLAT_MODIFIER
-    SPELLMOD_PCT          = 108                             // SPELL_AURA_ADD_PCT_MODIFIER
-};
 
 // 2^n internal values, they are never sent to the client
 enum PlayerUnderwaterState
@@ -455,6 +450,12 @@ enum PlayerFlags
     PLAYER_FLAGS_UNK24                  = 0x00800000,       // EVENT_SPELL_UPDATE_USABLE and EVENT_UPDATE_SHAPESHIFT_USABLE, disabled all abilitys on tab except autoattack
     PLAYER_FLAGS_UNK25                  = 0x01000000,       // EVENT_SPELL_UPDATE_USABLE and EVENT_UPDATE_SHAPESHIFT_USABLE, disabled all melee ability on tab include autoattack
     PLAYER_FLAGS_XP_USER_DISABLED       = 0x02000000,
+    PLAYER_FLAGS_UNK27                  = 0x04000000,
+    PLAYER_FLAGS_AUTO_DECLINE_GUILDS    = 0x08000000,       // Automatically declines guild invites
+    PLAYER_FLAGS_GUILD_LEVELING_ENABLED = 0x10000000,       // Lua_GetGuildLevelEnabled() - enables guild leveling related UI
+    PLAYER_FLAGS_VOID_STORAGE_UNLOCKED  = 0x20000000,       // unlocks void storage
+    PLAYER_FLAGS_UNK30                  = 0x40000000,
+    PLAYER_FLAGS_UNK31                  = 0x80000000,
 };
 
 // used for PLAYER__FIELD_KNOWN_TITLES field (uint64), (1<<bit_index) without (-1)
@@ -898,7 +899,7 @@ enum ReputationSource
 
 // Player summoning auto-decline time (in secs)
 #define MAX_PLAYER_SUMMON_DELAY                   (2*MINUTE)
-#define MAX_MONEY_AMOUNT                       (0x7FFFFFFF-1)
+#define MAX_MONEY_AMOUNT        (9999999999)    // from wowpedia
 
 struct InstancePlayerBind
 {
@@ -929,14 +930,14 @@ class MANGOS_DLL_SPEC PlayerTaxi
 
         bool IsTaximaskNodeKnown(uint32 nodeidx) const
         {
-            uint8  field   = uint8((nodeidx - 1) / 32);
-            uint32 submask = 1<<((nodeidx-1)%32);
+            uint8 field   = uint8((nodeidx - 1) / 8);
+            uint8 submask = 1 << ((nodeidx - 1) % 8);
             return (m_taximask[field] & submask) == submask;
         }
         bool SetTaximaskNode(uint32 nodeidx)
         {
-            uint8  field   = uint8((nodeidx - 1) / 32);
-            uint32 submask = 1<<((nodeidx-1)%32);
+            uint8 field   = uint8((nodeidx - 1) / 8);
+            uint8 submask = 1 << ((nodeidx - 1) % 8);
             if ((m_taximask[field] & submask) != submask )
             {
                 m_taximask[field] |= submask;
@@ -1106,7 +1107,6 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         void SendInitialPacketsBeforeAddToMap();
         void SendInitialPacketsAfterAddToMap();
-        void SendTransferAborted(uint32 mapid, uint8 reason, uint8 arg = 0);
         void SendInstanceResetWarning(uint32 mapid, Difficulty difficulty, uint32 time);
 
         Creature* GetNPCIfCanInteractWith(ObjectGuid guid, uint32 npcflagmask);
@@ -1409,6 +1409,7 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         void FailQuest(uint32 quest_id);
         bool SatisfyQuestSkill(Quest const* qInfo, bool msg) const;
+        bool SatisfyQuestSpell(Quest const* qInfo, bool msg) const;
         bool SatisfyQuestLevel(Quest const* qInfo, bool msg) const;
         bool SatisfyQuestLog(bool msg) const;
         bool SatisfyQuestPreviousQuest(Quest const* qInfo, bool msg) const;
@@ -1471,8 +1472,12 @@ class MANGOS_DLL_SPEC Player : public Unit
         uint32 GetReqKillOrCastCurrentCount(uint32 quest_id, int32 entry);
         void AreaExploredOrEventHappens(uint32 questId);
         void GroupEventHappens(uint32 questId, WorldObject const* pEventObject);
+        void CurrencyAddedQuestCheck(uint32 entry);
+        void CurrencyRemovedQuestCheck(uint32 entry);
         void ItemAddedQuestCheck(uint32 entry, uint32 count);
         void ItemRemovedQuestCheck(uint32 entry, uint32 count);
+        void SpellAddedQuestCheck(uint32 entry);
+        void SpellRemovedQuestCheck(uint32 entry);
         void KilledMonster(CreatureInfo const* cInfo, ObjectGuid guid);
         void KilledMonsterCredit(uint32 entry, ObjectGuid guid = ObjectGuid());
         void CastedCreatureOrGO(uint32 entry, ObjectGuid guid, uint32 spell_id, bool original_caster = true);
@@ -1551,20 +1556,20 @@ class MANGOS_DLL_SPEC Player : public Unit
         void setWeaponChangeTimer(uint32 time) {m_weaponChangeTimer = time;}
 
         uint64 GetMoney() const { return GetUInt64Value(PLAYER_FIELD_COINAGE); }
-        void ModifyMoney(int32 d)
+        void ModifyMoney(int64 d)
         {
             if (d < 0)
-                SetMoney (GetMoney() > uint32(-d) ? GetMoney() + d : 0);
+                SetMoney(GetMoney() > uint64(-d) ? GetMoney() + d : 0);
             else
-                SetMoney (GetMoney() < uint32(MAX_MONEY_AMOUNT - d) ? GetMoney() + d : MAX_MONEY_AMOUNT);
+                SetMoney(GetMoney() < uint64(MAX_MONEY_AMOUNT - d) ? GetMoney() + d : MAX_MONEY_AMOUNT);
 
             // "At Gold Limit"
             if (GetMoney() >= MAX_MONEY_AMOUNT)
                 SendEquipError(EQUIP_ERR_TOO_MUCH_GOLD,NULL,NULL);
         }
-        void SetMoney(uint32 value)
+        void SetMoney(uint64 value)
         {
-            SetUInt32Value (PLAYER_FIELD_COINAGE, value);
+            SetUInt64Value(PLAYER_FIELD_COINAGE, value);
             MoneyChanged(value);
             UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_HIGHEST_GOLD_VALUE_OWNED);
         }
@@ -1792,15 +1797,21 @@ class MANGOS_DLL_SPEC Player : public Unit
         void SetAllowLowLevelRaid(bool allow) { ApplyModFlag(PLAYER_FLAGS, PLAYER_FLAGS_ENABLE_LOW_LEVEL_RAID, allow); }
         bool GetAllowLowLevelRaid() const { return HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_ENABLE_LOW_LEVEL_RAID); }
 
-        void SetInGuild(uint32 GuildId) { m_guildId = GuildId; }
+        void SetInGuild(uint32 GuildId);
+        void SetGuildLevel(uint32 level) { SetUInt32Value(PLAYER_GUILDLEVEL, level); }
         void SetRank(uint32 rankId){ SetUInt32Value(PLAYER_GUILDRANK, rankId); }
-        void SetGuildIdInvited(uint32 GuildId) { m_GuildIdInvited = GuildId; }
-        uint32 GetGuildId() { return m_guildId; }
+        void SetGuildInvited(uint32 GuildId, ObjectGuid inviter = ObjectGuid()) { m_GuildIdInvited = GuildId; m_GuildInviterGuid = inviter; }
+        uint32 GetGuildId() const { return GetGuildGuid().GetCounter(); }
+        ObjectGuid GetGuildGuid() const { return GetGuidValue(OBJECT_FIELD_DATA); }
+        std::string GetGuildName() const;
         static uint32 GetGuildIdFromDB(ObjectGuid guid);
+        static ObjectGuid GetGuildGuidFromDB(ObjectGuid guid);
+        void SendGuildDeclined(std::string name, bool autodecline);
         uint32 GetRank(){ return GetUInt32Value(PLAYER_GUILDRANK); }
         static uint32 GetRankFromDB(ObjectGuid guid);
-        int GetGuildIdInvited() { return m_GuildIdInvited; }
-        static void RemovePetitionsAndSigns(ObjectGuid guid, uint32 type);
+        int GetGuildIdInvited() const { return m_GuildIdInvited; }
+        ObjectGuid GetGuildInviterGuid() const { return m_GuildInviterGuid; }
+        static void RemovePetitionsAndSigns(ObjectGuid guid);
         void SendPetitionSignResult(ObjectGuid petitionGuid, Player* player, uint32 result);
         void SendPetitionTurnInResult(uint32 result);
 
@@ -1836,11 +1847,6 @@ class MANGOS_DLL_SPEC Player : public Unit
         bool UpdateGatherSkill(uint32 SkillId, uint32 SkillValue, uint32 RedLevel, uint32 Multiplicator = 1);
         bool UpdateFishingSkill();
 
-        uint32 GetBaseDefenseSkillValue() const { return GetBaseSkillValue(SKILL_DEFENSE); }
-        uint32 GetBaseWeaponSkillValue(WeaponAttackType attType) const;
-
-        uint32 GetSpellByProto(ItemPrototype *proto);
-
         float GetHealthBonusFromStamina();
         float GetManaBonusFromIntellect();
 
@@ -1850,9 +1856,8 @@ class MANGOS_DLL_SPEC Player : public Unit
         void UpdateArmor() override;
         void UpdateMaxHealth() override;
         void UpdateMaxPower(Powers power) override;
-        void ApplyFeralAPBonus(int32 amount, bool apply);
         void UpdateAttackPowerAndDamage(bool ranged = false) override;
-        void UpdateShieldBlockValue();
+        void UpdateShieldBlockDamageValue();
         void UpdateDamagePhysical(WeaponAttackType attType) override;
         void ApplySpellPowerBonus(int32 amount, bool apply);
         void UpdateSpellDamageAndHealingBonus();
@@ -1862,15 +1867,15 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         void CalculateMinMaxDamage(WeaponAttackType attType, bool normalized, float& min_damage, float& max_damage);
 
-        void UpdateDefenseBonusesMod();
         float GetMeleeCritFromAgility();
         void GetDodgeFromAgility(float &diminishing, float &nondiminishing);
+        void GetParryFromStrength(float& diminishing, float& nondiminishing);
         float GetSpellCritFromIntellect();
-        float OCTRegenHPPerSpirit();
         float OCTRegenMPPerSpirit();
         float GetRatingMultiplier(CombatRating cr) const;
         float GetRatingBonusValue(CombatRating cr) const;
-        uint32 GetBaseSpellPowerBonus() { return m_baseSpellPower; }
+        // Returns base spellpower bonus from items without intellect bonus
+        uint32 GetBaseSpellPowerBonus() const { return m_baseSpellPower; }
 
         float GetExpertiseDodgeOrParryReduction(WeaponAttackType attType) const;
         void UpdateBlockPercentage();
@@ -1887,8 +1892,8 @@ class MANGOS_DLL_SPEC Player : public Unit
         void UpdateExpertise(WeaponAttackType attType);
         void UpdateArmorPenetration();
         void ApplyManaRegenBonus(int32 amount, bool apply);
-        void UpdateManaRegen();
         void ApplyHealthRegenBonus(int32 amount, bool apply);
+        void UpdateManaRegen();
         void UpdateMasteryAuras();
         void UpdateArmorSpecializations();
         bool FitArmorSpecializationRules(SpellEntry const * spellProto) const;
@@ -1967,10 +1972,6 @@ class MANGOS_DLL_SPEC Player : public Unit
         void UpdateLocalChannels(uint32 newZone);
         void LeaveLFGChannel();
         void JoinLFGChannel();
-
-        void UpdateDefense();
-        void UpdateWeaponSkill (WeaponAttackType attType);
-        void UpdateCombatSkills(Unit *pVictim, WeaponAttackType attType, bool defence);
 
         void SetSkill(uint16 id, uint16 currVal, uint16 maxVal, uint16 step = 0);
         uint16 GetMaxSkillValue(uint32 skill) const;        // max + perm. bonus + temp bonus
@@ -2058,7 +2059,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void UpdateCorpseReclaimDelay();
         void SendCorpseReclaimDelay(bool load = false);
 
-        uint32 GetShieldBlockValue() const override;        // overwrite Unit version (virtual)
+        uint32 GetShieldBlockDamageValue() const override;        // overwrite Unit version (virtual)
         bool CanParry() const { return m_canParry; }
         void SetCanParry(bool value);
         bool CanBlock() const { return m_canBlock; }
@@ -2125,7 +2126,7 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         void SendLoot(ObjectGuid guid, LootType loot_type);
         void SendLootRelease(ObjectGuid guid);
-        void SendNotifyLootItemRemoved(uint8 lootSlot);
+        void SendNotifyLootItemRemoved(uint8 lootSlot, bool currency = false);
         void SendNotifyLootMoneyRemoved();
 
         /*********************************************************/
@@ -2640,6 +2641,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         SkillStatusMap mSkillStatus;
 
         uint32 m_GuildIdInvited;
+        ObjectGuid m_GuildInviterGuid;
         uint32 m_ArenaTeamIdInvited;
 
         PlayerMails m_mail;
@@ -2661,9 +2663,8 @@ class MANGOS_DLL_SPEC Player : public Unit
         float m_auraBaseMod[BASEMOD_END][MOD_END];
         int16 m_baseRatingValue[MAX_COMBAT_RATING];
         uint16 m_baseSpellPower;
-        uint16 m_baseFeralAP;
         uint16 m_baseManaRegen;
-        uint16 m_baseHealthRegen;
+        uint32 m_baseHealthRegen;
         float m_armorPenetrationPct;
         int32 m_spellPenetrationItemMod;
 
@@ -2733,7 +2734,6 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         // Social
         PlayerSocial *m_social;
-        uint32 m_guildId;
 
         // Groups
         GroupReference m_group;

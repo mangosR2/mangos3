@@ -696,11 +696,6 @@ LexicsCutterNoActionOnGM = 1
 #        Default: 0 (false)
 #                 1 (true)
 #
-#    AlwaysMaxSkillForLevel
-#        Players will automatically gain max level dependent (weapon/defense) skill when logging in, leveling up etc.
-#        Default: 0 (false)
-#                 1 (true)
-#
 #    ActivateWeather
 #        Activate weather system
 #        Default: 1 (true)
@@ -785,6 +780,14 @@ LexicsCutterNoActionOnGM = 1
 #        Ignore database setting for loot rules for chests
 #        Default: 0 (disable)
 #
+#    Guild.UndeletableLevel
+#        A level above which guild can't be deleted.
+#        Default: 4
+#
+#    Guild.LevelingEnabled
+#        Allow guild leveling.
+#        Default: 1
+#
 #    TimerBar.Fatigue.GMLevel
 #        Disable/enable fatigue for security level (0..4) or high
 #        Default: 4 (None)
@@ -831,7 +834,7 @@ LexicsCutterNoActionOnGM = 1
 #
 #    MinPetitionSigns
 #        Min signatures count to creating guild (0..9).
-#        Default: 9
+#        Default: 4
 #
 #    MaxGroupXPDistance
 #        Max distance to creature for group memeber to get XP at creature death.
@@ -968,7 +971,6 @@ StartPlayerMoney = 0
 InstantLogout = 1
 DisableWaterBreath = 4
 AllFlightPaths = 0
-AlwaysMaxSkillForLevel = 0
 ActivateWeather = 1
 CastUnstuck = 1
 MaxSpellCastsInChain = 10
@@ -986,6 +988,8 @@ Quests.IgnoreRaid = 0
 Guild.EventLogRecordsCount = 100
 Guild.BankEventLogRecordsCount = 25
 Loot.IgnoreChestGroupRulesFromDB = 1
+Guild.UndeletableLevel = 4
+Guild.LevelingEnabled = 1
 TimerBar.Fatigue.GMLevel = 4
 TimerBar.Fatigue.Max = 60
 TimerBar.Breath.GMLevel = 4
@@ -996,7 +1000,7 @@ MaxPrimaryTradeSkill = 2
 TradeSkill.GMIgnore.MaxPrimarySkillsCount = 4
 TradeSkill.GMIgnore.Level = 4
 TradeSkill.GMIgnore.Skill = 4
-MinPetitionSigns = 9
+MinPetitionSigns = 4
 MaxGroupXPDistance = 74
 MailDeliveryDelay = 3600
 MassMailer.SendPerTick = 10
@@ -1462,7 +1466,12 @@ Visibility.AIRelocationNotifyDelay = 1000
 #    Rate.Drop.Item.Artifact
 #    Rate.Drop.Item.Referenced
 #    Rate.Drop.Money
-#         Drop rates (items by quality and money)
+#    Rate.Drop.Currency
+#         Drop rates (items by quality, money and currency drop chance)
+#         Default: 1
+#
+#    Rate.Drop.Currency.Amount
+#         Drop rate for currency amount
 #         Default: 1
 #
 #    Rate.XP.Kill
@@ -1517,10 +1526,8 @@ Visibility.AIRelocationNotifyDelay = 1000
 #        Default: 1
 #
 #    SkillGain.Crafting
-#    SkillGain.Defense
 #    SkillGain.Gathering
-#    SkillGain.Weapon
-#         crafting/defense/gathering/weapon skills gain at skill grow (1,2,...)
+#         Crafting and gathering skill gains at skill grow (1,2,...)
 #         Default: 1
 #
 #    SkillChance.Orange
@@ -1610,6 +1617,8 @@ Rate.Drop.Item.Legendary = 1
 Rate.Drop.Item.Artifact = 1
 Rate.Drop.Item.Referenced = 1
 Rate.Drop.Money = 1
+Rate.Drop.Currency = 1
+Rate.Drop.Currency.Amount = 1
 Rate.XP.Kill    = 1
 Rate.XP.Quest   = 1
 Rate.XP.Explore = 1
@@ -1630,9 +1639,7 @@ Rate.Reputation.LowLevel.Kill    = 1
 Rate.Reputation.LowLevel.Quest   = 1
 Rate.InstanceResetTime = 1
 SkillGain.Crafting = 1
-SkillGain.Defense = 1
 SkillGain.Gathering = 1
-SkillGain.Weapon = 1
 SkillChance.Orange = 100
 SkillChance.Yellow = 75
 SkillChance.Green  = 25

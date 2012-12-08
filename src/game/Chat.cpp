@@ -448,6 +448,7 @@ ChatCommand* ChatHandler::getCommandTable()
     static ChatCommand modifyCommandTable[] =
     {
         { "currency",       SEC_GAMEMASTER,     false, &ChatHandler::HandleModifyCurrencyCommand,      "", NULL },
+        { "holypower",      SEC_MODERATOR,      false, &ChatHandler::HandleModifyHolyPowerCommand,     "", NULL },
         { "hp",             SEC_MODERATOR,      false, &ChatHandler::HandleModifyHPCommand,            "", NULL },
         { "mana",           SEC_MODERATOR,      false, &ChatHandler::HandleModifyManaCommand,          "", NULL },
         { "rage",           SEC_MODERATOR,      false, &ChatHandler::HandleModifyRageCommand,          "", NULL },
@@ -2374,6 +2375,68 @@ bool  ChatHandler::ExtractUInt32Base(char** args, uint32& val, uint32 base)
     *args = tail;
 
     SkipWhiteSpaces(args);
+    return true;
+}
+
+/**
+ * Function extract to val arg unsigned long value or fail
+ *
+ * @param args variable pointer to non parsed args string, updated at function call to new position (with skipped white spaces)
+ * @param val  return extracted value if function success, in fail case original value unmodified
+ * @return     true if value extraction successful
+ */
+bool  ChatHandler::ExtractUInt64(char** args, uint64& val)
+{
+    if (!*args || !** args)
+        return false;
+
+    char* tail = *args;
+
+    unsigned long valRaw = strtoul(*args, &tail, 10);
+
+    if (tail != *args && isWhiteSpace(*tail))
+        *(tail++) = '\0';
+    else if (tail && *tail)                                 // some not whitespace symbol
+        return false;                                       // args not modified and can be re-parsed
+
+    if (valRaw > std::numeric_limits<uint64>::max())
+        return false;
+
+    // value successfully extracted
+    val = uint64(valRaw);
+    *args = tail;
+
+    SkipWhiteSpaces(args);
+    return true;
+}
+
+/**
+ * Function extract to val arg signed long value or fail
+ *
+ * @param args variable pointer to non parsed args string, updated at function call to new position (with skipped white spaces)
+ * @param val  return extracted value if function success, in fail case original value unmodified
+ * @return     true if value extraction successful
+ */
+bool  ChatHandler::ExtractInt64(char** args, int64& val)
+{
+    if (!*args || !** args)
+        return false;
+
+    char* tail = *args;
+
+    long valRaw = strtol(*args, &tail, 10);
+
+    if (tail != *args && isWhiteSpace(*tail))
+        *(tail++) = '\0';
+    else if (tail && *tail)                                 // some not whitespace symbol
+        return false;                                       // args not modified and can be re-parsed
+
+    if (valRaw < std::numeric_limits<int64>::min() || valRaw > std::numeric_limits<int64>::max())
+        return false;
+
+    // value successfully extracted
+    val = int64(valRaw);
+    *args = tail;
     return true;
 }
 

@@ -215,7 +215,6 @@ class MANGOS_DLL_SPEC WorldSession
         void SendGroupInvite(Player* player, bool alreadyInGroup = false);
         void SendAreaTriggerMessage(const char* Text, ...) ATTR_PRINTF(2, 3);
         void SendTransferAborted(uint32 mapid, uint8 reason, uint8 arg = 0);
-
         void SendSetPhaseShift(uint32 phaseMask, uint16 mapId = 0);
 
         void SendQueryTimeResponse();
@@ -492,14 +491,15 @@ class MANGOS_DLL_SPEC WorldSession
         void HandleMoveNotActiveMoverOpcode(WorldPacket &recv_data);
         void HandleMoveTimeSkippedOpcode(WorldPacket &recv_data);
 
-        void HandleDismissControlledVehicle(WorldPacket &recv_data);
-        void HandleRequestVehicleExit(WorldPacket &recv_data);
-        void HandleRequestVehiclePrevSeat(WorldPacket &recv_data);
-        void HandleRequestVehicleNextSeat(WorldPacket &recv_data);
-        void HandleRequestVehicleSwitchSeat(WorldPacket &recv_data);
-        void HandleEnterPlayerVehicle(WorldPacket &recv_data);
-        void HandleEjectPassenger(WorldPacket &recv_data);
-        void HandleChangeSeatsOnControlledVehicle(WorldPacket &recv_data);
+        void HandleDismissControlledVehicle(WorldPacket& recv_data);
+        void HandleRequestVehicleExit(WorldPacket& recv_data);
+        void HandleRequestVehiclePrevSeat(WorldPacket& recv_data);
+        void HandleRequestVehicleNextSeat(WorldPacket& recv_data);
+        void HandleRequestVehicleSwitchSeat(WorldPacket& recv_data);
+        void HandleEnterPlayerVehicle(WorldPacket& recv_data);
+        void HandleEjectPassenger(WorldPacket& recv_data);
+        void HandleChangeSeatsOnControlledVehicle(WorldPacket& recv_data);
+        void HandleRideVehicleInteract(WorldPacket& recvPacket);
 
         void HandleRequestRaidInfoOpcode( WorldPacket & recv_data );
 
@@ -542,17 +542,20 @@ class MANGOS_DLL_SPEC WorldSession
         void HandleGuildRosterOpcode(WorldPacket& recvPacket);
         void HandleGuildPromoteOpcode(WorldPacket& recvPacket);
         void HandleGuildDemoteOpcode(WorldPacket& recvPacket);
+        void HandleGuildSetRankOpcode(WorldPacket& recvPacket);
+        void HandleGuildSwitchRankOpcode(WorldPacket& recvPacket);
         void HandleGuildLeaveOpcode(WorldPacket& recvPacket);
         void HandleGuildDisbandOpcode(WorldPacket& recvPacket);
         void HandleGuildLeaderOpcode(WorldPacket& recvPacket);
         void HandleGuildMOTDOpcode(WorldPacket& recvPacket);
-        void HandleGuildSetPublicNoteOpcode(WorldPacket& recvPacket);
-        void HandleGuildSetOfficerNoteOpcode(WorldPacket& recvPacket);
+        void HandleGuildSetNoteOpcode(WorldPacket& recvPacket);
         void HandleGuildRankOpcode(WorldPacket& recvPacket);
         void HandleGuildAddRankOpcode(WorldPacket& recvPacket);
         void HandleGuildDelRankOpcode(WorldPacket& recvPacket);
         void HandleGuildChangeInfoTextOpcode(WorldPacket& recvPacket);
         void HandleSaveGuildEmblemOpcode(WorldPacket& recvPacket);
+        void HandleGuildQueryRanksOpcode(WorldPacket& recvPacket);
+        void HandleGuildAutoDeclineToggleOpcode(WorldPacket& recvPacket);
 
         void HandleTaxiNodeStatusQueryOpcode(WorldPacket& recvPacket);
         void HandleTaxiQueryAvailableNodes(WorldPacket& recvPacket);
@@ -773,6 +776,7 @@ class MANGOS_DLL_SPEC WorldSession
         void HandleInspectArenaTeamsOpcode(WorldPacket& recv_data);
         void HandleArenaTeamQueryOpcode(WorldPacket& recv_data);
         void HandleArenaTeamRosterOpcode(WorldPacket& recv_data);
+        void HandleArenaTeamCreateOpcode(WorldPacket& recv_data);
         void HandleArenaTeamInviteOpcode(WorldPacket& recv_data);
         void HandleArenaTeamAcceptOpcode(WorldPacket& recv_data);
         void HandleArenaTeamDeclineOpcode(WorldPacket& recv_data);

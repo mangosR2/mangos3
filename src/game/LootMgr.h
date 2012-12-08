@@ -41,6 +41,12 @@ enum PermissionTypes
     NONE_PERMISSION   = 4
 };
 
+enum LootItemType
+{
+    LOOT_ITEM_TYPE_ITEM     = 0,
+    LOOT_ITEM_TYPE_CURRENCY = 1,
+};
+
 enum LootType
 {
     LOOT_CORPSE                 = 1,
@@ -73,17 +79,18 @@ class LootStore;
 struct LootStoreItem
 {
     uint32  itemid;                                         // id of the item
+    uint8   type;                                           // 0 = item, 1 = currency
     float   chance;                                         // always positive, chance to drop for both quest and non-quest items, chance to be used for refs
     int32   mincountOrRef;                                  // mincount for drop items (positive) or minus referenced TemplateleId (negative)
+    uint32  maxcount;                                       // max drop count for the item (mincountOrRef positive) or Ref multiplicator (mincountOrRef negative)
     uint8   group       : 7;
     bool    needs_quest : 1;                                // quest drop (negative ChanceOrQuestChance in DB)
-    uint8   maxcount    : 8;                                // max drop count for the item (mincountOrRef positive) or Ref multiplicator (mincountOrRef negative)
     uint16  conditionId : 16;                               // additional loot condition Id
 
     // Constructor, converting ChanceOrQuestChance -> (chance, needs_quest)
     // displayid is filled in IsValid() which must be called after
-    LootStoreItem(uint32 _itemid, float _chanceOrQuestChance, int8 _group, uint16 _conditionId, int32 _mincountOrRef, uint8 _maxcount)
-        : itemid(_itemid), chance(fabs(_chanceOrQuestChance)), mincountOrRef(_mincountOrRef),
+    LootStoreItem(uint32 _itemid, uint8 _type, float _chanceOrQuestChance, int8 _group, uint16 _conditionId, int32 _mincountOrRef, uint32 _maxcount)
+        : itemid(_itemid), type(_type), chance(fabs(_chanceOrQuestChance)), mincountOrRef(_mincountOrRef),
           group(_group), needs_quest(_chanceOrQuestChance < 0), maxcount(_maxcount), conditionId(_conditionId)
     {}
 
@@ -97,11 +104,13 @@ typedef std::set<uint32> AllowedLooterSet;
 struct LootItem
 {
     uint32  itemid;
+    uint8   type;                                           // 0 = item, 1 = currency
     uint32  randomSuffix;
     int32   randomPropertyId;
     AllowedLooterSet allowedGuids;
+    uint32  count;
     uint16  conditionId       : 16;                         // allow compiler pack structure
-    uint8   count             : 8;
+    bool    currency          : 1;
     bool    is_looted         : 1;
     bool    is_blocked        : 1;
     bool    freeforall        : 1;                          // free for all
@@ -113,7 +122,7 @@ struct LootItem
     // Should be called for non-reference LootStoreItem entries only (mincountOrRef > 0)
     explicit LootItem(LootStoreItem const& li);
 
-    LootItem(uint32 itemid_, uint32 count_, uint32 randomSuffix_ = 0, int32 randomPropertyId_ = 0);
+    LootItem(uint32 itemid_, uint8 type_, uint32 count_, uint32 randomSuffix_ = 0, int32 randomPropertyId_ = 0);
 
     // Basic checks for player/item compatibility - if false no chance to see the item in the loot
     bool AllowedForPlayer(Player const* player) const;
@@ -240,9 +249,10 @@ struct Loot
 {
         friend ByteBuffer& operator<<(ByteBuffer& b, LootView const& lv);
 
+        QuestItemMap const& GetPlayerCurrencies() const { return m_playerCurrencies; }
         QuestItemMap const& GetPlayerQuestItems() const { return m_playerQuestItems; }
         QuestItemMap const& GetPlayerFFAItems() const { return m_playerFFAItems; }
-        QuestItemMap const& GetPlayerNonQuestNonFFAConditionalItems() const { return m_playerNonQuestNonFFAConditionalItems; }
+        QuestItemMap const& GetPlayerNonQuestNonFFANonCurrencyConditionalItems() const { return m_playerNonQuestNonFFANonCurrencyConditionalItems; }
 
         LootItemList items;
         uint32 gold;
@@ -261,6 +271,12 @@ struct Loot
         // void clear();
         void clear()
         {
+            for (QuestItemMap::const_iterator itr = m_playerCurrencies.begin(); itr != m_playerCurrencies.end(); ++itr)
+                delete itr->second;
+            m_playerCurrencies.clear();
+
+            for (QuestItemMap::const_iterator itr = m_playerQuestItems.begin(); itr != m_playerQuestItems.end(); ++itr)
+                delete itr->second;
             m_playerQuestItems.clear();
             m_playerFFAItems.clear();
             m_playerNonQuestNonFFAConditionalItems.clear();
@@ -287,22 +303,24 @@ struct Loot
         // Inserts the item into the loot (called by LootTemplate processors)
         void AddItem(LootStoreItem const& item);
 
-        LootItem* LootItemInSlot(uint32 lootslot, Player* player, QuestItem** qitem = NULL, QuestItem** ffaitem = NULL, QuestItem** conditem = NULL);
+        LootItem* LootItemInSlot(uint32 lootslot, Player* player, QuestItem** qitem = NULL, QuestItem** ffaitem = NULL, QuestItem** conditem = NULL, QuestItem** currency = NULL);
         uint32 GetMaxSlotInLootFor(Player* player) const;
 
     private:
         void FillNotNormalLootFor(Player* player);
+        QuestItemList* FillCurrencyLoot(Player* player);
         QuestItemList* FillFFALoot(Player* player);
         QuestItemList* FillQuestLoot(Player* player);
-        QuestItemList* FillNonQuestNonFFAConditionalLoot(Player* player);
+        QuestItemList* FillNonQuestNonFFANonCurrencyConditionalLoot(Player* player);
 
         LootItemList m_questItems;
 
         GuidSet m_playersLooting;
 
+        QuestItemMap m_playerCurrencies;
         QuestItemMap m_playerQuestItems;
         QuestItemMap m_playerFFAItems;
-        QuestItemMap m_playerNonQuestNonFFAConditionalItems;
+        QuestItemMap m_playerNonQuestNonFFANonCurrencyConditionalItems;
 
         // All rolls are registered here. They need to know, when the loot is not valid anymore
         LootValidatorRefManager m_LootValidatorRefManager;

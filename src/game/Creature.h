@@ -102,6 +102,7 @@ struct CreatureInfo
     uint32  rangeattacktime;
     uint32  unit_class;                                     // enum Classes. Note only 4 classes are known for creatures.
     uint32  unit_flags;                                     // enum UnitFlags mask values
+    uint32  unit_flags2;                                    // enum UnitFlags2 mask values
     uint32  dynamicflags;
     uint32  family;                                         // enum CreatureFamily values (optional)
     uint32  trainer_type;
@@ -175,6 +176,12 @@ struct CreatureInfo
         // if can tame exotic then can tame any temable
         return exotic || !IsExotic();
     }
+};
+
+struct CreatureTemplateSpells
+{
+    uint32 entry;
+    uint32 spells[CREATURE_MAX_SPELLS];
 };
 
 struct EquipmentInfo
@@ -526,10 +533,8 @@ class MANGOS_DLL_SPEC Creature : public Unit
         void FillGuidsListFromThreatList(GuidVector& guids, uint32 maxamount = 0);
 
         bool IsImmuneToSpell(SpellEntry const* spellInfo, bool isFriendly) const;
-
-        // redefine Unit::IsImmuneToSpell
         bool IsImmuneToSpellEffect(SpellEntry const* spellInfo, SpellEffectIndex index) const override;
-        // redefine Unit::IsImmuneToSpellEffect
+
         bool IsElite() const
         {
             if (IsPet())
@@ -562,9 +567,9 @@ class MANGOS_DLL_SPEC Creature : public Unit
         void SetRoot(bool enable) override;
         void SetWaterWalk(bool enable) override;
 
-        uint32 GetShieldBlockValue() const override         // dunno mob block value
+        uint32 GetShieldBlockDamageValue() const override         // dunno mob block value
         {
-            return (getLevel() / 2 + uint32(GetStat(STAT_STRENGTH) / 20));
+            return uint32(BASE_BLOCK_DAMAGE_PERCENT);
         }
 
         SpellSchoolMask GetMeleeDamageSchoolMask() const override { return m_meleeDamageSchoolMask; }

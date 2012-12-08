@@ -37,7 +37,7 @@ void WorldSession::HandleQuestgiverStatusQueryOpcode(WorldPacket & recv_data)
 {
     ObjectGuid guid;
     recv_data >> guid;
-    uint8 dialogStatus = DIALOG_STATUS_NONE;
+    uint32 dialogStatus = DIALOG_STATUS_NONE;
 
     Object* questgiver = _player->GetObjectByTypeMask(guid, TYPEMASK_CREATURE_OR_GAMEOBJECT);
 
@@ -416,7 +416,7 @@ void WorldSession::HandleQuestgiverCompleteQuest(WorldPacket& recv_data)
         }
         else
         {
-            if (pQuest->GetReqItemsCount())                 // some items required
+            if (pQuest->GetReqItemsCount() || pQuest->GetReqCurrencyCount())    // some items or currency required
                 _player->PlayerTalkClass->SendQuestGiverRequestItems(pQuest, guid, _player->CanRewardQuest(pQuest,false), false);
             else                                            // no items required
                 _player->PlayerTalkClass->SendQuestGiverOfferReward(pQuest, guid, true);

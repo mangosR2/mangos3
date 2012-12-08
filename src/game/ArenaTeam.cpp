@@ -175,10 +175,6 @@ bool ArenaTeam::AddMember(ObjectGuid playerGuid)
         }
     }
 
-    // remove all player signs from another petitions
-    // this will be prevent attempt joining player to many arenateams and corrupt arena team data integrity
-    Player::RemovePetitionsAndSigns(playerGuid, GetType());
-
     ArenaTeamMember newmember;
     newmember.name              = plName;
     newmember.guid              = playerGuid;
@@ -670,6 +666,20 @@ uint8 ArenaTeam::GetSlotByType(ArenaType type)
     }
     sLog.outError("FATAL: Unknown arena team type %u for some arena team", type);
     return 0xFF;
+}
+
+ArenaType ArenaTeam::GetTypeBySlot(uint8 slot)
+{
+    switch (slot)
+    {
+        case 0: return ARENA_TYPE_2v2;
+        case 1: return ARENA_TYPE_3v3;
+        case 2: return ARENA_TYPE_5v5;
+        default:
+            break;
+    }
+    sLog.outError("FATAL: Unknown arena team slot %u for some arena team", slot);
+    return ArenaType(0xFF);
 }
 
 bool ArenaTeam::HaveMember(ObjectGuid guid) const

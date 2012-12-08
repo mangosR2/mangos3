@@ -1279,38 +1279,38 @@ enum AuraState
 // Spell mechanics
 enum Mechanics
 {
-    MECHANIC_NONE             = 0,  // 0x00000000
-    MECHANIC_CHARM            = 1,  // 0x00000001
-    MECHANIC_DISORIENTED      = 2,  // 0x00000002
-    MECHANIC_DISARM           = 3,  // 0x00000004
-    MECHANIC_DISTRACT         = 4,  // 0x00000008
-    MECHANIC_FEAR             = 5,  // 0x00000010
-    MECHANIC_GRIP             = 6,  // 0x00000020
-    MECHANIC_ROOT             = 7,  // 0x00000040
-    MECHANIC_SLOWATTACK       = 8,  // 0x00000080           //0 spells use this mechanic, but some SPELL_AURA_MOD_HASTE and SPELL_AURA_MOD_RANGED_HASTE use as effect mechanic
-    MECHANIC_SILENCE          = 9,  // 0x00000100
-    MECHANIC_SLEEP            = 10, // 0x00000200
-    MECHANIC_SNARE            = 11, // 0x00000400
-    MECHANIC_STUN             = 12, // 0x00000800
-    MECHANIC_FREEZE           = 13, // 0x00001000
-    MECHANIC_KNOCKOUT         = 14, // 0x00002000
-    MECHANIC_BLEED            = 15, // 0x00004000
-    MECHANIC_BANDAGE          = 16, // 0x00008000
-    MECHANIC_POLYMORPH        = 17, // 0x00010000
-    MECHANIC_BANISH           = 18, // 0x00020000
-    MECHANIC_SHIELD           = 19, // 0x00040000
-    MECHANIC_SHACKLE          = 20, // 0x00080000
-    MECHANIC_MOUNT            = 21, // 0x00100000
-    MECHANIC_INFECTED         = 22, // 0x00200000
-    MECHANIC_TURN             = 23, // 0x00400000
-    MECHANIC_HORROR           = 24, // 0x00800000
-    MECHANIC_INVULNERABILITY  = 25, // 0x01000000
-    MECHANIC_INTERRUPT        = 26, // 0x02000000
-    MECHANIC_DAZE             = 27, // 0x04000000
-    MECHANIC_DISCOVERY        = 28, // 0x08000000
-    MECHANIC_IMMUNE_SHIELD    = 29, // 0x10000000           // Divine (Blessing) Shield/Protection and Ice Block
-    MECHANIC_SAPPED           = 30, // 0x20000000
-    MECHANIC_ENRAGED          = 31  // 0x40000000
+    MECHANIC_NONE             = 0,
+    MECHANIC_CHARM            = 1,
+    MECHANIC_DISORIENTED      = 2,
+    MECHANIC_DISARM           = 3,
+    MECHANIC_DISTRACT         = 4,
+    MECHANIC_FEAR             = 5,
+    MECHANIC_GRIP             = 6,
+    MECHANIC_ROOT             = 7,
+    MECHANIC_PACIFY           = 8,                          // No spells use this mechanic
+    MECHANIC_SILENCE          = 9,
+    MECHANIC_SLEEP            = 10,
+    MECHANIC_SNARE            = 11,
+    MECHANIC_STUN             = 12,
+    MECHANIC_FREEZE           = 13,
+    MECHANIC_KNOCKOUT         = 14,
+    MECHANIC_BLEED            = 15,
+    MECHANIC_BANDAGE          = 16,
+    MECHANIC_POLYMORPH        = 17,
+    MECHANIC_BANISH           = 18,
+    MECHANIC_SHIELD           = 19,
+    MECHANIC_SHACKLE          = 20,
+    MECHANIC_MOUNT            = 21,
+    MECHANIC_INFECTED         = 22,
+    MECHANIC_TURN             = 23,
+    MECHANIC_HORROR           = 24,
+    MECHANIC_INVULNERABILITY  = 25,
+    MECHANIC_INTERRUPT        = 26,
+    MECHANIC_DAZE             = 27,
+    MECHANIC_DISCOVERY        = 28,
+    MECHANIC_IMMUNE_SHIELD    = 29,                         // Divine (Blessing) Shield/Protection and Ice Block
+    MECHANIC_SAPPED           = 30,
+    MECHANIC_ENRAGED          = 31
 };
 
 #define FIRST_MECHANIC          1
@@ -2268,7 +2268,9 @@ enum LockType
     LOCKTYPE_SLOW_CLOSE            = 18,
     LOCKTYPE_FISHING               = 19,
     LOCKTYPE_INSCRIPTION           = 20,
-    LOCKTYPE_OPEN_FROM_VEHICLE     = 21
+    LOCKTYPE_OPEN_FROM_VEHICLE     = 21,
+    LOCKTYPE_ARCHAEOLOGY           = 22,
+    LOCKTYPE_PVP_OPEN_FAST         = 23,
 };
 
 enum TrainerType                                            // this is important type for npcs!
@@ -2611,7 +2613,6 @@ enum SkillType
     SKILL_DESTRUCTION              = 593,
     SKILL_HOLY2                    = 594,
     SKILL_DISCIPLINE               = 613,
-    SKILL_LOCKPICKING              = 633,
     SKILL_PET_BAT                  = 653,
     SKILL_PET_HYENA                = 654,
     SKILL_PET_BIRD_OF_PREY         = 655,
@@ -2666,20 +2667,30 @@ enum SkillType
     SKILL_GENERAL_SHAMAN           = 801,
     SKILL_GENERAL_WARLOCK          = 802,
     SKILL_GENERAL_WARRIOR          = 803,
-    SKILL_GENERAL_PRIEST           = 804
+    SKILL_GENERAL_PRIEST           = 804,
+    SKILL_PET_WATER_ELEMENTAL      = 805,
+    SKILL_PET_FOX                  = 808,
+    SKILL_ALL_GLYPHS               = 810,
+    SKILL_PET_DOG                  = 811,
+    SKILL_PET_MONKEY               = 815,
+    SKILL_PET_SHALE_SPIDER         = 817,
+    SKILL_PET_BEETLE               = 818,
+    SKILL_ALL_GUILD_PERKS          = 821,
+    SKILL_PET_HYDRA                = 824,
 };
 
-#define MAX_SKILL_TYPE               805
+#define MAX_SKILL_TYPE               825
 
 inline SkillType SkillByLockType(LockType locktype)
 {
     switch(locktype)
     {
-        case LOCKTYPE_PICKLOCK:    return SKILL_LOCKPICKING;
+        case LOCKTYPE_PICKLOCK:    return SkillType(MAX_SKILL_TYPE);    // no skill for such lock, 'skill' value scales with level
         case LOCKTYPE_HERBALISM:   return SKILL_HERBALISM;
         case LOCKTYPE_MINING:      return SKILL_MINING;
         case LOCKTYPE_FISHING:     return SKILL_FISHING;
         case LOCKTYPE_INSCRIPTION: return SKILL_INSCRIPTION;
+        case LOCKTYPE_ARCHAEOLOGY: return SKILL_ARCHAEOLOGY;
         default: break;
     }
     return SKILL_NONE;
@@ -2866,12 +2877,13 @@ enum PetDiet
 #define CHAIN_SPELL_JUMP_RADIUS 10
 
 // Max values for Guild & Guild Bank
-#define GUILD_BANK_MAX_TABS         6                       // send by client for money log also
+#define GUILD_BANK_MAX_TABS         8                       // send by client for money log also
+#define GUILD_BANK_MAX_BOUGHT_TABS  6                       // number of tabs that can be bought through bank interface
 #define GUILD_BANK_MAX_SLOTS        98
 #define GUILD_BANK_MAX_LOGS         25
 #define GUILD_BANK_MONEY_LOGS_TAB   100                     // used for money log in DB
 #define GUILD_EVENTLOG_MAX_RECORDS  100
-#define GUILD_RANKS_MIN_COUNT       5
+#define GUILD_RANKS_MIN_COUNT       2
 #define GUILD_RANKS_MAX_COUNT       10
 
 enum AiReaction
@@ -3175,12 +3187,14 @@ enum MailResponseResult
     MAIL_ERR_RECIPIENT_NOT_FOUND       = 4,
     MAIL_ERR_NOT_YOUR_TEAM             = 5,
     MAIL_ERR_INTERNAL_ERROR            = 6,
+    MAIL_ERR_DELETE_ITEM_ERROR         = 10,    // ERR_MAIL_DATABASE_ERROR
     MAIL_ERR_DISABLED_FOR_TRIAL_ACC    = 14,
     MAIL_ERR_RECIPIENT_CAP_REACHED     = 15,
     MAIL_ERR_CANT_SEND_WRAPPED_COD     = 16,
     MAIL_ERR_MAIL_AND_CHAT_SUSPENDED   = 17,
     MAIL_ERR_TOO_MANY_ATTACHMENTS      = 18,
     MAIL_ERR_MAIL_ATTACHMENT_INVALID   = 19,
+    MAIL_ERR_MAIL_FAILED_NO_REPORT     = 20,
     MAIL_ERR_ITEM_HAS_EXPIRED          = 21,
 };
 
@@ -3238,7 +3252,8 @@ enum PetTameFailureReason
     PETTAME_DEAD                    = 10,                   // not used in taming
     PETTAME_NOTDEAD                 = 11,                   // not used in taming
     PETTAME_CANTCONTROLEXOTIC       = 12,                   // 3.x
-    PETTAME_UNKNOWNERROR            = 13
+    PETTAME_INVALIDSLOT             = 13,
+    PETTAME_UNKNOWNERROR            = 14,
 };
 
 // Stored in SummonProperties.dbc with slot+1 values
@@ -3351,7 +3366,6 @@ enum ActivateTaxiReply
     ERR_TAXINOTSTANDING             = 12
 };
 
-
 enum TrackedAuraType
 {
     TRACK_AURA_TYPE_NOT_TRACKED                 = 0,        // relation - caster : target is n:m (usual case)
@@ -3372,5 +3386,19 @@ enum TrackedAuraType
 // because if client receive unsupported expansion level it think
 // that it not have expansion installed and reject
 #define MAX_EXPANSION 3
+
+// Maxlevel for expansion
+enum MaxLevel
+{
+    MAX_LEVEL_CLASSIC                   = 60,
+    MAX_LEVEL_TBC                       = 70,
+    MAX_LEVEL_WOTLK                     = 80,
+    MAX_LEVEL_CATACLYSM                 = 85,
+};
+
+static const MaxLevel maxLevelForExpansion[MAX_EXPANSION + 1] = { MAX_LEVEL_CLASSIC, MAX_LEVEL_TBC, MAX_LEVEL_WOTLK, MAX_LEVEL_CATACLYSM };
+
+// This spell is used for general boarding serverside
+#define SPELL_RIDE_VEHICLE_HARDCODED    46598
 
 #endif

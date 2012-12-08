@@ -17,6 +17,23 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+/**
+ * @addtogroup TransportSystem to provide abstract support for transported entities
+ * The Transport System in MaNGOS consists of these files:
+ * - TransportSystem.h to provide the basic classes TransportBase and TransportInfo
+ * - TransportSystem.cpp which implements these classes
+ * - Vehicle.h as a vehicle is a transporter it will inherit itr transporter-information from TransportBase
+ * - Transports.h to implement the MOTransporter (subclas of gameobject) - Remains TODO
+ * as well of
+ * - impacts to various files
+ *
+ * @{
+ *
+ * @file Vehicle.h
+ * This file contains the headers for the functionality required by Vehicles
+ *
+ */
+
 #ifndef MANGOSSERVER_VEHICLE_H
 #define MANGOSSERVER_VEHICLE_H
 
@@ -31,6 +48,7 @@
 #define SPELL_RIDE_VEHICLE_HARDCODED 46598
 
 struct VehicleEntry;
+struct VehicleSeatEntry;
 
 struct VehicleSeat
 {
@@ -116,3 +134,5 @@ class MANGOS_DLL_SPEC VehicleKit : public TransportBase
 };
 
 #endif
+
+/*! @} */

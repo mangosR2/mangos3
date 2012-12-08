@@ -954,7 +954,8 @@ uint32 Map::GetMaxPlayers() const
         if(mapDiff->maxPlayers || IsRegularDifficulty())    // Normal case (expect that regular difficulty always have correct maxplayers)
             return mapDiff->maxPlayers;
         else                                                // DBC have 0 maxplayers for heroic instances with expansion < 2
-        {                                                   // The heroic entry exists, so we don't have to check anything, simply return normal max players
+        {
+            // The heroic entry exists, so we don't have to check anything, simply return normal max players
             MapDifficultyEntry const* normalDiff = GetMapDifficultyData(i_id, REGULAR_DIFFICULTY);
             return normalDiff ? normalDiff->maxPlayers : 0;
         }
@@ -1684,19 +1685,14 @@ void BattleGroundMap::InitVisibilityDistance()
 
 bool BattleGroundMap::CanEnter(Player * player)
 {
-    if(player->GetMapRef().getTarget() == this)
-    {
-        sLog.outError("BGMap::CanEnter - player %u already in map!", player->GetGUIDLow());
-        MANGOS_ASSERT(false);
+    if (!Map::CanEnter(player))
         return false;
-    }
 
     if(player->GetBattleGroundId() != GetInstanceId())
         return false;
 
     // player number limit is checked in bgmgr, no need to do it here
-
-    return Map::CanEnter(player);
+    return true;
 }
 
 bool BattleGroundMap::Add(Player * player)
@@ -1736,6 +1732,18 @@ void BattleGroundMap::UnloadAll(bool pForce)
     }
 
     Map::UnloadAll(pForce);
+}
+
+bool Map::CanEnter(Player* player)
+{
+    if (player->GetMapRef().getTarget() == this)
+    {
+        sLog.outError("Map::CanEnter -%s already in map!", player->GetGuidStr().c_str());
+        MANGOS_ASSERT(false);
+        return false;
+    }
+
+    return true;
 }
 
 /// Put scripts in the execution queue

@@ -822,9 +822,6 @@ void Spell::EffectSchoolDMG(SpellEffectEntry const* effect)
                 {
                     damage = uint32(damage * (m_caster->GetTotalAttackPowerValue(BASE_ATTACK)) / 100);
                 }
-                // Shield Slam
-                else if ((classOptions && classOptions->SpellFamilyFlags & UI64LIT(0x0000020000000000)) && m_spellInfo->GetCategory()==1209)
-                    damage += int32(m_caster->GetShieldBlockValue());
                 // Victory Rush
                 else if (classOptions && classOptions->SpellFamilyFlags & UI64LIT(0x10000000000))
                 {
@@ -1199,6 +1196,7 @@ void Spell::EffectSchoolDMG(SpellEffectEntry const* effect)
                     int32 count = m_caster->CalculateSpellDamage(unitTarget, m_spellInfo, EFFECT_INDEX_2);
                     damage += count * int32(average * IN_MILLISECONDS) / m_caster->GetAttackTime(BASE_ATTACK);
                 }
+/*
                 // Shield of Righteousness
                 else if (classOptions && classOptions->SpellFamilyFlags & UI64LIT(0x0010000000000000))
                 {
@@ -1207,6 +1205,7 @@ void Spell::EffectSchoolDMG(SpellEffectEntry const* effect)
                     int32 iCurrentBlockValueCap = int32(34.5f * m_caster->getLevel());
                     damage += (iCurrentBlockValue > iCurrentBlockValueCap ? iCurrentBlockValueCap : iCurrentBlockValue);
                 }
+*/
                 // Judgement
                 else if (m_spellInfo->Id == 54158)
                 {
@@ -1987,6 +1986,23 @@ void Spell::EffectDummy(SpellEffectEntry const* effect)
                     m_caster->CastSpell(unitTarget, 42349, true);
                     return;
 
+                }
+                case 42628:                                 // Fire Bomb (throw)
+                {
+                    if (!unitTarget)
+                        return;
+
+                    unitTarget->CastSpell(unitTarget, 42629, true);
+                    return;
+                }
+                case 42631:                                 // Fire Bomb (explode)
+                {
+                    if (!unitTarget)
+                        return;
+
+                    unitTarget->RemoveAurasDueToSpell(42629);
+                    unitTarget->CastSpell(unitTarget, 42630, true);
+                    return;
                 }
                 case 42628:                                 // Fire Bomb (throw)
                 {
@@ -6186,6 +6202,8 @@ void Spell::EffectSummonType(SpellEffectEntry const* effect)
                         DoSummonCritter(effect, summon_prop->FactionId);
                     break;
                 case UNITNAME_SUMMON_TITLE_OPPONENT:
+                case UNITNAME_SUMMON_TITLE_VEHICLE:
+                case UNITNAME_SUMMON_TITLE_MOUNT:
                 case UNITNAME_SUMMON_TITLE_LIGHTWELL:
                 case UNITNAME_SUMMON_TITLE_BUTLER:
                 case UNITNAME_SUMMON_TITLE_MOUNT:
@@ -6226,8 +6244,6 @@ void Spell::EffectSummonType(SpellEffectEntry const* effect)
         case SUMMON_PROP_GROUP_UNCONTROLLABLE_VEHICLE:
         {
             DoSummonVehicle(effect, summon_prop->FactionId);
-//            sLog.outDebug("EffectSummonType: Unhandled summon group type SUMMON_PROP_GROUP_VEHICLE(%u)", summon_prop->Group);
-//            Mangos developers thinking - this summon is not supported. But in this his worked fine :)
             break;
         }
         default:
@@ -8948,7 +8964,7 @@ void Spell::EffectScriptEffect(SpellEffectEntry const* effect)
                     if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
                         return;
 
-                    ((Player*)unitTarget)->ModifyMoney(50000000);
+                    ((Player*)unitTarget)->ModifyMoney(5000 * GOLD);
                     break;
                 }
                 case 45625:                                 // Arcane Chains: Character Force Cast
@@ -9608,7 +9624,8 @@ void Spell::EffectScriptEffect(SpellEffectEntry const* effect)
                     if (!unitTarget)
                         return;
 
-                    unitTarget->CastSpell(unitTarget, 58648, true);
+                    unitTarget->CastSpell(unitTarget, 45548, true);
+                    unitTarget->CastSpell(unitTarget, 57073, true);
                     unitTarget->CastSpell(unitTarget, 57398, true);
                     break;
                 }
@@ -12482,6 +12499,7 @@ void Spell::EffectPlayMusic(SpellEffectEntry const* effect)
 
     WorldPacket data(SMSG_PLAY_MUSIC, 4);
     data << uint32(soundId);
+    data << ObjectGuid();
     ((Player*)unitTarget)->GetSession()->SendPacket(&data);
 }
 

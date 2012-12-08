@@ -644,8 +644,11 @@ bool Item::LoadFromDB(uint32 guidLow, Field* fields, ObjectGuid ownerGuid)
 
 void Item::LoadLootFromDB(Field* fields)
 {
-    uint32 itemId     = fields[1].GetUInt32();
-    uint32 itemAmount = fields[2].GetUInt32();
+    uint32 item_id     = abs(fields[1].GetInt32());
+    uint8  type        = fields[1].GetInt32() > 0 ? LOOT_ITEM_TYPE_ITEM : LOOT_ITEM_TYPE_CURRENCY;
+    uint32 item_amount = fields[2].GetUInt32();
+    uint32 item_suffix = fields[3].GetUInt32();
+    int32  item_propid = fields[4].GetInt32();
 
     // money value special case
     if (!itemId)
@@ -656,18 +659,31 @@ void Item::LoadLootFromDB(Field* fields)
     }
 
     // normal item case
-    ItemPrototype const* proto = ObjectMgr::GetItemPrototype(itemId);
-    if (!proto)
+    if (type == LOOT_ITEM_TYPE_ITEM)
     {
-        DeleteLootFromDB(GetGUIDLow(), itemId);
-        sLog.outError("Item::LoadLootFromDB: %s has an unknown item (id: %u) in item_loot, deleted.", GetGuidStr().c_str(), itemId);
-        return;
+        ItemPrototype const* proto = ObjectMgr::GetItemPrototype(item_id);
+        if (!proto)
+        {
+            DeleteLootFromDB(GetGUIDLow(), itemId);
+            sLog.outError("Item::LoadLootFromDB: %s has an unknown item (id: %u) in item_loot, deleted.", GetGuidStr().c_str(), itemId);
+            return;
+        }
+        loot.items.push_back(LootItem(item_id, type, item_amount, item_suffix, item_propid));
+    }
+    // currency case
+    else //if (type == LOOT_ITEM_TYPE_CURRENCY)
+    {
+        CurrencyTypesEntry const* currencyEntry = sCurrencyTypesStore.LookupEntry(item_id);
+        if (!currencyEntry)
+        {
+            CharacterDatabase.PExecute("DELETE FROM item_loot WHERE guid = '%u' AND itemid = '%i'", GetGUIDLow(), -int32(item_id));
+            sLog.outError("Item::LoadLootFromDB: %s has an unknown currency (id: #%u) in item_loot, deleted.", GetOwnerGuid().GetString().c_str(), item_id);
+            return;
+        }
+
+        loot.items.push_back(LootItem(item_id, type, item_amount));
     }
 
-    uint32 itemSuffix = fields[3].GetUInt32();
-    int32  itemPropId = fields[4].GetInt32();
-
-    loot.items.push_back(LootItem(itemId, itemAmount, itemSuffix, itemPropId));
     ++loot.unlootedCount;
 
     SetLootState(ITEM_LOOT_UNCHANGED);
@@ -769,50 +785,6 @@ uint32 Item::GetSkill()
         default:
             return 0;
     }
-}
-
-uint32 Item::GetSpell()
-{
-    ItemPrototype const* proto = GetProto();
-
-    switch (proto->Class)
-    {
-        case ITEM_CLASS_WEAPON:
-            switch (proto->SubClass)
-            {
-                case ITEM_SUBCLASS_WEAPON_AXE:     return  196;
-                case ITEM_SUBCLASS_WEAPON_AXE2:    return  197;
-                case ITEM_SUBCLASS_WEAPON_BOW:     return  264;
-                case ITEM_SUBCLASS_WEAPON_GUN:     return  266;
-                case ITEM_SUBCLASS_WEAPON_MACE:    return  198;
-                case ITEM_SUBCLASS_WEAPON_MACE2:   return  199;
-                case ITEM_SUBCLASS_WEAPON_POLEARM: return  200;
-                case ITEM_SUBCLASS_WEAPON_SWORD:   return  201;
-                case ITEM_SUBCLASS_WEAPON_SWORD2:  return  202;
-                case ITEM_SUBCLASS_WEAPON_STAFF:   return  227;
-                case ITEM_SUBCLASS_WEAPON_DAGGER:  return 1180;
-                case ITEM_SUBCLASS_WEAPON_THROWN:  return 2567;
-                case ITEM_SUBCLASS_WEAPON_SPEAR:   return 3386;
-                case ITEM_SUBCLASS_WEAPON_CROSSBOW: return 5011;
-                case ITEM_SUBCLASS_WEAPON_WAND:    return 5009;
-                default: return 0;
-            }
-            break;
-        case ITEM_CLASS_ARMOR:
-            switch (proto->SubClass)
-            {
-                case ITEM_SUBCLASS_ARMOR_CLOTH:    return 9078;
-                case ITEM_SUBCLASS_ARMOR_LEATHER:  return 9077;
-                case ITEM_SUBCLASS_ARMOR_MAIL:     return 8737;
-                case ITEM_SUBCLASS_ARMOR_PLATE:    return  750;
-                case ITEM_SUBCLASS_ARMOR_SHIELD:   return 9116;
-                default: return 0;
-            }
-            break;
-        default:
-            break;
-    }
-    return 0;
 }
 
 int32 Item::GenerateItemRandomPropertyId(uint32 item_id)
@@ -1042,6 +1014,12 @@ bool Item::IsBoundByEnchant() const
         if (!enchant_id)
             continue;
 
+        if (enchant_slot == TRANSMOGRIFY_ENCHANTMENT_SLOT)
+            return true;
+
+        if (enchant_slot > PRISMATIC_ENCHANTMENT_SLOT && enchant_slot < PROP_ENCHANTMENT_SLOT_0)
+            continue;
+
         SpellItemEnchantmentEntry const* enchantEntry = sSpellItemEnchantmentStore.LookupEntry(enchant_id);
         if (!enchantEntry)
             continue;
@@ -1055,10 +1033,6 @@ bool Item::IsBoundByEnchant() const
 bool Item::IsFitToSpellRequirements(SpellEntry const* spellInfo) const
 {
     ItemPrototype const* proto = GetProto();
-
-    SpellEquippedItemsEntry const* equippedItems = spellInfo->GetSpellEquippedItems();
-    if (!equippedItems)
-        return true;
 
     // Enchant spells only use Effect[0] (patch 3.3.2)
     if (proto->IsVellum())
@@ -1075,6 +1049,10 @@ bool Item::IsFitToSpellRequirements(SpellEntry const* spellInfo) const
             return proto->SubClass == ITEM_SUBCLASS_VELLUM && (eqItemClass == ITEM_CLASS_WEAPON || eqItemClass == ITEM_CLASS_ARMOR);
         }
     }
+
+    SpellEquippedItemsEntry const* equippedItems = spellInfo->GetSpellEquippedItems();
+    if (!equippedItems)
+        return true;
 
     if (equippedItems->EquippedItemClass != -1)             // -1 == any item class
     {

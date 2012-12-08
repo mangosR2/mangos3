@@ -140,6 +140,7 @@ enum SpellFacingFlags
 #define BASE_MINDAMAGE 1.0f
 #define BASE_MAXDAMAGE 2.0f
 #define BASE_ATTACK_TIME 2000
+#define BASE_BLOCK_DAMAGE_PERCENT 30
 
 // byte value (UNIT_FIELD_BYTES_1,0)
 enum UnitStandStateType
@@ -329,7 +330,7 @@ enum UnitMods
     UNIT_MOD_STAT_INTELLECT,
     UNIT_MOD_STAT_SPIRIT,
     UNIT_MOD_HEALTH,
-    UNIT_MOD_MANA,                                          // UNIT_MOD_MANA..UNIT_MOD_RUNIC_POWER must be in existing order, it's accessed by index values of Powers enum.
+    UNIT_MOD_MANA,                                          // UNIT_MOD_MANA..UNIT_MOD_ALTERNATIVE must be in existing order, it's accessed by index values of Powers enum.
     UNIT_MOD_RAGE,
     UNIT_MOD_FOCUS,
     UNIT_MOD_ENERGY,
@@ -369,8 +370,7 @@ enum BaseModGroup
     CRIT_PERCENTAGE,
     RANGED_CRIT_PERCENTAGE,
     OFFHAND_CRIT_PERCENTAGE,
-    SHIELD_BLOCK_VALUE,
-    NONSTACKING_CRIT_PERCENTAGE,
+    SHIELD_BLOCK_DAMAGE_VALUE,
     BASEMOD_END
 };
 
@@ -490,7 +490,7 @@ extern float baseMoveSpeed[MAX_MOVE_TYPE];
 enum CombatRating
 {
     CR_WEAPON_SKILL             = 0,
-    CR_DEFENSE_SKILL            = 1,
+    CR_DEFENSE_SKILL            = 1,                        // obsolete
     CR_DODGE                    = 2,
     CR_PARRY                    = 3,
     CR_BLOCK                    = 4,
@@ -1297,8 +1297,9 @@ typedef GuidSet GroupPetList;
 #define MAX_CREATURE_ATTACK_RADIUS 45.0f                    // max distance for creature aggro (use with CONFIG_FLOAT_RATE_CREATURE_AGGRO)
 
 // Regeneration defines
-#define REGEN_TIME_FULL     2000                            // For this time difference is computed regen value
+#define REGEN_TIME_FULL         2000                        // This determines how often regen value is computed
 #define REGEN_TIME_PRECISE  500                             // Used in Spell::CheckPower for precise regeneration in spell cast time
+#define REGEN_TIME_HOLY_POWER   10000                       // This determines how often holy power regen is processed
 
 // delay time for evading
 #define EVADE_TIME_DELAY     500
@@ -1434,6 +1435,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         int32 ModifyPower(Powers power, int32 val);
         void ApplyPowerMod(Powers power, uint32 val, bool apply);
         void ApplyMaxPowerMod(Powers power, uint32 val, bool apply);
+        void ResetHolyPowerRegenTimer() { m_holyPowerRegenTimer = REGEN_TIME_HOLY_POWER; }
 
         static uint32 GetPowerIndexByClass(Powers power, uint32 classId);
         static Powers GetPowerTypeByIndex(uint32 index, uint32 classId);
@@ -1488,7 +1490,6 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         void Mount(uint32 mount, uint32 spellId = 0, uint32 vehicleId = 0, uint32 creatureEntry = 0);
         void Unmount(bool from_aura = false);
 
-
         uint16 GetMaxSkillValueForLevel(Unit const* target = NULL) const { return (target ? GetLevelForTarget(target) : getLevel()) * 5; }
         void DealDamageMods(DamageInfo* damageInfo);
         uint32 DealDamage(Unit *pVictim, uint32 damage, DamageInfo* cleanDamage, DamageEffectType damagetype, SpellSchoolMask damageSchoolMask, SpellEntry const *spellProto, bool durabilityLoss);
@@ -1535,10 +1536,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         float GetUnitBlockChance()    const;
         float GetUnitCriticalChance(WeaponAttackType attackType, const Unit *pVictim) const;
 
-        virtual uint32 GetShieldBlockValue() const =0;
-        uint32 GetUnitMeleeSkill(Unit const* target = NULL) const { return (target ? GetLevelForTarget(target) : getLevel()) * 5; }
-        uint32 GetDefenseSkillValue(Unit const* target = NULL) const;
-        uint32 GetWeaponSkillValue(WeaponAttackType attType, Unit const* target = NULL) const;
+        virtual uint32 GetShieldBlockDamageValue() const = 0;
         float GetWeaponProcChance() const;
         float GetPPMProcChance(uint32 WeaponSpeed, float PPM) const;
 
@@ -1832,6 +1830,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         void SetCreateMana(uint32 val) { SetUInt32Value(UNIT_FIELD_BASE_MANA, val); }
         uint32 GetCreateMana() const { return GetUInt32Value(UNIT_FIELD_BASE_MANA); }
         uint32 GetCreatePowers(Powers power) const;
+        uint32 GetCreateMaxPowers(Powers power) const;
         float GetPosStat(Stats stat) const { return GetFloatValue(UNIT_FIELD_POSSTAT0+stat); }
         float GetNegStat(Stats stat) const { return GetFloatValue(UNIT_FIELD_NEGSTAT0+stat); }
         float GetCreateStat(Stats stat) const { return m_createStats[stat]; }
@@ -1937,7 +1936,6 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
 
         TrackedAuraTargetMap&       GetTrackedAuraTargets(TrackedAuraType type)       { return m_trackedAuraTargets[type]; }
         TrackedAuraTargetMap const& GetTrackedAuraTargets(TrackedAuraType type) const { return m_trackedAuraTargets[type]; }
-
         SpellImmuneList m_spellImmune[MAX_SPELL_IMMUNITY];
 
         // Threat related methods
@@ -2250,6 +2248,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         void BuildMoveWaterWalkPacket(WorldPacket* data, bool apply, uint32 value);
         void BuildSendPlayVisualPacket(WorldPacket* data, uint32 value, bool impact);
         void BuildMoveSetCanFlyPacket(WorldPacket* data, bool apply, uint32 value);
+        void BuildMoveFeatherFallPacket(WorldPacket* data, bool apply, uint32 value);
 
     protected:
         explicit Unit ();
@@ -2297,7 +2296,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
 
         uint32 m_reactiveTimer[MAX_REACTIVE];
         uint32 m_regenTimer;
-        uint32 m_lastManaUseTimer;
+        uint32 m_holyPowerRegenTimer;
 
         // Frozen Mod
         bool m_spoofSamePlayerFaction : 1;

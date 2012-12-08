@@ -4111,7 +4111,7 @@ void SpellMgr::LoadPetDefaultSpells()
                 if (mPetDefaultSpellsMap.find(cInfo->Entry) != mPetDefaultSpellsMap.end())
                     continue;
                 PetDefaultSpellsEntry petDefSpells;
-
+/*
                 CreatureSpellsList const* spellList = sObjectMgr.GetCreatureSpells(cInfo->Entry);
                 if (spellList && !spellList->empty())
                 {
@@ -4123,6 +4123,10 @@ void SpellMgr::LoadPetDefaultSpells()
                             petDefSpells.spellid[itr->first] = itr->second.spell;
                     }
                 }
+*/
+                if (CreatureTemplateSpells const* templateSpells = sCreatureTemplateSpellsStorage.LookupEntry<CreatureTemplateSpells>(cInfo->Entry))
+                    for (int j = 0; j < MAX_CREATURE_SPELL_DATA_SLOT; ++j)
+                        petDefSpells.spellid[j] = templateSpells->spells[j];
 
                 if (LoadPetDefaultSpells_helper(cInfo, petDefSpells))
                 {
@@ -5400,7 +5404,7 @@ int32 GetDiminishingReturnsLimitDuration(DiminishingGroup group, SpellEntry cons
             break;
     }
 
-    return 10000;
+    return 8000;
 }
 
 bool IsDiminishingReturnsGroupDurationLimited(DiminishingGroup group)
@@ -5728,3 +5732,4 @@ int32 GetMasteryCoefficient(SpellEntry const * spellProto)
 
     return coef;
 }
+

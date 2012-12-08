@@ -191,12 +191,10 @@ bool IsCastEndProcModifierAura(SpellEntry const *spellInfo, SpellEffectIndex eff
 inline bool IsSpellHaveAura(SpellEntry const* spellInfo, AuraType aura, uint32 effectMask = (1 << EFFECT_INDEX_0) | (1 << EFFECT_INDEX_1) | (1 << EFFECT_INDEX_2))
 {
     for(int i = 0; i < MAX_EFFECT_INDEX; ++i)
-    {
+        if (effectMask & (1 << i))
         if(SpellEffectEntry const* effectEntry = spellInfo->GetSpellEffect(SpellEffectIndex(i)))
             if(AuraType(effectEntry->EffectApplyAuraName)==aura)
                 return true;
-    }
-
     return false;
 }
 
@@ -841,6 +839,8 @@ DiminishingReturnsType GetDiminishingReturnsGroupType(DiminishingGroup group);
 int32 GetDiminishingReturnsLimitDuration(DiminishingGroup group, SpellEntry const* spellproto);
 
 MANGOS_DLL_SPEC SpellEntry const* GetSpellEntryByDifficulty(uint32 id, Difficulty difficulty, bool isRaid);
+
+int32 GetMasteryCoefficient(SpellEntry const * spellProto);
 
 int32 GetMasteryCoefficient(SpellEntry const * spellProto);
 

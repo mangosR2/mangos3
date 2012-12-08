@@ -42,6 +42,8 @@ m_declinedname(NULL)
 
     m_baseBonusData = new PetScalingData;
 
+    m_holyPowerRegenTimer = REGEN_TIME_HOLY_POWER;
+
     // pets always have a charminfo, even if they are not actually charmed
     if (!GetCharmInfo())
         InitCharmInfo(this);

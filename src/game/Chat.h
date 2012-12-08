@@ -326,6 +326,7 @@ class MANGOS_DLL_SPEC ChatHandler
         bool HandleLookupTeleCommand(char* args);
         bool HandleLookupTitleCommand(char* args);
 
+        bool HandleModifyHolyPowerCommand(char* args);
         bool HandleModifyHPCommand(char* args);
         bool HandleModifyManaCommand(char* args);
         bool HandleModifyRageCommand(char* args);
@@ -655,6 +656,8 @@ class MANGOS_DLL_SPEC ChatHandler
         bool  ExtractUInt32Base(char** args, uint32& val, uint32 base);
         bool  ExtractUInt32(char** args, uint32& val) { return ExtractUInt32Base(args, val, 10); }
         bool  ExtractOptUInt32(char** args, uint32& val, uint32 defVal);
+        bool  ExtractUInt64(char** args, uint64& val);
+        bool  ExtractInt64(char** args, int64& val);
         bool  ExtractFloat(char** args, float& val);
         bool  ExtractOptFloat(char** args, float& val, float defVal);
         char* ExtractQuotedArg(char** args, bool asis = false);

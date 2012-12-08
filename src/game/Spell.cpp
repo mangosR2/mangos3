@@ -47,6 +47,7 @@
 #include "Chat.h"
 #include "DB2Stores.h"
 #include "SQLStorages.h"
+#include "Vehicle.h"
 
 extern pEffect SpellEffects[TOTAL_SPELL_EFFECTS];
 
@@ -970,7 +971,7 @@ void Spell::AddUnitTarget(Unit* pVictim, SpellEffectIndex effIndex)
         return;
 
     // Check for effect immune skip if immuned
-    bool immuned = pVictim->IsImmuneToSpellEffect(m_spellInfo, effIndex);
+    bool immuned = pVictim->IsImmuneToSpellEffect(m_spellInfo, effIndex, pVictim == m_caster);
 
     if (pVictim->GetTypeId() == TYPEID_UNIT && ((Creature*)pVictim)->IsTotem() && (m_spellFlags & SPELL_FLAG_REDIRECTED))
         immuned = false;
@@ -2759,8 +2760,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
             break;
         case TARGET_DUELVSPLAYER:
         {
-            Unit *target = m_targets.getUnitTarget();
-            if (target)
+            if (Unit* target = m_targets.getUnitTarget())
             {
                 if (m_caster->IsFriendlyTo(target))
                 {
@@ -2768,7 +2768,9 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
                 }
                 else
                 {
-                    if (Unit* pUnitTarget = m_caster->SelectMagnetTarget(m_targets.getUnitTarget(), this, effIndex))
+                    if (Unit* pUnitTarget = m_caster->SelectMagnetTarget(target, this, effIndex))
+                    {
+                        if (target != pUnitTarget)
                     {
                         if (m_targets.getUnitTarget() != pUnitTarget)
                         {
@@ -5017,7 +5019,7 @@ void Spell::SendChannelStart(uint32 duration)
     //    data << uint32(0);
     //}
     data << uint8(0);       // unk2
-    //if (unk1)
+    //if (unk2)
     //{
     //    data << ObjectGuid().WriteAsPacked();
     //    data << uint32(0);
@@ -6803,6 +6805,34 @@ SpellCastResult Spell::CheckCast(bool strict)
 
                 break;
             }
+            case SPELL_AURA_CONTROL_VEHICLE:
+            {
+                if (m_caster->HasAuraType(SPELL_AURA_MOUNTED))
+                    return SPELL_FAILED_NOT_MOUNTED;
+
+                Unit* pTarget = m_targets.getUnitTarget();
+
+                if (!pTarget->IsVehicle())
+                    return SPELL_FAILED_BAD_TARGETS;
+
+                // It is possible to change between vehicles that are boarded on each other
+                if (m_caster->IsBoarded() && m_caster->GetTransportInfo()->IsOnVehicle())
+                {
+                    // Check if trying to board a vehicle that is boarded on current transport
+                    bool boardedOnEachOther = m_caster->GetTransportInfo()->HasOnBoard(pTarget);
+                    // Check if trying to board a vehicle that has the current transport on board
+                    if (!boardedOnEachOther && pTarget->IsBoarded())
+                        boardedOnEachOther = pTarget->GetTransportInfo()->HasOnBoard(m_caster);
+
+                    if (!boardedOnEachOther)
+                        return SPELL_FAILED_NOT_ON_TRANSPORT;
+                }
+
+                if (!pTarget->GetVehicleInfo()->CanBoard(m_caster))
+                    return SPELL_FAILED_BAD_TARGETS;
+
+                break;
+            }
             case SPELL_AURA_MIRROR_IMAGE:
             {
                 if (!expectedTarget)
@@ -8313,7 +8343,7 @@ SpellCastResult Spell::CanOpenLock(SpellEffectIndex effIndex, uint32 lockId, Ski
 
                 skillId = SkillByLockType(LockType(lockInfo->Index[j]));
 
-                if ( skillId != SKILL_NONE )
+                if (skillId != SKILL_NONE || skillId == MAX_SKILL_TYPE)
                 {
                     // skill bonus provided by casting spell (mostly item spells)
                     // add the damage modifier from the spell casted (cheat lock / skeleton key etc.) (use m_currentBasePoints, CalculateDamage returns wrong value)
@@ -8321,8 +8351,11 @@ SpellCastResult Spell::CanOpenLock(SpellEffectIndex effIndex, uint32 lockId, Ski
                     reqSkillValue = lockInfo->Skill[j];
 
                     // castitem check: rogue using skeleton keys. the skill values should not be added in this case.
-                    skillValue = m_CastItem || m_caster->GetTypeId()!= TYPEID_PLAYER ?
-                        0 : ((Player*)m_caster)->GetSkillValue(skillId);
+                    // MAX_SKILL_TYPE - skill value scales with caster level
+                    if (skillId == MAX_SKILL_TYPE)
+                        skillValue = m_CastItem || m_caster->GetTypeId() != TYPEID_PLAYER ? 0 : m_caster->getLevel() * 5;
+                    else
+                        skillValue = m_CastItem || m_caster->GetTypeId() != TYPEID_PLAYER ? 0 : ((Player*)m_caster)->GetSkillValue(skillId);
 
                     skillValue += spellSkillBonus;
 

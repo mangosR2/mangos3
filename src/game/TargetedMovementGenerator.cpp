@@ -89,6 +89,8 @@ void TargetedMovementGeneratorMedium<T, D>::_setTargetLocation(T& owner, bool up
     }
     else
     {
+        MANGOS_ASSERT(i_path);
+
         // the destination has not changed, we just need to refresh the path (usually speed change)
         G3D::Vector3 end = i_path->getEndPosition();
         x = end.x;
@@ -177,6 +179,7 @@ bool TargetedMovementGeneratorMedium<T, D>::Update(T& owner, const uint32& time_
 
     bool targetMoved = false;
 
+    bool targetMoved = false;
     i_recheckDistance.Update(time_diff);
     if (i_recheckDistance.Passed())
     {
@@ -230,6 +233,9 @@ bool TargetedMovementGeneratorMedium<T, D>::Update(T& owner, const uint32& time_
     if (m_speedChanged || targetMoved)
         _setTargetLocation(owner, true);
 
+    if (m_speedChanged || targetMoved)
+        _setTargetLocation(owner, targetMoved);
+
     if (owner.movespline->Finalized())
     {
         if (fabs(i_angle) < M_NULL_F && !owner.HasInArc(0.01f, i_target.getTarget()))
@@ -265,9 +271,10 @@ void ChaseMovementGenerator<Creature>::Initialize(Creature& owner)
     owner.SetWalk(false, false);                            // Chase movement is running
     owner.addUnitState(UNIT_STAT_CHASE | UNIT_STAT_CHASE_MOVE);
     _setTargetLocation(owner, true);
-
+/*
     if (owner.getVictim() && !owner.hasUnitState(UNIT_STAT_MELEE_ATTACKING))
         owner.Attack(owner.getVictim(), !owner.IsNonMeleeSpellCasted(true));
+*/
 }
 
 template<class T>
