@@ -2704,7 +2704,7 @@ bool ChatHandler::HandlePInfoCommand(char* args)
     AccountTypes security = SEC_PLAYER;
     std::string last_login = GetMangosString(LANG_ERROR);
 
-    QueryResult* result = LoginDatabase.PQuery("SELECT a.id, a.username, aa.gmlevel, a.last_ip, a.last_login, a.email FROM account a LEFT JOIN account_access aa ON (a.id = aa.id) WHERE a.id = '%u' AND aa.RealmID = '%u'", accId, sWorld.getConfig(CONFIG_UINT32_REALMID));
+    QueryResult* result = LoginDatabase.PQuery("SELECT a.id, a.username, aa.gmlevel, a.last_ip, a.last_login, a.email FROM account a LEFT JOIN account_access aa ON (a.id = aa.id) WHERE a.id = '%u'", accId);
 
     if (result)
     {

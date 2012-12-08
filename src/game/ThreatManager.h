@@ -180,7 +180,7 @@ class MANGOS_DLL_SPEC ThreatManager
     public:
         friend class HostileReference;
 
-        explicit ThreatManager(Unit *pOwner);
+        explicit ThreatManager(Unit& owner);
 
         ~ThreatManager() { clearReferences(); }
 
@@ -204,7 +204,7 @@ class MANGOS_DLL_SPEC ThreatManager
 
         HostileReference* getCurrentVictim() { return iCurrentVictim; }
 
-        Unit*  getOwner() const { return iOwner; }
+        Unit* getOwner() { return &owner; }
 
         bool isOwnerOnline() const;
 
@@ -221,7 +221,7 @@ class MANGOS_DLL_SPEC ThreatManager
         ThreatList const& getThreatList() const { return iThreatContainer.getThreatList(); }
     private:
         HostileReference* iCurrentVictim;
-        Unit* iOwner;
+        Unit& owner;
         ShortTimeTracker iUpdateTimer;
         bool iUpdateNeed;
         ThreatContainer iThreatContainer;
