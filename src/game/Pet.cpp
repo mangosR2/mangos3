@@ -34,7 +34,7 @@ Creature(CREATURE_SUBTYPE_PET),
 m_usedTalentCount(0),
 m_removed(false), m_updated(false), m_petType(type), m_duration(0),
 m_auraUpdateMask(0), m_loading(true), m_needSave(true), m_petFollowAngle(PET_FOLLOW_ANGLE),
-m_petCounter(0), m_PetScalingData(NULL), m_createSpellID(0),m_HappinessState(0),
+m_petCounter(0), m_PetScalingData(NULL), m_createSpellID(0),
 m_declinedname(NULL)
 {
     SetName("Pet");
@@ -129,18 +129,6 @@ bool Pet::LoadPetFromDB(Player* owner, uint32 petentry, uint32 petnumber, bool c
 
     setPetType(PetType(fields[16].GetUInt8()));
 
-    uint32 summon_spell_id = fields[16].GetUInt32();
-    SpellEntry const* spellInfo = sSpellStore.LookupEntry(summon_spell_id);
-
-    bool is_temporary_summoned = spellInfo && GetSpellDuration(spellInfo) > 0;
-
-    // check temporary summoned pets like mage water elemental
-    if (current && is_temporary_summoned)
-    {
-        delete result;
-        return false;
-    }
-
     PetType pet_type = PetType(fields[17].GetUInt8());
     if (pet_type == HUNTER_PET)
     {
@@ -222,8 +210,6 @@ bool Pet::LoadPetFromDB(Player* owner, uint32 petentry, uint32 petnumber, bool c
         case HUNTER_PET:
             SetByteFlag(UNIT_FIELD_BYTES_2, 2, fields[9].GetBool() ? UNIT_CAN_BE_ABANDONED : UNIT_CAN_BE_RENAMED | UNIT_CAN_BE_ABANDONED);
             RemoveByteFlag(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_FFA_PVP | UNIT_BYTE2_FLAG_SANCTUARY | UNIT_BYTE2_FLAG_PVP);
-            SetMaxPower(POWER_HAPPINESS, GetCreatePowers(POWER_HAPPINESS));
-            SetPower(POWER_HAPPINESS, fields[12].GetUInt32());
             setPowerType(POWER_FOCUS);
             break;
         default:
@@ -274,9 +260,6 @@ bool Pet::LoadPetFromDB(Player* owner, uint32 petentry, uint32 petnumber, bool c
 
     // load action bar, if data broken will fill later by default spells.
     m_charmInfo->LoadPetActionBar(fields[13].GetCppString());
-
-    // since last save (in seconds)
-    uint32 timediff = uint32(time(NULL) - fields[13].GetUInt64());
 
     // Finished use DB data
     delete result;
@@ -521,11 +504,7 @@ void Pet::SetDeathState(DeathState s)                       // overwrite virtual
             SetUInt32Value(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_NONE);
             RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE);
 
-            //lose happiness when died and not in BG/Arena
-            MapEntry const* mapEntry = sMapStore.LookupEntry(GetMapId());
-            if(!mapEntry || (mapEntry->map_type != MAP_ARENA && mapEntry->map_type != MAP_BATTLEGROUND))
-                ModifyPower(POWER_HAPPINESS, -HAPPINESS_LEVEL_SIZE);
-
+// FIXME - heart of phoenix
 //            if (HasSpell(55709))
 //                CastSpell(this, 55709, true);
 
@@ -684,25 +663,12 @@ void Pet::RegenerateAll( uint32 update_diff )
         Regenerate(getPowerType(), REGEN_TIME_FULL);
         m_regenTimer = REGEN_TIME_FULL;
 
-        if(getPetType() == HUNTER_PET)
-            Regenerate(POWER_HAPPINESS, REGEN_TIME_FULL);
-
         if (!isInCombat() || IsPolymorphed())
             RegenerateHealth(REGEN_TIME_FULL);
     }
     else
         m_regenTimer -= update_diff;
 
-}
-
-HappinessState Pet::GetHappinessState()
-{
-    if(GetPower(POWER_HAPPINESS) < HAPPINESS_LEVEL_SIZE)
-        return UNHAPPY;
-    else if(GetPower(POWER_HAPPINESS) >= HAPPINESS_LEVEL_SIZE * 2)
-        return HAPPY;
-    else
-        return CONTENT;
 }
 
 bool Pet::CanTakeMoreActiveSpells(uint32 spellid)
@@ -908,18 +874,7 @@ bool Pet::CreateBaseAtCreature(Creature* creature, Unit* owner)
         return false;
     }
 
-    if (cinfo->type == CREATURE_TYPE_CRITTER)
-    {
-        setPetType(MINI_PET);
-        return true;
-    }
-    SetDisplayId(creature->GetDisplayId());
-    SetNativeDisplayId(creature->GetNativeDisplayId());
-    setPowerType(POWER_FOCUS);
-    SetUInt32Value(UNIT_FIELD_PET_NAME_TIMESTAMP, 0);
-    SetUInt32Value(UNIT_FIELD_PETEXPERIENCE, 0);
-    SetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP, sObjectMgr.GetXPForPetLevel(creature->getLevel()));
-    SetUInt32Value(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_NONE);
+    CreatureCreatePos pos(creature, creature->GetOrientation());
 
     BASIC_LOG("Create new pet from creature %d ", creature->GetEntry());
 
@@ -2785,8 +2740,6 @@ bool Pet::Summon()
             SetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP, sObjectMgr.GetXPForPetLevel(getLevel()));
             SetUInt32Value(UNIT_FIELD_PET_NAME_TIMESTAMP, time(NULL));
             SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE);
-            SetMaxPower(POWER_HAPPINESS, GetCreatePowers(POWER_HAPPINESS));
-            SetPower(POWER_HAPPINESS, HAPPINESS_LEVEL_SIZE);
             SetNeedSave(true);
             owner->SetPet(this);
             setFaction(owner->getFaction());
@@ -3088,14 +3041,6 @@ void Pet::Regenerate(Powers power, uint32 diff)
             break;
         }
 
-        case POWER_HAPPINESS:
-        {
-            addvalue = -178.0f;                                   //value is 70/35/17/8/4 (per min) * 1000 / 8 (timer 2 secs)
-            if(isInCombat())                                     //we know in combat happiness fades faster, multiplier guess
-                addvalue = addvalue * 1.5f;
-            ApplyHappinessBonus(true);
-            break;
-        }
         case POWER_RUNIC_POWER:
         case POWER_RUNE:
         case POWER_HEALTH:
@@ -3230,47 +3175,6 @@ void ApplyScalingBonusWithHelper::operator() (Unit* unit) const
 
     if (pet->IsInWorld())
         pet->AddScalingAction(target, stat, apply);
-}
-
-void Pet::ApplyHappinessBonus(bool apply)
-{
-    if (!IsInWorld())
-        return;
-
-    if (GetHappinessState() == m_HappinessState)
-        return;
-    else
-        m_HappinessState = GetHappinessState();
-
-    if (apply)
-    {
-        RemoveAurasDueToSpell(8875);
-        int32 basePoints = 0;
-        switch (HappinessState(m_HappinessState))
-        {
-            case HAPPY:
-                // 125% of normal damage
-                basePoints = 25;
-                break;
-            case CONTENT:
-                // 100% of normal damage, nothing to modify
-                basePoints = 0;
-                break;
-            case UNHAPPY:
-                // 75% of normal damage
-                basePoints = -25;
-                break;
-            default:
-                basePoints = 0;
-                break;
-        }
-
-        CastCustomSpell(this, 8875, &basePoints, NULL, NULL, true);
-
-        UpdateDamagePhysical(BASE_ATTACK);
-        UpdateDamagePhysical(RANGED_ATTACK);
-        UpdateSpellPower();
-    }
 }
 
 float Pet::OCTRegenHPPerSpirit()

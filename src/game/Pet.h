@@ -179,7 +179,6 @@ class MANGOS_DLL_SPEC Pet : public Creature
 
         void RegenerateAll(uint32 update_diff);             // overwrite Creature::RegenerateAll
         void Regenerate(Powers power, uint32 diff);
-        HappinessState GetHappinessState();
         void GivePetXP(uint32 xp);
         void GivePetLevel(uint32 level);
         void SynchronizeLevelWithOwner();
@@ -227,7 +226,6 @@ class MANGOS_DLL_SPEC Pet : public Creature
         bool ReapplyScalingAura(Aura* aura, int32 basePoints);
         PetScalingData* CalculateScalingData( bool recalculate = false );
         void AddScalingAction(ScalingTarget target, uint32 stat, bool apply);
-        void ApplyHappinessBonus(bool apply);
 
         void _LoadSpellCooldowns();
         void _SaveSpellCooldowns();
@@ -297,7 +295,6 @@ class MANGOS_DLL_SPEC Pet : public Creature
         PetScalingData*  m_baseBonusData;
         uint32  m_createSpellID;
         std::queue<ScalingAction> m_scalingQueue;
-        uint8   m_HappinessState;
 
         DeclinedName *m_declinedname;
 
