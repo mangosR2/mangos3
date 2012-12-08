@@ -2594,8 +2594,8 @@ class MANGOS_DLL_SPEC Player : public Unit
         void _SaveTalents();
         void _SaveStats();
 
-        void _SetCreateBits(UpdateMask* updateMask, Player* target) const override;
-        void _SetUpdateBits(UpdateMask* updateMask, Player* target) const override;
+        void _SetCreateBits(UpdateMask* updateMask, Player* target) const;
+        void _SetUpdateBits(UpdateMask* updateMask, Player* target) const;
 
         /*********************************************************/
         /***              ENVIRONMENTAL SYSTEM                 ***/

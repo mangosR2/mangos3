@@ -747,7 +747,7 @@ class MANGOS_DLL_SPEC GameObject : public WorldObject
         // Loot System
         Loot loot;
         void getFishLoot(Loot* loot, Player* loot_owner);
-        void StartGroupLoot(Group* group, uint32 timer) override;
+        void StartGroupLoot(Group* group, uint32 timer);
 
         ObjectGuid GetLootRecipientGuid() const { return m_lootRecipientGuid; }
         uint32 GetLootGroupRecipientId() const { return m_lootGroupRecipientId; }
@@ -828,7 +828,7 @@ class MANGOS_DLL_SPEC GameObject : public WorldObject
         // Loot System
         uint32 m_groupLootTimer;                            // (msecs)timer used for group loot
         uint32 m_groupLootId;                               // used to find group which is looting
-        void StopGroupLoot() override;
+        void StopGroupLoot();
         ObjectGuid m_lootRecipientGuid;                     // player who will have rights for looting if m_lootGroupRecipient==0 or group disbanded
         uint32 m_lootGroupRecipientId;                      // group who will have rights for looting if set and exist
 
