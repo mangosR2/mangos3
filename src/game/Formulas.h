@@ -25,9 +25,9 @@ namespace MaNGOS
 {
     namespace Honor
     {
-        inline float hk_honor_at_level(uint32 level, uint32 count = 1)
+        inline float hk_honor_at_level(uint32 level, float mod = 1.0f)
         {
-            return (float)ceil(count * (-0.53177f + 0.59357f * exp((level + 23.54042f) / 26.07859f)));
+            return mod * level * 1.55f;
         }
     }
     namespace XP
@@ -116,7 +116,7 @@ namespace MaNGOS
                         (((Creature*)u)->GetCreatureInfo()->flags_extra & CREATURE_FLAG_EXTRA_NO_XP_AT_KILL)))
                 return 0;
 
-            uint32 xp_gain = BaseGain(pl->getLevel(), u->getLevel(), GetContentLevelsForMap(pl->GetMapId()));
+            uint32 xp_gain = BaseGain(pl->getLevel(), u->getLevel(), GetContentLevelsForMapAndZone(pl->GetMapId(), pl->GetZoneId()));
             if (xp_gain == 0)
                 return 0;
 
