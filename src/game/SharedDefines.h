@@ -21,6 +21,7 @@
 
 #include "Platform/Define.h"
 #include <cassert>
+#include "SystemConfig.h"
 
 enum Gender
 {

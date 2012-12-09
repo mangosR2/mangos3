@@ -16,9 +16,9 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 
-project(MaNGOS)
-set(MANGOS_VERSION 0.17)
-set(CLIENT_VERSION 12340)
+project(MangosR2)
+set(MANGOS_VERSION 0.19.2)
+set(CLIENT_VERSION 15595)
 
 # CMake policies
 cmake_minimum_required(VERSION 2.8)

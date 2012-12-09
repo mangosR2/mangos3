@@ -65,7 +65,7 @@ include_directories(
   ${MYSQL_INCLUDE_DIR}
 )
 
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/SystemConfig.h.in ${CMAKE_CURRENT_BINARY_DIR}/SystemConfig.h)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/SystemConfig.h.in ${CMAKE_CURRENT_SOURCE_DIR}/SystemConfig.h)
 
 add_library(shared STATIC
   ${shared_SRCS}
