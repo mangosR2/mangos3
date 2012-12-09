@@ -10432,8 +10432,10 @@ bool Unit::TauntApply(Unit* taunter, bool isSingleEffect)
 
     if (!taunter 
         || (taunter->GetTypeId() == TYPEID_PLAYER && ((Player*)taunter)->isGameMaster())
-        || !taunter->isVisibleForOrDetect(this,this,true)
-        || IsFriendlyTo(taunter))
+        // FIXME - this checks really needed?
+        //|| !taunter->isVisibleForOrDetect(this,this,true)
+        //|| IsFriendlyTo(taunter)
+        )
         return false;
 
     Unit* target = getVictim();
@@ -10457,7 +10459,8 @@ bool Unit::TauntApply(Unit* taunter, bool isSingleEffect)
     }
 
     if (isSingleEffect)
-        getThreatManager().addThreat(taunter,getThreatManager().getCurrentVictim()->getThreat());
+        getThreatManager().addThreat(taunter, getThreatManager().getCurrentVictim() ? 
+                                              getThreatManager().getCurrentVictim()->getThreat() : 1.0f);
     else
         getThreatManager().tauntApply(taunter);
 
