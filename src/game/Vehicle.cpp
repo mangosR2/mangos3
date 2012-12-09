@@ -479,7 +479,7 @@ void VehicleKit::InstallAccessory(VehicleAccessory const* accessory)
 
     if (Creature* summoned = GetBase()->SummonCreature(accessory->passengerEntry,
         GetBase()->GetPositionX() + accessory->m_offsetX, GetBase()->GetPositionY() + accessory->m_offsetY, GetBase()->GetPositionZ() + accessory->m_offsetZ, GetBase()->GetOrientation() + accessory->m_offsetX,
-        TEMPSUMMON_CORPSE_TIMED_DESPAWN, 30000))
+        TEMPSUMMON_DEAD_DESPAWN, 0))
     {
         summoned->SetCreatorGuid(ObjectGuid());
         summoned->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);

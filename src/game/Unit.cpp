@@ -10836,8 +10836,10 @@ bool Unit::TauntApply(Unit* taunter, bool isSingleEffect)
 
     if (!taunter 
         || (taunter->GetTypeId() == TYPEID_PLAYER && ((Player*)taunter)->isGameMaster())
-        || !taunter->isVisibleForOrDetect(this,this,true)
-        || IsFriendlyTo(taunter))
+        // FIXME - this checks really needed?
+        //|| !taunter->isVisibleForOrDetect(this,this,true)
+        //|| IsFriendlyTo(taunter)
+        )
         return false;
 
     Unit* target = getVictim();
@@ -10861,7 +10863,8 @@ bool Unit::TauntApply(Unit* taunter, bool isSingleEffect)
     }
 
     if (isSingleEffect)
-        getThreatManager().addThreat(taunter,getThreatManager().getCurrentVictim()->getThreat());
+        getThreatManager().addThreat(taunter, getThreatManager().getCurrentVictim() ? 
+                                              getThreatManager().getCurrentVictim()->getThreat() : 1.0f);
     else
         getThreatManager().tauntApply(taunter);
 
@@ -13797,7 +13800,7 @@ void Unit::ExitVehicle(bool forceDismount)
 
     if (vehicleBase->GetObjectGuid().IsAnyTypeCreature())
     {
-        if (!(vehicleBase->GetVehicleInfo()->m_flags & (VEHICLE_FLAG_NOT_DISMISS | VEHICLE_FLAG_ACCESSORY))
+        if (!vehicleBase->GetVehicle() && !(vehicleBase->GetVehicleInfo()->m_flags & VEHICLE_FLAG_NOT_DISMISS)
             && ((Creature*)vehicleBase)->IsTemporarySummon())
             dismiss = true;
     }

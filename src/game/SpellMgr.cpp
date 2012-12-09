@@ -2740,6 +2740,7 @@ uint32 SpellMgr::GetSpellMaxTargetsWithCustom(SpellEntry const* spellInfo, Unit 
                 case 59870:                                 // Glare of the Tribunal (h) (Halls of Stone)
                 case 62016:                                 // Charge Orb (Ulduar, Thorim)
                 case 62042:                                 // Stormhammer (Ulduar, Thorim)
+                case 62166:                                 // StoneGrip nh
                 case 62301:                                 // Cosmic Smash (Ulduar, Algalon)
                 case 62374:                                 // Pursued (Ulduar, Flame Leviathan)
                 case 62400:                                 // Missile Barrage (Ulduar, Flame Leviathan)
@@ -2817,6 +2818,7 @@ uint32 SpellMgr::GetSpellMaxTargetsWithCustom(SpellEntry const* spellInfo, Unit 
                 case 60936:                                 // Surge of Power (h) (Malygos)
                 case 61693:                                 // Arcane Storm (Malygos)
                 case 62477:                                 // Icicle (Hodir 25man)
+                case 63981:                                 // StoneGrip H
                 case 64598:                                 // Cosmic Smash (h) (Ulduar, Algalon)
                 case 64620:                                 // Summon Fire Bot Trigger (Ulduar, Mimiron) hits npc 33856
                 case 70814:                                 // Bone Slice (ICC, Lord Marrowgar, heroic)
