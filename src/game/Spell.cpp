@@ -2212,6 +2212,8 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
                     case 38028:                                             // Watery Grave
                     case 40618:                                             // Insignificance
                     case 41376:                                             // Spite
+                    case 62166:                                             // Stone Grip nh
+                    case 63981:                                             // Stone Grip h
                         if (Unit* pVictim = m_caster->getVictim())
                             targetUnitMap.remove(pVictim);
                         break;
@@ -8646,19 +8648,6 @@ bool Spell::FillCustomTargetMap(SpellEffectIndex i, UnitList &targetUnitMap)
                 targetUnitMap.push_back((Unit*)result);
             else
                 targetUnitMap.push_back((Unit*)m_caster);
-            break;
-        }
-        case 62166: // Stone Grip (Kologarn)
-        case 63981: // Stone Grip (Kologarn) H
-        {
-            FillAreaTargets(targetUnitMap, radius, PUSH_SELF_CENTER, SPELL_TARGETS_PLAYER);
-            if (m_caster->getVictim())
-                targetUnitMap.remove(m_caster->getVictim());
-
-            if (m_spellInfo->Id == 63981)
-                unMaxTargets = 3;
-            else
-                unMaxTargets = 1;
             break;
         }
         case 62343: // Heat (remove all except active iron constructs)
