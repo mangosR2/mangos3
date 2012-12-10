@@ -35,6 +35,7 @@
 #include "MapPersistentStateMgr.h"
 #include "ObjectAccessor.h"
 #include "ObjectGuid.h"
+#include "Opcodes.h"
 #include "Policies/Singleton.h"
 #include "Vehicle.h"
 
@@ -831,6 +832,8 @@ class ObjectMgr
         void LoadNPCSpellClickSpells();
         void LoadSpellTemplate();
 
+        void LoadOpcodes();
+
         void LoadWeatherZoneChances();
         void LoadGameTele();
 
@@ -1213,6 +1216,19 @@ class ObjectMgr
         QuestRelationsMap& GetCreatureQuestRelationsMap() { return m_CreatureQuestRelations; }
 
         uint32 GetModelForRace(uint32 sourceModelId, uint32 racemask);
+
+        uint16 const GetOpcodeValue(Opcodes opcode) const
+        {
+            UNORDERED_MAP<Opcodes, uint16>::const_iterator iter = opcodeValueSubstTable.find(opcode);
+            return (iter == opcodeValueSubstTable.end()) ? 0 : iter->second;
+        }
+        Opcodes const GetOpcode(uint16 value) const
+        {
+            UNORDERED_MAP<uint16, Opcodes>::const_iterator iter = opcodeSubstTable.find(value);
+            return (iter == opcodeSubstTable.end()) ? MSG_NULL_ACTION : iter->second;
+        }
+        bool MakeOpcodeHash(Opcodes opcode, uint16 value);
+
     protected:
 
         // initial free low guid for selected guid type for map local guids
@@ -1297,6 +1313,9 @@ class ObjectMgr
         QuestRelationsMap       m_GOQuestInvolvedRelations;
 
         int DBCLocaleIndex;
+
+        UNORDERED_MAP<Opcodes, uint16>  opcodeValueSubstTable;    // Hash for fast subst internal->real opcode
+        UNORDERED_MAP<uint16, Opcodes>  opcodeSubstTable;         // Hash for fast subst real->internal opcode
 
     private:
         void LoadCreatureAddons(SQLStorage& creatureaddons, char const* entryName, char const* comment);

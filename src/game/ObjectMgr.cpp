@@ -19,6 +19,7 @@
 #include "ObjectMgr.h"
 #include "Database/DatabaseEnv.h"
 #include "Policies/SingletonImp.h"
+#include "SystemConfig.h"
 
 #include "SQLStorages.h"
 #include "Log.h"
@@ -9911,4 +9912,76 @@ void ObjectMgr::LoadTransports(Map* map)
         while(result->NextRow());
         delete result;
     }
+}
+
+void ObjectMgr::LoadOpcodes()
+{
+    // Reload case
+    opcodeSubstTable.clear();
+    opcodeValueSubstTable.clear();
+
+    QueryResult* result = WorldDatabase.PQuery("SELECT `name`, `value`, `flags` FROM `opcodes` WHERE `version`= %u", CLIENT_VERSION);
+
+    if (!result)
+    {
+        sLog.outString();
+        sLog.outErrorDb(" Loading opcodes - current opcodes set is empty!");
+        MANGOS_ASSERT(false);
+        return;
+    }
+    uint32 count = 0;
+    uint32 count1 = 0;
+
+    BarGoLink bar(result->GetRowCount());
+
+    do
+    {
+        bar.step();
+
+        Field* fields = result->Fetch();
+
+        char const*  opcodeName         = fields[0].GetString();
+        uint16 opcodeValue              = fields[1].GetUInt16();
+        uint32 opcodeFlags              = fields[2].GetUInt32();
+
+        ++count;
+        bool parsed = false;
+        for (uint16 i = 0; i < NUM_MSG_TYPES; ++i)
+        {
+            OpcodeHandler* handler = &opcodeTable[i];
+            if (!strcmp(handler->name, opcodeName))
+            {
+                if (opcodeFlags & OPCODE_LOAD_FLAGS_UNHANDLED)
+                    handler->status = STATUS_UNHANDLED;
+
+                if (MakeOpcodeHash(Opcodes(i), opcodeValue))
+                {
+                    parsed = true;
+                    ++count1;
+                }
+                break;
+            }
+        }
+        if (!parsed && opcodeValue != MSG_NULL_ACTION)
+            DETAIL_LOG( "ObjectMgr::LoadOpcodes Opcode %u (%s) not has definition in opcodes table!", opcodeValue, opcodeName);
+    }
+    while(result->NextRow());
+
+    delete result;
+
+    sLog.outString();
+    sLog.outString(">> Loaded %u opcode definitions, %u successful parsed", count, count1);
+    if (count1 < (count-1))
+    {
+        sLog.outErrorDb(">> Loading opcodes - %u loaded opcodes not has handlers! check DB and core definitions!", count - count1 -1);
+    }
+}
+
+bool ObjectMgr::MakeOpcodeHash(Opcodes opcode, uint16 value)
+{
+    if (opcode > NUM_MSG_TYPES)
+        return false;
+    opcodeSubstTable[value] = opcode;
+    opcodeValueSubstTable[opcode] = value;
+    return true;
 }
