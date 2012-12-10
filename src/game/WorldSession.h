@@ -964,6 +964,7 @@ class MANGOS_DLL_SPEC WorldSession
         void HandleRequestResearchHistory(WorldPacket& recv_data);
 
         void HandleClearRaidMarkerOpcode(WorldPacket& recv_data);
+        void HandleObjectUpdateFailedOpcode(WorldPacket& recv_data);
 
     private:
         // private trade methods
