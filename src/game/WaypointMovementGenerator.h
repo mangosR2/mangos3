@@ -85,6 +85,8 @@ public PathMovementBase<Creature, WaypointPath const*>
 
         bool GetResetPosition(Creature&, float& x, float& y, float& z);
 
+        void AddToWaypointPauseTime(int32 waitTimeDiff);
+
     private:
 
         void Stop(int32 time) { i_nextMoveTime.Reset(time);}
