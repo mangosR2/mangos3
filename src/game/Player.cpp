@@ -2091,6 +2091,8 @@ temporarily disable precreate maps. need found reason double map creation
             // code for finish transfer to new map called in WorldSession::HandleMoveWorldportAckOpcode at client packet
             SetSemaphoreTeleportFar(true);
 
+            final.o = NormalizeOrientation(final.o);
+
             if (!GetSession()->PlayerLogout())
             {
                 // transfer finished, inform client to start load
