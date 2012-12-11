@@ -201,7 +201,7 @@ CREATE TABLE `spell_disabled` (
 -- Vehicle accessory
 
 ALTER TABLE `vehicle_accessory`
-    ADD COLUMN `flags` int(10) UNSIGNED NOT NULL DEFAULT '0' COMMENT 'various flags' AFTER `seat`,
+    ADD COLUMN `flags` int(10) UNSIGNED NOT NULL DEFAULT '0' COMMENT 'various flags' AFTER `accessory_entry`,
     ADD COLUMN `offset_x` FLOAT NOT NULL DEFAULT '0' COMMENT 'custom passenger offset X' AFTER `flags`,
     ADD COLUMN `offset_y` FLOAT NOT NULL DEFAULT '0' COMMENT 'custom passenger offset Y' AFTER `offset_x`,
     ADD COLUMN `offset_z` FLOAT NOT NULL DEFAULT '0' COMMENT 'custom passenger offset Z' AFTER `offset_y`,
