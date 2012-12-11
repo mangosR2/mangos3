@@ -20,6 +20,7 @@ REPLACE INTO `spell_bonus_data` (`entry`, `direct_bonus`, `dot_bonus`, `ap_bonus
 -- Warlock
 REPLACE INTO `spell_bonus_data` (`entry`, `direct_bonus`, `dot_bonus`, `ap_bonus`, `ap_dot_bonus`, `comments`) VALUES
 (980, 0, 0.096, 0, 0, 'Warlock - Bane of Agony'),
+(1120, 0, 0.378, 0, 0, 'Warlock - Drain Soul'),
 (5676, 0.423, 0, 0, 0, 'Warlock - Searing Pain'),
 (17877, 1.056, 0, 0, 0, 'Warlock - Shadowburn'),
 (17962, 0, 0, 0, 0, 'Warlock - Conflagrate'),

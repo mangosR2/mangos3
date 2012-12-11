@@ -4549,29 +4549,32 @@ void Spell::EffectDummy(SpellEffectEntry const* effect)
             // Life Tap
             if (wrlClassOptions && wrlClassOptions->SpellFamilyFlags & UI64LIT(0x0000000000040000))
             {
+                damage = (unitTarget->GetMaxHealth() * m_spellInfo->CalculateSimpleValue(EFFECT_INDEX_2) / 100.0f);
                 if (unitTarget && (int32(unitTarget->GetHealth()) > damage))
                 {
                     // Shouldn't Appear in Combat Log
                     unitTarget->ModifyHealth(-damage);
 
-                    int32 spell_power = m_caster->SpellBaseDamageBonusDone(GetSpellSchoolMask(m_spellInfo));
-                    int32 mana = damage + spell_power / 2;
+                    int32 mana = int32(damage * m_spellInfo->CalculateSimpleValue(EFFECT_INDEX_1) / 100.0f);
 
                     // Improved Life Tap mod
                     Unit::AuraList const& auraDummy = m_caster->GetAurasByType(SPELL_AURA_DUMMY);
                     for(Unit::AuraList::const_iterator itr = auraDummy.begin(); itr != auraDummy.end(); ++itr)
                         if((*itr)->GetSpellProto()->GetSpellFamilyName()==SPELLFAMILY_WARLOCK && (*itr)->GetSpellProto()->GetSpellIconID() == 208)
-                            mana = ((*itr)->GetModifier()->m_amount + 100)* mana / 100;
+                            mana = (((*itr)->GetModifier()->m_amount + 100) * mana / 100.0f);
 
                     m_caster->CastCustomSpell(unitTarget, 31818, &mana, NULL, NULL, true);
 
                     // Mana Feed
                     int32 manaFeedVal = 0;
                     Unit::AuraList const& mod = m_caster->GetAurasByType(SPELL_AURA_ADD_FLAT_MODIFIER);
-                    for(Unit::AuraList::const_iterator itr = mod.begin(); itr != mod.end(); ++itr)
+                    for (Unit::AuraList::const_iterator itr = mod.begin(); itr != mod.end(); ++itr)
                     {
-                        if((*itr)->GetSpellProto()->GetSpellFamilyName()==SPELLFAMILY_WARLOCK && (*itr)->GetSpellProto()->GetSpellIconID() == 1982)
-                            manaFeedVal+= (*itr)->GetModifier()->m_amount;
+                        if ((*itr)->GetSpellProto()->GetSpellFamilyName()==SPELLFAMILY_WARLOCK && (*itr)->GetSpellProto()->GetSpellIconID() == 1982 && (*itr)->GetEffIndex() == EFFECT_INDEX_0)
+                        {
+                            manaFeedVal += (*itr)->GetModifier()->m_amount;
+                            break;
+                        }
                     }
                     if (manaFeedVal > 0)
                     {

@@ -8624,7 +8624,7 @@ void Unit::SpellDamageBonusDone(DamageInfo* damageInfo, uint32 stack)
             if (damageInfo->GetSpellProto()->GetSpellFamilyFlags().test<CF_WARLOCK_DRAIN_SOUL>())
             {
                 if (pVictim->GetHealth() * 100 / pVictim->GetMaxHealth() <= 25)
-                    DoneTotalMod *= 4;
+                    DoneTotalMod *= 2;
             }
             // Fire and Brimstone: Chaos Bolt and Incinerate damage bonus
             if (classOptions && classOptions->SpellFamilyFlags & UI64LIT(0x0002004000000000) && pVictim->GetAura(SPELL_AURA_PERIODIC_DAMAGE, SPELLFAMILY_WARLOCK, UI64LIT(0x00000000000004), 0, GetObjectGuid()))

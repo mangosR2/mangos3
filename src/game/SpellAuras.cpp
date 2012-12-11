@@ -7041,8 +7041,17 @@ void Aura::HandlePeriodicDamage(bool apply, bool Real)
     // remove time effects
     else
     {
+        // Drain Soul energize
+        if (spellProto->Id == 1120)
+        {
+            if (m_removeMode == AURA_REMOVE_BY_DEATH)
+            {
+                if (Unit* caster = GetCaster())
+                    caster->CastSpell(caster, 79264, true);
+            }
+        }
         // Parasitic Shadowfiend - handle summoning of two Shadowfiends on DoT expire
-        if (spellProto->Id == 41917)
+        else if (spellProto->Id == 41917)
             target->CastSpell(target, 41915, true);
         else if (spellProto->Id == 74562) // SPELL_FIERY_COMBUSTION - Ruby sanctum boss Halion
             target->CastSpell(target, 74607, true, NULL, NULL, GetCasterGuid());
@@ -9131,18 +9140,6 @@ void Aura::PeriodicTick()
 
             pCaster->ProcDamageAndSpell(&damageInfo);
             pCaster->DealDamage(target, &damageInfo, true);
-
-            // Drain Soul (chance soul shard)
-            if (pCaster->GetTypeId() == TYPEID_PLAYER && spellProto->GetSpellFamilyName() == SPELLFAMILY_WARLOCK && spellProto->GetSpellFamilyFlags().test<CF_WARLOCK_DRAIN_SOUL>())
-            {
-                // Only from non-grey units
-                if (roll_chance_i(10) &&                    // 1-2 from drain with final and without glyph, 0-1 from damage
-                    ((Player*)pCaster)->isHonorOrXPTarget(target) &&
-                    (target->GetTypeId() != TYPEID_UNIT || ((Player*)pCaster)->isAllowedToLoot((Creature*)target)))
-                {
-                    pCaster->CastSpell(pCaster, 43836, true, NULL, this);
-                }
-            }
 
             break;
         }
