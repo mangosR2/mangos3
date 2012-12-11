@@ -8475,13 +8475,12 @@ void Unit::SpellDamageBonusDone(DamageInfo* damageInfo, uint32 stack)
                 {
                     SpellEntry const* m_spell = itr->second->GetSpellProto();
                     SpellClassOptionsEntry const* itrClassOptions = m_spell->GetSpellClassOptions();
-                    if (itrClassOptions && (itrClassOptions->GetSpellFamilyName() != SPELLFAMILY_WARLOCK || !(itrClassOptions->SpellFamilyFlags & UI64LIT(0x0004071B8044C402))))
+                    if (!itrClassOptions || (itrClassOptions->GetSpellFamilyName() != SPELLFAMILY_WARLOCK || !(itrClassOptions->GetSpellFamilyFlags() & UI64LIT(0x0004071B8044C402))))
                     //FIXME: would need 15 argument ClassFamilyMask::test() template for this one:
                     // CF_WARLOCK_CORRUPTION, CF_WARLOCK_CURSE_OF_AGONY, CF_WARLOCK_DRAIN_SOUL, CF_WARLOCK_CURSE_OF_WEAKNESS,
                     // CF_WARLOCK_LIFE_TAP, CF_WARLOCK_SLOWING_CURSES, CF_WARLOCK_MISC_DEBUFFS, CF_WARLOCK_SIPHON_LIFE, CF_WARLOCK_CURSE_OF_DOOM,
                     // CF_WARLOCK_HOWL_OF_TERROR, CF_WARLOCK_SEED_OF_CORRUPTION1, CF_WARLOCK_UNSTABLE_AFFLICTION, CF_WARLOCK_CURSE_OF_THE_ELEMENTS,
                     // CF_WARLOCK_FEAR, CF_WARLOCK_HAUNT
-                    if (m_spell->GetSpellFamilyName() != SPELLFAMILY_WARLOCK || !(m_spell->GetSpellFamilyFlags() & UI64LIT(0x0004071B8044C402)))
                         continue;
 
                     modPercent += stepPercent * itr->second->GetStackAmount();
