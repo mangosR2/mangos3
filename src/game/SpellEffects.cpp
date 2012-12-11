@@ -12049,11 +12049,32 @@ void Spell::EffectScriptEffect(SpellEffectEntry const* effect)
                     }
                     return;
                 }
-                case 63521:                                 // Guarded by The Light (Paladin spell with SPELLFAMILY_WARLOCK)
+                case 77799:                                 // Fel Flame
                 {
-                    // Divine Plea, refresh on target (3 aura slots)
-                    if (SpellAuraHolderPtr holder = unitTarget->GetSpellAuraHolder(54428))
-                        holder->RefreshHolder();
+                    if (!unitTarget)
+                        return;
+
+                    // get Immolate
+                    SpellAuraHolderPtr holder = unitTarget->GetSpellAuraHolder(348, m_caster->GetObjectGuid());
+                    if (holder)
+                    {
+                        int32 newDuration = holder->GetAuraDuration() + damage * IN_MILLISECONDS;
+                        if (newDuration > holder->GetAuraMaxDuration())
+                            newDuration = holder->GetAuraMaxDuration();
+                        holder->SetAuraDuration(newDuration);
+                        holder->SendAuraUpdate(false);
+                    }
+
+                    // get Unstable Affliction
+                    holder = unitTarget->GetSpellAuraHolder(30108, m_caster->GetObjectGuid());
+                    if (holder)
+                    {
+                        int32 newDuration = holder->GetAuraDuration() + damage * IN_MILLISECONDS;
+                        if (newDuration > holder->GetAuraMaxDuration())
+                            newDuration = holder->GetAuraMaxDuration();
+                        holder->SetAuraDuration(newDuration);
+                        holder->SendAuraUpdate(false);
+                    }
 
                     return;
                 }
