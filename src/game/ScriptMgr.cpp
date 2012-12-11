@@ -1655,12 +1655,12 @@ bool ScriptAction::HandleScriptStep()
 
             if (result)                                    // Terminate further steps of this script
             {
-                 if (m_script->textId[0] && !LogIfNotCreature(pSource))
-                 {
-                     Creature* cSource = static_cast<Creature*>(pSource);
-                     if (cSource->GetMotionMaster()->GetCurrentMovementGeneratorType() == WAYPOINT_MOTION_TYPE)
-                         (static_cast<WaypointMovementGenerator<Creature>* >(cSource->GetMotionMaster()->top()))->AddToWaypointPauseTime(m_script->textId[0]);
-                 }
+                if (m_script->textId[0] && !LogIfNotCreature(pSource))
+                {
+                    Creature* cSource = static_cast<Creature*>(pSource);
+                    if (cSource->IsInUnitState(UNIT_ACTION_DOWAYPOINTS))
+                        (static_cast<WaypointMovementGenerator<Creature>* >(cSource->GetMotionMaster()->CurrentMovementGenerator()))->AddToWaypointPauseTime(m_script->textId[0]);
+                }
 
                 return true;
             }
