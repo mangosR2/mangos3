@@ -1378,10 +1378,7 @@ void BattleGroundMgr::BuildPvpLogDataPacket(WorldPacket* data, BattleGround* bg)
         data->WriteBit(0);                  // unk5
         data->WriteBit(0);                  // unk6
         data->WriteGuidMask<3, 0, 5, 1, 6>(memberGuid);
-        Team team = bg->GetPlayerTeam(itr->first);
-        if (!team && player)
-            team = Team(player->GetTeam());
-        data->WriteBit(team == ALLIANCE);   // Team
+        data->WriteBit(player->GetBGTeam() == ALLIANCE);
         data->WriteGuidMask<7>(memberGuid);
 
         buffer << uint32(itr->second->HealingDone);         // healing done
