@@ -4694,6 +4694,20 @@ void Spell::EffectDummy(SpellEffectEntry const* effect)
                         return;
                 }
             }
+
+            switch(m_spellInfo->Id)
+            {
+                // Skull Bash
+                case 80964:
+                case 80965:
+                {
+                    m_caster->CastSpell(unitTarget, 93983, true);
+                    m_caster->CastSpell(unitTarget, 93985, true);
+                    m_caster->CastSpell(unitTarget, 82365, true);
+                    return;
+                }
+            }
+
             break;
         }
         case SPELLFAMILY_ROGUE:
