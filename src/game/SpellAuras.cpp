@@ -11321,6 +11321,10 @@ void SpellAuraHolder::_AddSpellAuraHolder()
         }
     }
 
+    if (m_spellProto->HasAttribute(SPELL_ATTR_EX8_AURA_SENDS_AMOUNT) &&
+        (flags & (AFLAG_EFF_INDEX_0 | AFLAG_EFF_INDEX_1 | AFLAG_EFF_INDEX_2)))
+        flags |= AFLAG_EFFECT_AMOUNT_SEND;
+
     SetAuraFlags(flags);
 
     SetAuraLevel(caster ? caster->getLevel() : sWorld.getConfig(CONFIG_UINT32_MAX_PLAYER_LEVEL));
