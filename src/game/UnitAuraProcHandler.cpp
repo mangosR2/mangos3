@@ -1263,6 +1263,19 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, DamageInfo* damageI
                     triggered_spell_id = 71879;
                     break;
                 }
+                case 85466:                                 // Bane of Havoc
+                case 85468:
+                {
+                    triggered_spell_id = 85455;
+                    // search bane debuff
+                    target = GetSingleCastSpellTarget(80240);
+                    if (SpellEntry const* havoc = sSpellStore.LookupEntry(80240))
+                        basepoints[0] = int32(damage * havoc->CalculateSimpleValue(EFFECT_INDEX_0) / 100.0f);
+
+                    if (!target || target == pVictim)
+                        return SPELL_AURA_PROC_FAILED;
+                    break;
+                }
             }
             break;
         }

@@ -15806,3 +15806,13 @@ uint32 Unit::GetDamageCounterInPastSecs(uint32 secs, int type)
 
     return damage;
 }
+
+Unit* Unit::GetSingleCastSpellTarget(uint32 spellId)
+{
+    SingleCastSpellTargetMap& scTargets = GetSingleCastSpellTargets();
+    for (SingleCastSpellTargetMap::iterator itr = scTargets.begin(); itr != scTargets.end(); ++itr)
+        if (itr->first->Id == spellId)
+            return GetMap()->GetUnit(itr->second);
+
+    return NULL;
+}

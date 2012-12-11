@@ -1376,6 +1376,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         typedef std::list<DiminishingReturn> Diminishing;
         typedef UNORDERED_SET<ObjectGuid> ComboPointHolderSet;
         typedef std::vector<SpellAuraHolderPtr> VisibleAuraMap;
+        typedef UNORDERED_MAP<SpellEntry const*, ObjectGuid> SingleCastSpellTargetMap;
         typedef UNORDERED_MAP<SpellEntry const*, ObjectGuid /*targetGuid*/> TrackedAuraTargetMap;
         typedef UNORDERED_SET<uint32> SpellIdSet;
 
@@ -2009,6 +2010,10 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         TrackedAuraTargetMap const& GetTrackedAuraTargets(TrackedAuraType type) const { return m_trackedAuraTargets[type]; }
         SpellImmuneList m_spellImmune[MAX_SPELL_IMMUNITY];
 
+        SingleCastSpellTargetMap      & GetSingleCastSpellTargets()       { return m_singleCastSpellTargets; }
+        SingleCastSpellTargetMap const& GetSingleCastSpellTargets() const { return m_singleCastSpellTargets; }
+        Unit* GetSingleCastSpellTarget(uint32 spellId);
+
         // Threat related methods
         bool CanHaveThreatList() const;
         void AddThreat(Unit* pVictim, float threat = 0.0f, bool crit = false, SpellSchoolMask schoolMask = SPELL_SCHOOL_MASK_NONE, SpellEntry const *threatSpell = NULL);
@@ -2375,6 +2380,8 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
 
         // Store Auras for which the target must be tracked
         TrackedAuraTargetMap m_trackedAuraTargets[MAX_TRACKED_AURA_TYPES];
+
+        SingleCastSpellTargetMap m_singleCastSpellTargets;  // casted by unit single per-caster auras
 
         GuidList m_dynObjGuids;
 

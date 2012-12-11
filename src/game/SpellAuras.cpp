@@ -12344,6 +12344,24 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
                 else
                     return;
             }
+            // Bane of Havoc
+            else if (m_spellProto->Id == 80240)
+            {
+                if (Unit* caster = GetCaster())
+                {
+                    uint32 spellId = 85466;     // pve spell
+                    if (m_target->GetCharmerOrOwnerPlayerOrPlayerItself())
+                        spellId = 85468;        // pvp spell
+
+                    if (apply)
+                        caster->CastSpell(caster, spellId, true);
+                    else
+                        caster->RemoveAurasByCasterSpell(spellId, caster->GetObjectGuid());
+                }
+                return;
+            }
+            else
+                return;
             break;
         }
         case SPELLFAMILY_PRIEST:
