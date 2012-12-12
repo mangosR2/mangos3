@@ -8018,12 +8018,12 @@ int32 Spell::CalculatePowerCost(SpellEntry const* spellInfo, Unit* caster, Spell
         }
     }
 
-    SpellSchools spellSchool = GetFirstSchoolInMask(spell ? spell->m_spellSchoolMask : GetSpellSchoolMask(spellInfo));
+    SpellSchoolMask schoolMask = spell ? spell->m_spellSchoolMask : GetSpellSchoolMask(spellInfo);
     // Flat mod from caster auras by spell school
     Unit::AuraList const& pwrCostAuras = caster->GetAurasByType(SPELL_AURA_MOD_POWER_COST_SCHOOL);
     for (Unit::AuraList::const_iterator itr = pwrCostAuras.begin(); itr != pwrCostAuras.end(); ++itr)
     {
-        if (((*itr)->GetModifier()->m_miscvalue & spellSchool) &&
+        if (((*itr)->GetModifier()->m_miscvalue & schoolMask) &&
             (!(*itr)->GetSpellEffect()->EffectMiscValueB || (*itr)->GetSpellEffect()->EffectMiscValueB & (1 << spellInfo->powerType)))
             powerCost += (*itr)->GetModifier()->m_amount;
     }
@@ -8045,13 +8045,14 @@ int32 Spell::CalculatePowerCost(SpellEntry const* spellInfo, Unit* caster, Spell
     Unit::AuraList const& pwrCostPctAuras = caster->GetAurasByType(SPELL_AURA_MOD_POWER_COST_SCHOOL_PCT);
     for (Unit::AuraList::const_iterator itr = pwrCostPctAuras.begin(); itr != pwrCostPctAuras.end(); ++itr)
     {
-        if (((*itr)->GetModifier()->m_miscvalue & spellSchool) &&
+        if (((*itr)->GetModifier()->m_miscvalue & schoolMask) &&
             (!(*itr)->GetSpellEffect()->EffectMiscValueB || (*itr)->GetSpellEffect()->EffectMiscValueB & (1 << spellInfo->powerType)))
             pctCostMultiplier += (*itr)->GetModifier()->m_amount / 100.0f;
     }
 
     // PCT mod from user auras by school
     powerCost = ceil((float)powerCost * pctCostMultiplier);
+
     if (powerCost < 0)
         powerCost = 0;
     return powerCost;
