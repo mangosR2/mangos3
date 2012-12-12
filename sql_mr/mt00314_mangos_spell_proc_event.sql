@@ -264,3 +264,8 @@ INSERT INTO `spell_proc_event` (`entry`, `SchoolMask`, `procFlags`) VALUE
 DELETE FROM `creature_template_addon` WHERE `entry` = 44199;
 INSERT INTO `creature_template_addon` (`entry`, `b2_0_sheath`, `auras`) VALUE
 (44199, 1, '91264');
+
+-- Siphon Life
+DELETE FROM `spell_proc_event` WHERE `entry` = 63108;
+INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`) VALUE
+(63108, 5, 2);
