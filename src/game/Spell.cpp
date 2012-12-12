@@ -2746,10 +2746,10 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
         case TARGET_ALL_ENEMY_IN_AREA_INSTANT:
         {
             // targets the ground, not the units in the area
-            if(!spellEffect)
+            if (!spellEffect)
                 break;
 
-            switch(spellEffect->Effect)
+            switch (spellEffect->Effect)
             {
                 case SPELL_EFFECT_PERSISTENT_AREA_AURA:
                     break;
@@ -2758,6 +2758,9 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
                     break;
                 default:
                     FillAreaTargets(targetUnitMap, radius, PUSH_DEST_CENTER, SPELL_TARGETS_AOE_DAMAGE);
+                    // Jinx: Curse of the Elements
+                    if (m_spellInfo->Id == 85547 || m_spellInfo->Id == 86105)
+                        targetUnitMap.remove(m_targets.getUnitTarget());
                     break;
             }
             break;

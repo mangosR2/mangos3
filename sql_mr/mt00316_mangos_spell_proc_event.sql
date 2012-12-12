@@ -257,6 +257,10 @@ INSERT INTO `spell_proc_event` (`entry`, `SchoolMask`, `procFlags`) VALUE
 (85466, 127, 332116),
 (85468, 127, 332116);
 
+-- Jinx
+DELETE FROM `spell_proc_event` WHERE `entry` = 18179;
+INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA1`) VALUE
+(18179, 5, 32768);
 
 ### Mage ###
 
@@ -269,3 +273,4 @@ INSERT INTO `creature_template_addon` (`entry`, `b2_0_sheath`, `auras`) VALUE
 DELETE FROM `spell_proc_event` WHERE `entry` = 63108;
 INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`) VALUE
 (63108, 5, 2);
+

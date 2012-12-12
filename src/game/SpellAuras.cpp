@@ -10460,8 +10460,19 @@ void Aura::PeriodicDummyTick()
             break;
         }
         case SPELLFAMILY_WARLOCK:
+        {
             switch (spell->Id)
             {
+                // Curse of the Elements
+                case 1490:
+                {
+                    if (Unit* caster = GetCaster())
+                        if (caster->HasAura(18179))         // Jinx (Rank 1)
+                            caster->CastSpell(target, 85547, true);
+                        else if (caster->HasAura(85479))    // Jinx (Rank 2)
+                            caster->CastSpell(target, 86105, true);
+                    return;
+                }
                 // Demonic Circle: Summon 
                 case 48018:
                 {
@@ -10489,6 +10500,7 @@ void Aura::PeriodicDummyTick()
                     break;
             }
             break;
+        }
         case SPELLFAMILY_ROGUE:
         {
             switch (spell->Id)
@@ -12374,6 +12386,19 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
                     spellId1 = 63311;
                 else if(((caster = GetCaster())) && caster->HasAura(63310))
                     spellId1 = 63311;
+                else
+                    return;
+            }
+            // Curse of Weakness
+            else if (m_spellProto->Id == 702)
+            {
+                if (!apply)
+                {
+                    spellId1 = 85539;
+                    spellId2 = 85540;
+                    spellId3 = 85541;
+                    spellId4 = 85542;
+                }
                 else
                     return;
             }

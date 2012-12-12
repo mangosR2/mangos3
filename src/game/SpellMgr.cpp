@@ -571,6 +571,10 @@ SpellSpecific GetSpellSpecific(uint32 spellId)
             // Unstable Affliction | Immolate
             if (spellInfo->GetSpellFamilyFlags().test<CF_WARLOCK_IMMOLATE, CF_WARLOCK_UNSTABLE_AFFLICTION>())
                 return SPELL_UA_IMMOLATE;
+
+            // Jinx: Curse of the Elements
+            if (spellInfo->Id == 85547 || spellInfo->Id == 86105)
+                return SPELL_CURSE;
             break;
         }
         // Need Fix
@@ -3088,6 +3092,8 @@ uint32 SpellMgr::GetSpellMaxTargetsWithCustom(SpellEntry const* spellInfo, Unit 
                 case 25991:                                 // Poison Bolt Volley (Pincess Huhuran)
                 case 67158:                                 // Light Bullet Summon Trigger 25 nonhero (maybe wrong amount)
                 case 67160:                                 // Light Bullet Summon Trigger 25 hero (maybe wrong amount)
+                case 85547:                                 // Jinx: Curse of the Elements
+                case 86105:                                 // Jinx: Curse of the Elements
                     unMaxTargets = 15;
                     break;
                 // random count

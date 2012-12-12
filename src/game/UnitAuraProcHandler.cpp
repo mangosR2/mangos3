@@ -1667,6 +1667,43 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, DamageInfo* damageI
                 triggered_spell_id = 54181;
                 break;
             }
+            // Jinx
+            else if (dummySpell->GetSpellIconID() == 5002)
+            {
+                if (!target || effIndex != EFFECT_INDEX_1)
+                    return SPELL_AURA_PROC_FAILED;
+
+                basepoints[0] = triggerAmount;
+
+                switch (target->getClass())
+                {
+                    case CLASS_WARRIOR:
+                        triggered_spell_id = 85539;
+                        break;
+                    case CLASS_ROGUE:
+                        triggered_spell_id = 85540;
+                        break;
+                    case CLASS_DEATH_KNIGHT:
+                        triggered_spell_id = 85541;
+                        break;
+                    case CLASS_HUNTER:
+                        triggered_spell_id = 85542;
+                        break;
+                    case CLASS_DRUID:
+                    {
+                        if (target->GetShapeshiftForm() == FORM_BEAR)
+                            triggered_spell_id = 85539;
+                        else if (target->GetShapeshiftForm() == FORM_CAT)
+                            triggered_spell_id = 85540;
+                        break;
+                    }
+                }
+
+                if (!triggered_spell_id)
+                    return SPELL_AURA_PROC_FAILED;
+
+                break;
+            }
             // Burning Embers
             else if (dummySpell->SpellIconID == 5116)
             {
