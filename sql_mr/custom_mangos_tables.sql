@@ -95,7 +95,7 @@ CREATE TABLE IF NOT EXISTS `spell_dbc` (
   `AuraInterruptFlags` int(10) unsigned NOT NULL DEFAULT '0',
   `ProcFlags` int(10) unsigned NOT NULL DEFAULT '0',
   `ProcChance` tinyint(3) unsigned NOT NULL DEFAULT '0',
-  `ProcCharges` tinyint(3) unsigned NOT NULL DEFAULT '0',
+  `ProcCharges` int(10) unsigned NOT NULL DEFAULT '0',
   `MaxLevel` tinyint(3) unsigned NOT NULL DEFAULT '0',
   `BaseLevel` tinyint(3) unsigned NOT NULL DEFAULT '0',
   `SpellLevel` tinyint(3) unsigned NOT NULL DEFAULT '0',
