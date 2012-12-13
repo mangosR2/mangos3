@@ -262,6 +262,11 @@ DELETE FROM `spell_proc_event` WHERE `entry` = 18179;
 INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA1`) VALUE
 (18179, 5, 32768);
 
+-- Everlasting Affliction
+DELETE FROM `spell_proc_event` WHERE `entry` = 47201;
+INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`, `SpellFamilyMaskB0`) VALUE
+(47201, 5, 16384+8, 262144);
+
 ### Mage ###
 
 -- Ring of Frost

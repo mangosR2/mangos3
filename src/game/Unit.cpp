@@ -8450,12 +8450,18 @@ void Unit::SpellDamageBonusDone(DamageInfo* damageInfo, uint32 stack)
         {
             case 4920: // Molten Fury
             case 4919:
+            case 12368:
+            {
+                if (pVictim->HasAuraState(AURA_STATE_HEALTHLESS_35_PERCENT))
+                    DoneTotalMod *= (100.0f+(*i)->GetModifier()->m_amount)/100.0f;
+                break;
+            }
             case 6917: // Death's Embrace
             case 6926:
             case 6928:
             {
-                if (pVictim->HasAuraState(AURA_STATE_HEALTHLESS_35_PERCENT))
-                    DoneTotalMod *= (100.0f+(*i)->GetModifier()->m_amount)/100.0f;
+                if (pVictim->GetHealthPercent() < 25.0f)
+                    DoneTotalMod *= (100.0f + (*i)->GetModifier()->m_amount) / 100.0f;
                 break;
             }
             // Soul Siphon
@@ -8494,12 +8500,6 @@ void Unit::SpellDamageBonusDone(DamageInfo* damageInfo, uint32 stack)
                 DoneTotalMod *= (modPercent+100.0f)/100.0f;
                 break;
             }
-            case 6916: // Death's Embrace
-            case 6925:
-            case 6927:
-                if (HasAuraState(AURA_STATE_HEALTHLESS_20_PERCENT))
-                    DoneTotalMod *= (100.0f+(*i)->GetModifier()->m_amount)/100.0f;
-                break;
             case 5481: // Starfire Bonus
             {
                 if (pVictim->GetAura(SPELL_AURA_PERIODIC_DAMAGE, SPELLFAMILY_DRUID, ClassFamilyMask::create<CF_DRUID_MOONFIRE, CF_DRUID_INSECT_SWARM>()))
@@ -8667,6 +8667,20 @@ void Unit::SpellDamageBonusDone(DamageInfo* damageInfo, uint32 stack)
                                 }
                             }
                         }
+                    }
+                }
+            }
+            // Drain Life
+            if (damageInfo->GetSpellProto()->Id == 689 && GetHealthPercent() < 25.0f)
+            {
+                // Search Death's Embrace
+                Unit::AuraList const& dummyAuras = GetAurasByType(SPELL_AURA_DUMMY);
+                for (Unit::AuraList::const_iterator itr = dummyAuras.begin(); itr != dummyAuras.end(); ++itr)
+                {
+                    if ((*itr)->GetSpellProto()->GetSpellIconID() == 3223 && (*itr)->GetSpellProto()->GetSpellFamilyName() == SPELLFAMILY_WARLOCK)
+                    {
+                        DoneTotal += GetMaxHealth() * (*itr)->GetModifier()->m_amount / 100.0f;
+                        break;
                     }
                 }
             }

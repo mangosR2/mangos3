@@ -12036,17 +12036,12 @@ void Spell::EffectScriptEffect(SpellEffectEntry const* effect)
                 }
                 case 47422:                                 // Everlasting Affliction
                 {
+                    if (!unitTarget)
+                        return;
+
                     // Need refresh caster corruption auras on target
-                    Unit::SpellAuraHolderMap& suAuras = unitTarget->GetSpellAuraHolderMap();
-                    for(Unit::SpellAuraHolderMap::iterator itr = suAuras.begin(); itr != suAuras.end(); ++itr)
-                    {
-                        SpellEntry const *spellInfo = (*itr).second->GetSpellProto();
-                        SpellClassOptionsEntry const* eaClassOptions = spellInfo->GetSpellClassOptions();
-                        if(eaClassOptions && eaClassOptions->SpellFamilyName == SPELLFAMILY_WARLOCK &&
-                            (eaClassOptions->SpellFamilyFlags & UI64LIT(0x0000000000000002)) &&
-                           (*itr).second->GetCasterGuid() == m_caster->GetObjectGuid())
-                           (*itr).second->RefreshHolder();
-                    }
+                    if (SpellAuraHolderPtr corruption = unitTarget->GetSpellAuraHolder(172, m_caster->GetObjectGuid()))
+                        corruption->RefreshHolder();
                     return;
                 }
                 case 77799:                                 // Fel Flame

@@ -12367,7 +12367,7 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
                             {
                                 // Rank 1
                                 case 0: spellId1 = 60946; break;
-                                // Rank 1
+                                // Rank 2
                                 case 1: spellId1 = 60947; break;
                             }
                             break;
