@@ -5273,6 +5273,20 @@ SpellAuraProcResult Unit::HandleAddFlatModifierAuraProc(Unit* pVictim, DamageInf
             }
             break;
         }
+        case SPELLFAMILY_WARLOCK:
+        {
+            // Pandemic
+            if (spellInfo->SpellIconID == 4554)
+            {
+                if (!roll_chance_i(spellInfo->CalculateSimpleValue(EFFECT_INDEX_0)) ||
+                    pVictim->GetHealthPercent() > 25.0f)
+                    return SPELL_AURA_PROC_FAILED;
+
+                CastSpell(this, 92931, true);
+                return SPELL_AURA_PROC_OK;
+            }
+            break;
+        }
         case SPELLFAMILY_PRIEST:
         {
             // Chakra

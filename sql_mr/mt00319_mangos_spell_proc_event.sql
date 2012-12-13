@@ -277,6 +277,11 @@ DELETE FROM `spell_proc_event` WHERE `entry` = 63108;
 INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`) VALUE
 (63108, 5, 2);
 
+-- Pandemic
+DELETE FROM `spell_proc_event` WHERE `entry` = 85099;
+INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA1`, `procFlags`, `CustomChance`) VALUES
+(85099, 5, 16384, 262144, 100);
+
 ### Mage ###
 
 -- Ring of Frost

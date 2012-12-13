@@ -12073,6 +12073,17 @@ void Spell::EffectScriptEffect(SpellEffectEntry const* effect)
 
                     return;
                 }
+                case 92931:                                 // Pandemic
+                {
+                    if (!unitTarget)
+                        return;
+
+                    // get Unstable Affliction
+                    if (SpellAuraHolderPtr holder = unitTarget->GetSpellAuraHolder(30108, m_caster->GetObjectGuid()))
+                        holder->RefreshHolder();
+
+                    return;
+                }
             }
             break;
         }
