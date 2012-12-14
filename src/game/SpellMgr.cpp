@@ -793,6 +793,7 @@ bool IsPositiveEffect(SpellEntry const* spellproto, SpellEffectIndex effIndex)
         case 39290:                                         // Kargath's Executioner
         case 66550:                                         // Teleport(BattlegroundIC)
         case 66551:                                         // Teleport(BattlegroundIC)
+        case 62910:                                         // Mimiron's Inferno (Ulduar - Flame Leviathan)
             return false;
         case 552:                                           // Abolish Disease
         case 12042:                                         // Arcane Power

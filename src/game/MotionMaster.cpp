@@ -24,6 +24,7 @@
 #include "HomeMovementGenerator.h"
 #include "IdleMovementGenerator.h"
 #include "PointMovementGenerator.h"
+#include "Pet.h"
 #include "TargetedMovementGenerator.h"
 #include "WaypointMovementGenerator.h"
 #include "RandomMovementGenerator.h"

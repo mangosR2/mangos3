@@ -861,7 +861,7 @@ void Group::StartLootRoll(WorldObject* lootTarget, LootMethod method, Loot* loot
         if (!playerToRoll || !playerToRoll->GetSession())
             continue;
 
-        if (lootItem.AllowedForPlayer(playerToRoll))
+        if (lootItem.AllowedForPlayer(playerToRoll, lootTarget))
         {
             if (playerToRoll->IsWithinDistInMap(lootTarget, sWorld.getConfig(CONFIG_FLOAT_GROUP_XP_DISTANCE), false))
             {
@@ -1029,8 +1029,8 @@ void Group::CountTheRoll(Rolls::iterator& rollI)
                     roll->getLoot()->NotifyItemRemoved(roll->itemSlot);
                     --roll->getLoot()->unlootedCount;
 
-                    ItemPrototype const *pProto = ObjectMgr::GetItemPrototype(roll->itemid);
-                    player->AutoStoreLoot(pProto->DisenchantID, LootTemplates_Disenchant, true);
+                    ItemPrototype const* pProto = ObjectMgr::GetItemPrototype(roll->itemid);
+                    player->AutoStoreLoot(roll->getLoot()->GetLootTarget(), pProto->DisenchantID, LootTemplates_Disenchant, true);
                 }
             }
         }

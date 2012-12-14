@@ -767,8 +767,15 @@ Map::Remove(T *obj, bool remove)
     }
 }
 
-void
-Map::PlayerRelocation(Player *player, float x, float y, float z, float orientation)
+template<class T>
+void Map::Relocation(T* obj, float x, float y, float z, float orientation)
+{
+    sLog.outError("Map::Relocation unhandled relocation call (object %s)!", obj ? obj->GetObjectGuid().GetString().c_str() : "<none>");
+    MANGOS_ASSERT(false);
+};
+
+template<>
+void Map::Relocation(Player* player, float x, float y, float z, float orientation)
 {
     MANGOS_ASSERT(player);
 
@@ -804,9 +811,10 @@ Map::PlayerRelocation(Player *player, float x, float y, float z, float orientati
         ResetGridExpiry(*newGrid, 0.1f);
         newGrid->SetGridState(GRID_STATE_ACTIVE);
     }
-}
+};
 
-void Map::CreatureRelocation(Creature *creature, float x, float y, float z, float ang)
+template<>
+void Map::Relocation(Creature* creature, float x, float y, float z, float orientation)
 {
     MANGOS_ASSERT(CheckGridIntegrity(creature,false));
 
@@ -817,7 +825,7 @@ void Map::CreatureRelocation(Creature *creature, float x, float y, float z, floa
     if (CreatureCellRelocation(creature,new_cell))
     {
         // update pos
-        creature->Relocate(x, y, z, ang);
+        creature->Relocate(x, y, z, orientation);
         creature->OnRelocated();
     }
     // if creature can't be move in new cell/grid (not loaded) move it to repawn cell/grid
@@ -829,7 +837,49 @@ void Map::CreatureRelocation(Creature *creature, float x, float y, float z, floa
     }
 
     MANGOS_ASSERT(CheckGridIntegrity(creature,true));
-}
+};
+
+template<>
+void Map::Relocation(GameObject* go, float x, float y, float z, float orientation)
+{
+    MANGOS_ASSERT(go);
+
+    CellPair old_val = MaNGOS::ComputeCellPair(go->GetPositionX(), go->GetPositionY());
+    CellPair new_val = MaNGOS::ComputeCellPair(x, y);
+
+    Cell old_cell(old_val);
+    Cell new_cell(new_val);
+    bool same_cell = (new_cell == old_cell);
+
+    go->Relocate(x, y, z, orientation);
+
+    if (old_cell != new_cell)
+    {
+        NGridType* oldGrid = getNGrid(old_cell.GridX(), old_cell.GridY());
+        RemoveFromGrid(go, oldGrid,old_cell);
+        if (!old_cell.DiffGrid(new_cell) )
+            AddToGrid(go, oldGrid, new_cell);
+        else
+            EnsureGridLoadedAtEnter(new_cell);
+
+        NGridType* newGrid = getNGrid(new_cell.GridX(), new_cell.GridY());
+        go->GetViewPoint().Event_GridChanged(&(*newGrid)(new_cell.CellX(),new_cell.CellY()));
+
+        if (newGrid->GetGridState() != GRID_STATE_ACTIVE)
+        {
+            ResetGridExpiry(*newGrid, 0.1f);
+            newGrid->SetGridState(GRID_STATE_ACTIVE);
+        }
+    }
+
+    go->UpdateObjectVisibility();
+    //go->OnRelocated();
+};
+
+void Map::CreatureRelocation(Creature* object, float x, float y, float z, float orientation)
+{
+    Relocation(object, x, y, z, orientation);
+};
 
 bool Map::CreatureCellRelocation(Creature *c, Cell new_cell)
 {
@@ -1732,8 +1782,10 @@ bool Map::CanEnter(Player* player)
 }
 
 /// Put scripts in the execution queue
-bool Map::ScriptsStart(ScriptMapMapName const& scripts, uint32 id, Object* source, Object* target)
+bool Map::ScriptsStart(ScriptMapMapName const& scripts, uint32 id, Object* source, Object* target, ScriptExecutionParam execParams /*=SCRIPT_EXEC_PARAM_UNIQUE_BY_SOURCE_TARGET*/)
 {
+    MANGOS_ASSERT(source);
+
     ///- Find the script map
     ScriptMapMap::const_iterator s = scripts.second.find(id);
     if (s == scripts.second.end())
@@ -1743,6 +1795,20 @@ bool Map::ScriptsStart(ScriptMapMapName const& scripts, uint32 id, Object* sourc
     ObjectGuid sourceGuid = source->GetObjectGuid();
     ObjectGuid targetGuid = target ? target->GetObjectGuid() : ObjectGuid();
     ObjectGuid ownerGuid  = source->isType(TYPEMASK_ITEM) ? ((Item*)source)->GetOwnerGuid() : ObjectGuid();
+
+    if (execParams)                                         // Check if the execution should be uniquely
+    {
+        for (ScriptScheduleMap::const_iterator searchItr = m_scriptSchedule.begin(); searchItr != m_scriptSchedule.end(); ++searchItr)
+        {
+            if (searchItr->second.IsSameScript(scripts.first, id,
+                    execParams & SCRIPT_EXEC_PARAM_UNIQUE_BY_SOURCE ? sourceGuid : ObjectGuid(),
+                    execParams & SCRIPT_EXEC_PARAM_UNIQUE_BY_TARGET ? targetGuid : ObjectGuid(), ownerGuid))
+            {
+                DEBUG_LOG("DB-SCRIPTS: Process table `%s` id %u. Skip script as script already started for source %s, target %s - ScriptsStartParams %u", scripts.first, id, sourceGuid.GetString().c_str(), targetGuid.GetString().c_str(), execParams);
+                return true;
+            }
+        }
+    }
 
     ///- Schedule script execution for all scripts in the script map
     ScriptMap const *s2 = &(s->second);
@@ -1785,12 +1851,33 @@ void Map::ScriptsProcess()
     // ok as multimap is a *sorted* associative container
     while (!m_scriptSchedule.empty() && (iter->first <= sWorld.GetGameTime()))
     {
-        iter->second.HandleScriptStep();
+        if (iter->second.HandleScriptStep())
+        {
+            // Terminate following script steps of this script
+            const char* tableName = iter->second.GetTableName();
+            uint32 id = iter->second.GetId();
+            ObjectGuid sourceGuid = iter->second.GetSourceGuid();
+            ObjectGuid targetGuid = iter->second.GetTargetGuid();
+            ObjectGuid ownerGuid = iter->second.GetOwnerGuid();
 
-        m_scriptSchedule.erase(iter);
+            for (ScriptScheduleMap::iterator rmItr = m_scriptSchedule.begin(); rmItr != m_scriptSchedule.end();)
+            {
+                if (rmItr->second.IsSameScript(tableName, id, sourceGuid, targetGuid, ownerGuid))
+                {
+                    m_scriptSchedule.erase(rmItr++);
+                    sScriptMgr.DecreaseScheduledScriptCount();
+                }
+                else
+                    ++rmItr;
+            }
+        }
+        else
+        {
+            m_scriptSchedule.erase(iter);
+
+            sScriptMgr.DecreaseScheduledScriptCount();
+        }
         iter = m_scriptSchedule.begin();
-
-        sScriptMgr.DecreaseScheduledScriptCount();
     }
 }
 

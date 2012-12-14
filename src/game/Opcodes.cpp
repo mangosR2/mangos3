@@ -34,18 +34,18 @@ static void DefineOpcode(uint16 opcode, const char* name, SessionStatus status, 
 #define OPCODE( name, status, packetProcessing, handler ) DefineOpcode( name, #name, status, packetProcessing, handler )
 
 /// Correspondence between opcodes and their names
-OpcodeHandler opcodeTable[MAX_OPCODE_TABLE_SIZE];
+OpcodeHandler opcodeTable[NUM_MSG_TYPES];
 
 void InitializeOpcodes()
 {
-    for(uint16 i = 0; i < MAX_OPCODE_TABLE_SIZE; ++i)
+    for(uint16 i = 0; i < NUM_MSG_TYPES; ++i)
         DefineOpcode(i, "UNKNOWN", STATUS_UNHANDLED, PROCESS_INPLACE, &WorldSession::Handle_NULL);
 
+    OPCODE(MSG_NULL_ACTION,                                STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     );
     OPCODE(MSG_WOW_CONNECTION,                             STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_EarlyProccess            );
     OPCODE(SMSG_AUTH_CHALLENGE,                            STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
     OPCODE(CMSG_AUTH_SESSION,                              STATUS_NEVER,    PROCESS_THREADUNSAFE, &WorldSession::Handle_EarlyProccess            );
     OPCODE(SMSG_AUTH_RESPONSE,                             STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
-    //OPCODE(MSG_NULL_ACTION,                              STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     );
     //OPCODE(CMSG_BOOTME,                                  STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     );
     //OPCODE(CMSG_DBLOOKUP,                                STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     );
     //OPCODE(SMSG_DBLOOKUP,                                STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );

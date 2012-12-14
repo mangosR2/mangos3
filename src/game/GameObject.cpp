@@ -49,6 +49,7 @@
 GameObject::GameObject() : WorldObject(),
     m_model(NULL),
     m_goInfo(NULL),
+    loot(this),
     m_displayInfo(NULL)
 {
     m_objectType |= TYPEMASK_GAMEOBJECT;
@@ -377,22 +378,9 @@ void GameObject::Update(uint32 update_diff, uint32 p_time)
                     // Note: this hack with search required until GO casting not implemented
                     // search unfriendly creature
                     // Should trap trigger?
-                    else if (owner)                              // We have an owner, trigger if there is any unfriendly nearby
-                    {
-                        MaNGOS::AnyUnfriendlyUnitInObjectRangeCheck u_check(this, owner, radius);
-                        MaNGOS::UnitSearcher<MaNGOS::AnyUnfriendlyUnitInObjectRangeCheck> checker(ok, u_check);
-                        Cell::VisitGridObjects(this, checker, radius);
-                        if (!ok)
-                            Cell::VisitWorldObjects(this, checker, radius);
-                    }
-                    else                                    // Environmental traps
-                    {
-                        Unit* u_ok = NULL;
-                        MaNGOS::NearestAttackableUnitInObjectRangeCheck u_check(this, radius);
-                        MaNGOS::UnitLastSearcher<MaNGOS::NearestAttackableUnitInObjectRangeCheck> checker(u_ok, u_check);
-                        Cell::VisitAllObjects(this, checker, radius);
-                        ok = u_ok;
-                    }
+                    MaNGOS::AnyUnfriendlyUnitInObjectRangeCheck u_check(this, radius);
+                    MaNGOS::UnitSearcher<MaNGOS::AnyUnfriendlyUnitInObjectRangeCheck> checker(ok, u_check);
+                    Cell::VisitAllObjects(this, checker, radius);
 
                     if (ok)
                     {
@@ -597,19 +585,6 @@ void GameObject::Delete()
         sPoolMgr.UpdatePool<GameObject>(*GetMap()->GetPersistentState(), poolid, GetGUIDLow());
     else
         AddObjectToRemoveList();
-}
-
-void GameObject::getFishLoot(Loot* fishloot, Player* loot_owner)
-{
-    fishloot->clear();
-
-    uint32 zone, subzone;
-    GetZoneAndAreaId(zone, subzone);
-
-    // if subzone loot exist use it
-    if (!fishloot->FillLoot(subzone, LootTemplates_Fishing, loot_owner, true, (subzone != zone)) && subzone != zone)
-        // else use zone loot (if zone diff. from subzone, must exist in like case)
-        fishloot->FillLoot(zone, LootTemplates_Fishing, loot_owner, true);
 }
 
 void GameObject::SaveToDB()
@@ -2092,9 +2067,9 @@ bool GameObject::IsHostileTo(Unit const* unit) const
             return true;
     }
 
-    // for not set faction case (wild object) use hostile case
+    // for not set faction case: be hostile towards player, not hostile towards not-players
     if (!GetGOInfo()->faction)
-        return true;
+        return unit->IsControlledByPlayer();
 
     // faction base cases
     FactionTemplateEntry const* tester_faction = sFactionTemplateStore.LookupEntry(GetGOInfo()->faction);

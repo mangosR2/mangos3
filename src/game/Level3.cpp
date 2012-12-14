@@ -383,6 +383,14 @@ bool ChatHandler::HandleReloadConfigCommand(char* /*args*/)
     return true;
 }
 
+bool ChatHandler::HandleReloadOpcodesCommand(char* /*args*/)
+{
+    sLog.outString("Re-Loading opcodes...");
+    sObjectMgr.LoadOpcodes();
+    SendGlobalSysMessage("Opcodes reloaded.");
+    return true;
+}
+
 bool ChatHandler::HandleReloadAchievementCriteriaRequirementCommand(char* /*args*/)
 {
     sLog.outString("Re-Loading Additional Achievement Criteria Requirements Data...");

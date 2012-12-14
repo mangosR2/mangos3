@@ -8506,85 +8506,68 @@ void Player::SendLoot(ObjectGuid guid, LootType loot_type)
             {
                 uint32 lootid =  go->GetGOInfo()->GetLootId();
                 if ((go->GetEntry() == BG_AV_OBJECTID_MINE_N || go->GetEntry() == BG_AV_OBJECTID_MINE_S))
-                    if (BattleGround *bg = GetBattleGround())
-                        if (bg->GetTypeID(true) == BATTLEGROUND_AV)
+                {
+                    if (BattleGround* bg = GetBattleGround())
+                        if (bg->GetTypeID() == BATTLEGROUND_AV)
                             if (!(((BattleGroundAV*)bg)->PlayerCanDoMineQuest(go->GetEntry(), GetTeam())))
                             {
                                 SendLootRelease(guid);
                                 return;
                             }
+                }
 
-                if (Group* group = this->GetGroup())
+                loot->clear();
+                switch (loot_type)
                 {
-                    if (go->GetGoType() == GAMEOBJECT_TYPE_CHEST)
-                    {
-                        if (go->GetGOInfo()->chest.groupLootRules == 1  || sWorld.getConfig(CONFIG_BOOL_LOOT_CHESTS_IGNORE_DB))
+                    // Entry 0 in fishing loot template used for store junk fish loot at fishing fail it junk allowed by config option
+                    // this is overwrite fishinghole loot for example
+                    case LOOT_FISHING_FAIL:
+                        loot->FillLoot(0, LootTemplates_Fishing, this, true);
+                        break;
+                    case LOOT_FISHING:
+                        uint32 zone, subzone;
+                        go->GetZoneAndAreaId(zone, subzone);
+                        // if subzone loot exist use it
+                        if (!loot->FillLoot(subzone, LootTemplates_Fishing, this, true, (subzone != zone)) && subzone != zone)
+                            // else use zone loot (if zone diff. from subzone, must exist in like case)
+                            loot->FillLoot(zone, LootTemplates_Fishing, this, true);
+                        break;
+                    default:
+                        if (!lootid)
+                            break;
+                        DEBUG_LOG("       send normal GO loot");
+
+                        loot->FillLoot(lootid, LootTemplates_Gameobject, this, false);
+                        loot->generateMoneyLoot(go->GetGOInfo()->MinMoneyLoot, go->GetGOInfo()->MaxMoneyLoot);
+
+                        if (go->GetGoType() == GAMEOBJECT_TYPE_CHEST && go->GetGOInfo()->chest.groupLootRules)
                         {
-                            group->UpdateLooterGuid(go,true);
-                            switch (group->GetLootMethod())
+                            if (Group* group = go->GetGroupLootRecipient())
                             {
-                                case GROUP_LOOT:
-                                // GroupLoot delete items over threshold (threshold even not implemented), and roll them. Items with quality<threshold, round robin
-                                     group->GroupLoot(go, loot);
-                                     permission = GROUP_PERMISSION;
-                                     break;
-                                case NEED_BEFORE_GREED:
-                                     group->NeedBeforeGreed(go, loot);
-                                     permission = GROUP_PERMISSION;
-                                     break;
-                                case MASTER_LOOT:
-                                     group->MasterLoot(go, loot);
-                                     permission = MASTER_PERMISSION;
-                                     break;
-                                default:
-                                     break;
-                             }
-                         }
-                         else
-                             permission = GROUP_PERMISSION;
-                     }
-                 }
+                                group->UpdateLooterGuid(go, true);
 
-                // Entry 0 in fishing loot template used for store junk fish loot at fishing fail it junk allowed by config option
-                // this is overwrite fishinghole loot for example
-                if (loot_type == LOOT_FISHING_FAIL)
-                    loot->FillLoot(0, LootTemplates_Fishing, this, true);
-                else if (lootid)
-                {
-                    DEBUG_LOG("       if (lootid)");
-                    loot->clear();
-                    loot->FillLoot(lootid, LootTemplates_Gameobject, this, false);
-                    loot->generateMoneyLoot(go->GetGOInfo()->MinMoneyLoot, go->GetGOInfo()->MaxMoneyLoot);
-
-                    if (go->GetGoType() == GAMEOBJECT_TYPE_CHEST && go->GetGOInfo()->chest.groupLootRules)
-                    {
-                        if (Group* group = go->GetGroupLootRecipient())
-                        {
-                            group->UpdateLooterGuid(go, true);
-
-                            switch (group->GetLootMethod())
-                            {
-                                case GROUP_LOOT:
-                                    // GroupLoot delete items over threshold (threshold even not implemented), and roll them. Items with quality<threshold, round robin
-                                    group->GroupLoot(go, loot);
-                                    permission = GROUP_PERMISSION;
-                                    break;
-                                case NEED_BEFORE_GREED:
-                                    group->NeedBeforeGreed(go, loot);
-                                    permission = GROUP_PERMISSION;
-                                    break;
-                                case MASTER_LOOT:
-                                    group->MasterLoot(go, loot);
-                                    permission = MASTER_PERMISSION;
-                                    break;
-                                default:
-                                    break;
+                                switch (group->GetLootMethod())
+                                {
+                                    case GROUP_LOOT:
+                                        // GroupLoot delete items over threshold (threshold even not implemented), and roll them. Items with quality<threshold, round robin
+                                        group->GroupLoot(go, loot);
+                                        permission = GROUP_PERMISSION;
+                                        break;
+                                    case NEED_BEFORE_GREED:
+                                        group->NeedBeforeGreed(go, loot);
+                                        permission = GROUP_PERMISSION;
+                                        break;
+                                    case MASTER_LOOT:
+                                        group->MasterLoot(go, loot);
+                                        permission = MASTER_PERMISSION;
+                                        break;
+                                    default:
+                                        break;
+                                }
                             }
                         }
-                    }
+                        break;
                 }
-                else if (loot_type == LOOT_FISHING)
-                    go->getFishLoot(loot,this);
 
                 go->SetLootState(GO_ACTIVATED);
             }
@@ -12947,7 +12930,7 @@ void Player::PrepareGossipMenu(WorldObject* pSource, uint32 menuId)
 
         if (!isGameMaster())                                // Let GM always see menu items regardless of conditions
         {
-            if (itr->second.conditionId && !sObjectMgr.IsPlayerMeetToCondition(this, itr->second.conditionId))
+            if (itr->second.conditionId && !sObjectMgr.IsPlayerMeetToCondition(itr->second.conditionId, this, GetMap(), pSource, CONDITION_FROM_GOSSIP_OPTION))
             {
                 if (itr->second.option_id == GOSSIP_OPTION_QUESTGIVER)
                     canSeeQuests = false;
@@ -13269,9 +13252,9 @@ void Player::OnGossipSelect(WorldObject* pSource, uint32 gossipListId, uint32 me
     if (pMenuData.m_gAction_script)
     {
         if (pSource->GetTypeId() == TYPEID_UNIT)
-            GetMap()->ScriptsStart(sGossipScripts, pMenuData.m_gAction_script, pSource, this);
+            GetMap()->ScriptsStart(sGossipScripts, pMenuData.m_gAction_script, pSource, this, Map::SCRIPT_EXEC_PARAM_UNIQUE_BY_SOURCE);
         else if (pSource->GetTypeId() == TYPEID_GAMEOBJECT)
-            GetMap()->ScriptsStart(sGossipScripts, pMenuData.m_gAction_script, this, pSource);
+            GetMap()->ScriptsStart(sGossipScripts, pMenuData.m_gAction_script, this, pSource, Map::SCRIPT_EXEC_PARAM_UNIQUE_BY_TARGET);
     }
 }
 
@@ -13302,7 +13285,7 @@ uint32 Player::GetGossipTextId(uint32 menuId, WorldObject* pSource)
         // Take the text that has the highest conditionId of all fitting
         // No condition and no text with condition found OR higher and fitting condition found
         if ((!itr->second.conditionId && !lastConditionId) ||
-                (itr->second.conditionId > lastConditionId && sObjectMgr.IsPlayerMeetToCondition(this, itr->second.conditionId)))
+                (itr->second.conditionId > lastConditionId && sObjectMgr.IsPlayerMeetToCondition(itr->second.conditionId, this, GetMap(), pSource, CONDITION_FROM_GOSSIP_MENU)))
         {
             lastConditionId = itr->second.conditionId;
             textId = itr->second.text_id;
@@ -13312,7 +13295,7 @@ uint32 Player::GetGossipTextId(uint32 menuId, WorldObject* pSource)
 
     // Start related script
     if (scriptId)
-        GetMap()->ScriptsStart(sGossipScripts, scriptId, this, pSource);
+        GetMap()->ScriptsStart(sGossipScripts, scriptId, this, pSource, Map::SCRIPT_EXEC_PARAM_UNIQUE_BY_TARGET);
 
     return textId;
 }
@@ -13862,7 +13845,7 @@ void Player::AddQuest(Quest const *pQuest, Object *questGiver)
 
         // starting initial DB quest script
         if (pQuest->GetQuestStartScript() != 0)
-            GetMap()->ScriptsStart(sQuestStartScripts, pQuest->GetQuestStartScript(), questGiver, this);
+            GetMap()->ScriptsStart(sQuestStartScripts, pQuest->GetQuestStartScript(), questGiver, this, Map::SCRIPT_EXEC_PARAM_UNIQUE_BY_SOURCE);
     }
 
     // remove start item if not need
@@ -14106,8 +14089,8 @@ void Player::RewardQuest(Quest const *pQuest, uint32 reward, Object* questGiver,
         }
     }
 
-    if (!handled && questGiver && pQuest->GetQuestCompleteScript() != 0)
-        GetMap()->ScriptsStart(sQuestEndScripts, pQuest->GetQuestCompleteScript(), questGiver, this);
+    if (!handled && pQuest->GetQuestCompleteScript() != 0)
+        GetMap()->ScriptsStart(sQuestEndScripts, pQuest->GetQuestCompleteScript(), questGiver, this, Map::SCRIPT_EXEC_PARAM_UNIQUE_BY_SOURCE);
 
     // cast spells after mark quest complete (some spells have quest completed state reqyurements in spell_area data)
     if (pQuest->GetRewSpellCast() > 0)
@@ -19137,7 +19120,7 @@ void Player::RemovePetActionBar()
 void Player::AddSpellMod(Aura* aura, bool apply)
 {
     Modifier const* mod = aura->GetModifier();
-    uint16 Opcode= (mod->m_auraname == SPELL_AURA_ADD_FLAT_MODIFIER) ? SMSG_SET_FLAT_SPELL_MODIFIER : SMSG_SET_PCT_SPELL_MODIFIER;
+    Opcodes opcode = (mod->m_auraname == SPELL_AURA_ADD_FLAT_MODIFIER) ? SMSG_SET_FLAT_SPELL_MODIFIER : SMSG_SET_PCT_SPELL_MODIFIER;
 
     for (uint8 eff = 0; eff < 96; ++eff)
     {
@@ -19156,7 +19139,7 @@ void Player::AddSpellMod(Aura* aura, bool apply)
             val += apply ? mod->m_amount : 0;
 
             val += apply ? mod->m_amount : -(mod->m_amount);
-            WorldPacket data(Opcode, 4 + 4 + 1 + 1 + 4);
+            WorldPacket data(opcode, 4 + 4 + 1 + 1 + 4);
             data << uint32(1);
             data << uint32(1);
             data << uint8(mod->m_miscvalue);
@@ -22410,10 +22393,10 @@ bool Player::IsBaseRuneSlotsOnCooldown(RuneType runeType) const
     return true;
 }
 
-void Player::AutoStoreLoot(uint32 loot_id, LootStore const& store, bool broadcast, uint8 bag, uint8 slot)
+void Player::AutoStoreLoot(WorldObject const* lootTarget, uint32 loot_id, LootStore const& store, bool broadcast, uint8 bag, uint8 slot)
 {
-    Loot loot;
-    loot.FillLoot (loot_id, store, this, true);
+    Loot loot(lootTarget);
+    loot.FillLoot(loot_id, store, this, true);
 
     AutoStoreLoot(loot, broadcast, bag, slot);
 }
