@@ -69,6 +69,7 @@ enum LootSlotType
 
 class Player;
 class LootStore;
+class WorldObject;
 
 struct LootStoreItem
 {

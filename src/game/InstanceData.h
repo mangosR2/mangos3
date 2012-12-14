@@ -28,8 +28,7 @@ class Unit;
 class Player;
 class GameObject;
 class Creature;
-
-enum ConditionSource;
+class WorldObject;
 
 enum InstanceConditionIDs                                   // Suggested values used with CONDITION_INSTANCE_SCRIPT for some generic uses
 {
