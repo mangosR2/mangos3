@@ -8046,7 +8046,9 @@ char const* conditionSourceToStr[] =
     "referencing loot",
     "gossip menu",
     "gossip menu option",
-    "event AI"
+    "event AI",
+    "hardcoded",
+    "vendor's item check"
 };
 
 // Checks if player meets the condition
@@ -9178,7 +9180,7 @@ void ObjectMgr::LoadVendors(char const* tableName, bool isTemplates)
 
     std::set<uint32> skip_vendors;
 
-    QueryResult *result = WorldDatabase.PQuery("SELECT entry, item, maxcount, incrtime, ExtendedCost FROM %s", tableName);
+    QueryResult* result = WorldDatabase.PQuery("SELECT entry, item, maxcount, incrtime, ExtendedCost, condition_id FROM %s", tableName);
     if (!result)
     {
         BarGoLink bar(1);
@@ -9203,13 +9205,14 @@ void ObjectMgr::LoadVendors(char const* tableName, bool isTemplates)
         uint32 maxcount     = fields[2].GetUInt32();
         uint32 incrtime     = fields[3].GetUInt32();
         uint32 ExtendedCost = fields[4].GetUInt32();
+        uint16 conditionId  = fields[5].GetUInt16();
 
-        if (!IsVendorItemValid(isTemplates, tableName, entry, item_id, maxcount, incrtime, ExtendedCost, NULL, &skip_vendors))
+        if (!IsVendorItemValid(isTemplates, tableName, entry, item_id, maxcount, incrtime, ExtendedCost, conditionId, NULL, &skip_vendors))
             continue;
 
         VendorItemData& vList = vendorList[entry];
 
-        vList.AddItem(item_id, maxcount, incrtime, ExtendedCost);
+        vList.AddItem(item_id, maxcount, incrtime, ExtendedCost, conditionId);
         ++count;
 
     } while (result->NextRow());
@@ -9531,7 +9534,7 @@ void ObjectMgr::LoadGossipMenus()
 void ObjectMgr::AddVendorItem( uint32 entry,uint32 item, uint32 maxcount, uint32 incrtime, uint32 extendedcost )
 {
     VendorItemData& vList = m_mCacheVendorItemMap[entry];
-    vList.AddItem(item,maxcount,incrtime,extendedcost);
+    vList.AddItem(item, maxcount, incrtime, extendedcost, 0);
 
     WorldDatabase.PExecuteLog("INSERT INTO npc_vendor (entry,item,maxcount,incrtime,extendedcost) VALUES('%u','%u','%u','%u','%u')",entry, item, maxcount,incrtime,extendedcost);
 }
@@ -9549,7 +9552,7 @@ bool ObjectMgr::RemoveVendorItem( uint32 entry,uint32 item )
     return true;
 }
 
-bool ObjectMgr::IsVendorItemValid(bool isTemplate, char const* tableName, uint32 vendor_entry, uint32 item_id, uint32 maxcount, uint32 incrtime, uint32 ExtendedCost, Player* pl, std::set<uint32>* skip_vendors ) const
+bool ObjectMgr::IsVendorItemValid(bool isTemplate, char const* tableName, uint32 vendor_entry, uint32 item_id, uint32 maxcount, uint32 incrtime, uint32 ExtendedCost, uint16 conditionId, Player* pl, std::set<uint32>* skip_vendors) const
 {
     char const* idStr = isTemplate ? "vendor template" : "vendor";
     CreatureInfo const* cInfo = NULL;
@@ -9618,6 +9621,12 @@ bool ObjectMgr::IsVendorItemValid(bool isTemplate, char const* tableName, uint32
         else
             sLog.outErrorDb( "Table `%s` has `maxcount`=0 for item %u of %s %u but `incrtime`<>0, ignoring",
                 tableName, item_id, idStr, vendor_entry);
+        return false;
+    }
+
+    if (conditionId && !sConditionStorage.LookupEntry<PlayerCondition>(conditionId))
+    {
+        sLog.outErrorDb("Table `%s` has `condition_id`=%u for item %u of %s %u but this condition is not valid, ignoring", tableName, conditionId, item_id, idStr, vendor_entry);
         return false;
     }
 
