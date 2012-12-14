@@ -7829,7 +7829,13 @@ void Spell::DoSummonWild(SpellEffectEntry const* effect, uint32 forceFaction)
                 ((Creature*)m_originalCaster)->AI()->JustSummoned(summon);
 
             SendEffectLogExecute(effect, summon->GetObjectGuid());
+
+            DEBUG_LOG("DoSummonWild: summoned npc %u from spell %u at %f %f %f map %u summonType %u duration %i",
+                creature_entry, m_spellInfo->Id, p.x, p.y, p.z, m_caster->GetMapId(), summonType, m_duration);
         }
+        else
+            sLog.outError("DoSummonWild: failed to summon npc %u from spell %u at %f %f %f map %u summonType %u duration %i",
+                creature_entry, m_spellInfo->Id, p.x, p.y, p.z, m_caster->GetMapId(), summonType, m_duration);
     }
 }
 
