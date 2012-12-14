@@ -987,3 +987,25 @@ Unit* PetAI::GetPrimaryTarget()
 
     return target;
 }
+
+void PetAI::JustDied(Unit* pKiller)
+{
+    if (Unit* owner = m_creature->GetOwner())
+    {
+        if (owner != pKiller && owner->GetTypeId() == TYPEID_PLAYER)
+        {
+            if (!owner->HasAura(89140)) // Demonic Rebirth Marker
+            {
+                // get Demonic Rebirth talent
+                if (SpellEntry const* talent = ((Player*)owner)->GetKnownTalentRankById(11713))
+                {
+                    int32 bp = -talent->CalculateSimpleValue(EFFECT_INDEX_0);
+                    owner->CastCustomSpell(owner, 88448, &bp, NULL, NULL, true);
+                    owner->CastSpell(owner, 89140, true);
+                }
+            }
+        }
+    }
+
+    CreatureAI::JustDied(pKiller);
+}

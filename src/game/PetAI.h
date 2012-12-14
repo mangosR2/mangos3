@@ -76,6 +76,7 @@ class MANGOS_DLL_DECL PetAI : public CreatureAI
 
         void UpdateAI(const uint32) override;
         static int Permissible(const Creature *);
+        void JustDied(Unit* pKiller) override;
 
         bool UpdateAIType();
         void MoveToVictim(Unit* unit);

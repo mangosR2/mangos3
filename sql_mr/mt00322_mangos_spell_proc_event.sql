@@ -282,6 +282,11 @@ DELETE FROM `spell_proc_event` WHERE `entry` = 85099;
 INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA1`, `procFlags`, `CustomChance`) VALUES
 (85099, 5, 16384, 262144, 100);
 
+-- Demonic Rebirth
+DELETE FROM `spell_proc_event` WHERE `entry` = 88448;
+INSERT INTO `spell_proc_event` (`entry`, `procEx`) VALUES
+(88448, 524288);
+
 ### Mage ###
 
 -- Ring of Frost
