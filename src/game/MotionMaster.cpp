@@ -260,6 +260,13 @@ void MotionMaster::propagateSpeedChange()
     GetUnitStateMgr()->CurrentAction()->UnitSpeedChanged();
 }
 
+uint32 MotionMaster::getLastReachedWaypoint() const
+{
+    if (ActionInfo* action = const_cast<MotionMaster*>(this)->GetUnitStateMgr()->GetAction(UNIT_ACTION_DOWAYPOINTS))
+        return static_cast<WaypointMovementGenerator<Creature>*>(&*(action->Action()))->getLastReachedWaypoint();
+    return 0;
+}
+
 MovementGeneratorType MotionMaster::GetCurrentMovementGeneratorType() const
 {
     return const_cast<MotionMaster*>(this)->CurrentMovementGenerator()->GetMovementGeneratorType();
