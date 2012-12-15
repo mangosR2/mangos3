@@ -4925,6 +4925,8 @@ void Spell::EffectTriggerMissileSpell(SpellEffectIndex effect_idx)
         float x,y,z;
         m_targets.getDestination(x, y, z);
 
+        Unit* target = unitTarget ? unitTarget : m_caster;
+
         MaNGOS::NormalizeMapCoord(x);
         MaNGOS::NormalizeMapCoord(y);
 
@@ -4935,7 +4937,7 @@ void Spell::EffectTriggerMissileSpell(SpellEffectIndex effect_idx)
             triggered_spell_id,
             x,y,z);
 
-        unitTarget->CastSpell(x, y, z, spellInfo, true, m_CastItem, NULL, m_originalCasterGUID, m_spellInfo);
+        target->CastSpell(x, y, z, spellInfo, true, m_CastItem, NULL, m_originalCasterGUID, m_spellInfo);
     }
     else
     {
