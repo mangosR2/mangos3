@@ -49,7 +49,6 @@
 GameObject::GameObject() : WorldObject(),
     m_model(NULL),
     m_goInfo(NULL),
-    loot(this),
     m_displayInfo(NULL)
 {
     m_objectType |= TYPEMASK_GAMEOBJECT;
@@ -2234,87 +2233,6 @@ void GameObject::UpdateModel()
         GetMap()->InsertGameObjectModel(*m_model);
 
     EnableCollision(CalculateCurrentCollisionState());
-}
-
-void GameObject::StartGroupLoot(Group* group, uint32 timer)
-{
-    m_groupLootId = group->GetId();
-    m_groupLootTimer = timer;
-}
-
-void GameObject::StopGroupLoot()
-{
-    if (!m_groupLootId)
-        return;
-
-    Group* group = sObjectMgr.GetGroupById(m_groupLootId);
-    if (group)
-        group->EndRoll();
-
-    m_groupLootTimer = 0;
-    m_groupLootId = 0;
-}
-
-Player* GameObject::GetOriginalLootRecipient() const
-{
-    return m_lootRecipientGuid ? ObjectAccessor::FindPlayer(m_lootRecipientGuid) : NULL;
-}
-
-Group* GameObject::GetGroupLootRecipient() const
-{
-    // original recipient group if set and not disbanded
-    return m_lootGroupRecipientId ? sObjectMgr.GetGroupById(m_lootGroupRecipientId) : NULL;
-}
-
-Player* GameObject::GetLootRecipient() const
-{
-    // original recipient group if set and not disbanded
-    Group* group = GetGroupLootRecipient();
-
-    // original recipient player if online
-    Player* player = GetOriginalLootRecipient();
-
-    // if group not set or disbanded return original recipient player if any
-    if (!group)
-        return player;
-
-    // group case
-
-    // return player if it still be in original recipient group
-    if (player && player->GetGroup() == group)
-        return player;
-
-    // find any in group
-    for (GroupReference* itr = group->GetFirstMember(); itr != NULL; itr = itr->next())
-        if (Player* newPlayer = itr->getSource())
-            return newPlayer;
-
-    return NULL;
-}
-
-void GameObject::SetLootRecipient(Unit* pUnit)
-{
-    // set the player whose group should receive the right
-    // to loot the gameobject after its used
-    // should be set to NULL after the loot disappears
-
-    if (!pUnit)
-    {
-        m_lootRecipientGuid.Clear();
-        m_lootGroupRecipientId = 0;
-        return;
-    }
-
-    Player* player = pUnit->GetCharmerOrOwnerPlayerOrPlayerItself();
-    if (!player)                                            // normal creature, no player involved
-        return;
-
-    // set player for non group case or if group will disbanded
-    m_lootRecipientGuid = player->GetObjectGuid();
-
-    // set group for group existed case including if player will leave group at loot time
-    if (Group* group = player->GetGroup())
-        m_lootGroupRecipientId = group->GetId();
 }
 
 float GameObject::GetObjectBoundingRadius() const
