@@ -287,6 +287,12 @@ DELETE FROM `spell_proc_event` WHERE `entry` = 88448;
 INSERT INTO `spell_proc_event` (`entry`, `procEx`) VALUES
 (88448, 524288);
 
+-- Decimation
+DELETE FROM `spell_proc_event` WHERE `entry` IN (63165, 63167);
+INSERT INTO `spell_proc_event` (`entry`, `procFlags`, `procEx`, `CustomChance`) VALUE
+(63165, 65536, 524288, 100),
+(63167, 65536, 524288, 100);
+
 ### Mage ###
 
 -- Ring of Frost

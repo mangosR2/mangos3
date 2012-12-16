@@ -4227,14 +4227,10 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(Unit *pVictim, DamageIn
             // Decimation
             else if (auraSpellInfo->Id == 63156 || auraSpellInfo->Id == 63158)
             {
-                // Looking for dummy effect
-                Aura *aur = GetAura(auraSpellInfo->Id, EFFECT_INDEX_1);
-                if (!aur)
+                // If target's health is not below equal certain value (25%) not proc
+                if (!pVictim || pVictim->GetHealthPercent() > auraSpellInfo->CalculateSimpleValue(EFFECT_INDEX_1))
                     return SPELL_AURA_PROC_FAILED;
-
-                // If target's health is not below equal certain value (35%) not proc
-                if (int32(pVictim->GetHealth() * 100 / pVictim->GetMaxHealth()) > aur->GetModifier()->m_amount)
-                    return SPELL_AURA_PROC_FAILED;
+                break;
             }
             // Aftermath
             else if (auraSpellInfo->SpellIconID == 11)
