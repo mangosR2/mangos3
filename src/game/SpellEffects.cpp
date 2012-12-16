@@ -5651,7 +5651,7 @@ void Spell::EffectTriggerSpell(SpellEffectEntry const* effect)
     uint32 triggered_spell_id = effect->EffectTriggerSpell;
 
     // special cases
-    switch(triggered_spell_id)
+    switch (triggered_spell_id)
     {
         case 18461:                                         // Vanish (not exist)
         {
@@ -5716,6 +5716,23 @@ void Spell::EffectTriggerSpell(SpellEffectEntry const* effect)
             if (m_caster->HasAura(63093))
                m_caster->CastSpell(m_caster, 65047, true);  // creates a 4th copy
             break;
+        }
+        // Demonic Leap
+        case 54786:
+        {
+            if (m_targets.m_targetMask & TARGET_FLAG_DEST_LOCATION)
+            {
+                float x = m_targets.getDestination().getX();
+                float y = m_targets.getDestination().getY();
+                float z = m_targets.getDestination().getZ();
+
+                MaNGOS::NormalizeMapCoord(x);
+                MaNGOS::NormalizeMapCoord(y);
+                m_caster->UpdateGroundPositionZ(x, y, z);
+
+                m_caster->CastSpell(x, y, z, triggered_spell_id, true, NULL, NULL, m_originalCasterGuid);
+                return;
+            }
         }
         // Coldflame (Lord Marrowgar - Icecrown Citadel) - have casting time 0.2s, must be casted with triggered=false
         case 69147:
