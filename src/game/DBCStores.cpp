@@ -535,9 +535,9 @@ void LoadDBCStores(const std::string& dataPath)
         std::swap(*((uint32*)(&spell->SpellFamilyFlags)), *(((uint32*)(&spell->SpellFamilyFlags)) + 1));
 #endif
 
-        for (uint8 j = 0; i < MAX_EFFECT_INDEX; ++i)
+        for (uint8 j = 0; j < MAX_EFFECT_INDEX; ++j)
         {
-            sSpellEffectMap[spell->Id].effects[SpellEffectIndex(j)] = SpellEffectEntry(spell, SpellEffectIndex(i));
+            sSpellEffectMap[spell->Id].effects[SpellEffectIndex(j)] = SpellEffectEntry(spell, SpellEffectIndex(j));
         }
     }
 
