@@ -13208,7 +13208,7 @@ void Unit::ExitVehicle(bool forceDismount)
 
     Unit* vehicleBase = GetVehicle()->GetBase();
 
-    if (!vehicleBase || !vehicleBase->IsInWorld())
+    if (!vehicleBase || !vehicleBase->IsInWorld() || vehicleBase->IsInitialized())
     {
         sLog.outError("Unit::ExitVehicle: %s try leave vehicle, but no vehicle base in world!", GetObjectGuid().GetString().c_str());
         _ExitVehicle();
