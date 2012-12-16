@@ -1430,9 +1430,7 @@ bool CreatureEventAI::CanCast(Unit* Target, SpellEntry const* Spell, bool Trigge
     if (!Triggered && int32(m_creature->GetPower((Powers)Spell->powerType)) < abs(Spell::CalculatePowerCost(Spell, m_creature)))
         return false;
 
-    SpellRangeEntry const* TempRange = NULL;
-
-    TempRange = GetSpellRangeStore()->LookupEntry(Spell->rangeIndex);
+    SpellRangeEntry const* TempRange = GetSpellRangeStore()->LookupEntry(Spell->rangeIndex);
 
     // Spell has invalid range store so we can't use it
     if (!TempRange)

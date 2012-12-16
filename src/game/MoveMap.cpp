@@ -186,7 +186,7 @@ namespace MMAP
         if (fileHeader.mmapVersion != MMAP_VERSION)
         {
             sLog.outError("MMAP:loadMap: %03u%02i%02i.mmtile was built with generator v%i, expected v%i",
-                                                mapId, x, y, fileHeader.mmapVersion, MMAP_VERSION);
+                          mapId, x, y, fileHeader.mmapVersion, MMAP_VERSION);
             fclose(file);
             return false;
         }

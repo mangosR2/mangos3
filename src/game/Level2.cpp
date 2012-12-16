@@ -1505,8 +1505,7 @@ bool ChatHandler::HandleModifyRepCommand(char* args)
     if (!*args)
         return false;
 
-    Player* target = NULL;
-    target = getSelectedPlayer();
+    Player* target = getSelectedPlayer();
 
     if (!target)
     {
