@@ -1086,6 +1086,20 @@ void Spell::AddGOTarget(GameObject* pVictim, SpellEffectIndex effIndex)
 
     ObjectGuid targetGUID = pVictim->GetObjectGuid();
 
+    // Check target is effectible to this effect ?
+    GameobjectTypes gameobjectType = pVictim->GetGoType();
+    switch(m_spellInfo->Effect[effIndex])
+    {
+        case SPELL_EFFECT_WMO_DAMAGE:
+        case SPELL_EFFECT_WMO_REPAIR:
+        case SPELL_EFFECT_WMO_CHANGE:
+            if (gameobjectType != GAMEOBJECT_TYPE_DESTRUCTIBLE_BUILDING)
+                return;
+            break;
+        default:
+            break;
+    }
+
     // Lookup target in already in list
     for(GOTargetList::iterator ihit = m_UniqueGOTargetInfo.begin(); ihit != m_UniqueGOTargetInfo.end(); ++ihit)
     {
