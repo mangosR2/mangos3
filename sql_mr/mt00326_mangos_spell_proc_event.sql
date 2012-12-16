@@ -293,6 +293,11 @@ INSERT INTO `spell_proc_event` (`entry`, `procFlags`, `procEx`, `CustomChance`) 
 (63165, 65536, 524288, 100),
 (63167, 65536, 524288, 100);
 
+-- Cremation
+DELETE FROM `spell_proc_event` WHERE `entry` = 85103;
+INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`) VALUE
+(85103, 5, 2097152);
+
 ### Mage ###
 
 -- Ring of Frost
