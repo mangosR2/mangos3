@@ -1812,7 +1812,7 @@ bool Player::TeleportTo(WorldLocation const& loc, uint32 options)
     m_movementInfo.SetMovementFlags(MOVEFLAG_NONE);
     DisableSpline();
 
-    if (GetMapId() == loc.mapid && !m_transport)
+    if (GetMap() && GetMapId() == loc.mapid && !m_transport)
     {
         //lets reset far teleport flag if it wasn't reset during chained teleports
         SetSemaphoreTeleportFar(false);
