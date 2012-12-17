@@ -74,8 +74,11 @@ VehicleKit::VehicleKit(Unit* base, VehicleEntry const* entry)
 
 VehicleKit::~VehicleKit()
 {
-    Reset();
-    GetBase()->RemoveSpellsCausingAura(SPELL_AURA_CONTROL_VEHICLE);
+    if (GetBase() && GetBase()->IsInitialized())
+    {
+        Reset();
+        GetBase()->RemoveSpellsCausingAura(SPELL_AURA_CONTROL_VEHICLE);
+    }
 }
 
 void VehicleKit::Initialize(uint32 creatureEntry)
