@@ -131,7 +131,7 @@ bool TargetedMovementGeneratorMedium<T, D>::Update(T& owner, const uint32& time_
     if (!i_target.isValid() || !i_target->IsInWorld())
         return false;
 
-    if (owner.hasUnitState(UNIT_STAT_NOT_MOVE))
+    if (owner.hasUnitState(UNIT_STAT_NOT_MOVE) || (owner.IsInUnitState(UNIT_ACTION_CHASE) && owner.hasUnitState(UNIT_STAT_NO_COMBAT_MOVEMENT)))
     {
         D::_clearUnitStateMove(owner);
         return true;
