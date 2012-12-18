@@ -3569,7 +3569,7 @@ SpellMissInfo Unit::SpellResistResult(Unit* pVictim, SpellEntry const* spell)
         return SPELL_MISS_NONE;
 
     // Spell this type can't be resisted
-    if ((spell->SchoolMask & SPELL_SCHOOL_MASK_NORMAL) && spell->HasAttribute(SPELL_ATTR_EX3_CANT_MISS))
+    if ((spell->SchoolMask & SPELL_SCHOOL_MASK_NORMAL) || spell->HasAttribute(SPELL_ATTR_EX3_CANT_MISS))
         return SPELL_MISS_NONE;
 
     // Impossible resist friendly spells
