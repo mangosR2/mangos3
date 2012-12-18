@@ -7068,7 +7068,14 @@ uint32 Player::GetLevelFromDB(ObjectGuid guid)
 
 void Player::UpdateArea(uint32 newArea)
 {
-    m_areaUpdateId    = newArea;
+    if (m_areaUpdateId != newArea)
+    {
+        // call this method in order to handle some scripted maps
+        if (InstanceData* mapInstance = GetInstanceData())
+            mapInstance->OnPlayerEnterArea(this, newArea);
+    }
+
+    m_areaUpdateId = newArea;
 
     AreaTableEntry const* area = GetAreaEntryByAreaID(newArea);
 
