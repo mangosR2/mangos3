@@ -7072,7 +7072,7 @@ void Player::UpdateArea(uint32 newArea)
     {
         // call this method in order to handle some scripted maps
         if (InstanceData* mapInstance = GetInstanceData())
-            mapInstance->OnPlayerEnterArea(this, newArea);
+            mapInstance->OnPlayerEnterArea(this, newArea, m_areaUpdateId);
     }
 
     m_areaUpdateId = newArea;

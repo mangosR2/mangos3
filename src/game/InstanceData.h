@@ -81,7 +81,7 @@ class MANGOS_DLL_SPEC InstanceData
         virtual void OnPlayerLeave(Player*) {}
 
         // Called when a player successfully enters the other area
-        virtual void OnPlayerEnterArea(Player*, uint32 /*uiNewAreaId*/) {}
+        virtual void OnPlayerEnterArea(Player*, uint32 /*uiNewAreaId*/,  uint32 /*uiOldAreaId*/) {}
 
         // Called when a player successfully enters the other zone
         virtual void OnPlayerEnterZone(Player*, uint32 /*uiNewZoneId*/, uint32 /*uiNewAreaId*/) {}
