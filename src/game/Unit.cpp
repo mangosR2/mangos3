@@ -9097,6 +9097,10 @@ bool Unit::IsSpellCrit(Unit *pVictim, SpellEntry const *spellProto, SpellSchoolM
                         // Searing Pain
                         if (spellProto->Id == 5676)
                         {
+                            // Soulburn
+                            if (HasAura(74434))
+                                return true;
+
                             // Search Improved Searing Pain
                             AuraList const& mDummyAuras = GetAurasByType(SPELL_AURA_DUMMY);
                             for(AuraList::const_iterator i = mDummyAuras.begin(); i!= mDummyAuras.end(); ++i)

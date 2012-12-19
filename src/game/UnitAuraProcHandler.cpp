@@ -1605,7 +1605,15 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, DamageInfo* damageI
                     RemoveAurasDueToSpell(triggeredByAura->GetId());
 
                     // Cast finish spell (triggeredByAura already not exist!)
-                    CastSpell(this, 27285, true, castItem, NULL, casterGuid);
+                    int32 bp = 0;
+                    if (mod->m_miscvalue)               // marked as affected by soulburn
+                    {
+                        bp = 1;
+                        CastSpell(this, 87388, true);   // Soul Shard energize
+                    }
+
+                    CastCustomSpell(this, 27285, NULL, &bp, NULL, true, castItem, NULL, casterGuid);
+
                     return SPELL_AURA_PROC_OK;                            // no hidden cooldown
                 }
 
@@ -5310,7 +5318,7 @@ SpellAuraProcResult Unit::HandleAddFlatModifierAuraProc(Unit* pVictim, DamageInf
     return SPELL_AURA_PROC_OK;
 }
 
-SpellAuraProcResult Unit::HandleAddPctModifierAuraProc(Unit* /*pVictim*/, DamageInfo* damageInfo, Aura const* triggeredByAura, SpellEntry const *procSpell, uint32 /*procFlag*/, uint32 procEx, uint32 /*cooldown*/)
+SpellAuraProcResult Unit::HandleAddPctModifierAuraProc(Unit* pVictim, DamageInfo* damageInfo, Aura const* triggeredByAura, SpellEntry const *procSpell, uint32 /*procFlag*/, uint32 procEx, uint32 /*cooldown*/)
 {
     SpellEntry const *spellInfo = triggeredByAura->GetSpellProto();
     Item* castItem = triggeredByAura->GetCastItemGuid() && GetTypeId()==TYPEID_PLAYER
@@ -5329,6 +5337,55 @@ SpellAuraProcResult Unit::HandleAddPctModifierAuraProc(Unit* /*pVictim*/, Damage
 
                 CastSpell(this, 28682, true, castItem, triggeredByAura);
                 return (procEx & PROC_EX_CRITICAL_HIT) ? SPELL_AURA_PROC_OK : SPELL_AURA_PROC_FAILED; // charge update only at crit hits, no hidden cooldowns
+            }
+            break;
+        }
+        case SPELLFAMILY_WARLOCK:
+        {
+            // Soulburn
+            if (spellInfo->Id == 74434)
+            {
+                if (!procSpell)
+                    return SPELL_AURA_PROC_FAILED;
+
+                switch (procSpell->Id)
+                {
+                    case 5676:      // Searing Pain
+                        CastSpell(this, 79440, true);
+                        break;
+                    case 6262:      // Healthstone
+                        CastSpell(this, 79437, true);
+                        break;
+                    case 27243:     // Seed of Corruption
+                    {
+                        // Soulburn: Seed of Corruption, rank 1
+                        if (!HasSpell(86664))
+                            return SPELL_AURA_PROC_FAILED;
+
+                        if (pVictim)
+                        {
+                            if (SpellAuraHolderPtr holder = pVictim->GetSpellAuraHolder(procSpell->Id, GetObjectGuid()))
+                            {
+                                if (Aura* aura = holder->GetAuraByEffectIndex(EFFECT_INDEX_1))
+                                    aura->GetModifier()->m_miscvalue = 1;   // mark as affected by Soulburn
+                            }
+                        }
+                        break;
+                    }
+                    case 48020:     // Demonic Circle: Teleport
+                        CastSpell(this, 79438, true);
+                        break;
+                    case 688:       // Summon Imp
+                    case 691:       // Summon Felhunter
+                    case 697:       // Summon Voidwalker
+                    case 6353:      // Soul Fire
+                    case 11519:     // Summon Succubus
+                    case 30146:     // Summon Felguard
+                    case 89420:     // Drain Life
+                        break;
+                    default:
+                        return SPELL_AURA_PROC_FAILED;
+                }
             }
             break;
         }

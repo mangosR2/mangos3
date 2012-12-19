@@ -303,6 +303,11 @@ DELETE FROM `spell_proc_event` WHERE `entry` = 61595;
 INSERT INTO `spell_proc_event` (`entry`, `procEx`) VALUES
 (61595, 524288);
 
+-- Soulburn
+DELETE FROM `spell_proc_event` WHERE `entry` = 74434;
+INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SchoolMask`, `procFlags`, `CustomChance`, procEx) VALUE
+(74434, 0, 127, 16384 | 65536, 100, 0x0010000);
+
 ### Mage ###
 
 -- Ring of Frost
