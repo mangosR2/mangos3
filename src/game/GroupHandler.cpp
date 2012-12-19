@@ -167,7 +167,7 @@ void WorldSession::HandleGroupInviteOpcode(WorldPacket& recv_data)
         SendPartyResult(PARTY_OP_INVITE, membername, ERR_ALREADY_IN_GROUP_S);
 
         // tell the player that they were invited but it failed as they were already in a group
-        SendGroupInvite(player, true);
+        player->GetSession()->SendGroupInvite(_player, true);
         return;
     }
 
