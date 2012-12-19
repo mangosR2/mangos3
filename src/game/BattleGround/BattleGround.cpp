@@ -2065,7 +2065,7 @@ void BattleGround::CheckArenaWinConditions()
         EndBattleGround(ALLIANCE);
 }
 
-Group* GetBgRaid(Team team)
+Group* BattleGround::GetBgRaid(Team team)
 {
     return sObjectMgr.GetGroup(m_BgRaids[GetTeamIndex(team)]);
 }
