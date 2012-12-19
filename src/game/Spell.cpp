@@ -6016,7 +6016,8 @@ SpellCastResult Spell::CheckCast(bool strict)
         return SPELL_FAILED_CASTER_AURASTATE;
 
     // Caster aura req check if need
-    if (auraRestrictions && auraRestrictions->casterAuraSpell && !m_caster->HasAura(auraRestrictions->casterAuraSpell))
+    if (auraRestrictions && auraRestrictions->casterAuraSpell && !m_caster->HasAura(auraRestrictions->casterAuraSpell) &&
+        sSpellStore.LookupEntry(auraRestrictions->casterAuraSpell))
         return SPELL_FAILED_CASTER_AURASTATE;
 
     if (auraRestrictions && auraRestrictions->excludeCasterAuraSpell)
@@ -6079,7 +6080,8 @@ SpellCastResult Spell::CheckCast(bool strict)
             return SPELL_FAILED_TARGET_NOT_DEAD;
 
         // Target aura req check if need
-        if(auraRestrictions && auraRestrictions->targetAuraSpell && !target->HasAura(auraRestrictions->targetAuraSpell))
+        if (auraRestrictions && auraRestrictions->targetAuraSpell && !target->HasAura(auraRestrictions->targetAuraSpell) &&
+            sSpellStore.LookupEntry(auraRestrictions->targetAuraSpell))
             return SPELL_FAILED_CASTER_AURASTATE;
 
         if(auraRestrictions && auraRestrictions->excludeTargetAuraSpell)
