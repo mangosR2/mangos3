@@ -411,6 +411,7 @@ class MANGOS_DLL_SPEC Aura
         void HandleOverrideSpellPowerByAp(bool apply, bool Real);
         void HandleAuraForceWeather(bool apply, bool Real);
         void HandleAuraPreventResurrection(bool apply, bool Real);
+        void HandleAuraOverrideActionbarSpells(bool apply, bool Real);
 
         virtual ~Aura();
 

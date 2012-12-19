@@ -387,8 +387,8 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleNULL,                                      //329 SPELL_AURA_MOD_RUNIC_POWER_GAIN 3 spells in 4.3.4
     &Aura::HandleNoImmediateEffect,                         //330 SPELL_AURA_ALLOW_CAST_WHILE_MOVING 16 spells in 4.3.4
     &Aura::HandleAuraForceWeather,                          //331 SPELL_AURA_MOD_WEATHER 10 spells in 4.3.4
-    &Aura::HandleNULL,                                      //332 SPELL_AURA_OVERRIDE_ACTIONBAR_SPELLS 16 spells in 4.3.4
-    &Aura::HandleNULL,                                      //333 SPELL_AURA_OVERRIDE_ACTIONBAR_SPELLS_2 10 spells in 4.3.4
+    &Aura::HandleAuraOverrideActionbarSpells,               //332 SPELL_AURA_OVERRIDE_ACTIONBAR_SPELLS 16 spells in 4.3.4, implemented in WorldSession::HandleCastSpellOpcode
+    &Aura::HandleAuraOverrideActionbarSpells,               //333 SPELL_AURA_OVERRIDE_ACTIONBAR_SPELLS_2 10 spells in 4.3.4, implemented in WorldSession::HandleCastSpellOpcode
     &Aura::HandleNULL,                                      //334 SPELL_AURA_BLIND_SIGHT 2 spells in 4.3.4
     &Aura::HandleNULL,                                      //335 SPELL_AURA_SEE_WHILE_INVISIBLE invisibility-related 5 spells in 4.3.4
     &Aura::HandleNULL,                                      //336 SPELL_AURA_FLIGHT_RESTRICTIONS 8 spells in 4.3.4
@@ -13627,4 +13627,15 @@ void Aura::HandleAuraPreventResurrection(bool apply, bool Real)
         GetTarget()->RemoveByteFlag(PLAYER_FIELD_BYTES, 0, PLAYER_FIELD_BYTE_RELEASE_TIMER);
     else if (!GetTarget()->GetMap()->Instanceable())
         GetTarget()->SetByteFlag(PLAYER_FIELD_BYTES, 0, PLAYER_FIELD_BYTE_RELEASE_TIMER);
+}
+
+void Aura::HandleAuraOverrideActionbarSpells(bool apply, bool Real)
+{
+    Unit* target = GetTarget();
+
+    if (GetId() == 86211 && !apply && target->GetTypeId() == TYPEID_PLAYER)
+    {
+        ((Player*)target)->m_soulSwapData.spells.clear();
+        ((Player*)target)->m_soulSwapData.swapTarget.Clear();
+    }
 }

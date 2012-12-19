@@ -989,6 +989,74 @@ void Spell::EffectSchoolDMG(SpellEffectEntry const* effect)
                         }
                     }
                 }
+                // Soul Swap
+                else if (m_spellInfo->Id == 86121)
+                {
+                    if (m_caster->GetTypeId() == TYPEID_PLAYER)
+                    {
+                        Player* pCaster = (Player*)m_caster;
+                        pCaster->m_soulSwapData.spells.clear();
+                        pCaster->m_soulSwapData.swapTarget = unitTarget->GetObjectGuid();
+
+                        if (SpellEntry const * affecter = sSpellStore.LookupEntry(92794))
+                        {
+                            if (SpellEffectEntry const* effect = affecter->GetSpellEffect(EFFECT_INDEX_0))
+                            {
+                                Unit::SpellAuraHolderMap const& holders = unitTarget->GetSpellAuraHolderMap();
+                                for (Unit::SpellAuraHolderMap::const_iterator itr = holders.begin(); itr != holders.end(); ++itr)
+                                {
+                                    if (itr->second->IsPositive() ||
+                                        itr->second->IsPassive() ||
+                                        itr->second->GetCasterGuid() != m_caster->GetObjectGuid())
+                                        continue;
+
+                                    bool isPeriodic = false;
+                                    for (uint32 i = 0; i < MAX_AURAS; ++i)
+                                    {
+                                        if (Aura* aura = itr->second->GetAuraByEffectIndex(SpellEffectIndex(i)))
+                                        {
+                                            if (aura->IsPeriodic())
+                                            {
+                                                isPeriodic = true;
+                                                break;
+                                            }
+                                        }
+                                    }
+
+                                    if (!isPeriodic)
+                                        continue;
+
+                                    if (itr->second->GetSpellProto()->IsFitToFamily(SPELLFAMILY_WARLOCK, effect->EffectSpellClassMask))
+                                        pCaster->m_soulSwapData.spells.push_back(itr->second->GetId());
+                                }
+                            }
+                        }
+
+                        // Glyph of Soul Swap
+                        if (m_caster->HasAura(56226))
+                            m_caster->CastSpell(m_caster, 64229, true);
+                        else
+                        {
+                            for (uint32 i = 0; i < pCaster->m_soulSwapData.spells.size(); ++i)
+                                unitTarget->RemoveAurasByCasterSpell(pCaster->m_soulSwapData.spells[i], m_caster->GetObjectGuid());
+                        }
+
+                        // aura 332 spell
+                        m_caster->CastSpell(m_caster, 86211, true);
+                    }
+                }
+                // Soul Swap Exhale
+                else if (m_spellInfo->Id == 86213)
+                {
+                    if (m_caster->GetTypeId() == TYPEID_PLAYER)
+                    {
+                        Player* pCaster = (Player*)m_caster;
+                        for (uint32 i = 0; i < pCaster->m_soulSwapData.spells.size(); ++i)
+                            m_caster->CastSpell(unitTarget, pCaster->m_soulSwapData.spells[i], true);
+
+                        m_caster->RemoveAurasDueToSpell(86211);
+                    }
+                }
                 break;
             }
             case SPELLFAMILY_PRIEST:
@@ -12015,69 +12083,13 @@ void Spell::EffectScriptEffect(SpellEffectEntry const* effect)
         {
             switch(m_spellInfo->Id)
             {
-                case  6201:                                 // Healthstone creating spells
-                case  6202:
-                case  5699:
-                case 11729:
-                case 11730:
-                case 27230:
-                case 47871:
-                case 47878:
+                case  6201:                                 // Conjure Healthstone
                 {
                     if (!unitTarget)
                         return;
 
-                    uint32 itemtype;
-                    uint32 rank = 0;
-                    Unit::AuraList const& mDummyAuras = unitTarget->GetAurasByType(SPELL_AURA_DUMMY);
-                    for(Unit::AuraList::const_iterator i = mDummyAuras.begin();i != mDummyAuras.end(); ++i)
-                    {
-                        if ((*i)->GetId() == 18692)
-                        {
-                            rank = 1;
-                            break;
-                        }
-                        else if ((*i)->GetId() == 18693)
-                        {
-                            rank = 2;
-                            break;
-                        }
-                    }
-
-                    static uint32 const itypes[8][3] =
-                    {
-                        { 5512, 19004, 19005},              // Minor Healthstone
-                        { 5511, 19006, 19007},              // Lesser Healthstone
-                        { 5509, 19008, 19009},              // Healthstone
-                        { 5510, 19010, 19011},              // Greater Healthstone
-                        { 9421, 19012, 19013},              // Major Healthstone
-                        {22103, 22104, 22105},              // Master Healthstone
-                        {36889, 36890, 36891},              // Demonic Healthstone
-                        {36892, 36893, 36894}               // Fel Healthstone
-                    };
-
-                    switch(m_spellInfo->Id)
-                    {
-                        case  6201:
-                            itemtype=itypes[0][rank];break; // Minor Healthstone
-                        case  6202:
-                            itemtype=itypes[1][rank];break; // Lesser Healthstone
-                        case  5699:
-                            itemtype=itypes[2][rank];break; // Healthstone
-                        case 11729:
-                            itemtype=itypes[3][rank];break; // Greater Healthstone
-                        case 11730:
-                            itemtype=itypes[4][rank];break; // Major Healthstone
-                        case 27230:
-                            itemtype=itypes[5][rank];break; // Master Healthstone
-                        case 47871:
-                            itemtype=itypes[6][rank];break; // Demonic Healthstone
-                        case 47878:
-                            itemtype=itypes[7][rank];break; // Fel Healthstone
-                        default:
-                            return;
-                    }
-                    DoCreateItem( effect, itemtype );
+                    uint32 item = 5509;
+                    DoCreateItem(effect, item);
                     return;
                 }
                 case 47193:                                 // Demonic Empowerment

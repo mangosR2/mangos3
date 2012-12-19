@@ -2705,6 +2705,11 @@ class MANGOS_DLL_SPEC Player : public Unit
         void _SaveVoidStorage();
 
         uint32 GetChampioningFaction();
+        struct SoulSwapData
+        {
+            std::vector<uint32> spells;
+            ObjectGuid swapTarget;
+        } m_soulSwapData;
 
     protected:
 
