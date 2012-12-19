@@ -116,6 +116,10 @@ Group::~Group()
         for (BoundInstancesMap::iterator itr2 = m_boundInstances[i].begin(); itr2 != m_boundInstances[i].end(); ++itr2)
             itr2->second.state->RemoveGroup(this);
 
+    // recheck deletion in ObjectMgr (must be deleted wile disband, but additional check not be bad)
+    if (!GetObjectGuid().IsEmpty())
+        sObjectMgr.RemoveGroup(this);
+
     // Sub group counters clean up
     if (m_subGroupsCounts)
         delete[] m_subGroupsCounts;
