@@ -4008,8 +4008,7 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                         if (!target->IsInFeralForm())
                             return;
 
-                        int32 bp0 = int32(target->GetMaxHealth() * m_modifier.m_amount / 100);
-                        target->CastCustomSpell(target, 50322, &bp0, NULL, NULL, true);
+                        target->CastSpell(target, 50322, true);
                     }
                     else
                         target->RemoveAurasDueToSpell(50322);
