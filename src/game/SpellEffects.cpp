@@ -4793,12 +4793,11 @@ void Spell::EffectDummy(SpellEffectEntry const* effect)
     
                     for (std::list<Creature*>::const_iterator i = list.begin(); i != list.end(); ++i)
                     {
-                        if ((*i)->IsTemporarySummon() && (*i)->GetCreator() == m_caster)
+                        if ((*i)->IsTemporarySummon() && (*i)->GetCreator() == m_caster && (*i)->isAlive())
                         {
                             summonList.push_back((TemporarySummon*)(*i));
-                            if (summonList.size() == 3) // max 3 mushroom
+                            if (summonList.size() >= 3) // max 3 mushroom (buggers?)
                                 break;
-                            continue;
                         }
                     }
 
@@ -4810,6 +4809,8 @@ void Spell::EffectDummy(SpellEffectEntry const* effect)
                         if (!m_caster->IsWithinDist3d((*i)->GetPositionX(), (*i)->GetPositionY(), (*i)->GetPositionZ(), spellRange))
                             continue;
 
+                        (*i)->SetVisibility(VISIBILITY_ON);
+                        (*i)->CastSpell((*i), 92701, true); // Detonate Death Visual
                         (*i)->CastSpell((*i), 92853, true); // Explosion visual and suicide
                         m_caster->CastSpell((*i)->GetPositionX(), (*i)->GetPositionY(), (*i)->GetPositionZ(), 78777, true); // damage
 
@@ -7266,6 +7267,14 @@ void Spell::EffectSummonType(SpellEffectEntry const* effect)
                         (responsibleCaster ? responsibleCaster->getFaction() : m_caster->getFaction()) :
                         // else auto faction detect
                         0);
+
+    // in 4.3.4 two spells with unlimited summon support: 81283 & 81291
+    // need research summon metod, DoSummonWild by default?
+    if ((int32)summon_prop->Title == -1)
+    {
+        DoSummonWild(effect, factionId);
+        return;
+    }
 
     switch(summon_prop->Group)
     {

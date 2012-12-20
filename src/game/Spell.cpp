@@ -7492,34 +7492,18 @@ SpellCastResult Spell::CheckCast(bool strict)
             if (m_caster->hasUnitState(UNIT_STAT_ROOT))
                 return SPELL_FAILED_ROOTED;
             break;
-        case 88747:     // Wild Mushroom
-        {
-            if (m_caster->GetTypeId() == TYPEID_PLAYER)
-            {
-                if (((Player*)m_caster)->GetSummonUnitCountBySpell(m_spellInfo->Id) >= 3)
-                    if (Unit* mushroom = ((Player *)m_caster)->GetSummonUnit(m_spellInfo->Id))
-                        ((TemporarySummon*)mushroom)->UnSummon();
-            }
-            break;
-        }
         case 88751:     // Wild Mushroom : Detonate
         {
             if (m_caster->GetTypeId() == TYPEID_PLAYER)
             {
-                if (!((Player*)m_caster)->GetSummonUnitCountBySpell(88747))
-                    return SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW;
-
                 std::list<Creature*> list;
                 std::list<TemporarySummon*> summonList;
                 m_caster->GetCreatureListWithEntryInGrid(list, 47649, 500.0f);
 
                 for (std::list<Creature*>::const_iterator i = list.begin(); i != list.end(); ++i)
                 {
-                    if ((*i)->IsTemporarySummon() && (*i)->GetCreator() == m_caster)
-                    {
+                    if ((*i)->IsTemporarySummon() && (*i)->GetCreator() == m_caster && (*i)->isAlive())
                         summonList.push_back((TemporarySummon*)(*i));
-                        continue;
-                    }
                 }
 
                 if (summonList.empty())
