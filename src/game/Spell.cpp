@@ -3997,6 +3997,9 @@ void Spell::cast(bool skipCheck)
                 if (m_caster->HasAura(70844))               // Item - Warrior T10 Protection 4P Bonus
                     AddTriggeredSpell(70845);               // Stoicism
             }
+            // Shattering Throw
+            else if (m_spellInfo->Id == 64382)
+                AddTriggeredSpell(64380);
             // Bloodsurge (triggered), Sudden Death (triggered)
             else if (m_spellInfo->Id == 46916 || m_spellInfo->Id == 52437)
             {
