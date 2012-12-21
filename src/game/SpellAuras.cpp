@@ -6964,23 +6964,13 @@ void Aura::HandlePeriodicDamage(bool apply, bool Real)
                 // Rend
                 if (spellProto->GetSpellFamilyFlags().test<CF_WARRIOR_REND>())
                 {
-                    // $0.2*(($MWB+$mwb)/2+$AP/14*$MWS) bonus per tick
+                    // ${0.25*6*(($MWB+$mwb)/2+$AP/14*$MWS)}
                     float ap = caster->GetTotalAttackPowerValue(BASE_ATTACK);
                     int32 mws = caster->GetAttackTime(BASE_ATTACK);
-                    float mwb_min = caster->GetWeaponDamageRange(BASE_ATTACK,MINDAMAGE);
-                    float mwb_max = caster->GetWeaponDamageRange(BASE_ATTACK,MAXDAMAGE);
-                    m_modifier.m_amount+=int32(((mwb_min+mwb_max)/2+ap*mws/14000)*0.2f);
-                    // If used while target is above 75% health, Rend does 35% more damage
-                    if (spellProto->CalculateSimpleValue(EFFECT_INDEX_1) !=0 &&
-                        target->GetHealth() > target->GetMaxHealth() * spellProto->CalculateSimpleValue(EFFECT_INDEX_1) / 100)
-                        m_modifier.m_amount += m_modifier.m_amount * spellProto->CalculateSimpleValue(EFFECT_INDEX_2) / 100;
-
-                    // Improved Rend - Rank 1
-                    if (caster->HasAura(12286))
-                        m_modifier.m_amount += int32(m_modifier.m_amount * 0.1f);
-                    // Improved Rend - Rank 2
-                    if (caster->HasAura(12658))
-                        m_modifier.m_amount += int32(m_modifier.m_amount * 0.2f);
+                    float mwb_min = caster->GetWeaponDamageRange(BASE_ATTACK, MINDAMAGE);
+                    float mwb_max = caster->GetWeaponDamageRange(BASE_ATTACK, MAXDAMAGE);
+                    m_modifier.m_amount += int32(((mwb_min + mwb_max) / 2 + ap * mws / 14000) * 0.25f);
+                    ChangeAmount(m_modifier.m_amount);
                 }
                 break;
             }
