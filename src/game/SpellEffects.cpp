@@ -888,11 +888,6 @@ void Spell::EffectSchoolDMG(SpellEffectEntry const* effect)
                         damage+= int32(m_caster->GetTotalAttackPowerValue(BASE_ATTACK) * pct / 100);
                     break;
                 }
-                // Thunder Clap
-                else if (classOptions && classOptions->SpellFamilyFlags & UI64LIT(0x0000000000000080))
-                {
-                    damage+=int32(m_caster->GetTotalAttackPowerValue(BASE_ATTACK) * 12 / 100);
-                }
                 break;
             }
             case SPELLFAMILY_WARLOCK:
