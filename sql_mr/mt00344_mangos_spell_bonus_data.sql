@@ -35,7 +35,9 @@ REPLACE INTO `spell_bonus_data` (`entry`, `direct_bonus`, `dot_bonus`, `ap_bonus
 -- Warrior
 REPLACE INTO `spell_bonus_data` (`entry`, `direct_bonus`, `dot_bonus`, `ap_bonus`, `ap_dot_bonus`, `comments`) VALUES
 (772, 0, 0, 0, 0, 'Warrior - Rend'),
+(1680, 0, 0, 0.236, 0, 'Warrior - Whirlwind'),
 (6343, 0, 0, 0.228, 0, 'Warrior - Thunder Clap'),
 (20253, 0, 0, 0.12, 0, 'Warrior - Intercept'),
+(44949, 0, 0, 0.236, 0, 'Warrior - Whirlwind (offhand)'),
 (57755, 0, 0, 0.75, 0, 'Warrior - Heroic Throw'),
 (64382, 0, 0, 0.5, 0, 'Warrior - Shattering Throw');

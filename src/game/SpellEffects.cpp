@@ -8653,8 +8653,28 @@ void Spell::EffectWeaponDmg(SpellEffectEntry const* effect)
         }
         case SPELLFAMILY_WARRIOR:
         {
+            // Whirlwind
+            if (m_spellInfo->Id == 1680)
+            {
+                if (effect->EffectIndex != EFFECT_INDEX_0)
+                    break;
+
+                if (m_caster->GetTypeId() != TYPEID_PLAYER)
+                    break;
+
+                uint32 count = 0;
+                for (TargetList::const_iterator ihit = m_UniqueTargetInfo.begin(); ihit != m_UniqueTargetInfo.end(); ++ihit)
+                    if (ihit->effectMask & (1 << effect->EffectIndex))
+                        ++count;
+
+                if (count >= 4)
+                {
+                    int32 secs = m_spellInfo->CalculateSimpleValue(EFFECT_INDEX_2);
+                    ((Player*)m_caster)->SendModifyCooldown(m_spellInfo->Id, - secs * IN_MILLISECONDS);
+                }
+            }
             // Devastate
-            if (m_spellInfo->GetSpellVisual() == 12295 && m_spellInfo->GetSpellIconID() == 1508)
+            else if (m_spellInfo->GetSpellVisual() == 12295 && m_spellInfo->GetSpellIconID() == 1508)
             {
                 // Sunder Armor
                 Aura* sunder = unitTarget->GetAura<SPELL_AURA_MOD_RESISTANCE_PCT, SPELLFAMILY_WARRIOR, CF_WARRIOR_SUNDER_ARMOR>(m_caster->GetObjectGuid());
