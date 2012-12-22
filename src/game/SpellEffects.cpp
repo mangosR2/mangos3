@@ -406,12 +406,6 @@ void Spell::EffectSchoolDMG(SpellEffectEntry const* effect)
                             damage = 200;
                         break;
                     }
-                    case 20253:                             // Intercept (warrior spell trigger)
-                    case 61491:
-                    {
-                        damage+= uint32(m_caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.12f);
-                        break;
-                    }
                     // Mana Detonation
                     case 27820:
                     {
