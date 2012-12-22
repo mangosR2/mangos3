@@ -9321,6 +9321,9 @@ void Aura::PeriodicTick()
 
                     damageInfo.damage = damageInfo.damage + addition;
                 }
+                // Second Wind
+                else if (spellProto->Id == 29842 || spellProto->Id == 29841)
+                    damageInfo.damage = int32(amount * target->GetMaxHealth() / 100.0f);
             }
             damageInfo.CleanDamage(-int32(damageInfo.damage), 0, BASE_ATTACK, MELEE_HIT_NORMAL);
 
