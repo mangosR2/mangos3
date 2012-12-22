@@ -25,6 +25,7 @@
 #include "ObjectAccessor.h"
 #include "UnitEvents.h"
 #include "SpellMgr.h"
+#include "Vehicle.h"
 
 //==============================================================
 //================= ThreatCalcHelper ===========================
