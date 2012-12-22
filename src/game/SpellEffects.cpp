@@ -873,7 +873,9 @@ void Spell::EffectSchoolDMG(SpellEffectEntry const* effect)
                 }
                 // Revenge ${$m1+$AP*0.310} to ${$M1+$AP*0.310}
                 else if (classOptions && classOptions->SpellFamilyFlags & UI64LIT(0x0000000000000400))
-                    damage+= uint32(m_caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.310f);
+                {
+                    m_caster->ModifyAuraState(AURA_STATE_DEFENSE, false);
+                }
                 // Shockwave ${$m3/100*$AP}
                 else if (classOptions && classOptions->SpellFamilyFlags & UI64LIT(0x0000800000000000))
                 {

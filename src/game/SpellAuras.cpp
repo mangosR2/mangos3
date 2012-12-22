@@ -12346,6 +12346,20 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
                 }
                 return;
             }
+            else
+            {
+                // Shield Block
+                if (GetId() == 2565)
+                {
+                    if (m_target->GetTypeId() == TYPEID_PLAYER)
+                    {
+                        float blockValue = m_target->GetFloatValue(PLAYER_BLOCK_PERCENTAGE);
+                        if (blockValue > 100.0f)
+                            if (Aura* aura = GetAuraByEffectIndex(EFFECT_INDEX_2))
+                                aura->ChangeAmount(int32(blockValue - 100.0f));
+                    }
+                }
+            }
             break;
         }
         case SPELLFAMILY_WARLOCK:
