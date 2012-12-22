@@ -321,3 +321,8 @@ INSERT INTO `creature_template_addon` (`entry`, `b2_0_sheath`, `auras`) VALUE
 DELETE FROM `spell_proc_event` WHERE `entry` = 29723;
 INSERT INTO `spell_proc_event` (`entry`, `SchoolMask`) VALUE
 (29723, 127);
+
+-- Blitz
+DELETE FROM `spell_proc_event` WHERE `entry` = 80976;
+INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`, `procFlags`, `CustomChance`) VALUE
+(80976, 4, 1, 65536, 100);

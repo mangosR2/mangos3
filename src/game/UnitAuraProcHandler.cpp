@@ -5277,6 +5277,24 @@ SpellAuraProcResult Unit::HandleAddFlatModifierAuraProc(Unit* pVictim, DamageInf
             }
             break;
         }
+        case SPELLFAMILY_WARRIOR:
+        {
+            switch (spellInfo->Id)
+            {
+                case 80976:     // Blitz Rank 1
+                case 80977:     // Blitz Rank 2
+                {
+                    if (!pVictim || triggeredByAura->GetEffIndex() != EFFECT_INDEX_0)
+                        return SPELL_AURA_PROC_FAILED;
+
+                    CastSpell(pVictim, 96273, true);
+                    return SPELL_AURA_PROC_OK;
+                }
+                default:
+                    break;
+            }
+            break;
+        }
         case SPELLFAMILY_WARLOCK:
         {
             // Pandemic
