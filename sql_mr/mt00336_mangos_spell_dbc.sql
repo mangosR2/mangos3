@@ -10,3 +10,7 @@ DELETE FROM `spell_dbc` WHERE `Id` = 82365;
 INSERT IGNORE INTO `spell_dbc` (`Id`, `EffectBasePoints1`) VALUES
 (82365, 25);
 
+-- Druid - Innervate
+DELETE FROM `spell_dbc` WHERE `Id` = 54833;
+INSERT IGNORE INTO `spell_dbc` (`Id`, `EffectApplyAuraName1`) VALUES
+(54833, 24);
