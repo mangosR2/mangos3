@@ -11724,6 +11724,14 @@ int32 Unit::CalculateSpellDamage(Unit const* target, SpellEntry const* spellProt
             }
             break;
         }
+        case SPELL_AURA_MOD_IGNORE_ARMOR_PCT:
+        {
+            // Colossus Smash
+            if (spellProto->Id == 86346 || spellProto->Id == 108126)
+                if (target && target->GetTypeId() == TYPEID_PLAYER)
+                    return 50;
+            break;
+        }
         case SPELL_AURA_MOD_RESISTANCE_EXCLUSIVE:
         {
             int32 amount = GetResistancesAtLevel(target ? target->getLevel() : getLevel());
