@@ -5909,10 +5909,10 @@ SpellAuraProcResult Unit::HandleRemoveByDamageChanceProc(Unit* pVictim, DamageIn
     return SPELL_AURA_PROC_FAILED;
 }
 
-SpellAuraProcResult Unit::HandleIgnoreUnitStateAuraProc(Unit* /*pVictim*/, DamageInfo* damageInfo, Aura const* triggeredByAura, SpellEntry const * procSpell, uint32 /*procFlag*/, uint32 /*procEx*/, uint32 /*cooldown*/)
+SpellAuraProcResult Unit::HandleIgnoreUnitStateAuraProc(Unit* /*pVictim*/, DamageInfo* damageInfo, Aura const* triggeredByAura, SpellEntry const *procSpell, uint32 /*procFlag*/, uint32 /*procEx*/, uint32 /*cooldown*/)
 {
     SpellEntry const* spellInfo = triggeredByAura->GetSpellProto();
-    if (spellInfo->Id == 52437 && procSpell && procSpell->Id==20647)   // Sudden Death must proc only from dummy part of Execute
+    if (spellInfo->Id == 52437)
     {
         //Remove only single aura from stack
         return SPELL_AURA_PROC_CANT_TRIGGER;

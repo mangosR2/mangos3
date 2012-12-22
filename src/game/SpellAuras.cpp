@@ -3034,6 +3034,14 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                         ((Creature*)target)->SetVirtualItem(VIRTUAL_ITEM_SLOT_2, 0);
                         return;
                     }
+                    case 52437:                             // Sudden Death
+                    {
+                        if (target->GetTypeId() != TYPEID_PLAYER)
+                            return;
+
+                        ((Player*)target)->RemoveSpellCooldown(86346, true);
+                        return;
+                    }
                     case 53790:                             // Defensive Stance
                     {
                         if (target->GetTypeId() != TYPEID_UNIT)

@@ -888,6 +888,46 @@ void Spell::EffectSchoolDMG(SpellEffectEntry const* effect)
                         damage+= int32(m_caster->GetTotalAttackPowerValue(BASE_ATTACK) * pct / 100);
                     break;
                 }
+                // Execute
+                else if (m_spellInfo->Id == 5308)
+                {
+                    if (!unitTarget)
+                        return;
+
+                    // megai2: may be i'm crazy
+                    if ((unitTarget->GetHealth() * 100 / unitTarget->GetMaxHealth() > 20))
+                        return;
+
+                    int32 rage = m_caster->GetPower(POWER_RAGE);
+
+                    // up to max 20 rage cost
+                    int32 maxRage = m_spellInfo->CalculateSimpleValue(EFFECT_INDEX_1);
+                    if (rage > maxRage * 10)
+                        rage = maxRage * 10;
+
+                    // ${10+$AP*0.437*$m1/100}
+                    int32 apBonus = int32(m_caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.437f);
+                    int32 addBonus = int32(apBonus * rage / 100);
+                    damage += apBonus + addBonus;
+
+                    // Sudden Death
+                    Unit::AuraList const& auras = m_caster->GetAurasByType(SPELL_AURA_PROC_TRIGGER_SPELL);
+                    for (Unit::AuraList::const_iterator itr = auras.begin(); itr != auras.end(); ++itr)
+                    {
+                        // Only Sudden Death have this SpellIconID with SPELL_AURA_PROC_TRIGGER_SPELL
+                        if ((*itr)->GetSpellProto()->SpellIconID == 1989)
+                        {
+                            // saved rage top stored in next affect
+                            uint32 lastrage = (*itr)->GetModifier()->m_amount * 10;
+                            if (lastrage < rage)
+                                rage -= lastrage;
+                            break;
+                        }
+                    }
+
+                    m_caster->ModifyPower(POWER_RAGE, -rage);
+                    return;
+                }
                 break;
             }
             case SPELLFAMILY_WARLOCK:
@@ -4474,50 +4514,6 @@ void Spell::EffectDummy(SpellEffectEntry const* effect)
             {
                 int32 chargeBasePoints0 = damage;
                 m_caster->CastCustomSpell(m_caster, 34846, &chargeBasePoints0, NULL, NULL, true);
-                return;
-            }
-            // Execute
-            if (warClassOptions && warClassOptions->SpellFamilyFlags & UI64LIT(0x20000000))
-            {
-                if (!unitTarget)
-                    return;
-
-                uint32 rage = m_caster->GetPower(POWER_RAGE);
-
-                // up to max 30 rage cost
-                if (rage > 300)
-                    rage = 300;
-
-                // Glyph of Execution bonus
-                uint32 rage_modified = rage;
-
-                if (Aura const* aura = m_caster->GetDummyAura(58367))
-                    rage_modified +=  aura->GetModifier()->m_amount*10;
-
-                int32 basePoints0 = damage+int32(rage_modified * effect->DmgMultiplier +
-                                                 m_caster->GetTotalAttackPowerValue(BASE_ATTACK)*0.2f);
-
-                m_caster->CastCustomSpell(unitTarget, 20647, &basePoints0, NULL, NULL, true, 0);
-
-                // Sudden Death
-                if (m_caster->HasAura(52437))
-                {
-                    Unit::AuraList const& auras = m_caster->GetAurasByType(SPELL_AURA_PROC_TRIGGER_SPELL);
-                    for (Unit::AuraList::const_iterator itr = auras.begin(); itr != auras.end(); ++itr)
-                    {
-                        // Only Sudden Death have this SpellIconID with SPELL_AURA_PROC_TRIGGER_SPELL
-                        if ((*itr)->GetSpellProto()->GetSpellIconID() == 1989)
-                        {
-                            // saved rage top stored in next affect
-                            uint32 lastrage = (*itr)->GetSpellProto()->CalculateSimpleValue(EFFECT_INDEX_1)*10;
-                            if (lastrage < rage)
-                                rage -= lastrage;
-                            break;
-                        }
-                    }
-                }
-
-                m_caster->SetPower(POWER_RAGE,m_caster->GetPower(POWER_RAGE)-rage);
                 return;
             }
             // Slam

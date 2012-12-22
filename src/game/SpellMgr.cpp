@@ -5503,10 +5503,10 @@ DiminishingGroup GetDiminishingReturnsGroupForSpell(SpellEntry const* spellproto
             // Cheap Shot
             else if (classOptions && classOptions->SpellFamilyFlags & UI64LIT(0x00000000400))
                 return DIMINISHING_CHEAPSHOT_POUNCE;
-            // Crippling poison - Limit to 10 seconds in PvP (No SpellFamilyFlags)
+            // Crippling poison - Limit to 8 seconds in PvP (No SpellFamilyFlags)
             else if (spellproto->GetSpellIconID() == 163)
                 return DIMINISHING_LIMITONLY;
-            // Wound poison - Limit to 10 seconds in PvP (No SpellFamilyFlags)
+            // Wound poison - Limit to 8 seconds in PvP (No SpellFamilyFlags)
             else if (spellproto->GetSpellIconID() == 1496)
                 return DIMINISHING_LIMITONLY;
             break;
@@ -5561,7 +5561,7 @@ DiminishingGroup GetDiminishingReturnsGroupForSpell(SpellEntry const* spellproto
         }
         case SPELLFAMILY_WARRIOR:
         {
-            // Hamstring - limit duration to 10s in PvP
+            // Hamstring - limit duration to 8s in PvP
             if (spellproto->GetSpellFamilyFlags().test<CF_WARRIOR_HAMSTRING>())
                 return DIMINISHING_LIMITONLY;
             // Charge - since 3.1.0

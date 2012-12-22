@@ -314,3 +314,10 @@ INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SchoolMask`, `procF
 DELETE FROM `creature_template_addon` WHERE `entry` = 44199;
 INSERT INTO `creature_template_addon` (`entry`, `b2_0_sheath`, `auras`) VALUE
 (44199, 1, '91264');
+
+### Warrior ###
+
+-- Sudden Death
+DELETE FROM `spell_proc_event` WHERE `entry` = 29723;
+INSERT INTO `spell_proc_event` (`entry`, `SchoolMask`) VALUE
+(29723, 127);
