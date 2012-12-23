@@ -68,6 +68,12 @@ ipch
 *.user
 
 #
+# NetBeans binaries output
+#
+
+nbproject/*
+
+#
 # CMake temporary files
 #
 CMakeFiles

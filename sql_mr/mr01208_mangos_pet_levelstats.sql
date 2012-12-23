@@ -1,6 +1,8 @@
 -- Pets levelstats from wowwiki
 
 -- default pet
+-- NEED stats for 81-85
+/*
 DELETE FROM `pet_levelstats` WHERE `creature_entry`='1';
 INSERT INTO `pet_levelstats`
     (`creature_entry`, `level`, `hp`, `mana`, `armor`, `mindmg`, `maxdmg`, `attackpower`, `str`, `agi`, `sta`, `inte`, `spi`)
@@ -765,3 +767,4 @@ INSERT INTO pet_levelstats (creature_entry, level, hp, mana, armor, mindmg, maxd
 (510, 78, 2011, 2100, 3110, 263, 640, 622, 59, 54, 85, 94,  91),
 (510, 79, 2073, 2167, 3150, 322, 720, 710, 60, 61, 88, 96,  92),
 (510, 80, 2300, 2200, 3250, 360, 780, 740, 62, 86, 92, 99,  93);
+*/
