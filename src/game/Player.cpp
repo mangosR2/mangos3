@@ -17623,24 +17623,27 @@ void Player::SaveToDB()
     SqlStatement stmt = CharacterDatabase.CreateStatement(delChar, "DELETE FROM characters WHERE guid = ?");
     stmt.PExecute(GetGUIDLow());
 
-    SqlStatement uberInsert = CharacterDatabase.CreateStatement(insChar, "INSERT INTO characters (guid,account,name,race,class,gender,level,xp,money,playerBytes,playerBytes2,playerFlags,"
-        "map, dungeon_difficulty, position_x, position_y, position_z, orientation, "
-        "taximask, online, cinematic, "
-        "totaltime, leveltime, rest_bonus, logout_time, is_logout_resting, resettalents_cost, resettalents_time, primary_trees, "
-        "trans_x, trans_y, trans_z, trans_o, transguid, extra_flags, stable_slots, at_login, zone, "
-        "death_expire_time, taxi_path, arenaPoints, totalHonorPoints, todayHonorPoints, yesterdayHonorPoints, totalKills, "
-        "todayKills, yesterdayKills, chosenTitle, knownCurrencies, watchedFaction, drunk, health, power1, power2, power3, "
-        "power4, power5, specCount, activeSpec, exploredZones, equipmentCache, knownTitles, actionBars) "
-        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, "
-        "?, ?, ?, ?, ?, ?, "
-        "?, ?, ?, "
-        "?, ?, ?, ?, ?, ?, ?, ?, "
-        "?, ?, ?, ?, ?, ?, ?, ?, ?, "
-        "?, ?, ?, "
-        "?, ?, ?, ?, ?, ?, ?, ?, ?, "
+    SqlStatement uberInsert = CharacterDatabase.CreateStatement(insChar, "INSERT INTO characters ("
+        "guid, account, name, race, class, gender, level, "
+        "xp, money, playerBytes, playerBytes2, playerFlags, map, dungeon_difficulty, "
+        "position_x, position_y, position_z, orientation, taximask, online, cinematic, "
+        "totaltime, leveltime, rest_bonus, logout_time, is_logout_resting, resettalents_cost, resettalents_time, "
+        "primary_trees, trans_x, trans_y, trans_z, trans_o, transguid, extra_flags, "
+        "stable_slots, at_login, zone, death_expire_time, taxi_path, totalKills, todayKills, "
+        "yesterdayKills, chosenTitle, watchedFaction, drunk, health, power1, power2, "
+        "power3, power4, power5, specCount, activeSpec, exploredZones, equipmentCache, "
+        "knownTitles, actionBars, grantableLevels, slot) "
+        "VALUES ("
         "?, ?, ?, ?, ?, ?, ?, "
-        "?, ?, ?, ?, ?, ?, ?, ?, ?, ?, "
-        "?, ?, ?, ?, ?, ?, ?, ?) ");
+        "?, ?, ?, ?, ?, ?, ?, "
+        "?, ?, ?, ?, ?, ?, ?, "
+        "?, ?, ?, ?, ?, ?, ?, "
+        "?, ?, ?, ?, ?, ?, ?, "
+        "?, ?, ?, ?, ?, ?, ?, "
+        "?, ?, ?, ?, ?, ?, ?, "
+        "?, ?, ?, ?, ?, ?, ?, "
+        "?, ?, ?, ?)"
+            );
 
     uberInsert.addUInt32(GetGUIDLow());
     uberInsert.addUInt32(GetSession()->GetAccountId());
@@ -17716,6 +17719,7 @@ void Player::SaveToDB()
 
     uberInsert.addUInt64(uint64(m_deathExpireTime));
 
+    ss.str("");
     ss << m_taxi.SaveTaxiDestinationsToString();       //string
     uberInsert.addString(ss);
 
@@ -17750,22 +17754,22 @@ void Player::SaveToDB()
     uberInsert.addUInt32(uint32(m_specsCount));
     uberInsert.addUInt32(uint32(m_activeSpec));
 
+    ss.str("");
     for (uint32 i = 0; i < PLAYER_EXPLORED_ZONES_SIZE; ++i)         //string
-    {
         ss << GetUInt32Value(PLAYER_EXPLORED_ZONES_1 + i) << " ";
-    }
+
     uberInsert.addString(ss);
 
+    ss.str("");
     for (uint32 i = 0; i < EQUIPMENT_SLOT_END * 2; ++i)             //string
-    {
         ss << GetUInt32Value(PLAYER_VISIBLE_ITEM_1_ENTRYID + i) << " ";
-    }
+
     uberInsert.addString(ss);
 
+    ss.str("");
     for(uint32 i = 0; i < KNOWN_TITLES_SIZE*2; ++i )                //string
-    {
         ss << GetUInt32Value(PLAYER__FIELD_KNOWN_TITLES + i) << " ";
-    }
+
     uberInsert.addString(ss);
 
     uberInsert.addUInt32(uint32(GetByteValue(PLAYER_FIELD_BYTES, 2)));
