@@ -15,3 +15,6 @@ UPDATE `creature_template` SET `ScriptName` = '' WHERE `entry` = '27829';
 -- ---------- --
 -- mr2523
 ALTER TABLE `spell_dbc` CHANGE `ProcCharges` `ProcCharges` INT(10) UNSIGNED NOT NULL DEFAULT 0;
+
+-- mr2550
+UPDATE `creature_template` SET `IconName` = 'vehichleCursor' WHERE `IconName` = 'vehicleCursor';

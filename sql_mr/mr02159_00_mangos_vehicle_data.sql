@@ -393,7 +393,7 @@ AIName = 'NullAI'
 WHERE entry IN (33062);
 
 -- Siege engine
-UPDATE creature_template SET IconName = 'VehicleCursor',  PowerType = 3,
+UPDATE creature_template SET IconName = 'vehichleCursor',  PowerType = 3,
 AIName = 'NullAI'
 WHERE entry IN (33060);
 REPLACE INTO `creature_template_spells` SET `entry` = 33060, `spell1` = 62345, `spell2` = 62522, `spell3` = 62346;
@@ -845,8 +845,6 @@ INSERT INTO `creature_spell` (`guid`, `spell`, `index`, `active`, `disabled`, `f
 -- (@GUID, 50025, 0, 0, 0, 0),
 (@GUID, 57606, 0, 0, 0, 0),
 (@GUID, 50989, 1, 0, 0, 0);
-
-UPDATE `creature_template` SET `IconName` = 'vehicleCursor' WHERE `IconName` = 'vehichleCursor';
 
 -- Under Development
 
