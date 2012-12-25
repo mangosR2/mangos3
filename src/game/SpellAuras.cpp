@@ -12222,6 +12222,16 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
                     }
                     break;
                 }
+                case 85768:                                 // Dark Intent
+                {
+                    if (!apply)
+                    {
+                        // remove haster buff from target on remove from caster
+                        if (Unit* target = m_target->GetSingleCastSpellTarget(85767))
+                            target->RemoveAurasByCasterSpell(85767, m_target->GetObjectGuid());
+                    }
+                    return;
+                }
                 default:
                     return;
             }
@@ -12439,6 +12449,17 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
                         caster->CastSpell(caster, spellId, true);
                     else
                         caster->RemoveAurasByCasterSpell(spellId, caster->GetObjectGuid());
+                }
+                return;
+            }
+            // Dark Intent
+            else if (m_spellProto->Id == 85767)
+            {
+                if (!apply)
+                {
+                    // remove buff from caster on remove from target
+                    if (Unit* caster = GetCaster())
+                        caster->RemoveAurasByCasterSpell(85768, caster->GetObjectGuid());
                 }
                 return;
             }

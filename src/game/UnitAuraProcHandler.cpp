@@ -225,7 +225,7 @@ pAuraProcHandler AuraProcHandler[TOTAL_AURAS]=
     &Unit::HandleNULLProc,                                  //190 SPELL_AURA_MOD_FACTION_REPUTATION_GAIN
     &Unit::HandleNULLProc,                                  //191 SPELL_AURA_USE_NORMAL_MOVEMENT_SPEED
     &Unit::HandleNULLProc,                                  //192 SPELL_AURA_HASTE_MELEE
-    &Unit::HandleNULLProc,                                  //193 SPELL_AURA_HASTE_ALL (in fact combat (any type attack) speed pct)
+    &Unit::HandleHasteAllProc,                              //193 SPELL_AURA_HASTE_ALL (in fact combat (any type attack) speed pct)
     &Unit::HandleNULLProc,                                  //194 SPELL_AURA_MOD_IGNORE_ABSORB_SCHOOL
     &Unit::HandleNULLProc,                                  //195 SPELL_AURA_MOD_IGNORE_ABSORB_FOR_SPELL
     &Unit::HandleNULLProc,                                  //196 SPELL_AURA_MOD_COOLDOWN (single spell 24818 in 3.2.2a)
@@ -6103,6 +6103,50 @@ SpellAuraProcResult Unit::HandleIncreaseSpeedAuraProc(Unit* /*pVictim*/, DamageI
             }
 
             return SPELL_AURA_PROC_OK;
+        }
+    }
+
+    return SPELL_AURA_PROC_OK;
+}
+
+SpellAuraProcResult Unit::HandleHasteAllProc(Unit* /*pVictim*/, DamageInfo* /*damageInfo*/, Aura const* triggeredByAura, SpellEntry const *procSpell, uint32 /*procFlag*/, uint32 /*procEx*/, uint32 /*cooldown*/)
+{
+    SpellEntry const* spellProto = triggeredByAura->GetSpellProto();
+
+    // Dark Intent (target)
+    if (spellProto->Id == 85767)
+    {
+        if (Unit* caster = triggeredByAura->GetCaster())
+            caster->CastSpell(caster, 94310, true);
+    }
+    // Dark Intent (caster)
+    else if (spellProto->Id == 85768)
+    {
+        if (Unit* caster = triggeredByAura->GetTarget())
+        {
+            if (Unit* singleTarget = caster->GetSingleCastSpellTarget(85767))
+            {
+                uint32 triggered_spell = 0;
+
+                switch (singleTarget->getClass())
+                {
+                    case CLASS_WARRIOR: triggered_spell = 94313; break;
+                    case CLASS_PALADIN: triggered_spell = 94323; break;
+                    case CLASS_HUNTER: triggered_spell = 94320; break;
+                    case CLASS_ROGUE: triggered_spell = 94324; break;
+                    case CLASS_PRIEST: triggered_spell = 94311; break;
+                    case CLASS_DEATH_KNIGHT: triggered_spell = 94312; break;
+                    case CLASS_SHAMAN: triggered_spell = 94319; break;
+                    case CLASS_MAGE: triggered_spell = 85759; break;
+                    case CLASS_WARLOCK: triggered_spell = 94310; break;
+                    case CLASS_DRUID: triggered_spell = 94318; break;
+                    default:
+                        return SPELL_AURA_PROC_FAILED;
+                }
+
+                int32 bp = 1;
+                singleTarget->CastCustomSpell(singleTarget, triggered_spell, &bp, &bp, NULL, true);
+            }
         }
     }
 

@@ -308,6 +308,12 @@ DELETE FROM `spell_proc_event` WHERE `entry` = 74434;
 INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SchoolMask`, `procFlags`, `CustomChance`, procEx) VALUE
 (74434, 0, 127, 16384 | 65536, 100, 0x0010000);
 
+-- Dark Intent
+DELETE FROM `spell_proc_event` WHERE `entry` IN (85767, 85768);
+INSERT INTO `spell_proc_event` (`entry`, `SchoolMask`, `procFlags`, `procEx`) VALUE
+(85767, 127, 0x40000, 0x0010001),
+(85768, 127, 0x40000, 0x0010001);
+
 ### Mage ###
 
 -- Ring of Frost

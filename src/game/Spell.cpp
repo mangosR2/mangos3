@@ -4024,6 +4024,8 @@ void Spell::cast(bool skipCheck)
                 if (m_caster->HasSpell(86664))              // Soulburn: Seed of Corruption, rank 1
                     AddTriggeredSpell(93313);               // marker
             }
+            else if (m_spellInfo->Id == 80398)              // Dark Intent
+                AddTriggeredSpell(85768);                   // caster haste part
             else if (m_spellInfo->Id == 86213)              // Soul Swap Exhale
                 AddPrecastSpell(92794);
             break;
@@ -7472,6 +7474,16 @@ SpellCastResult Spell::CheckCast(bool strict)
             {
                 if (m_caster->GetTypeId() != TYPEID_PLAYER || ((Player*)m_caster)->HasExternalViewPoint())
                     return SPELL_FAILED_BAD_TARGETS;
+            }
+            case SPELL_AURA_HASTE_ALL:
+            {
+                // Dark Intent
+                if (m_spellInfo->Id == 80398)
+                {
+                    if (m_targets.getUnitTarget() && m_targets.getUnitTarget()->GetTypeId() != TYPEID_PLAYER)
+                        return SPELL_FAILED_BAD_TARGETS;
+                }
+                break;
             }
             case SPELL_AURA_WORGEN_TRANSFORM:
             {
