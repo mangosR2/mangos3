@@ -448,8 +448,9 @@ bool Master::_StartDB()
     if(!WorldDatabase.CheckRequiredField("db_version",REVISION_DB_MANGOS))
     {
         ///- Wait for already started DB delay threads to end
-        WorldDatabase.HaltDelayThread();
-        return false;
+        sLog.outError("Version guard for mangos DB temporary disabled. use at own risk!");
+        //WorldDatabase.HaltDelayThread();
+        //return false;
     }
 
     dbstring = sConfig.GetStringDefault("CharacterDatabaseInfo", "");
@@ -477,9 +478,10 @@ bool Master::_StartDB()
     if(!CharacterDatabase.CheckRequiredField("character_db_version",REVISION_DB_CHARACTERS))
     {
         ///- Wait for already started DB delay threads to end
-        WorldDatabase.HaltDelayThread();
-        CharacterDatabase.HaltDelayThread();
-        return false;
+        sLog.outError("Version guard for characters DB temporary disabled. use at own risk!");
+        //WorldDatabase.HaltDelayThread();
+        //CharacterDatabase.HaltDelayThread();
+        //return false;
     }
 
     ///- Get login database info from configuration file

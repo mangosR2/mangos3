@@ -512,8 +512,8 @@ int WorldSocket::handle_input_header(void)
     if (internalOpcode == MSG_NULL_ACTION)
     {
         DEBUG_LOG("WorldSocket::handle_input_header received unhandled opcode %u", header.cmd);
-        errno = EINVAL;
-        return -1;
+        //errno = EINVAL;
+        //return -1;
     }
 
     ACE_NEW_RETURN(m_RecvWPct, WorldPacket(internalOpcode, header.size), -1);
