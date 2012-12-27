@@ -686,7 +686,7 @@ void InitializeOpcodes()
     OPCODE(SMSG_SET_PCT_SPELL_MODIFIER,                  STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
     //OPCODE(CMSG_SET_AMMO,                                STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleSetAmmoOpcode             );
     OPCODE(SMSG_CORPSE_RECLAIM_DELAY,                    STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
-    //OPCODE(CMSG_SET_ACTIVE_MOVER,                        STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleSetActiveMoverOpcode      );
+    OPCODE(CMSG_SET_ACTIVE_MOVER,                        STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleSetActiveMoverOpcode      );
     OPCODE(CMSG_PET_CANCEL_AURA,                         STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandlePetCancelAuraOpcode       );
     //OPCODE(CMSG_PLAYER_AI_CHEAT,                         STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     );
     OPCODE(CMSG_CANCEL_AUTO_REPEAT_SPELL,                STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleCancelAutoRepeatSpellOpcode);
@@ -1609,7 +1609,6 @@ void InitializeOpcodes()
     OPCODE(MSG_LIST_STABLED_PETS,                          STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide       );
     OPCODE(MSG_GM_ACCOUNT_ONLINE,                          STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide       );
     OPCODE(CMSG_PLAYER_AI_CHEAT,                          STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide       );
-    OPCODE(CMSG_SET_ACTIVE_MOVER,                          STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide       );
     OPCODE(CMSG_SET_AMMO,                          STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide       );
     OPCODE(SMSG_COMBAT_EVENT_FAILED,                          STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide       );
     OPCODE(SMSG_PROCRESIST,                          STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide       );
@@ -2021,6 +2020,7 @@ void InitializeOpcodes()
     OPCODE(CMSG_VOICE_SESSION_ENABLE,                  STATUS_UNHANDLED,PROCESS_INPLACE,      &WorldSession::Handle_NULL             );
     OPCODE(CMSG_REQUEST_CATEGORY_COOLDOWNS,            STATUS_UNHANDLED,PROCESS_INPLACE,      &WorldSession::Handle_NULL             );
     OPCODE(CMSG_LOAD_SCREEN,                           STATUS_UNHANDLED,PROCESS_INPLACE,      &WorldSession::Handle_NULL             );
+    OPCODE(CMSG_ENABLE_NAGLE,                          STATUS_UNHANDLED,PROCESS_INPLACE,      &WorldSession::Handle_NULL             );
 
     OPCODE(NUM_MSG_TYPES,                              STATUS_UNHANDLED,PROCESS_INPLACE,      &WorldSession::Handle_NULL             );
 };
