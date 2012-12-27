@@ -1431,14 +1431,25 @@ struct MapDifficultyEntry
     //char*       difficultyString;                         // 6        m_difficultystring
 };
 
-// Additional 335 fields to MapDifficulty
-/*
-    //char*       areaTriggerText[16];                      // 3-18     m_message_lang (text showed when transfer to map failed)
-    //uint32      textFlags;                                // 19
-    uint32      resetTime;                                  // 20       m_raidDuration in secs, 0 if no fixed reset time
-    uint32      maxPlayers;                                 // 21       m_maxPlayers some heroic versions have 0 when expected same amount as in normal version
-    //char*       difficultyString;                         // 22
-*/
+struct MountCapabilityEntry
+{
+    uint32 Id;
+    uint32 Flags;
+    uint32 RequiredRidingSkill;
+    uint32 RequiredArea;
+    uint32 RequiredAura;
+    uint32 RequiredSpell;
+    uint32 SpeedModSpell;
+    int32  RequiredMap;
+};
+
+#define MAX_MOUNT_CAPABILITIES 24
+
+struct MountTypeEntry
+{
+    uint32 Id;
+    uint32 MountCapability[MAX_MOUNT_CAPABILITIES];
+};
 
 struct MovieEntry
 {
