@@ -385,7 +385,7 @@ void WorldSession::HandleSetActiveMoverOpcode(WorldPacket &recv_data)
 {
     DEBUG_LOG("WORLD: Recvd CMSG_SET_ACTIVE_MOVER");
     recv_data.hexlike();
-
+/*
     ObjectGuid guid;
     recv_data >> guid;
     ObjectGuid moverGuid = GetPlayer()->GetMover() ? GetPlayer()->GetMover()->GetObjectGuid() : ObjectGuid();
@@ -396,6 +396,7 @@ void WorldSession::HandleSetActiveMoverOpcode(WorldPacket &recv_data)
             moverGuid.GetString().c_str(), guid.GetString().c_str());
         return;
     }
+*/
 }
 
 void WorldSession::HandleMoveNotActiveMoverOpcode(WorldPacket &recv_data)
