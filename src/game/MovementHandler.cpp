@@ -384,19 +384,20 @@ void WorldSession::HandleForceSpeedChangeAckOpcodes(WorldPacket &recv_data)
 void WorldSession::HandleSetActiveMoverOpcode(WorldPacket &recv_data)
 {
     DEBUG_LOG("WORLD: Recvd CMSG_SET_ACTIVE_MOVER");
-    recv_data.hexlike();
-/*
+
     ObjectGuid guid;
-    recv_data >> guid;
+
+    recv_data.ReadGuidMask<7, 2, 1, 0, 4, 5, 6, 3>(guid);
+    recv_data.ReadGuidBytes<3, 2, 4, 0, 5, 1, 6, 7>(guid);
+
     ObjectGuid moverGuid = GetPlayer()->GetMover() ? GetPlayer()->GetMover()->GetObjectGuid() : ObjectGuid();
 
-    if ( moverGuid != guid )
+    if (moverGuid != guid)
     {
         sLog.outError("HandleSetActiveMoverOpcode: incorrect mover guid: mover is %s and should be %s",
             moverGuid.GetString().c_str(), guid.GetString().c_str());
         return;
     }
-*/
 }
 
 void WorldSession::HandleMoveNotActiveMoverOpcode(WorldPacket &recv_data)
