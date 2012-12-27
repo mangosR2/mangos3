@@ -61,11 +61,11 @@ Map::~Map()
 
 void Map::LoadMapAndVMap(int gx,int gy)
 {
-    if(m_bLoadedGrids[gx][gx])
+    if (m_bLoadedGrids[gx][gy])
         return;
 
     GridMap * pInfo = m_TerrainData->Load(gx, gy);
-    if(pInfo)
+    if (pInfo)
         m_bLoadedGrids[gx][gy] = true;
 }
 
@@ -1040,8 +1040,7 @@ bool Map::CheckGridIntegrity(Creature* c, bool moved) const
 
 const char* Map::GetMapName() const
 {
-    //return i_mapEntry ? i_mapEntry->name[sWorld.GetDefaultDbcLocale()] : "UNNAMEDMAP\x0";
-    return "UNNAMEDMAP\x0";
+    return i_mapEntry ? i_mapEntry->name[sWorld.GetDefaultDbcLocale()] : "UNNAMEDMAP\x0";
 }
 
 void Map::UpdateObjectVisibility( WorldObject* obj, Cell cell, CellPair cellpair)
