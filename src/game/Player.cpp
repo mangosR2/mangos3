@@ -17620,7 +17620,7 @@ void Player::SaveToDB()
         "position_x, position_y, position_z, orientation, taximask, online, cinematic, "
         "totaltime, leveltime, rest_bonus, logout_time, is_logout_resting, resettalents_cost, resettalents_time, "
         "primary_trees, trans_x, trans_y, trans_z, trans_o, transguid, extra_flags, "
-        "stable_slots, at_login, zone, death_expire_time, taxi_path, dungeon_difficulty, totalKills, todayKills, "
+        "stable_slots, at_login, zone, death_expire_time, taxi_path, totalKills, todayKills, "
         "yesterdayKills, chosenTitle, watchedFaction, drunk, health, power1, power2, "
         "power3, power4, power5, specCount, activeSpec, exploredZones, equipmentCache, "
         "knownTitles, actionBars, grantableLevels, slot) "
@@ -17630,7 +17630,7 @@ void Player::SaveToDB()
         "?, ?, ?, ?, ?, ?, ?, "
         "?, ?, ?, ?, ?, ?, ?, "
         "?, ?, ?, ?, ?, ?, ?, "
-        "?, ?, ?, ?, ?, ?, ?, ?, "
+        "?, ?, ?, ?, ?, ?, ?, "
         "?, ?, ?, ?, ?, ?, ?, "
         "?, ?, ?, ?, ?, ?, ?, "
         "?, ?, ?, ?)"
@@ -17713,8 +17713,6 @@ void Player::SaveToDB()
     ss.str("");
     ss << m_taxi.SaveTaxiDestinationsToString();       //string
     uberInsert.addString(ss);
-
-    uberInsert.addUInt32(GetDifficulty());
 
     uberInsert.addUInt32(GetUInt32Value(PLAYER_FIELD_LIFETIME_HONORBALE_KILLS));
 

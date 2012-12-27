@@ -157,7 +157,7 @@ void WorldSession::SendPacket(WorldPacket const* packet)
 
     if (opcodeTable[packet->GetOpcode()].status == STATUS_UNHANDLED)
     {
-        sLog.outError("SESSION: tried to send an unhandled opcode 0x%.4X", packet->GetOpcode());
+        DEBUG_LOG("SESSION: tried to send an unhandled opcode 0x%.4X", packet->GetOpcode());
         return;
     }
 
@@ -302,7 +302,7 @@ bool WorldSession::Update(PacketFilter& updater)
                         packet->GetOpcode());
                     break;
                 case STATUS_UNHANDLED:
-                    sLog.outError("SESSION: received not handled opcode %s (0x%.4X)",
+                    DEBUG_LOG("SESSION: received unhandled opcode %s (0x%.4X) (real value may be not shown there)",
                         LookupOpcodeName(packet->GetOpcode()),
                         packet->GetOpcode());
                     break;
