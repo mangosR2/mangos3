@@ -10259,7 +10259,8 @@ void ObjectMgr::LoadOpcodes()
             }
         }
         if (!parsed && opcodeValue != MSG_NULL_ACTION)
-            DETAIL_LOG( "ObjectMgr::LoadOpcodes Opcode %u (%s) not has definition in opcodes table!", opcodeValue, opcodeName);
+            DETAIL_LOG( "ObjectMgr::LoadOpcodes Opcode 0x%.4X (%s) not has definition in opcodes table!", opcodeValue, opcodeName);
+
     }
     while(result->NextRow());
 

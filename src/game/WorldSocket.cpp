@@ -511,7 +511,7 @@ int WorldSocket::handle_input_header(void)
     Opcodes internalOpcode = sObjectMgr.GetOpcode(header.cmd);
     if (internalOpcode == MSG_NULL_ACTION)
     {
-        DEBUG_LOG("WorldSocket::handle_input_header received unhandled opcode %u", header.cmd);
+        DEBUG_LOG("WorldSocket::handle_input_header received unhandled opcode 0x%.4X (%u)", header.cmd, header.cmd);
         //errno = EINVAL;
         //return -1;
     }

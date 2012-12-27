@@ -227,19 +227,21 @@ pEffect SpellEffects[TOTAL_SPELL_EFFECTS]=
     &Spell::EffectCancelAura,                               //164 SPELL_EFFECT_CANCEL_AURA
 };
 
-void Spell::EffectEmpty(SpellEffectEntry const* /*effect*/)
+void Spell::EffectEmpty(SpellEffectEntry const* effect)
 {
     // NOT NEED ANY IMPLEMENTATION CODE, EFFECT POSISBLE USED AS MARKER OR CLIENT INFORM
+    DEBUG_LOG("WORLD: Spell Effect Empty (spell %u effect %u index %u)", m_spellInfo->Id, effect->Effect, effect->EffectIndex);
 }
 
-void Spell::EffectNULL(SpellEffectEntry const* /*effect*/)
+void Spell::EffectNULL(SpellEffectEntry const* effect)
 {
-    DEBUG_LOG("WORLD: Spell Effect DUMMY");
+    DEBUG_LOG("WORLD: Spell Effect Null (spell %u effect %u index %u)", m_spellInfo->Id, effect->Effect, effect->EffectIndex);
 }
 
-void Spell::EffectUnused(SpellEffectEntry const* /*effect*/)
+void Spell::EffectUnused(SpellEffectEntry const* effect)
 {
     // NOT USED BY ANY SPELL OR USELESS OR IMPLEMENTED IN DIFFERENT WAY IN MANGOS
+    DEBUG_LOG("WORLD: Spell Effect Unused (spell %u effect %u index %u)", m_spellInfo->Id, effect->Effect, effect->EffectIndex);
 }
 
 void Spell::EffectResurrectNew(SpellEffectEntry const* effect)
