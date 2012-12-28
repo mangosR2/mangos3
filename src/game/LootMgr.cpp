@@ -578,6 +578,8 @@ QuestItemList* Loot::FillCurrencyLoot(Player* player)
 {
     QuestItemList* ql = &m_playerCurrencies[player->GetGUIDLow()];
 
+    ql->clear();
+
     for (uint8 i = 0; i < items.size(); ++i)
     {
         LootItem& item = items[i];
@@ -587,11 +589,9 @@ QuestItemList* Loot::FillCurrencyLoot(Player* player)
             ++unlootedCount;
         }
     }
+
     if (ql->empty())
-    {
-        delete ql;
-        return NULL;
-    }
+       return NULL;
 
     return ql;
 }
@@ -611,14 +611,17 @@ QuestItemList* Loot::FillFFALoot(Player* player)
             ++unlootedCount;
         }
     }
+
     if (ql->empty())
         return NULL;
+
     return ql;
 }
 
 QuestItemList* Loot::FillQuestLoot(Player* player)
 {
-    if (items.size() == MAX_NR_LOOT_ITEMS) return NULL;
+    if (items.size() == MAX_NR_LOOT_ITEMS)
+        return NULL;
 
     QuestItemList* ql = &m_playerQuestItems[player->GetGUIDLow()];
 
@@ -644,8 +647,10 @@ QuestItemList* Loot::FillQuestLoot(Player* player)
                 break;
         }
     }
+
     if (ql->empty())
         return NULL;
+
     return ql;
 }
 
@@ -668,6 +673,7 @@ QuestItemList* Loot::FillNonQuestNonFFANonCurrencyConditionalLoot(Player* player
             }
         }
     }
+
     if (ql->empty())
         return NULL;
 
