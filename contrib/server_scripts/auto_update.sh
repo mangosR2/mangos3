@@ -1,13 +1,13 @@
 #!/bin/bash
 ###############################################################################
 # configuration
-home="/home/mangos"
+home="/home/mangos3"
 mangosConf=$home"/etc/mangosd.conf"
 scriptConf=$home"/etc/scriptdev2.conf"
 mangosSource=$home"/Mangos-Sources/mangos"
-YTDBSource=$home"/Mangos-Sources/ytdbase/Wotlk"
+YTDBSource=$home"/Mangos-Sources/ytdbase/Cataclysm"
 #
-#echo "Please, setup directories and files in begin of this script!"
+echo "Please, setup directories and files in begin of this script!"
 exit
 ###############################################################################
 r2searchDir=$mangosSource"/sql_mr"
@@ -155,7 +155,17 @@ fi
 checkupdateField=$(db_exec $mangoshost $mangosport $mangosuser $mangospass $mangosdb "SELECT COLUMN_NAME FROM information_schema.COLUMNS WHERE TABLE_SCHEMA='"$mangosdb"' AND TABLE_NAME='db_version' AND COLUMN_NAME='r2_db_version'")
 if [[ $checkupdateField == "" ]]; then
     checkUpdateField=$(db_exec $mangoshost $mangosport $mangosuser $mangospass $mangosdb "ALTER TABLE db_version ADD COLUMN r2_db_version smallint NOT NULL default 0")
-    _rc=$(db_run $mangoshost $mangosport $mangosuser $mangospass $mangosdb $r2searchDir"/custom_mangos_tables.sql")
+    if [ -f $r2searchDir"/custom_mangos_tables.sql" ]; then
+        _rc=$(db_run $mangoshost $mangosport $mangosuser $mangospass $mangosdb $r2searchDir"/custom_mangos_tables.sql")
+    fi
+fi
+
+checkupdateField=$(db_exec $mangoshost $mangosport $mangosuser $mangospass $mangosdb "SELECT COLUMN_NAME FROM information_schema.COLUMNS WHERE TABLE_SCHEMA='"$mangosdb"' AND TABLE_NAME='db_version' AND COLUMN_NAME='r2_v3_db_version'")
+if [[ $checkupdateField == "" ]]; then
+    checkUpdateField=$(db_exec $mangoshost $mangosport $mangosuser $mangospass $mangosdb "ALTER TABLE db_version ADD COLUMN r2_v3_db_version smallint NOT NULL default 0")
+    if [ -f $r2searchDir"/custom_mangos3_tables.sql" ]; then
+        _rc=$(db_run $mangoshost $mangosport $mangosuser $mangospass $mangosdb $r2searchDir"/custom_mangos3_tables.sql")
+    fi
 fi
 ###############################################################################
 searchDir=$mangosSource"/sql/updates"
@@ -250,7 +260,17 @@ fi
 checkupdateField=$(db_exec $charhost $charport $charuser $charpass $chardb "SELECT COLUMN_NAME FROM information_schema.COLUMNS WHERE TABLE_SCHEMA='"$chardb"' AND TABLE_NAME='character_db_version' AND COLUMN_NAME='r2_db_version'")
 if [[ $checkupdateField == "" ]]; then
     checkUpdateField=$(db_exec $charhost $charport $charuser $charpass $chardb "ALTER TABLE character_db_version ADD COLUMN r2_db_version smallint NOT NULL default 0")
-    _rc=$(db_run $charhost $charport $charuser $charpass $chardb $r2searchDir"/custom_characters_tables.sql")
+    if [ -f $r2searchDir"/custom_characters_tables.sql" ]; then
+        _rc=$(db_run $charhost $charport $charuser $charpass $chardb $r2searchDir"/custom_characters_tables.sql")
+    fi
+fi
+
+checkupdateField=$(db_exec $charhost $charport $charuser $charpass $chardb "SELECT COLUMN_NAME FROM information_schema.COLUMNS WHERE TABLE_SCHEMA='"$chardb"' AND TABLE_NAME='character_db_version' AND COLUMN_NAME='r2_v3_db_version'")
+if [[ $checkupdateField == "" ]]; then
+    checkUpdateField=$(db_exec $charhost $charport $charuser $charpass $chardb "ALTER TABLE character_db_version ADD COLUMN r2_v3_db_version smallint NOT NULL default 0")
+    if [ -f $r2searchDir"/custom_characters3_tables.sql" ]; then
+        _rc=$(db_run $charhost $charport $charuser $charpass $chardb $r2searchDir"/custom_characters3_tables.sql")
+    fi
 fi
 ###############################################################################
 while [ ! -z $chardb ]
@@ -360,14 +380,14 @@ echo "Updating SCRIPT DB completed. Count of updates:"$count
 length=$((${#r2searchDir}+3));
 length1=$((${#r2searchDir}+8));
 
-todb=`find $r2searchDir -maxdepth 1 -name "*.sql" -print |grep "\/mr"|sort -n --key=$length,$length1`
+todb=`find $r2searchDir -maxdepth 1 -name "*.sql" -print |grep "\/m[rt]"|sort -n --key=$length,$length1`
 
 for j in $todb; do
-_num=`echo $j|sed -r "s/.*sql_mr\/mr//"|sed -r "s/_.*//"|sed -r "s/^0*//g"`
+_num=`echo $j|sed -r "s/.*sql_mr\/m[rt]//"|sed -r "s/_.*//"|sed -r "s/^0*//g"`
 
 num=$(($_num));
 
-    if [[ $j =~ .*_mangos_.* ]]; then
+    if [[ $j =~ mr.*_mangos_.* ]]; then
         dblastupdate=$(db_exec $mangoshost $mangosport $mangosuser $mangospass $mangosdb "SELECT r2_db_version FROM db_version")
         if [[ $num -ge $dblastupdate ]]; then
             _rc=$(db_run $mangoshost $mangosport $mangosuser $mangospass $mangosdb "$j")
@@ -376,7 +396,18 @@ num=$(($_num));
             dblastupdate=$num;
         fi
     fi
-    if [[ $j =~ .*_characters_.* ]]; then
+
+    if [[ $j =~ mt.*_mangos_.* ]]; then
+        dblastupdate=$(db_exec $mangoshost $mangosport $mangosuser $mangospass $mangosdb "SELECT r2_v3_db_version FROM db_version")
+        if [[ $num -ge $dblastupdate ]]; then
+            _rc=$(db_run $mangoshost $mangosport $mangosuser $mangospass $mangosdb "$j")
+            echo "Installed update "$j"  with rc="$_rc
+            newlastupdate=$(db_exec $mangoshost $mangosport $mangosuser $mangospass $mangosdb "UPDATE db_version SET r2_v3_db_version='$num'")
+            dblastupdate=$num;
+        fi
+    fi
+
+    if [[ $j =~ mr.*_characters_.* ]]; then
         dblastupdate=$(db_exec $charhost $charport $charuser $charpass $chardb "SELECT r2_db_version FROM character_db_version")
         if [[ $num -ge $dblastupdate ]]; then
         _rc=$(db_run $charhost $charport $charuser $charpass $chardb "$j")
@@ -385,6 +416,17 @@ num=$(($_num));
             dblastupdate=$num;
         fi
     fi
+
+    if [[ $j =~ mt.*_characters_.* ]]; then
+        dblastupdate=$(db_exec $charhost $charport $charuser $charpass $chardb "SELECT r2_v3_db_version FROM character_db_version")
+        if [[ $num -ge $dblastupdate ]]; then
+        _rc=$(db_run $charhost $charport $charuser $charpass $chardb "$j")
+            echo "Installed update "$j"  with rc="$_rc
+            newlastupdate=$(db_exec $charhost $charport $charuser $charpass $chardb "UPDATE character_db_version SET r2_v3_db_version='$num'")
+            dblastupdate=$num;
+        fi
+    fi
+
     if [[ $j =~ .*_realmd_.* ]]; then
         dblastupdate=$(db_exec $realmhost $realmport $realmuser $realmpass $realmdb "SELECT r2_db_version FROM realmd_db_version")
         if [[ $num -ge $dblastupdate ]]; then
@@ -413,10 +455,10 @@ fi
 length=$((${#searchDir}+3));
 length1=$((${#searchDir}+9));
 
-todb=`find $searchDir -maxdepth 1 -name "*.sql" -print |grep "\/mr"|sort -n --key=$length,$length1`
+todb=`find $searchDir -maxdepth 1 -name "*.sql" -print |grep "\/m[rt]"|sort -n --key=$length,$length1`
 
 for j in $todb; do
-_num=`echo $j|sed -r "s/.*sql_mr\/mr//"|sed -r "s/_.*//"|sed -r "s/^0*//g"`
+_num=`echo $j|sed -r "s/.*sql_mr\/m[rt]//"|sed -r "s/_.*//"|sed -r "s/^0*//g"`
 num=$(($_num));
     if [[ $j =~ .*_mangos_.* ]]; then
         dblastupdatemangos=$(db_exec $mangoshost $mangosport $mangosuser $mangospass $mangosdb "SELECT r2_sd2_db_version FROM db_version")
