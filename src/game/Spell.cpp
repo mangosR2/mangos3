@@ -1292,8 +1292,7 @@ void Spell::DoAllEffectOnTarget(TargetInfo *target)
 
     // recheck for availability/visibility of target
     if (((m_spellInfo->speed > M_NULL_F ||
-        (m_spellInfo->GetSpellEffect(EFFECT_INDEX_0)->EffectImplicitTargetA == TARGET_CHAIN_DAMAGE &&
-        GetSpellCastTime(m_spellInfo, this) > 0)) &&
+        (IsSpellHaveDelayedEffect(m_spellInfo) && GetSpellCastTime(m_spellInfo, this) > 0)) &&
         (!unit->isVisibleForOrDetect(m_caster, m_caster, false) && !m_IsTriggeredSpell)))
     {
         caster->SendSpellMiss(unit, m_spellInfo->Id, SPELL_MISS_EVADE);

@@ -832,6 +832,21 @@ enum SpellPreferredTargetType
 
 SpellPreferredTargetType GetPreferredTargetForSpell(SpellEntry const* spellInfo);
 
+inline bool IsSpellHaveDelayedEffect(SpellEntry const* spellInfo)
+{
+    for (int32 i = 0; i < MAX_EFFECT_INDEX; ++i)
+    {
+        SpellEffectEntry const* spellEff = spellInfo->GetSpellEffect(SpellEffectIndex(i));
+
+        if (!spellEff)
+            continue;
+
+        if (spellEff->EffectImplicitTargetA == TARGET_CHAIN_DAMAGE)
+            return true;
+    }
+    return false;
+}
+
 // Diminishing Returns interaction with spells
 DiminishingGroup GetDiminishingReturnsGroupForSpell(SpellEntry const* spellproto, bool triggered);
 bool IsDiminishingReturnsGroupDurationLimited(DiminishingGroup group);
