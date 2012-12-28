@@ -433,6 +433,7 @@ Spell::Spell( Unit* caster, SpellEntry const *info, bool triggered, ObjectGuid o
     m_delayStart = 0;
     m_delayAtDamageCount = 0;
     m_damage = 0;
+    damage = 0;
 
     m_applyMultiplierMask = 0;
 
@@ -1133,6 +1134,21 @@ void Spell::AddGOTarget(GameObject* pVictim, SpellEffectIndex effIndex)
         return;
 
     ObjectGuid targetGUID = pVictim->GetObjectGuid();
+
+    // Check target is effectible to this effect ?
+    GameobjectTypes gameobjectType = pVictim->GetGoType();
+
+    switch(spellEffect->Effect)
+    {
+        case SPELL_EFFECT_WMO_DAMAGE:
+        case SPELL_EFFECT_WMO_REPAIR:
+        case SPELL_EFFECT_WMO_CHANGE:
+            if (gameobjectType != GAMEOBJECT_TYPE_DESTRUCTIBLE_BUILDING)
+                return;
+            break;
+        default:
+            break;
+    }
 
     // Lookup target in already in list
     for(GOTargetList::iterator ihit = m_UniqueGOTargetInfo.begin(); ihit != m_UniqueGOTargetInfo.end(); ++ihit)

@@ -79,6 +79,9 @@ class MANGOS_DLL_SPEC InstanceData
         // Called when a player leaves the instance (before really removed from map (or possibly world))
         virtual void OnPlayerLeave(Player*) {}
 
+        // Called when a player successfully enters the other area
+        virtual void OnPlayerEnterArea(Player*, uint32 /*uiNewAreaId*/,  uint32 /*uiOldAreaId*/) {}
+
         // Called when a player successfully enters the other zone
         virtual void OnPlayerEnterZone(Player*, uint32 /*uiNewZoneId*/, uint32 /*uiNewAreaId*/) {}
 

@@ -7761,6 +7761,11 @@ uint8 ObjectMgr::CheckPlayerName( const std::string& name, bool create )
     if(!isValidString(wname,strictMask,false,create))
         return CHAR_NAME_MIXED_LANGUAGES;
 
+    wstrToLower(wname);
+    for (size_t i = 2; i < wname.size(); ++i)
+        if (wname[i] == wname[i-1] && wname[i] == wname[i-2])
+            return CHAR_NAME_THREE_CONSECUTIVE;
+
     return CHAR_NAME_SUCCESS;
 }
 
@@ -7993,7 +7998,7 @@ bool ObjectMgr::LoadMangosStrings(DatabaseType& db, char const* table, int32 min
 
         MangosStringLocale& data = mMangosStringLocaleMap[entry];
 
-        if (data.Content.size() > 0)
+        if (!data.Content.empty())
         {
             sLog.outErrorDb("Table `%s` contain data for already loaded entry  %i (from another table?), ignored.",table,entry);
             continue;
@@ -8428,6 +8433,22 @@ bool PlayerCondition::Meets(Player const* player, Map const* map, WorldObject co
             }
             return ((Unit*)source)->HasAura(m_value1, SpellEffectIndex(m_value2));
         }
+        case CONDITION_LAST_WAYPOINT:
+        {
+            if (source->GetTypeId() != TYPEID_UNIT)
+            {
+                sLog.outErrorDb("CONDITION_LAST_WAYPOINT (entry %u) is used for non creature source (source %s) by %s", m_entry, source->GetGuidStr().c_str(), player->GetGuidStr().c_str());
+                return false;
+            }
+            uint32 lastReachedWp = ((Creature*)source)->GetMotionMaster()->getLastReachedWaypoint();
+            switch (m_value2)
+            {
+                case 0: return m_value1 == lastReachedWp;
+                case 1: return m_value1 <= lastReachedWp;
+                case 2: return m_value1 > lastReachedWp;
+            }
+            return false;
+        }
         default:
             return false;
     }
@@ -8467,6 +8488,7 @@ bool PlayerCondition::CheckParamRequirements(Player const* pPlayer, Map const* m
             }
             break;
         case CONDITION_SOURCE_AURA:
+        case CONDITION_LAST_WAYPOINT:
             if (!source)
             {
                 sLog.outErrorDb("CONDITION %u type %u used with bad parameters, called from %s, used with plr: %s, map %i, src %s",
@@ -8817,6 +8839,15 @@ bool PlayerCondition::IsValid(uint16 entry, ConditionType condition, uint32 valu
             }
             break;
         }
+        case CONDITION_LAST_WAYPOINT:
+        {
+            if (value2 > 2)
+            {
+                sLog.outErrorDb("Last Waypoint condition (entry %u, type %u) has an invalid value in value2. (Has %u, supported 0, 1, or 2), skipping.", entry, condition, value2);
+                return false;
+            }
+            break;
+        }
         case CONDITION_NONE:
             break;
         default:
@@ -8851,6 +8882,7 @@ bool PlayerCondition::CanBeUsedWithoutPlayer(uint16 entry)
         case CONDITION_INSTANCE_SCRIPT:
         case CONDITION_COMPLETED_ENCOUNTER:
         case CONDITION_SOURCE_AURA:
+        case CONDITION_LAST_WAYPOINT:
             return true;
         default:
             return false;

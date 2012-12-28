@@ -86,6 +86,8 @@ public PathMovementBase<Creature, WaypointPath const*>
 
         void AddToWaypointPauseTime(int32 waitTimeDiff);
 
+        uint32 getLastReachedWaypoint() const { return m_isArrivalDone ? i_currentNode + 1 : i_currentNode; }
+
     private:
         void Stop(int32 time) { i_nextMoveTime.Reset(time); }
         bool Stopped(Creature& u);
