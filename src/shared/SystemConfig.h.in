@@ -107,14 +107,19 @@
 
 #if CLIENT_VERSION >= 16057
     #define MAX_EXPANSION 4
+    #define DEFAULT_MAX_LEVEL 90
 #elif CLIENT_VERSION >= 13623
     #define MAX_EXPANSION 3
+    #define DEFAULT_MAX_LEVEL 85
 #elif CLIENT_VERSION > 8606
     #define MAX_EXPANSION 2
+    #define DEFAULT_MAX_LEVEL 80
 #elif CLIENT_VERSION > 6005
     #define MAX_EXPANSION 1
+    #define DEFAULT_MAX_LEVEL 70
 #else
     #define MAX_EXPANSION 0
+    #define DEFAULT_MAX_LEVEL 60
 #endif
 
 #define DEFAULT_PLAYER_LIMIT 100

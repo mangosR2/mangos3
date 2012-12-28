@@ -227,7 +227,7 @@ class MANGOS_DLL_SPEC WorldSession
         void SetSecurity(AccountTypes security) { _security = security; }
         std::string const& GetRemoteAddress() { return m_Address; }
         void SetPlayer(Player *plr);
-        uint8 Expansion() const { return m_expansion; }
+        uint8 Expansion() const;
 
         void InitWarden(BigNumber *K, std::string os);
 

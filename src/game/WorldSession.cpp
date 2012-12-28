@@ -1157,3 +1157,8 @@ void WorldSession::SendPlaySpellVisual(ObjectGuid guid, uint32 spellArtKit)
     data << spellArtKit;                                    // index from SpellVisualKit.dbc
     SendPacket(&data);
 }
+
+uint8 WorldSession::Expansion() const
+{
+    return sWorld.getConfig(CONFIG_BOOL_MAX_EXPANSION) ? MAX_EXPANSION : m_expansion;
+}

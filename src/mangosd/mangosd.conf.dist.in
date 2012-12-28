@@ -945,6 +945,10 @@ LexicsCutterNoActionOnGM = 1
 #        Default: 0 - false
 #                 1 - true -> not blizzlike
 #
+#    Realm.AlwaysMaxExpansion - player always has max expansion in server
+#        Default: 0 - false (standart)
+#                 1 - true -> not blizzlike
+#
 ###################################################################################################################
 
 GameType = 1
@@ -1025,6 +1029,7 @@ AllowTransferToCustomMap = 0
 ResilenceAlternativeCalculation = 0
 BlinkAnimationType = 0
 FactiomAndRaceChangeWithoutRenaming = 0
+Realm.AlwaysMaxExpansion = 0
 
 ###################################################################################################################
 # PLAYER INTERACTION
