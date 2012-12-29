@@ -3997,6 +3997,28 @@ void Spell::cast(bool skipCheck)
                 if (m_caster->HasAura(70844))               // Item - Warrior T10 Protection 4P Bonus
                     AddTriggeredSpell(70845);               // Stoicism
             }
+            else if (m_spellInfo->Id == 1715)               // Hamstring
+            {
+                if (m_caster->GetTypeId() == TYPEID_PLAYER && m_targets.getUnitTarget() && m_targets.getUnitTarget()->HasAura(m_spellInfo->Id))
+                {
+                    // Search Improved Hamstring
+                    Unit::AuraList const& triggerAuras = m_caster->GetAurasByType(SPELL_AURA_PROC_TRIGGER_SPELL);
+                    for (Unit::AuraList::const_iterator itr = triggerAuras.begin(); itr != triggerAuras.end(); ++itr)
+                    {
+                        if ((*itr)->GetSpellProto()->SpellIconID == 23 && (*itr)->GetSpellProto()->GetSpellFamilyName() == SPELLFAMILY_WARRIOR)
+                        {
+                            SpellEffectEntry const* effect = (*itr)->GetSpellEffect();
+                            uint32 triggerSpell = effect->EffectTriggerSpell;
+                            if (!((Player*)m_caster)->HasSpellCooldown(triggerSpell))
+                            {
+                                AddTriggeredSpell(triggerSpell);
+                                ((Player*)m_caster)->AddSpellCooldown(triggerSpell, 0, time(NULL) + effect->EffectBasePoints);
+                            }
+                            break;
+                        }
+                    }
+                }
+            }
             // Shattering Throw
             else if (m_spellInfo->Id == 64382)
                 AddTriggeredSpell(64380);

@@ -332,3 +332,6 @@ INSERT INTO `spell_proc_event` (`entry`, `SchoolMask`) VALUE
 DELETE FROM `spell_proc_event` WHERE `entry` = 80976;
 INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`, `procFlags`, `CustomChance`) VALUE
 (80976, 4, 1, 65536, 100);
+
+-- Improved Hamstring
+DELETE FROM `spell_proc_event` WHERE `entry` = 12289;

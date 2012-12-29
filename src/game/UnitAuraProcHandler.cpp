@@ -4173,9 +4173,14 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(Unit *pVictim, DamageIn
 
                 uint32 tickcount = GetSpellDuration(triggerspellInfo) / spellEff->EffectAmplitude;
 
-                basepoints[0] = floor( f_damage / tickcount);
+                basepoints[0] = floor(f_damage / tickcount);
 
                 break;
+            }
+            else if (auraSpellInfo->GetSpellIconID() == 23)      // Improved Hamstring
+            {
+                // done in other way
+                return SPELL_AURA_PROC_FAILED;
             }
             else if (auraSpellInfo->GetSpellIconID() == 2961)    // Taste for Blood
             {
