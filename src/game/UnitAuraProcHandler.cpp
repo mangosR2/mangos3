@@ -4188,6 +4188,15 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(Unit *pVictim, DamageIn
                 if (!damage)
                     return SPELL_AURA_PROC_FAILED;
             }
+            else if (auraSpellInfo->GetSpellIconID() == 4978)    // Lambs to the Slaughter
+            {
+                if (pVictim)
+                {
+                    // Refresh Rend on target
+                    if (SpellAuraHolderPtr holder = pVictim->GetSpellAuraHolder(772, GetObjectGuid()))
+                        holder->RefreshHolder();
+                }
+            }
             else if (auraSpellInfo->Id == 50421)            // Scent of Blood
                 trigger_spell_id = 50422;
             break;

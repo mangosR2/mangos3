@@ -335,3 +335,8 @@ INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`,
 
 -- Improved Hamstring
 DELETE FROM `spell_proc_event` WHERE `entry` = 12289;
+
+-- Lambs to the Slaughter
+DELETE FROM `spell_proc_event` WHERE `entry` = 84583;
+INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`) VALUE
+(84583, 4, 33554432);
