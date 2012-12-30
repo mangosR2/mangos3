@@ -9327,6 +9327,10 @@ void Aura::PeriodicTick()
             }
             damageInfo.CleanDamage(-int32(damageInfo.damage), 0, BASE_ATTACK, MELEE_HIT_NORMAL);
 
+            // Blood Craze
+            if (spellProto->Id == 16488 || spellProto->Id == 16490 || spellProto->Id == 16491)
+                damageInfo.damage /= 10;
+
             damageInfo.damage = target->SpellHealingBonusTaken(pCaster, spellProto, damageInfo.damage, DOT, GetStackAmount());
 
             // This method can modify pdamage

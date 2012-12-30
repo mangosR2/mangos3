@@ -350,3 +350,8 @@ INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`)
 DELETE FROM `spell_proc_event` WHERE `entry` = 64976;
 INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`, `procFlags`) VALUE
 (64976, 4, 1 | 1073741824, 65536);
+
+-- Blood Craze
+DELETE FROM `spell_proc_event` WHERE `entry` = 16487;
+INSERT INTO `spell_proc_event` (`entry`, `SchoolMask`) VALUE
+(16487, 127);
