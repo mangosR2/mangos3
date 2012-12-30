@@ -633,7 +633,7 @@ void Guild::MassInviteToEvent(WorldSession* session, uint32 minLevel, uint32 max
         if (count >= CALENDAR_MAX_INVITES)
         {
             if (Player* player = session->GetPlayer())
-                sCalendarMgr->SendCalendarCommandResult(player->GetObjectGuid(), CALENDAR_ERROR_INVITES_EXCEEDED);
+                sCalendarMgr.SendCalendarCommandResult(player->GetObjectGuid(), CALENDAR_ERROR_INVITES_EXCEEDED);
             return;
         }
 

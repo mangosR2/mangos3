@@ -18,6 +18,10 @@
 
 #ifndef MANGOS_CALENDAR_H
 #define MANGOS_CALENDAR_H
+#include "Policies/Singleton.h"
+#include "Common.h"
+#include "ObjectGuid.h"
+#include "SharedDefines.h"
 
 enum CalendarEventType
 {
@@ -78,52 +82,16 @@ enum CalendarModerationRank
     CALENDAR_RANK_OWNER             = 2
 };
 
-enum CalendarError
-{
-    CALENDAR_OK                                 = 0,
-    CALENDAR_ERROR_GUILD_EVENTS_EXCEEDED        = 1,
-    CALENDAR_ERROR_EVENTS_EXCEEDED              = 2,
-    CALENDAR_ERROR_SELF_INVITES_EXCEEDED        = 3,
-    CALENDAR_ERROR_OTHER_INVITES_EXCEEDED       = 4,
-    CALENDAR_ERROR_PERMISSIONS                  = 5,
-    CALENDAR_ERROR_EVENT_INVALID                = 6,
-    CALENDAR_ERROR_NOT_INVITED                  = 7,
-    CALENDAR_ERROR_INTERNAL                     = 8,
-    CALENDAR_ERROR_GUILD_PLAYER_NOT_IN_GUILD    = 9,
-    CALENDAR_ERROR_ALREADY_INVITED_TO_EVENT_S   = 10,
-    CALENDAR_ERROR_PLAYER_NOT_FOUND             = 11,
-    CALENDAR_ERROR_NOT_ALLIED                   = 12,
-    CALENDAR_ERROR_IGNORING_YOU_S               = 13,
-    CALENDAR_ERROR_INVITES_EXCEEDED             = 14,
-    CALENDAR_ERROR_INVALID_DATE                 = 16,
-    CALENDAR_ERROR_INVALID_TIME                 = 17,
-
-    CALENDAR_ERROR_NEEDS_TITLE                  = 19,
-    CALENDAR_ERROR_EVENT_PASSED                 = 20,
-    CALENDAR_ERROR_EVENT_LOCKED                 = 21,
-    CALENDAR_ERROR_DELETE_CREATOR_FAILED        = 22,
-    CALENDAR_ERROR_SYSTEM_DISABLED              = 24,
-    CALENDAR_ERROR_RESTRICTED_ACCOUNT           = 25,
-    CALENDAR_ERROR_ARENA_EVENTS_EXCEEDED        = 26,
-    CALENDAR_ERROR_RESTRICTED_LEVEL             = 27,
-    CALENDAR_ERROR_USER_SQUELCHED               = 28,
-    CALENDAR_ERROR_NO_INVITE                    = 29,
-
-    CALENDAR_ERROR_EVENT_WRONG_SERVER           = 36,
-    CALENDAR_ERROR_INVITE_WRONG_SERVER          = 37,
-    CALENDAR_ERROR_NO_GUILD_INVITES             = 38,
-    CALENDAR_ERROR_INVALID_SIGNUP               = 39,
-    CALENDAR_ERROR_NO_MODERATOR                 = 40
-};
-
 #define CALENDAR_MAX_INVITES        100
 
 // forward declaration
+class WorldPacket;
+
 class CalendarEvent;
 class CalendarInvite;
 class CalendarMgr;
 
-typedef std::map<uint64, CalendarInvite*> CalendarInviteMap;
+typedef UNORDERED_MAP<uint64, CalendarInvite*> CalendarInviteMap;
 typedef std::list<CalendarInvite*> CalendarInvitesList;
 typedef std::list<CalendarEvent*> CalendarEventsList;
 
@@ -202,20 +170,20 @@ private:
 
 typedef std::map<uint64, CalendarEvent> CalendarEventStore;
 
-class CalendarMgr
+class CalendarMgr : public MaNGOS::Singleton<CalendarMgr, MaNGOS::ClassLevelLockable<CalendarMgr, ACE_Thread_Mutex> >
 {
-    friend class ACE_Singleton<CalendarMgr, ACE_Null_Mutex>;
-    private:
+    public:
         CalendarMgr();
         ~CalendarMgr();
 
+    private:
         CalendarEventStore m_EventStore;
         uint32 m_MaxEventId;
         uint32 m_MaxInviteId;
         std::deque<uint32> m_FreeEventIds;
         std::deque<uint32> m_FreeInviteIds;
 
-        uint32 GetNewEventId();
+        uint64 GetNewEventId();
         uint32 GetNewInviteId();
 
     public:
@@ -243,7 +211,7 @@ class CalendarMgr
         // send data to client function
         void SendCalendarEventInvite(CalendarInvite const* invite);
         void SendCalendarEventInviteAlert(CalendarInvite const* invite);
-        void SendCalendarCommandResult(ObjectGuid const& guid, CalendarError err, char const* param = NULL);
+        void SendCalendarCommandResult(ObjectGuid const& guid, CalendarResponseResult err, char const* param = NULL);
         void SendCalendarEventRemovedAlert(CalendarEvent const* event);
         void SendCalendarEvent(ObjectGuid const& guid, CalendarEvent const* event, uint32 sendType);
         void SendCalendarEventInviteRemoveAlert(ObjectGuid const& guid, CalendarEvent const* event, CalendarInviteStatus status);
@@ -256,6 +224,6 @@ class CalendarMgr
         void SendPacketToAllEventRelatives(WorldPacket packet, CalendarEvent const* event);
 };
 
-#define sCalendarMgr ACE_Singleton<CalendarMgr, ACE_Null_Mutex>::instance()
+#define sCalendarMgr MaNGOS::Singleton<CalendarMgr>::Instance()
 
 #endif

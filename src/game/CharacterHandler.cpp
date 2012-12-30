@@ -547,7 +547,7 @@ void WorldSession::HandleCharDeleteOpcode(WorldPacket& recv_data)
         sLog.outCharDump(dump.c_str(), GetAccountId(), lowguid, name.c_str());
     }
 
-    sCalendarMgr->RemovePlayerCalendar(guid);
+    sCalendarMgr.RemovePlayerCalendar(guid);
 
     Player::DeleteFromDB(guid, GetAccountId());
 

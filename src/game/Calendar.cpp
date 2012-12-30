@@ -18,6 +18,10 @@
 
 #include "Calendar.h"
 #include "Guild.h"
+#include "GuildMgr.h"
+#include "ObjectMgr.h"
+
+INSTANTIATE_SINGLETON_1(CalendarMgr);
 
 //////////////////////////////////////////////////////////////////////////
 // CalendarEvent Class
@@ -71,9 +75,9 @@ CalendarInviteMap::iterator CalendarEvent::RemoveInviteByItr(CalendarInviteMap::
     {
         // TODO: check why only send alert if its not guild event
         if (!IsGuildEvent())
-            sCalendarMgr->SendCalendarEventInviteRemoveAlert(inviteItr->second->InviteeGuid, this, CALENDAR_STATUS_REMOVED);
+            sCalendarMgr.SendCalendarEventInviteRemoveAlert(inviteItr->second->InviteeGuid, this, CALENDAR_STATUS_REMOVED);
 
-        sCalendarMgr->SendCalendarEventInviteRemove(inviteItr->second, Flags);
+        sCalendarMgr.SendCalendarEventInviteRemove(inviteItr->second, Flags);
         delete inviteItr->second;
         return m_Invitee.erase(inviteItr);
     }
@@ -100,7 +104,7 @@ bool CalendarEvent::RemoveInviteById(uint64 inviteId, ObjectGuid const& removerG
     if (inviteItr == m_Invitee.end())
     {
         // invite not found
-        sCalendarMgr->SendCalendarCommandResult(removerGuid, CALENDAR_ERROR_NO_INVITE);
+        sCalendarMgr.SendCalendarCommandResult(removerGuid, CALENDAR_ERROR_NO_INVITE);
         return false;
     }
 
@@ -114,21 +118,21 @@ bool CalendarEvent::RemoveInviteById(uint64 inviteId, ObjectGuid const& removerG
         if (removerInvite == NULL)
         {
             // remover is not invitee cheat???
-            sCalendarMgr->SendCalendarCommandResult(removerGuid, CALENDAR_ERROR_NOT_INVITED);
+            sCalendarMgr.SendCalendarCommandResult(removerGuid, CALENDAR_ERROR_NOT_INVITED);
             return false;
         }
 
         if (removerInvite->Rank != CALENDAR_RANK_MODERATOR && removerInvite->Rank != CALENDAR_RANK_OWNER)
         {
             // remover have not enough right to remove invite
-            sCalendarMgr->SendCalendarCommandResult(removerGuid, CALENDAR_ERROR_PERMISSIONS);
+            sCalendarMgr.SendCalendarCommandResult(removerGuid, CALENDAR_ERROR_PERMISSIONS);
             return false;
         }
     }
 
     if (CreatorGuid == invite->InviteeGuid)
     {
-        sCalendarMgr->SendCalendarCommandResult(removerGuid, CALENDAR_ERROR_DELETE_CREATOR_FAILED);
+        sCalendarMgr.SendCalendarCommandResult(removerGuid, CALENDAR_ERROR_DELETE_CREATOR_FAILED);
         return false;
     }
 
@@ -235,7 +239,7 @@ CalendarInvitesList* CalendarMgr::GetPlayerInvitesList(ObjectGuid const& guid)
     return invites;
 }
 
-uint32 CalendarMgr::GetNewEventId()
+uint64 CalendarMgr::GetNewEventId()
 {
     // actualy that method seem too complicated but its needed when DB part will be implemented
     if (m_FreeEventIds.empty())
@@ -280,7 +284,7 @@ CalendarEvent* CalendarMgr::AddEvent(ObjectGuid const& guid, std::string title, 
         return NULL;
     }
 
-    uint32 nId = GetNewEventId();
+    uint64 nId = GetNewEventId();
 
     DEBUG_FILTER_LOG(LOG_FILTER_CALENDAR, "CalendarMgr::AddEvent> '%s', ID(%u), Desc > '%s', type=%u, repeat=%u, maxInvites=%u, dungeonId=%u,\netime=%s,\nutime=%s,\nflags=%u",
         title.c_str(), nId, description.c_str(), type, repeatable, maxInvites, dungeonId, secsToTimeString(eventTime - time(NULL)).c_str(), secsToTimeString(unkTime - time(NULL)).c_str(), flags);
@@ -433,12 +437,13 @@ void CalendarMgr::RemovePlayerCalendar(ObjectGuid const& playerGuid)
 {
     CalendarEventStore::iterator itr = m_EventStore.begin();
 
-    while (itr!= m_EventStore.end())
+    while (itr != m_EventStore.end())
     {
+        uint64 eventId = itr->first;
         if (itr->second.CreatorGuid == playerGuid)
         {
             // all invite will be automaticaly deleted
-            itr = m_EventStore.erase(itr);
+            m_EventStore.erase(eventId);
             // itr already incremented so go recheck event owner
             continue;
         }
@@ -453,13 +458,14 @@ void CalendarMgr::RemoveGuildCalendar(ObjectGuid const& playerGuid, uint32 Guild
 {
     CalendarEventStore::iterator itr = m_EventStore.begin();
 
-    while (itr!= m_EventStore.end())
+    while (itr != m_EventStore.end())
     {
         CalendarEvent* event = &itr->second;
+        uint64 eventId = itr->first;
         if (event->CreatorGuid == playerGuid && (event->IsGuildEvent()|| event->IsGuildAnnouncement()))
         {
             // all invite will be automaticaly deleted
-            itr = m_EventStore.erase(itr);
+            m_EventStore.erase(eventId);
             // itr already incremented so go recheck event owner
             continue;
         }
@@ -485,7 +491,7 @@ void CalendarMgr::SendCalendarEventInviteAlert(CalendarInvite const* invite)
     WorldPacket data(SMSG_CALENDAR_EVENT_INVITE_ALERT);
     data << uint64(event->EventId);
     data << event->Title;
-    data << secsToTimeBitFields(event->EventTime);
+    data.AppendPackedTime(event->EventTime);
     data << uint32(event->Flags);
     data << uint32(event->Type);
     data << int32(event->DungeonId);
@@ -533,7 +539,7 @@ void CalendarMgr::SendCalendarEventInvite(CalendarInvite const* invite)
     data << uint8(invite->Status);
     data << uint8(!preInvite);
     if (!preInvite)
-        data << secsToTimeBitFields(statusTime);
+        data.AppendPackedTime(statusTime);
     data << uint8(invite->SenderGuid != invite->InviteeGuid); // false only if the invite is sign-up
 
     DEBUG_FILTER_LOG(LOG_FILTER_CALENDAR, "SendCalendarInvit> %s senderGuid[%u], inviteeGuid[%u], EventId[%lu], Status[%u], InviteId[%u]",
@@ -549,7 +555,7 @@ void CalendarMgr::SendCalendarEventInvite(CalendarInvite const* invite)
         SendPacketToAllEventRelatives(data, event);
 }
 
-void CalendarMgr::SendCalendarCommandResult(ObjectGuid const& guid, CalendarError err, char const* param /*= NULL*/)
+void CalendarMgr::SendCalendarCommandResult(ObjectGuid const& guid, CalendarResponseResult err, char const* param /*= NULL*/)
 {
     if (Player* player = sObjectMgr.GetPlayer(guid))
     {
@@ -581,7 +587,7 @@ void CalendarMgr::SendCalendarEventRemovedAlert(CalendarEvent const* event)
     WorldPacket data(SMSG_CALENDAR_EVENT_REMOVED_ALERT, 1 + 8 + 1);
     data << uint8(1);       // show pending alert?
     data << uint64(event->EventId);
-    data << secsToTimeBitFields(event->EventTime);
+    data.AppendPackedTime(event->EventTime);
     data.hexlike();
     SendPacketToAllEventRelatives(data, event);
 }
@@ -607,8 +613,8 @@ void CalendarMgr::SendCalendarEvent(ObjectGuid const& guid, CalendarEvent const*
     data << uint32(CALENDAR_MAX_INVITES);
     data << event->DungeonId;
     data << event->Flags;
-    data << secsToTimeBitFields(event->EventTime);
-    data << secsToTimeBitFields(event->UnknownTime);
+    data.AppendPackedTime(event->EventTime);
+    data.AppendPackedTime(event->UnknownTime);
     data << event->GuildId;
 
     CalendarInviteMap const* cInvMap = event->GetInviteMap();
@@ -628,7 +634,7 @@ void CalendarMgr::SendCalendarEvent(ObjectGuid const& guid, CalendarEvent const*
         data << uint8(calendarInvite->Rank);
         data << uint8(event->IsGuildEvent() && event->GuildId == inviteeGuildId);
         data << uint64(itr->first);
-        data << secsToTimeBitFields(calendarInvite->LastUpdateTime);
+        data.AppendPackedTime(calendarInvite->LastUpdateTime);
         data << calendarInvite->Text;
 
         DEBUG_FILTER_LOG(LOG_FILTER_CALENDAR, "Invite> InviteId[%u], InviteLvl[%u], Status[%u], Rank[%u],  GuildEvent[%s], Text[%s]",
@@ -661,7 +667,7 @@ void CalendarMgr::SendCalendarEventInviteRemoveAlert(ObjectGuid const& guid, Cal
         DEBUG_FILTER_LOG(LOG_FILTER_CALENDAR, "SMSG_CALENDAR_EVENT_INVITE_REMOVED_ALERT\n");
         WorldPacket data(SMSG_CALENDAR_EVENT_INVITE_REMOVED_ALERT, 8 + 4 + 4 + 1);
         data << uint64(event->EventId);
-        data << secsToTimeBitFields(event->EventTime);
+        data.AppendPackedTime(event->EventTime);
         data << uint32(event->Flags);
         data << uint8(status);
         data.hexlike();
@@ -677,11 +683,11 @@ void CalendarMgr::SendCalendarEventStatus(CalendarInvite const* invite)
 
     data << invite->InviteeGuid.WriteAsPacked();
     data << uint64(event->EventId);
-    data << secsToTimeBitFields(event->EventTime);
+    data.AppendPackedTime(event->EventTime);
     data << uint32(event->Flags);
     data << uint8(invite->Status);
     data << uint8(invite->Rank);
-    data << secsToTimeBitFields(invite->LastUpdateTime);
+    data.AppendPackedTime(invite->LastUpdateTime);
     data.hexlike();
     SendPacketToAllEventRelatives(data, event);
 }
@@ -716,9 +722,9 @@ void CalendarMgr::SendCalendarEventUpdateAlert(CalendarEvent const* event, time_
         event->Title.size() + event->Description.size() + 1 + 4 + 4);
     data << uint8(1);       // show pending alert?
     data << uint64(event->EventId);
-    data << secsToTimeBitFields(oldEventTime);
+    data.AppendPackedTime(oldEventTime);
     data << uint32(event->Flags);
-    data << secsToTimeBitFields(event->EventTime);
+    data.AppendPackedTime(event->EventTime);
     data << uint8(event->Type);
     data << int32(event->DungeonId);
     data << event->Title;
