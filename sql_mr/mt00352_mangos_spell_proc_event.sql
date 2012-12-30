@@ -340,3 +340,13 @@ DELETE FROM `spell_proc_event` WHERE `entry` = 12289;
 DELETE FROM `spell_proc_event` WHERE `entry` = 84583;
 INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`) VALUE
 (84583, 4, 33554432);
+
+-- Juggernaut proc
+DELETE FROM `spell_proc_event` WHERE `entry` = 65156;
+INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`) VALUE
+(65156, 4, 33554432 | 2097152);
+
+-- Juggernaut
+DELETE FROM `spell_proc_event` WHERE `entry` = 64976;
+INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`, `procFlags`) VALUE
+(64976, 4, 1 | 1073741824, 65536);

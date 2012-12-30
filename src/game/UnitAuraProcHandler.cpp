@@ -5256,8 +5256,35 @@ SpellAuraProcResult Unit::HandleMechanicImmuneResistanceAuraProc(Unit* /*pVictim
        ? SPELL_AURA_PROC_OK : SPELL_AURA_PROC_FAILED;
 }
 
-SpellAuraProcResult Unit::HandleModDamageFromCasterAuraProc(Unit* pVictim, DamageInfo* damageInfo, Aura const* triggeredByAura, SpellEntry const* /*procSpell*/, uint32 /*procFlag*/, uint32 /*procEx*/, uint32 /*cooldown*/)
+SpellAuraProcResult Unit::HandleModDamageFromCasterAuraProc(Unit* pVictim, DamageInfo* /*damageInfo*/, Aura const* triggeredByAura, SpellEntry const* procSpell, uint32 /*procFlag*/, uint32 /*procEx*/, uint32 /*cooldown*/)
 {
+    SpellEntry const* spellProto = triggeredByAura->GetSpellProto();
+
+    switch (spellProto->GetSpellFamilyName())
+    {
+        case SPELLFAMILY_WARRIOR:
+        {
+            // Juggernaut
+            if (spellProto->Id == 64976)
+            {
+                if (!procSpell)
+                    return SPELL_AURA_PROC_FAILED;
+
+                // add cooldowns
+                // procced from Charge
+                if (procSpell->Id == 100)
+                {
+                    CastSpell(this, 96216, false);  // Intercept cooldown
+                    // cast proc
+                    CastSpell(this, 65156, true);
+                }
+                else
+                    CastSpell(this, 96215, false);  // Charge cooldown
+            }
+            break;
+        }
+    }
+
     // Compare casters
     return triggeredByAura->GetCasterGuid() == pVictim->GetObjectGuid() ? SPELL_AURA_PROC_OK : SPELL_AURA_PROC_FAILED;
 }
