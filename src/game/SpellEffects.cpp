@@ -10290,6 +10290,7 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                         {
                             // third Inhale
                             m_caster->RemoveAurasDueToSpell(69164);
+                            m_caster->CastSpell(m_caster, 69171, true);
                         }
                     }
 
@@ -10303,6 +10304,7 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     unitTarget->CastSpell(unitTarget, 69201, true);
                     return;
                 }
+                case 69171:                                 // Low Plague Blight Visual Cancel (Festergut)
                 case 69298:                                 // Cancel Resistant to Blight (Festergut)
                 {
                     if (unitTarget)
