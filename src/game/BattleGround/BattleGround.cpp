@@ -1468,22 +1468,9 @@ void BattleGround::AddOrSetPlayerToCorrectBgGroup(Player* plr, ObjectGuid plr_gu
     }
     else                                                    // first player joined
     {
-        group = new Group();
-
-        // Need first set BG type for group, even his be wrong type
-        group->SetBattlegroundGroup(this);
-
-        if (group->Create(plr_guid, plr->GetName()))
-        {
-            sObjectMgr.AddGroup(group);
-            SetBgRaid(team, group);
-        }
-        else
-        {
-            delete group;
-            return;
-        }
-
+        group = new Group;
+        SetBgRaid(team, group);
+        group->Create(plr_guid, plr->GetName());
     }
 }
 
