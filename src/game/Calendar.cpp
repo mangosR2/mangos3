@@ -594,7 +594,7 @@ void CalendarMgr::SaveToDB()
 {
     bool dataSaved = false;
 
-    for (CalendarEventStore::iterator iter = m_EventStore.begin(); iter != m_EventStore.end(); ++iter)
+    for (CalendarEventStore::iterator iter = m_EventStore.begin(); iter != m_EventStore.end();)
     {
         if (!iter->second.HasFlag(CALENDAR_STATE_FLAG_SAVED))
         {
@@ -605,6 +605,7 @@ void CalendarMgr::SaveToDB()
             }
             SaveEventToDB(&iter->second);
             iter->second.AddFlag(CALENDAR_STATE_FLAG_SAVED);
+            ++iter;
         }
         else if (iter->second.HasFlag(CALENDAR_STATE_FLAG_DELETED))
         {
@@ -617,9 +618,11 @@ void CalendarMgr::SaveToDB()
             DeleteEventFromDB(iter->first);
             m_EventStore.erase(iter++);
         }
+        else
+            ++iter;
     }
 
-    for (CalendarInviteStore::iterator iter = m_InviteStore.begin(); iter != m_InviteStore.end(); ++iter)
+    for (CalendarInviteStore::iterator iter = m_InviteStore.begin(); iter != m_InviteStore.end();)
     {
         if (!iter->second.HasFlag(CALENDAR_STATE_FLAG_SAVED))
         {
@@ -630,6 +633,7 @@ void CalendarMgr::SaveToDB()
             }
             SaveInviteToDB(&iter->second);
             iter->second.AddFlag(CALENDAR_STATE_FLAG_SAVED);
+            ++iter;
         }
         else if (iter->second.HasFlag(CALENDAR_STATE_FLAG_DELETED))
         {
@@ -642,6 +646,8 @@ void CalendarMgr::SaveToDB()
             DeleteInviteFromDB(iter->first);
             m_InviteStore.erase(iter++);
         }
+        else
+            ++iter;
     }
 
     if (dataSaved)
