@@ -5209,7 +5209,7 @@ void Spell::SendEffectLogExecute(SpellEffectEntry const* effect, ObjectGuid targ
         case SPELL_EFFECT_DISMISS_PET:
         case SPELL_EFFECT_RESURRECT:
         case SPELL_EFFECT_RESURRECT_NEW:
-        case SPELL_EFFECT_MASS_RESSURECTION:
+        case SPELL_EFFECT_RESURRECT_WITH_AURA:
         {
             data << targetGuid.WriteAsPacked();
             break;

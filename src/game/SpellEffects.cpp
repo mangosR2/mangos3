@@ -228,14 +228,14 @@ pEffect SpellEffects[TOTAL_SPELL_EFFECTS]=
     &Spell::EffectActivateSpec,                             //162 SPELL_EFFECT_TALENT_SPEC_SELECT       activate primary/secondary spec
     &Spell::EffectUnused,                                   //163 unused in 3.3.5a
     &Spell::EffectCancelAura,                               //164 SPELL_EFFECT_CANCEL_AURA
-    &Spell::EffectNULL,                                     //165 SPELL_EFFECT_DAMAGE_FROM_MAX_HEALTH_PCT 82 spells in 4.3.4
+    &Spell::EffectDamageFromMaxHealthPct,                   //165 SPELL_EFFECT_DAMAGE_FROM_MAX_HEALTH_PCT 82 spells in 4.3.4
     &Spell::EffectRewardCurrency,                           //166 SPELL_EFFECT_REWARD_CURRENCY          56 spells in 4.3.4
     &Spell::EffectNULL,                                     //167 SPELL_EFFECT_167                      42 spells in 4.3.4
     &Spell::EffectNULL,                                     //168 SPELL_EFFECT_168                      2 spells in 4.3.4 Allows give commands to controlled pet
     &Spell::EffectNULL,                                     //169 SPELL_EFFECT_DESTROY_ITEM             9 spells in 4.3.4
     &Spell::EffectNULL,                                     //170 SPELL_EFFECT_170                      70 spells in 4.3.4
     &Spell::EffectNULL,                                     //171 SPELL_EFFECT_171                      19 spells in 4.3.4 related to GO summon
-    &Spell::EffectNULL,                                     //172 SPELL_EFFECT_MASS_RESSURECTION        Mass Ressurection (Guild Perk)
+    &Spell::EffectResurrectWithAura,                        //172 SPELL_EFFECT_RESURRECT_WITH_AURA      Mass Ressurection (Guild Perk)
     &Spell::EffectBuyGuildBankSlot,                         //173 SPELL_EFFECT_BUY_GUILD_BANKSLOT       4 spells in 4.3.4 basepoints - slot
     &Spell::EffectNULL,                                     //174 SPELL_EFFECT_174                      13 spells some sort of area aura apply effect
     &Spell::EffectUnused,                                   //175 SPELL_EFFECT_175                      unused in 4.3.4
@@ -283,7 +283,7 @@ void Spell::EffectResurrectNew(SpellEffectEntry const* effect)
 
     uint32 health = damage;
     uint32 mana = effect->EffectMiscValue;
-    pTarget->setResurrectRequestData(m_caster->GetObjectGuid(), m_caster->GetMapId(), m_caster->GetPositionX(), m_caster->GetPositionY(), m_caster->GetPositionZ(), health, mana);
+    pTarget->setResurrectRequestData(m_caster->GetObjectGuid(), m_caster->GetMapId(), m_caster->GetPositionX(), m_caster->GetPositionY(), m_caster->GetPositionZ(), health, mana, 0);
     SendResurrectRequest(pTarget);
     SendEffectLogExecute(effect, pTarget->GetObjectGuid());
 }
@@ -13195,7 +13195,7 @@ void Spell::EffectResurrect(SpellEffectEntry const* effect)
     uint32 health = pTarget->GetMaxHealth() * damage / 100;
     uint32 mana   = pTarget->GetMaxPower(POWER_MANA) * damage / 100;
 
-    pTarget->setResurrectRequestData(m_caster->GetObjectGuid(), m_caster->GetMapId(), m_caster->GetPositionX(), m_caster->GetPositionY(), m_caster->GetPositionZ(), health, mana);
+    pTarget->setResurrectRequestData(m_caster->GetObjectGuid(), m_caster->GetMapId(), m_caster->GetPositionX(), m_caster->GetPositionY(), m_caster->GetPositionZ(), health, mana, 0);
     SendResurrectRequest(pTarget);
 
     SendEffectLogExecute(effect, pTarget->GetObjectGuid());
@@ -14673,4 +14673,43 @@ void Spell::EffectRewardCurrency(SpellEffectEntry const* effect)
         return;
 
     ((Player*)unitTarget)->ModifyCurrencyCount(effect->EffectMiscValue, damage);
+}
+
+void Spell::EffectDamageFromMaxHealthPct(SpellEffectEntry const* effect)
+{
+    if (!unitTarget)
+        return;
+
+    m_damage += int32(unitTarget->GetMaxHealth() * damage / 100.0f);
+}
+
+void Spell::EffectResurrectWithAura(SpellEffectEntry const* effect)
+{
+    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
+        return;
+
+    if (unitTarget->isAlive() || !unitTarget->IsInWorld())
+        return;
+
+    Player* pTarget = (Player*)unitTarget;
+
+    if (pTarget->isRessurectRequested())       // already have one active request
+        return;
+
+    float healthPct = damage / 100.0f;
+    if (m_caster->GetTypeId() == TYPEID_PLAYER)
+    {
+        if (((Player*)m_caster)->GetGuildId() == pTarget->GetGuildId())
+            healthPct *= m_caster->GetTotalAuraMultiplier(SPELL_AURA_MOD_RESURRECTED_HEALTH_BY_GUILD_MEMBER);
+    }
+    uint32 health = uint32(pTarget->GetMaxHealth() * std::min(healthPct, 1.0f));
+    uint32 mana   = pTarget->GetMaxPower(POWER_MANA) * std::min(healthPct, 1.0f);
+
+    uint32 resurrectAuraSpell = effect->EffectTriggerSpell;
+    SpellEntry const* spellInfo = sSpellStore.LookupEntry(resurrectAuraSpell);
+    if (spellInfo && unitTarget->HasAura(resurrectAuraSpell))
+        return;
+
+    pTarget->setResurrectRequestData(m_caster->GetObjectGuid(), m_caster->GetMapId(), m_caster->GetPositionX(), m_caster->GetPositionY(), m_caster->GetPositionZ(), health, mana, spellInfo ? resurrectAuraSpell : 0);
+    SendResurrectRequest(pTarget);
 }

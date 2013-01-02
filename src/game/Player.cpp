@@ -2161,6 +2161,9 @@ void Player::ProcessDelayedOperations()
         SetPower(POWER_RAGE, 0);
         SetPower(POWER_ENERGY, GetMaxPower(POWER_ENERGY));
 
+        if (m_resurrectAura)
+            CastSpell(this, m_resurrectAura, true);
+
         SpawnCorpseBones();
     }
 
@@ -22231,6 +22234,9 @@ void Player::ResurectUsingRequestData()
     SetPower(POWER_RAGE, 0);
 
     SetPower(POWER_ENERGY, GetMaxPower(POWER_ENERGY));
+
+    if (m_resurrectAura)
+        CastSpell(this, m_resurrectAura, true);
 
     SpawnCorpseBones();
 }

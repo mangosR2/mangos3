@@ -916,7 +916,7 @@ enum SpellEffects
     SPELL_EFFECT_DESTROY_ITEM              = 169,
     SPELL_EFFECT_170                       = 170,
     SPELL_EFFECT_171                       = 171,
-    SPELL_EFFECT_MASS_RESSURECTION         = 172,
+    SPELL_EFFECT_RESURRECT_WITH_AURA       = 172,
     SPELL_EFFECT_BUY_GUILD_BANKSLOT        = 173,
     SPELL_EFFECT_174                       = 174,
     SPELL_EFFECT_175                       = 175,
