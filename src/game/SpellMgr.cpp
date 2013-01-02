@@ -2602,6 +2602,10 @@ uint32 SpellMgr::GetSpellMaxTargetsWithCustom(SpellEntry const* spellInfo, Unit 
                 case 68912:                                 // Wailing Souls (FoS)
                 case 68987:                                 // Pursuit (Pit of Saron, Ick)
                 case 69048:                                 // Mirrored Soul (FoS)
+                case 69057:                                 // Bone Spike Graveyard (Icecrown Citadel, Lord Marrowgar) 10 mann
+                case 72088:
+                case 73142:
+                case 73144:
                 case 69140:                                 // Coldflame (ICC, Marrowgar)
                 case 69674:                                 // Mutated Infection (ICC, Rotface)
                 case 70450:                                 // Blood Mirror
@@ -2648,6 +2652,10 @@ uint32 SpellMgr::GetSpellMaxTargetsWithCustom(SpellEntry const* spellInfo, Unit 
                 case 70814:                                 // Bone Slice (ICC, Lord Marrowgar, heroic)
                 case 71221:                                 // Gas spore (Mode 1) (ICC, Festergut)
                 case 72095:                                 // Frozen Orb (h) (Vault of Archavon, Toravon)
+                case 72089:                                 // Bone Spike Graveyard (Icecrown Citadel, Lord Marrowgar) 25 mann
+                case 70826:
+                case 73143:
+                case 73145:
                     unMaxTargets = 3;
                     break;
                 case 37676:                                 // Insidious Whisper
@@ -2760,6 +2768,14 @@ float SpellMgr::GetSpellRadiusWithCustom(SpellEntry const* spellInfo, Unit const
                 case 72769:                                 // Scent of Blood (Saurfang)
                 case 72771:
                 case 72934:                                 // Blood infusion credit
+                case 69057:                                 // Bone Spike Graveyard (Icecrown Citadel, Lord Marrowgar encounter, 10N)
+                case 70826:                                 // Bone Spike Graveyard (Icecrown Citadel, Lord Marrowgar encounter, 25N)
+                case 72088:                                 // Bone Spike Graveyard (Icecrown Citadel, Lord Marrowgar encounter, 10H)
+                case 72089:                                 // Bone Spike Graveyard (Icecrown Citadel, Lord Marrowgar encounter, 25H)
+                case 73142:                                 // Bone Spike Graveyard (during Bone Storm) (Icecrown Citadel, Lord Marrowgar encounter, 10N)
+                case 73143:                                 // Bone Spike Graveyard (during Bone Storm) (Icecrown Citadel, Lord Marrowgar encounter, 25N)
+                case 73144:                                 // Bone Spike Graveyard (during Bone Storm) (Icecrown Citadel, Lord Marrowgar encounter, 10H)
+                case 73145:                                 // Bone Spike Graveyard (during Bone Storm) (Icecrown Citadel, Lord Marrowgar encounter, 25H)
                     radius = DEFAULT_VISIBILITY_INSTANCE;
                     break;
                 case 72350:                                 // Fury of Frostmourne

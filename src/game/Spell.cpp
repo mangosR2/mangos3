@@ -8808,41 +8808,6 @@ bool Spell::FillCustomTargetMap(SpellEffectIndex i, UnitList &targetUnitMap)
             }
             break;
         }
-        case 69057:                                 // Bone Spike Graveyard (Icecrown Citadel, Lord Marrowgar encounter, 10N)
-        case 70826:                                 // Bone Spike Graveyard (Icecrown Citadel, Lord Marrowgar encounter, 25N)
-        case 72088:                                 // Bone Spike Graveyard (Icecrown Citadel, Lord Marrowgar encounter, 10H)
-        case 72089:                                 // Bone Spike Graveyard (Icecrown Citadel, Lord Marrowgar encounter, 25H)
-        case 73142:                                 // Bone Spike Graveyard (during Bone Storm) (Icecrown Citadel, Lord Marrowgar encounter, 10N)
-        case 73143:                                 // Bone Spike Graveyard (during Bone Storm) (Icecrown Citadel, Lord Marrowgar encounter, 25N)
-        case 73144:                                 // Bone Spike Graveyard (during Bone Storm) (Icecrown Citadel, Lord Marrowgar encounter, 10H)
-        case 73145:                                 // Bone Spike Graveyard (during Bone Storm) (Icecrown Citadel, Lord Marrowgar encounter, 25H)
-        {
-            unMaxTargets = 1;
-            switch (m_spellInfo->Id)
-            {
-                case 72089:
-                case 70826:
-                case 73143:
-                case 73145:
-                    unMaxTargets = 3;
-            }
-
-            radius = DEFAULT_VISIBILITY_INSTANCE;
-
-            UnitList tmpUnitMap;
-            FillAreaTargets(tmpUnitMap, radius, PUSH_SELF_CENTER, SPELL_TARGETS_AOE_DAMAGE);
-            for (UnitList::const_iterator itr = tmpUnitMap.begin(); itr != tmpUnitMap.end(); ++itr)
-            {
-                if ((*itr) && (*itr)->GetTypeId() == TYPEID_PLAYER && // target players only
-                    m_caster->getVictim() &&                        // don't target tank
-                    m_caster->getVictim()->GetObjectGuid() != (*itr)->GetObjectGuid())
-                {
-                    targetUnitMap.push_back(*itr);
-                }
-            }
-
-            break;
-        }
         case 69099: // Ice Pulse (Lich King)
         case 73776:
         case 73777:
