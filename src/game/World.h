@@ -83,7 +83,8 @@ enum WorldTimers
     WUPDATE_AHBOT       = 6,
     WUPDATE_AUTOBROADCAST = 7,
     WUPDATE_WORLDSTATE  = 8,
-    WUPDATE_COUNT       = 9
+    WUPDATE_CALENDAR    = 9,
+    WUPDATE_COUNT
 };
 
 /// Configuration elements

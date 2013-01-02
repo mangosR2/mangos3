@@ -480,9 +480,9 @@ time_t DungeonResetScheduler::CalculateNextResetTime(MapDifficultyEntry const* m
 
 void DungeonResetScheduler::LoadResetTimes()
 {
-    const time_t now = time(NULL);
-    // time_t today = (now / DAY) * DAY;
-    // time_t nextWeek = today + (7 * DAY);
+    time_t const now = time(NULL);
+    time_t const today = (now / DAY) * DAY;
+    time_t const nextWeek = today + (7 * DAY);
 
     // NOTE: Use DirectPExecute for tables that will be queried later
 

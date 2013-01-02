@@ -30,6 +30,7 @@
 #include "Guild.h"
 #include "GuildMgr.h"
 #include "ArenaTeam.h"
+#include "ObjectMgr.h"
 
 void WorldSession::HandleCalendarGetCalendar(WorldPacket& /*recv_data*/)
 {
@@ -44,28 +45,30 @@ void WorldSession::HandleCalendarGetCalendar(WorldPacket& /*recv_data*/)
     invites = sCalendarMgr.GetPlayerInvitesList(guid);
 
     data << uint32(invites->size());
-    DEBUG_FILTER_LOG(LOG_FILTER_CALENDAR, "Sending > %u invites", invites->size());
+    DEBUG_FILTER_LOG(LOG_FILTER_CALENDAR, "WorldSession::HandleCalendarGetCalendar Sending %u invites", invites->size());
 
     for (CalendarInvitesList::const_iterator itr = invites->begin(); itr != invites->end(); ++itr)
     {
         CalendarEvent const* calendarEvent = (*itr)->GetCalendarEvent();
-        MANGOS_ASSERT(calendarEvent);                           // TODO: be sure no way to have a null event
+
+        if (!calendarEvent)
+            continue;
 
         data << uint64(calendarEvent->EventId);
         data << uint64((*itr)->InviteId);
         data << uint8((*itr)->Status);
         data << uint8((*itr)->Rank);
-        
+
         data << uint8(calendarEvent->IsGuildEvent());
         data << calendarEvent->CreatorGuid.WriteAsPacked();
-        DEBUG_FILTER_LOG(LOG_FILTER_CALENDAR, "invite> EventId[%u], InviteId[%u], status[%u], rank[%u]",
+        DEBUG_FILTER_LOG(LOG_FILTER_CALENDAR, "WorldSession::HandleCalendarGetCalendar EventId[%u], InviteId[%u], status[%u], rank[%u]",
             uint32((*itr)->GetCalendarEvent()->EventId), uint32((*itr)->InviteId), uint32((*itr)->Status), uint32((*itr)->Rank));
     }
     delete invites;
 
     CalendarEventsList* events = sCalendarMgr.GetPlayerEventsList(guid);
     data << uint32(events->size());
-    DEBUG_FILTER_LOG(LOG_FILTER_CALENDAR, "Sending > %u events", events->size());
+    DEBUG_FILTER_LOG(LOG_FILTER_CALENDAR, "WorldSession::HandleCalendarGetCalendar Sending %u events", events->size());
 
     for (CalendarEventsList::const_iterator itr = events->begin(); itr != events->end(); ++itr)
     {
@@ -80,7 +83,7 @@ void WorldSession::HandleCalendarGetCalendar(WorldPacket& /*recv_data*/)
         data << calendarEvent->CreatorGuid.WriteAsPacked();
 
         std::string timeStr = TimeToTimestampStr(calendarEvent->EventTime);
-        DEBUG_FILTER_LOG(LOG_FILTER_CALENDAR, "Events> EventId[%u], Title[%s], Time[%s], Type[%u],  Flag[%u], DungeonId[%d], CreatorGuid[%u]",
+        DEBUG_FILTER_LOG(LOG_FILTER_CALENDAR, "WorldSession::HandleCalendarGetCalendar  EventId[%u], Title[%s], Time[%s], Type[%u],  Flag[%u], DungeonId[%d], CreatorGuid[%u]",
                          uint32(calendarEvent->EventId), calendarEvent->Title.c_str(), timeStr.c_str(), uint32(calendarEvent->Type),
                          uint32(calendarEvent->Flags), calendarEvent->DungeonId, calendarEvent->CreatorGuid.GetCounter());
     }
@@ -143,8 +146,8 @@ void WorldSession::HandleCalendarGetCalendar(WorldPacket& /*recv_data*/)
         sentMaps.insert(mapId);
         dataBuffer << mapId;
         dataBuffer << resetTime;
-        
-        DEBUG_FILTER_LOG(LOG_FILTER_CALENDAR,"MapId [%u] -> Reset Time: %u", mapId, resetTime);
+
+        DEBUG_FILTER_LOG(LOG_FILTER_CALENDAR,"WorldSession::HandleCalendarGetCalendar MapId [%u] -> Reset Time: %u", mapId, resetTime);
         dataBuffer << int32(0); // showed 68400 on map 509 must investigate more
         ++boundCounter;
     }
@@ -178,7 +181,7 @@ void WorldSession::HandleCalendarGetCalendar(WorldPacket& /*recv_data*/)
         data << holiday->TextureFilename;                   // m_textureFilename (holiday name)
     }*/
 
-    data.hexlike();
+    //data.hexlike();
     SendPacket(&data);
 }
 
@@ -187,7 +190,7 @@ void WorldSession::HandleCalendarGetEvent(WorldPacket& recv_data)
     ObjectGuid guid = _player->GetObjectGuid();
     DEBUG_LOG("WORLD: CMSG_CALENDAR_GET_EVENT [%u]", guid.GetCounter());
 
-    uint64 eventId;
+    ObjectGuid eventId;
     recv_data >> eventId;
 
     if (CalendarEvent* calendarEvent = sCalendarMgr.GetEventById(eventId))
@@ -209,7 +212,7 @@ void WorldSession::HandleCalendarGuildFilter(WorldPacket& recv_data)
     if (Guild* guild = sGuildMgr.GetGuildById(_player->GetGuildId()))
         guild->MassInviteToEvent(this, minLevel, maxLevel, minRank);
 
-    DEBUG_FILTER_LOG(LOG_FILTER_CALENDAR, "CMSG_CALENDAR_GUILD_FILTER: Min level [%u], Max level [%u], Min rank [%u]", minLevel, maxLevel, minRank);
+    DEBUG_FILTER_LOG(LOG_FILTER_CALENDAR, "WorldSession::HandleCalendarGuildFilter Min level [%u], Max level [%u], Min rank [%u]", minLevel, maxLevel, minRank);
 }
 
 void WorldSession::HandleCalendarEventSignup(WorldPacket& recv_data)
@@ -217,12 +220,12 @@ void WorldSession::HandleCalendarEventSignup(WorldPacket& recv_data)
     ObjectGuid guid = _player->GetObjectGuid();
     DEBUG_LOG("WORLD: CMSG_CALENDAR_EVENT_SIGNUP [%u]", guid.GetCounter());
 
-    uint64 eventId;
+    ObjectGuid eventId;
     bool tentative;
 
     recv_data >> eventId;
     recv_data >> tentative; // uint8 == bool size in all compilator???
-    DEBUG_FILTER_LOG(LOG_FILTER_CALENDAR, "CMSG_CALENDAR_EVENT_SIGNUP [%u] EventId [%u] Tentative %u", guid.GetCounter(), uint32(eventId), tentative);
+    DEBUG_FILTER_LOG(LOG_FILTER_CALENDAR, "WorldSession::HandleCalendarEventSignup [%u] EventId [%u] Tentative %u", guid.GetCounter(), uint32(eventId), tentative);
 
     if (CalendarEvent* calendarEvent = sCalendarMgr.GetEventById(eventId))
     {
@@ -311,8 +314,8 @@ void WorldSession::HandleCalendarUpdateEvent(WorldPacket& recv_data)
     DEBUG_LOG("WORLD: CMSG_CALENDAR_UPDATE_EVENT [%u]", guid.GetCounter());
 
     time_t oldEventTime;
-    uint64 eventId;
-    uint64 inviteId;
+    ObjectGuid eventId;
+    ObjectGuid inviteId;
     std::string title;
     std::string description;
     uint8 type;
@@ -328,7 +331,7 @@ void WorldSession::HandleCalendarUpdateEvent(WorldPacket& recv_data)
     UnknownPackedTime = recv_data.ReadPackedTime();
     recv_data >> flags;
 
-    DEBUG_FILTER_LOG(LOG_FILTER_CALENDAR, "CMSG_CALENDAR_UPDATE_EVENT [%u] EventId [%u], InviteId [%u] Title %s, Description %s, type %u "
+    DEBUG_FILTER_LOG(LOG_FILTER_CALENDAR, "WorldSession::HandleCalendarUpdateEvent [%u] EventId [%u], InviteId [%u] Title %s, Description %s, type %u "
         "Repeatable %u, MaxInvites %u, Dungeon ID %d, Flags %u", guid.GetCounter(), uint32(eventId), uint32(inviteId), title.c_str(),
         description.c_str(), uint32(type), uint32(repetitionType), maxInvites, dungeonId, flags);
 
@@ -361,15 +364,11 @@ void WorldSession::HandleCalendarUpdateEvent(WorldPacket& recv_data)
         calendarEvent->Title = title;
         calendarEvent->Description = description;
 
+        calendarEvent->RemoveFlag(CALENDAR_STATE_FLAG_SAVED);
+        calendarEvent->AddFlag(CALENDAR_STATE_FLAG_UPDATED);
+
         sCalendarMgr.SendCalendarEventUpdateAlert(calendarEvent, oldEventTime);
 
-        // query construction
-        CharacterDatabase.escape_string(title);
-        CharacterDatabase.escape_string(description);
-        CharacterDatabase.PExecute("UPDATE calendar_events SET "
-            "type=%hu, flags=%u, dungeonId=%d, eventTime=%u, title=%s, description=%s "
-            "WHERE eventid=" UI64FMTD,
-             type, flags, dungeonId, calendarEvent->EventTime, title, description, eventId);
     }
     else
         sCalendarMgr.SendCalendarCommandResult(guid, CALENDAR_ERROR_EVENT_INVALID);
@@ -380,14 +379,14 @@ void WorldSession::HandleCalendarRemoveEvent(WorldPacket& recv_data)
     ObjectGuid guid = _player->GetObjectGuid();
     DEBUG_LOG("WORLD: CMSG_CALENDAR_REMOVE_EVENT [%u]", guid.GetCounter());
 
-    uint64 eventId;
+    ObjectGuid eventId;
     ObjectGuid creatorGuid;
     uint32 Flags;
 
     recv_data >> eventId;
     recv_data >> creatorGuid.ReadAsPacked();
     recv_data >> Flags;
-    DEBUG_FILTER_LOG(LOG_FILTER_CALENDAR, "CMSG_CALENDAR_REMOVE_EVENT [%u], creator [%u]",
+    DEBUG_FILTER_LOG(LOG_FILTER_CALENDAR, "WorldSession::HandleCalendarRemoveEvent [%u], creator [%u]",
         guid.GetCounter(), creatorGuid.GetCounter());
     sCalendarMgr.RemoveEvent(eventId, guid);
 }
@@ -397,14 +396,14 @@ void WorldSession::HandleCalendarCopyEvent(WorldPacket& recv_data)
     ObjectGuid guid = _player->GetObjectGuid();
     DEBUG_LOG("WORLD: CMSG_CALENDAR_COPY_EVENT [%u]", guid.GetCounter());
 
-    uint64 eventId;
-    uint64 inviteId;
+    ObjectGuid eventId;
+    ObjectGuid inviteId;
     uint32 packedTime;
 
     recv_data >> eventId >> inviteId;
     packedTime = recv_data.ReadPackedTime();
 
-    DEBUG_FILTER_LOG(LOG_FILTER_CALENDAR, "CMSG_CALENDAR_COPY_EVENT [%u], EventId [%u] inviteId [%u]",
+    DEBUG_FILTER_LOG(LOG_FILTER_CALENDAR, "WorldSession::HandleCalendarCopyEvent [%u], EventId [%u] inviteId [%u]",
         guid.GetCounter(), uint32(eventId), uint32(inviteId));
 
     sCalendarMgr.CopyEvent(eventId, packedTime, guid);
@@ -415,15 +414,15 @@ void WorldSession::HandleCalendarEventInvite(WorldPacket& recv_data)
     ObjectGuid playerGuid = _player->GetObjectGuid();
     DEBUG_LOG("WORLD: CMSG_CALENDAR_EVENT_INVITE [%u]", playerGuid.GetCounter());
 
-    uint64 eventId;
+    ObjectGuid eventId;
 
     // TODO it seem its not inviteID but event->CreatorGuid
-    uint64 inviteId;
+    ObjectGuid inviteId;
     std::string name;
     bool isPreInvite;
     bool isGuildEvent;
 
-    ObjectGuid inviteeGuid;
+    ObjectGuid inviteeGuid = ObjectGuid();
     uint32 inviteeTeam = 0;
     uint32 inviteeGuildId = 0;
 
@@ -439,15 +438,12 @@ void WorldSession::HandleCalendarEventInvite(WorldPacket& recv_data)
     else
     {
         // Invitee offline, get data from database
-        CharacterDatabase.escape_string(name);
-        QueryResult* result = CharacterDatabase.PQuery("SELECT guid,race FROM characters WHERE name ='%s'", name.c_str());
-        if (result)
+        PlayerDataCache const* data = sAccountMgr.GetPlayerDataCache(name);
+        if (data)
         {
-            Field* fields = result->Fetch();
-            inviteeGuid = ObjectGuid(HIGHGUID_PLAYER, fields[0].GetUInt32());
-            inviteeTeam = Player::TeamForRace(fields[1].GetUInt8());
+            inviteeGuid = ObjectGuid(HIGHGUID_PLAYER, data->lowguid);
+            inviteeTeam = Player::TeamForRace(data->race);
             inviteeGuildId = Player::GetGuildIdFromDB(inviteeGuid);
-            delete result;
         }
     }
 
@@ -506,7 +502,7 @@ void WorldSession::HandleCalendarEventInvite(WorldPacket& recv_data)
         calendarInvite.LastUpdateTime = time(NULL);
 
         sCalendarMgr.SendCalendarEventInvite(&calendarInvite);
-        DEBUG_FILTER_LOG(LOG_FILTER_CALENDAR, "PREINVITE> sender[%u], Invitee[%u]", playerGuid.GetCounter(), inviteeGuid.GetCounter());
+        DEBUG_FILTER_LOG(LOG_FILTER_CALENDAR, "WorldSession::HandleCalendarEventInvite PREINVITE sender[%u], Invitee[%u]", playerGuid.GetCounter(), inviteeGuid.GetCounter());
     }
 }
 
@@ -515,14 +511,13 @@ void WorldSession::HandleCalendarEventRsvp(WorldPacket& recv_data)
     ObjectGuid guid = _player->GetObjectGuid();
     DEBUG_LOG("WORLD: CMSG_CALENDAR_EVENT_RSVP [%u]", guid.GetCounter());
 
-    uint64 eventId;
-    uint64 inviteId;
+    ObjectGuid eventId;
+    ObjectGuid inviteId;
     uint32 status;
 
     recv_data >> eventId >> inviteId >> status;
-    DEBUG_FILTER_LOG(LOG_FILTER_CALENDAR, "CMSG_CALENDAR_EVENT_RSVP [" UI64FMTD"] EventId ["
-        UI64FMTD "], InviteId [" UI64FMTD "], status %u\n", guid, eventId,
-        inviteId, status);
+    DEBUG_FILTER_LOG(LOG_FILTER_CALENDAR, "WorldSession::HandleCalendarEventRsvp %s EventId %u InviteId %u status %u", guid.GetString().c_str(), eventId.GetCounter(),
+        inviteId.GetCounter(), status);
 
     if (CalendarEvent* calendarEvent = sCalendarMgr.GetEventById(eventId))
     {
@@ -556,7 +551,10 @@ void WorldSession::HandleCalendarEventRsvp(WorldPacket& recv_data)
 
             sCalendarMgr.SendCalendarEventStatus(invite);
             sCalendarMgr.SendCalendarClearPendingAction(guid);
-            CharacterDatabase.PExecute("UPDATE calendar_invites SET status=%u, lastUpdateTime=%u WHERE inviteId = "UI64FMTD, status, uint32(invite->LastUpdateTime), invite->InviteId);
+
+            invite->RemoveFlag(CALENDAR_STATE_FLAG_SAVED);
+            invite->AddFlag(CALENDAR_STATE_FLAG_UPDATED);
+
         }
         else
             sCalendarMgr.SendCalendarCommandResult(guid, CALENDAR_ERROR_NO_INVITE); // correct?
@@ -571,15 +569,15 @@ void WorldSession::HandleCalendarEventRemoveInvite(WorldPacket& recv_data)
     DEBUG_LOG("WORLD: CMSG_CALENDAR_EVENT_REMOVE_INVITE [%u]", guid.GetCounter());
 
     ObjectGuid invitee;
-    uint64 eventId;
-    uint64 ownerInviteId; // isn't it sender's inviteId? TODO: need more test to see what we can do with that value
-    uint64 inviteId;
+    ObjectGuid eventId;
+    ObjectGuid ownerInviteId; // isn't it sender's inviteId? TODO: need more test to see what we can do with that value
+    ObjectGuid inviteId;
 
     recv_data >> invitee.ReadAsPacked();
     recv_data >> inviteId >> ownerInviteId >> eventId;
 
-    DEBUG_FILTER_LOG(LOG_FILTER_CALENDAR, "CMSG_CALENDAR_EVENT_REMOVE_INVITE [%u] EventId ["UI64FMTD"], ownerInviteId ["UI64FMTD"], Invitee ([%u] id: ["UI64FMTD"])",
-        guid.GetCounter(), eventId, ownerInviteId, invitee.GetCounter(), inviteId);
+    DEBUG_FILTER_LOG(LOG_FILTER_CALENDAR, "WorldSession::HandleCalendarEventRemoveInvite %u EventId %u, ownerInviteId %u, Invitee %u id: %u",
+        guid.GetCounter(), eventId.GetCounter(), ownerInviteId.GetCounter(), invitee.GetCounter(), inviteId.GetCounter());
 
     if (CalendarEvent* calendarEvent = sCalendarMgr.GetEventById(eventId))
         sCalendarMgr.RemoveInvite(eventId, inviteId, guid);
@@ -591,18 +589,18 @@ void WorldSession::HandleCalendarEventStatus(WorldPacket& recv_data)
 {
     ObjectGuid updaterGuid = _player->GetObjectGuid();
     DEBUG_LOG("WORLD: CMSG_CALENDAR_EVENT_STATUS [%u]", updaterGuid.GetCounter());
-    recv_data.hexlike();
+    //recv_data.hexlike();
 
     ObjectGuid invitee;
-    uint64 eventId;
-    uint64 inviteId;
-    uint64 ownerInviteId; // isn't it sender's inviteId?
+    ObjectGuid eventId;
+    ObjectGuid inviteId;
+    ObjectGuid ownerInviteId; // isn't it sender's inviteId?
     uint32 status;
 
     recv_data >> invitee.ReadAsPacked();
     recv_data >> eventId >> inviteId >> ownerInviteId >> status;
-    DEBUG_FILTER_LOG(LOG_FILTER_CALENDAR, "CMSG_CALENDAR_EVENT_STATUS [%u] EventId [%u] ownerInviteId [%u], Invitee ([%u] id: [%u], status %u",
-        updaterGuid.GetCounter(), uint32(eventId), uint32(ownerInviteId), invitee.GetCounter(), uint32(inviteId), status);
+    DEBUG_FILTER_LOG(LOG_FILTER_CALENDAR, "WorldSession::HandleCalendarEventStatus EventId %u ownerInviteId %u, Invitee %u id: %u, status %u",
+        updaterGuid.GetCounter(), eventId.GetCounter(), ownerInviteId.GetCounter(), invitee.GetCounter(), inviteId.GetCounter(), status);
 
     if (CalendarEvent* calendarEvent = sCalendarMgr.GetEventById(eventId))
     {
@@ -631,7 +629,9 @@ void WorldSession::HandleCalendarEventStatus(WorldPacket& recv_data)
             sCalendarMgr.SendCalendarEventStatus(invite);
             sCalendarMgr.SendCalendarClearPendingAction(invitee);
 
-            CharacterDatabase.PExecute("UPDATE calendar_invites SET status=%u, lastUpdateTime=%u WHERE inviteId=" UI64FMTD, status, uint32(invite->LastUpdateTime), invite->InviteId);
+            invite->RemoveFlag(CALENDAR_STATE_FLAG_SAVED);
+            invite->AddFlag(CALENDAR_STATE_FLAG_UPDATED);
+
         }
         else
             sCalendarMgr.SendCalendarCommandResult(updaterGuid, CALENDAR_ERROR_NO_INVITE);
@@ -646,15 +646,15 @@ void WorldSession::HandleCalendarEventModeratorStatus(WorldPacket& recv_data)
     DEBUG_LOG("WORLD: CMSG_CALENDAR_EVENT_MODERATOR_STATUS [%u]", guid.GetCounter());
 
     ObjectGuid invitee;
-    uint64 eventId;
-    uint64 inviteId;
-    uint64 ownerInviteId; // isn't it sender's inviteId?
+    ObjectGuid eventId;
+    ObjectGuid inviteId;
+    ObjectGuid ownerInviteId; // isn't it sender's inviteId?
     uint32 rank;
 
     recv_data >> invitee.ReadAsPacked();
     recv_data >> eventId >>  inviteId >> ownerInviteId >> rank;
-    DEBUG_FILTER_LOG(LOG_FILTER_CALENDAR, "CMSG_CALENDAR_EVENT_MODERATOR_STATUS [%u] EventId [%u] ownerInviteId [%u], Invitee ([%u] id: [%u], rank %u",
-        guid.GetCounter(), uint32(eventId), uint32(ownerInviteId), invitee.GetCounter(), uint32(inviteId), rank);
+    DEBUG_FILTER_LOG(LOG_FILTER_CALENDAR, "WorldSession::HandleCalendarEventModeratorStatus [%u] EventId [%u] ownerInviteId [%u], Invitee ([%u] id: [%u], rank %u",
+        guid.GetCounter(), eventId.GetCounter(), ownerInviteId.GetCounter(), invitee.GetCounter(), inviteId.GetCounter(), rank);
 
     if (CalendarEvent* calendarEvent = sCalendarMgr.GetEventById(eventId))
     {
@@ -683,7 +683,9 @@ void WorldSession::HandleCalendarEventModeratorStatus(WorldPacket& recv_data)
                  return;
             }
 
-            CharacterDatabase.PExecute("UPDATE calendar_invites SET rank = %u WHERE inviteId=" UI64FMTD, rank, invite->InviteId);
+            invite->RemoveFlag(CALENDAR_STATE_FLAG_SAVED);
+            invite->AddFlag(CALENDAR_STATE_FLAG_UPDATED);
+
             invite->Rank = CalendarModerationRank(rank);
             sCalendarMgr.SendCalendarEventModeratorStatusAlert(invite);
         }
@@ -700,13 +702,13 @@ void WorldSession::HandleCalendarComplain(WorldPacket& recv_data)
     DEBUG_LOG("WORLD: CMSG_CALENDAR_COMPLAIN [%u]", guid.GetCounter());
 
     ObjectGuid badGuyGuid;
-    uint64 eventId;
-    uint64 inviteId;
+    ObjectGuid eventId;
+    ObjectGuid inviteId;
 
     recv_data >> badGuyGuid;
     recv_data >> eventId >>  inviteId;
-    DEBUG_FILTER_LOG(LOG_FILTER_CALENDAR, "CMSG_CALENDAR_EVENT_MODERATOR_STATUS [%u] EventId [%u], Invitee ([%u] id: [%u])",
-        guid.GetCounter(), uint32(eventId), badGuyGuid.GetCounter(), uint32(inviteId));
+    DEBUG_FILTER_LOG(LOG_FILTER_CALENDAR, "WorldSession::HandleCalendarComplain %u EventId %u, Invitee %u id: %u",
+        guid.GetCounter(), eventId.GetCounter(), badGuyGuid.GetCounter(), inviteId.GetCounter());
 
     // Remove the invite
     if (sCalendarMgr.RemoveInvite(eventId, inviteId, guid))
@@ -725,8 +727,7 @@ void WorldSession::HandleCalendarGetNumPending(WorldPacket& /*recv_data*/)
 
     uint32 pending = sCalendarMgr.GetPlayerNumPending(guid);
 
-    DEBUG_FILTER_LOG(LOG_FILTER_CALENDAR, "CMSG_CALENDAR_GET_NUM_PENDING: [" UI64FMTD
-        "] Pending: %u\n", guid, pending);
+    DEBUG_FILTER_LOG(LOG_FILTER_CALENDAR, "WorldSession::HandleCalendarGetNumPending %s Pending: %u", guid.GetString().c_str(), pending);
 
     WorldPacket data(SMSG_CALENDAR_SEND_NUM_PENDING, 4);
     data << uint32(pending);

@@ -1581,7 +1581,7 @@ void World::SetInitialWorldSettings()
     static uint32 abtimer = 0;
     abtimer = sConfig.GetIntDefault("AutoBroadcast.Timer", 60000);
 
-    m_timers[WUPDATE_WEATHERS].SetInterval(1*IN_MILLISECONDS);
+    m_timers[WUPDATE_WEATHERS].SetInterval(1*MINUTE*IN_MILLISECONDS);
     m_timers[WUPDATE_AUCTIONS].SetInterval(MINUTE*IN_MILLISECONDS);
     m_timers[WUPDATE_UPTIME].SetInterval(getConfig(CONFIG_UINT32_UPTIME_UPDATE)*MINUTE*IN_MILLISECONDS);
                                                             //Update "uptime" table based on configuration entry in minutes.
@@ -1589,6 +1589,7 @@ void World::SetInitialWorldSettings()
     m_timers[WUPDATE_DELETECHARS].SetInterval(DAY*IN_MILLISECONDS); // check for chars to delete every day
     m_timers[WUPDATE_AUTOBROADCAST].SetInterval(abtimer);
     m_timers[WUPDATE_WORLDSTATE].SetInterval(1*MINUTE*IN_MILLISECONDS);
+    m_timers[WUPDATE_CALENDAR].SetInterval(30*IN_MILLISECONDS);
 
     // for AhBot
     m_timers[WUPDATE_AHBOT].SetInterval(20*IN_MILLISECONDS); // every 20 sec
@@ -1812,6 +1813,13 @@ void World::Update(uint32 diff)
     {
         m_timers[WUPDATE_WORLDSTATE].Reset();
         sWorldStateMgr.Update();
+    }
+
+    // Update Calendar (cleanup and save)
+    if (m_timers[WUPDATE_CALENDAR].Passed())
+    {
+        m_timers[WUPDATE_CALENDAR].Reset();
+        sCalendarMgr.Update();
     }
 
     // Check if any group can be created by dungeon finder
