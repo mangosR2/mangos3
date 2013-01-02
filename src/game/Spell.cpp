@@ -7930,11 +7930,6 @@ bool Spell::CheckTarget(Unit* target, SpellEffectIndex eff )
         case SPELL_EFFECT_FRIEND_SUMMON:
         case SPELL_EFFECT_SUMMON_PLAYER:                    // from anywhere
             break;
-        case SPELL_EFFECT_THREAT:
-        case SPELL_EFFECT_THREAT_ALL:
-            if ( target->GetTypeId() == TYPEID_PLAYER && !target->GetCharmer() )
-                return false;
-            break;
         case SPELL_EFFECT_DUMMY:
             break;
         case SPELL_EFFECT_RESURRECT_NEW:
