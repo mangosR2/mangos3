@@ -481,8 +481,8 @@ time_t DungeonResetScheduler::CalculateNextResetTime(MapDifficultyEntry const* m
 void DungeonResetScheduler::LoadResetTimes()
 {
     const time_t now = time(NULL);
-    //time_t today = (now / DAY) * DAY;
-    //time_t oldest_reset_time = now;
+    // time_t today = (now / DAY) * DAY;
+    // time_t nextWeek = today + (7 * DAY);
 
     // NOTE: Use DirectPExecute for tables that will be queried later
 
@@ -616,7 +616,7 @@ void DungeonResetScheduler::LoadResetTimes()
 
         time_t t = GetResetTimeFor(mapid,difficulty);
 
-        if(!t || t < now)
+        if (!t || t < now || t > nextWeek)
         {
             t = CalculateNextResetTime(mapDiff);
             CharacterDatabase.DirectPExecute("REPLACE INTO instance_reset VALUES ('%u','%u','"UI64FMTD"')", mapid, difficulty, (uint64)t);

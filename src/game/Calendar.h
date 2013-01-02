@@ -178,8 +178,8 @@ class CalendarMgr : public MaNGOS::Singleton<CalendarMgr, MaNGOS::ClassLevelLock
 
     private:
         CalendarEventStore m_EventStore;
-        uint32 m_MaxEventId;
-        uint32 m_MaxInviteId;
+        uint64 m_MaxEventId;
+        uint64 m_MaxInviteId;
         std::deque<uint32> m_FreeEventIds;
         std::deque<uint32> m_FreeInviteIds;
 
@@ -208,6 +208,9 @@ class CalendarMgr : public MaNGOS::Singleton<CalendarMgr, MaNGOS::ClassLevelLock
             return (itr != m_EventStore.end()) ? &itr->second : NULL;
         }
 
+        // sql related
+        void LoadFromDB();
+
         // send data to client function
         void SendCalendarEventInvite(CalendarInvite const* invite);
         void SendCalendarEventInviteAlert(CalendarInvite const* invite);
@@ -220,6 +223,8 @@ class CalendarMgr : public MaNGOS::Singleton<CalendarMgr, MaNGOS::ClassLevelLock
         void SendCalendarClearPendingAction(ObjectGuid const& guid);
         void SendCalendarEventModeratorStatusAlert(CalendarInvite const* invite);
         void SendCalendarEventUpdateAlert(CalendarEvent const* event, time_t oldEventTime);
+        void SendCalendarRaidLockoutRemove(ObjectGuid const& guid, DungeonPersistentState const* save);
+        void SendCalendarRaidLockoutAdd(ObjectGuid const& guid, DungeonPersistentState const* save);
 
         void SendPacketToAllEventRelatives(WorldPacket packet, CalendarEvent const* event);
 };

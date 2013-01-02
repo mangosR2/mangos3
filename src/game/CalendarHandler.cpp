@@ -29,6 +29,7 @@
 #include "World.h"
 #include "Guild.h"
 #include "GuildMgr.h"
+#include "ArenaTeam.h"
 
 void WorldSession::HandleCalendarGetCalendar(WorldPacket& /*recv_data*/)
 {
@@ -85,7 +86,7 @@ void WorldSession::HandleCalendarGetCalendar(WorldPacket& /*recv_data*/)
     }
     delete events;
 
-    data.AppendPackedTime(currTime);                      // server time
+    data << uint32(currTime);                             // server time
     data.AppendPackedTime(currTime);                      // zone time ??
 
     ByteBuffer dataBuffer;
@@ -117,30 +118,37 @@ void WorldSession::HandleCalendarGetCalendar(WorldPacket& /*recv_data*/)
     std::set<uint32> sentMaps;
     dataBuffer.clear();
 
-    // TODO: check why that don't work returning some imposible reset time
-    /*DungeonResetScheduler::ResetTimeByMapDifficultyMap const& resets = sMapPersistentStateMgr.GetScheduler().GetResetTimeMap();
-
-    for (DungeonResetScheduler::ResetTimeByMapDifficultyMap::const_iterator itr = resets.begin(); itr != resets.end(); ++itr)
+    for (MapDifficultyMap::const_iterator itr = sMapDifficultyMap.begin(); itr != sMapDifficultyMap.end(); ++itr)
     {
-        uint32 mapId = PAIR32_LOPART(itr->first);
-        if (sentMaps.find(mapId) != sentMaps.end())
+        uint32 map_diff_pair = itr->first;
+        uint32 mapId = PAIR32_LOPART(map_diff_pair);
+        Difficulty difficulty = Difficulty(PAIR32_HIPART(map_diff_pair));
+        MapDifficultyEntry const* mapDiff = itr->second;
+
+        // skip mapDiff without global reset time
+        if (!mapDiff->resetTime)
             continue;
 
+        // skip non raid map
         MapEntry const* mapEntry = sMapStore.LookupEntry(mapId);
         if (!mapEntry || !mapEntry->IsRaid())
             continue;
 
+        // skip already sent map (not same difficulty?)
+        if (sentMaps.find(mapId) != sentMaps.end())
+            continue;
+
+        uint32 resetTime = sMapPersistentStateMgr.GetScheduler().GetMaxResetTimeFor(mapDiff);
+
         sentMaps.insert(mapId);
-
-        dataBuffer << int32(mapId);
-        //dataBuffer << int32(itr->second - currTime);
-
-        DEBUG_FILTER_LOG(LOG_FILTER_CALENDAR,"Map [%u] will reset in %s", mapId, secsToTimeString(itr->second - currTime).c_str());
-
-        dataBuffer << int32(600); //test value
-        dataBuffer << int32(0); // Never seen anything else in sniffs - still unknown
+        dataBuffer << mapId;
+        dataBuffer << resetTime;
+        
+        DEBUG_FILTER_LOG(LOG_FILTER_CALENDAR,"MapId [%u] -> Reset Time: %u", mapId, resetTime);
+        dataBuffer << int32(0); // showed 68400 on map 509 must investigate more
         ++boundCounter;
-    }*/
+    }
+    DEBUG_FILTER_LOG(LOG_FILTER_CALENDAR,"Map sent [%u]", boundCounter);
 
     data << uint32(boundCounter);
     data.append(dataBuffer);
@@ -234,9 +242,12 @@ void WorldSession::HandleCalendarEventSignup(WorldPacket& recv_data)
 
 void WorldSession::HandleCalendarArenaTeam(WorldPacket& recv_data)
 {
-    DEBUG_LOG("WORLD: CMSG_CALENDAR_ARENA_TEAM");
-    recv_data.hexlike();
-    recv_data.read_skip<uint32>();                          // unk
+    DEBUG_LOG("WORLD: CMSG_CALENDAR_ARENA_TEAM [%u]", _player->GetObjectGuid().GetCounter());
+    uint32 areanTeamId;
+    recv_data >> areanTeamId;
+
+    if (ArenaTeam* team = sObjectMgr.GetArenaTeamById(areanTeamId))
+        team->MassInviteToEvent(this);
 }
 
 void WorldSession::HandleCalendarAddEvent(WorldPacket& recv_data)
@@ -351,6 +362,14 @@ void WorldSession::HandleCalendarUpdateEvent(WorldPacket& recv_data)
         calendarEvent->Description = description;
 
         sCalendarMgr.SendCalendarEventUpdateAlert(calendarEvent, oldEventTime);
+
+        // query construction
+        CharacterDatabase.escape_string(title);
+        CharacterDatabase.escape_string(description);
+        CharacterDatabase.PExecute("UPDATE calendar_events SET "
+            "type=%hu, flags=%u, dungeonId=%d, eventTime=%u, title=%s, description=%s "
+            "WHERE eventid=" UI64FMTD,
+             type, flags, dungeonId, calendarEvent->EventTime, title, description, eventId);
     }
     else
         sCalendarMgr.SendCalendarCommandResult(guid, CALENDAR_ERROR_EVENT_INVALID);
@@ -537,6 +556,7 @@ void WorldSession::HandleCalendarEventRsvp(WorldPacket& recv_data)
 
             sCalendarMgr.SendCalendarEventStatus(invite);
             sCalendarMgr.SendCalendarClearPendingAction(guid);
+            CharacterDatabase.PExecute("UPDATE calendar_invites SET status=%u, lastUpdateTime=%u WHERE inviteId = "UI64FMTD, status, uint32(invite->LastUpdateTime), invite->InviteId);
         }
         else
             sCalendarMgr.SendCalendarCommandResult(guid, CALENDAR_ERROR_NO_INVITE); // correct?
@@ -558,8 +578,8 @@ void WorldSession::HandleCalendarEventRemoveInvite(WorldPacket& recv_data)
     recv_data >> invitee.ReadAsPacked();
     recv_data >> inviteId >> ownerInviteId >> eventId;
 
-    DEBUG_FILTER_LOG(LOG_FILTER_CALENDAR, "CMSG_CALENDAR_EVENT_REMOVE_INVITE [%u] EventId [%u], ownerInviteId [%u], Invitee ([%u] id: [%u])",
-        guid.GetCounter(), uint32(eventId), uint32(ownerInviteId), invitee.GetCounter(), uint32(inviteId));
+    DEBUG_FILTER_LOG(LOG_FILTER_CALENDAR, "CMSG_CALENDAR_EVENT_REMOVE_INVITE [%u] EventId ["UI64FMTD"], ownerInviteId ["UI64FMTD"], Invitee ([%u] id: ["UI64FMTD"])",
+        guid.GetCounter(), eventId, ownerInviteId, invitee.GetCounter(), inviteId);
 
     if (CalendarEvent* calendarEvent = sCalendarMgr.GetEventById(eventId))
         sCalendarMgr.RemoveInvite(eventId, inviteId, guid);
@@ -610,6 +630,8 @@ void WorldSession::HandleCalendarEventStatus(WorldPacket& recv_data)
             //sCalendarMgr.UpdateInvite(invite);
             sCalendarMgr.SendCalendarEventStatus(invite);
             sCalendarMgr.SendCalendarClearPendingAction(invitee);
+
+            CharacterDatabase.PExecute("UPDATE calendar_invites SET status=%u, lastUpdateTime=%u WHERE inviteId=" UI64FMTD, status, uint32(invite->LastUpdateTime), invite->InviteId);
         }
         else
             sCalendarMgr.SendCalendarCommandResult(updaterGuid, CALENDAR_ERROR_NO_INVITE);
@@ -661,6 +683,7 @@ void WorldSession::HandleCalendarEventModeratorStatus(WorldPacket& recv_data)
                  return;
             }
 
+            CharacterDatabase.PExecute("UPDATE calendar_invites SET rank = %u WHERE inviteId=" UI64FMTD, rank, invite->InviteId);
             invite->Rank = CalendarModerationRank(rank);
             sCalendarMgr.SendCalendarEventModeratorStatusAlert(invite);
         }

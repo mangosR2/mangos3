@@ -65,6 +65,7 @@
 #include "Util.h"
 #include "AuctionHouseBot/AuctionHouseBot.h"
 #include "CharacterDatabaseCleaner.h"
+#include "Calendar.h"
 #include "CreatureLinkingMgr.h"
 #include "LFGMgr.h"
 #include "warden/WardenDataStorage.h"
@@ -1504,6 +1505,9 @@ void World::SetInitialWorldSettings()
 
     sLog.outString( "Loading GameTeleports..." );
     sObjectMgr.LoadGameTele();
+
+    sLog.outString( "Loading Calendar events/invites..." );
+    sCalendarMgr.LoadFromDB();
 
     sLog.outString( "Loading GM tickets...");
     sTicketMgr.LoadGMTickets();
