@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005-2012 MaNGOS <http://getmangos.com/>
+ * Copyright (C) 2005-2013 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,19 +24,16 @@
 enum ModelFlags
 {
     MOD_M2 = 1,
-    MOD_WORLDSPAWN = 1<<1,
-    MOD_HAS_BOUND = 1<<2
+    MOD_WORLDSPAWN = 1 << 1,
+    MOD_HAS_BOUND = 1 << 2
 };
 
-extern const char * szWorkDirWmo;
-extern const char * szRawVMAPMagic;                         // vmap magic string for extracted raw vmap data
+extern const char* szWorkDirWmo;
+extern const char* szRawVMAPMagic;                          // vmap magic string for extracted raw vmap data
 
-bool FileExists(const char * file);
+bool FileExists(const char* file);
 void strToLower(char* str);
 
 bool ExtractSingleWmo(std::string& fname);
-bool ExtractSingleModel(std::string& fname);
-
-void ExtractGameobjectModels();
 
 #endif

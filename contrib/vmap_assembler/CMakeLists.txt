@@ -33,6 +33,7 @@ add_library(g3dlite ../../dep/src/g3dlite/AABox.cpp
 	../../dep/src/g3dlite/Crypto.cpp
 	../../dep/src/g3dlite/format.cpp
 	../../dep/src/g3dlite/Matrix3.cpp
+	../../dep/src/g3dlite/MeshAlgWeld.cpp
 	../../dep/src/g3dlite/Plane.cpp
 	../../dep/src/g3dlite/System.cpp
 	../../dep/src/g3dlite/Triangle.cpp
@@ -58,6 +59,7 @@ add_library(g3dlite ../../dep/src/g3dlite/AABox.cpp
 	../../dep/src/g3dlite/Log.cpp
 	../../dep/src/g3dlite/Matrix4.cpp
 	../../dep/src/g3dlite/MemoryManager.cpp
+	../../dep/src/g3dlite/PhysicsFrame.cpp
 	../../dep/src/g3dlite/Quat.cpp
 	../../dep/src/g3dlite/Random.cpp
 	../../dep/src/g3dlite/Ray.cpp
@@ -66,7 +68,9 @@ add_library(g3dlite ../../dep/src/g3dlite/AABox.cpp
 	../../dep/src/g3dlite/TextInput.cpp
 	../../dep/src/g3dlite/TextOutput.cpp
 	../../dep/src/g3dlite/UprightFrame.cpp
+	../../dep/src/g3dlite/uint128.cpp
 	../../dep/src/g3dlite/Vector2.cpp
+	../../dep/src/g3dlite/Welder.cpp
 	)
 
 add_library(vmap

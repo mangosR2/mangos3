@@ -16,3 +16,8 @@ debug
 release
 *.ilk
 ad_debug.exe
+
+bin
+build
+i686
+x86_64

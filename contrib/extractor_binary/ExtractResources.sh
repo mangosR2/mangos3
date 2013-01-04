@@ -145,7 +145,7 @@ fi
 if [ "$USE_VMAPS" = "1" ]
 then
   echo "`date`: Start extraction of vmaps..." | tee -a $LOG_FILE
-  vmapExtractor | tee -a $DETAIL_LOG_FILE
+  vmapextractor | tee -a $DETAIL_LOG_FILE
   echo "`date`: Extracting of vmaps finished" | tee -a $LOG_FILE
   mkdir vmaps
   echo "`date`: Start assembling of vmaps..." | tee -a $LOG_FILE

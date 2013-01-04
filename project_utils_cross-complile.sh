@@ -83,7 +83,7 @@ fi
 cd ../../..
 ################################################################################################
 # Make extractor
-cd contrib/vmap_extractor_v4
+cd contrib/vmap_extractor
 make clean
 if [ ! -d ./$PLATFORM ]; then
     mkdir $PLATFORM
@@ -99,10 +99,10 @@ fi
 make
 
 if [ "$PLATFORM" != "build" ]; then
-    cp ./vmapextract/vmapExtractor3.exe ../../../$BINARY_PATH/$PLATFORM/
+    cp ./vmapextract/vmapextractor.exe ../../../$BINARY_PATH/$PLATFORM/
     cp /usr/$PLATFORM-w64-mingw32/sys-root/mingw/bin/libbz2-1.dll ../../../$BINARY_PATH/$PLATFORM/
 else
-    cp ./vmapextract/vmapExtractor3 ../../../$BINARY_PATH/$PLATFORM/
+    cp ./vmapextract/vmapextractor ../../../$BINARY_PATH/$PLATFORM/
 fi
 cd ../../..
 ################################################################################################

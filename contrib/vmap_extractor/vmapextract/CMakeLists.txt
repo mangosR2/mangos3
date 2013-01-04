@@ -1,4 +1,4 @@
-# Copyright (C) 2005-2012 MaNGOS project <http://getmangos.com/>
+# Copyright (C) 2005-2013 MaNGOS project <http://getmangos.com/>
 #
 # This file is free software; as a special exception the author gives
 # unlimited permission to copy and/or distribute it, with or without
@@ -11,5 +11,6 @@
 cmake_minimum_required (VERSION 2.6)
 project (MANGOS_IOMAP_EXTRACTOR)
 
-add_executable(vmapExtractor3 adtfile.cpp  dbcfile.cpp  model.cpp  mpq_libmpq.cpp  vmapexport.cpp  wdtfile.cpp  wmo.cpp gameobject_extract.cpp)
-target_link_libraries(vmapExtractor3 libmpq.a bz2 z)
+LINK_DIRECTORIES( ${LINK_DIRECTORIES} )
+add_executable(vmapextractor adtfile.cpp  dbcfile.cpp  model.cpp mpqfile.cpp  vmapexport.cpp  wdtfile.cpp  wmo.cpp)
+target_link_libraries(vmapextractor bz2 libStormLib z)
