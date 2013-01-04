@@ -1264,14 +1264,7 @@ bool Creature::CreateFromProto(uint32 guidlow, CreatureInfo const* cinfo, Team t
 
     Object::_Create(guidlow, cinfo->Entry, cinfo->GetHighGuid());
 
-    if (!UpdateEntry(cinfo->Entry, team, data, eventData, false))
-        return false;
-
-    // Checked at startup
-    if (GetCreatureInfo()->vehicleId)
-        SetVehicleId(GetCreatureInfo()->vehicleId);
-
-    return true;
+    return UpdateEntry(cinfo->Entry, team, data, eventData, false);
 }
 
 bool Creature::LoadFromDB(uint32 guidlow, Map* map)

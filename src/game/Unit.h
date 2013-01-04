@@ -660,6 +660,11 @@ enum MovementFlags
     MOVEFLAG_SAFE_FALL          = 0x08000000,               // active rogue safe fall spell (passive)
     MOVEFLAG_HOVER              = 0x10000000,
     MOVEFLAG_LOCAL_DIRTY        = 0x20000000,
+
+    MOVEFLAG_MASK_MOVING =
+        MOVEFLAG_FORWARD | MOVEFLAG_BACKWARD | MOVEFLAG_STRAFE_LEFT | MOVEFLAG_STRAFE_RIGHT |
+        MOVEFLAG_PITCH_UP | MOVEFLAG_PITCH_DOWN | MOVEFLAG_FALLING | MOVEFLAG_FALLINGFAR | MOVEFLAG_ASCENDING | MOVEFLAG_DESCENDING |
+        MOVEFLAG_SPLINE_ELEVATION,
 };
 
 // flags that use in movement check for example at spell casting
@@ -803,6 +808,7 @@ class MovementInfo
         uint32 GetFallTime() const { return fallTime; }
         void ChangeOrientation(float o) { pos.o = o; }
         void ChangePosition(float x, float y, float z, float o) { pos.x = x; pos.y = y; pos.z = z; pos.o = o; }
+        void ChangeTransportPosition(float x, float y, float z, float o) { t_pos.x = x; t_pos.y = y; t_pos.z = z; t_pos.o = o; }
         void UpdateTime(uint32 _time) { time = _time; }
 
         struct JumpInfo

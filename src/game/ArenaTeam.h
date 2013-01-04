@@ -218,6 +218,9 @@ class ArenaTeam
         void SetBattleRating(uint32 rating) { BattleRating = rating; }
         uint32 GetBattleRating() { return BattleRating; }
 
+        // Calendar
+        void MassInviteToEvent(WorldSession* session);
+
     protected:
 
         uint32 m_TeamId;

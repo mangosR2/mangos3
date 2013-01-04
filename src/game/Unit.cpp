@@ -3870,7 +3870,7 @@ SpellMissInfo Unit::SpellResistResult(Unit* pVictim, SpellEntry const* spell)
             //    resist_mech = 5;
         }
 
-        // Need additional confirmation for next: 
+        // Need additional confirmation for next:
         // if (spell->Effect[eff] == SPELL_EFFECT_APPLY_AURA && IsCrowdControlAura(AuraType(spell->EffectApplyAuraName[eff])))
         //     resist_mech = 5;
     }
@@ -3890,9 +3890,9 @@ SpellMissInfo Unit::SpellResistResult(Unit* pVictim, SpellEntry const* spell)
         modResistChance
         );
 
-    if (modResistChance <  0) 
+    if (modResistChance <  0)
         modResistChance =  0;
-    else if (modResistChance > 100) 
+    else if (modResistChance > 100)
         modResistChance = 100;
 
     int32 rand = irand(0,100);
@@ -3905,7 +3905,7 @@ SpellMissInfo Unit::SpellResistResult(Unit* pVictim, SpellEntry const* spell)
         return SPELL_MISS_NONE;
 
     // Calculate plain resistance chances (binary resistances part 2, formula from http://www.wowwiki.com/Resistance)
-    // http://www.wowwiki.com/Resistance - "Resistance reduces the chance for the binary spell to land by a certain percentage. 
+    // http://www.wowwiki.com/Resistance - "Resistance reduces the chance for the binary spell to land by a certain percentage.
     // Spell hit will not reduce this chance. It is assumed that this percentage is exactly the damage reduction percentage given above."
 
     // Get base resistance values
@@ -3931,8 +3931,8 @@ SpellMissInfo Unit::SpellResistResult(Unit* pVictim, SpellEntry const* spell)
         effectiveRR,
         drp);
 
-    // http://www.wowwiki.com/Formulas:Magical_resistance - "Average resistance may be no higher than 75%." 
-    if (drp >  75) 
+    // http://www.wowwiki.com/Formulas:Magical_resistance - "Average resistance may be no higher than 75%."
+    if (drp >  75)
         drp =  75;
 
     modResistChance = 100 - drp;
@@ -5075,7 +5075,7 @@ bool Unit::AddSpellAuraHolder(SpellAuraHolderPtr holder)
         {
             if (iter->second == holder)
             {
-                sLog.outError("Unit::AddSpellAuraHolder cannot add SpellAuraHolder %u, to %s due to holder already added!", 
+                sLog.outError("Unit::AddSpellAuraHolder cannot add SpellAuraHolder %u, to %s due to holder already added!",
                     holder->GetId(),GetObjectGuid().GetString().c_str());
                 return false;
             }
@@ -10890,7 +10890,7 @@ bool Unit::TauntApply(Unit* taunter, bool isSingleEffect)
 {
     MANGOS_ASSERT(GetTypeId() == TYPEID_UNIT);
 
-    if (!taunter 
+    if (!taunter
         || (taunter->GetTypeId() == TYPEID_PLAYER && ((Player*)taunter)->isGameMaster())
         // FIXME - this checks really needed?
         //|| !taunter->isVisibleForOrDetect(this,this,true)
@@ -10919,7 +10919,7 @@ bool Unit::TauntApply(Unit* taunter, bool isSingleEffect)
     }
 
     if (isSingleEffect)
-        getThreatManager().addThreat(taunter, getThreatManager().getCurrentVictim() ? 
+        getThreatManager().addThreat(taunter, getThreatManager().getCurrentVictim() ?
                                               getThreatManager().getCurrentVictim()->getThreat() : 1.0f);
     else
         getThreatManager().tauntApply(taunter);
@@ -14394,7 +14394,7 @@ void Unit::SetVehicleId(uint32 entry)
 
 VehicleEntry const* Unit::GetVehicleInfo() const
 {
-    return GetVehicleKit() ? GetVehicleKit()->GetEntry() : NULL; 
+    return GetVehicleKit() ? GetVehicleKit()->GetEntry() : NULL;
 }
 
 uint32 Unit::CalculateAuraPeriodicTimeWithHaste(SpellEntry const* spellProto, uint32 oldPeriodicTime)
@@ -14491,13 +14491,13 @@ bool Unit::IsVisibleTargetForSpell(WorldObject const* caster, SpellEntry const* 
 
     if (location && location->HasMap()) // check only for fully initialized WorldLocation
     {
-        DEBUG_FILTER_LOG(LOG_FILTER_SPELL_CAST, "Unit::IsVisibleTargetForSpell check LOS for spell %u, caster %s, location %f %f %f, target %s", 
+        DEBUG_FILTER_LOG(LOG_FILTER_SPELL_CAST, "Unit::IsVisibleTargetForSpell check LOS for spell %u, caster %s, location %f %f %f, target %s",
             spellInfo->Id, caster->GetObjectGuid().GetString().c_str(), location->x, location->y, location->z, GetObjectGuid().GetString().c_str());
-        return ((GetMapId() == location->mapid) && IsWithinLOS(location->x, location->y, location->z));
+        return ((GetMapId() == location->GetMapId()) && IsWithinLOS(location->x, location->y, location->z));
     }
     else
     {
-        DEBUG_FILTER_LOG(LOG_FILTER_SPELL_CAST, "Unit::IsVisibleTargetForSpell check LOS for spell %u, caster %s, target %s", 
+        DEBUG_FILTER_LOG(LOG_FILTER_SPELL_CAST, "Unit::IsVisibleTargetForSpell check LOS for spell %u, caster %s, target %s",
             spellInfo->Id, caster->GetObjectGuid().GetString().c_str(), GetObjectGuid().GetString().c_str());
         return IsWithinLOSInMap(caster);
     }
@@ -14620,10 +14620,13 @@ void Unit::UpdateSplineMovement(uint32 t_diff)
     if (m_movesplineTimer.Passed() || arrived)
     {
         m_movesplineTimer.Reset(POSITION_UPDATE_DELAY);
-        Movement::Location loc = movespline->ComputePosition();
+        Location loc = movespline->ComputePosition();
 
         if (IsBoarded())
+        {
+            m_movementInfo.ChangeTransportPosition(loc.x, loc.y, loc.z, loc.orientation);
             GetTransportInfo()->SetLocalPosition(loc.x, loc.y, loc.z, loc.orientation);
+        }
         else
             SetPosition(loc.x,loc.y,loc.z,loc.orientation);
     }
@@ -14644,7 +14647,7 @@ uint32 Unit::GetResistance(SpellSchoolMask schoolMask) const
         if (schoolMask & (1 << i))
         {
             int32 schoolRes = (GetObjectGuid().IsPlayer() || (GetObjectGuid().IsPet() && GetOwner() && GetOwner()->GetObjectGuid().IsPlayer())) ?
-                              GetResistance(SpellSchools(i)) : 
+                              GetResistance(SpellSchools(i)) :
                               floor(GetResistanceBuffMods(SpellSchools(i), true) - GetResistanceBuffMods(SpellSchools(i), false));
             if (resistance < schoolRes)
                 resistance = schoolRes;

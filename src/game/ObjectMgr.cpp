@@ -3687,7 +3687,7 @@ void ObjectMgr::LoadGroups()
         bar.step();
         Field *fields = result->Fetch();
         ++count;
-        Group *group = new Group;
+        Group* group = new Group(GROUPTYPE_NORMAL);
         if (!group->LoadGroupFromDB(fields))
         {
             group->Disband();
