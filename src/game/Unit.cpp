@@ -13973,7 +13973,7 @@ void Unit::UpdateSplineMovement(uint32 t_diff)
     if (m_movesplineTimer.Passed() || arrived)
     {
         m_movesplineTimer.Reset(POSITION_UPDATE_DELAY);
-        Movement::Location loc = movespline->ComputePosition();
+        Location loc = movespline->ComputePosition();
 
         if (IsBoarded())
         {
