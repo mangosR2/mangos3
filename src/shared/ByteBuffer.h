@@ -673,6 +673,14 @@ class ByteBuffer
             return f;
         }
 
+        uint32 ReadPackedTime();
+
+        ByteBuffer& ReadPackedTime(uint32& time)
+        {
+            time = ReadPackedTime();
+            return *this;
+        }
+
         const uint8 *contents() const { return &_storage[0]; }
 
         size_t size() const { return _storage.size(); }

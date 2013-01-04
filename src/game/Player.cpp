@@ -2089,7 +2089,7 @@ bool Player::TeleportTo(WorldLocation const& loc, uint32 options)
                     data << float(final_z);
                 }
 
-                data << uint32(loc.mapid);
+                data << uint32(loc.GetMapId());
 
                 if (m_transport)
                     data << float(m_movementInfo.GetTransportPos()->y);
@@ -15693,7 +15693,7 @@ bool Player::LoadFromDB(ObjectGuid guid, SqlQueryHolder *holder)
 
     WorldLocation savedLocation = WorldLocation(fields[15].GetUInt32(),fields[12].GetFloat(),fields[13].GetFloat(),fields[14].GetFloat(),fields[16].GetFloat());
 
-    SetLocationMapId(savedLocation.mapid);
+    SetLocationMapId(savedLocation.GetMapId());
     Relocate(savedLocation.x, savedLocation.y, savedLocation.z, savedLocation.o);
 
     m_Difficulty = fields[39].GetUInt32();                  // may be changed in _LoadGroup

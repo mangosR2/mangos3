@@ -75,6 +75,23 @@ void BitStream::Print()
     sLog.outDebug(ss.str().c_str());
 }
 
+uint32 ByteBuffer::ReadPackedTime()
+{
+    uint32 packedDate = read<uint32>();
+
+    tm _localtime;
+    memset(&_localtime, 0, sizeof(_localtime));
+
+    _localtime.tm_min     = packedDate & 0x3F;
+    _localtime.tm_hour    = (packedDate >> 6) & 0x1F;
+    //_localtime.tm_wday   = (packedDate >> 11) & 7;
+    _localtime.tm_mday    = ((packedDate >> 14) & 0x3F) + 1;
+    _localtime.tm_mon     = (packedDate >> 20) & 0xF;
+    _localtime.tm_year    = ((packedDate >> 24) & 0x1F) + 100;
+
+    return mktime(&_localtime) + timezone;
+}
+
 void ByteBuffer::AppendPackedTime(time_t time)
 {
     tm* _localtime = localtime(&time);
