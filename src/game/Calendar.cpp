@@ -670,7 +670,7 @@ void CalendarMgr::SaveEventToDB(CalendarEvent const* event)
     uberInsert.addUInt32(event->GuildId);
     uberInsert.addUInt32(event->Type);
     uberInsert.addUInt32(event->Flags);
-    uberInsert.addUInt32(event->DungeonId);
+    uberInsert.addInt32(event->DungeonId);
     uberInsert.addUInt32(event->EventTime);
     uberInsert.addString(event->Title.c_str());
     uberInsert.addString(event->Description.c_str());
