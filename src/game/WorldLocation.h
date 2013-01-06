@@ -56,19 +56,19 @@ struct MANGOS_DLL_SPEC Location : public Vector3
 struct MANGOS_DLL_SPEC Position : public Location
 {
     Position() 
-        : Location()
+        : Location(), coord_x(x), coord_y(y), coord_z(z)
     {};
 
     Position(float _x, float _y, float _z, float _o = 0.0f)
-        : Location(_x, _y, _z, _o)
+        : Location(_x, _y, _z, _o), coord_x(x), coord_y(y), coord_z(z)
     {};
 
     virtual ~Position()
     {};
 
-    float& coord_x = x;
-    float& coord_y = y;
-    float& coord_z = z;
+    float& coord_x;
+    float& coord_y;
+    float& coord_z;
 
     virtual bool HasMap() const { return false; };
 

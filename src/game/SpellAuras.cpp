@@ -1055,7 +1055,7 @@ void Aura::PersistentAreaAuraUpdate(uint32 diff)
         DynamicObject *dynObj = caster->GetDynObject(GetId(), GetEffIndex());
         if (dynObj)
         {
-            if (!GetTarget()->IsWithinDistInMap(dynObj, dynObj->GetRadius()))
+            if (GetHolder()->IsPermanent() && !GetTarget()->IsWithinDistInMap(dynObj, dynObj->GetRadius()))
             {
                 remove = true;
                 dynObj->RemoveAffected(GetTarget());        // let later reapply if target return to range
@@ -10713,7 +10713,7 @@ m_permanent(false), m_isRemovedOnShapeLost(true), m_deleted(false), m_in_use(0)
     m_duration = m_maxDuration = CalculateSpellDuration(spellproto, unitCaster);
 
     if (m_maxDuration == -1 || (m_isPassive && spellproto->DurationIndex == 0))
-        m_permanent = true;
+        SetPermanent(true);
 
     if (unitCaster)
     {

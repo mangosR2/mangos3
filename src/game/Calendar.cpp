@@ -72,7 +72,7 @@ CalendarInvite* CalendarEvent::GetInviteByGuid(ObjectGuid const& guid)
 
 CalendarInviteMap::iterator CalendarEvent::RemoveInviteByItr(CalendarInviteMap::iterator inviteItr)
 {
-    if (inviteItr != m_Invitee.end())
+    if (inviteItr != m_Invitee.end() && !inviteItr->second->HasFlag(CALENDAR_STATE_FLAG_DELETED))
     {
         // TODO: check why only send alert if its not guild event
         if (!IsGuildEvent())
@@ -91,7 +91,7 @@ void CalendarEvent::RemoveInviteByGuid(ObjectGuid const& playerGuid)
     CalendarInviteMap::iterator itr = m_Invitee.begin();
     while (itr != m_Invitee.end())
     {
-        if (itr->second->InviteeGuid == playerGuid)
+        if (!itr->second->HasFlag(CALENDAR_STATE_FLAG_DELETED) && itr->second->InviteeGuid == playerGuid)
         {
             itr = RemoveInviteByItr(itr);
         }
@@ -425,47 +425,35 @@ void CalendarMgr::CopyEvent(ObjectGuid const& eventId, time_t newTime, ObjectGui
 
 void CalendarMgr::RemovePlayerCalendar(ObjectGuid const& playerGuid)
 {
-    CalendarEventStore::iterator itr = m_EventStore.begin();
-
-    while (itr != m_EventStore.end())
+    for (CalendarEventStore::iterator itr = m_EventStore.begin(); itr != m_EventStore.end();)
     {
-        ObjectGuid eventId = itr->first;
-        if (itr->second.CreatorGuid == playerGuid)
+        CalendarEvent& event = itr->second;
+        ObjectGuid const& eventId = itr->first;
+
+        if (!event.HasFlag(CALENDAR_STATE_FLAG_DELETED) && event.CreatorGuid == playerGuid)
         {
-            // all invite will be automaticaly deleted
-            m_EventStore.erase(eventId);
-            // itr already incremented so go recheck event owner
-            continue;
+            event.RemoveInviteByGuid(playerGuid);
+            event.AddFlag(CALENDAR_STATE_FLAG_DELETED);
         }
-        // event not owned by playerGuid but an invite can still be found
-        CalendarEvent* event = &itr->second;
-        event->RemoveInviteByGuid(playerGuid);
-        ++itr;
+        else
+            ++itr;
     }
 }
 
 void CalendarMgr::RemoveGuildCalendar(ObjectGuid const& playerGuid, uint32 GuildId)
 {
-    CalendarEventStore::iterator itr = m_EventStore.begin();
-
-    while (itr != m_EventStore.end())
+    for (CalendarEventStore::iterator itr = m_EventStore.begin(); itr != m_EventStore.end();)
     {
-        CalendarEvent* event = &itr->second;
-        ObjectGuid eventId = itr->first;
-        if (event->CreatorGuid == playerGuid && (event->IsGuildEvent()|| event->IsGuildAnnouncement()))
+        CalendarEvent& event = itr->second;
+        ObjectGuid const& eventId  = itr->first;
+
+        if (!event.HasFlag(CALENDAR_STATE_FLAG_DELETED) && event.CreatorGuid == playerGuid && (event.IsGuildEvent() || event.IsGuildAnnouncement()))
         {
-            // all invite will be automaticaly deleted
-            m_EventStore.erase(eventId);
-            // itr already incremented so go recheck event owner
-            continue;
+            event.RemoveInviteByGuid(playerGuid);
+            event.AddFlag(CALENDAR_STATE_FLAG_DELETED);
         }
-        // event not owned by playerGuid but an guild invite can still be found
-
-        if (event->GuildId != GuildId || !(event->IsGuildEvent() || event->IsGuildAnnouncement()))
-            continue;
-
-        event->RemoveInviteByGuid(playerGuid);
-        ++itr;
+        else
+            ++itr;
     }
 }
 
@@ -670,7 +658,7 @@ void CalendarMgr::SaveEventToDB(CalendarEvent const* event)
     uberInsert.addUInt32(event->GuildId);
     uberInsert.addUInt32(event->Type);
     uberInsert.addUInt32(event->Flags);
-    uberInsert.addUInt32(event->DungeonId);
+    uberInsert.addInt32(event->DungeonId);
     uberInsert.addUInt32(event->EventTime);
     uberInsert.addString(event->Title.c_str());
     uberInsert.addString(event->Description.c_str());
