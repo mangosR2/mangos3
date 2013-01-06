@@ -221,6 +221,8 @@ void Object::BuildCreateUpdateBlockForPlayer(UpdateData *data, Player *target) c
                 updatetype = UPDATETYPE_CREATE_OBJECT2;
             break;
         }
+        default:
+            break;
     }
     if (updateFlags & UPDATEFLAG_HAS_POSITION)
     {
