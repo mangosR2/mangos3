@@ -396,7 +396,7 @@ class MANGOS_DLL_SPEC Object
             float  *m_floatValues;
         };
 
-        uint32 *m_uint32Values_mirror;
+        std::vector<bool> m_changedValues;
 
         uint16 m_valuesCount;
         uint16 m_fieldNotifyFlags;
