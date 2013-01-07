@@ -70,6 +70,7 @@ CalendarInvite* CalendarEvent::GetInviteByGuid(ObjectGuid const& guid)
     return NULL;
 }
 
+// FIXME - need remove this monstruous methods chain...
 CalendarInviteMap::iterator CalendarEvent::RemoveInviteByItr(CalendarInviteMap::iterator inviteItr)
 {
     if (inviteItr != m_Invitee.end() && !inviteItr->second->HasFlag(CALENDAR_STATE_FLAG_DELETED))
@@ -103,7 +104,7 @@ void CalendarEvent::RemoveInviteByGuid(ObjectGuid const& playerGuid)
 bool CalendarEvent::RemoveInviteById(ObjectGuid inviteId, ObjectGuid const& removerGuid)
 {
     CalendarInviteMap::iterator inviteItr = m_Invitee.find(inviteId);
-    if (inviteItr == m_Invitee.end())
+    if (inviteItr == m_Invitee.end() || inviteItr->second->HasFlag(CALENDAR_STATE_FLAG_DELETED))
     {
         // invite not found
         sCalendarMgr.SendCalendarCommandResult(removerGuid, CALENDAR_ERROR_NO_INVITE);
@@ -189,6 +190,20 @@ CalendarMgr::~CalendarMgr()
 {
 }
 
+CalendarEvent* CalendarMgr::GetEventById(ObjectGuid const& eventId)
+{
+    ReadGuard guard(GetLock());
+    CalendarEventStore::iterator itr = m_EventStore.find(eventId);
+    return (itr != m_EventStore.end() && !itr->second.HasFlag(CALENDAR_STATE_FLAG_DELETED)) ? &itr->second : NULL;
+}
+
+CalendarInvite* CalendarMgr::GetInviteById(ObjectGuid const& inviteId)
+{
+    ReadGuard guard(GetLock());
+    CalendarInviteStore::iterator itr = m_InviteStore.find(inviteId);
+    return (itr != m_InviteStore.end() && !itr->second.HasFlag(CALENDAR_STATE_FLAG_DELETED)) ? &itr->second : NULL;
+}
+
 CalendarEventsList* CalendarMgr::GetPlayerEventsList(ObjectGuid const& guid)
 {
     CalendarEventsList* events = new CalendarEventsList;
@@ -200,20 +215,23 @@ CalendarEventsList* CalendarMgr::GetPlayerEventsList(ObjectGuid const& guid)
     else
         guildId = Player::GetGuildIdFromDB(guid);
 
+    ReadGuard guard(GetLock());
     for (CalendarEventStore::iterator itr = m_EventStore.begin(); itr != m_EventStore.end(); ++itr)
     {
-        CalendarEvent* event = &itr->second;
+        CalendarEvent& event = itr->second;
+        if (event.HasFlag(CALENDAR_STATE_FLAG_DELETED))
+            continue;
 
         // add own event and same guild event or announcement
-        if ((event->CreatorGuid == guid) || ((event->IsGuildAnnouncement() || event->IsGuildEvent()) && event->GuildId == guildId))
+        if ((event.CreatorGuid == guid) || ((event.IsGuildAnnouncement() || event.IsGuildEvent()) && event.GuildId == guildId))
         {
-            events->insert(event);
+            events->insert(&event);
             continue;
         }
 
         // add all event where player is invited
-        if (event->GetInviteByGuid(guid))
-            events->insert(event);
+        if (event.GetInviteByGuid(guid))
+            events->insert(&event);
     }
     return events;
 }
@@ -229,14 +247,17 @@ CalendarInvitesList* CalendarMgr::GetPlayerInvitesList(ObjectGuid const& guid)
     else
         guildId = Player::GetGuildIdFromDB(guid);
 
+    // ReadGuard guard(GetLock());
+    // FIXME - need use main invites list instead of
+
     for (CalendarEventStore::iterator itr = m_EventStore.begin(); itr != m_EventStore.end(); ++itr)
     {
-        CalendarEvent* event = &itr->second;
+        CalendarEvent& event = itr->second;
 
-        if (event->IsGuildAnnouncement())
+        if (event.IsGuildAnnouncement())
             continue;
 
-        CalendarInviteMap const* cInvMap = event->GetInviteMap();
+        CalendarInviteMap const* cInvMap = event.GetInviteMap();
         CalendarInviteMap::const_iterator ci_itr = cInvMap->begin();
         while (ci_itr != cInvMap->end())
         {
@@ -277,6 +298,7 @@ CalendarEvent* CalendarMgr::AddEvent(ObjectGuid const& guid, std::string title, 
 
     uint32 guild = ((flags & CALENDAR_FLAG_GUILD_EVENT) || (flags && CALENDAR_FLAG_GUILD_ANNOUNCEMENT)) ? player->GetGuildId() : 0;
 
+    // FIXME - need lock and constructor usage in this place
     m_EventStore[eventGuid].EventId = eventGuid;
     m_EventStore[eventGuid].CreatorGuid = guid;
     m_EventStore[eventGuid].Title = title;
@@ -311,7 +333,10 @@ CalendarInvite* CalendarMgr::AddInvite(CalendarEvent* event, ObjectGuid const& s
 
 //    CalendarInvite* calendarInvite = new CalendarInvite(event, GetNewInviteId(), senderGuid, inviteeGuid, statusTime, status, rank, text);
     ObjectGuid inviteGuid = ObjectGuid(HIGHGUID_INVITE, GenerateInviteLowGuid());
-    m_InviteStore.insert(CalendarInviteStore::value_type(inviteGuid, CalendarInvite(event, inviteGuid, senderGuid, inviteeGuid, statusTime, status, rank, text)));
+    {
+        WriteGuard guard(GetLock());
+        m_InviteStore.insert(CalendarInviteStore::value_type(inviteGuid, CalendarInvite(event, inviteGuid, senderGuid, inviteeGuid, statusTime, status, rank, text)));
+    }
     CalendarInvite* calendarInvite = &m_InviteStore[inviteGuid];
 
     if (!event->IsGuildAnnouncement())
