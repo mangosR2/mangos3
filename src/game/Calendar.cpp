@@ -48,7 +48,7 @@ bool CalendarEvent::AddInvite(CalendarInvite* invite)
 CalendarInvite* CalendarEvent::GetInviteById(ObjectGuid const& inviteId)
 {
     CalendarInviteMap::iterator itr = m_Invitee.find(inviteId);
-    if (itr != m_Invitee.end())
+    if (itr != m_Invitee.end() && !itr->second->HasFlag(CALENDAR_STATE_FLAG_DELETED))
         return itr->second;
     return NULL;
 }
@@ -63,7 +63,7 @@ CalendarInvite* CalendarEvent::GetInviteByGuid(ObjectGuid const& guid)
         ++inviteItr;
     }
 
-    if (inviteItr != m_Invitee.end())
+    if (inviteItr != m_Invitee.end() && !inviteItr->second->HasFlag(CALENDAR_STATE_FLAG_DELETED))
     {
         return inviteItr->second;
     }
@@ -91,7 +91,7 @@ void CalendarEvent::RemoveInviteByGuid(ObjectGuid const& playerGuid)
     CalendarInviteMap::iterator itr = m_Invitee.begin();
     while (itr != m_Invitee.end())
     {
-        if (!itr->second->HasFlag(CALENDAR_STATE_FLAG_DELETED) && itr->second->InviteeGuid == playerGuid)
+        if (itr->second->InviteeGuid == playerGuid && !itr->second->HasFlag(CALENDAR_STATE_FLAG_DELETED))
         {
             itr = RemoveInviteByItr(itr);
         }
@@ -140,9 +140,9 @@ bool CalendarEvent::RemoveInviteById(ObjectGuid inviteId, ObjectGuid const& remo
 
     // TODO: Send mail to invitee if needed
 
+    RemoveInviteByItr(inviteItr);
     invite->AddFlag(CALENDAR_STATE_FLAG_DELETED);
 
-    RemoveInviteByItr(inviteItr);
     return true;
 }
 
@@ -335,8 +335,8 @@ CalendarInvite* CalendarMgr::AddInvite(CalendarEvent* event, ObjectGuid const& s
         return NULL;
     }
 
-    calendarInvite->AddFlag(CALENDAR_STATE_FLAG_UPDATED);
     calendarInvite->RemoveFlag(CALENDAR_STATE_FLAG_SAVED);
+    calendarInvite->AddFlag(CALENDAR_STATE_FLAG_UPDATED);
 
     return calendarInvite;
 }
@@ -560,7 +560,8 @@ void CalendarMgr::LoadFromDB()
 
                 maxInviteId = (maxInviteId < inviteGuid.GetCounter()) ? inviteGuid.GetCounter() : maxEventId;
 
-            } while (invitesQuery->NextRow());
+            }
+            while (invitesQuery->NextRow());
             sLog.outString();
             sLog.outString(">> Loaded %u invites!", uint32(invitesQuery->GetRowCount()));
         }
@@ -650,7 +651,7 @@ void CalendarMgr::SaveEventToDB(CalendarEvent const* event)
     DeleteEventFromDB(event->GetObjectGuid());
 
     static SqlStatementID insEvent;
-    SqlStatement uberInsert = CharacterDatabase.CreateStatement(insEvent, "INSERT INTO `calendar_events`  (eventId, creatorGuid, guildId, type, flags, dungeonId, eventTime, title, description)"
+    SqlStatement uberInsert = CharacterDatabase.CreateStatement(insEvent, "INSERT INTO calendar_events (eventId, creatorGuid, guildId, type, flags, dungeonId, eventTime, title, description)"
         " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)" );
 
     uberInsert.addUInt32(event->GetObjectGuid().GetCounter());
@@ -674,7 +675,7 @@ void CalendarMgr::SaveInviteToDB(CalendarInvite const* invite)
     DeleteInviteFromDB(invite->GetObjectGuid());
 
     static SqlStatementID insEvent;
-    SqlStatement uberInsert = CharacterDatabase.CreateStatement(insEvent, "INSERT INTO `calendar_invites`  (inviteId, eventId, inviteeGuid, senderGuid, status, lastUpdateTime, rank, description)"
+    SqlStatement uberInsert = CharacterDatabase.CreateStatement(insEvent, "INSERT INTO calendar_invites (inviteId, eventId, inviteeGuid, senderGuid, status, lastUpdateTime, rank, description)"
         " VALUES (?, ?, ?, ?, ?, ?, ?, ?)" );
 
     uberInsert.addUInt32(invite->GetObjectGuid().GetCounter());
