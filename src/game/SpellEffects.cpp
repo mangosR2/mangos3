@@ -6331,7 +6331,7 @@ void Spell::DoSummonGroupPets(SpellEffectEntry const* effect)
                          --amount;
                         DEBUG_LOG("Pet %s summoned (from database). Counter is %d ",
                                      pet->GetObjectGuid().GetString().c_str(), pet->GetPetCounter());
-                        SendEffectLogExecute(effect, pet->GetObjectGuid());
+                        //SendEffectLogExecute(effect, pet->GetObjectGuid());
                     }
                     else
                     {
@@ -6374,7 +6374,7 @@ void Spell::DoSummonGroupPets(SpellEffectEntry const* effect)
             ((Creature*)m_caster)->AI()->JustSummoned((Creature*)pet);
         if (m_originalCaster && m_originalCaster != m_caster && m_originalCaster->GetTypeId() == TYPEID_UNIT && ((Creature*)m_originalCaster)->AI())
             ((Creature*)m_originalCaster)->AI()->JustSummoned((Creature*)pet);
-        SendEffectLogExecute(effect, pet->GetObjectGuid());
+        //SendEffectLogExecute(effect, pet->GetObjectGuid());
     }
 
 }
@@ -6422,11 +6422,11 @@ void Spell::DoSummonPossessed(SpellEffectEntry const* effect)
         DEBUG_LOG("New possessed creature (%s) summoned. Owner is %s ", spawnCreature->GetObjectGuid().GetString().c_str(), m_caster->GetObjectGuid().GetString().c_str());
 
         // Notify original caster if not done already
-    if (m_originalCaster && m_originalCaster != m_caster && m_originalCaster->GetTypeId() == TYPEID_UNIT && ((Creature*)m_originalCaster)->AI())
-        ((Creature*)m_originalCaster)->AI()->JustSummoned((Creature*)spawnCreature);
+        if (m_originalCaster && m_originalCaster != m_caster && m_originalCaster->GetTypeId() == TYPEID_UNIT && ((Creature*)m_originalCaster)->AI())
+            ((Creature*)m_originalCaster)->AI()->JustSummoned((Creature*)spawnCreature);
 
-    SendEffectLogExecute(effect, spawnCreature->GetObjectGuid());
-}
+        //SendEffectLogExecute(effect, spawnCreature->GetObjectGuid());
+    }
     else
         sLog.outError("New possessed creature (entry %d) NOT summoned. Owner is %s ", creature_entry, m_caster->GetObjectGuid().GetString().c_str());
 }
@@ -6763,7 +6763,7 @@ void Spell::DoSummonWild(SpellEffectEntry const* effect, uint32 forceFaction)
             if (m_originalCaster && m_originalCaster != m_caster && m_originalCaster->GetTypeId() == TYPEID_UNIT && ((Creature*)m_originalCaster)->AI())
                 ((Creature*)m_originalCaster)->AI()->JustSummoned(summon);
 
-            SendEffectLogExecute(effect, summon->GetObjectGuid());
+            //SendEffectLogExecute(effect, summon->GetObjectGuid());
         }
     }
 }
@@ -6897,7 +6897,7 @@ void Spell::DoSummonGuardian(SpellEffectEntry const* effect, uint32 forceFaction
 
         DEBUG_LOG("Guardian pet %s summoned (default). Counter is %d ", spawnCreature->GetObjectGuid().GetString().c_str(), spawnCreature->GetPetCounter());
 
-        SendEffectLogExecute(effect, spawnCreature->GetObjectGuid());
+        //SendEffectLogExecute(effect, spawnCreature->GetObjectGuid());
     }
 }
 
@@ -6961,7 +6961,7 @@ void Spell::DoSummonVehicle(SpellEffectEntry const* effect, uint32 forceFaction)
         if (m_originalCaster && m_originalCaster != m_caster && m_originalCaster->GetTypeId() == TYPEID_UNIT && ((Creature*)m_originalCaster)->AI())
             ((Creature*)m_originalCaster)->AI()->JustSummoned(vehicle);
 
-        SendEffectLogExecute(effect, vehicle->GetObjectGuid());
+        //SendEffectLogExecute(effect, vehicle->GetObjectGuid());
     }
     else
         sLog.outError("Vehicle (entry %d) NOT summoned by undefined reason. ", vehicle_entry);
@@ -7393,7 +7393,7 @@ void Spell::EffectSummonPet(SpellEffectEntry const* effect)
     }
 
     DEBUG_LOG("New pet %s summoned", NewSummon->GetObjectGuid().GetString().c_str());
-    SendEffectLogExecute(effect, NewSummon->GetObjectGuid());
+    //SendEffectLogExecute(effect, NewSummon->GetObjectGuid());
 }
 
 void Spell::EffectLearnPetSpell(SpellEffectEntry const* effect)
@@ -11467,7 +11467,7 @@ void Spell::EffectFeedPet(SpellEffectEntry const* effect)
 
     m_caster->CastCustomSpell(pet, effect->EffectTriggerSpell, &benefit, NULL, NULL, true);
 
-    SendEffectLogExecute(effect, ObjectGuid(), entry);
+    //SendEffectLogExecute(effect, ObjectGuid(), entry);
 }
 
 void Spell::EffectDismissPet(SpellEffectEntry const* effect)
@@ -11481,7 +11481,7 @@ void Spell::EffectDismissPet(SpellEffectEntry const* effect)
     if (!pet || !pet->isAlive())
         return;
 
-    SendEffectLogExecute(effect, pet->GetObjectGuid());
+    //SendEffectLogExecute(effect, pet->GetObjectGuid());
     pet->Unsummon(PET_SAVE_NOT_IN_SLOT, m_caster);
 }
 
@@ -11549,7 +11549,7 @@ void Spell::EffectSummonObject(SpellEffectEntry const* effect)
     if (m_originalCaster && m_originalCaster != m_caster && m_originalCaster->GetTypeId() == TYPEID_UNIT && ((Creature*)m_originalCaster)->AI())
         ((Creature*)m_originalCaster)->AI()->JustSummoned(pGameObj);
 
-    SendEffectLogExecute(effect, pGameObj->GetObjectGuid());
+    //SendEffectLogExecute(effect, pGameObj->GetObjectGuid());
 }
 
 void Spell::EffectResurrect(SpellEffectEntry const* effect)
@@ -11598,7 +11598,7 @@ void Spell::EffectResurrect(SpellEffectEntry const* effect)
     pTarget->setResurrectRequestData(m_caster->GetObjectGuid(), m_caster->GetMapId(), m_caster->GetPositionX(), m_caster->GetPositionY(), m_caster->GetPositionZ(), health, mana);
     SendResurrectRequest(pTarget);
 
-    SendEffectLogExecute(effect, pTarget->GetObjectGuid());
+    //SendEffectLogExecute(effect, pTarget->GetObjectGuid());
 }
 
 void Spell::EffectAddExtraAttacks(SpellEffectEntry const* effect)
@@ -11905,7 +11905,7 @@ void Spell::DoSummonCritter(SpellEffectEntry const* effect, uint32 forceFaction)
         ((Creature*)m_originalCaster)->AI()->JustSummoned(critter);
 
     DEBUG_LOG("New mini pet %s summoned", critter->GetObjectGuid().GetString().c_str());
-    SendEffectLogExecute(effect, critter->GetObjectGuid());
+    //SendEffectLogExecute(effect, critter->GetObjectGuid());
 
 }
 
@@ -12975,6 +12975,6 @@ void Spell::DoSummonSnakes(SpellEffectEntry const* effect)
         pSummon->setFaction(m_caster->getFaction());
         pSummon->SetLevel(m_caster->getLevel());
         pSummon->SetMaxHealth(m_caster->getLevel()+ urand(20,30));
-        SendEffectLogExecute(effect, pSummon->GetObjectGuid());
+        //SendEffectLogExecute(effect, pSummon->GetObjectGuid());
     }
 }

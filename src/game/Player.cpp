@@ -1919,8 +1919,6 @@ bool Player::TeleportTo(WorldLocation const& loc, uint32 options)
         if (!GetSession()->PlayerLogout())
         {
             WorldPacket data;
-//            BuildTeleportAckMsg(data, loc.coord_x, loc.coord_y, loc.coord_z, loc.orientation);
-//            GetSession()->SendPacket(&data);
             float oldX, oldY, oldZ;
             float oldO = GetOrientation();
             GetPosition(oldX, oldY, oldZ);;
