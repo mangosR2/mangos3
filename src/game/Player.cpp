@@ -21817,6 +21817,22 @@ void Player::SetClientControl(Unit* target, uint8 allowMove)
     data << uint8(allowMove);
     if (GetSession())
         GetSession()->SendPacket(&data);
+    if (target == this)
+        SetMover(this);
+}
+
+void Player::SetMover(Unit* target)
+{
+    if (!target)
+        m_mover = this;
+
+    ObjectGuid guid = m_mover->GetObjectGuid();
+
+    WorldPacket data(SMSG_MOVE_SET_ACTIVE_MOVER, 9);
+    data.WriteGuidMask<5, 7, 3, 6, 0, 4, 1, 2>(guid);
+    data.WriteGuidBytes<6,2,3,0,5,7,1,4>(guid);
+
+    SendDirectMessage(&data);
 }
 
 void Player::UpdateZoneDependentAuras()
@@ -25453,12 +25469,9 @@ void Player::SetViewPoint(WorldObject* target, bool immediate, bool update_far_s
         {
             if (((Unit*)target)->IsLevitating() || (target->GetObjectGuid().IsPlayer() && ((Player*)target)->IsFlying()))
             {
-// FIXME: need use new set_can_fly
                 WorldPacket data;
-                data.Initialize(SMSG_MOVE_SET_CAN_FLY, 12);
-                data << target->GetPackGUID();
-                data << (uint32)(0);
-                target->SendMessageToSet(&data,false);
+                ((Unit*)target)->BuildMoveSetCanFlyPacket(&data, true, 0);
+                target->SendMessageToSet(&data, true);
             }
         }
         GetCamera()->SetView(target, update_far_sight_field);

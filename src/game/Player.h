@@ -2314,7 +2314,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         bool CanStartFlyInArea(uint32 mapid, uint32 zone, uint32 area) const;
 
         void SetClientControl(Unit* target, uint8 allowMove);
-        void SetMover(Unit* target) { m_mover = target ? target : this; }
+        void SetMover(Unit* target);
         Unit* GetMover() const { return m_mover; }
         bool IsSelfMover() const { return m_mover == this; }// normal case for player not controlling other unit
         void InterruptTaxiFlying();

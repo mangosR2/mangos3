@@ -356,9 +356,9 @@ void Object::BuildMovementUpdate(ByteBuffer * data, uint16 updateFlags) const
             hasElevation = unit->m_movementInfo.GetStatusInfo().hasSplineElevation;
             hasTransportTime2 = unit->m_movementInfo.GetStatusInfo().hasTransportTime2;
             hasTransportTime3 = unit->m_movementInfo.GetStatusInfo().hasTransportTime3;
-    }
-    else
-    {
+        }
+        else
+        {
             hasPitch = unit->m_movementInfo.HasMovementFlag(MovementFlags(MOVEFLAG_SWIMMING | MOVEFLAG_FLYING)) ||
                             unit->m_movementInfo.HasMovementFlag2(MOVEFLAG2_ALLOW_PITCHING);
             hasFallData = unit->m_movementInfo.HasMovementFlag2(MOVEFLAG2_INTERP_TURNING);
@@ -368,7 +368,7 @@ void Object::BuildMovementUpdate(ByteBuffer * data, uint16 updateFlags) const
     }
 
     if (updateFlags & UPDATEFLAG_LIVING)
-        {
+    {
         Unit const* unit = (Unit const*)this;
 
         data->WriteBit(!unit->m_movementInfo.GetMovementFlags());
@@ -429,13 +429,13 @@ void Object::BuildMovementUpdate(ByteBuffer * data, uint16 updateFlags) const
     }
 
     if (updateFlags & UPDATEFLAG_HAS_ATTACKING_TARGET)
-        {
+    {
         ObjectGuid guid;
         if (Unit* victim = ((Unit*)this)->getVictim())
             guid = victim->GetObjectGuid();
 
         data->WriteGuidMask<2, 7, 0, 4, 5, 6, 1, 3>(guid);
-        }
+    }
 
     if (updateFlags & UPDATEFLAG_ANIM_KITS)
     {
@@ -461,11 +461,11 @@ void Object::BuildMovementUpdate(ByteBuffer * data, uint16 updateFlags) const
                 *data << float(unit->m_movementInfo.GetJumpInfo().cosAngle);
                 *data << float(unit->m_movementInfo.GetJumpInfo().xyspeed);
                 *data << float(unit->m_movementInfo.GetJumpInfo().sinAngle);
-        }
+            }
 
             *data << uint32(unit->m_movementInfo.GetFallTime());
             *data << float(unit->m_movementInfo.GetJumpInfo().velocity);
-    }
+        }
 
         *data << float(unit->GetSpeed(MOVE_SWIM_BACK));
 
@@ -479,7 +479,7 @@ void Object::BuildMovementUpdate(ByteBuffer * data, uint16 updateFlags) const
         data->WriteGuidBytes<5>(Guid);
 
         if (hasTransport)
-    {
+        {
             ObjectGuid tGuid = unit->m_movementInfo.GetTransportGuid();
 
             data->WriteGuidBytes<5, 7>(tGuid);
@@ -500,7 +500,7 @@ void Object::BuildMovementUpdate(ByteBuffer * data, uint16 updateFlags) const
 
             *data << int32(unit->m_movementInfo.GetTransportSeat());
             data->WriteGuidBytes<1, 6, 2, 4>(tGuid);
-    }
+        }
 
         *data << float(unit->GetPositionX());
         *data << float(unit->GetSpeed(MOVE_PITCH_RATE));
