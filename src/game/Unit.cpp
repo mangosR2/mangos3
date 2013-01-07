@@ -3749,7 +3749,7 @@ uint32 Unit::CalculateBaseSpellHitChance(Unit* pVictim)
 //   Parry
 // For spells
 //   Resist
-SpellMissInfo Unit::SpellHitResult(Unit* pVictim, SpellEntry const* spell, bool CanReflect)
+SpellMissInfo Unit::SpellHitResult(Unit* pVictim, SpellEntry const* spell)
 {
     // Return evade for units in evade mode
     if (pVictim->GetTypeId()==TYPEID_UNIT && ((Creature*)pVictim)->IsInEvadeMode())
@@ -3768,7 +3768,7 @@ SpellMissInfo Unit::SpellHitResult(Unit* pVictim, SpellEntry const* spell, bool 
     }
 
     // Try victim reflect spell
-    if (CanReflect)
+    if (SpellMgr::IsReflectableSpell(spell))
     {
         int32 reflectchance = pVictim->GetTotalAuraModifier(SPELL_AURA_REFLECT_SPELLS);
         Unit::AuraList const& mReflectSpellsSchool = pVictim->GetAurasByType(SPELL_AURA_REFLECT_SPELLS_SCHOOL);
