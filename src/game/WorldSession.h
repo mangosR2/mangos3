@@ -499,7 +499,6 @@ class MANGOS_DLL_SPEC WorldSession
         void HandleEnterPlayerVehicle(WorldPacket& recv_data);
         void HandleEjectPassenger(WorldPacket& recv_data);
         void HandleChangeSeatsOnControlledVehicle(WorldPacket& recv_data);
-        void HandleRideVehicleInteract(WorldPacket& recvPacket);
 
         void HandleRequestRaidInfoOpcode( WorldPacket & recv_data );
 
@@ -771,6 +770,7 @@ class MANGOS_DLL_SPEC WorldSession
         void HandleInstanceLockResponse(WorldPacket& recv_data);
         void HandleSetSavedInstanceExtend(WorldPacket& recv_data);
         void HandleUpdateMissileTrajectory(WorldPacket& recv_data);
+        void HandleViolenceLevel(WorldPacket& recv_data);
 
         // Arena Team
         void HandleInspectArenaTeamsOpcode(WorldPacket& recv_data);

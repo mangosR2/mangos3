@@ -1589,3 +1589,11 @@ void WorldSession::HandleSetSavedInstanceExtend(WorldPacket& recv_data)
         sLog.outError("SetSavedInstanceExtend: Player tryed to extend instance, but not bound to.");
     }
 }
+
+void WorldSession::HandleViolenceLevel(WorldPacket& recv_data)
+{
+    uint8 violenceLevel;
+    recv_data >> violenceLevel;
+    DEBUG_LOG("WORLD: CMSG_VIOLENCE_LEVEL %u", violenceLevel);
+    // do something?
+}
