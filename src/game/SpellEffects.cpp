@@ -10209,7 +10209,31 @@ void Spell::EffectScriptEffect(SpellEffectEntry const* effect)
                 {
                     SpellAuraHolderPtr holder = m_caster->GetSpellAuraHolder(69166);
 
-                    m_caster->CastSpell(unitTarget, effect->CalculateSimpleValue(), true);
+                    if (!holder)
+                        holder = m_caster->GetSpellAuraHolder(71912);
+
+                    if (!holder)
+                    {
+                        // first Inhale
+                        m_caster->RemoveAurasDueToSpell(69157);
+                        m_caster->CastSpell(m_caster, 69162, true);
+                    }
+                    else if (holder)
+                    {
+                        if (holder->GetStackAmount() == 1)
+                        {
+                            // second Inhale
+                            m_caster->RemoveAurasDueToSpell(69162);
+                            m_caster->CastSpell(m_caster, 69164, true);
+                        }
+                        else if (holder->GetStackAmount() == 2)
+                        {
+                            // third Inhale
+                            m_caster->RemoveAurasDueToSpell(69164);
+                            m_caster->CastSpell(m_caster, 69171, true);
+                        }
+                    }
+
                     return;
                 }
                 case 69200:                                 // Raging Spirit
@@ -10220,6 +10244,7 @@ void Spell::EffectScriptEffect(SpellEffectEntry const* effect)
                     unitTarget->CastSpell(unitTarget, effect->CalculateSimpleValue(), true);
                     return;
                 }
+                case 69171:                                 // Low Plague Blight Visual Cancel (Festergut)
                 case 69298:                                 // Cancel Resistant to Blight (Festergut)
                 {
                     if (unitTarget)
