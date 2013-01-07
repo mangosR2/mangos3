@@ -129,9 +129,8 @@ bool Pet::LoadPetFromDB(Player* owner, uint32 petentry, uint32 petnumber, bool c
         return false;
     }
 
-    setPetType(PetType(fields[16].GetUInt8()));
+    PetType pet_type = PetType(fields[15].GetUInt8());
 
-    PetType pet_type = PetType(fields[16].GetUInt8());
     if (pet_type == HUNTER_PET)
     {
         if (!creatureInfo->isTameable(owner->CanTameExoticPets()))
@@ -140,6 +139,8 @@ bool Pet::LoadPetFromDB(Player* owner, uint32 petentry, uint32 petnumber, bool c
             return false;
         }
     }
+
+    setPetType(PetType(pet_type));
 
     if (!GetCreateSpellID())
         SetCreateSpellID(fields[14].GetUInt32());
@@ -423,8 +424,8 @@ void Pet::SavePetToDB(PetSaveMode mode)
 
         // save pet
         SqlStatement savePet = CharacterDatabase.CreateStatement(insPet, "INSERT INTO character_pet ( id, entry,  owner, modelid, level, exp, Reactstate, slot, name, renamed, curhealth, "
-            "curmana, abdata, savetime, resettalents_cost, resettalents_time, CreatedBySpell, PetType) "
-             "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+            "curmana, abdata, savetime, CreatedBySpell, PetType) "
+             "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
 
         savePet.addUInt32(m_charmInfo->GetPetNumber());
         savePet.addUInt32(GetEntry());
