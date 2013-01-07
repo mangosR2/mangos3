@@ -4791,9 +4791,9 @@ void Spell::SendLogExecute()
     if (!count1)
         return;
 
-    Unit *target = m_targets.getUnitTarget() ? m_targets.getUnitTarget() : m_caster;
+    Unit* target = m_targets.getUnitTarget() ? m_targets.getUnitTarget() : m_caster;
 
-    WorldPacket data(SMSG_SPELLLOGEXECUTE, (8+4+4+4+4+8));
+    WorldPacket data(SMSG_SPELLLOGEXECUTE, (8 + 4 + 4 + (4+4+4+8)*count1));
 
     if (m_caster->GetTypeId() == TYPEID_PLAYER)
         data << m_caster->GetPackGUID();
@@ -4805,10 +4805,11 @@ void Spell::SendLogExecute()
 
     DEBUG_FILTER_LOG(LOG_FILTER_SPELL_CAST, "Spell::SendLogExecute() sended spelllog to %s (spell %u, effects count %u)", m_caster->GetObjectGuid().GetString().c_str(), m_spellInfo->Id, count1);
 
-    for (uint32 i = 0; i < count1; ++i)
+    for (uint32 i = 0; i < MAX_EFFECT_INDEX; ++i)
     {
         if (m_effectExecuteData[i].empty())
             continue;
+
         SpellEffectEntry const* spellEffect = m_spellInfo->GetSpellEffect(SpellEffectIndex(i));
         data << uint32(spellEffect ? spellEffect->Effect : 0);             // spell effect
         data.append(m_effectExecuteData[i]);

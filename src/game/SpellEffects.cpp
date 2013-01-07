@@ -7926,7 +7926,7 @@ void Spell::EffectSummonObjectWild(SpellEffectEntry const* effect)
         ((Creature*)m_caster)->AI()->JustSummoned(pGameObj);
     if (m_originalCaster && m_originalCaster != m_caster && m_originalCaster->GetTypeId() == TYPEID_UNIT && ((Creature*)m_originalCaster)->AI())
         ((Creature*)m_originalCaster)->AI()->JustSummoned(pGameObj);
-    SendEffectLogExecute(effect, pGameObj->GetObjectGuid());
+    //SendEffectLogExecute(effect, pGameObj->GetObjectGuid());
 }
 
 void Spell::EffectScriptEffect(SpellEffectEntry const* effect)
