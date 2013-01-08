@@ -462,6 +462,10 @@ void WorldStateMgr::CreateLinkedWorldStatesIfNeed(WorldObject* object)
         case HIGHGUID_GAMEOBJECT:
         {
             GameObjectInfo const* goInfo = sGOStorage.LookupEntry<GameObjectInfo>(guid.GetEntry());
+
+            if (!goInfo)
+                return;
+
             switch (goInfo->type)
             {
                 case GAMEOBJECT_TYPE_CAPTURE_POINT:

@@ -3248,7 +3248,7 @@ void Unit::AttackerStateUpdate(Unit* pVictim, WeaponAttackType attType, bool ext
     }
 }
 
-MeleeHitOutcome Unit::RollMeleeOutcomeAgainst(const Unit *pVictim, WeaponAttackType attType) const
+MeleeHitOutcome Unit::RollMeleeOutcomeAgainst(const Unit* pVictim, WeaponAttackType attType) const
 {
     // This is only wrapper
 
@@ -8077,7 +8077,8 @@ void Unit::SpellDamageBonusDone(DamageInfo* damageInfo, uint32 stack)
 
         SpellEquippedItemsEntry const* spellEquip = (*i)->GetSpellProto()->GetSpellEquippedItems();
 
-        if (spellEquip->EquippedItemClass != -1 ||
+        if (!spellEquip ||
+            spellEquip->EquippedItemClass != -1 ||
                                                             // -1 == any item class (not wand then)
             spellEquip->EquippedItemInventoryTypeMask != 0)
                                                             // 0 == any inventory type (not wand then)
