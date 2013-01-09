@@ -6731,6 +6731,8 @@ void Spell::DoSummonWild(SpellEffectEntry const* effect, uint32 forceFaction)
     float radius = GetSpellRadius(sSpellRadiusStore.LookupEntry(effect->EffectRadiusIndex));
     TempSummonType summonType = (m_duration == 0) ? TEMPSUMMON_DEAD_DESPAWN : TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT;
 
+    uint32 uDuration = m_duration > 0 ? uint32(m_duration) : 0;
+
     int32 amount = effect->EffectRealPointsPerLevel ? effect->EffectRealPointsPerLevel : m_currentBasePoints[effect->GetIndex()];
     if (amount <= 0)
         amount = 1;
@@ -6766,7 +6768,7 @@ void Spell::DoSummonWild(SpellEffectEntry const* effect, uint32 forceFaction)
             }
         }
 
-        if (Creature* summon = m_caster->SummonCreature(creature_entry, px, py, pz, m_caster->GetOrientation(), summonType, m_duration))
+        if (Creature* summon = m_caster->SummonCreature(creature_entry, px, py, pz, m_caster->GetOrientation(), summonType, uDuration))
         {
             summon->SetUInt32Value(UNIT_CREATED_BY_SPELL, m_spellInfo->Id);
 

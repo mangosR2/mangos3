@@ -2703,6 +2703,33 @@ bool SpellMgr::IsTargetMatchedWithCreatureType(SpellEntry const* pSpellInfo, Uni
     return true;
 }
 
+bool SpellMgr::IsReflectableSpell(SpellEntry const* spellInfo)
+{
+    // AoE spells, spells with non-magic DmgClass or SchoolMask or with SPELL_ATTR_EX2_CANT_REFLECTED cannot be reflected
+    if (spellInfo->GetDmgClass() == SPELL_DAMAGE_CLASS_MAGIC &&
+        GetSpellSchoolMask(spellInfo) != SPELL_SCHOOL_MASK_NORMAL &&
+        !spellInfo->HasAttribute(SPELL_ATTR_EX2_IGNORE_LOS) &&
+        !spellInfo->HasAttribute(SPELL_ATTR_EX_CANT_REFLECTED) &&
+        !IsAreaOfEffectSpell(spellInfo))
+    {
+        for(int j = 0; j < MAX_EFFECT_INDEX; ++j)
+        {
+            SpellEffectEntry const* spellEffect = spellInfo->GetSpellEffect(SpellEffectIndex(j));
+            if (!spellEffect)
+                continue;;
+
+            if (spellEffect->Effect == SPELL_EFFECT_NONE)
+                continue;
+
+            if (IsPositiveTarget(spellEffect->EffectImplicitTargetA, spellEffect->EffectImplicitTargetB) && !spellInfo->HasAttribute(SPELL_ATTR_EX_NEGATIVE))
+                continue;
+            else
+                return true;
+        }
+    }
+    return false;
+}
+
 uint32 SpellMgr::GetSpellMaxTargetsWithCustom(SpellEntry const* spellInfo, Unit const* caster)
 {
     // Get spell max affected targets
