@@ -318,3 +318,10 @@ CREATE TABLE IF NOT EXISTS `worldstate_template` (
     `comment`          varchar(255) NOT NULL DEFAULT '',
     PRIMARY KEY (`state_id`,`type`,`condition`,`linked_id`)
 ) DEFAULT CHARSET=utf8 PACK_KEYS=0 COMMENT='WorldState templates storage';
+
+CREATE TABLE IF NOT EXISTS `hotfix_data` (
+  `entry` int(10) unsigned NOT NULL COMMENT 'Item entry',
+  `type` int(10) unsigned NOT NULL DEFAULT '0' COMMENT 'Hotfix type',
+  `hotfix_time` datetime NOT NULL DEFAULT '0000-00-00 00:00:00' COMMENT 'Hotfix date/time',
+  PRIMARY KEY (`entry`,`type`,`hotfix_time`)
+) DEFAULT CHARSET=utf8;

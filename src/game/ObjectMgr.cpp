@@ -10314,3 +10314,44 @@ bool ObjectMgr::MakeOpcodeHash(Opcodes opcode, uint16 value)
     opcodeValueSubstTable[opcode] = value;
     return true;
 }
+
+void ObjectMgr::LoadHotfixData()
+{
+    QueryResult* result = WorldDatabase.Query("SELECT entry, type, UNIX_TIMESTAMP(hotfix_time) FROM hotfix_data");
+
+    if (!result)
+    {
+        sLog.outString(">> Loaded 0 hotfix info entries. DB table `hotfix_data` is empty.");
+        return;
+    }
+
+    BarGoLink bar(result->GetRowCount());
+
+    do
+    {
+        bar.step();
+        Field* fields = result->Fetch();
+
+        HotfixInfo info;
+        info.Entry     = fields[0].GetUInt32();
+        info.Type      = fields[1].GetUInt32();
+        info.Timestamp = time_t(fields[2].GetUInt64());
+        m_hotfixData.push_back(info);
+    }
+    while (result->NextRow());
+    delete result;
+
+    sLog.outString();
+    sLog.outString(">> Loaded %u hotfix info entries", m_hotfixData.size());
+}
+
+time_t ObjectMgr::GetHotfixTime(uint32 entry, uint32 type) const
+{
+    time_t ret = 0;
+    for (HotfixData::const_iterator itr = m_hotfixData.begin(); itr != m_hotfixData.end(); ++itr)
+        if (itr->Entry == entry && itr->Type == type)
+            if (itr->Timestamp > ret)
+                ret = itr->Timestamp;
+
+    return ret ? ret : time(NULL);
+}

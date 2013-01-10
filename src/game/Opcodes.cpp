@@ -2016,5 +2016,10 @@ void InitializeOpcodes()
 
     OPCODE(CMSG_VIOLENCE_LEVEL,                          STATUS_AUTHED,   PROCESS_INPLACE,      &WorldSession::HandleViolenceLevel     );
 
+    OPCODE(CMSG_REQUEST_HOTFIX,                          STATUS_AUTHED,   PROCESS_INPLACE,      &WorldSession::HandleRequestHotfix     );
+    OPCODE(SMSG_DB_REPLY,                                STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide       );
+    OPCODE(SMSG_HOTFIX_INFO,                             STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide       );
+    OPCODE(SMSG_HOTFIX_NOTIFY,                           STATUS_UNHANDLED,PROCESS_INPLACE,      &WorldSession::Handle_ServerSide       );
+
     OPCODE(NUM_MSG_TYPES,                                STATUS_UNHANDLED,PROCESS_INPLACE,      &WorldSession::Handle_NULL             );
 };

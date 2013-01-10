@@ -552,7 +552,7 @@ struct ItemPrototype
     uint32 ItemId;
     uint32 Class;                                           // id from ItemClass.dbc
     uint32 SubClass;                                        // id from ItemSubClass.dbc
-    int32  Unk0;
+    int32  SoundOverrideSubclass;                           // < 0: id from ItemSubClass.dbc, used to override weapon sound from actual SubClass
     char*  Name1;
     uint32 DisplayInfoID;                                   // id from ItemDisplayInfo.dbc
     uint32 Quality;
@@ -614,8 +614,8 @@ struct ItemPrototype
     uint32 DisenchantID;
     uint32 FoodType;
     float  StatScalingFactor;
-    uint32 Unknown400_1;
-    uint32 Unknown400_2;
+    uint32 CurrencySubstitutionId;
+    uint32 CurrencySubstitutionCount;
     uint32 MinMoneyLoot;
     uint32 MaxMoneyLoot;
     uint32 ExtraFlags;                                      // see ItemExtraFlags

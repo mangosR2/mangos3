@@ -595,6 +595,15 @@ class IdGenerator
         T m_nextGuid;
 };
 
+struct HotfixInfo
+{
+    uint32 Entry;
+    uint32 Type;
+    time_t Timestamp;
+};
+
+typedef std::vector<HotfixInfo> HotfixData;
+
 class ObjectMgr
 {
     friend class PlayerDumpReader;
@@ -1248,6 +1257,11 @@ class ObjectMgr
         }
         bool MakeOpcodeHash(Opcodes opcode, uint16 value);
 
+        // Hotfix
+        void LoadHotfixData();
+        HotfixData const& GetHotfixData() const { return m_hotfixData; }
+        time_t GetHotfixTime(uint32 entry, uint32 type) const;
+
     protected:
 
         // initial free low guid for selected guid type for map local guids
@@ -1398,6 +1412,8 @@ class ObjectMgr
         CacheVendorItemMap m_mCacheVendorItemMap;
         CacheTrainerSpellMap m_mCacheTrainerTemplateSpellMap;
         CacheTrainerSpellMap m_mCacheTrainerSpellMap;
+
+        HotfixData m_hotfixData;
 };
 
 #define sObjectMgr MaNGOS::Singleton<ObjectMgr>::Instance()

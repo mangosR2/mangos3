@@ -1597,3 +1597,43 @@ void WorldSession::HandleViolenceLevel(WorldPacket& recv_data)
     DEBUG_LOG("WORLD: CMSG_VIOLENCE_LEVEL %u", violenceLevel);
     // do something?
 }
+
+void WorldSession::HandleRequestHotfix(WorldPacket& recv_data)
+{
+    uint32 type, count;
+
+    recv_data >> type;
+    count = recv_data.ReadBits(23);
+
+    UNORDERED_MAP<uint32, ObjectGuid> guids;
+    for (uint32 i = 0; i < count; ++i)
+    {
+        guids[i] = ObjectGuid();
+        ObjectGuid& guid = guids[i];
+        recv_data.ReadGuidMask<0,4,7,2,5,3,6,1>(guid);
+    }
+
+    for (uint32 i = 0; i < count; ++i)
+    {
+        uint32 entry;
+        ObjectGuid& guid = guids[i];
+        recv_data.ReadGuidBytes<5,6,7,0,1,3,4>(guid);
+        recv_data >> entry;
+        recv_data.ReadGuidBytes<2>(guid);
+
+        switch (type)
+        {
+            case DB2_REPLY_ITEM:
+                SendItemDb2Reply(entry);
+                break;
+            case DB2_REPLY_SPARSE:
+                SendItemSparseDb2Reply(entry);
+                break;
+            default:
+                sLog.outError("CMSG_REQUEST_HOTFIX: Received unknown hotfix request type: %u", type);
+                recv_data.rfinish();
+                break;
+        }
+    }
+}
+

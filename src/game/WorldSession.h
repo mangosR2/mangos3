@@ -151,6 +151,12 @@ enum TutorialDataState
     TUTORIALDATA_NEW       = 2
 };
 
+enum DB2ReplyRequest
+{
+    DB2_REPLY_SPARSE = 2442913102,
+    DB2_REPLY_ITEM   = 1344507586,
+};
+
 //class to deal with packet processing
 //allows to determine if next packet is safe to be processed
 class PacketFilter
@@ -635,6 +641,9 @@ class MANGOS_DLL_SPEC WorldSession
         void HandleAutoStoreBankItemOpcode(WorldPacket& recvPacket);
         void HandleWrapItemOpcode(WorldPacket& recvPacket);
 
+        void SendItemDb2Reply(uint32 entry);
+        void SendItemSparseDb2Reply(uint32 entry);
+
         void HandleAttackSwingOpcode(WorldPacket& recvPacket);
         void HandleAttackStopOpcode(WorldPacket& recvPacket);
         void HandleSetSheathedOpcode(WorldPacket& recvPacket);
@@ -891,6 +900,7 @@ class MANGOS_DLL_SPEC WorldSession
         void SendLfgDisabled();
 
         void HandleSetCurrencyFlagsOpcode(WorldPacket& recv_data);
+        void HandleRequestHotfix(WorldPacket& recv_data);
 
     private:
         // private trade methods
