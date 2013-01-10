@@ -308,12 +308,6 @@ void WorldSession::HandleBattlefieldListOpcode(WorldPacket& recv_data)
     uint32 bgTypeId;
     recv_data >> bgTypeId;                                  // id from DBC
 
-    uint8 fromWhere;
-    recv_data >> fromWhere;                                 // 0 - battlemaster (lua: ShowBattlefieldList), 1 - UI (lua: RequestBattlegroundInstanceInfo)
-
-    uint8 unk1;
-    recv_data >> unk1;                                      // unknown 3.2.2
-
     BattlemasterListEntry const* bl = sBattlemasterListStore.LookupEntry(bgTypeId);
     if (!bl)
     {
