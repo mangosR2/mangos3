@@ -2022,9 +2022,12 @@ void Unit::CalculateMeleeDamage(DamageInfo* damageInfo)
         damageInfo->procEx        |= PROC_EX_IMMUNE;
         damageInfo->damage         = 0;
         damageInfo->cleanDamage    = 0;
+        DEBUG_FILTER_LOG(LOG_FILTER_COMBAT,"Unit::CalculateMeleeDamage  %s attacked %s, but target immuned to melee damage!",
+            GetObjectGuid().GetString().c_str(), pVictim->GetObjectGuid().GetString().c_str());
         return;
     }
     damageInfo->damage += CalculateDamage(damageInfo->attackType, false);
+
     // Add melee damage bonus
     MeleeDamageBonusDone(damageInfo);
     pVictim->MeleeDamageBonusTaken(damageInfo);
@@ -2069,9 +2072,11 @@ void Unit::CalculateMeleeDamage(DamageInfo* damageInfo)
             break;
         }
         case MELEE_HIT_NORMAL:
+        {
             damageInfo->TargetState = VICTIMSTATE_NORMAL;
             damageInfo->procEx     |= PROC_EX_NORMAL_HIT;
             break;
+        }
         case MELEE_HIT_CRIT:
         {
             damageInfo->HitInfo    |= HITINFO_CRITICALHIT;
@@ -2222,13 +2227,8 @@ void Unit::CalculateMeleeDamage(DamageInfo* damageInfo)
     if (damageInfo->damage > 0 && (GetTypeId() == TYPEID_PLAYER || (GetObjectGuid().IsPet() && GetOwner() && GetOwner()->GetTypeId() == TYPEID_PLAYER)))
     {
         uint32 reduction_affected_damage = CalcNotIgnoreDamageReduction(damageInfo);
-        uint32 resilienceReduction = reduction_affected_damage;
-/*
-        if (damageInfo->attackType != RANGED_ATTACK)
-            resilienceReduction = pVictim->GetMeleeDamageReduction(reduction_affected_damage);
-        else
-            resilienceReduction = pVictim->GetRangedDamageReduction(reduction_affected_damage);
-*/
+        uint32 resilienceReduction = pVictim->GetDamageReduction(reduction_affected_damage);
+
         damageInfo->damage      -= resilienceReduction;
         damageInfo->cleanDamage += resilienceReduction;
     }
@@ -2245,6 +2245,9 @@ void Unit::CalculateMeleeDamage(DamageInfo* damageInfo)
     }
     else // Umpossible get negative result but....
         damageInfo->damage = 0;
+
+    DEBUG_FILTER_LOG(LOG_FILTER_COMBAT,"Unit::CalculateMeleeDamage %s attacked %s, damage %i",
+            GetObjectGuid().GetString().c_str(), pVictim->GetObjectGuid().GetString().c_str(), damageInfo->damage);
 }
 
 void Unit::DealMeleeDamage(DamageInfo* damageInfo, bool durabilityLoss)
@@ -2266,7 +2269,7 @@ void Unit::DealMeleeDamage(DamageInfo* damageInfo, bool durabilityLoss)
         return;
 
     // Hmmmm dont like this emotes client must by self do all animations
-    if (damageInfo->HitInfo&HITINFO_CRITICALHIT)
+    if (damageInfo->HitInfo & HITINFO_CRITICALHIT)
         pVictim->HandleEmoteCommand(EMOTE_ONESHOT_WOUNDCRITICAL);
     if (damageInfo->blocked && damageInfo->TargetState != VICTIMSTATE_BLOCKS)
         pVictim->HandleEmoteCommand(EMOTE_ONESHOT_PARRYSHIELD);
@@ -3221,17 +3224,19 @@ void Unit::AttackerStateUpdate(Unit* pVictim, WeaponAttackType attType, bool ext
     damageInfo.CleanDamage(0, 0, attType, MELEE_HIT_NORMAL);
     damageInfo.damageType = DIRECT_DAMAGE;
     damageInfo.HitInfo    = hitInfo;
+    damageInfo.attackType = attType;
 
     CalculateMeleeDamage(&damageInfo);
 
     // Send log damage message to client
     DealDamageMods(&damageInfo);
+
     SendAttackStateUpdate(&damageInfo);
     ProcDamageAndSpell(&damageInfo);
     DealMeleeDamage(&damageInfo,true);
 
-    DEBUG_FILTER_LOG(LOG_FILTER_COMBAT,"Unit::AttackerStateUpdate:  %s attacked %s  hit %u att %u for %u dmg, absorbed %u, blocked %u, resisted %u",
-        GetObjectGuid().GetString().c_str(), pVictim->GetObjectGuid().GetString().c_str(), hitInfo, attType, damageInfo.damage, damageInfo.absorb, damageInfo.blocked, damageInfo.resist);
+    DEBUG_FILTER_LOG(LOG_FILTER_COMBAT,"Unit::AttackerStateUpdate :  %s attacked %s  hit %u att %u for %u dmg, absorbed %u, blocked %u, resisted %u",
+        GetObjectGuid().GetString().c_str(), pVictim->GetObjectGuid().GetString().c_str(), damageInfo.HitInfo, damageInfo.attackType, damageInfo.damage, damageInfo.absorb, damageInfo.blocked, damageInfo.resist);
 
     // if damage pVictim call AI reaction
     pVictim->AttackedBy(this);
