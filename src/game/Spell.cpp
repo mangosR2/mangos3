@@ -4759,15 +4759,9 @@ void Spell::SendLogExecute()
     if (!count1)
         return;
 
-    Unit* target = m_targets.getUnitTarget() ? m_targets.getUnitTarget() : m_caster;
-
     WorldPacket data(SMSG_SPELLLOGEXECUTE, (8 + 4 + 4 + (4+4+4+8)*count1));
 
-    if (m_caster->GetTypeId() == TYPEID_PLAYER)
-        data << m_caster->GetPackGUID();
-    else
-        data << target->GetPackGUID();
-
+    data << m_caster->GetPackGUID();
     data << uint32(m_spellInfo->Id);
     data << uint32(count1);                                 // count1 (effects count)
 
@@ -4795,14 +4789,15 @@ void Spell::SendEffectLogExecute(SpellEffectEntry const* effect, ObjectGuid targ
     ByteBuffer& data = m_effectExecuteData[effect->GetIndex()];
     bool isFirst = data.empty();
 
+    // reserve one uint32 for counter, if need
+    if (isFirst)
+        data << uint32(1);
+
     switch(effect->Effect)
     {
         // target guid and some data logged
         case SPELL_EFFECT_POWER_DRAIN:
         {
-            // reserve one uint32 for counter, if need
-            if (isFirst)
-                data << uint32(0);
             data << targetGuid.WriteAsPacked();
             data << data1;
             data << data2;
@@ -4812,9 +4807,6 @@ void Spell::SendEffectLogExecute(SpellEffectEntry const* effect, ObjectGuid targ
         // target guid and some data logged
         case SPELL_EFFECT_DURABILITY_DAMAGE:
         {
-            // reserve one uint32 for counter, if need
-            if (isFirst)
-                data << uint32(0);
             data << targetGuid.WriteAsPacked();
             data << data1;
             data << data2;
@@ -4824,23 +4816,17 @@ void Spell::SendEffectLogExecute(SpellEffectEntry const* effect, ObjectGuid targ
         case SPELL_EFFECT_ADD_EXTRA_ATTACKS:
         case SPELL_EFFECT_INTERRUPT_CAST:
         {
-            // reserve one uint32 for counter, if need
-            if (isFirst)
-                data << uint32(0);
             data << targetGuid.WriteAsPacked();
             data << data1;
             break;
         }
         // only entry of item used/created
         case SPELL_EFFECT_CREATE_ITEM:
-                case SPELL_EFFECT_CREATE_RANDOM_ITEM:
+        case SPELL_EFFECT_CREATE_RANDOM_ITEM:
         case SPELL_EFFECT_CREATE_ITEM_2:
         case SPELL_EFFECT_FEED_PET:
         {
-            // reserve one uint32 for counter, if need
-            if (isFirst)
-                data << uint32(0);
-            data <<    data1;
+            data << data1;
             break;
         }
         // only ObjectGuid of target logged
@@ -4865,9 +4851,6 @@ void Spell::SendEffectLogExecute(SpellEffectEntry const* effect, ObjectGuid targ
         case SPELL_EFFECT_RESURRECT_NEW:
         case SPELL_EFFECT_MASS_RESSURECTION:
         {
-            // reserve one uint32 for counter, if need
-            if (isFirst)
-                data << uint32(0);
             data << targetGuid.WriteAsPacked();
             break;
         }
@@ -4878,8 +4861,12 @@ void Spell::SendEffectLogExecute(SpellEffectEntry const* effect, ObjectGuid targ
             return;
         }
     }
-    uint32 count = m_effectExecuteData[effect->GetIndex()].read<uint32>(0);
-    m_effectExecuteData[effect->GetIndex()].put<uint32>(0, ++count);
+
+    if (!isFirst)
+    {
+        uint32 count = data.read<uint32>(0);
+        data.put<uint32>(0, ++count);
+    }
 }
 
 void Spell::SendInterrupted(uint8 result)
