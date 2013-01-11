@@ -10384,20 +10384,17 @@ void Aura::HandleAuraLinked(bool apply, bool Real)
                                  / (float)sWorld.getConfig(CONFIG_UINT32_GEAR_CALC_BASE);
 
             float curHealthRatio = pTarget->GetHealthPercent() / 100.0f;
+            int32 bp[MAX_EFFECT_INDEX];
 
-            int32 bp0 = int32(((float)spellInfo->GetSpellEffect(EFFECT_INDEX_0)->EffectBasePoints + bonus) * 100);
-            int32 bp1 = int32(((float)spellInfo->GetSpellEffect(EFFECT_INDEX_1)->EffectBasePoints + bonus) * 100);
-            int32 bp2 = int32(((float)spellInfo->GetSpellEffect(EFFECT_INDEX_2)->EffectBasePoints + bonus) * 100);
+            for (int32 i = 0; i < MAX_EFFECT_INDEX; ++i)
+            {
+                SpellEffectEntry const* spellEff = spellInfo->GetSpellEffect(SpellEffectIndex(i));
+                bp[i] = spellEff ? int32(((float)spellEff->EffectBasePoints + bonus) * 100) : 0;
+                if (bp[i] < 0)
+                    bp[i] = 0;
+            }
 
-            // don't lower stats of vehicle, if GS player below then calculation base
-            if (bp0 < 0)
-                bp0 = 0;
-            if (bp1 < 0)
-                bp1 = 0;
-            if (bp2 < 0)
-                bp2 = 0;
-
-            pTarget->CastCustomSpell(pTarget, spellInfo, &bp0, &bp1, &bp2, true, NULL, this, GetCasterGuid(), GetSpellProto());
+            pTarget->CastCustomSpell(pTarget, spellInfo, &bp[0], &bp[1], &bp[2], true, NULL, this, GetCasterGuid(), GetSpellProto());
             pTarget->SetHealth(uint32((float)pTarget->GetMaxHealth() * curHealthRatio));
         }
         // Ebon Plague and Crypt Fever - set basepoints for linked aura increasing disease damage taken
