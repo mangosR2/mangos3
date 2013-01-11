@@ -20935,6 +20935,9 @@ void Player::SendInitialPacketsAfterAddToMap()
     SendAurasForTarget(this);
     SendEnchantmentDurations();                             // must be after add to map
     SendItemDurations();                                    // must be after add to map
+
+    // "Fake movement" in current point - maked only for grid activating (seems not need make special method for this)
+    GetMap()->Relocation(this, GetPositionX(), GetPositionY(), GetPositionZ(), GetOrientation());
 }
 
 void Player::SendUpdateToOutOfRangeGroupMembers()
