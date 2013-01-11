@@ -85,8 +85,6 @@ void WorldSession::HandleBattlemasterJoinOpcode(WorldPacket& recv_data)
     bool isPremade = false;
     Group* grp;
 
-    recv_data >> guid;                                      // battlemaster guid
-    recv_data >> bgTypeId_;                                 // battleground type id (DBC id)
     recv_data >> instanceId;                                // instance id, 0 if First Available selected
     recv_data.ReadGuidMask<2, 0, 3, 1, 5>(guid);
     joinAsGroup = recv_data.ReadBit();
