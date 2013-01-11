@@ -595,6 +595,10 @@ Player::Player (WorldSession *session): Unit(), m_mover(this), m_camera(NULL), m
     m_cachedGS = 0;
 
     m_slot = 255;
+
+    for (uint8 i = 0; i < MAX_CUF_PROFILES; ++i)
+        m_CUFProfiles[i] = NULL;
+
 }
 
 Player::~Player ()
@@ -650,6 +654,9 @@ Player::~Player ()
     delete m_anticheat;
     delete m_LFGState;
     delete m_camera;
+
+    for (uint8 i = 0; i < MAX_CUF_PROFILES; ++i)
+        SaveCUFProfile(i, NULL);
 
     // Playerbot mod
     if (m_playerbotAI)
@@ -16279,6 +16286,8 @@ bool Player::LoadFromDB(ObjectGuid guid, SqlQueryHolder *holder)
 
     _LoadEquipmentSets(holder->GetResult(PLAYER_LOGIN_QUERY_LOADEQUIPMENTSETS));
 
+    _LoadCUFProfiles(holder->GetResult(PLAYER_LOGIN_QUERY_LOAD_CUF_PROFILES));
+
     if (!GetGroup() || !GetGroup()->isLFDGroup())
     {
         sLFGMgr.RemoveMemberFromLFDGroup(GetGroup(),GetObjectGuid());
@@ -17814,6 +17823,8 @@ void Player::SaveToDB()
     _SaveTalents();
 
     CharacterDatabase.CommitTransaction();
+
+    _SaveCUFProfiles();
 
     // check if stats should only be saved on logout
     // save stats can be out of transaction
@@ -20891,6 +20902,8 @@ void Player::SendInitialPacketsAfterAddToMap()
 
     ResetTimeSync();
     SendTimeSync();
+
+    GetSession()->SendLoadCUFProfiles();
 
     CastSpell(this, 836, true);                             // LOGINEFFECT
 
@@ -25655,4 +25668,105 @@ void Player::SendPetitionTurnInResult(uint32 result)
     WorldPacket data(SMSG_TURN_IN_PETITION_RESULTS, 4);
     data << uint32(result);
     GetSession()->SendPacket(&data);
+}
+
+void Player::_LoadCUFProfiles(QueryResult* result)
+{
+    if (!result)
+        return;
+
+    do
+    {
+        // SELECT id, name, frameHeight, frameWidth, sortBy, healthText, boolOptions, unk146, unk147, unk148, unk150, unk152, unk154 FROM character_cuf_profiles WHERE guid = ?
+        Field* fields      = result->Fetch();
+
+        uint8 id           = fields[0].GetUInt8();
+        std::string name   = fields[1].GetString();
+        uint16 frameHeight = fields[2].GetUInt16();
+        uint16 frameWidth  = fields[3].GetUInt16();
+        uint8 sortBy       = fields[4].GetUInt8();
+        uint8 healthText   = fields[5].GetUInt8();
+        uint32 boolOptions = fields[6].GetUInt32();
+        uint8 unk146       = fields[7].GetUInt8();
+        uint8 unk147       = fields[8].GetUInt8();
+        uint8 unk148       = fields[9].GetUInt8();
+        uint16 unk150      = fields[10].GetUInt16();
+        uint16 unk152      = fields[11].GetUInt16();
+        uint16 unk154      = fields[12].GetUInt16();
+
+        if (id > MAX_CUF_PROFILES)
+        {
+            sLog.outError("Player::_LoadCUFProfiles - Player %s has an CUF profile with invalid id (id: %u), max is %i.", GetObjectGuid().GetString().c_str(), id, MAX_CUF_PROFILES);
+            continue;
+        }
+
+        CUFProfile* profile = new CUFProfile(name, frameHeight, frameWidth, sortBy, healthText, boolOptions, unk146, unk147, unk148, unk150, unk152, unk154);
+        SaveCUFProfile(id, profile);
+    }
+    while (result->NextRow());
+    delete result;
+}
+
+void Player::_SaveCUFProfiles(bool deleteOnly)
+{
+
+    static SqlStatementID deleteCUFProfile;
+    SqlStatement stmtDel = CharacterDatabase.CreateStatement(deleteCUFProfile, "DELETE FROM character_cuf_profiles WHERE guid = ? and id = ?");
+
+    static SqlStatementID updateCUFProfile;
+    SqlStatement stmtUpd = CharacterDatabase.CreateStatement(updateCUFProfile, "INSERT INTO character_cuf_profiles (guid, id, name, frameHeight, frameWidth, sortBy, healthText, boolOptions, unk146, unk147, unk148, unk150, unk152, unk154) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+
+    CharacterDatabase.BeginTransaction();
+
+    for (uint8 i = 0; i < MAX_CUF_PROFILES; ++i)
+    {
+        stmtDel.PExecute(GetObjectGuid().GetCounter(), i);
+
+        CUFProfile* profile = GetCUFProfile(i);
+        if (profile && ! deleteOnly)
+        {
+            // INSERT INTO character_cuf_profiles (guid, id, name, frameHeight, frameWidth, sortBy, healthText, boolOptions, unk146, unk147, unk148, unk150, unk152, unk154) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            stmtUpd.addUInt32(GetObjectGuid().GetCounter());
+            stmtUpd.addUInt8(i);
+            stmtUpd.addString(profile->ProfileName);
+            stmtUpd.addUInt16(profile->FrameHeight);
+            stmtUpd.addUInt16(profile->FrameWidth);
+            stmtUpd.addUInt8(profile->SortBy);
+            stmtUpd.addUInt8(profile->HealthText);
+            stmtUpd.addUInt32(profile->BoolOptions.to_ulong()); // 27 of 32 fields used, fits in an int
+            stmtUpd.addUInt8(profile->Unk146);
+            stmtUpd.addUInt8(profile->Unk147);
+            stmtUpd.addUInt8(profile->Unk148);
+            stmtUpd.addUInt16(profile->Unk150);
+            stmtUpd.addUInt16(profile->Unk152);
+            stmtUpd.addUInt16(profile->Unk154);
+
+            stmtUpd.Execute();
+        }
+    }
+    CharacterDatabase.CommitTransaction();
+}
+
+void Player::SaveCUFProfile(uint8 id, CUFProfile* profile) 
+{
+    if (m_CUFProfiles[id])
+    {
+        delete m_CUFProfiles[id]; 
+        m_CUFProfiles[id] = NULL;
+    }
+    m_CUFProfiles[id] = profile;
+}
+
+CUFProfile* Player::GetCUFProfile(uint8 id) const 
+{
+    return m_CUFProfiles[id];
+}
+
+uint8 Player::GetCUFProfilesCount() const
+{
+    uint8 count = 0;
+    for (uint8 i = 0; i < MAX_CUF_PROFILES; ++i)
+        if (m_CUFProfiles[i])
+            ++count;
+    return count;
 }

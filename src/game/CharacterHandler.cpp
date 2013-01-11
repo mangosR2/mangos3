@@ -113,6 +113,7 @@ bool LoginQueryHolder::Initialize()
     res &= SetPQuery(PLAYER_LOGIN_QUERY_LOADMAILEDITEMS,     "SELECT data, text, mail_id, item_guid, item_template FROM mail_items JOIN item_instance ON item_guid = guid WHERE receiver = '%u'", m_guid.GetCounter());
     res &= SetPQuery(PLAYER_LOGIN_QUERY_LOADRANDOMBG,        "SELECT guid FROM character_battleground_random WHERE guid = '%u'", m_guid.GetCounter());
     res &= SetPQuery(PLAYER_LOGIN_QUERY_LOADCURRENCIES,      "SELECT id, totalCount, weekCount, seasonCount, flags FROM character_currencies WHERE guid = '%u'", m_guid.GetCounter());
+    res &= SetPQuery(PLAYER_LOGIN_QUERY_LOAD_CUF_PROFILES,   "SELECT id, name, frameHeight, frameWidth, sortBy, healthText, boolOptions, unk146, unk147, unk148, unk150, unk152, unk154 FROM character_cuf_profiles WHERE guid = '%u'", m_guid.GetCounter());
 
     return res;
 }
@@ -658,22 +659,27 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
     LoadAccountData(holder->GetResult(PLAYER_LOGIN_QUERY_LOADACCOUNTDATA), PER_CHARACTER_CACHE_MASK);
     SendAccountDataTimes(PER_CHARACTER_CACHE_MASK);
 
-    data.Initialize(SMSG_FEATURE_SYSTEM_STATUS, 34);        // added in 2.2.0
-    data << uint8(2);                                       // status
-    data << uint32(1);                                      // Scrolls of Ressurection?
+    bool featureBit4 = true;
+    data.Initialize(SMSG_FEATURE_SYSTEM_STATUS, 7);         // checked in 4.2.2
+    data << uint8(2);                                       // unknown value
+    data << uint32(1);
     data << uint32(1);
     data << uint32(2);
     data << uint32(0);
-    data.WriteBit(true);
-    data.WriteBit(true);
-    data.WriteBit(false);
-    data.WriteBit(true);
-    data.WriteBit(false);
-    data.WriteBit(false);                                   // enable(1)/disable(0) voice chat interface in client
-    data << uint32(1);
-    data << uint32(0);
-    data << uint32(10);
-    data << uint32(60);
+    data.WriteBit(1);
+    data.WriteBit(1);
+    data.WriteBit(0);
+    data.WriteBit(featureBit4);
+    data.WriteBit(0);
+    data.WriteBit(0);
+    data.FlushBits();
+    if (featureBit4)
+    {
+        data << uint32(1);
+        data << uint32(0);
+        data << uint32(10);
+        data << uint32(60);
+    }
     SendPacket(&data);
 
     // Send MOTD
