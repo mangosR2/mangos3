@@ -22,20 +22,34 @@
 #include "World.h"
 #include "WorldLocation.h"
 
+Location& Location::operator = (Location const& loc)
+{
+    x = loc.x;
+    y = loc.y;
+    z = loc.z;
+    orientation = loc.orientation;
+    return *this;
+}
+
+bool Location::operator == (Location const& loc) const
+{
+    return ((fabs(x - loc.x) < M_NULL_F)
+        && (fabs(y - loc.y) < M_NULL_F)
+        && (fabs(z - loc.z) < M_NULL_F));
+};
+
 Position& Position::operator = (Position const& pos)
 {
-    x = pos.x;
-    y = pos.y;
-    z = pos.z;
+    x           = pos.x;
+    y           = pos.y;
+    z           = pos.z;
     orientation = pos.orientation;
     return *this;
 }
 
 bool Position::operator == (Position const& pos) const
 {
-    return ((fabs(x - pos.x) < M_NULL_F)
-        && (fabs(y - pos.y) < M_NULL_F)
-        && (fabs(z - pos.z) < M_NULL_F));
+    return ((Location*)this) == ((Location*)&pos);
 };
 
 WorldLocation::WorldLocation(WorldObject const& object)
@@ -63,8 +77,9 @@ bool WorldLocation::operator == (WorldLocation const& loc) const
 
 void WorldLocation::SetMapId(uint32 value)
 {
-    if (MapManager::IsValidMAP(value))
-        mapid = value;
+    //if (!MapManager::IsValidMAP(value))
+    //    sLog.outError("WorldLocation::SetMapId try set invalid map id!");
+    mapid = value;
 }
 
 void WorldLocation::SetOrientation(float value)
@@ -77,15 +92,17 @@ void WorldLocation::SetOrientation(float value)
 
 WorldLocation& WorldLocation::operator = (WorldLocation const& loc)
 {
-    if (IsValidMapCoord(loc))
-    {
-        SetMapId(loc.GetMapId());
-        SetInstanceId(loc.GetInstanceId() > 0  ? loc.GetInstanceId() : instance);
-        coord_x = loc.coord_x;
-        coord_y = loc.coord_y;
-        coord_z = loc.coord_z;
-        SetOrientation(loc.orientation);
-    }
+
+    //if (!IsValidMapCoord(loc))
+    //    sLog.outError("WorldLocation::operator = try set invalid location!");
+
+    mapid       = loc.mapid;
+    instance    = loc.instance;
+    x           = loc.x;
+    y           = loc.y;
+    z           = loc.z;
+    orientation = loc.orientation;
+
     return *this;
 }
 
@@ -93,6 +110,7 @@ uint32 WorldLocation::GetAreaId() const
 {
     if (!HasMap())
         return 0;
+
     return sTerrainMgr.GetAreaId(GetMapId(), coord_x, coord_y, coord_z);
 }
 
@@ -100,5 +118,6 @@ uint32 WorldLocation::GetZoneId() const
 {
     if (!HasMap())
         return 0;
+
     return sTerrainMgr.GetZoneId(GetMapId(), coord_x, coord_y, coord_z);
 }

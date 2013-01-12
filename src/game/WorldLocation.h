@@ -28,7 +28,7 @@ using G3D::Vector3;
 struct MANGOS_DLL_SPEC Location : public Vector3
 {
     Location() 
-        : orientation(0.0f)
+        : Vector3(0.0f, 0.0f, 0.0f), orientation(0.0f)
     {}
 
     Location(float x, float y, float z, float o = 0.0f)
@@ -43,8 +43,15 @@ struct MANGOS_DLL_SPEC Location : public Vector3
         : Vector3(v), orientation(o)
     {}
 
+    Location(Location const &loc)
+        : Vector3(loc.x, loc.y, loc.z), orientation(loc.orientation)
+    {}
+
     virtual ~Location()
     {};
+
+    Location& operator = (Location const& loc);
+    bool operator == (Location const& loc) const;
 
     union
     {
@@ -62,6 +69,10 @@ struct MANGOS_DLL_SPEC Position : public Location
     Position(float _x, float _y, float _z, float _o = 0.0f)
         : Location(_x, _y, _z, _o), coord_x(x), coord_y(y), coord_z(z)
     {};
+
+    Position(Position const &pos)
+        : Location(pos.x, pos.y, pos.z, pos.orientation), coord_x(x), coord_y(y), coord_z(z)
+    {}
 
     virtual ~Position()
     {};
@@ -99,7 +110,7 @@ struct MANGOS_DLL_SPEC WorldLocation : public Position
     {}
 
     WorldLocation(WorldLocation const &loc)
-        : Position(loc.coord_x, loc.coord_y, loc.coord_z, loc.orientation), mapid(loc.mapid), instance(loc.instance), realmid(loc.realmid)
+        : Position(loc.x, loc.y, loc.z, loc.orientation), mapid(loc.mapid), instance(loc.instance), realmid(loc.realmid)
     {}
 
     WorldLocation(WorldObject const& object);
