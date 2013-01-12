@@ -1879,12 +1879,10 @@ void Unit::CalculateSpellDamage(DamageInfo* damageInfo, float DamageMultiplier)
                 uint32 reduction_affected_damage = sWorld.getConfig(CONFIG_BOOL_RESILENCE_ALTERNATIVE_CALCULATION) ?
                                                    damageInfo->damage :
                                                    CalcNotIgnoreDamageReduction(damageInfo);
-/*
-                uint32 damageCritReduction = (damageInfo->attackType != RANGED_ATTACK) ?
-                                                damageInfo->target->GetMeleeCritDamageReduction(reduction_affected_damage) :
-                                                damageInfo->target->GetRangedCritDamageReduction(reduction_affected_damage);
 
-                damageInfo->damage -= damageCritReduction;*/
+                uint32 damageCritReduction =  damageInfo->target->GetCritDamageReduction(reduction_affected_damage);
+
+                damageInfo->damage -= damageCritReduction;
             }
             else
             {
@@ -1909,11 +1907,11 @@ void Unit::CalculateSpellDamage(DamageInfo* damageInfo, float DamageMultiplier)
                 damageInfo->damage = SpellCriticalDamageBonus(damageInfo->GetSpellProto(), damageInfo->damage, damageInfo->target);
 
                 // Resilience - reduce crit damage (full or reduced)
-/*                uint32 reduction_affected_damage = sWorld.getConfig(CONFIG_BOOL_RESILENCE_ALTERNATIVE_CALCULATION) ?
+                uint32 reduction_affected_damage = sWorld.getConfig(CONFIG_BOOL_RESILENCE_ALTERNATIVE_CALCULATION) ?
                                                    damageInfo->damage :
                                                    CalcNotIgnoreDamageReduction(damageInfo);
 
-                damageInfo->damage -= damageInfo->target->GetSpellCritDamageReduction(reduction_affected_damage);*/
+                damageInfo->damage -= damageInfo->target->GetCritDamageReduction(reduction_affected_damage);
             }
             else
             {
@@ -2103,13 +2101,8 @@ void Unit::CalculateMeleeDamage(DamageInfo* damageInfo)
 
             // Resilience - reduce crit damage
             uint32 reduction_affected_damage = CalcNotIgnoreDamageReduction(damageInfo);
-            uint32 resilienceReduction;
-/*
-            if (damageInfo->attackType != RANGED_ATTACK)
-                resilienceReduction = pVictim->GetMeleeCritDamageReduction(reduction_affected_damage);
-            else
-                resilienceReduction = pVictim->GetRangedCritDamageReduction(reduction_affected_damage);
-*/
+            uint32 resilienceReduction = pVictim->GetCritDamageReduction(reduction_affected_damage);
+
             damageInfo->damage      -= resilienceReduction;
             damageInfo->cleanDamage += resilienceReduction;
             break;

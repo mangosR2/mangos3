@@ -8844,7 +8844,7 @@ void Aura::PeriodicTick()
             {
                 damageInfo.hitOutCome = MELEE_HIT_CRIT;
                 // Resilience - reduce crit damage
-                // damageInfo.damage -= target->GetSpellCritDamageReduction(damageInfo.damage);
+                damageInfo.damage -= target->GetCritDamageReduction(damageInfo.damage);
             }
 
             // only from players
@@ -8944,13 +8944,13 @@ void Aura::PeriodicTick()
             {
                 damageInfo.hitOutCome = MELEE_HIT_CRIT;
                 // Resilience - reduce crit damage
-//                damageInfo.damage -= target->GetSpellCritDamageReduction(damageInfo.damage);
+                damageInfo.damage -= target->GetCritDamageReduction(damageInfo.damage);
             }
 
             // only from players
             // FIXME: need use SpellDamageBonus instead?
-//            if (GetAffectiveCasterGuid().IsPlayer())
-//                damageInfo.damage -= target->GetSpellDamageReduction(damageInfo.damage);
+            if (GetAffectiveCasterGuid().IsPlayer())
+                damageInfo.damage -= target->GetDamageReduction(damageInfo.damage);
 
             target->CalculateDamageAbsorbAndResist(pCaster, &damageInfo, !spellProto->HasAttribute(SPELL_ATTR_EX_CANT_REFLECTED));
 
@@ -9336,8 +9336,8 @@ void Aura::PeriodicTick()
                 return;
 
             // resilience reduce mana draining effect at spell crit damage reduction (added in 2.4)
-//            if (powerType == POWER_MANA)
-//                damageInfo.damage -= target->GetSpellCritDamageReduction(damageInfo.damage);
+            if (powerType == POWER_MANA)
+                damageInfo.damage -= target->GetCritDamageReduction(damageInfo.damage);
             damageInfo.cleanDamage = abs(target->ModifyPower(powerType, -damageInfo.damage));
 
             damageInfo.damage = uint32(damageInfo.cleanDamage * GetSpellEffect()->EffectMultipleValue);
