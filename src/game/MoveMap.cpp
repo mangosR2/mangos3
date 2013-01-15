@@ -208,7 +208,7 @@ namespace MMAP
 
         dtStatus stat;
         {
-            WriteGuard Guard(GetLock(mapId));
+            ReadGuard Guard(GetLock(mapId));
             stat = mmap->navMesh->addTile(data, fileHeader.size, DT_TILE_FREE_DATA, 0, &tileRef);
         }
 
