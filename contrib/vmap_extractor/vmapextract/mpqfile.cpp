@@ -9,10 +9,12 @@ MPQFile::MPQFile(HANDLE mpq, const char* filename):
     pointer(0),
     size(0)
 {
-    HANDLE file;
+    HANDLE file = NULL;
     if (!SFileOpenFileEx(mpq, filename, SFILE_OPEN_PATCHED_FILE, &file))
     {
-        fprintf(stderr, "Can't open %s, err=%u!\n", filename, GetLastError());
+        int _err = GetLastError();
+        if (_err != ERROR_FILE_NOT_FOUND)
+            fprintf(stderr, "Can't open %s ,err= %u!\n", filename, _err );
         eof = true;
         return;
     }

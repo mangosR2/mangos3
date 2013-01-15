@@ -24,7 +24,8 @@ case "$1" in
 esac
 ################################################################################################
 #make binary storage
-BINARY_PATH=bin
+BINARY_PATH=contrib/extractor_binary
+#BINARY_PATH=bin
 if [ ! -d ./$BINARY_PATH ]; then
     mkdir $BINARY_PATH
 fi;
@@ -35,7 +36,7 @@ fi;
 ################################################################################################
 # Make StormLib
 cd dep/StormLib
-make clean
+# make clean
 if [ ! -d ./$PLATFORM ]; then
     mkdir $PLATFORM
 fi;
@@ -43,13 +44,13 @@ fi;
 cd $PLATFORM
 
 if [ "$PLATFORM" != "build" ]; then
-    mingw32-cmake -DCMAKE_TOOLCHAIN_FILE=../../../cmake/mingw32-$PLATFORM.cmake ..
+    mingw32-cmake -DCMAKE_TOOLCHAIN_FILE=../../../cmake/mingw32-$PLATFORM.cmake  -DLIB_INSTALL_DIR=/usr/$PLATFORM-w64-mingw32/sys-root/mingw/lib -DINCLUDE_INSTALL_DIR=/usr/$PLATFORM-w64-mingw32/sys-root/mingw/include \..
 else
     cmake ..
 fi
 
 make
-make install
+sudo make install
 
 if [ "$PLATFORM" != "build" ]; then
     cp /usr/$PLATFORM-w64-mingw32/sys-root/mingw/lib/libStormLib.dll ../../../$BINARY_PATH/$PLATFORM/
