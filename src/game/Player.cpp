@@ -21090,7 +21090,7 @@ void Player::learnSkillRewardedSpells(uint32 skill_id, uint32 skill_value)
     }
 }
 
-void Player::SendAurasForTarget(Unit *target)
+void Player::SendAurasForTarget(Unit* target)
 {
     if (!target)
         return;
@@ -21098,11 +21098,11 @@ void Player::SendAurasForTarget(Unit *target)
     WorldPacket data(SMSG_AURA_UPDATE_ALL);
     data << target->GetPackGUID();
 
-    Unit::VisibleAuraMap const& visibleAuras = target->GetVisibleAuras();
-    for (size_t i = 0; i < MAX_AURAS && i < visibleAuras.size() ; ++i)
+    for (uint8 slot = 0; slot < MAX_AURAS; ++slot)
     {
-        if (visibleAuras[i])
-            visibleAuras[i]->BuildUpdatePacket(data);
+        SpellAuraHolderPtr const vAura = target->GetVisibleAura(slot);
+        if (vAura)
+            vAura->BuildUpdatePacket(data);
     }
 
     GetSession()->SendPacket(&data);
