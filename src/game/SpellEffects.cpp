@@ -9057,27 +9057,39 @@ void Spell::EffectInterruptCast(SpellEffectEntry const* effect)
         }
     }
 
-    if (spellSchoolMask && m_spellInfo->Id == 57994 && m_caster->GetTypeId() == TYPEID_PLAYER && m_caster->getClass() == CLASS_SHAMAN)
+    if (spellSchoolMask && m_caster->GetTypeId() == TYPEID_PLAYER)
     {
-        Player* plrCaster = (Player*)m_caster;
-        // Frozen Power
-        if (SpellEntry const * spellProto = plrCaster->GetKnownTalentRankById(11220))
+        // Pummel
+        if (m_spellInfo->Id == 6552)
         {
-            uint32 triggeredSpell = 0;
-            if (spellSchoolMask & SPELL_SCHOOL_MASK_FIRE)
-                triggeredSpell = 97618;
-            else if (spellSchoolMask & SPELL_SCHOOL_MASK_FROST)
-                triggeredSpell = 97619;
-            else if (spellSchoolMask & SPELL_SCHOOL_MASK_NATURE)
-                triggeredSpell = 97620;
-            else if (spellSchoolMask & SPELL_SCHOOL_MASK_ARCANE)
-                triggeredSpell = 97621;
-            else if (spellSchoolMask & SPELL_SCHOOL_MASK_SHADOW)
-                triggeredSpell = 97622;
-            if (triggeredSpell)
+            // Rude Interruption
+            if (SpellEntry const * spellProto = ((Player*)m_caster)->GetKnownTalentRankById(11415))
+                if (SpellEffectEntry const * effect = spellProto->GetSpellEffect(EFFECT_INDEX_0))
+                    m_caster->CastSpell(m_caster, effect->EffectTriggerSpell, true);
+        }
+        // Wind Shear
+        else if (m_spellInfo->Id == 57994)
+        {
+            Player* plrCaster = (Player*)m_caster;
+            // Frozen Power
+            if (SpellEntry const * spellProto = plrCaster->GetKnownTalentRankById(11220))
             {
-                int32 bp = GetResistancesAtLevel(m_caster->getLevel()) * (spellProto->Id == 16086 ? 0.5f : 1.0f);
-                m_caster->CastCustomSpell(m_caster, triggeredSpell, &bp, NULL, NULL, true);
+                uint32 triggeredSpell = 0;
+                if (spellSchoolMask & SPELL_SCHOOL_MASK_FIRE)
+                    triggeredSpell = 97618;
+                else if (spellSchoolMask & SPELL_SCHOOL_MASK_FROST)
+                    triggeredSpell = 97619;
+                else if (spellSchoolMask & SPELL_SCHOOL_MASK_NATURE)
+                    triggeredSpell = 97620;
+                else if (spellSchoolMask & SPELL_SCHOOL_MASK_ARCANE)
+                    triggeredSpell = 97621;
+                else if (spellSchoolMask & SPELL_SCHOOL_MASK_SHADOW)
+                    triggeredSpell = 97622;
+                if (triggeredSpell)
+                {
+                    int32 bp = GetResistancesAtLevel(m_caster->getLevel()) * (spellProto->Id == 16086 ? 0.5f : 1.0f);
+                    m_caster->CastCustomSpell(m_caster, triggeredSpell, &bp, NULL, NULL, true);
+                }
             }
         }
     }
