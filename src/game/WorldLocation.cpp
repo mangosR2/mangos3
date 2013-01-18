@@ -44,16 +44,18 @@ Position& Position::operator = (Position const& pos)
     y           = pos.y;
     z           = pos.z;
     orientation = pos.orientation;
+    m_phaseMask = pos.GetPhaseMask();
+
     return *this;
 }
 
 bool Position::operator == (Position const& pos) const
 {
-    return ((Location*)this) == ((Location*)&pos);
+    return (((Location*)this) == ((Location*)&pos)) && (GetPhaseMask() & pos.GetPhaseMask());
 };
 
 WorldLocation::WorldLocation(WorldObject const& object)
-    : Position(object.GetPositionX(), object.GetPositionX(), object.GetPositionZ(), object.GetOrientation()),
+    : Position(object.GetPositionX(), object.GetPositionX(), object.GetPositionZ(), object.GetOrientation(), object.GetPhaseMask()),
         mapid(object.GetMapId()), instance(object.GetInstanceId()), realmid(sWorld.getConfig(CONFIG_UINT32_REALMID))
 {
 };
@@ -102,6 +104,7 @@ WorldLocation& WorldLocation::operator = (WorldLocation const& loc)
     y           = loc.y;
     z           = loc.z;
     orientation = loc.orientation;
+    m_phaseMask = loc.GetPhaseMask();
 
     return *this;
 }
