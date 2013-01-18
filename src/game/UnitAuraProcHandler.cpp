@@ -4774,10 +4774,10 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(Unit *pVictim, DamageIn
             }
             return SPELL_AURA_PROC_FAILED;
         }
-        // Bloodthirst (($m/100)% of max health)
+        // Bloodthirst ${$23881m2/1000}.1%
         case 23880:
         {
-            basepoints[0] = int32(GetMaxHealth() * triggerAmount / 100);
+            basepoints[0] = int32(GetMaxHealth() * triggerAmount / 100 / 1000);
             break;
         }
         // Shamanistic Rage triggered spell
