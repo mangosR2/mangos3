@@ -10515,6 +10515,14 @@ void Unit::FixateTarget(Unit* pVictim)
     SelectHostileTarget();
 }
 
+Unit* Unit::GetFixatedTarget()
+{
+    if (!GetMap() || m_fixateTargetGuid.IsEmpty())
+        return NULL;
+
+    return GetMap()->GetUnit(m_fixateTargetGuid);
+}
+
 //======================================================================
 
 bool Unit::IsSecondChoiceTarget(Unit* pTarget, bool checkThreatArea) const
