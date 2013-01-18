@@ -2181,7 +2181,14 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                 }
                 case 44997:                                 // Converting Sentry
                 {
-                    //Converted Sentry Credit
+                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_UNIT)
+                        return;
+
+                    Creature* creatureTarget = (Creature*)unitTarget;
+
+                    creatureTarget->ForcedDespawn(500);
+
+                    // Converted Sentry Credit
                     m_caster->CastSpell(m_caster, 45009, true);
                     return;
                 }
