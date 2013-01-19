@@ -237,6 +237,10 @@ CalendarInvitesList* CalendarMgr::GetPlayerInvitesList(ObjectGuid const& guid)
     for (CalendarEventStore::iterator iter = m_EventStore.begin(); iter != m_EventStore.end(); ++iter)
     {
         CalendarEvent& event = iter->second;
+
+        if (event.HasFlag(CALENDAR_STATE_FLAG_DELETED))
+            continue;
+
         if (event.IsGuildAnnouncement())
             continue;
 
@@ -244,7 +248,7 @@ CalendarInvitesList* CalendarMgr::GetPlayerInvitesList(ObjectGuid const& guid)
         CalendarInviteMap::const_iterator ci_itr = cInvMap->begin();
         while (ci_itr != cInvMap->end())
         {
-            if (ci_itr->second->InviteeGuid == guid)
+            if (!ci_itr->second->HasFlag(CALENDAR_STATE_FLAG_DELETED) && ci_itr->second->InviteeGuid == guid)
             {
                 invites->insert(ci_itr->second);
                 break;
@@ -725,7 +729,7 @@ void CalendarMgr::Update()
         for (CalendarEventStore::iterator itr = m_EventStore.begin(); itr != m_EventStore.end(); ++itr)
         {
             CalendarEvent* event = &itr->second;
-            if (!event)
+            if (!event || event->HasFlag(CALENDAR_STATE_FLAG_DELETED))
                 continue;
 
             if (event->GetInviteMap()->empty())
@@ -736,7 +740,7 @@ void CalendarMgr::Update()
         for (CalendarInviteStore::iterator itr = m_InviteStore.begin(); itr != m_InviteStore.end(); ++itr)
         {
             CalendarInvite* invite = &itr->second;
-            if (!invite)
+            if (!invite  || invite->HasFlag(CALENDAR_STATE_FLAG_DELETED))
                 continue;
 
             if (invite->GetEventGuid().IsEmpty() || !invite->GetCalendarEvent())
@@ -754,7 +758,7 @@ void CalendarMgr::SendCalendarEventInviteAlert(CalendarInvite const* invite)
     DEBUG_LOG("WORLD: SMSG_CALENDAR_EVENT_INVITE_ALERT");
 
     CalendarEvent const* event = invite->GetCalendarEvent();
-    if (!event)
+    if (!event || event->HasFlag(CALENDAR_STATE_FLAG_DELETED))
         return;
 
     WorldPacket data(SMSG_CALENDAR_EVENT_INVITE_ALERT);
@@ -887,10 +891,15 @@ void CalendarMgr::SendCalendarEvent(ObjectGuid const& guid, CalendarEvent const*
     data << event->GuildId;
 
     CalendarInviteMap const* cInvMap = event->GetInviteMap();
-    data << (uint32)cInvMap->size();
+    size_t pos = data.wpos();
+    data << uint32(0);                                  // size of list, placeholder
+    uint32 _count = 0;
     for (CalendarInviteMap::const_iterator itr = cInvMap->begin(); itr != cInvMap->end(); ++itr)
     {
         CalendarInvite const* calendarInvite = itr->second;
+        if (calendarInvite->HasFlag(CALENDAR_STATE_FLAG_DELETED))
+            continue;
+
         ObjectGuid inviteeGuid = calendarInvite->InviteeGuid;
         Player* invitee = sObjectMgr.GetPlayer(inviteeGuid);
 
@@ -909,7 +918,9 @@ void CalendarMgr::SendCalendarEvent(ObjectGuid const& guid, CalendarEvent const*
         DEBUG_FILTER_LOG(LOG_FILTER_CALENDAR, "CalendarMgr::SendCalendarEvent InviteId[%u], InviteLvl[%u], Status[%u], Rank[%u],  GuildEvent[%s], Text[%s]",
             uint32(calendarInvite->InviteId), uint32(inviteeLevel), uint32(calendarInvite->Status), uint32(calendarInvite->Rank),
             (event->IsGuildEvent() && event->GuildId == inviteeGuildId) ? "true" : "false", calendarInvite->Text.c_str());
+        ++_count;
     }
+    data.put<uint32>(pos, _count);
     //data.hexlike();
     player->SendDirectMessage(&data);
 }
@@ -1014,9 +1025,10 @@ void CalendarMgr::SendPacketToAllEventRelatives(WorldPacket packet, CalendarEven
     // Send packet to all invitees if event is non-guild, in other case only to non-guild invitees (packet was broadcasted for them)
     CalendarInviteMap const* cInvMap = event->GetInviteMap();
     for (CalendarInviteMap::const_iterator itr = cInvMap->begin(); itr != cInvMap->end(); ++itr)
-        if (Player* player = sObjectMgr.GetPlayer(itr->second->InviteeGuid))
-            if (!event->IsGuildEvent() || (event->IsGuildEvent() && player->GetGuildId() != event->GuildId))
-                player->SendDirectMessage(&packet);
+        if (!itr->second->HasFlag(CALENDAR_STATE_FLAG_DELETED))
+            if (Player* player = sObjectMgr.GetPlayer(itr->second->InviteeGuid))
+                if (!event->IsGuildEvent() || (event->IsGuildEvent() && player->GetGuildId() != event->GuildId))
+                    player->SendDirectMessage(&packet);
 }
 
 void CalendarMgr::SendCalendarRaidLockoutRemove(ObjectGuid const& guid, DungeonPersistentState const* save)

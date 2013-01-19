@@ -221,10 +221,10 @@ class CalendarMgr : public MaNGOS::Singleton<CalendarMgr, MaNGOS::ClassLevelLock
         uint32 GenerateInviteLowGuid()                   { return m_InviteGuids.Generate(); }
 
         inline bool IsDeletedEvent(CalendarEventStore::const_iterator iter) { return iter->second.HasFlag(CALENDAR_STATE_FLAG_DELETED); }
-		inline bool IsValidEvent(CalendarEventStore::const_iterator iter) { return iter != m_EventStore.end() && !IsDeletedEvent(iter); }
+        inline bool IsValidEvent(CalendarEventStore::const_iterator iter) { return iter != m_EventStore.end() && !IsDeletedEvent(iter); }
 
         inline bool IsDeletedInvite(CalendarInviteStore::const_iterator iter) { return iter->second.HasFlag(CALENDAR_STATE_FLAG_DELETED); }
-		inline bool IsValidInvite(CalendarInviteStore::const_iterator iter) { return iter != m_InviteStore.end() && !IsDeletedInvite(iter); }
+        inline bool IsValidInvite(CalendarInviteStore::const_iterator iter) { return iter != m_InviteStore.end() && !IsDeletedInvite(iter); }
 
     public:
         CalendarEventsList* GetPlayerEventsList(ObjectGuid const& guid);
