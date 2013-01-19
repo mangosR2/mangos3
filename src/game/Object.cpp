@@ -2284,9 +2284,10 @@ void WorldObject::SetLootRecipient(Unit *unit)
 // Frozen Mod
 void Object::ForceValuesUpdateAtIndex(uint16 index)
 {
-    MANGOS_ASSERT( index < m_valuesCount || PrintIndexError( index, true ) );
+    MANGOS_ASSERT( index < m_valuesCount || PrintIndexError(index, true));
 
-    m_uint32Values_mirror[index] = m_uint32Values[index] + 1; // makes server think the field changed
+    m_changedValues[index] = true; // makes server think the field changed
+
     MarkForClientUpdate();
 }
 // Frozen Mod
