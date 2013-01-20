@@ -6316,6 +6316,24 @@ void Unit::RemoveAllDynObjects()
     }
 }
 
+DynamicObject* Unit::GetEffectiveDynObject(uint32 spellId, SpellEffectIndex effIndex, Unit* pTarget)
+{
+    for (GuidList::iterator itr = m_dynObjGUIDs.begin(); itr != m_dynObjGUIDs.end();)
+    {
+        DynamicObject* dynObj = GetMap()->GetDynamicObject(*itr);
+        if(!dynObj)
+        {
+            itr = m_dynObjGUIDs.erase(itr);
+            continue;
+        }
+
+        if (dynObj->GetSpellId() == spellId && dynObj->GetEffIndex() == effIndex && dynObj->IsWithinDistInMap(pTarget, dynObj->GetRadius()))
+            return dynObj;
+        ++itr;
+    }
+    return NULL;
+}
+
 DynamicObject * Unit::GetDynObject(uint32 spellId, SpellEffectIndex effIndex)
 {
     for (GuidList::iterator i = m_dynObjGUIDs.begin(); i != m_dynObjGUIDs.end();)

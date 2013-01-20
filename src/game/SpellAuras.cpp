@@ -979,18 +979,10 @@ void Aura::PersistentAreaAuraUpdate(uint32 diff)
 
     // remove the aura if its caster or the dynamic object causing it was removed
     // or if the target moves too far from the dynamic object
-    if (Unit *caster = GetCaster())
+    if (Unit* pCaster = GetCaster())
     {
-        DynamicObject *dynObj = caster->GetDynObject(GetId(), GetEffIndex());
-        if (dynObj)
-        {
-            if (!GetTarget()->IsWithinDistInMap(dynObj, dynObj->GetRadius()))
-            {
-                remove = true;
-                dynObj->RemoveAffected(GetTarget());        // let later reapply if target return to range
-            }
-        }
-        else
+        DynamicObject* dynObj = pCaster->GetEffectiveDynObject(GetId(), GetEffIndex(), GetTarget());
+        if (!dynObj)
             remove = true;
     }
     else

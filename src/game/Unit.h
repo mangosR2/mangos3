@@ -1993,6 +1993,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         // at any changes to scale and/or displayId
         void UpdateModelData();
 
+        DynamicObject* GetEffectiveDynObject(uint32 spellId, SpellEffectIndex effIndex, Unit* pTarget);
         DynamicObject* GetDynObject(uint32 spellId, SpellEffectIndex effIndex);
         DynamicObject* GetDynObject(uint32 spellId);
         void AddDynObject(DynamicObject* dynObj);
