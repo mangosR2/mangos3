@@ -984,7 +984,7 @@ void Aura::PersistentAreaAuraUpdate(uint32 diff)
         DynamicObject *dynObj = caster->GetDynObject(GetId(), GetEffIndex());
         if (dynObj)
         {
-            if (GetHolder()->IsPermanent() && !GetTarget()->IsWithinDistInMap(dynObj, dynObj->GetRadius()))
+            if (!GetTarget()->IsWithinDistInMap(dynObj, dynObj->GetRadius()))
             {
                 remove = true;
                 dynObj->RemoveAffected(GetTarget());        // let later reapply if target return to range
