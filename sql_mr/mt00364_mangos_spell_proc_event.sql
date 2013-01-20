@@ -370,3 +370,13 @@ INSERT INTO `spell_proc_event` (`entry`, `SchoolMask`) VALUE
 DELETE FROM `spell_proc_event` WHERE `entry` = 81913;
 INSERT INTO `spell_proc_event` (`entry`, `SchoolMask`, `Cooldown`) VALUE
 (81913, 127, 120);
+
+-- Incite
+DELETE FROM `spell_proc_event` WHERE `entry` = 50685;
+INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA1`, `procEx`) VALUE
+(50685, 4, 64, 524288+2);
+
+-- Incite proc
+DELETE FROM `spell_proc_event` WHERE `entry` = 86627;
+INSERT INTO `spell_proc_event` (`entry`, `procEx`) VALUE
+(86627, 524288);
