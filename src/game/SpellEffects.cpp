@@ -884,6 +884,40 @@ void Spell::EffectSchoolDMG(SpellEffectEntry const* effect)
                         damage+= int32(m_caster->GetTotalAttackPowerValue(BASE_ATTACK) * pct / 100);
                     break;
                 }
+                // Thunder Clap
+                else if (m_spellInfo->Id == 6343)
+                {
+                    if (m_caster->GetTypeId() == TYPEID_PLAYER)
+                    {
+                        // find Blood and Thunder
+                        if (SpellEntry const * bat = ((Player*)m_caster)->GetKnownTalentRankById(10480))
+                        {
+                            // check if Blood and Thunder chance is already calculated
+                            if (!m_currentBasePoints[EFFECT_INDEX_2])
+                            {
+                                m_currentBasePoints[EFFECT_INDEX_2] = 1;
+                                m_currentBasePoints[EFFECT_INDEX_1] = 0;
+
+                                if (roll_chance_i(bat->CalculateSimpleValue(EFFECT_INDEX_0)))
+                                {
+                                    for (TargetList::iterator itr = m_UniqueTargetInfo.begin(); itr != m_UniqueTargetInfo.end(); ++itr)
+                                    {
+                                        if (Unit* unit = m_caster->GetMap()->GetUnit(itr->targetGUID))
+                                            if (unit->GetSpellAuraHolder(94009, m_caster->GetObjectGuid()))
+                                            {
+                                                m_currentBasePoints[EFFECT_INDEX_1] = 1;
+                                                break;
+                                            }
+                                    }
+                                }
+                            }
+
+                            // check if we should cast rend
+                            if (m_currentBasePoints[EFFECT_INDEX_1])
+                                m_caster->CastSpell(unitTarget, 94009, true);
+                        }
+                    }
+                }
                 // Execute
                 else if (m_spellInfo->Id == 5308)
                 {
