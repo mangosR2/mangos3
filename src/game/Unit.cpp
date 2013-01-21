@@ -1146,7 +1146,7 @@ uint32 Unit::DealDamage(DamageInfo* damageInfo)
                 else
                     weaponSpeedHitFactor = uint32(GetAttackTime(damageInfo->attackType)/1000.0f * 3.5f);
 
-                ((Player*)this)->RewardRage(damageInfo->damage + damageInfo->GetAbsorb(), weaponSpeedHitFactor, true);
+                ((Player*)this)->RewardRage(damageInfo->damage + damageInfo->GetAbsorb(), weaponSpeedHitFactor, true, pVictim);
 
                 break;
             }
@@ -1157,7 +1157,7 @@ uint32 Unit::DealDamage(DamageInfo* damageInfo)
                 else
                     weaponSpeedHitFactor = uint32(GetAttackTime(damageInfo->attackType)/1000.0f * 1.75f);
 
-                ((Player*)this)->RewardRage(damageInfo->damage + damageInfo->GetAbsorb(), weaponSpeedHitFactor, true);
+                ((Player*)this)->RewardRage(damageInfo->damage + damageInfo->GetAbsorb(), weaponSpeedHitFactor, true, pVictim);
 
                 break;
             }
@@ -1419,7 +1419,7 @@ uint32 Unit::DealDamage(DamageInfo* damageInfo)
             if (this != pVictim && pVictim->getPowerType() == POWER_RAGE)
             {
                 uint32 rage_damage = damageInfo->damage + (damageInfo->cleanDamage ? (damageInfo->cleanDamage + damageInfo->GetAbsorb()) : 0);
-                ((Player*)pVictim)->RewardRage(rage_damage, 0, false);
+                ((Player*)pVictim)->RewardRage(rage_damage, 0, false, pVictim);
             }
 
             // random durability for items (HIT TAKEN)
