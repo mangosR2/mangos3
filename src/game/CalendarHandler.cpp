@@ -380,14 +380,16 @@ void WorldSession::HandleCalendarRemoveEvent(WorldPacket& recv_data)
     DEBUG_LOG("WORLD: CMSG_CALENDAR_REMOVE_EVENT [%u]", guid.GetCounter());
 
     ObjectGuid eventId;
-    ObjectGuid creatorGuid;
+    ObjectGuid inviteGuid;
     uint32 Flags;
 
     recv_data >> eventId;
-    recv_data >> creatorGuid.ReadAsPacked();
+    recv_data >> inviteGuid;
     recv_data >> Flags;
-    DEBUG_FILTER_LOG(LOG_FILTER_CALENDAR, "WorldSession::HandleCalendarRemoveEvent [%u], creator [%u]",
-        guid.GetCounter(), creatorGuid.GetCounter());
+
+    DEBUG_FILTER_LOG(LOG_FILTER_CALENDAR, "WorldSession::HandleCalendarRemoveEvent event %u, invite %u, flags %u, remover %s",
+        guid.GetCounter(), inviteGuid.GetCounter(), Flags, guid.GetString().c_str());
+
     sCalendarMgr.RemoveEvent(eventId, guid);
 }
 
@@ -400,7 +402,8 @@ void WorldSession::HandleCalendarCopyEvent(WorldPacket& recv_data)
     ObjectGuid inviteId;
     uint32 packedTime;
 
-    recv_data >> eventId >> inviteId;
+    recv_data >> eventId;
+    recv_data >> inviteId;
     packedTime = recv_data.ReadPackedTime();
 
     DEBUG_FILTER_LOG(LOG_FILTER_CALENDAR, "WorldSession::HandleCalendarCopyEvent [%u], EventId [%u] inviteId [%u]",

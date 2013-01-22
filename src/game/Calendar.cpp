@@ -285,17 +285,12 @@ CalendarEvent* CalendarMgr::AddEvent(ObjectGuid const& guid, std::string title, 
 
     uint32 guild = ((flags & CALENDAR_FLAG_GUILD_EVENT) || (flags && CALENDAR_FLAG_GUILD_ANNOUNCEMENT)) ? player->GetGuildId() : 0;
 
-    // FIXME - need lock and constructor usage in this place
-    m_EventStore[eventGuid].EventId = eventGuid;
-    m_EventStore[eventGuid].CreatorGuid = guid;
-    m_EventStore[eventGuid].Title = title;
-    m_EventStore[eventGuid].Description = description;
-    m_EventStore[eventGuid].Type = (CalendarEventType) type;
-    m_EventStore[eventGuid].Repeatable = (CalendarRepeatType) repeatable;
-    m_EventStore[eventGuid].DungeonId = dungeonId;
-    m_EventStore[eventGuid].EventTime = eventTime;
-    m_EventStore[eventGuid].Flags = flags;
-    m_EventStore[eventGuid].GuildId = guild;
+    {
+        WriteGuard guard(GetLock());
+        m_EventStore.insert(CalendarEventStore::value_type(eventGuid,
+            CalendarEvent(eventGuid, guid, guild, CalendarEventType(type), dungeonId, eventTime, flags, unkTime, title, description)));
+    }
+
     return &m_EventStore[eventGuid];
 }
 
@@ -324,33 +319,34 @@ CalendarInvite* CalendarMgr::AddInvite(CalendarEvent* event, ObjectGuid const& s
         WriteGuard guard(GetLock());
         m_InviteStore.insert(CalendarInviteStore::value_type(inviteGuid, CalendarInvite(event, inviteGuid, senderGuid, inviteeGuid, statusTime, status, rank, text)));
     }
-    CalendarInvite* calendarInvite = &m_InviteStore[inviteGuid];
+
+    CalendarInvite& calendarInvite = m_InviteStore[inviteGuid];
 
     if (!event->IsGuildAnnouncement())
-        SendCalendarEventInvite(calendarInvite);
+        SendCalendarEventInvite(&calendarInvite);
 
-    if (!event->IsGuildEvent() || calendarInvite->InviteeGuid == event->CreatorGuid)
-        SendCalendarEventInviteAlert(calendarInvite);
+    if (!event->IsGuildEvent() || calendarInvite.InviteeGuid == event->CreatorGuid)
+        SendCalendarEventInviteAlert(&calendarInvite);
 
     if (event->IsGuildAnnouncement())
     {
-        calendarInvite->AddFlag(CALENDAR_STATE_FLAG_DELETED);
+        calendarInvite.AddFlag(CALENDAR_STATE_FLAG_DELETED);
         return NULL;
     }
 
     DEBUG_FILTER_LOG(LOG_FILTER_CALENDAR, "CalendarMgr::AddInvite eventId[%u], senderGuid[%u], inviteGuid[%u], Status[%u], rank[%u], text[%s], time[%u]", (uint32)event->EventId, senderGuid.GetCounter(), inviteeGuid.GetCounter(), status, rank, text.c_str(), (uint32)statusTime);
 
-    if (!event->AddInvite(calendarInvite))
+    if (!event->AddInvite(&calendarInvite))
     {
         sLog.outError("CalendarEvent::AddInvite Fail adding invite!");
-        calendarInvite->AddFlag(CALENDAR_STATE_FLAG_DELETED);
+        calendarInvite.AddFlag(CALENDAR_STATE_FLAG_DELETED);
         return NULL;
     }
 
-    calendarInvite->RemoveFlag(CALENDAR_STATE_FLAG_SAVED);
-    calendarInvite->AddFlag(CALENDAR_STATE_FLAG_UPDATED);
+    calendarInvite.RemoveFlag(CALENDAR_STATE_FLAG_SAVED);
+    calendarInvite.AddFlag(CALENDAR_STATE_FLAG_UPDATED);
 
-    return calendarInvite;
+    return &calendarInvite;
 }
 
 bool CalendarMgr::RemoveInvite(ObjectGuid const& eventId, ObjectGuid const& inviteId, ObjectGuid const& removerGuid)
@@ -497,20 +493,23 @@ void CalendarMgr::LoadFromDB()
             uint32 eventId = field[0].GetUInt32();
             ObjectGuid eventGuid = ObjectGuid(HIGHGUID_CALENDAR_EVENT, eventId);
 
-            m_EventStore[eventGuid].EventId       = eventGuid;
-            m_EventStore[eventGuid].CreatorGuid   = ObjectGuid(HIGHGUID_PLAYER, field[1].GetUInt32());
-            m_EventStore[eventGuid].GuildId       = field[2].GetUInt32();
-            m_EventStore[eventGuid].Type          = CalendarEventType(field[3].GetUInt8());
-            m_EventStore[eventGuid].Flags         = field[4].GetUInt32();
-            m_EventStore[eventGuid].DungeonId     = field[5].GetInt32();
-            m_EventStore[eventGuid].EventTime     = time_t(field[6].GetUInt32());
-            m_EventStore[eventGuid].Title         = field[7].GetString();
-            m_EventStore[eventGuid].Description   = field[8].GetString();
+            m_EventStore.insert(CalendarEventStore::value_type(eventGuid,
+                CalendarEvent(eventGuid,
+                    ObjectGuid(HIGHGUID_PLAYER, field[1].GetUInt32()), 
+                    field[2].GetUInt32(), 
+                    CalendarEventType(field[3].GetUInt8()), 
+                    field[5].GetInt32(), 
+                    time_t(field[6].GetUInt32()), 
+                    field[4].GetUInt32(), 
+                    time_t(time(NULL)), 
+                    field[7].GetString(),
+                    field[8].GetString())));
 
             maxEventId = (maxEventId < eventId) ? eventId : maxEventId;
+            CalendarEvent& event = m_EventStore[eventGuid];
 
-            m_EventStore[eventGuid].RemoveFlag(CALENDAR_STATE_FLAG_UPDATED);
-            m_EventStore[eventGuid].AddFlag(CALENDAR_STATE_FLAG_SAVED);
+            event.RemoveFlag(CALENDAR_STATE_FLAG_UPDATED);
+            event.AddFlag(CALENDAR_STATE_FLAG_SAVED);
 
         } while (eventsQuery->NextRow());
         sLog.outString();
@@ -555,18 +554,18 @@ void CalendarMgr::LoadFromDB()
                 std::string _text           = field[7].GetString();
 
                 m_InviteStore.insert(CalendarInviteStore::value_type(inviteGuid, CalendarInvite(event, inviteGuid, senderGuid, inviteeGuid, lastUpdateTime, status, rank, _text)));
-                CalendarInvite* invite = &m_InviteStore[inviteGuid];
+                CalendarInvite& invite = m_InviteStore[inviteGuid];
 
-                invite->RemoveFlag(CALENDAR_STATE_FLAG_UPDATED);
-                invite->AddFlag(CALENDAR_STATE_FLAG_SAVED);
+                invite.RemoveFlag(CALENDAR_STATE_FLAG_UPDATED);
+                invite.AddFlag(CALENDAR_STATE_FLAG_SAVED);
 
                 if (!event)
                 {
                     // delete invite
-                    invite->AddFlag(CALENDAR_STATE_FLAG_DELETED);
+                    invite.AddFlag(CALENDAR_STATE_FLAG_DELETED);
                 }
                 else
-                    event->AddInvite(invite);
+                    event->AddInvite(&invite);
 
                 maxInviteId = (maxInviteId < inviteGuid.GetCounter()) ? inviteGuid.GetCounter() : maxEventId;
 
