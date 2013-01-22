@@ -1084,7 +1084,7 @@ void Object::MarkForClientUpdate()
 
 WorldObject::WorldObject()
     : m_groupLootTimer(0), loot(this), m_groupLootId(0), m_lootGroupRecipientId(0), m_transportInfo(NULL),
-    m_currMap(NULL), m_mapId(0), m_InstanceId(0), m_phaseMask(PHASEMASK_NORMAL), m_viewPoint(*this), m_isActiveObject(false),
+    m_currMap(NULL), m_position(WorldLocation()), m_viewPoint(*this), m_isActiveObject(false),
     m_LastUpdateTime(WorldTimer::getMSTime())
 {
 }
@@ -1098,7 +1098,7 @@ void WorldObject::CleanupsBeforeDelete()
 void WorldObject::_Create(ObjectGuid guid, uint32 phaseMask)
 {
     Object::_Create(guid);
-    m_phaseMask = phaseMask;
+    SetPhaseMask(phaseMask, false);
 }
 
 void WorldObject::AddToWorld()
@@ -1132,6 +1132,22 @@ void WorldObject::RemoveFromWorld(bool remove)
 ObjectLockType& WorldObject::GetLock(MapLockType _lockType)
 {
     return GetMap() ? GetMap()->GetLock(_lockType) : sWorld.GetLock(_lockType);
+}
+
+void WorldObject::Relocate(WorldLocation const& location)
+{
+    bool locationChanged    = !bool(location == m_position);
+    bool orientationChanged = bool(fabs(location.o - m_position.o) > M_NULL_F);
+
+    m_position = location;
+
+    if (isType(TYPEMASK_UNIT))
+    {
+        if (locationChanged)
+            ((Unit*)this)->m_movementInfo.ChangePosition(m_position.x, m_position.y, m_position.z, m_position.o);
+        else if (orientationChanged)
+            ((Unit*)this)->m_movementInfo.ChangeOrientation(m_position.o);
+    }
 }
 
 void WorldObject::Relocate(float x, float y, float z, float orientation)
@@ -1749,8 +1765,8 @@ void WorldObject::SetMap(Map * map)
     MANGOS_ASSERT(map);
     m_currMap = map;
     //lets save current map's Id/instanceId
-    m_mapId = map->GetId();
-    m_InstanceId = map->GetInstanceId();
+    m_position.SetMapId(map->GetId());
+    m_position.SetInstanceId(map->GetInstanceId());
 }
 
 TerrainInfo const* WorldObject::GetTerrain() const
@@ -2034,7 +2050,7 @@ void WorldObject::GetNearPoint(WorldObject const* searcher, float &x, float &y, 
 
 void WorldObject::SetPhaseMask(uint32 newPhaseMask, bool update)
 {
-    m_phaseMask = newPhaseMask;
+    m_position.SetPhaseMask(newPhaseMask);
 
     if (update && IsInWorld())
         UpdateVisibilityAndView();

@@ -1820,12 +1820,12 @@ bool Player::TeleportTo(WorldLocation const& loc, uint32 options)
         SetSemaphoreTeleportFar(false);
 
         // try preload grid, targeted for teleport
-        if (!(options & TELE_TO_NODELAY) && !GetMap()->PreloadGrid(loc.coord_x, loc.coord_y))
+        if (!(options & TELE_TO_NODELAY) && !GetMap()->PreloadGrid(loc.x, loc.y))
         {
             // If loading grid not finished, delay teleport on one update tick
             AddEvent(new TeleportDelayEvent(*this, loc, options),
                 sWorld.getConfig(CONFIG_UINT32_INTERVAL_MAPUPDATE));
-            DEBUG_LOG("Player::TeleportTo grid (map %u, instance %u, X%f Y%f) not fully loaded, near teleport %s delayed.", loc.GetMapId(), GetInstanceId(), loc.coord_x, loc.coord_y, GetName());
+            DEBUG_LOG("Player::TeleportTo grid (map %u, instance %u, X%f Y%f) not fully loaded, near teleport %s delayed.", loc.GetMapId(), GetInstanceId(), loc.x, loc.y, GetName());
             SetSemaphoreTeleportDelayEvent(true);
             m_teleport_dest = loc;
             return true;
@@ -1860,7 +1860,7 @@ bool Player::TeleportTo(WorldLocation const& loc, uint32 options)
 
         // this will be used instead of the current location in SaveToDB
         m_teleport_dest = loc;
-        SetFallInformation(0, loc.coord_z);
+        SetFallInformation(0, loc.z);
 
         // code for finish transfer called in WorldSession::HandleMovementOpcodes()
         // at client packet MSG_MOVE_TELEPORT_ACK
@@ -1909,13 +1909,13 @@ bool Player::TeleportTo(WorldLocation const& loc, uint32 options)
             }
 
             // try preload grid, targeted for teleport
-            if (!(options & TELE_TO_NODELAY) && !map->PreloadGrid(loc.coord_x, loc.coord_y))
+            if (!(options & TELE_TO_NODELAY) && !map->PreloadGrid(loc.x, loc.y))
             {
                 // If loading grid not finished, delay teleport 5 map update ticks
-                AddEvent(new TeleportDelayEvent(*this, WorldLocation(loc.coord_x, loc.coord_y, loc.coord_z, loc.orientation, loc.GetMapId(), map->GetInstanceId(), sWorld.getConfig(CONFIG_UINT32_REALMID)), options),
+                AddEvent(new TeleportDelayEvent(*this, WorldLocation(loc.x, loc.y, loc.z, loc.orientation, loc.GetMapId(), map->GetInstanceId(), sWorld.getConfig(CONFIG_UINT32_REALMID)), options),
                     5 * sWorld.getConfig(CONFIG_UINT32_INTERVAL_MAPUPDATE));
 
-                DEBUG_LOG("Player::TeleportTo grid (map %u, instance %u, X%f Y%f) not fully loaded, far teleport %s delayed.", loc.GetMapId(), map->GetInstanceId(), loc.coord_x, loc.coord_y, GetName());
+                DEBUG_LOG("Player::TeleportTo grid (map %u, instance %u, X%f Y%f) not fully loaded, far teleport %s delayed.", loc.GetMapId(), map->GetInstanceId(), loc.x, loc.y, GetName());
                 SetSemaphoreTeleportDelayEvent(true);
                 m_teleport_dest = loc;
                 return true;
@@ -1986,9 +1986,9 @@ bool Player::TeleportTo(WorldLocation const& loc, uint32 options)
                 oldmap->Remove(this, false);
 
             // new final coordinates
-            float final_x = loc.coord_x;
-            float final_y = loc.coord_y;
-            float final_z = loc.coord_z;
+            float final_x = loc.x;
+            float final_y = loc.y;
+            float final_z = loc.z;
             float final_o = loc.orientation;
 
             if (m_movementInfo.HasMovementFlag(MOVEFLAG_ONTRANSPORT))
@@ -15868,13 +15868,13 @@ bool Player::LoadFromDB(ObjectGuid guid, SqlQueryHolder *holder)
         sLog.outError("Player::LoadFromDB player %s have invalid coordinates (map: %u X: %f Y: %f Z: %f O: %f). Teleport to default race/class locations.",
             guid.GetString().c_str(),
             savedLocation.GetMapId(),
-            savedLocation.coord_x,
-            savedLocation.coord_y,
-            savedLocation.coord_z,
+            savedLocation.x,
+            savedLocation.y,
+            savedLocation.z,
             savedLocation.orientation);
         RelocateToHomebind();
 
-        GetPosition(savedLocation);                          // reset saved position to homebind
+        savedLocation = GetPosition();                          // reset saved position to homebind
 
         transGUID = 0;
         m_movementInfo.ClearTransportData();
@@ -17777,9 +17777,9 @@ void Player::SaveToDB()
     {
         uberInsert.addUInt32(GetTeleportDest().GetMapId());
         uberInsert.addUInt32(GetDifficulty());
-        uberInsert.addFloat(finiteAlways(GetTeleportDest().coord_x));
-        uberInsert.addFloat(finiteAlways(GetTeleportDest().coord_y));
-        uberInsert.addFloat(finiteAlways(GetTeleportDest().coord_z));
+        uberInsert.addFloat(finiteAlways(GetTeleportDest().x));
+        uberInsert.addFloat(finiteAlways(GetTeleportDest().y));
+        uberInsert.addFloat(finiteAlways(GetTeleportDest().z));
         uberInsert.addFloat(finiteAlways(GetTeleportDest().orientation));
     }
 
@@ -23454,9 +23454,9 @@ void Player::_SaveBGData(bool forceClean)
         stmt.addUInt32(GetGUIDLow());
         stmt.addUInt32(m_bgData.bgInstanceID);
         stmt.addUInt32(uint32(m_bgData.bgTeam));
-        stmt.addFloat(m_bgData.joinPos.coord_x);
-        stmt.addFloat(m_bgData.joinPos.coord_y);
-        stmt.addFloat(m_bgData.joinPos.coord_z);
+        stmt.addFloat(m_bgData.joinPos.x);
+        stmt.addFloat(m_bgData.joinPos.y);
+        stmt.addFloat(m_bgData.joinPos.z);
         stmt.addFloat(m_bgData.joinPos.orientation);
         stmt.addUInt32(m_bgData.joinPos.GetMapId());
         stmt.addUInt32(m_bgData.taxiPath[0]);
