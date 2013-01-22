@@ -102,8 +102,6 @@ class CalendarEvent;
 class CalendarInvite;
 class CalendarMgr;
 
-typedef UNORDERED_MAP<ObjectGuid, CalendarInvite*> CalendarInviteMap;
-
 typedef UNORDERED_SET<CalendarInvite*> CalendarInvitesList;
 typedef UNORDERED_SET<CalendarEvent*> CalendarEventsList;
 
@@ -152,10 +150,15 @@ public:
         EventId(eventId), CreatorGuid(creatorGUID), GuildId(guildId), Type(type), DungeonId(dungeonId),
         EventTime(eventTime), Flags(flags), UnknownTime(unknownTime), Title(title),
         Description(description), m_flags(0)
-        {}
+        {
+            m_Invitee.clear();
+        }
 
     CalendarEvent() : EventId(ObjectGuid()), CreatorGuid(ObjectGuid()), GuildId(0), Type(CALENDAR_TYPE_OTHER), DungeonId(-1), EventTime(0),
-        Flags(0), UnknownTime(0), Title(), Description() { }
+        Flags(0), UnknownTime(0), Title(), Description()
+        {
+            m_Invitee.clear();
+        }
 
     ~CalendarEvent();
 
@@ -166,13 +169,14 @@ public:
 
     bool AddInvite(CalendarInvite* invite);
 
-    CalendarInviteMap const* GetInviteMap() const { return &m_Invitee; }
+    GuidSet const* GetInvites() const { return &m_Invitee; }
 
     CalendarInvite* GetInviteById(ObjectGuid const& inviteId);
     CalendarInvite* GetInviteByGuid(ObjectGuid const& guid);
 
     bool RemoveInviteById(ObjectGuid inviteId, ObjectGuid const& removerGuid);
     void RemoveInviteByGuid(ObjectGuid const& playerGuid);
+    void RemoveInviteById(ObjectGuid const& inviteId);
 
     ObjectGuid EventId;
     ObjectGuid CreatorGuid;
@@ -191,12 +195,8 @@ public:
     void RemoveFlag(CalendarStateFlags flag)      { m_flags &= ~(1 << flag); };
     bool HasFlag(CalendarStateFlags flag) const   { return bool(m_flags & (1 << flag)); };
 
-    inline bool IsDeletedInvite(CalendarInviteMap::const_iterator iter) { return iter->second->HasFlag(CALENDAR_STATE_FLAG_DELETED); }
-    inline bool IsValidInvite(CalendarInviteMap::const_iterator iter) { return iter != m_Invitee.end() && !IsDeletedInvite(iter); }
-
 private:
-    CalendarInviteMap m_Invitee;
-    CalendarInviteMap::iterator RemoveInviteByItr(CalendarInviteMap::iterator inviteItr);
+    GuidSet m_Invitee;
     void RemoveAllInvite();
     uint32 m_flags;
 };
