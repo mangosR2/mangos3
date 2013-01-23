@@ -324,6 +324,10 @@ inline bool IsCasterSourceTarget(uint32 target)
         case TARGET_DIRECTLY_FORWARD:
         case TARGET_NONCOMBAT_PET:
         case TARGET_IN_FRONT_OF_CASTER_30:
+        case TARGET_RANDOM_NEARBY_LOC:
+        case TARGET_RANDOM_CIRCUMFERENCE_POINT:
+        case TARGET_DEST_RADIUS:
+        case TARGET_RANDOM_NEARBY_DEST:
             return true;
         default:
             break;
