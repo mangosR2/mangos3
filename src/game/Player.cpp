@@ -15908,7 +15908,7 @@ bool Player::LoadFromDB(ObjectGuid guid, SqlQueryHolder *holder)
             SetInviteForBattleGroundQueueType(bgQueueTypeId,currentBg->GetInstanceID());
 
             SetLocationMapId(savedLocation.GetMapId());
-            Relocate(savedLocation.coord_x, savedLocation.coord_y, savedLocation.coord_z, savedLocation.orientation);
+            Relocate(savedLocation);
         }
         else
         {
@@ -15921,7 +15921,7 @@ bool Player::LoadFromDB(ObjectGuid guid, SqlQueryHolder *holder)
             // move to bg enter point
             const WorldLocation& _loc = GetBattleGroundEntryPoint();
             SetLocationMapId(_loc.GetMapId());
-            Relocate(_loc.coord_x, _loc.coord_y, _loc.coord_z, _loc.orientation);
+            Relocate(_loc);
 
             // We are not in BG anymore
             SetBattleGroundId(0, BATTLEGROUND_TYPE_NONE);
@@ -15946,7 +15946,7 @@ bool Player::LoadFromDB(ObjectGuid guid, SqlQueryHolder *holder)
             else
             {
                 SetLocationMapId(_loc.GetMapId());
-                Relocate(_loc.coord_x, _loc.coord_y, _loc.coord_z, _loc.orientation);
+                Relocate(_loc);
             }
 
             // We are not in BG anymore
@@ -15960,7 +15960,7 @@ bool Player::LoadFromDB(ObjectGuid guid, SqlQueryHolder *holder)
             _SaveBGData(true);
             // Saved location checked before
             SetLocationMapId(savedLocation.GetMapId());
-            Relocate(savedLocation.coord_x, savedLocation.coord_y, savedLocation.coord_z, savedLocation.orientation);
+            Relocate(savedLocation);
         }
         else if (mapEntry->IsDungeon())
         {
@@ -15971,7 +15971,7 @@ bool Player::LoadFromDB(ObjectGuid guid, SqlQueryHolder *holder)
                 if (state && time(NULL) - time_t(fields[22].GetUInt64()) < 30)
                 {
                     SetLocationMapId(savedLocation.GetMapId());
-                    Relocate(savedLocation.coord_x, savedLocation.coord_y, savedLocation.coord_z, savedLocation.orientation);
+                    Relocate(savedLocation);
                 }
                 else
                 {
@@ -17667,17 +17667,14 @@ bool Player::_LoadHomeBind(QueryResult *result)
     if (result)
     {
         Field* fields = result->Fetch();
-        m_homebindMapId = fields[0].GetUInt32();
-        m_homebindAreaId = fields[1].GetUInt16();
-        m_homebindX = fields[2].GetFloat();
-        m_homebindY = fields[3].GetFloat();
-        m_homebindZ = fields[4].GetFloat();
+        m_homebind  = WorldLocation(fields[0].GetUInt32(), fields[2].GetFloat(), fields[3].GetFloat(), fields[4].GetFloat());
+        // m_homebindAreaId = fields[1].GetUInt16();
         delete result;
 
-        MapEntry const* bindMapEntry = sMapStore.LookupEntry(m_homebindMapId);
+        MapEntry const* bindMapEntry = sMapStore.LookupEntry(m_homebind.GetMapId());
 
         // accept saved data only for valid position (and non instanceable), and accessable
-        if (MapManager::IsValidMapCoord(m_homebindMapId,m_homebindX,m_homebindY,m_homebindZ) &&
+        if (MapManager::IsValidMapCoord(m_homebind) &&
             !bindMapEntry->Instanceable() && GetSession()->Expansion() >= bindMapEntry->Expansion())
         {
             ok = true;
@@ -17687,18 +17684,10 @@ bool Player::_LoadHomeBind(QueryResult *result)
     }
 
     if (!ok)
-    {
-        m_homebindMapId = info->mapId;
-        m_homebindAreaId = info->areaId;
-        m_homebindX = info->positionX;
-        m_homebindY = info->positionY;
-        m_homebindZ = info->positionZ;
-
-        CharacterDatabase.PExecute("INSERT INTO character_homebind (guid,map,zone,position_x,position_y,position_z) VALUES ('%u', '%u', '%u', '%f', '%f', '%f')", GetGUIDLow(), m_homebindMapId, (uint32)m_homebindAreaId, m_homebindX, m_homebindY, m_homebindZ);
-    }
+        SetHomebindToLocation(WorldLocation(info->mapId, info->positionX, info->positionY, info->positionZ));
 
     DEBUG_LOG("Setting player home position: mapid is: %u, zoneid is %u, X is %f, Y is %f, Z is %f",
-        m_homebindMapId, m_homebindAreaId, m_homebindX, m_homebindY, m_homebindZ);
+        m_homebind.GetMapId(), m_homebind.GetAreaId(), m_homebind.x, m_homebind.y, m_homebind.z);
 
     return true;
 }
@@ -20469,7 +20458,7 @@ void Player::SetBattleGroundEntryPoint(bool forLFG)
     }
 
     // In error cases use homebind position
-    m_bgData.joinPos = WorldLocation(m_homebindMapId, m_homebindX, m_homebindY, m_homebindZ, 0.0f);
+    m_bgData.joinPos = m_homebind;
     m_bgData.m_needSave = true;
 }
 
@@ -20773,9 +20762,9 @@ void Player::SendInitialPacketsBeforeAddToMap()
 
     // Homebind
     WorldPacket data(SMSG_BINDPOINTUPDATE, 5*4);
-    data << m_homebindX << m_homebindY << m_homebindZ;
-    data << (uint32) m_homebindMapId;
-    data << (uint32) m_homebindAreaId;
+    data << m_homebind.x << m_homebind.y << m_homebind.z;
+    data << (uint32)m_homebind.GetMapId();
+    data << (uint32)m_homebind.GetAreaId();
     GetSession()->SendPacket(&data);
 
     // SMSG_SET_PROFICIENCY
@@ -23779,17 +23768,13 @@ bool Player::IsImmuneToSpellEffect(SpellEntry const* spellInfo, SpellEffectIndex
     return Unit::IsImmuneToSpellEffect(spellInfo, index);
 }
 
-void Player::SetHomebindToLocation(WorldLocation const& loc, uint32 area_id)
+void Player::SetHomebindToLocation(WorldLocation const& loc)
 {
-    m_homebindMapId = loc.GetMapId();
-    m_homebindAreaId = area_id;
-    m_homebindX = loc.coord_x;
-    m_homebindY = loc.coord_y;
-    m_homebindZ = loc.coord_z;
+    m_homebind = loc;
 
     // update sql homebind
     CharacterDatabase.PExecute("UPDATE character_homebind SET map = '%u', zone = '%u', position_x = '%f', position_y = '%f', position_z = '%f' WHERE guid = '%u'",
-        m_homebindMapId, m_homebindAreaId, m_homebindX, m_homebindY, m_homebindZ, GetGUIDLow());
+        m_homebind.GetMapId(), m_homebind.GetAreaId(), m_homebind.x, m_homebind.y, m_homebind.z, GetGUIDLow());
 }
 
 Object* Player::GetObjectByTypeMask(ObjectGuid guid, TypeMask typemask)

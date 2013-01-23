@@ -12641,7 +12641,6 @@ void Spell::EffectBind(SpellEffectIndex eff_idx)
 
     Player* player = (Player*)unitTarget;
 
-    uint32 area_id;
     WorldLocation loc;
     if (m_spellInfo->EffectImplicitTargetA[eff_idx] == TARGET_TABLE_X_Y_Z_COORDINATES ||
         m_spellInfo->EffectImplicitTargetB[eff_idx] == TARGET_TABLE_X_Y_Z_COORDINATES)
@@ -12658,16 +12657,12 @@ void Spell::EffectBind(SpellEffectIndex eff_idx)
         loc.y           = st->target_Y;
         loc.z           = st->target_Z;
         loc.orientation = st->target_Orientation;
-        area_id = sTerrainMgr.GetAreaId(loc.GetMapId(), loc.x, loc.y, loc.z);
     }
     else
-    {
         loc = player->GetPosition();
-        area_id = player->GetAreaId();
-    }
 
-    player->SetHomebindToLocation(loc,area_id);
-
+    player->SetHomebindToLocation(loc);
+    uint32 area_id = loc.GetAreaId();
     // binding
     WorldPacket data( SMSG_BINDPOINTUPDATE, (4+4+4+4+4) );
     data << float(loc.x);
