@@ -422,22 +422,26 @@ struct CreatureCreatePos
     public:
         // exactly coordinates used
         CreatureCreatePos(Map* map, float x, float y, float z, float o, uint32 phaseMask)
-            : m_map(map), m_phaseMask(phaseMask), m_closeObject(NULL), m_angle(0.0f), m_dist(0.0f) { m_pos.x = x; m_pos.y = y; m_pos.z = z; m_pos.o = o; }
+            : m_map(map), m_closeObject(NULL), m_angle(0.0f), m_dist(0.0f),
+            m_pos(x, y, z, o, map->GetId(), map->GetInstanceId(), 0)
+            {}
         // if dist == 0.0f -> exactly object coordinates used, in other case close point to object (CONTACT_DIST can be used as minimal distances)
         CreatureCreatePos(WorldObject* closeObject, float ori, float dist = 0.0f, float angle = 0.0f)
-            : m_map(closeObject->GetMap()), m_phaseMask(closeObject->GetPhaseMask()),
-              m_closeObject(closeObject), m_angle(angle), m_dist(dist) { m_pos.o = ori; }
+            : m_map(closeObject->GetMap()),
+              m_closeObject(closeObject), m_angle(angle), m_dist(dist), m_pos(*closeObject)
+            {
+                m_pos.o = ori;
+            }
     public:
         Map* GetMap() const { return m_map; }
-        uint32 GetPhaseMask() const { return m_phaseMask; }
+        uint32 GetPhaseMask() const { return m_pos.GetPhaseMask(); }
         void SelectFinalPoint(Creature* cr, bool checkLOS = false);
         bool Relocate(Creature* cr) const;
 
         // read only after SelectFinalPoint
-        Position m_pos;
+        WorldLocation m_pos;
     private:
         Map* m_map;
-        uint32 m_phaseMask;
         WorldObject* m_closeObject;
         float m_angle;
         float m_dist;

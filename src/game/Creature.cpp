@@ -103,9 +103,7 @@ void CreatureCreatePos::SelectFinalPoint(Creature* cr, bool checkLOS)
     {
         if (fabs(m_dist) < M_NULL_F)
         {
-            m_pos.x = m_closeObject->GetPositionX();
-            m_pos.y = m_closeObject->GetPositionY();
-            m_pos.z = m_closeObject->GetPositionZ();
+            m_pos = m_closeObject->GetPosition();
         }
         else if (checkLOS)
         {
@@ -123,7 +121,7 @@ void CreatureCreatePos::SelectFinalPoint(Creature* cr, bool checkLOS)
 
 bool CreatureCreatePos::Relocate(Creature* cr) const
 {
-    cr->Relocate(m_pos.x, m_pos.y, m_pos.z, m_pos.o);
+    cr->Relocate(m_pos);
 
     if (!cr->IsPositionValid())
     {
