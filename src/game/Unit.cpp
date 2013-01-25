@@ -13735,16 +13735,10 @@ void Unit::ScheduleAINotify(uint32 delay)
 
 void Unit::OnRelocated()
 {
-    // switch to use G3D::Vector3 is good idea, maybe
-    float dx = m_last_notified_position.x - GetPositionX();
-    float dy = m_last_notified_position.y - GetPositionY();
-    float dz = m_last_notified_position.z - GetPositionZ();
-    float distsq = dx*dx+dy*dy+dz*dz;
+    float distsq = GetDistance(m_last_notified_position);
     if (distsq > World::GetRelocationLowerLimitSq())
     {
-        m_last_notified_position.x = GetPositionX();
-        m_last_notified_position.y = GetPositionY();
-        m_last_notified_position.z = GetPositionZ();
+        m_last_notified_position = GetPosition();
 
         GetViewPoint().Call_UpdateVisibilityForOwner();
         UpdateObjectVisibility();

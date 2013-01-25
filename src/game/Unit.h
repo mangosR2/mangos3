@@ -2295,7 +2295,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         uint32 m_castCounter;                               // count casts chain of triggered spells for prevent infinity cast crashes
 
         UnitVisibility m_Visibility;
-        Position m_last_notified_position;
+        WorldLocation m_last_notified_position;
         bool m_AINotifyScheduled;
         ShortTimeTracker m_movesplineTimer;
 

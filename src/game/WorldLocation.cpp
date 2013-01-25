@@ -38,6 +38,11 @@ bool Location::operator == (Location const& loc) const
         && (fabs(z - loc.z) < M_NULL_F));
 };
 
+float Location::GetDistance(Location const& loc) const
+{
+    return (*this - loc).magnitude();
+};
+
 Position& Position::operator = (Position const& pos)
 {
     x           = pos.x;
@@ -51,7 +56,14 @@ Position& Position::operator = (Position const& pos)
 
 bool Position::operator == (Position const& pos) const
 {
-    return (((Location*)this) == ((Location*)&pos)) && (GetPhaseMask() & pos.GetPhaseMask());
+    return (((Location)*this) == ((Location)pos)) && (GetPhaseMask() & pos.GetPhaseMask());
+};
+
+float Position::GetDistance(Position const& pos) const
+{
+    return (GetPhaseMask() & pos.GetPhaseMask()) ?
+        ((Location)*this).GetDistance((Location)pos) :
+        MAX_VISIBILITY_DISTANCE + 1.0f;
 };
 
 WorldLocation::WorldLocation(WorldObject const& object)
@@ -74,7 +86,7 @@ bool WorldLocation::operator == (WorldLocation const& loc) const
             (realmid == 0 || realmid == loc.realmid)
         && (!HasMap() || GetMapId()  == loc.GetMapId())
         && (GetInstanceId() == 0 || GetInstanceId() == loc.GetInstanceId())
-        && ((Position*)this) == ((Position*)&loc));
+        && ((Position)*this) == ((Position)loc));
 }
 
 void WorldLocation::SetMapId(uint32 value)
@@ -124,3 +136,10 @@ uint32 WorldLocation::GetZoneId() const
 
     return sTerrainMgr.GetZoneId(GetMapId(), coord_x, coord_y, coord_z);
 }
+
+float WorldLocation::GetDistance(WorldLocation const& loc) const
+{
+    return (!HasMap() || !loc.HasMap() || (GetMapId() == loc.GetMapId() && GetInstanceId() == loc.GetInstanceId())) ?
+        ((Position)*this).GetDistance((Position)loc) :
+        MAX_VISIBILITY_DISTANCE + 1.0f;
+};
