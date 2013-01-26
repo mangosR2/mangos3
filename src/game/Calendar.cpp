@@ -20,6 +20,7 @@
 #include "Guild.h"
 #include "GuildMgr.h"
 #include "ObjectMgr.h"
+#include "Mail.h"
 #include "MapPersistentStateMgr.h"
 #include "ProgressBar.h"
 
@@ -74,7 +75,6 @@ CalendarInvite* CalendarEvent::GetInviteByGuid(ObjectGuid const& guid)
 
 void CalendarEvent::RemoveInviteById(ObjectGuid const& inviteId)
 {
-
     CalendarInvite* invite = sCalendarMgr.GetInviteById(inviteId);
     if (!invite)
         return;
@@ -153,6 +153,27 @@ void CalendarEvent::RemoveAllInvite()
         if (!invite)
             continue;
         RemoveInviteById(*itr);
+    }
+}
+
+void CalendarEvent::SendMailOnRemoveEvent(ObjectGuid const& removerGuid)
+{
+    // build mail title
+    std::ostringstream title;
+    title << removerGuid << ':' << Title;
+
+    // build mail body
+    std::ostringstream body;
+    body << secsToTimeBitFields(time(NULL));
+
+    // creating mail draft
+    MailDraft draft(title.str(), body.str());
+
+    for (GuidSet::const_iterator itr = m_Invitee.begin(); itr != m_Invitee.end(); ++itr)
+    {
+        CalendarInvite* invite = sCalendarMgr.GetInviteById(*itr);
+        if (invite && invite->InviteeGuid != removerGuid)
+            draft.SendMailTo(MailReceiver(invite->InviteeGuid), this, MAIL_CHECK_MASK_COPIED);
     }
 }
 
@@ -317,7 +338,16 @@ void CalendarMgr::RemoveEvent(ObjectGuid const& eventId, ObjectGuid const& remov
         return;
     }
 
+    if (remover != event->CreatorGuid)
+    {
+        // only creator can remove his event
+        SendCalendarCommandResult(remover, CALENDAR_ERROR_PERMISSIONS);
+        return;
+    }
+
     SendCalendarEventRemovedAlert(event);
+
+    event->SendMailOnRemoveEvent(remover);
     event->AddFlag(CALENDAR_STATE_FLAG_DELETED);
 }
 

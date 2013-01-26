@@ -178,6 +178,8 @@ public:
     void RemoveInviteByGuid(ObjectGuid const& playerGuid);
     void RemoveInviteById(ObjectGuid const& inviteId);
 
+    void SendMailOnRemoveEvent(ObjectGuid const& removerGuid);
+
     ObjectGuid EventId;
     ObjectGuid CreatorGuid;
     uint32     GuildId;
