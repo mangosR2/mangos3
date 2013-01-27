@@ -23770,8 +23770,16 @@ void Player::SetHomebindToLocation(WorldLocation const& loc)
     m_homebind = loc;
 
     // update sql homebind
-    CharacterDatabase.PExecute("UPDATE character_homebind SET map = '%u', zone = '%u', position_x = '%f', position_y = '%f', position_z = '%f' WHERE guid = '%u'",
-        m_homebind.GetMapId(), m_homebind.GetAreaId(), m_homebind.x, m_homebind.y, m_homebind.z, GetGUIDLow());
+    static SqlStatementID saveHomebind;
+    SqlStatement stmt = CharacterDatabase.CreateStatement(saveHomebind, "REPLACE INTO character_homebind (guid, map, zone, position_x, position_y, position_z) VALUES (? ? ? ? ? ?)");
+
+    stmt.addUInt32(GetGUIDLow());
+    stmt.addUInt32(m_homebind.GetMapId());
+    stmt.addUInt32(m_homebind.GetAreaId());
+    stmt.addFloat(m_homebind.x);
+    stmt.addFloat(m_homebind.y);
+    stmt.addFloat(m_homebind.z);
+    stmt.Execute();
 }
 
 Object* Player::GetObjectByTypeMask(ObjectGuid guid, TypeMask typemask)
