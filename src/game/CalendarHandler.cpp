@@ -414,7 +414,7 @@ void WorldSession::HandleCalendarCopyEvent(WorldPacket& recv_data)
 
 void WorldSession::HandleCalendarEventInvite(WorldPacket& recv_data)
 {
-    ObjectGuid playerGuid = _player->GetObjectGuid();
+    ObjectGuid playerGuid = GetPlayer()->GetObjectGuid();
     DEBUG_LOG("WORLD: CMSG_CALENDAR_EVENT_INVITE [%u]", playerGuid.GetCounter());
 
     ObjectGuid eventId;
@@ -450,7 +450,7 @@ void WorldSession::HandleCalendarEventInvite(WorldPacket& recv_data)
         }
     }
 
-    if (inviteeGuid.IsEmpty())
+    if (inviteeGuid.IsEmpty() || !inviteeGuid.IsPlayer())
     {
         sCalendarMgr.SendCalendarCommandResult(playerGuid, CALENDAR_ERROR_PLAYER_NOT_FOUND);
         return;
@@ -462,6 +462,8 @@ void WorldSession::HandleCalendarEventInvite(WorldPacket& recv_data)
         return;
     }
 
+/*
+    wrong query (must be checked in another place), also memleak here. FIXME!
     if (QueryResult* result = CharacterDatabase.PQuery("SELECT flags FROM character_social WHERE guid = " UI64FMTD " AND friend = " UI64FMTD, inviteeGuid, playerGuid))
     {
         Field* fields = result->Fetch();
@@ -471,7 +473,7 @@ void WorldSession::HandleCalendarEventInvite(WorldPacket& recv_data)
             return;
         }
     }
-
+*/
     if (!isPreInvite)
     {
         if (CalendarEvent* calendarEvent = sCalendarMgr.GetEventById(eventId))
