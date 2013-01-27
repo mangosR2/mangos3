@@ -23771,7 +23771,7 @@ void Player::SetHomebindToLocation(WorldLocation const& loc)
 
     // update sql homebind
     static SqlStatementID saveHomebind;
-    SqlStatement stmt = CharacterDatabase.CreateStatement(saveHomebind, "REPLACE INTO character_homebind (guid, map, zone, position_x, position_y, position_z) VALUES (? ? ? ? ? ?)");
+    SqlStatement stmt = CharacterDatabase.CreateStatement(saveHomebind, "REPLACE INTO character_homebind (guid, map, zone, position_x, position_y, position_z) VALUES (?, ?, ?, ?, ?, ?)");
 
     stmt.addUInt32(GetGUIDLow());
     stmt.addUInt32(m_homebind.GetMapId());
