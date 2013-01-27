@@ -1673,6 +1673,17 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                 case 26074:                                 // Holiday Cheer
                     // implemented at client side
                     return;
+                case 26373:                                 // Lunar Invitation
+                {
+                    m_caster->CastSpell(m_caster, 18960, true); // Teleport: Moonglade
+                    return;
+                }
+                case 26374:                                 // Elune's Candle
+                {
+                    if (unitTarget)
+                        m_caster->CastSpell(unitTarget, 26636, true);
+                    return;
+                }
                 case 28006:                                 // Arcane Cloaking
                 {
                     if (unitTarget && unitTarget->GetTypeId() == TYPEID_PLAYER )
@@ -4731,7 +4742,7 @@ void Spell::EffectForceCast(SpellEffectIndex eff_idx)
         if (spellInfo->Effect[i] == SPELL_EFFECT_NONE)
             continue;
 
-        if (spellInfo->EffectImplicitTargetA[i] == TARGET_DUELVSPLAYER && 
+        if (spellInfo->EffectImplicitTargetA[i] == TARGET_DUELVSPLAYER &&
             spellInfo->EffectImplicitTargetB[i] == TARGET_NONE)
         {
             b_castBack = true;
@@ -5247,7 +5258,7 @@ void Spell::EffectApplyAura(SpellEffectIndex eff_idx)
 
     if (!aura)
     {
-        sLog.outError("Spell::EffectApplyAura cannot create aura, caster %s, spell %u effect %u", 
+        sLog.outError("Spell::EffectApplyAura cannot create aura, caster %s, spell %u effect %u",
             caster ?  caster->GetObjectGuid().GetString().c_str() : "<none>", m_spellInfo->Id, eff_idx);
         return;
     }
@@ -9668,7 +9679,7 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                 {
                     if (!unitTarget)
                         return;
-                    
+
                     unitTarget->CastSpell(unitTarget, 58648, true);
                     unitTarget->CastSpell(unitTarget, 57398, true);
                     break;
@@ -11700,7 +11711,7 @@ void Spell::EffectLeapForward(SpellEffectIndex eff_idx)
         float x,y,z;
         m_targets.getDestination(x,y,z);
 
-        // Try to normalize Z coord 
+        // Try to normalize Z coord
         m_caster->UpdateGroundPositionZ(x, y, z);
         z += 0.2f;
 
@@ -11855,9 +11866,9 @@ void Spell::EffectCharge(SpellEffectIndex /*eff_idx*/)
     float speed = m_spellInfo->speed ? m_spellInfo->speed : BASE_CHARGE_SPEED;
 
     DEBUG_FILTER_LOG(LOG_FILTER_SPELL_CAST, "Spell::EffectCharge spell %u caster %s target %s speed %f dest. point %f %f %f",
-             m_spellInfo->Id, 
-             m_caster ? m_caster->GetObjectGuid().GetString().c_str() : "<none>", 
-             unitTarget ? unitTarget->GetObjectGuid().GetString().c_str() : "<none>", 
+             m_spellInfo->Id,
+             m_caster ? m_caster->GetObjectGuid().GetString().c_str() : "<none>",
+             unitTarget ? unitTarget->GetObjectGuid().GetString().c_str() : "<none>",
              speed, z, y, z);
 
     if (m_caster->IsFalling())
