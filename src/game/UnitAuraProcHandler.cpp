@@ -4858,7 +4858,8 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(Unit *pVictim, DamageIn
         case 50227:
         {
             // Remove cooldown on Shield Slam
-            RemoveSpellCategoryCooldown(1209, true);
+            if (GetTypeId() == TYPEID_PLAYER)
+                ((Player*)this)->RemoveSpellCategoryCooldown(971, true);
             break;
         }
         // Maelstrom Weapon
