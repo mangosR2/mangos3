@@ -8705,6 +8705,9 @@ void Spell::EffectWeaponDmg(SpellEffectEntry const* effect)
                 if (m_caster->GetTypeId() != TYPEID_PLAYER)
                     break;
 
+                if (!m_currentBasePoints[EFFECT_INDEX_2])
+                    break;
+
                 uint32 count = 0;
                 for (TargetList::const_iterator ihit = m_UniqueTargetInfo.begin(); ihit != m_UniqueTargetInfo.end(); ++ihit)
                     if (ihit->effectMask & (1 << effect->EffectIndex))
@@ -8714,6 +8717,7 @@ void Spell::EffectWeaponDmg(SpellEffectEntry const* effect)
                 {
                     int32 secs = m_spellInfo->CalculateSimpleValue(EFFECT_INDEX_2);
                     ((Player*)m_caster)->SendModifyCooldown(m_spellInfo->Id, - secs * IN_MILLISECONDS);
+                    m_currentBasePoints[EFFECT_INDEX_2] = 0;    // mark as decreased cd
                 }
             }
             // Devastate
