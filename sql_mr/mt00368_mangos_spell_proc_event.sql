@@ -385,3 +385,8 @@ INSERT INTO `spell_proc_event` (`entry`, `procEx`) VALUE
 DELETE FROM `spell_proc_event` WHERE `entry` = 12298;
 INSERT INTO `spell_proc_event` (`entry`, `SchoolMask`, `procFlags`, `procEx`) VALUE
 (12298, 127, 0x202A8, 64 + 2048);
+
+-- Bastion of Defense
+DELETE FROM `spell_proc_event` WHERE `entry` = 29593;
+INSERT INTO `spell_proc_event` (`entry`, `SchoolMask`, `procEx`) VALUE
+(29593, 127, 112);

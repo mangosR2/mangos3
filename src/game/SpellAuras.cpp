@@ -8582,8 +8582,24 @@ void Aura::HandleShapeshiftBoosts(bool apply)
         {
             if (itr->second->IsRemovedOnShapeLost())
             {
-                target->RemoveAurasDueToSpell(itr->second->GetId());
-                itr = tAuras.begin();
+                bool remove = true;
+                // Bastion of Defense special check
+                if (itr->second->GetId() == 29593 || itr->second->GetId() == 29594)
+                {
+                    if (Aura* aura = itr->second->GetAuraByEffectIndex(EFFECT_INDEX_0))
+                    {
+                        target->RemoveAura(aura);
+                        remove = false;
+                    }
+                }
+
+                if (remove)
+                {
+                    target->RemoveAurasDueToSpell(itr->second->GetId());
+                    itr = tAuras.begin();
+                }
+                else
+                    ++itr;
             }
             else
                 ++itr;
