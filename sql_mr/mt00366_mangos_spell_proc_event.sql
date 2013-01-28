@@ -380,3 +380,8 @@ INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA1`,
 DELETE FROM `spell_proc_event` WHERE `entry` = 86627;
 INSERT INTO `spell_proc_event` (`entry`, `procEx`) VALUE
 (86627, 524288);
+
+-- Shield Specialization
+DELETE FROM `spell_proc_event` WHERE `entry` = 12298;
+INSERT INTO `spell_proc_event` (`entry`, `SchoolMask`, `procFlags`, `procEx`) VALUE
+(12298, 127, 0x202A8, 64 + 2048);
