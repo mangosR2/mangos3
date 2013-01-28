@@ -869,7 +869,6 @@ void Spell::EffectSchoolDMG(SpellEffectEntry const* effect)
                 else if (classOptions && classOptions->SpellFamilyFlags & UI64LIT(0x10000000000))
                 {
                     damage = uint32(damage * m_caster->GetTotalAttackPowerValue(BASE_ATTACK) / 100);
-                    m_caster->ModifyAuraState(AURA_STATE_WARRIOR_VICTORY_RUSH, false);
                 }
                 // Revenge ${$m1+$AP*0.310} to ${$M1+$AP*0.310}
                 else if (classOptions && classOptions->SpellFamilyFlags & UI64LIT(0x0000000000000400))
@@ -6637,6 +6636,19 @@ void Spell::EffectHealPct(SpellEffectEntry const* effect)
         Unit *caster = GetAffectiveCaster();
         if (!caster)
             return;
+
+        // Victory Rush
+        if (m_spellInfo->Id == 34428)
+        {
+            // Impending Victory
+            if (SpellAuraHolderPtr holder = m_caster->GetSpellAuraHolder(82368, m_caster->GetObjectGuid()))
+            {
+                damage = 5;
+                m_caster->RemoveSpellAuraHolder(holder);
+            }
+            else
+                m_caster->RemoveAurasDueToSpell(32216);
+        }
 
         uint32 addhealth = unitTarget->GetMaxHealth() * damage / 100;
 

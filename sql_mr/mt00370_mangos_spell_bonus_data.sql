@@ -41,6 +41,7 @@ REPLACE INTO `spell_bonus_data` (`entry`, `direct_bonus`, `dot_bonus`, `ap_bonus
 (12809, 0, 0, 0.75, 0, 'Warrior - Concussion Blow'),
 (20243, 0, 0, 0.171, 0, 'Warrior - Devastate'),
 (20253, 0, 0, 0.12, 0, 'Warrior - Intercept'),
+(34428, 0, 0, 0, 0, 'Warrior - Victory Rush'),
 (44949, 0, 0, 0.236, 0, 'Warrior - Whirlwind (offhand)'),
 (57755, 0, 0, 0.75, 0, 'Warrior - Heroic Throw'),
 (64382, 0, 0, 0.5, 0, 'Warrior - Shattering Throw');
