@@ -39,7 +39,6 @@ uint32 TimeStringToSecs(const std::string& timestring);
 std::string TimeToTimestampStr(time_t t);
 
 time_t timeBitFieldsToTimeStamp(uint32 bits);
-time_t timeBitFieldsToSecs(uint32 packedDate);
 uint32 secsToTimeBitFields(time_t secs);
 
 /* Return a random number in the range min..max; (max-min) must be smaller than 32768. */
