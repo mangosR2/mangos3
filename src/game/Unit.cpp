@@ -8418,7 +8418,7 @@ void Unit::SpellDamageBonusDone(DamageInfo* damageInfo, uint32 stack)
     for(AuraList::const_iterator i = mDamageDoneVersusAuraState.begin();i != mDamageDoneVersusAuraState.end(); ++i)
     {
         if (damageInfo->target->HasAuraState(AuraState((*i)->GetModifier()->m_miscvalue)))
-            DoneTotalMod *= ((*i)->GetModifier()->m_amount + 100.0f)/100.0f;
+            DoneTotalMod *= ((*i)->GetModifier()->m_amount + 100.0f) / 100.0f;
     }
 
     if (getPowerType() == POWER_MANA)
@@ -9884,7 +9884,7 @@ void Unit::MeleeDamageBonusDone(DamageInfo* damageInfo, uint32 stack)
     for(AuraList::const_iterator i = mDamageDoneVersusAuraState.begin();i != mDamageDoneVersusAuraState.end(); ++i)
     {
         if (pVictim->HasAuraState(AuraState((*i)->GetModifier()->m_miscvalue)))
-            DonePercent *= ((*i)->GetModifier()->m_amount + 100.0f)/100.0f;
+            DonePercent *= ((*i)->GetModifier()->m_amount + 100.0f) / 100.0f;
     }
 
     // ..done (class scripts)

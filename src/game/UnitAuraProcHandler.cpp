@@ -335,7 +335,7 @@ pAuraProcHandler AuraProcHandler[TOTAL_AURAS]=
     &Unit::HandleNULLProc,                                  //300 21 spells (share damage?)
     &Unit::HandleNULLProc,                                  //301 SPELL_AURA_HEAL_ABSORB 31 spells
     &Unit::HandleNULLProc,                                  //302 unused (3.2.2a-4.3.4)
-    &Unit::HandleNULLProc,                                  //303 35 spells increases damage done vs. creature type
+    &Unit::HandleNULLProc,                                  //303 AURA_STATE_BLEEDING 35 spells increases damage done vs. aurastate
     &Unit::HandleNULLProc,                                  //304 SPELL_AURA_FAKE_INEBRIATE
     &Unit::HandleNULLProc,                                  //305 SPELL_AURA_MOD_MINIMUM_SPEED
     &Unit::HandleNULLProc,                                  //306 0 spells in 4.3.4

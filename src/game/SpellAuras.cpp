@@ -351,14 +351,14 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleAuraAddMechanicAbilities,                  //293 SPELL_AURA_ADD_MECHANIC_ABILITIES  replaces target's action bars with a predefined spellset
     &Aura::HandleAuraStopNaturalManaRegen,                  //294 SPELL_AURA_STOP_NATURAL_MANA_REGEN implemented in Player:Regenerate
     &Aura::HandleUnused,                                    //295 unused (4.3.4)
-    &Aura::HandleAuraSetVehicle,                            //296 SPELL_AURA_SET_VEHICLE_ID sets vehicle on target
-    &Aura::HandleNULL,                                      //297 1 spell (counter spell school?)
-    &Aura::HandleUnused,                                    //298 unused (3.2.2a)
-    &Aura::HandleUnused,                                    //299 unused (3.2.2a)
-    &Aura::HandleNoImmediateEffect,                         //300 3 spells, share damage (in percent) with aura owner and aura target. implemented in Unit::DealDamage
-    &Aura::HandleNULL,                                      //301 SPELL_AURA_HEAL_ABSORB 5 spells
-    &Aura::HandleUnused,                                    //302 unused (3.2.2a)
-    &Aura::HandleNoImmediateEffect,                         //303 SPELL_AURA_DAMAGE_DONE_VERSUS_AURA_STATE_PCT 17 spells implemented in Unit::*DamageBonus
+    &Aura::HandleAuraSetVehicle,                            //296 62 spells in 4.3.4 SPELL_AURA_SET_VEHICLE_ID sets vehicle on target
+    &Aura::HandleNULL,                                      //297 14 spells in 4.3.4 (counter spell school?)
+    &Aura::HandleUnused,                                    //298 6 spells in 4.3.4
+    &Aura::HandleUnused,                                    //299 unused (3.2.2a-4.3.4)
+    &Aura::HandleNoImmediateEffect,                         //300 21 spells, share damage (in percent) with aura owner and aura target. implemented in Unit::DealDamage
+    &Aura::HandleNULL,                                      //301 SPELL_AURA_HEAL_ABSORB 31 spells
+    &Aura::HandleUnused,                                    //302 unused (3.2.2a-4.3.4)
+    &Aura::HandleNoImmediateEffect,                         //303 AURA_STATE_BLEEDING SPELL_AURA_DAMAGE_DONE_VERSUS_AURA_STATE_PCT 35 spells implemented in Unit::*DamageBonus
     &Aura::HandleAuraFakeInebriation,                       //304 SPELL_AURA_FAKE_INEBRIATE
     &Aura::HandleAuraModIncreaseSpeed,                      //305 SPELL_AURA_MOD_MINIMUM_SPEED
     &Aura::HandleUnused,                                    //306 0 spells in 4.3.4
