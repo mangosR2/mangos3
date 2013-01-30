@@ -68,7 +68,6 @@ public:
         if (!target)
             return;
 
-        target->StopMoving();
         target->addUnitState(UNIT_STAT_STUNNED);
         target->SetTargetGuid(ObjectGuid());
 
