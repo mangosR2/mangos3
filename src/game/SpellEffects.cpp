@@ -1301,8 +1301,8 @@ void Spell::EffectSchoolDMG(SpellEffectEntry const* effect)
                             damage += int32(((Player*)m_caster)->GetTotalAttackPowerValue(BASE_ATTACK) * 0.09f * doses);
                         }
                         // Eviscerate and Envenom Bonus Damage (item set effect)
-                        if (m_caster->GetDummyAura(37169))
-                            damage += m_caster->GetComboPoints()*40;
+                        if (Aura const* aura = m_caster->GetDummyAura(37169))
+                            damage += combo * aura->GetModifier()->m_amount;
                     }
                 }
                 // Eviscerate
@@ -1314,8 +1314,21 @@ void Spell::EffectSchoolDMG(SpellEffectEntry const* effect)
                         damage += irand(int32(ap * combo * 0.03f), int32(ap * combo * 0.07f));
 
                         // Eviscerate and Envenom Bonus Damage (item set effect)
-                        if (m_caster->GetDummyAura(37169))
-                            damage += combo*40;
+                        if (Aura const* aura = m_caster->GetDummyAura(37169))
+                            damage += combo * aura->GetModifier()->m_amount;
+
+                        Unit::AuraList const& dummyAuras = m_caster->GetAurasByType(SPELL_AURA_DUMMY);
+                        for (Unit::AuraList::const_iterator itr = dummyAuras.begin(); itr != dummyAuras.end(); ++itr)
+                        {
+                            // Serrated Blades
+                            if ((*itr)->GetSpellProto()->GetSpellIconID() == 2004 && (*itr)->GetSpellProto()->GetSpellFamilyName() == SPELLFAMILY_ROGUE)
+                            {
+                                if (roll_chance_i((*itr)->GetModifier()->m_amount * combo))
+                                    if (SpellAuraHolderPtr holder = unitTarget->GetSpellAuraHolder(1943, m_caster->GetObjectGuid()))
+                                        holder->RefreshHolder();
+                                break;
+                            }
+                        }
 
                         // Apply spell mods
                         if (Player* modOwner = m_caster->GetSpellModOwner())
