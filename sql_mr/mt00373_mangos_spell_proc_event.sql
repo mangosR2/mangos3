@@ -390,3 +390,12 @@ INSERT INTO `spell_proc_event` (`entry`, `SchoolMask`, `procFlags`, `procEx`) VA
 DELETE FROM `spell_proc_event` WHERE `entry` = 29593;
 INSERT INTO `spell_proc_event` (`entry`, `SchoolMask`, `procEx`) VALUE
 (29593, 127, 112);
+
+### Rogue ###
+
+-- Honor Among Thieves
+DELETE FROM `spell_proc_event` WHERE `entry` IN (51698, 51700, 51701);
+INSERT INTO `spell_proc_event` (`entry`, `SchoolMask`, `procEx`, `Cooldown`) VALUES
+(51698, 127, 2, 4),
+(51700, 127, 2, 3),
+(51701, 127, 2, 2);

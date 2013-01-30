@@ -2365,8 +2365,18 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, DamageInfo* damageI
                     break;
                 }
             }
+            // Honor Among Thieves
+            if (dummySpell->GetSpellIconID() == 2903)
+            {
+                if (Unit* caster = triggeredByAura->GetCaster())
+                {
+                    caster->CastSpell(caster, 51699, true);
+                    return SPELL_AURA_PROC_OK;
+                }
+                return SPELL_AURA_PROC_FAILED;
+            }
             // Cut to the Chase
-            if (dummySpell->GetSpellIconID() == 2909)
+            else if (dummySpell->GetSpellIconID() == 2909)
             {
                 // "refresh your Slice and Dice duration to its 5 combo point maximum"
                 // lookup Slice and Dice
