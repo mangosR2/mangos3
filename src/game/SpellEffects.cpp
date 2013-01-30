@@ -4868,6 +4868,8 @@ void Spell::EffectDummy(SpellEffectEntry const* effect)
                     if (!item)
                         return;
 
+                    m_caster->CastSpell(unitTarget, 5940, true);
+
                     // all poison enchantments is temporary
                     uint32 enchant_id = item->GetEnchantmentId(TEMP_ENCHANTMENT_SLOT);
                     if (!enchant_id)
@@ -4879,7 +4881,7 @@ void Spell::EffectDummy(SpellEffectEntry const* effect)
 
                     for (int s = 0; s < 3; ++s)
                     {
-                        if (pEnchant->type[s]!=ITEM_ENCHANTMENT_TYPE_COMBAT_SPELL)
+                        if (pEnchant->type[s] != ITEM_ENCHANTMENT_TYPE_COMBAT_SPELL)
                             continue;
 
                         SpellEntry const* combatEntry = sSpellStore.LookupEntry(pEnchant->spellid[s]);
@@ -4889,7 +4891,6 @@ void Spell::EffectDummy(SpellEffectEntry const* effect)
                         m_caster->CastSpell(unitTarget, combatEntry, true, item);
                     }
 
-                    m_caster->CastSpell(unitTarget, 5940, true);
                     return;
                 }
                 case 14185:                                 // Preparation
@@ -8771,8 +8772,8 @@ void Spell::EffectWeaponDmg(SpellEffectEntry const* effect)
         }
         case SPELLFAMILY_ROGUE:
         {
-            // Mutilate (for each hand)
-            if(classOptions && classOptions->SpellFamilyFlags & UI64LIT(0x600000000))
+            // Ambush
+            if (m_caster->GetTypeId() == TYPEID_PLAYER && m_spellInfo->Id == 8676)
             {
                 bool found = false;
                 // fast check
@@ -8800,14 +8801,7 @@ void Spell::EffectWeaponDmg(SpellEffectEntry const* effect)
             {
                 Item* weapon = ((Player*)m_caster)->GetWeaponForAttack(m_attackType,true,true);
                 if (weapon && weapon->GetProto()->SubClass == ITEM_SUBCLASS_WEAPON_DAGGER)
-                    totalDamagePercentMod *= 1.5f;          // 150% to daggers
-            }
-            // Ghostly Strike
-            else if (m_caster->GetTypeId() == TYPEID_PLAYER && m_spellInfo->Id == 14278)
-            {
-                Item* weapon = ((Player*)m_caster)->GetWeaponForAttack(m_attackType,true,true);
-                if (weapon && weapon->GetProto()->SubClass == ITEM_SUBCLASS_WEAPON_DAGGER)
-                    totalDamagePercentMod *= 1.44f;         // 144% to daggers
+                    totalDamagePercentMod *= 1.447f;         // 144.7% to daggers
             }
             // Hemorrhage
             else if (m_caster->GetTypeId() == TYPEID_PLAYER && classOptions && (classOptions->SpellFamilyFlags & UI64LIT(0x2000000)))

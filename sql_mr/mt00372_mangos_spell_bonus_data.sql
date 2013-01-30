@@ -45,3 +45,9 @@ REPLACE INTO `spell_bonus_data` (`entry`, `direct_bonus`, `dot_bonus`, `ap_bonus
 (44949, 0, 0, 0.236, 0, 'Warrior - Whirlwind (offhand)'),
 (57755, 0, 0, 0.75, 0, 'Warrior - Heroic Throw'),
 (64382, 0, 0, 0.5, 0, 'Warrior - Shattering Throw');
+
+-- Rogue
+REPLACE INTO `spell_bonus_data` (`entry`, `direct_bonus`, `dot_bonus`, `ap_bonus`, `ap_dot_bonus`, `comments`) VALUES
+(5374, 0, 0, 0.243, 0, 'Rogue - Mutilate'),
+(5940, 0, 0, 0.121, 0, 'Rogue - Shiv'),
+(8676, 0, 0, 0.171, 0, 'Rogue - Ambush');
