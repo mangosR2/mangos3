@@ -5691,7 +5691,7 @@ bool ChatHandler::HandleWorldStateListCommand(char* args)
     for (uint8 i = 0; i < wsSet->count(); ++i)
     {
         WorldState* ws = (*wsSet)[i];
-		PSendSysMessage(LANG_WORLDSTATE_LIST, ws->GetId(), ws->GetType(), ws->GetCondition(), ws->GetInstance(), ws->GetValue());
+        PSendSysMessage(LANG_WORLDSTATE_LIST, ws->GetId(), ws->GetType(), ws->GetCondition(), ws->GetInstance(), ws->GetValue());
     }
     delete wsSet;
     return true;
