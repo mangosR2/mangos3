@@ -2364,6 +2364,14 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, DamageInfo* damageI
                     CastSpell(this, 59628, true);           // Tricks of the Trade (caster timer)
                     break;
                 }
+                case 76806:                                 // Main Gauche
+                {
+                    if (effIndex != EFFECT_INDEX_0 || !roll_chance_i(triggerAmount))
+                        return SPELL_AURA_PROC_FAILED;
+
+                    triggered_spell_id = 86392;
+                    break;
+                }
                 case 84617:                                 // Revealing Strike
                 {
                     // Check procSpell for Eviscerate, Envenom, Expose Armor, Kidney Shot and Rupture
@@ -4438,7 +4446,8 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(Unit *pVictim, DamageIn
         {
             if (auraSpellInfo->GetSpellIconID() == 2260)         // Combat Potency
             {
-                if (!(procFlags & PROC_FLAG_SUCCESSFUL_OFFHAND_HIT))
+                // proc from offhand hits and Main Gauche
+                if (!(procFlags & PROC_FLAG_SUCCESSFUL_OFFHAND_HIT) && (!procSpell || procSpell->Id != 86392))
                     return SPELL_AURA_PROC_FAILED;
             }
             // Item - Rogue T10 2P Bonus

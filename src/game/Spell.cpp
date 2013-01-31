@@ -1085,6 +1085,9 @@ void Spell::prepareDataForTriggerSystem()
                 // For poisons need do it
                 if (m_spellInfo->GetSpellFamilyFlags().test<CF_ROGUE_INSTANT_POISON, CF_ROGUE_CRIPPLING_POISON, CF_ROGUE_MIND_NUMBING_POISON, CF_ROGUE_DEADLY_POISON, CF_ROGUE_WOUND_POISON, CF_ROGUE_ANESTHETIC_POISON>())
                     m_canTrigger = true;
+                // Main Gauche
+                else if (m_spellInfo->Id == 86392)
+                    m_canTrigger = true;
                 break;
             case SPELLFAMILY_HUNTER:
                 // Hunter Rapid Killing/Explosive Trap Effect/Immolation Trap Effect/Frost Trap Aura/Snake Trap Effect/Explosive Shot

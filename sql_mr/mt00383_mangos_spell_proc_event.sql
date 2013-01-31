@@ -409,3 +409,9 @@ INSERT INTO `spell_proc_event` (`entry`, `SchoolMask`, `procEx`, `Cooldown`) VAL
 DELETE FROM `spell_proc_event` WHERE `entry` = 84617;
 INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA2`) VALUES
 (84617, 8, 0xBA0000);
+
+-- Main Gauche
+DELETE FROM `spell_proc_event` WHERE `entry` = 76806;
+INSERT INTO `spell_proc_event` (`entry`, `SchoolMask`) VALUES
+(76806, 127);
+
