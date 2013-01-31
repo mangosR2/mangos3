@@ -415,3 +415,7 @@ DELETE FROM `spell_proc_event` WHERE `entry` = 76806;
 INSERT INTO `spell_proc_event` (`entry`, `SchoolMask`) VALUES
 (76806, 127);
 
+-- Bandit's Guile
+DELETE FROM `spell_proc_event` WHERE `entry` = 84652;
+INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`, `SpellFamilyMaskB0`) VALUES
+(84652, 8, 2, 0x10000000);

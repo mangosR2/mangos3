@@ -2413,13 +2413,54 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, DamageInfo* damageI
                 return SPELL_AURA_PROC_FAILED;
             }
             // Deadly Brew
-            if (dummySpell->GetSpellIconID() == 2963)
+            else if (dummySpell->GetSpellIconID() == 2963)
             {
                 triggered_spell_id = 44289;
                 break;
             }
+            // Bandit's Guile
+            else if (dummySpell->GetSpellIconID() == 2983)
+            {
+                basepoints[0] = 0;
+                triggered_spell_id = 84748;
+
+                // Insight buffs
+                uint32 buffs[4] = { 84745, 84746, 84747, 0 };
+
+                if (pVictim->HasAura(triggered_spell_id))
+                {
+                    int i = 0;
+                    bool found = false;
+                    for (; i < 3; ++i)
+                    {
+                        if (SpellAuraHolderPtr holder = GetSpellAuraHolder(buffs[i]))
+                        {
+                            found = true;
+                            RemoveSpellAuraHolder(holder);
+                            break;
+                        }
+                    }
+
+                    if (found)
+                        ++i;
+                    else
+                        i = 0;
+
+                    if (SpellEntry const * spell = sSpellStore.LookupEntry(buffs[i]))
+                    {
+                        CastSpell(this, spell, true);
+                        basepoints[0] = spell->CalculateSimpleValue(EFFECT_INDEX_0);
+                    }
+                }
+                else
+                {
+                    for (int i = 0; i < 3; ++i)
+                        RemoveAurasDueToSpell(buffs[i]);
+                }
+                break;
+            }
             // Quick Recovery
-            if (dummySpell->GetSpellIconID() == 2116)
+            else if (dummySpell->GetSpellIconID() == 2116)
             {
                 if (!procSpell)
                     return SPELL_AURA_PROC_FAILED;

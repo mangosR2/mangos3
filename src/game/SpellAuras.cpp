@@ -12682,12 +12682,26 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
                 }
             }
             // Sprint (skip non player casted spells by category)
-            if (classOptions && classOptions->SpellFamilyFlags & UI64LIT(0x0000000000000040) && GetSpellProto()->GetCategory() == 44)
+            else if (classOptions && classOptions->SpellFamilyFlags & UI64LIT(0x0000000000000040) && GetSpellProto()->GetCategory() == 44)
             {
                 if (!apply || m_target->HasAura(58039))      // Glyph of Blurred Speed
                     spellId1 = 61922;                       // Sprint (waterwalk)
                 else
                    return;
+            }
+            // Bandit's Guile
+            else if (GetId() == 84748)
+            {
+                if (!apply && m_removeMode == AURA_REMOVE_BY_EXPIRE)
+                {
+                    if (Unit* caster = GetCaster())
+                    {
+                        caster->RemoveAurasDueToSpell(84745);   // Shallow Insight
+                        caster->RemoveAurasDueToSpell(84746);   // Moderate Insight
+                        caster->RemoveAurasDueToSpell(84747);   // Deep Insight
+                    }
+                }
+                return;
             }
             else
                 return;
