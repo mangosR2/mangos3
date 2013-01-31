@@ -217,14 +217,14 @@ CalendarMgr::~CalendarMgr()
 
 CalendarEvent* CalendarMgr::GetEventById(ObjectGuid const& eventId)
 {
-    ReadGuard guard(GetLock());
+    //ReadGuard guard(GetLock());
     CalendarEventStore::iterator iter = m_EventStore.find(eventId);
     return IsValidEvent(iter) ? &iter->second : NULL;
 }
 
 CalendarInvite* CalendarMgr::GetInviteById(ObjectGuid const& inviteId)
 {
-    ReadGuard guard(GetLock());
+    //ReadGuard guard(GetLock());
     CalendarInviteStore::iterator iter = m_InviteStore.find(inviteId);
     return IsValidInvite(iter) ? &iter->second : NULL;
 }
