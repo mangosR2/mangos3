@@ -23,6 +23,9 @@
 #include "ObjectGuid.h"
 #include "SharedDefines.h"
 
+// TODO: make as parameter in config file
+#define EXPIRED_EVENT_KEEP_TIME     WEEK
+
 enum CalendarEventType
 {
     CALENDAR_TYPE_RAID              = 0,
@@ -221,6 +224,8 @@ class CalendarMgr : public MaNGOS::Singleton<CalendarMgr, MaNGOS::ClassLevelLock
         ObjectGuidGenerator<HIGHGUID_INVITE>             m_InviteGuids;
         uint32 GenerateEventLowGuid()                    { return m_EventGuids.Generate();  }
         uint32 GenerateInviteLowGuid()                   { return m_InviteGuids.Generate(); }
+
+        void RemoveExpiredEventsAndRemapData();
 
         inline bool IsDeletedEvent(CalendarEventStore::const_iterator iter) { return iter->second.HasFlag(CALENDAR_STATE_FLAG_DELETED); }
         inline bool IsValidEvent(CalendarEventStore::const_iterator iter) { return iter != m_EventStore.end() && !IsDeletedEvent(iter); }

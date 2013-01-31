@@ -513,6 +513,97 @@ void CalendarMgr::RemoveGuildCalendar(ObjectGuid const& playerGuid, uint32 Guild
     }
 }
 
+void CalendarMgr::RemoveExpiredEventsAndRemapData()
+{
+    QueryResult* result = CharacterDatabase.Query("SELECT eventId, eventTime FROM calendar_events ORDER BY eventId");
+    if (!result)
+        return;
+
+    typedef std::unordered_map<uint32, int32> TRemapData;
+
+    // prepare data
+    uint32 remapId = 1;
+    bool removed = false;
+    TRemapData remapData;
+    do
+    {
+        Field* field = result->Fetch();
+        uint32 eventId = field[0].GetUInt32();
+        bool removeEvent = time_t(field[1].GetUInt32()) + EXPIRED_EVENT_KEEP_TIME < time(NULL);
+        remapData.insert(std::make_pair<uint32, int32>(eventId, removeEvent ? -1 : remapId));
+        removeEvent ? removed = true : ++remapId;
+    }
+    while (result->NextRow());
+    delete result;
+
+    // remove expired
+    if (removed)
+    {
+        static SqlStatementID delEvent;
+        static SqlStatementID delInvite;
+
+        for (TRemapData::iterator itr = remapData.begin(); itr != remapData.end();)
+        {
+            if (itr->second < 0)
+            {
+                CharacterDatabase.CreateStatement(delEvent, "DELETE FROM calendar_events WHERE eventId = ?")
+                    .PExecute(itr->first);
+                CharacterDatabase.CreateStatement(delInvite, "DELETE FROM calendar_invites WHERE eventId = ?")
+                    .PExecute(itr->first);
+                itr = remapData.erase(itr);
+            }
+            else
+                ++itr;
+        }
+    }
+
+    // remap
+    if (!remapData.empty())
+    {
+        static SqlStatementID updEvent;
+        static SqlStatementID updInvite;
+
+        for (TRemapData::const_iterator itr = remapData.begin(); itr != remapData.end(); ++itr)
+        {
+            if (itr->second > 0 && itr->first != itr->second)
+            {
+                CharacterDatabase.CreateStatement(updEvent, "UPDATE calendar_events SET eventId = ? WHERE eventId = ?")
+                    .PExecute(itr->second, itr->first);
+                CharacterDatabase.CreateStatement(updInvite, "UPDATE calendar_invites SET eventId = ? WHERE eventId = ?")
+                    .PExecute(itr->second, itr->first);
+            }
+        }
+    }
+
+    // remap invites
+    result = CharacterDatabase.Query("SELECT inviteId FROM calendar_invites ORDER BY inviteId");
+    if (!result)
+        return;
+
+    remapData.clear();
+    remapId = 1;
+    do
+    {
+        uint32 inviteId = result->Fetch()[0].GetUInt32();
+        if (inviteId != remapId)
+            remapData.insert(std::make_pair<uint32, int32>(inviteId, remapId));
+        ++remapId;
+    }
+    while (result->NextRow());
+    delete result;
+
+    if (!remapData.empty())
+    {
+        static SqlStatementID updInvite;
+
+        for (TRemapData::const_iterator itr = remapData.begin(); itr != remapData.end(); ++itr)
+        {
+            CharacterDatabase.CreateStatement(updInvite, "UPDATE calendar_invites SET inviteId = ? WHERE inviteId = ?")
+                .PExecute(itr->second, itr->first);
+        }
+    }
+}
+
 void CalendarMgr::LoadFromDB()
 {
     uint32 maxInviteId = 0;
@@ -521,6 +612,9 @@ void CalendarMgr::LoadFromDB()
     // For reload case
     m_EventStore.clear();
     m_InviteStore.clear();
+
+    // before fill
+    RemoveExpiredEventsAndRemapData();
 
     sLog.outString("Loading Calendar Events...");
     //                                                          0        1            2        3     4      5          6          7      8
@@ -560,7 +654,6 @@ void CalendarMgr::LoadFromDB()
 
             event.RemoveFlag(CALENDAR_STATE_FLAG_UPDATED);
             event.AddFlag(CALENDAR_STATE_FLAG_SAVED);
-
         }
         while (eventsQuery->NextRow());
 
@@ -783,10 +876,9 @@ void CalendarMgr::Update()
             if (!event || event->HasFlag(CALENDAR_STATE_FLAG_DELETED))
                 continue;
 
-            // Event expired a week before, remove it
-            if (event->EventTime + WEEK < time(NULL))
-                event->AddFlag(CALENDAR_STATE_FLAG_DELETED);
-            else if (event->GetInvites()->empty())
+            // Event expired or empty, remove it
+            if (event->EventTime + EXPIRED_EVENT_KEEP_TIME < time(NULL) ||
+                event->GetInvites()->empty())
                 event->AddFlag(CALENDAR_STATE_FLAG_DELETED);
         }
 
@@ -950,7 +1042,6 @@ void CalendarMgr::SendCalendarEvent(ObjectGuid const& guid, CalendarEvent const*
     for (GuidSet::const_iterator itr = cInvMap->begin(); itr != cInvMap->end(); ++itr)
     {
         CalendarInvite const* calendarInvite = sCalendarMgr.GetInviteById(*itr);
-
         if (!calendarInvite)
             continue;
 
