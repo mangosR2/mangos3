@@ -1673,11 +1673,6 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                 case 26074:                                 // Holiday Cheer
                     // implemented at client side
                     return;
-                case 26373:                                 // Lunar Invitation
-                {
-                    m_caster->CastSpell(m_caster, 26448, true); // Holiday - Teleport: Moonglade
-                    return;
-                }
                 case 28006:                                 // Arcane Cloaking
                 {
                     if (unitTarget && unitTarget->GetTypeId() == TYPEID_PLAYER )
