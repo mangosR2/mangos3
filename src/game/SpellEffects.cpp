@@ -1675,13 +1675,7 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     return;
                 case 26373:                                 // Lunar Invitation
                 {
-                    m_caster->CastSpell(m_caster, 18960, true); // Teleport: Moonglade
-                    return;
-                }
-                case 26374:                                 // Elune's Candle
-                {
-                    if (unitTarget)
-                        m_caster->CastSpell(unitTarget, 26636, true);
+                    m_caster->CastSpell(m_caster, 26448, true); // Holiday - Teleport: Moonglade
                     return;
                 }
                 case 28006:                                 // Arcane Cloaking
