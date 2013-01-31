@@ -541,13 +541,13 @@ void CalendarMgr::LoadFromDB()
 
             m_EventStore.insert(CalendarEventStore::value_type(eventGuid,
                 CalendarEvent(eventGuid,
-                    ObjectGuid(HIGHGUID_PLAYER, field[1].GetUInt32()), 
-                    field[2].GetUInt32(), 
-                    CalendarEventType(field[3].GetUInt8()), 
-                    field[5].GetInt32(), 
-                    time_t(field[6].GetUInt32()), 
-                    field[4].GetUInt32(), 
-                    time_t(time(NULL)), 
+                    ObjectGuid(HIGHGUID_PLAYER, field[1].GetUInt32()),
+                    field[2].GetUInt32(),
+                    CalendarEventType(field[3].GetUInt8()),
+                    field[5].GetInt32(),
+                    time_t(field[6].GetUInt32()),
+                    field[4].GetUInt32(),
+                    time_t(time(NULL)),
                     field[7].GetString(),
                     field[8].GetString())));
 
@@ -557,7 +557,9 @@ void CalendarMgr::LoadFromDB()
             event.RemoveFlag(CALENDAR_STATE_FLAG_UPDATED);
             event.AddFlag(CALENDAR_STATE_FLAG_SAVED);
 
-        } while (eventsQuery->NextRow());
+        }
+        while (eventsQuery->NextRow());
+
         sLog.outString();
         sLog.outString(">> Loaded %u events!", uint32(eventsQuery->GetRowCount()));
         someEventExist = true;
@@ -777,15 +779,17 @@ void CalendarMgr::Update()
             if (!event || event->HasFlag(CALENDAR_STATE_FLAG_DELETED))
                 continue;
 
-            if (event->GetInvites()->empty())
+            // Event expired a week before, remove it
+            if (event->EventTime + WEEK < time(NULL))
                 event->AddFlag(CALENDAR_STATE_FLAG_DELETED);
-            // Place check for expireable here
+            else if (event->GetInvites()->empty())
+                event->AddFlag(CALENDAR_STATE_FLAG_DELETED);
         }
 
         for (CalendarInviteStore::iterator itr = m_InviteStore.begin(); itr != m_InviteStore.end(); ++itr)
         {
             CalendarInvite* invite = &itr->second;
-            if (!invite  || invite->HasFlag(CALENDAR_STATE_FLAG_DELETED))
+            if (!invite || invite->HasFlag(CALENDAR_STATE_FLAG_DELETED))
                 continue;
 
             if (invite->GetEventGuid().IsEmpty() || !invite->GetCalendarEvent())
