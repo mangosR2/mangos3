@@ -520,7 +520,7 @@ void CalendarMgr::RemoveExpiredEventsAndRemapData()
         return;
 
     #define DELETED_ID UINT32_MAX
-    typedef std::unordered_map<uint32, uint32> TRemapData;
+    typedef UNORDERED_MAP<uint32, uint32> TRemapData;
 
     // prepare data
     uint32 remapId = 1;
