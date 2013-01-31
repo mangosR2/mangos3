@@ -158,6 +158,10 @@ void CalendarEvent::RemoveAllInvite()
 
 void CalendarEvent::SendMailOnRemoveEvent(ObjectGuid const& removerGuid)
 {
+    // only event creator in list
+    if (m_Invitee.size() <= 1)
+        return;
+
     // build mail title
     std::ostringstream title;
     title << removerGuid << ':' << Title;
