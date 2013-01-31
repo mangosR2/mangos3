@@ -3744,11 +3744,14 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(Unit *pVictim, DamageIn
                     trigger_spell_id = 72195;
                     break;
                 }
-                case 72408:                                 // Rune of Blood (Saurfang)
+                case 72256:                                 // Mark of the Fallen Champion
                 {
-                    // Proc on targets with dummy aura (debuff cast by Saurfang)
-                    if (pVictim && !pVictim->HasAura(72410))
-                        return SPELL_AURA_PROC_FAILED;
+                    if (SpellEntry const* triggerSpell = sSpellStore.LookupEntry(trigger_spell_id))
+                    {
+                        if (SpellEntry const* difftrigEntry =  GetSpellEntryByDifficulty(triggerSpell->SpellDifficultyId, GetMap()->GetDifficulty(), GetMap()->IsRaid()))
+                            triggerSpell = difftrigEntry;
+                        basepoints[EFFECT_INDEX_0] = triggerSpell->CalculateSimpleValue(EFFECT_INDEX_0) + damage;
+                    }
                     break;
                 }
             }
@@ -4537,22 +4540,6 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(Unit *pVictim, DamageIn
         case 62606:
         {
             basepoints[0] = int32(GetTotalAttackPowerValue(BASE_ATTACK) * triggerAmount / 100);
-            break;
-        }
-        // Hack for Blood mark (ICC Saurfang)
-        case 72255:
-        case 72444:
-        case 72445:
-        case 72446:
-        {
-            float radius = GetSpellRadius(sSpellRadiusStore.LookupEntry(auraSpellInfo->EffectRadiusIndex[EFFECT_INDEX_0]));
-            Map::PlayerList const& pList = GetMap()->GetPlayers();
-            for (Map::PlayerList::const_iterator itr = pList.begin(); itr != pList.end(); ++itr)
-                if (itr->getSource() && itr->getSource()->IsWithinDistInMap(this,radius) && itr->getSource()->HasAura(triggerEntry->targetAuraSpell))
-                {
-                    target = itr->getSource();
-                    break;
-                }
             break;
         }
     }
