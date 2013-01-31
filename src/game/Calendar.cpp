@@ -519,7 +519,8 @@ void CalendarMgr::RemoveExpiredEventsAndRemapData()
     if (!result)
         return;
 
-    typedef std::unordered_map<uint32, int32> TRemapData;
+    #define DELETED_ID UINT32_MAX
+    typedef std::unordered_map<uint32, uint32> TRemapData;
 
     // prepare data
     uint32 remapId = 1;
@@ -530,7 +531,7 @@ void CalendarMgr::RemoveExpiredEventsAndRemapData()
         Field* field = result->Fetch();
         uint32 eventId = field[0].GetUInt32();
         bool removeEvent = time_t(field[1].GetUInt32()) + EXPIRED_EVENT_KEEP_TIME < time(NULL);
-        remapData.insert(std::make_pair<uint32, int32>(eventId, removeEvent ? -1 : remapId));
+        remapData.insert(std::make_pair<uint32, uint32>(eventId, removeEvent ? DELETED_ID : remapId));
         removeEvent ? removed = true : ++remapId;
     }
     while (result->NextRow());
@@ -544,7 +545,7 @@ void CalendarMgr::RemoveExpiredEventsAndRemapData()
 
         for (TRemapData::iterator itr = remapData.begin(); itr != remapData.end();)
         {
-            if (itr->second < 0)
+            if (itr->second == DELETED_ID)
             {
                 CharacterDatabase.CreateStatement(delEvent, "DELETE FROM calendar_events WHERE eventId = ?")
                     .PExecute(itr->first);
@@ -565,7 +566,7 @@ void CalendarMgr::RemoveExpiredEventsAndRemapData()
 
         for (TRemapData::const_iterator itr = remapData.begin(); itr != remapData.end(); ++itr)
         {
-            if (itr->second > 0 && itr->first != itr->second)
+            if (itr->first != itr->second)
             {
                 CharacterDatabase.CreateStatement(updEvent, "UPDATE calendar_events SET eventId = ? WHERE eventId = ?")
                     .PExecute(itr->second, itr->first);
@@ -586,7 +587,7 @@ void CalendarMgr::RemoveExpiredEventsAndRemapData()
     {
         uint32 inviteId = result->Fetch()[0].GetUInt32();
         if (inviteId != remapId)
-            remapData.insert(std::make_pair<uint32, int32>(inviteId, remapId));
+            remapData.insert(std::make_pair<uint32, uint32>(inviteId, remapId));
         ++remapId;
     }
     while (result->NextRow());
