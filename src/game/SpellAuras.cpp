@@ -11715,25 +11715,8 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
         }
         case SPELLFAMILY_DRUID:
         {
-            // Rejuvenation
-            if (GetSpellProto()->GetSpellFamilyFlags().test<CF_DRUID_REJUVENATION>())
-            {
-                Unit* caster = GetCaster();
-                if (!caster)
-                    return;
-
-                if (caster->HasAura(64760))                 // Item - Druid T8 Restoration 4P Bonus
-                {
-                    Aura* aura = GetAuraByEffectIndex(EFFECT_INDEX_0);
-                    if (!aura)
-                        return;
-
-                    int32 heal = aura->GetModifier()->m_amount;
-                    caster->CastCustomSpell(m_target, 64801, &heal, NULL, NULL, true, NULL);
-                }
-            }
             // Rip
-            else if (GetSpellProto()->GetSpellFamilyFlags().test<CF_DRUID_RIP>())
+            if (GetSpellProto()->GetSpellFamilyFlags().test<CF_DRUID_RIP>())
             {
                 Unit* caster = GetCaster();
                 if (!caster)
