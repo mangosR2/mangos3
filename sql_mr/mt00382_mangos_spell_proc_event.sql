@@ -404,3 +404,8 @@ INSERT INTO `spell_proc_event` (`entry`, `SchoolMask`, `procEx`, `Cooldown`) VAL
 (51698, 127, 2, 4),
 (51700, 127, 2, 3),
 (51701, 127, 2, 2);
+
+-- Revealing Strike
+DELETE FROM `spell_proc_event` WHERE `entry` = 84617;
+INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA2`) VALUES
+(84617, 8, 0xBA0000);

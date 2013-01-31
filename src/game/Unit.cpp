@@ -8421,6 +8421,14 @@ void Unit::SpellDamageBonusDone(DamageInfo* damageInfo, uint32 stack)
             DoneTotalMod *= ((*i)->GetModifier()->m_amount + 100.0f) / 100.0f;
     }
 
+    if (damageInfo->GetSpellProto()->IsFitToFamily(SPELLFAMILY_ROGUE, UI64LIT(0xB20000)))
+    {
+        // Revealing Strike
+        if (SpellAuraHolderPtr holder = pVictim->GetSpellAuraHolder(84617, GetObjectGuid()))
+            if (Aura const* aura = holder->GetAuraByEffectIndex(EFFECT_INDEX_2))
+                DoneTotalMod *= (aura->GetModifier()->m_amount + 100.0f) / 100.0f;
+    }
+
     if (getPowerType() == POWER_MANA)
     {
         Unit::AuraList const& doneFromManaPctAuras = GetAurasByType(SPELL_AURA_MOD_DAMAGE_DONE_FROM_PCT_POWER);
@@ -10018,7 +10026,15 @@ void Unit::MeleeDamageBonusDone(DamageInfo* damageInfo, uint32 stack)
                 if (pVictim->GetAura<SPELL_AURA_PERIODIC_DAMAGE, SPELLFAMILY_HUNTER, CF_HUNTER_SERPENT_STING>())
                     DonePercent *= (aur->GetModifier()->m_amount+100.0f) / 100.0f;
         }
-     }
+
+        if (damageInfo->GetSpellProto()->IsFitToFamily(SPELLFAMILY_ROGUE, UI64LIT(0xB20000)))
+        {
+            // Revealing Strike
+            if (SpellAuraHolderPtr holder = pVictim->GetSpellAuraHolder(84617, GetObjectGuid()))
+                if (Aura const* aura = holder->GetAuraByEffectIndex(EFFECT_INDEX_2))
+                    DonePercent *= (aura->GetModifier()->m_amount + 100.0f) / 100.0f;
+        }
+    }
 
     // final calculation
     // =================
@@ -11961,6 +11977,15 @@ int32 Unit::CalculateAuraDuration(SpellEntry const* spellProto, uint32 effectMas
             default:
                 break;
         }
+    }
+
+    // Kidney Shot and Expose Armor
+    if (spellProto->IsFitToFamily(SPELLFAMILY_ROGUE, UI64LIT(0x280000)))
+    {
+        // Revealig Strike
+        if (SpellAuraHolderPtr holder = GetSpellAuraHolder(84617, caster->GetObjectGuid()))
+            if (Aura const* aura = holder->GetAuraByEffectIndex(EFFECT_INDEX_2))
+                duration = int32(duration * (aura->GetModifier()->m_amount + 100.0f) / 100.0f);
     }
 
     return duration;
