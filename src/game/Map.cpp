@@ -2581,6 +2581,8 @@ template<class T> void Map::LoadObjectToGrid(uint32& guid, GridType& grid, Battl
 
     if (bg)
         bg->OnObjectDBLoad(obj);
+
+    obj->UpdateObjectVisibility();
 }
 
 WorldObjectEventProcessor* Map::GetEvents()
