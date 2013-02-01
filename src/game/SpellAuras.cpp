@@ -12277,6 +12277,12 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
                     }
                     break;
                 }
+                case 74002:                                 // Combat Readiness
+                {
+                    if (!apply && m_removeMode == AURA_REMOVE_BY_EXPIRE)
+                        m_target->RemoveAurasDueToSpell(74001);
+                    return;
+                }
                 case 85768:                                 // Dark Intent
                 {
                     if (!apply)
