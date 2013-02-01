@@ -377,7 +377,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleModMeleeSpeedPct,                          //319 SPELL_AURA_MOD_MELEE_ATTACK_SPEED 47 spells in 4.3.4
     &Aura::HandleAuraModRangedHaste,                        //320 SPELL_AURA_MOD_RANGED_ATTACK_SPEED 5 spells in 4.3.4
     &Aura::HandleNULL,                                      //321 1 spells in 4.3 Hex
-    &Aura::HandleNULL,                                      //322 SPELL_AURA_INTERFERE_TARGETING 6 spells in 4.3
+    &Aura::HandleAuraInterfereTargeting,                    //322 SPELL_AURA_INTERFERE_TARGETING 6 spells in 4.3
     &Aura::HandleUnused,                                    //323 0 spells in 4.3.4
     &Aura::HandleNULL,                                      //324 2 spells in 4.3.4 test spells
     &Aura::HandleUnused,                                    //325 0 spells in 4.3.4
@@ -10597,6 +10597,13 @@ void Aura::PeriodicDummyTick()
                     target->CastSpell(victim, 57841, true);
                     return;
                 }
+                // Smoke Bomb
+                case 76577:
+                {
+                    if (DynamicObject* dynObj = target->GetDynObject(spell->Id))
+                        target->CastSpell(dynObj->GetPositionX(), dynObj->GetPositionY(), dynObj->GetPositionZ(), 88611, true);
+                    return;
+                }
                 default:
                     break;
             }
@@ -10642,21 +10649,15 @@ void Aura::PeriodicDummyTick()
             // Earthquake
             else if (spell->Id == 61882)
             {
-                if (Unit* caster = GetCaster())
-                {
-                    if (DynamicObject* dynObj = caster->GetDynObject(spell->Id))
-                        target->CastSpell(dynObj->GetPositionX(), dynObj->GetPositionY(), dynObj->GetPositionZ(), 77478, true, NULL, this, GetCasterGuid());
-                }
+                if (DynamicObject* dynObj = target->GetDynObject(spell->Id))
+                    target->CastSpell(dynObj->GetPositionX(), dynObj->GetPositionY(), dynObj->GetPositionZ(), 77478, true, NULL, this, GetCasterGuid());
                 return;
             }
             // Healing Rain
             else if (spell->Id == 73920)
             {
-                if (Unit* caster = GetCaster())
-                {
-                    if (DynamicObject* dynObj = caster->GetDynObject(spell->Id))
-                        target->CastSpell(dynObj->GetPositionX(), dynObj->GetPositionY(), dynObj->GetPositionZ(), 73921, true, NULL, this, GetCasterGuid());
-                }
+                if (DynamicObject* dynObj = target->GetDynObject(spell->Id))
+                    target->CastSpell(dynObj->GetPositionX(), dynObj->GetPositionY(), dynObj->GetPositionZ(), 73921, true, NULL, this, GetCasterGuid());
                 return;
             }
             break;
@@ -13750,3 +13751,20 @@ void Aura::HandleAuraOverrideActionbarSpells(bool apply, bool Real)
         ((Player*)target)->m_soulSwapData.swapTarget.Clear();
     }
 }
+
+void Aura::HandleAuraInterfereTargeting(bool apply, bool Real)
+{
+    Unit* target = GetTarget();
+
+    if (apply)
+    {
+        // Smoke Bomb
+        if (GetId() == 88611)
+        {
+            if (Unit* caster = GetCaster())
+                if (target->IsHostileTo(caster))
+                    target->RemoveAurasWithDispelType(DISPEL_STEALTH);
+        }
+    }
+}
+

@@ -15842,3 +15842,66 @@ Unit* Unit::GetSingleCastSpellTarget(uint32 spellId)
 
     return NULL;
 }
+
+bool Unit::IsVisionObscured(Unit* target) const
+{
+    AuraList const& myAuras = GetAurasByType(SPELL_AURA_INTERFERE_TARGETING);
+    AuraList const& hisAuras = target->GetAurasByType(SPELL_AURA_INTERFERE_TARGETING);
+
+    if (myAuras.empty() && hisAuras.empty())
+        return false;
+
+    // check owner auras
+    for (AuraList::const_iterator i = myAuras.begin(); i != myAuras.end(); ++i)
+    {
+        Unit* caster = (*i)->GetCaster();
+        if (!caster)
+            continue;
+
+        if (!IsAreaOfEffectSpell((*i)->GetSpellProto()))
+            return caster->IsHostileTo(this);
+        else
+        {
+            bool found = false;
+            for (AuraList::const_iterator itr = hisAuras.begin(); itr != hisAuras.end(); ++itr)
+            {
+                if ((*itr)->GetId() == (*i)->GetId() && (*itr)->GetCasterGuid() == (*i)->GetCasterGuid())
+                {
+                    found = true;
+                    break;
+                }
+            }
+
+            if (!found && caster->IsHostileTo(this))
+                return true;
+        }
+    }
+
+    // check target auras
+    for (AuraList::const_iterator i = hisAuras.begin(); i != hisAuras.end(); ++i)
+    {
+        Unit* caster = (*i)->GetCaster();
+        if (!caster)
+            continue;
+
+        if (!IsAreaOfEffectSpell((*i)->GetSpellProto()))
+            return caster->IsHostileTo(this);
+        else
+        {
+            bool found = false;
+            for (AuraList::const_iterator itr = myAuras.begin(); itr != myAuras.end(); ++itr)
+            {
+                if ((*itr)->GetId() == (*i)->GetId() && (*itr)->GetCasterGuid() == (*i)->GetCasterGuid())
+                {
+                    found = true;
+                    break;
+                }
+            }
+
+            if (!found && caster->IsHostileTo(this))
+                return true;
+        }
+    }
+
+    return false;
+}
