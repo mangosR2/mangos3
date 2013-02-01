@@ -13737,8 +13737,8 @@ void Unit::ScheduleAINotify(uint32 delay)
 
 void Unit::OnRelocated()
 {
-    float distsq = GetDistance(m_last_notified_position);
-    if (distsq > World::GetRelocationLowerLimitSq())
+    float dist = GetDistance(m_last_notified_position);
+    if (dist * dist > World::GetRelocationLowerLimitSq())
     {
         m_last_notified_position = GetPosition();
 
