@@ -12787,6 +12787,29 @@ void Spell::EffectAddComboPoints(SpellEffectEntry const* effect /*effect*/)
     if (!unitTarget)
         return;
 
+    if (m_spellInfo->Id == 73981)   // Redirect
+    {
+        damage = m_caster->GetComboPoints();
+
+        int32 bp = 0;
+        // Search Shallow, Moderate and Deep Insight auras
+        Unit::AuraList const& dummyAuras = m_caster->GetAurasByType(SPELL_AURA_DUMMY);
+        for (Unit::AuraList::const_iterator itr = dummyAuras.begin(); itr != dummyAuras.end(); ++itr)
+        {
+            if ((*itr)->GetId() == 84745 || (*itr)->GetId() == 84746 || (*itr)->GetId() == 84747)
+            {
+                bp = (*itr)->GetModifier()->m_amount;
+                if (SpellAuraHolderPtr holder = (*itr)->GetHolder())
+                    holder->RefreshHolder();
+                break;
+            }
+        }
+
+        // cast damage bonus aura
+        if (bp)
+            m_caster->CastCustomSpell(unitTarget, 84748, &bp, NULL, NULL, true);
+    }
+
     if (damage <= 0)
         return;
 
