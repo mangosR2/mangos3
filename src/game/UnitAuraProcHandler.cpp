@@ -2474,6 +2474,20 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, DamageInfo* damageI
                 triggered_spell_id = 31663;
                 break;
             }
+            // Restless Blades
+            else if (dummySpell->GetSpellIconID() == 4897)
+            {
+                if (!procSpell || GetTypeId() != TYPEID_PLAYER || !NeedsComboPoints(procSpell))
+                    return SPELL_AURA_PROC_FAILED;
+
+                int32 amt = GetComboPoints() * triggerAmount;
+                ((Player*)this)->SendModifyCooldown(2983, -amt);    // Sprint
+                ((Player*)this)->SendModifyCooldown(13750, -amt);   // Adrenaline Rush
+                ((Player*)this)->SendModifyCooldown(51690, -amt);   // Shadowstep
+                ((Player*)this)->SendModifyCooldown(73981, -amt);   // Redirect
+
+                return SPELL_AURA_PROC_OK;
+            }
             break;
         }
         case SPELLFAMILY_HUNTER:

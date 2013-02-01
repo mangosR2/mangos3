@@ -419,3 +419,8 @@ INSERT INTO `spell_proc_event` (`entry`, `SchoolMask`) VALUES
 DELETE FROM `spell_proc_event` WHERE `entry` = 84652;
 INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`, `SpellFamilyMaskB0`) VALUES
 (84652, 8, 2, 0x10000000);
+
+-- Restless Blades
+DELETE FROM `spell_proc_event` WHERE `entry` = 79095;
+INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`, `SpellFamilyMaskB0`) VALUES
+(79095, 8, 0x920000, 1);
