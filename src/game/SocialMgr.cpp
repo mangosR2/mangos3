@@ -62,23 +62,16 @@ bool PlayerSocial::AddToSocialList(ObjectGuid const& friend_guid, bool ignore)
             return false;
     }
 
-    uint32 flag = SOCIAL_FLAG_FRIEND;
-    if(ignore)
-        flag = SOCIAL_FLAG_IGNORED;
+    FriendInfo& fi = m_playerSocialMap[friend_guid];
 
-    PlayerSocialMap::const_iterator itr = m_playerSocialMap.find(friend_guid);
-    if(itr != m_playerSocialMap.end())
-    {
-        CharacterDatabase.PExecute("UPDATE character_social SET flags = (flags | %u) WHERE guid = '%u' AND friend = '%u'", flag, m_playerGuid.GetCounter(), friend_guid.GetCounter());
-        m_playerSocialMap[friend_guid].Flags |= flag;
-    }
-    else
-    {
-        CharacterDatabase.PExecute("INSERT INTO character_social (guid, friend, flags) VALUES ('%u', '%u', '%u')", m_playerGuid.GetCounter(), friend_guid.GetCounter(), flag);
-        FriendInfo fi;
-        fi.Flags |= flag;
-        m_playerSocialMap[friend_guid] = fi;
-    }
+    fi.Flags |= (ignore ? SOCIAL_FLAG_IGNORED : SOCIAL_FLAG_FRIEND);
+    fi.Flags &= ~(ignore ? SOCIAL_FLAG_FRIEND  : SOCIAL_FLAG_IGNORED);
+
+    // FIXME - need make this asynchronows, like all other DB save methods
+    CharacterDatabase.BeginTransaction();
+    SaveFriendInfo(friend_guid, fi);
+    CharacterDatabase.CommitTransaction();
+
     return true;
 }
 
@@ -93,15 +86,14 @@ void PlayerSocial::RemoveFromSocialList(ObjectGuid const& friend_guid, bool igno
         flag = SOCIAL_FLAG_IGNORED;
 
     itr->second.Flags &= ~flag;
-    if(itr->second.Flags == 0)
-    {
-        CharacterDatabase.PExecute("DELETE FROM character_social WHERE guid = '%u' AND friend = '%u'", m_playerGuid.GetCounter(), friend_guid.GetCounter());
+
+    // FIXME - need make this asynchronows, like all other DB save methods
+    CharacterDatabase.BeginTransaction();
+    SaveFriendInfo(friend_guid, itr->second);
+    CharacterDatabase.CommitTransaction();
+
+    if (itr->second.Flags == SOCIAL_FLAG_NONE)
         m_playerSocialMap.erase(itr);
-    }
-    else
-    {
-        CharacterDatabase.PExecute("UPDATE character_social SET flags = (flags & ~%u) WHERE guid = '%u' AND friend = '%u'", flag, m_playerGuid.GetCounter(), friend_guid.GetCounter());
-    }
 }
 
 void PlayerSocial::SetFriendNote(ObjectGuid const& friend_guid, std::string note)
@@ -111,11 +103,13 @@ void PlayerSocial::SetFriendNote(ObjectGuid const& friend_guid, std::string note
         return;
 
     utf8truncate(note,48);                                  // DB and client size limitation
-
-    std::string safe_note = note;
-    CharacterDatabase.escape_string(safe_note);
-    CharacterDatabase.PExecute("UPDATE character_social SET note = '%s' WHERE guid = '%u' AND friend = '%u'", safe_note.c_str(), m_playerGuid.GetCounter(), friend_guid.GetCounter());
+    CharacterDatabase.escape_string(note);
     m_playerSocialMap[friend_guid].Note = note;
+
+    // FIXME - need make this asynchronows, like all other DB save methods
+    CharacterDatabase.BeginTransaction();
+    SaveFriendInfo(friend_guid, m_playerSocialMap[friend_guid]);
+    CharacterDatabase.CommitTransaction();
 }
 
 void PlayerSocial::SendSocialList()
@@ -132,8 +126,6 @@ void PlayerSocial::SendSocialList()
 
     for(PlayerSocialMap::iterator itr = m_playerSocialMap.begin(); itr != m_playerSocialMap.end(); ++itr)
     {
-        itr->second = sSocialMgr.GetFriendInfo(plr, itr->first);
-
         data << itr->first;                                 // player guid
         data << uint32(itr->second.Flags);                  // player flag (0x1-friend?, 0x2-ignored?, 0x4-muted?)
         data << itr->second.Note;                           // string note
@@ -150,7 +142,7 @@ void PlayerSocial::SendSocialList()
     }
 
     plr->GetSession()->SendPacket(&data);
-    DEBUG_LOG("WORLD: Sent SMSG_CONTACT_LIST");
+    DEBUG_LOG("WORLD: Sent SMSG_CONTACT_LIST size = %u", size);
 }
 
 bool PlayerSocial::HasFriend(ObjectGuid const& friend_guid)
@@ -169,14 +161,25 @@ bool PlayerSocial::HasIgnore(ObjectGuid const& ignore_guid)
     return false;
 }
 
+void PlayerSocial::SaveFriendInfo(ObjectGuid const& friend_guid, FriendInfo const& fi)
+{
+    static SqlStatementID delstmtId;
+    SqlStatement delstmt    = CharacterDatabase.CreateStatement(delstmtId, "DELETE FROM character_social WHERE guid = ? AND friend = ?");
+    static SqlStatementID insSocialId;
+    SqlStatement insertstmt = CharacterDatabase.CreateStatement(insSocialId, "INSERT INTO character_social (guid, friend, flags, note) VALUES (?, ?, ?, ?)" );
+
+    delstmt.PExecute(m_playerGuid.GetCounter(), friend_guid.GetCounter());
+
+    if (fi.Flags != SOCIAL_FLAG_NONE)
+        insertstmt.PExecute(m_playerGuid.GetCounter(), friend_guid.GetCounter(), fi.Flags, fi.Note.c_str());
+}
+
 SocialMgr::SocialMgr()
 {
-
 }
 
 SocialMgr::~SocialMgr()
 {
-
 }
 
 FriendInfo SocialMgr::GetFriendInfo(Player* player, ObjectGuid const& friend_guid)
@@ -187,9 +190,6 @@ FriendInfo SocialMgr::GetFriendInfo(Player* player, ObjectGuid const& friend_gui
         return friendInfo;
 
     Player* pFriend = ObjectAccessor::FindPlayer(friend_guid);
-
-    if (!pFriend)
-        return friendInfo;
 
     Team team = player->GetTeam();
     AccountTypes security = player->GetSession()->GetSecurity();

@@ -39,6 +39,7 @@ enum FriendStatus
 
 enum SocialFlag
 {
+    SOCIAL_FLAG_NONE        = 0,
     SOCIAL_FLAG_FRIEND      = 0x01,
     SOCIAL_FLAG_IGNORED     = 0x02,
     SOCIAL_FLAG_MUTED       = 0x04,                         // guessed
@@ -129,6 +130,10 @@ class PlayerSocial
         bool HasIgnore(ObjectGuid const& ignore_guid);
         void SetPlayerGuid(ObjectGuid const& guid) { m_playerGuid = guid; }
         uint32 GetNumberOfSocialsWithFlag(SocialFlag flag);
+
+        // Saving
+        void SaveFriendInfo(ObjectGuid const& friend_guid, FriendInfo const& fi);
+
     private:
         PlayerSocialMap m_playerSocialMap;
         ObjectGuid m_playerGuid;
