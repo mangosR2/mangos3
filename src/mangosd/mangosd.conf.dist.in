@@ -228,6 +228,12 @@ BindIP = "0.0.0.0"
 #        Min:     5    ( less then 3 - objects not be loaded anyway )
 #        Max:     1000 ( value more may cause false-freeze detection )
 #
+#    Calendar.RemoveExpiredEvents
+#        Delay (in hours) to remove expired events from the calendar.
+#        Default: -1  (never)
+#                  0  (at once)
+#                  1+ (delay hours (8760 - one year))
+#
 ###################################################################################################################
 
 UseProcessors = 0
@@ -261,6 +267,7 @@ MapUpdate.LoadBalanceLowValue = 0.2
 MapUpdate.MaxVisitorsInUpdate = 9
 MapUpdate.MaxVisitsInUpdate = 10
 ObjectLoadingSplitter.MaxAllowedTime = 10
+Calendar.RemoveExpiredEvents = -1
 
 ###################################################################################################################
 # SERVER LOGGING
@@ -2098,7 +2105,7 @@ LFG.DisableDungeonMapIds= ""
 #        Default: 1 - on
 #
 #    PlayerbotAI.Collect.Objects
-#        Enable collection options nearby objects 
+#        Enable collection options nearby objects
 #                 0 - off
 #        Default: 1 - on
 #
@@ -2177,7 +2184,7 @@ VMSS.ForceUnloadDelay = 3000
 #
 #    DuelReset.AreaIds
 #        List of area's ids where Duel Reset Script will be enabled. With delimiter ','. You can lookup areas going with a GM to X zone and typing .gps
-#        Default: "12,14,4570" Outdoor Stormwind, Outdoor Orgrimmar, Dalaran's Circle of Wills 
+#        Default: "12,14,4570" Outdoor Stormwind, Outdoor Orgrimmar, Dalaran's Circle of Wills
 #
 ###################################################################################################################
 DuelReset.Enable = 0

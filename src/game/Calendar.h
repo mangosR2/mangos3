@@ -22,9 +22,7 @@
 #include "Common.h"
 #include "ObjectGuid.h"
 #include "SharedDefines.h"
-
-// TODO: make as parameter in config file
-#define EXPIRED_EVENT_KEEP_TIME     WEEK
+#include "World.h"
 
 enum CalendarEventType
 {
@@ -225,6 +223,11 @@ class CalendarMgr : public MaNGOS::Singleton<CalendarMgr, MaNGOS::ClassLevelLock
         uint32 GenerateEventLowGuid()                    { return m_EventGuids.Generate();  }
         uint32 GenerateInviteLowGuid()                   { return m_InviteGuids.Generate(); }
 
+        bool IsEventReadyForRemove(time_t eventTime)
+        {
+            int32 delaySec = sWorld.getConfig(CONFIG_INT32_CALENDAR_REMOVE_EXPIRED_EVENTS_DELAY);
+            return delaySec < 0 ? false : eventTime + time_t(delaySec) <= time(NULL);
+        }
         void RemoveExpiredEventsAndRemapData();
 
         inline bool IsDeletedEvent(CalendarEventStore::const_iterator iter) { return iter->second.HasFlag(CALENDAR_STATE_FLAG_DELETED); }

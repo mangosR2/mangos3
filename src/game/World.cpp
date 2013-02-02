@@ -471,7 +471,7 @@ void World::LoadConfigSettings(bool reload)
         setConfig(CONFIG_BOOL_VMSS_ENABLE, "fakeString", false);
     }
 #endif
- 
+
     setConfig(CONFIG_UINT32_VMSS_MAXTHREADBREAKS,     "VMSS.MaxThreadBreaks",5);
     setConfig(CONFIG_UINT32_VMSS_TBREMTIME,           "VMSS.ThreadBreakRememberTime",600);
     setConfig(CONFIG_UINT32_VMSS_MAPFREEMETHOD,       "VMSS.MapFreeMethod",1);
@@ -1101,8 +1101,14 @@ void World::LoadConfigSettings(bool reload)
 
     // initialize chat logs (and lexics cutter)
     sChatLog.Initialize();
+
+    // calendar
+    int32 delayHours = sConfig.GetIntDefault("Calendar.RemoveExpiredEvents", -1);
+    setConfig(CONFIG_INT32_CALENDAR_REMOVE_EXPIRED_EVENTS_DELAY, delayHours < 0 ? -1 : delayHours * HOUR /*convert to sec.*/);
 }
+
 extern void LoadGameObjectModelList();
+
 /// Initialize the World
 void World::SetInitialWorldSettings()
 {
@@ -2801,4 +2807,3 @@ bool World::IsDungeonMapIdDisable(uint32 mapId)
 {
     return disabledMapIdForDungeonFinder.find(mapId) != disabledMapIdForDungeonFinder.end();
 }
-

@@ -530,7 +530,7 @@ void CalendarMgr::RemoveExpiredEventsAndRemapData()
     {
         Field* field = result->Fetch();
         uint32 eventId = field[0].GetUInt32();
-        bool removeEvent = time_t(field[1].GetUInt32()) + EXPIRED_EVENT_KEEP_TIME < time(NULL);
+        bool removeEvent = IsEventReadyForRemove(time_t(field[1].GetUInt32()));
         remapData.insert(std::make_pair<uint32, uint32>(eventId, removeEvent ? DELETED_ID : remapId));
         removeEvent ? removed = true : ++remapId;
     }
@@ -878,7 +878,7 @@ void CalendarMgr::Update()
                 continue;
 
             // Event expired or empty, remove it
-            if (event->EventTime + EXPIRED_EVENT_KEEP_TIME < time(NULL) ||
+            if (IsEventReadyForRemove(event->EventTime) ||
                 event->GetInvites()->empty())
                 event->AddFlag(CALENDAR_STATE_FLAG_DELETED);
         }
