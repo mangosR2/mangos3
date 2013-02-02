@@ -234,6 +234,12 @@ BindIP = "0.0.0.0"
 #                  0  (at once)
 #                  1+ (delay hours (8760 - one year))
 #
+#    MapUpdate.PositionUpdateDelay
+#        Time (in ms!) for recalculation unit/GO position while spline movement.
+#        Default: 400 (0,4s)
+#        Min:     100 ( 1 MapUpdate cycle)
+#        Max:     2000( 2s)
+#
 ###################################################################################################################
 
 UseProcessors = 0
@@ -268,6 +274,7 @@ MapUpdate.MaxVisitorsInUpdate = 9
 MapUpdate.MaxVisitsInUpdate = 10
 ObjectLoadingSplitter.MaxAllowedTime = 10
 Calendar.RemoveExpiredEvents = -1
+MapUpdate.PositionUpdateDelay = 400
 
 ###################################################################################################################
 # SERVER LOGGING

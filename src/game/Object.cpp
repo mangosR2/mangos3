@@ -43,6 +43,8 @@
 #include "TemporarySummon.h"
 #include "OutdoorPvP/OutdoorPvPMgr.h"
 #include "movement/packet_builder.h"
+#include "movement/MoveSplineInit.h"
+#include "movement/MoveSpline.h"
 #include "UpdateFieldFlags.h"
 #include "Group.h"
 #include "CreatureLinkingMgr.h"
@@ -1083,9 +1085,14 @@ void Object::MarkForClientUpdate()
 }
 
 WorldObject::WorldObject()
-    : loot(this), m_groupLootTimer(0), m_groupLootId(0), m_lootGroupRecipientId(0), m_transportInfo(NULL),
+    : loot(this), m_groupLootTimer(0), m_groupLootId(0), m_lootGroupRecipientId(0), m_transportInfo(NULL), movespline(new Movement::MoveSpline()),
     m_currMap(NULL), m_position(WorldLocation()), m_viewPoint(*this), m_isActiveObject(false), m_LastUpdateTime(WorldTimer::getMSTime())
 {
+}
+
+WorldObject::~WorldObject()
+{
+    delete movespline;
 }
 
 void WorldObject::CleanupsBeforeDelete()

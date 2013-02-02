@@ -192,7 +192,6 @@ void GlobalCooldownMgr::CancelGlobalCooldown(SpellEntry const* spellInfo)
 // Methods of class Unit
 
 Unit::Unit() :
-    movespline(new Movement::MoveSpline()),
     m_charmInfo(NULL),
     i_motionMaster(this),
     m_ThreatManager(*this),
@@ -329,7 +328,6 @@ Unit::~Unit()
         CleanupDeletedHolders(true);
 
         delete m_charmInfo;
-        delete movespline;
     }
     delete m_HostileRefManager;
 
@@ -4344,7 +4342,7 @@ void Unit::SetInFront(Unit const* target)
 
 void Unit::SetFacingTo(float ori)
 {
-    Movement::MoveSplineInit init(*this);
+    Movement::MoveSplineInit<Unit*> init(*this);
     init.SetFacing(ori);
     init.Launch();
 }
@@ -12438,7 +12436,7 @@ void Unit::StopMoving()
     if (!IsInWorld())
         return;
 
-    Movement::MoveSplineInit init(*this);
+    Movement::MoveSplineInit<Unit*> init(*this);
     init.SetFacing(GetOrientation());
     init.Launch();
 }
@@ -14012,9 +14010,6 @@ bool Unit::HasMorePoweredBuff(uint32 spellId)
 
 void Unit::UpdateSplineMovement(uint32 t_diff)
 {
-    enum{
-        POSITION_UPDATE_DELAY = 400,
-    };
 
     if (movespline->Finalized())
         return;
@@ -14028,7 +14023,7 @@ void Unit::UpdateSplineMovement(uint32 t_diff)
     m_movesplineTimer.Update(t_diff);
     if (m_movesplineTimer.Passed() || arrived)
     {
-        m_movesplineTimer.Reset(POSITION_UPDATE_DELAY);
+        m_movesplineTimer.Reset(sWorld.getConfig(CONFIG_UINT32_POSITION_UPDATE_DELAY));
         Location loc = movespline->ComputePosition();
 
         if (IsBoarded())

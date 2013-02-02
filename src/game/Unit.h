@@ -862,10 +862,6 @@ inline ByteBuffer& operator>> (ByteBuffer& buf, MovementInfo& mi)
     return buf;
 }
 
-namespace Movement{
-    class MoveSpline;
-}
-
 enum DiminishingLevels
 {
     DIMINISHING_LEVEL_1             = 0,
@@ -2175,7 +2171,6 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
 
         // Movement info
         MovementInfo m_movementInfo;
-        Movement::MoveSpline * movespline;
 
         // Transports
         Transport* GetTransport() const { return m_transport; }
@@ -2297,7 +2292,6 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         UnitVisibility m_Visibility;
         WorldLocation m_last_notified_position;
         bool m_AINotifyScheduled;
-        ShortTimeTracker m_movesplineTimer;
 
         Diminishing m_Diminishing;
         // Manage all Units threatening us
