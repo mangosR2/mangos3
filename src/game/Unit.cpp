@@ -12037,7 +12037,6 @@ void Unit::DoPetCastSpell(Player* owner, uint8 cast_count, SpellCastTargets* tar
 
     if (pet && result == SPELL_CAST_OK)
     {
-        pet->AddSpellAndCategoryCooldowns(spellInfo);
         if (GetObjectGuid().IsPet())
         {
             //10% chance to play special pet attack talk, else growl
