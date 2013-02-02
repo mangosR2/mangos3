@@ -2226,7 +2226,7 @@ void Unit::CalculateDamageAbsorbAndResist(Unit *pCaster, DamageInfo* damageInfo,
     // Reflect damage spells (not cast any damage spell in aura lookup)
     uint32 reflectSpell = 0;
     int32  reflectDamage = 0;
-    Aura const*  reflectTriggeredBy = NULL;                       // expected as not expired at reflect as in current cases
+    AuraPair reflectTriggeredBy;                                      // expected as not expired at reflect as in current cases
     // Death Prevention Aura
     SpellEntry const*  preventDeathSpell = NULL;
     int32  preventDeathAmount = 0;
@@ -2353,7 +2353,7 @@ void Unit::CalculateDamageAbsorbAndResist(Unit *pCaster, DamageInfo* damageInfo,
                         else
                             reflectDamage = currentAbsorb / 2;
                         reflectSpell = 33619;
-                        reflectTriggeredBy = (*i)();
+                        reflectTriggeredBy = *i;
                         break;
                     }
                     if (spellProto->Id == 39228 ||              // Argussian Compass
@@ -2472,7 +2472,7 @@ void Unit::CalculateDamageAbsorbAndResist(Unit *pCaster, DamageInfo* damageInfo,
                                     else
                                         reflectDamage = (*k)->GetModifier()->m_amount * RemainingDamage/100;
                                     reflectSpell = 33619;
-                                    reflectTriggeredBy = (*i)();
+                                    reflectTriggeredBy = *i;
                                     break;
                                 }
                                 default:
@@ -2588,12 +2588,8 @@ void Unit::CalculateDamageAbsorbAndResist(Unit *pCaster, DamageInfo* damageInfo,
     }
 
     // Cast back reflect damage spell
-    if (canReflect && reflectSpell)
-    {
-        reflectTriggeredBy->GetHolder()->SetInUse(true);                 // lock from deletion (possible redundant, need check)
-        CastCustomSpell(pCaster, reflectSpell, &reflectDamage, NULL, NULL, true, NULL, reflectTriggeredBy);
-        reflectTriggeredBy->GetHolder()->SetInUse(false);                // free lock from deletion
-    }
+    if (canReflect && reflectSpell && !reflectTriggeredBy.IsEmpty(false))
+        CastCustomSpell(pCaster, reflectSpell, &reflectDamage, NULL, NULL, true, NULL, reflectTriggeredBy());
 
     // absorb by mana cost
     AuraList const& vManaShield = GetAurasByType(SPELL_AURA_MANA_SHIELD);
