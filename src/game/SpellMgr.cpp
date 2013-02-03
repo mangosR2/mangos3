@@ -3598,7 +3598,7 @@ void SpellMgr::LoadSpellScriptTarget()
         uint32 spellId     = fields[0].GetUInt32();
         uint32 type        = fields[1].GetUInt32();
         uint32 targetEntry = fields[2].GetUInt32();
-        uint32 invertEffectMask = fields[2].GetUInt32();
+        uint32 invertEffectMask = fields[3].GetUInt32();
 
         SpellEntry const* spellProto = sSpellStore.LookupEntry(spellId);
 
