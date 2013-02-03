@@ -524,33 +524,30 @@ void CalendarMgr::RemoveExpiredEventsAndRemapData()
 
     // prepare data
     uint32 remapId = 1;
-    bool removed = false;
     TRemapData remapData;
     do
     {
         Field* field = result->Fetch();
-        uint32 eventId = field[0].GetUInt32();
         bool removeEvent = IsEventReadyForRemove(time_t(field[1].GetUInt32()));
-        remapData.insert(std::make_pair<uint32, uint32>(eventId, removeEvent ? DELETED_ID : remapId));
-        removeEvent ? removed = true : ++remapId;
+        remapData.insert(std::make_pair<uint32, uint32>(field[0].GetUInt32(), removeEvent ? DELETED_ID : remapId++));
     }
     while (result->NextRow());
     delete result;
 
     // remove expired
-    if (removed)
+    if (remapId <= remapData.size())
     {
         static SqlStatementID delEvent;
         static SqlStatementID delInvite;
+        SqlStatement delEventStmt = CharacterDatabase.CreateStatement(delEvent, "DELETE FROM calendar_events WHERE eventId = ?");
+        SqlStatement delInviteStmt = CharacterDatabase.CreateStatement(delInvite, "DELETE FROM calendar_invites WHERE eventId = ?");
 
         for (TRemapData::iterator itr = remapData.begin(); itr != remapData.end();)
         {
             if (itr->second == DELETED_ID)
             {
-                CharacterDatabase.CreateStatement(delEvent, "DELETE FROM calendar_events WHERE eventId = ?")
-                    .PExecute(itr->first);
-                CharacterDatabase.CreateStatement(delInvite, "DELETE FROM calendar_invites WHERE eventId = ?")
-                    .PExecute(itr->first);
+                delEventStmt.PExecute(itr->first);
+                delInviteStmt.PExecute(itr->first);
                 itr = remapData.erase(itr);
             }
             else
@@ -563,15 +560,15 @@ void CalendarMgr::RemoveExpiredEventsAndRemapData()
     {
         static SqlStatementID updEvent;
         static SqlStatementID updInvite;
+        SqlStatement updEventStmt = CharacterDatabase.CreateStatement(updEvent, "UPDATE calendar_events SET eventId = ? WHERE eventId = ?");
+        SqlStatement updInviteStmt = CharacterDatabase.CreateStatement(updInvite, "UPDATE calendar_invites SET eventId = ? WHERE eventId = ?");
 
         for (TRemapData::const_iterator itr = remapData.begin(); itr != remapData.end(); ++itr)
         {
             if (itr->first != itr->second)
             {
-                CharacterDatabase.CreateStatement(updEvent, "UPDATE calendar_events SET eventId = ? WHERE eventId = ?")
-                    .PExecute(itr->second, itr->first);
-                CharacterDatabase.CreateStatement(updInvite, "UPDATE calendar_invites SET eventId = ? WHERE eventId = ?")
-                    .PExecute(itr->second, itr->first);
+                updEventStmt.PExecute(itr->second, itr->first);
+                updInviteStmt.PExecute(itr->second, itr->first);
             }
         }
     }
@@ -581,8 +578,8 @@ void CalendarMgr::RemoveExpiredEventsAndRemapData()
     if (!result)
         return;
 
-    remapData.clear();
     remapId = 1;
+    remapData.clear();
     do
     {
         uint32 inviteId = result->Fetch()[0].GetUInt32();
@@ -596,12 +593,10 @@ void CalendarMgr::RemoveExpiredEventsAndRemapData()
     if (!remapData.empty())
     {
         static SqlStatementID updInvite;
+        SqlStatement updInviteStmt = CharacterDatabase.CreateStatement(updInvite, "UPDATE calendar_invites SET inviteId = ? WHERE inviteId = ?");
 
         for (TRemapData::const_iterator itr = remapData.begin(); itr != remapData.end(); ++itr)
-        {
-            CharacterDatabase.CreateStatement(updInvite, "UPDATE calendar_invites SET inviteId = ? WHERE inviteId = ?")
-                .PExecute(itr->second, itr->first);
-        }
+            updInviteStmt.PExecute(itr->second, itr->first);
     }
 }
 
