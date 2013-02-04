@@ -76,7 +76,7 @@ enum HighGuid
     HIGHGUID_PET            = 0xF14,                        // blizz F14/F54
     HIGHGUID_VEHICLE        = 0xF15,                        // blizz F15/F55
     HIGHGUID_DYNAMICOBJECT  = 0xF10,                        // blizz F10/F50
-    HIGHGUID_CORPSE         = 0xF50,                        // blizz F10/F50 used second variant to resolve conflict with HIGHGUID_DYNAMICOBJECT
+    HIGHGUID_CORPSE         = 0xF101,                       // blizz F10/F50 used second variant to resolve conflict with HIGHGUID_DYNAMICOBJECT
     HIGHGUID_BATTLEGROUND   = 0x1F1,                        // blizz 1F1, used for battlegrounds
     HIGHGUID_MO_TRANSPORT   = 0x1FC,                        // blizz 1FC (for GAMEOBJECT_TYPE_MO_TRANSPORT)
     HIGHGUID_INSTANCE       = 0x1F4,                        // blizz 1F4
