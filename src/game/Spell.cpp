@@ -3945,7 +3945,7 @@ void Spell::_handle_finish_phase()
 
 void Spell::SendSpellCooldown()
 {
-    if (m_caster->GetTypeId() != TYPEID_PLAYER)
+    if (m_caster->GetTypeId() == TYPEID_PLAYER)
     {
         // mana/health/etc potions, disabled by client (until combat out as declarate)
         if (m_CastItem && m_CastItem->IsPotion())
