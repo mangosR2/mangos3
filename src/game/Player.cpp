@@ -2116,7 +2116,6 @@ void Player::AddToWorld()
         if (m_items[i])
             m_items[i]->AddToWorld();
     }
-    SetViewPoint(NULL);
 }
 
 void Player::RemoveFromWorld(bool remove)
@@ -20650,6 +20649,7 @@ void Player::SendInitialPacketsBeforeAddToMap()
         m_movementInfo.AddMovementFlag(MOVEFLAG_FLYING);
 
     SetMover(this);
+    SetViewPoint(NULL);
 }
 
 void Player::SendInitialPacketsAfterAddToMap()
