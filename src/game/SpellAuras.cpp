@@ -12703,6 +12703,29 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
                 else
                    return;
             }
+            // Sap
+            else if (GetId() == 6770)
+            {
+                if (!apply)
+                {
+                    if (Unit* caster = GetCaster())
+                    {
+                        if (caster->GetTypeId() == TYPEID_PLAYER)
+                        {
+                            // Search Blackjack talent
+                            if (SpellEntry const* blackJack = ((Player*)caster)->GetKnownTalentRankById(6515))
+                            {
+                                cast_at_remove = true;
+                                if (blackJack->Id == 79123)         // Rank 1
+                                    m_target->CastSpell(m_target, 79124, true, NULL, NULL, caster->GetObjectGuid());
+                                else if (blackJack->Id == 79125)    // Rank 2
+                                    m_target->CastSpell(m_target, 79126, true, NULL, NULL, caster->GetObjectGuid());
+                            }
+                        }
+                    }
+                }
+                return;
+            }
             // Bandit's Guile
             else if (GetId() == 84748)
             {
