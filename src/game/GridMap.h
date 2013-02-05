@@ -152,7 +152,7 @@ class GridMap
         float m_liquidLevel;
         uint16* m_liquidEntry;
         uint8* m_liquidFlags;
-        float *m_liquid_map;
+        float* m_liquid_map;
 
         bool loadAreaData(FILE *in, uint32 offset, uint32 size);
         bool loadHeightData(FILE *in, uint32 offset, uint32 size);

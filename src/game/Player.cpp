@@ -1197,6 +1197,8 @@ void Player::HandleDrowning(uint32 time_diff)
                     EnvironmentalDamage(DAMAGE_LAVA, damage);
                 // need to skip Slime damage in Undercity and Ruins of Lordaeron arena
                 // maybe someone can find better way to handle environmental damage
+                //else if (m_zoneUpdateId != 1497)
+                //    EnvironmentalDamage(DAMAGE_SLIME, damage);
             }
         }
     }
@@ -22797,7 +22799,7 @@ void Player::UpdateUnderwaterState(Map* m, float x, float y, float z)
     }
 
     // All liquids type - check under water position
-    if (liquid_status.type_flags&(MAP_LIQUID_TYPE_WATER | MAP_LIQUID_TYPE_OCEAN | MAP_LIQUID_TYPE_MAGMA | MAP_LIQUID_TYPE_SLIME))
+    if (liquid_status.type_flags & (MAP_LIQUID_TYPE_WATER | MAP_LIQUID_TYPE_OCEAN | MAP_LIQUID_TYPE_MAGMA | MAP_LIQUID_TYPE_SLIME))
     {
         if (res & LIQUID_MAP_UNDER_WATER)
             m_MirrorTimerFlags |= UNDERWATER_INWATER;
@@ -22806,13 +22808,13 @@ void Player::UpdateUnderwaterState(Map* m, float x, float y, float z)
     }
 
     // Allow travel in dark water on taxi or transport
-    if ((liquid_status.type_flags & MAP_LIQUID_TYPE_DARK_WATER) && !IsTaxiFlying() && !IsOnTransport())
+    if ((liquid_status.type_flags & MAP_LIQUID_TYPE_DARK_WATER) && !IsTaxiFlying() && !GetTransport())
         m_MirrorTimerFlags |= UNDERWATER_INDARKWATER;
     else
         m_MirrorTimerFlags &= ~UNDERWATER_INDARKWATER;
 
     // in lava check, anywhere in lava level
-    if (liquid_status.type_flags&MAP_LIQUID_TYPE_MAGMA)
+    if (liquid_status.type_flags & MAP_LIQUID_TYPE_MAGMA)
     {
         if (res & (LIQUID_MAP_UNDER_WATER | LIQUID_MAP_IN_WATER | LIQUID_MAP_WATER_WALK))
             m_MirrorTimerFlags |= UNDERWATER_INLAVA;
@@ -22820,7 +22822,7 @@ void Player::UpdateUnderwaterState(Map* m, float x, float y, float z)
             m_MirrorTimerFlags &= ~UNDERWATER_INLAVA;
     }
     // in slime check, anywhere in slime level
-    if (liquid_status.type_flags&MAP_LIQUID_TYPE_SLIME)
+    if (liquid_status.type_flags & MAP_LIQUID_TYPE_SLIME)
     {
         if (res & (LIQUID_MAP_UNDER_WATER | LIQUID_MAP_IN_WATER | LIQUID_MAP_WATER_WALK))
             m_MirrorTimerFlags |= UNDERWATER_INSLIME;

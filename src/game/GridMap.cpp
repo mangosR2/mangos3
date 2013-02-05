@@ -119,9 +119,9 @@ bool GridMap::loadData(char* filename)
 
 void GridMap::unloadData()
 {
-        delete[] m_area_map;
-        delete[] m_V9;
-        delete[] m_V8;
+    delete[] m_area_map;
+    delete[] m_V9;
+    delete[] m_V8;
 
     if (m_liquidEntry)
         delete[] m_liquidEntry;
@@ -220,11 +220,11 @@ bool GridMap::loadGridMapLiquidData(FILE* in, uint32 offset, uint32 /*size*/)
 
     if (!(header.flags & MAP_LIQUID_NO_TYPE))
     {
-        m_liquidEntry = new uint16[16*16];
-        fread(m_liquidEntry, sizeof(uint16), 16*16, in);
+        m_liquidEntry = new uint16[16 * 16];
+        fread(m_liquidEntry, sizeof(uint16), 16 * 16, in);
 
-        m_liquidFlags = new uint8[16*16];
-        fread(m_liquidFlags, sizeof(uint8), 16*16, in);
+        m_liquidFlags = new uint8[16 * 16];
+        fread(m_liquidFlags, sizeof(uint8), 16 * 16, in);
     }
 
     if (!(header.flags & MAP_LIQUID_NO_HEIGHT))
@@ -500,7 +500,7 @@ uint8 GridMap::getTerrainType(float x, float y)
     y = 16 * (32 - y / SIZE_OF_GRIDS);
     int lx = (int)x & 15;
     int ly = (int)y & 15;
-    return m_liquidFlags[lx*16 + ly];
+    return m_liquidFlags[lx * 16 + ly];
 }
 
 // Get water state on map
@@ -518,7 +518,7 @@ GridMapLiquidStatus GridMap::getLiquidStatus(float x, float y, float z, uint8 Re
     int y_int = (int)cy & (MAP_RESOLUTION - 1);
 
     // Check water type in cell
-    int idx = (x_int>>3)*16 + (y_int>>3);
+    int idx = (x_int >> 3) * 16 + (y_int >> 3);
     uint8 type = m_liquidFlags ? m_liquidFlags[idx] : m_liquidType;
     uint32 entry = 0;
     if (m_liquidEntry)
@@ -928,9 +928,10 @@ GridMapLiquidStatus TerrainInfo::getLiquidStatus(float x, float y, float z, uint
 {
     GridMapLiquidStatus result = LIQUID_MAP_NO_WATER;
     VMAP::IVMapManager* vmgr = VMAP::VMapFactory::createOrGetVMapManager();
-    uint32 liquid_type = 0;
     float liquid_level = INVALID_HEIGHT_VALUE;
-    float ground_level = GetHeightStatic(x, y, z, true, DEFAULT_WATER_SEARCH);
+    float ground_level = INVALID_HEIGHT_VALUE;
+    uint32 liquid_type = 0;
+    ground_level = GetHeightStatic(x, y, z, true, DEFAULT_WATER_SEARCH);
 
     if (vmgr->GetLiquidLevel(GetMapId(), x, y, z, ReqLiquidType, liquid_level, ground_level, liquid_type))
     {
