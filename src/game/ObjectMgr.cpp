@@ -8798,14 +8798,14 @@ void ObjectMgr::LoadGameTele()
 
         GameTele gt;
 
-        gt.position_x     = fields[1].GetFloat();
-        gt.position_y     = fields[2].GetFloat();
-        gt.position_z     = fields[3].GetFloat();
-        gt.orientation    = fields[4].GetFloat();
-        gt.mapId          = fields[5].GetUInt32();
+        gt.loc.x          = fields[1].GetFloat();
+        gt.loc.y          = fields[2].GetFloat();
+        gt.loc.z          = fields[3].GetFloat();
+        gt.loc.orientation = fields[4].GetFloat();
+        gt.loc.SetMapId(fields[5].GetUInt32());
         gt.name           = fields[6].GetCppString();
 
-        if (!MapManager::IsValidMapCoord(gt.mapId,gt.position_x,gt.position_y,gt.position_z,gt.orientation))
+        if (!MapManager::IsValidMapCoord(gt.loc))
         {
             sLog.outErrorDb("Wrong position for id %u (name: %s) in `game_tele` table, ignoring.",id,gt.name.c_str());
             continue;
@@ -8874,8 +8874,8 @@ bool ObjectMgr::AddGameTele(GameTele& tele)
     return WorldDatabase.PExecuteLog("INSERT INTO game_tele "
         "(id,position_x,position_y,position_z,orientation,map,name) "
         "VALUES (%u,%f,%f,%f,%f,%u,'%s')",
-        new_id, tele.position_x, tele.position_y, tele.position_z,
-        tele.orientation, tele.mapId, safeName.c_str());
+        new_id, tele.loc.x, tele.loc.y, tele.loc.z,
+        tele.loc.orientation, tele.loc.GetMapId(), safeName.c_str());
 }
 
 bool ObjectMgr::DeleteGameTele(const std::string& name)

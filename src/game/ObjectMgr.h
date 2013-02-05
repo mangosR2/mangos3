@@ -50,11 +50,7 @@ class SQLStorage;
 
 struct GameTele
 {
-    float  position_x;
-    float  position_y;
-    float  position_z;
-    float  orientation;
-    uint32 mapId;
+    WorldLocation loc;
     std::string name;
     std::wstring wnameLow;
 };
