@@ -481,7 +481,7 @@ void CalendarMgr::CopyEvent(ObjectGuid const& eventId, time_t newTime, ObjectGui
 
 void CalendarMgr::RemovePlayerCalendar(ObjectGuid const& playerGuid)
 {
-    for (CalendarEventStore::iterator iter = m_EventStore.begin(); iter != m_EventStore.end();)
+    for (CalendarEventStore::iterator iter = m_EventStore.begin(); iter != m_EventStore.end(); ++iter)
     {
         CalendarEvent& event = iter->second;
         ObjectGuid const& eventId = iter->first;
@@ -490,15 +490,13 @@ void CalendarMgr::RemovePlayerCalendar(ObjectGuid const& playerGuid)
         {
             event.RemoveInviteByGuid(playerGuid);
             event.AddFlag(CALENDAR_STATE_FLAG_DELETED);
-            continue; // FIXME: seems we have here endless loop (or while event will not be removed from m_EventStore)
         }
-        ++iter;
     }
 }
 
 void CalendarMgr::RemoveGuildCalendar(ObjectGuid const& playerGuid, uint32 GuildId)
 {
-    for (CalendarEventStore::iterator iter = m_EventStore.begin(); iter != m_EventStore.end();)
+    for (CalendarEventStore::iterator iter = m_EventStore.begin(); iter != m_EventStore.end(); ++iter)
     {
         CalendarEvent& event = iter->second;
         ObjectGuid const& eventId = iter->first;
@@ -507,9 +505,7 @@ void CalendarMgr::RemoveGuildCalendar(ObjectGuid const& playerGuid, uint32 Guild
         {
             event.RemoveInviteByGuid(playerGuid);
             event.AddFlag(CALENDAR_STATE_FLAG_DELETED);
-            continue; // FIXME: seems we have here endless loop (or while event will not be removed from m_EventStore)
         }
-        ++iter;
     }
 }
 
