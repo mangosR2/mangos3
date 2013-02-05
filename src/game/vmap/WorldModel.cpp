@@ -143,7 +143,7 @@ namespace VMAP
         if (other.iFlags)
         {
             iFlags = new uint8[iTilesX * iTilesY];
-            memcpy(iFlags, other.iFlags, iTilesX * iTilesY);
+            memcpy(iFlags, other.iFlags, iTilesX * iTilesY * sizeof(uint8));
         }
         else
             iFlags = NULL;
