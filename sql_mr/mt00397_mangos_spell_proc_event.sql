@@ -444,3 +444,13 @@ INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskC0`)
 DELETE FROM `spell_proc_event` WHERE `entry` = 31124;
 INSERT INTO `spell_proc_event` (`entry`, `SchoolMask`) VALUES
 (31124, 127);
+
+-- Deadly Momentum
+DELETE FROM `spell_proc_event` WHERE `entry` = 79121;
+INSERT INTO `spell_proc_event` (`entry`, `SchoolMask`, `Cooldown`) VALUES
+(79121, 127, 1);
+
+-- Deadly Momentum (proc)
+DELETE FROM `spell_proc_event` WHERE `entry` = 84590;
+INSERT INTO `spell_proc_event` (`entry`, `procEx`) VALUE
+(84590, 524288);

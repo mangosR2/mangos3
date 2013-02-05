@@ -1360,7 +1360,8 @@ bool Aura::IsEffectStacking()
 /*********************************************************/
 void Aura::HandleAddModifier(bool apply, bool Real)
 {
-    if (GetTarget()->GetTypeId() != TYPEID_PLAYER || !Real)
+    Unit* target = GetTarget();
+    if (target->GetTypeId() != TYPEID_PLAYER || !Real)
         return;
 
     if (m_modifier.m_miscvalue >= MAX_SPELLMOD)
@@ -1403,16 +1404,24 @@ void Aura::HandleAddModifier(bool apply, bool Real)
 
     switch (GetId())
     {
-        // Evangelism
-        case 81661:
-        // Dark Evangelism
-        case 87118:
+        case 81661:     // Evangelism
+        case 87118:     // Dark Evangelism
         {
-            if (GetEffIndex() == EFFECT_INDEX_0)
+            if (GetEffIndex() == EFFECT_INDEX_0 && !apply)
+                target->RemoveAurasByCasterSpell(87154, GetCasterGuid());
+            break;
+        }
+        case 84590:     // Deadly Momentum
+        {
+            if (apply)
             {
-                Unit* target = GetTarget();
-                if (!apply)
-                    target->RemoveAurasByCasterSpell(87154, GetCasterGuid());
+                // Slice and Dice
+                if (SpellAuraHolderPtr holder = target->GetSpellAuraHolder(5171))
+                    holder->RefreshHolder();
+
+                // Recuperate
+                if (SpellAuraHolderPtr holder = target->GetSpellAuraHolder(73651))
+                    holder->RefreshHolder();
             }
             break;
         }
