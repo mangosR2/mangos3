@@ -209,7 +209,7 @@ FriendInfo SocialMgr::GetFriendInfo(Player* player, ObjectGuid const& friend_gui
     if (pFriend && 
         pFriend->IsInWorld() &&
         pFriend->GetName() &&
-        (security > SEC_PLAYER ||
+        ((security > SEC_PLAYER && security > pFriend->GetSession()->GetSecurity()) ||
         ((pFriend->GetTeam() == team || allowTwoSideWhoList) && 
         (pFriend->GetSession()->GetSecurity() <= gmLevelInWhoList))) &&
         pFriend->IsVisibleGloballyFor(player))
