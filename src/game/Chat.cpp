@@ -3284,10 +3284,10 @@ bool ChatHandler::ExtractLocationFromLink(char** text, uint32& mapid, float& x, 
                 return false;
             }
 
-            mapid = at->target_mapId;
-            x = at->target_X;
-            y = at->target_Y;
-            z = at->target_Z;
+            mapid = at->loc.GetMapId();
+            x = at->loc.x;
+            y = at->loc.y;
+            z = at->loc.z;
             return true;
         }
     }

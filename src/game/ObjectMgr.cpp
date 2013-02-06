@@ -5832,11 +5832,11 @@ void ObjectMgr::LoadAreaTriggerTeleports()
         at.requiredQuestHeroicH = fields[9].GetUInt32();
         at.minGS                = fields[10].GetUInt32();
         at.maxGS                = fields[11].GetUInt32();
-        at.target_mapId         = fields[12].GetUInt32();
-        at.target_X             = fields[13].GetFloat();
-        at.target_Y             = fields[14].GetFloat();
-        at.target_Z             = fields[15].GetFloat();
-        at.target_Orientation   = fields[16].GetFloat();
+        at.loc                  = WorldLocation(fields[12].GetUInt32(),
+                                                fields[13].GetFloat(),
+                                                fields[14].GetFloat(),
+                                                fields[15].GetFloat(),
+                                                fields[16].GetFloat());
         at.achiev0              = fields[17].GetUInt32();
         at.achiev1              = fields[18].GetUInt32();
         at.combatMode           = fields[19].GetUInt32();
@@ -5928,14 +5928,14 @@ void ObjectMgr::LoadAreaTriggerTeleports()
             }
         }
 
-        MapEntry const* mapEntry = sMapStore.LookupEntry(at.target_mapId);
+        MapEntry const* mapEntry = sMapStore.LookupEntry(at.loc.GetMapId());
         if (!mapEntry)
         {
-            sLog.outErrorDb("Table `areatrigger_teleport` has nonexistent target map (ID: %u) for Area trigger (ID:%u).", at.target_mapId, Trigger_ID);
+            sLog.outErrorDb("Table `areatrigger_teleport` has nonexistent target map (ID: %u) for Area trigger (ID:%u).", at.loc.GetMapId(), Trigger_ID);
             continue;
         }
 
-        if ( fabs(at.target_X) < M_NULL_F && fabs(at.target_Y) < M_NULL_F && fabs(at.target_Z) < M_NULL_F)
+        if (at.loc.IsEmpty())
         {
             if (!sWorld.getConfig(CONFIG_BOOL_ALLOW_CUSTOM_MAPS))
             {
@@ -5980,7 +5980,7 @@ AreaTrigger const* ObjectMgr::GetGoBackTrigger(uint32 mapId) const
     AreaTrigger const* compareTrigger = NULL;
     for (AreaTriggerMap::const_iterator itr = mAreaTriggers.begin(); itr != mAreaTriggers.end(); ++itr)
     {
-        if (itr->second.target_mapId == ghost_entrance_map)
+        if (itr->second.loc.GetMapId() == ghost_entrance_map)
         {
             if (!compareTrigger || itr->second.IsLessOrEqualThan(compareTrigger))
             {
@@ -5996,7 +5996,7 @@ AreaTrigger const* ObjectMgr::GetGoBackTrigger(uint32 mapId) const
     {
         for (AreaTriggerMap::const_iterator itr = mAreaTriggers.begin(); itr != mAreaTriggers.end(); ++itr)
         {
-            if (itr->second.target_mapId == ghost_entrance_map)
+            if (itr->second.loc.GetMapId() == ghost_entrance_map)
             {
                 compareTrigger = &itr->second;
                 break;
@@ -6017,7 +6017,7 @@ AreaTrigger const* ObjectMgr::GetMapEntranceTrigger(uint32 mapId) const
 
     for (AreaTriggerMap::const_iterator itr = mAreaTriggers.begin(); itr != mAreaTriggers.end(); ++itr)
     {
-        if (itr->second.target_mapId == mapId)
+        if (itr->second.loc.GetMapId() == mapId)
         {
             AreaTriggerEntry const* atEntry = sAreaTriggerStore.LookupEntry(itr->first);
             if (!atEntry && sWorld.getConfig(CONFIG_BOOL_ALLOW_CUSTOM_MAPS))
