@@ -4712,8 +4712,36 @@ void Spell::finish(bool ok)
                 }
             }
         }
+
         if (needDrop)
-            m_caster->ClearComboPoints();
+        {
+            // Expose Armor
+            if (m_spellInfo->Id == 8647)
+            {
+                int32 cpAmount = 0;
+                Unit::AuraList const& mDummyAuras = m_caster->GetAurasByType(SPELL_AURA_DUMMY);
+                // Search Improved Expose Armor
+                for (Unit::AuraList::const_iterator itr = mDummyAuras.begin(); itr != mDummyAuras.end(); ++itr)
+                {
+                    if ((*itr)->GetSpellProto()->SpellIconID == 563 && (*itr)->GetSpellProto()->GetSpellFamilyName() == SPELLFAMILY_ROGUE)
+                    {
+                        if (roll_chance_i((*itr)->GetSpellProto()->GetProcChance()))
+                            cpAmount = m_caster->GetComboPoints();
+                        break;
+                    }
+                }
+
+                ObjectGuid comboTargetGuid = m_caster->GetComboTargetGuid();
+                m_caster->ClearComboPoints();
+
+                // Restore combo points
+                if (cpAmount)
+                    if (Unit* target = m_caster->GetMap()->GetUnit(comboTargetGuid))
+                        m_caster->CastCustomSpell(target, 79128, &cpAmount, NULL, NULL, true);
+            }
+            else
+                m_caster->ClearComboPoints();
+        }
     }
 
     // potions disabled by client, send event "not in combat" if need

@@ -2380,8 +2380,11 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, DamageInfo* damageI
                     break;
                 }
             }
+            // Improved Expose Armor
+            if (dummySpell->GetSpellIconID() == 563)
+                return SPELL_AURA_PROC_FAILED;              // done in other way
             // Honor Among Thieves
-            if (dummySpell->GetSpellIconID() == 2903)
+            else if (dummySpell->GetSpellIconID() == 2903)
             {
                 if (Unit* caster = triggeredByAura->GetCaster())
                 {
