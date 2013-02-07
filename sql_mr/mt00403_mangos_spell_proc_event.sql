@@ -459,3 +459,8 @@ INSERT INTO `spell_proc_event` (`entry`, `procEx`) VALUE
 DELETE FROM `spell_proc_event` WHERE `entry` = 14186;
 INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`, `SpellFamilyMaskB0`, `procEx`) VALUES
 (14186, 8, 1082131720, 2, 2);
+
+-- Murderous Intent
+DELETE FROM `spell_proc_event` WHERE `entry` = 14158;
+INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`, `procFlags`, `CustomChance`) VALUES
+(14158, 8, 4, 0x10, 100);

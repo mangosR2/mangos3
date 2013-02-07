@@ -1290,6 +1290,20 @@ void Spell::EffectSchoolDMG(SpellEffectEntry const* effect)
                         // Eviscerate and Envenom Bonus Damage (item set effect)
                         if (Aura const* aura = m_caster->GetDummyAura(37169))
                             damage += combo * aura->GetModifier()->m_amount;
+
+                        float pctBonus = 1.0f;
+                        // Vile Poisons
+                        Unit::AuraList const& mPctModifierAuras = m_caster->GetAurasByType(SPELL_AURA_ADD_PCT_MODIFIER);
+                        for (Unit::AuraList::const_iterator i = mPctModifierAuras.begin(); i != mPctModifierAuras.end(); ++i)
+                        {
+                            if ((*i)->GetSpellProto()->GetSpellFamilyName() == SPELLFAMILY_ROGUE && (*i)->GetSpellProto()->GetSpellIconID() == 857 && (*i)->GetEffIndex() == EFFECT_INDEX_0)
+                            {
+                                pctBonus *= (100.0f + (*i)->GetModifier()->m_amount) / 100;
+                                break;
+                            }
+                        }
+
+                        damage = int32(pctBonus * damage);
                     }
                 }
                 // Eviscerate

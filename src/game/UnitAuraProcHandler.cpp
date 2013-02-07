@@ -2380,8 +2380,21 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, DamageInfo* damageI
                     break;
                 }
             }
+            // Murderous Intent
+            if (dummySpell->GetSpellIconID() == 134)
+            {
+                if (triggeredByAura->GetEffIndex() != EFFECT_INDEX_0)
+                    return SPELL_AURA_PROC_FAILED;
+
+                if (!pVictim || pVictim->GetHealthPercent() > dummySpell->CalculateSimpleValue(EFFECT_INDEX_1))
+                    return SPELL_AURA_PROC_FAILED;
+
+                triggered_spell_id = 79132;
+                basepoints[0] = triggerAmount;
+                break;
+            }
             // Improved Expose Armor
-            if (dummySpell->GetSpellIconID() == 563)
+            else if (dummySpell->GetSpellIconID() == 563)
                 return SPELL_AURA_PROC_FAILED;              // done in other way
             // Honor Among Thieves
             else if (dummySpell->GetSpellIconID() == 2903)
