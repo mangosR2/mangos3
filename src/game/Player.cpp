@@ -8126,6 +8126,10 @@ void Player::DestroyItemWithOnStoreSpell(Item* item, uint32 spellId)
 /// handles unique effect of Deadly Poison: apply poison of the other weapon when already at max. stack
 void Player::_HandleDeadlyPoison(Unit* Target, WeaponAttackType attType, SpellEntry const* spellInfo)
 {
+    // Do not handle ranged attacks. Should we?
+    if (attType == RANGED_ATTACK)
+        return;
+
     SpellAuraHolderPtr dPoison = SpellAuraHolderPtr(NULL);
     SpellAuraHolderConstBounds holders = Target->GetSpellAuraHolderBounds(spellInfo->Id);
     for (SpellAuraHolderMap::const_iterator iter = holders.first; iter != holders.second; ++iter)
