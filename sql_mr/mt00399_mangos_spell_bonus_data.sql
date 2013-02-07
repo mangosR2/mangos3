@@ -52,4 +52,5 @@ REPLACE INTO `spell_bonus_data` (`entry`, `direct_bonus`, `dot_bonus`, `ap_bonus
 (5374, 0, 0, 0.243, 0, 'Rogue - Mutilate'),
 (5940, 0, 0, 0.121, 0, 'Rogue - Shiv'),
 (8676, 0, 0, 0.171, 0, 'Rogue - Ambush'),
+(51723, 0, 0, 0.129, 0, 'Rogue - Fan of Knives'),
 (84617, 0, 0, 0.114, 0, 'Rogue - Revealing Strike');

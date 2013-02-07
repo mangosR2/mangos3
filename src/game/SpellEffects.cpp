@@ -8830,6 +8830,18 @@ void Spell::EffectWeaponDmg(SpellEffectEntry const* effect)
                 if (weapon && weapon->GetProto()->SubClass == ITEM_SUBCLASS_WEAPON_DAGGER)
                     totalDamagePercentMod *= 1.447f;         // 144.7% to daggers
             }
+            // Fan of Knives
+            else if (m_caster->GetTypeId() == TYPEID_PLAYER && m_spellInfo->Id == 51723)
+            {
+                // search Vile Poisons
+                if (SpellEntry const* talent = ((Player*)m_caster)->GetKnownTalentRankById(682))
+                {
+                    for (int i = BASE_ATTACK; i <= OFF_ATTACK; ++i)
+                        if (Item* weapon = ((Player*)m_caster)->GetWeaponForAttack(WeaponAttackType(i), true, true))
+                            if (roll_chance_i(talent->CalculateSimpleValue(EFFECT_INDEX_0)))
+                                ((Player*)m_caster)->CastItemCombatSpell(unitTarget, WeaponAttackType(i));
+                }
+            }
             // Hemorrhage
             else if (m_caster->GetTypeId() == TYPEID_PLAYER && classOptions && (classOptions->SpellFamilyFlags & UI64LIT(0x2000000)))
             {

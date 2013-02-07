@@ -4122,14 +4122,6 @@ void Spell::cast(bool skipCheck)
                 AddTriggeredSpell(58923);
             break;
         }
-        case SPELLFAMILY_ROGUE:
-            // Fan of Knives (main hand)
-            if (m_spellInfo->Id == 51723 && m_caster->GetTypeId() == TYPEID_PLAYER &&
-                ((Player*)m_caster)->haveOffhandWeapon())
-            {
-                AddTriggeredSpell(52874);                   // Fan of Knives (offhand)
-            }
-            break;
         case SPELLFAMILY_HUNTER:
         {
             // Deterrence
