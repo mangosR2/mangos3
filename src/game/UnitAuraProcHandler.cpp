@@ -2486,6 +2486,40 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, DamageInfo* damageI
                 triggered_spell_id = 31663;
                 break;
             }
+            // Venomous Wounds
+            else if (dummySpell->GetSpellIconID() == 4888)
+            {
+                if (!pVictim || triggeredByAura->GetEffIndex() != EFFECT_INDEX_1)
+                    return SPELL_AURA_PROC_FAILED;
+
+                // search poison
+                bool found = false;
+                if (pVictim->HasAuraState(AURA_STATE_DEADLY_POISON))
+                    found = true;
+                else
+                {
+                    Unit::SpellAuraHolderMap const& auras = pVictim->GetSpellAuraHolderMap();
+                    for (Unit::SpellAuraHolderMap::const_iterator itr = auras.begin(); itr != auras.end(); ++itr)
+                    {
+                        if (itr->second->GetSpellProto()->GetSpellFamilyName() == SPELLFAMILY_ROGUE &&
+                            itr->second->GetSpellProto()->GetDispel() == DISPEL_POISON &&
+                            itr->second->GetCasterGuid() == GetObjectGuid())
+                        {
+                            found = true;
+                            break;
+                        }
+                    }
+                }
+                if (!found)
+                    return SPELL_AURA_PROC_FAILED;
+
+                // Venomous Wound
+                CastSpell(pVictim, 79136, true);
+                // Venomous Vim
+                triggered_spell_id = 51637;
+                basepoints[0] = triggerAmount;
+                break;
+            }
             // Restless Blades
             else if (dummySpell->GetSpellIconID() == 4897)
             {

@@ -7098,6 +7098,35 @@ void Aura::HandlePeriodicDamage(bool apply, bool Real)
                     caster->CastSpell(caster, 79264, true);
             }
         }
+        // Rupture
+        else if (spellProto->Id == 1943)
+        {
+            if (m_removeMode == AURA_REMOVE_BY_DEATH)
+            {
+                if (Unit* caster = GetCaster())
+                {
+                    Unit::AuraList const& mDummyAuras = caster->GetAurasByType(SPELL_AURA_DUMMY);
+                    for (Unit::AuraList::const_iterator itr = mDummyAuras.begin(); itr != mDummyAuras.end(); ++itr)
+                    {
+                        // Venomous Wounds
+                        if ((*itr)->GetSpellProto()->GetSpellIconID() == 4888 && (*itr)->GetEffIndex() == EFFECT_INDEX_1 && (*itr)->GetSpellProto()->GetSpellFamilyName() == SPELLFAMILY_ROGUE)
+                        {
+                            int32 bp = 0;
+                            uint32 ticks = GetAuraMaxTicks() - GetAuraTicks();
+                            for (int i = 0; i < ticks; ++i)
+                            {
+                                if (roll_chance_i((*itr)->GetSpellProto()->GetProcChance()))
+                                    bp += (*itr)->GetModifier()->m_amount;
+                            }
+                            if (bp)
+                                // Venomous Vim
+                                caster->CastCustomSpell(caster, 51637, &bp, NULL, NULL, true);
+                            break;
+                        }
+                    }
+                }
+            }
+        }
         // Parasitic Shadowfiend - handle summoning of two Shadowfiends on DoT expire
         else if (spellProto->Id == 41917)
             target->CastSpell(target, 41915, true);
