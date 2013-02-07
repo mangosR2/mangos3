@@ -4511,6 +4511,20 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(Unit *pVictim, DamageIn
                 if (pVictim != this)
                     return SPELL_AURA_PROC_FAILED;
             }
+            // Seal Fate
+            else if (auraSpellInfo->GetSpellIconID() == 2984)
+            {
+                if (!procSpell || !IsSpellHaveEffect(procSpell, SPELL_EFFECT_ADD_COMBO_POINTS))
+                    return SPELL_AURA_PROC_FAILED;
+                break;
+            }
+            // Master Poisoner
+            else if (auraSpellInfo->Id == 58410)
+            {
+                if (!procSpell || procSpell->GetDispel() != DISPEL_POISON)
+                    return SPELL_AURA_PROC_FAILED;
+                break;
+            }
             // Item - Rogue T10 4P Bonus
             else if (auraSpellInfo->Id == 70803)
             {
@@ -4875,7 +4889,7 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(Unit *pVictim, DamageIn
             break;                                   // continue normal case
         }
         // Finishing moves that add combo points
-        case 14189: // Seal Fate (Netherblade set)
+        case 14189: // Seal Fate (talent, Netherblade set)
         case 14157: // Ruthlessness
         case 70802: // Mayhem (Shadowblade sets)
         {

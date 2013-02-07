@@ -454,3 +454,8 @@ INSERT INTO `spell_proc_event` (`entry`, `SchoolMask`, `Cooldown`) VALUES
 DELETE FROM `spell_proc_event` WHERE `entry` = 84590;
 INSERT INTO `spell_proc_event` (`entry`, `procEx`) VALUE
 (84590, 524288);
+
+-- Seal Fate
+DELETE FROM `spell_proc_event` WHERE `entry` = 14186;
+INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`, `SpellFamilyMaskB0`, `procEx`) VALUES
+(14186, 8, 1082131720, 2, 2);

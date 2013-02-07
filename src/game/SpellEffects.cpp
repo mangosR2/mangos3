@@ -1281,20 +1281,7 @@ void Spell::EffectSchoolDMG(SpellEffectEntry const* effect)
                                 doses = combo;
 
                             // Master Poisoner
-                            Unit::AuraList const& auraList = ((Player*)m_caster)->GetAurasByType(SPELL_AURA_MOD_DURATION_OF_EFFECTS_BY_DISPEL);
-                            for(Unit::AuraList::const_iterator iter = auraList.begin(); iter!=auraList.end(); ++iter)
-                            {
-                                if ((*iter)->GetSpellProto()->GetSpellFamilyName() == SPELLFAMILY_ROGUE && (*iter)->GetSpellProto()->GetSpellIconID() == 1960)
-                                {
-                                    if (int32 chance = (*iter)->GetSpellProto()->CalculateSimpleValue(EFFECT_INDEX_2))
-                                        if (roll_chance_i(chance))
-                                            needConsume = false;
-
-                                    break;
-                                }
-                            }
-
-                            if (needConsume)
+                            if (!m_caster->HasAura(58410))
                                 unitTarget->RemoveAuraHolderFromStack(spellId, doses, m_caster->GetObjectGuid());
 
                             damage *= doses;
