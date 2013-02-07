@@ -2411,21 +2411,17 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, DamageInfo* damageI
             {
                 // "refresh your Slice and Dice duration to its 5 combo point maximum"
                 // lookup Slice and Dice
-                AuraList const& sd = GetAurasByType(SPELL_AURA_MOD_MELEE_HASTE);
-                for(AuraList::const_iterator itr = sd.begin(); itr != sd.end(); ++itr)
+                if (SpellAuraHolderPtr holder = GetSpellAuraHolder(5171))
                 {
-                    SpellEntry const *spellProto = (*itr)->GetSpellProto();
-                    if (spellProto->GetSpellFamilyName() == SPELLFAMILY_ROGUE &&
-                        spellProto->GetSpellFamilyFlags().test<CF_ROGUE_SLICE_AND_DICE>())
-                    {
-                        int32 duration = GetSpellMaxDuration(spellProto);
-                        if (GetTypeId() == TYPEID_PLAYER)
-                            static_cast<Player*>(this)->ApplySpellMod(spellProto->Id, SPELLMOD_DURATION, duration);
-                        (*itr)->GetHolder()->SetAuraMaxDuration(duration);
-                        (*itr)->GetHolder()->RefreshHolder();
-                        return SPELL_AURA_PROC_OK;
-                    }
+                    int32 duration = GetSpellMaxDuration(holder->GetSpellProto());
+                    if (GetTypeId() == TYPEID_PLAYER)
+                        ((Player*)this)->ApplySpellMod(holder->GetId(), SPELLMOD_DURATION, duration);
+
+                    holder->SetAuraMaxDuration(duration);
+                    holder->RefreshHolder();
+                    return SPELL_AURA_PROC_OK;
                 }
+
                 return SPELL_AURA_PROC_FAILED;
             }
             // Deadly Brew
