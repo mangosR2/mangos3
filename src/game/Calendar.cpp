@@ -213,6 +213,8 @@ CalendarMgr::CalendarMgr()
 
 CalendarMgr::~CalendarMgr()
 {
+   m_InviteStore.clear();
+   m_EventStore.clear();
 }
 
 CalendarEvent* CalendarMgr::GetEventById(ObjectGuid const& eventId)
@@ -527,7 +529,7 @@ void CalendarMgr::DBRemap(TRemapAction remapAction, TRemapData& remapData, bool&
         {
             SqlStatement delEventStmt = CharacterDatabase.CreateStatement(stmtEventID, "DELETE FROM calendar_events WHERE eventId = ?");
             SqlStatement delInviteStmt = CharacterDatabase.CreateStatement(stmtInviteID, "DELETE FROM calendar_invites WHERE eventId = ?");
-            for (TRemapData::iterator itr = remapData.begin(); itr != remapData.end();)
+            for (TRemapData::const_iterator itr = remapData.begin(); itr != remapData.end();)
             {
                 if (itr->second == DELETED_ID)
                 {
@@ -546,11 +548,8 @@ void CalendarMgr::DBRemap(TRemapAction remapAction, TRemapData& remapData, bool&
             SqlStatement updInviteStmt = CharacterDatabase.CreateStatement(stmtInviteID, "UPDATE calendar_invites SET eventId = ? WHERE eventId = ?");
             for (TRemapData::const_iterator itr = remapData.begin(); itr != remapData.end(); ++itr)
             {
-                if (itr->first != itr->second)
-                {
-                    updEventStmt.PExecute(itr->second, itr->first);
-                    updInviteStmt.PExecute(itr->second, itr->first);
-                }
+                updEventStmt.PExecute(itr->second, itr->first);
+                updInviteStmt.PExecute(itr->second, itr->first);
             }
             break;
         }
@@ -590,11 +589,14 @@ void CalendarMgr::RemoveExpiredEventsAndRemapData()
 
     // remap eventId
     if (!remapData.empty())
-        DBRemap(RA_REMAP_EVENTS, remapData, dbTransactionUsed);
+    {
+        remapData.remove_if(IsNotRemap());
+        if (!remapData.empty())
+            DBRemap(RA_REMAP_EVENTS, remapData, dbTransactionUsed);
+    }
 
     // remap inviteId
-    result = CharacterDatabase.Query("SELECT inviteId FROM calendar_invites ORDER BY inviteId");
-    if (result)
+    if (result = CharacterDatabase.Query("SELECT inviteId FROM calendar_invites ORDER BY inviteId"))
     {
         remapId = 1;
         remapData.clear();
