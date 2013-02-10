@@ -486,8 +486,6 @@ void CalendarMgr::RemovePlayerCalendar(ObjectGuid const& playerGuid)
     for (CalendarEventStore::iterator iter = m_EventStore.begin(); iter != m_EventStore.end(); ++iter)
     {
         CalendarEvent& event = iter->second;
-        ObjectGuid const& eventId = iter->first;
-
         if (event.CreatorGuid == playerGuid && !IsDeletedEvent(iter))
         {
             event.RemoveInviteByGuid(playerGuid);
@@ -501,8 +499,6 @@ void CalendarMgr::RemoveGuildCalendar(ObjectGuid const& playerGuid, uint32 Guild
     for (CalendarEventStore::iterator iter = m_EventStore.begin(); iter != m_EventStore.end(); ++iter)
     {
         CalendarEvent& event = iter->second;
-        ObjectGuid const& eventId = iter->first;
-
         if (event.CreatorGuid == playerGuid && (event.IsGuildEvent() || event.IsGuildAnnouncement()) && !IsDeletedEvent(iter))
         {
             event.RemoveInviteByGuid(playerGuid);
