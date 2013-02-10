@@ -8547,32 +8547,50 @@ bool Unit::IsSpellCrit(Unit *pVictim, SpellEntry const *spellProto, SpellSchoolM
             break;
         }
         case SPELL_DAMAGE_CLASS_MELEE:
-            // Rend and Tear crit chance with Ferocious Bite on bleeding target
-            if (spellProto->SpellFamilyName == SPELLFAMILY_DRUID)
+        {
+            // Custom crit by class
+            switch (spellProto->SpellFamilyName)
             {
-                if (spellProto->GetSpellFamilyFlags().test<CF_DRUID_RIP_BITE>())
+                case SPELLFAMILY_WARRIOR:
                 {
-                    if (pVictim->HasAuraState(AURA_STATE_BLEEDING))
+                    // Victory Rush
+                    if (spellProto->GetSpellFamilyFlags().test<CF_WARRIOR_VICTORY_RUSH>())
                     {
-                        Unit::AuraList const& aura = GetAurasByType(SPELL_AURA_DUMMY);
-                        for(Unit::AuraList::const_iterator itr = aura.begin(); itr != aura.end(); ++itr)
+                        // Glyph of Victory Rush
+                        if (Aura* aura = GetAura(58382, EFFECT_INDEX_0))
+                            crit_chance += aura->GetModifier()->m_amount;
+                    }
+                    break;
+                }
+                case SPELLFAMILY_DRUID:
+                {
+                    // Rend and Tear crit chance with Ferocious Bite on bleeding target
+                    if (spellProto->GetSpellFamilyFlags().test<CF_DRUID_RIP_BITE>())
+                    {
+                        if (pVictim && pVictim->HasAuraState(AURA_STATE_BLEEDING))
                         {
-                            if ((*itr)->GetSpellProto()->SpellIconID == 2859 && (*itr)->GetEffIndex() == 1)
+                            Unit::AuraList const& aura = GetAurasByType(SPELL_AURA_DUMMY);
+                            for(Unit::AuraList::const_iterator itr = aura.begin(); itr != aura.end(); ++itr)
                             {
-                                crit_chance += (*itr)->GetModifier()->m_amount;
-                                break;
+                                if ((*itr)->GetSpellProto()->SpellIconID == 2859 && (*itr)->GetEffIndex() == 1)
+                                {
+                                    crit_chance += (*itr)->GetModifier()->m_amount;
+                                    break;
+                                }
                             }
                         }
                     }
+                    break;
                 }
             }
             /* no break */
+        }
         case SPELL_DAMAGE_CLASS_RANGED:
         {
             if (pVictim)
                 crit_chance += GetUnitCriticalChance(attackType, pVictim);
 
-            crit_chance+= GetTotalAuraModifierByMiscMask(SPELL_AURA_MOD_SPELL_CRIT_CHANCE_SCHOOL, schoolMask);
+            crit_chance += GetTotalAuraModifierByMiscMask(SPELL_AURA_MOD_SPELL_CRIT_CHANCE_SCHOOL, schoolMask);
             break;
         }
         default:
