@@ -8030,16 +8030,7 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                 case 2270:                                          // Spells 73142 , 73143 , 73144 , 73145
                 {
                     if (unitTarget)
-                    {
-                        float x, y, z;
-                        unitTarget->GetPosition(x, y, z);
-
-                        if (Creature *pSpike = unitTarget->SummonCreature(38711, x, y, z, 0.0f, TEMPSUMMON_DEAD_DESPAWN, 2000))
-                        {
-                            unitTarget->CastSpell(pSpike, 46598, true); // enter vehicle
-                            pSpike->CastSpell(unitTarget, m_spellInfo->CalculateSimpleValue(EFFECT_INDEX_1), true, 0, 0, m_caster->GetObjectGuid(), m_spellInfo);
-                        }
-                    }
+                        unitTarget->CastSpell(unitTarget, 69062, true); // enter vehicle
                     return;
                 }
                 case 1988:                                          // Pungent Blight (Festergut) - Spells 69195 , 71219 , 73031 , 73032
