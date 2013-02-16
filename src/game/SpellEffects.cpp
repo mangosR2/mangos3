@@ -3624,6 +3624,10 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                 case 71908:
                 case 72270:
                 case 72271:
+                case 72295:                                 // Malleable Goo (ICC -Professor Putricide)
+                case 72615:
+                case 74280:
+                case 74281:
                 {
                     if (unitTarget)
                         m_caster->CastSpell(unitTarget, m_spellInfo->CalculateSimpleValue(eff_idx), true);
@@ -10446,6 +10450,9 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     }
                 }
                 case 69782:                                 // Ooze Flood (Rotface)
+                case 69796:
+                case 69798:
+                case 69801:
                 {
                     // targets Puddle Stalker which casts slime AoE
                     if (unitTarget)
