@@ -674,7 +674,7 @@ void Spell::EffectSchoolDMG(SpellEffectIndex effect_idx)
                     }
                     case 72506: // 10hero
                     {
-                        if (SpellAuraHolderPtr holder = m_caster->GetSpellAuraHolder(72745))
+                        if (SpellAuraHolderPtr holder = m_caster->GetSpellAuraHolder(72671))
                         {
                             uint32 stack = holder->GetStackAmount();
                             switch(stack)
