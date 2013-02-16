@@ -16422,7 +16422,7 @@ void Player::_LoadAuras(QueryResult *result, uint32 timediff)
 
             if (caster_guid.IsEmpty() || !caster_guid.IsUnit())
             {
-                sLog.outError("Player::LoadAuras Unknown caster %u, ignore.",fields[0].GetUInt64());
+                sLog.outError("Player::LoadAuras Unknown caster %lu, ignore.",fields[0].GetUInt64());
                 continue;
             }
 
@@ -18394,6 +18394,8 @@ void Player::_SaveSpells()
 
     for (PlayerSpellMap::iterator itr = m_spells.begin(), next = m_spells.begin(); itr != m_spells.end();)
     {
+        next = itr;
+        ++next;
         uint32 talentCosts = GetTalentSpellCost(itr->first);
 
         if (!talentCosts)
@@ -18407,13 +18409,11 @@ void Player::_SaveSpells()
         }
 
         if (itr->second.state == PLAYERSPELL_REMOVED)
-            m_spells.erase(itr++);
+            m_spells.erase(itr);
         else
         {
             itr->second.state = PLAYERSPELL_UNCHANGED;
-            ++itr;
         }
-
     }
 }
 
@@ -23868,18 +23868,18 @@ void Player::LoadAccountLinkedState()
     if (referredAccounts)
     {
         if (referredAccounts->size() > sWorld.getConfig(CONFIG_UINT32_RAF_MAXREFERERS))
-            sLog.outError("Player:RAF:Warning: loaded %u referred accounts instead of %u for player %s",referredAccounts->size(),sWorld.getConfig(CONFIG_UINT32_RAF_MAXREFERERS),GetObjectGuid().GetString().c_str());
+            sLog.outError("Player:RAF:Warning: loaded "SIZEFMTD" referred accounts instead of %u for player %s",referredAccounts->size(),sWorld.getConfig(CONFIG_UINT32_RAF_MAXREFERERS),GetObjectGuid().GetString().c_str());
         else
-            DEBUG_LOG("Player:RAF: loaded %u referred accounts for player %s",referredAccounts->size(),GetObjectGuid().GetString().c_str());
+            DEBUG_LOG("Player:RAF: loaded "SIZEFMTD" referred accounts for player %s",referredAccounts->size(),GetObjectGuid().GetString().c_str());
     }
 
     RafLinkedList const* referalAccounts = sAccountMgr.GetRAFAccounts(GetSession()->GetAccountId(), false);
     if (referalAccounts)
     {
         if (referalAccounts->size() > sWorld.getConfig(CONFIG_UINT32_RAF_MAXREFERALS))
-            sLog.outError("Player:RAF:Warning: loaded %u referal accounts instead of %u for player %s",referalAccounts->size(),sWorld.getConfig(CONFIG_UINT32_RAF_MAXREFERALS),GetObjectGuid().GetString().c_str());
+            sLog.outError("Player:RAF:Warning: loaded "SIZEFMTD" referal accounts instead of %u for player %s",referalAccounts->size(),sWorld.getConfig(CONFIG_UINT32_RAF_MAXREFERALS),GetObjectGuid().GetString().c_str());
         else
-            DEBUG_LOG("Player:RAF: loaded %u referal accounts for player %s",referalAccounts->size(),GetObjectGuid().GetString().c_str());
+            DEBUG_LOG("Player:RAF: loaded "SIZEFMTD" referal accounts for player %s",referalAccounts->size(),GetObjectGuid().GetString().c_str());
     }
 }
 

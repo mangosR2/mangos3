@@ -4477,7 +4477,7 @@ void Spell::SendSpellGo()
 
     m_caster->SendMessageToSet(&data, true);
 
-    DEBUG_FILTER_LOG(LOG_FILTER_SPELL_CAST,"Spell::SendSpellGo: %s cast spell %u on %s, targets count (mask %u) %u %u %u",
+    DEBUG_FILTER_LOG(LOG_FILTER_SPELL_CAST,"Spell::SendSpellGo: %s cast spell %u on %s, targets count (mask %u) "SIZEFMTD" "SIZEFMTD" "SIZEFMTD,
                 m_caster->GetObjectGuid().GetString().c_str(),
                 m_spellInfo->Id,
                 m_targets.getUnitTarget() ? m_targets.getUnitTarget()->GetObjectGuid().GetString().c_str() : "<none>",
@@ -4790,7 +4790,7 @@ void Spell::SendChannelUpdate(uint32 time)
         }
         else if (m_spellInfo->HasAttribute(SPELL_ATTR_EX_FARSIGHT) && m_caster->GetTypeId() == TYPEID_PLAYER)
         {
-            if (DynamicObject* dynObj = m_caster->GetDynObject(m_triggeredByAuraSpell ? m_triggeredByAuraSpell->Id : m_spellInfo->Id))
+            if (/*DynamicObject* dynObj = */m_caster->GetDynObject(m_triggeredByAuraSpell ? m_triggeredByAuraSpell->Id : m_spellInfo->Id))
                 ((Player*)m_caster)->SetViewPoint(NULL);
         }
 
