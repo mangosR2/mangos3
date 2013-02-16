@@ -2593,6 +2593,10 @@ uint32 SpellMgr::GetSpellMaxTargetsWithCustom(SpellEntry const* spellInfo, Unit 
                 case 55479:                                 // Forced Obedience (Naxxramas, Razovius)
                 case 56140:                                 // Summon Power Spark (Eye of Eternity, Malygos)
                 case 59870:                                 // Glare of the Tribunal (h) (Halls of Stone)
+                case 62978:                                 // Summon Guardian (Ulduar - Yogg Saron)
+                case 63713:                                 // Dominate Mind (Ulduar - Yogg Saron)
+                case 63830:                                 // Malady of the Mind (Ulduar - Yogg Saron)
+                case 64465:                                 // Shadow Beacon (Ulduar - Yogg Saron)
                 case 62016:                                 // Charge Orb (Ulduar, Thorim)
                 case 62042:                                 // Stormhammer (Ulduar, Thorim)
                 case 62166:                                 // StoneGrip nh
@@ -2611,6 +2615,8 @@ uint32 SpellMgr::GetSpellMaxTargetsWithCustom(SpellEntry const* spellInfo, Unit 
                 case 64234:                                 // Gravity Bomb (h) (Ulduar, XT-002)
                 case 64425:                                 // Summon Scrap Bot Trigger (Ulduar, Mimiron) use for Assault Bots, hits npc 33856
                 case 64531:                                 // Rapid Burst (h)
+                case 64562:                                 // Summon Flames Spread Trigger (Ulduar, Mimiron)
+                case 64623:                                 // Frost Bomb (Ulduar, Mimiron)
                 case 65121:                                 // Searing Light (h)
                 case 65301:                                 // Psychosis (Ulduar, Yogg-Saron)
                 case 65872:                                 // Pursuing Spikes
