@@ -721,7 +721,7 @@ void Spell::EffectSchoolDMG(SpellEffectIndex effect_idx)
                                     damage = urand(4500, 5500);
                                     break;
                                 case 5:
-                                    damage = urand(10000, 1200);
+                                    damage = urand(10000, 12000);
                                     break;
                                 default:
                                     damage = 4000 * stack;
