@@ -19085,6 +19085,12 @@ void Player::AddSpellMod(Aura* aura, bool apply)
     Modifier const* mod = aura->GetModifier();
     Opcodes opcode = (mod->m_auraname == SPELL_AURA_ADD_FLAT_MODIFIER) ? SMSG_SET_FLAT_SPELL_MODIFIER : SMSG_SET_PCT_SPELL_MODIFIER;
 
+    uint32 modTypeCount = 0;    // count of mods per one mod->op
+    WorldPacket data(opcode, 4 + 4 + 1 + 1 + 4);
+    data << uint32(1);          // count of different mod->op's in packet
+    size_t writePos = data.wpos();
+    data << uint32(modTypeCount);
+    data << uint8(mod->m_miscvalue);
     for (uint8 eff = 0; eff < 96; ++eff)
     {
         if (aura->GetAuraSpellClassMask().test(eff))
@@ -19102,15 +19108,13 @@ void Player::AddSpellMod(Aura* aura, bool apply)
             val += apply ? mod->m_amount : 0;
 
             val += apply ? mod->m_amount : -(mod->m_amount);
-            WorldPacket data(opcode, 4 + 4 + 1 + 1 + 4);
-            data << uint32(1);
-            data << uint32(1);
-            data << uint8(mod->m_miscvalue);
             data << uint8(eff);
-            data << int32(val);
-            SendDirectMessage(&data);
+            data << float(val);
+            ++modTypeCount;
         }
     }
+    data.put<uint32>(writePos, modTypeCount);
+    SendDirectMessage(&data);
 
     if (apply)
         m_spellMods[mod->m_miscvalue].push_back(aura);
