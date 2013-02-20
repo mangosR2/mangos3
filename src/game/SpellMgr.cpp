@@ -2106,7 +2106,7 @@ bool SpellMgr::IsSpellProcEventCanTriggeredBy(SpellProcEventEntry const * spellP
             SpellClassOptionsEntry const* spellClassOptions = procSpell->GetSpellClassOptions();
 
             // Check (if set) for spellFamilyName
-            if (spellProcEvent->spellFamilyName && spellClassOptions && (spellProcEvent->spellFamilyName != spellClassOptions->SpellFamilyName))
+            if (spellProcEvent->spellFamilyName && (!spellClassOptions || spellProcEvent->spellFamilyName != spellClassOptions->SpellFamilyName))
                 return false;
         }
     }
