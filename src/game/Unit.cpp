@@ -9952,7 +9952,7 @@ void Unit::SetInCombatState(bool PvP, Unit* enemy)
 
     RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_ENTER_COMBAT);
 
-    if (getRace() == RACE_WORGEN && !IsInWorgenForm(true))
+    if (getRace() == RACE_WORGEN && !IsInWorgenForm(true) && HasWorgenForm())
         CastSpell(this, 97709, true);   // cast Altered Form
 
     if (creatureNotInCombat)
@@ -14815,6 +14815,11 @@ bool Unit::IsInWorgenForm(bool inPermanent) const
             return true;
 
     return false;
+}
+
+bool Unit::HasWorgenForm() const
+{
+    return HasAuraType(SPELL_AURA_ALLOW_WORGEN_TRANSFORM);
 }
 
 void Unit::BuildForceMoveRootPacket(WorldPacket* data, bool apply, uint32 value)
