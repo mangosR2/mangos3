@@ -3160,4 +3160,13 @@ enum ConditionSource                                        // From where was th
     CONDITION_FROM_VENDOR           = 6,                    // Used to check a condition from a vendor
 };
 
+enum Expansions
+{
+    EXPANSION_NONE                      = 0,                // classic
+    EXPANSION_TBC                       = 1,                // TBC
+    EXPANSION_WOTLK                     = 2,                // WotLK
+    EXPANSION_CATA                      = 3,                // Cata
+    EXPANSION_MOP                       = 4,                // MoP
+};
+
 #endif
