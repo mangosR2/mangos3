@@ -47,7 +47,7 @@
 #include "MapManager.h"
 #include "ScriptMgr.h"
 #include "CreatureAIRegistry.h"
-#include "Policies/SingletonImp.h"
+#include "Policies/Singleton.h"
 #include "BattleGround/BattleGroundMgr.h"
 #include "Language.h"
 #include "OutdoorPvP/OutdoorPvP.h"

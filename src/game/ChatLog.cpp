@@ -25,7 +25,7 @@
 #include "GuildMgr.h"
 #include "ObjectMgr.h"
 #include "SpellAuras.h"
-#include "Policies/SingletonImp.h"
+#include "Policies/Singleton.h"
 
 INSTANTIATE_SINGLETON_1( ChatLog );
 

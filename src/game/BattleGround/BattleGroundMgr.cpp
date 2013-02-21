@@ -45,7 +45,7 @@
 #include "Formulas.h"
 #include "WorldObjectEvents.h"
 
-#include "Policies/SingletonImp.h"
+#include "Policies/Singleton.h"
 
 INSTANTIATE_SINGLETON_1(BattleGroundMgr);
 

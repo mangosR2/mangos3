@@ -53,7 +53,7 @@
 #include "CreatureLinkingMgr.h"
 
 // apply implementation of the singletons
-#include "Policies/SingletonImp.h"
+#include "Policies/Singleton.h"
 
 ObjectGuid CreatureData::GetObjectGuid(uint32 lowguid) const
 {
