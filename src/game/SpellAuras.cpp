@@ -549,7 +549,7 @@ void Aura::AreaAura(SpellEntry const* spellproto, SpellEffectIndex eff, int32 *c
     // caster==NULL in constructor args if target==caster in fact
     Unit* caster_ptr = caster ? caster : target;
 
-    m_radius = GetSpellRadius(sSpellRadiusStore.LookupEntry(m_spellEffect->EffectRadiusIndex));
+    m_radius = GetSpellRadius(sSpellRadiusStore.LookupEntry(m_spellEffect->GetRadiusIndex()));
     if(Player* modOwner = caster_ptr->GetSpellModOwner())
         modOwner->ApplySpellMod(spellproto->Id, SPELLMOD_RADIUS, m_radius);
 

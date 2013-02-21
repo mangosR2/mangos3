@@ -5814,7 +5814,7 @@ void Spell::EffectPersistentAA(SpellEffectEntry const* effect)
     if (!pCaster)
         pCaster = m_caster;
 
-    float radius = GetSpellRadius(sSpellRadiusStore.LookupEntry(effect->EffectRadiusIndex));
+    float radius = GetSpellRadius(sSpellRadiusStore.LookupEntry(effect->GetRadiusIndex()));
 
     if (Player* modOwner = pCaster->GetSpellModOwner())
         modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_RADIUS, radius);
@@ -6749,7 +6749,7 @@ void Spell::EffectTeleUnitsFaceCaster(SpellEffectEntry const* effect)
         m_targets.getDestination(fx, fy, fz);
     else
     {
-        float dis = GetSpellRadius(sSpellRadiusStore.LookupEntry(effect->EffectRadiusIndex));
+        float dis = GetSpellRadius(sSpellRadiusStore.LookupEntry(effect->GetRadiusIndex()));
         m_caster->GetClosePoint(fx, fy, fz, unitTarget->GetObjectBoundingRadius(), dis);
     }
 
@@ -12211,10 +12211,10 @@ void Spell::EffectTransmitted(SpellEffectEntry const* effect)
 
     if (m_targets.m_targetMask & TARGET_FLAG_DEST_LOCATION)
         m_targets.getDestination(fx, fy, fz);
-    //FIXME: this can be better check for most objects but still hack
-    else if(effect->EffectRadiusIndex && m_spellInfo->speed==0)
+    // FIXME: this can be better check for most objects but still hack
+    else if (effect->GetRadiusIndex() && m_spellInfo->speed == 0)
     {
-        float dis = GetSpellRadius(sSpellRadiusStore.LookupEntry(effect->EffectRadiusIndex));
+        float dis = GetSpellRadius(sSpellRadiusStore.LookupEntry(effect->GetRadiusIndex()));
         m_caster->GetClosePoint(fx, fy, fz, DEFAULT_WORLD_OBJECT_SIZE, dis);
     }
     else

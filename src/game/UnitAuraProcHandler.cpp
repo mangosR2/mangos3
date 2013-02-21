@@ -2082,8 +2082,8 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, DamageInfo* damageI
 
                     float radius;
                     SpellEffectEntry const* spellEffect = procSpell->GetSpellEffect(EFFECT_INDEX_0);
-                    if (spellEffect && spellEffect->EffectRadiusIndex)
-                        radius = GetSpellRadius(sSpellRadiusStore.LookupEntry(spellEffect->EffectRadiusIndex));
+                    if (spellEffect && spellEffect->GetRadiusIndex())
+                        radius = GetSpellRadius(sSpellRadiusStore.LookupEntry(spellEffect->GetRadiusIndex()));
                     else
                         radius = GetSpellMaxRange(sSpellRangeStore.LookupEntry(procSpell->rangeIndex));
 
@@ -4871,8 +4871,8 @@ SpellAuraProcResult Unit::HandleMendingAuraProc( Unit* /*pVictim*/, DamageInfo* 
     {
         SpellEffectEntry const* spellEffect = spellProto->GetSpellEffect(effIdx);
         float radius;
-        if (spellEffect && spellEffect->EffectRadiusIndex)
-            radius = GetSpellRadius(sSpellRadiusStore.LookupEntry(spellEffect->EffectRadiusIndex));
+        if (spellEffect && spellEffect->GetRadiusIndex())
+            radius = GetSpellRadius(sSpellRadiusStore.LookupEntry(spellEffect->GetRadiusIndex()));
         else
             radius = GetSpellMaxRange(sSpellRangeStore.LookupEntry(spellProto->rangeIndex));
 

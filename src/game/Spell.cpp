@@ -1955,7 +1955,6 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
             target->GetPosition(ox, oy, oz);
             float direction = target->GetOrientation();
             float distance = radius;
-
             //Glyph of blink or etc this type
             if (m_caster->GetTypeId() == TYPEID_PLAYER)
                 ((Player*)m_caster)->ApplySpellMod(m_spellInfo->Id, SPELLMOD_RADIUS, distance);
@@ -3066,7 +3065,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
                 // "at the base of", in difference to 0 which appear to be "directly in front of".
                 // TODO: some summoned will make caster be half inside summoned object. Need to fix
                 // that in the below code (nearpoint vs closepoint, etc).
-                if (!spellEffect || spellEffect->EffectRadiusIndex == 0)
+                if (!spellEffect || spellEffect->GetRadiusIndex() == 0)
                     radius = 0.0f;
 
                 if (m_spellInfo->Id == 50019)               // Hawk Hunting, problematic 50K radius
@@ -6140,7 +6139,7 @@ SpellCastResult Spell::CheckCast(bool strict)
                     if (target->GetOwnerGuid() != m_caster->GetObjectGuid())
                         return SPELL_FAILED_BAD_IMPLICIT_TARGETS;
 
-                    float dist = GetSpellRadius(sSpellRadiusStore.LookupEntry(spellEffect->EffectRadiusIndex));
+                    float dist = GetSpellRadius(sSpellRadiusStore.LookupEntry(spellEffect->GetRadiusIndex()));
                     if (!target->IsWithinDistInMap(m_caster,dist))
                         return SPELL_FAILED_OUT_OF_RANGE;
 
