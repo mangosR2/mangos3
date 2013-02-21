@@ -1694,6 +1694,7 @@ bool IsCastEndProcModifierAura(SpellEntry const *spellInfo, SpellEffectIndex eff
             {
                 case SPELLMOD_RANGE:
                 case SPELLMOD_RADIUS:
+                case SPELLMOD_CRITICAL_CHANCE:
                 case SPELLMOD_NOT_LOSE_CASTING_TIME:
                 case SPELLMOD_CASTING_TIME:
                 case SPELLMOD_COOLDOWN:
