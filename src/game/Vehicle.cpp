@@ -599,7 +599,11 @@ void VehicleKit::Dismount(Unit* passenger, VehicleSeatEntry const* seatInfo)
     if (tRadius < 1.0f || tRadius > 10.0f)
         tRadius = 1.0f;
 
-    if (b_dstSet)
+    if (base->GetMap()->IsInUnloading())
+    {
+        // Do not change passenger location, changing to unloaded gride cause crash.
+    }
+    else if (b_dstSet)
     {
         // parabolic traectory (catapults, explode, other effects). mostly set destination in DummyEffect.
         // destination Z not checked in this case! only limited on 8.0 delta. requred full correct set in spelleffects.
