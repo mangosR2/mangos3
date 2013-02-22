@@ -2744,6 +2744,24 @@ uint32 SpellMgr::GetSpellMaxTargetsWithCustom(SpellEntry const* spellInfo, Unit 
                 case 63482:                                 // Lightning Whirl (h) (Ulduar, Stormcaller Brundir)
                     unMaxTargets = urand(3, 6);
                     break;
+                case 74452:                                 // Conflagration (Saviana, Ruby Sanctum) (hack, in 25 mode spell simple casted double time)
+                {
+                    if (caster)
+                    {
+                        switch (caster->GetMap()->GetDifficulty())
+                        {
+                            case RAID_DIFFICULTY_10MAN_NORMAL:
+                            case RAID_DIFFICULTY_10MAN_HEROIC:
+                                unMaxTargets = 3;
+                                break;
+                            case RAID_DIFFICULTY_25MAN_NORMAL:
+                            case RAID_DIFFICULTY_25MAN_HEROIC:
+                                unMaxTargets = 6;
+                                break;
+                        }
+                    }
+                    break;
+                }
                 default:
                     break;
             }

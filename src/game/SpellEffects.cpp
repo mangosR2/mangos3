@@ -3723,6 +3723,14 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     m_originalCaster->CastSpell(unitTarget, 72380, true);
                     return;
                 }
+                case 74452:                                 // Conflagration
+                {
+                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
+                        return;
+
+                    m_caster->CastSpell(unitTarget, 74453, true);
+                    return;
+                }
                 default:
                     break;
             }
@@ -10607,6 +10615,13 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                             ((Creature*)m_caster)->ForcedDespawn(800);
                     }
                     return;
+                }
+                case 74455:                                 // Conflagration
+                {
+                    if (!unitTarget)
+                        return;
+
+                    unitTarget->CastSpell(m_caster, m_spellInfo->CalculateSimpleValue(eff_idx), true);
                 }
             }
             break;
