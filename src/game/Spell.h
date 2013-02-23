@@ -535,6 +535,7 @@ class Spell
 
         // Unstead of GetAffectiveCaster() not return NULL if original caster is GameObject.
         Unit* GetAffectiveUnitCaster() const { return (m_originalCaster ? m_originalCaster : m_caster); }
+        uint32 GetUsedHolyPower() const { return m_usedHolyPower; }
 
         int32 GetPowerCost() const { return m_powerCost; }
 
@@ -573,6 +574,7 @@ class Spell
         SpellSchoolMask m_spellSchoolMask;                  // Spell school (can be overwrite for some spells (wand shoot for example)
         WeaponAttackType m_attackType;                      // For weapon based attack
         int32 m_powerCost;                                  // Calculated spell cost     initialized only in Spell::prepare
+        uint32 m_usedHolyPower;
         int32 m_casttime;                                   // Calculated spell cast time initialized only in Spell::prepare
         int32 m_duration;
         uint8 m_spellFlags;                                 // for spells whose target was changed in cast i.e. due to reflect
