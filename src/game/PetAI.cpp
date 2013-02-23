@@ -427,7 +427,7 @@ void PetAI::UpdateAI(const uint32 diff)
             m_savedTargetGuid.Clear();
     }
 
-    if (inCombat && 
+    if (inCombat &&
         (!m_creature->getVictim() ||
          !m_creature->getVictim()->isAlive() ||
         (m_creature->IsPet() && m_creature->GetCharmInfo()->HasState(CHARM_STATE_ACTION,ACTIONS_DISABLE))))
@@ -523,8 +523,8 @@ void PetAI::UpdateAI(const uint32 diff)
         {
             case REACT_DEFENSIVE:
             {
-                if (!m_creature->getVictim() 
-                    || !m_creature->getVictim()->isAlive() 
+                if (!m_creature->getVictim()
+                    || !m_creature->getVictim()->isAlive()
                     || (m_primaryTargetGuid.IsEmpty() && owner->getVictim() != m_creature->getVictim() && owner->getVictim()->isAlive()))
                     AttackStart(owner->getAttackerForHelper());
                 break;
@@ -644,7 +644,8 @@ void PetAI::UpdateAI(const uint32 diff)
             {
                 if (!IsInCombat())
                     break;
-                if (m_creature->IsCrowdControlled() || m_creature->GetCharmerOrOwner()->IsCrowdControlled())
+
+                if (m_creature->IsCrowdControlled() || (owner && owner->IsCrowdControlled()))
                     currentSpells.push_back(GetSpellType(PET_SPELL_FREEACTION));
                 currentSpells.push_back(GetSpellType(PET_SPELL_DEFENCE));
                 currentSpells.push_back(GetSpellType(PET_SPELL_BUFF));
@@ -656,10 +657,11 @@ void PetAI::UpdateAI(const uint32 diff)
             {
                 if (!IsInCombat())
                     break;
-                if (m_creature->IsCrowdControlled() || m_creature->GetCharmerOrOwner()->IsCrowdControlled())
+
+                if (m_creature->IsCrowdControlled() || (owner && owner->IsCrowdControlled()))
                     currentSpells.push_back(GetSpellType(PET_SPELL_FREEACTION));
                 if (m_creature->GetHealth() < m_creature->GetMaxHealth() ||
-                    (m_creature->GetOwner() && m_creature->GetOwner()->GetHealth() < m_creature->GetOwner()->GetMaxHealth()))
+                    (owner && (owner->GetHealth() < owner->GetMaxHealth())))
                     currentSpells.push_back(GetSpellType(PET_SPELL_HEAL));
                 currentSpells.push_back(GetSpellType(PET_SPELL_BUFF));
                 currentSpells.push_back(GetSpellType(PET_SPELL_RANGED));
@@ -669,7 +671,8 @@ void PetAI::UpdateAI(const uint32 diff)
             {
                 if (!IsInCombat())
                     break;
-                if (m_creature->IsCrowdControlled() || m_creature->GetCharmerOrOwner()->IsCrowdControlled())
+
+                if (m_creature->IsCrowdControlled() || (owner && owner->IsCrowdControlled()))
                     currentSpells.push_back(GetSpellType(PET_SPELL_FREEACTION));
                 currentSpells.push_back(GetSpellType(PET_SPELL_RANGED));
                 currentSpells.push_back(GetSpellType(PET_SPELL_DEBUFF));
@@ -689,7 +692,8 @@ void PetAI::UpdateAI(const uint32 diff)
                         currentSpells.push_back(GetSpellType(PET_SPELL_THREAT));
                     }
                 }
-                if (m_creature->IsCrowdControlled() || m_creature->GetCharmerOrOwner()->IsCrowdControlled())
+
+                if (m_creature->IsCrowdControlled() || (owner && owner->IsCrowdControlled()))
                     currentSpells.push_back(GetSpellType(PET_SPELL_FREEACTION));
             }
             /* no break here!*/
@@ -906,7 +910,7 @@ uint32 PetAI::GetSpellType(PetAutoSpellType type)
         return tmpSet[urand(0, tmpSet.size() - 1)];
 }
 
-bool PetAI::IsInCombat() 
+bool PetAI::IsInCombat()
 {
     return (inCombat || m_creature->isInCombat());
 }
