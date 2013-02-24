@@ -10779,6 +10779,16 @@ void SpellAuraHolder::AddAura(Aura const& aura, SpellEffectIndex index)
 
     m_aurasStorage.insert(AuraStorage::value_type(index,aura));
     m_auraFlags |= (1 << index);
+
+    switch (aura.GetModifier() && aura.GetModifier()->m_auraname)
+    {
+        case SPELL_AURA_SCHOOL_ABSORB:
+            if (aura.GetModifier()->m_amount)
+                m_auraFlags |= AFLAG_EFFECT_AMOUNT_SEND;
+            break;
+        default:
+            break;
+    }
 }
 
 void SpellAuraHolder::RemoveAura(SpellEffectIndex index)
