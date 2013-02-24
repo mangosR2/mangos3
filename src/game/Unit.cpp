@@ -8149,7 +8149,7 @@ void Unit::SpellDamageBonusDone(DamageInfo* damageInfo, uint32 stack)
             float powerPct = std::min(float(GetPower(POWER_MANA)) / GetMaxPower(POWER_MANA), 1.0f);
             for (Unit::AuraList::const_iterator itr = doneFromManaPctAuras.begin(); itr != doneFromManaPctAuras.end(); ++itr)
             {
-                if (GetSpellSchoolMask(spellProto) & (*itr)->GetModifier()->m_miscvalue)
+                if (damageInfo->SchoolMask() & (*itr)->GetModifier()->m_miscvalue)
                     DoneTotalMod *= (100.0f + (*itr)->GetModifier()->m_amount * powerPct) / 100.0f;
             }
         }
