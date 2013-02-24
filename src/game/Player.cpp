@@ -6278,12 +6278,10 @@ ActionButton const* Player::GetActionButton(uint8 button)
 
 bool Player::SetPosition(float x, float y, float z, float orientation, bool teleport)
 {
+    bool groupUpdate = (GetGroup() && (teleport || abs(GetPositionX() - x) > 1.0f || abs(GetPositionY() - y) > 1.0f));
+
     if (!Unit::SetPosition(x, y, z, orientation, teleport))
         return false;
-
-    // group update
-    if (GetGroup())
-        SetGroupUpdateFlag(GROUP_UPDATE_FLAG_POSITION);
 
     if (GetTrader() && !IsWithinDistInMap(GetTrader(), INTERACTION_DISTANCE))
         GetSession()->SendCancelTrade();   // will close both side trade windows
@@ -6291,6 +6289,10 @@ bool Player::SetPosition(float x, float y, float z, float orientation, bool tele
     if (m_positionStatusUpdateTimer)                        // Update position's state only on interval
         return true;
     m_positionStatusUpdateTimer = 100;
+
+    // group update
+    if (groupUpdate)
+        SetGroupUpdateFlag(GROUP_UPDATE_FLAG_POSITION);
 
     // code block for underwater state update
     UpdateUnderwaterState(GetMap(), x, y, z);
