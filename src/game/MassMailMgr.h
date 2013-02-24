@@ -35,6 +35,7 @@
 #define MANGOS_MASS_MAIL_MGR_H
 
 #include "Common.h"
+#include "SharedDefines.h"
 #include "Mail.h"
 #include "Policies/Singleton.h"
 
