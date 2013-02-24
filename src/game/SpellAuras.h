@@ -421,6 +421,8 @@ class MANGOS_DLL_SPEC Aura
         void HandleInitializeImages(bool apply, bool Real);
         void HandleAuraMastery(bool apply, bool Real);
         void HandleAuraModBlockCritChance(bool apply, bool Real);
+        void HandleModIncreaseSpellPowerPct(bool apply, bool Real);
+        void HandleOverrideSpellPowerByAp(bool apply, bool Real);
 
         virtual ~Aura();
 
