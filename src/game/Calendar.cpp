@@ -20,6 +20,7 @@
 #include "Guild.h"
 #include "GuildMgr.h"
 #include "ObjectMgr.h"
+#include "Mail.h"
 #include "MapPersistentStateMgr.h"
 #include "ProgressBar.h"
 
@@ -34,63 +35,72 @@ CalendarEvent::~CalendarEvent()
     RemoveAllInvite();
 }
 
-// Add an invite to internal invite map return true if success
+// Add an invite to internal invite set return true if success
 bool CalendarEvent::AddInvite(CalendarInvite* invite)
 {
     if (!invite)
         return false;
 
-    std::pair<CalendarInviteMap::iterator, bool> result;
-    result = m_Invitee.insert(CalendarInviteMap::value_type(invite->InviteId, invite));
-    return result.second;
+    if (m_Invitee.find(invite->GetObjectGuid()) != m_Invitee.end())
+        return false;
+
+    m_Invitee.insert(invite->GetObjectGuid());
+    return true;
 }
 
 CalendarInvite* CalendarEvent::GetInviteById(ObjectGuid const& inviteId)
 {
-    CalendarInviteMap::const_iterator iter = m_Invitee.find(inviteId);
-    return IsValidInvite(iter) ? iter->second : NULL;
+    if (m_Invitee.find(inviteId) != m_Invitee.end())
+        return sCalendarMgr.GetInviteById(inviteId);
+
+    return NULL;
 }
 
 CalendarInvite* CalendarEvent::GetInviteByGuid(ObjectGuid const& guid)
 {
-    CalendarInviteMap::const_iterator iter = m_Invitee.begin();
-    while (iter != m_Invitee.end())
+    if (guid.IsEmpty() || !guid.IsPlayer())
+        return NULL;
+
+    for (GuidSet::const_iterator itr = m_Invitee.begin(); itr != m_Invitee.end(); ++itr)
     {
-        if (iter->second->InviteeGuid == guid)
-            break;
-        ++iter;
+        CalendarInvite* invite = sCalendarMgr.GetInviteById(*itr);
+        if (!invite)
+            continue;
+
+        if (invite->InviteeGuid == guid)
+            return invite;
     }
-    return IsValidInvite(iter) ? iter->second : NULL;
+    return NULL;
 }
 
-// FIXME - need remove this monstruous methods chain...
-CalendarInviteMap::iterator CalendarEvent::RemoveInviteByItr(CalendarInviteMap::iterator inviteItr)
+void CalendarEvent::RemoveInviteById(ObjectGuid const& inviteId)
 {
-    if (IsValidInvite(inviteItr))
-    {
-        // TODO: check why only send alert if its not guild event
-        if (!IsGuildEvent())
-            sCalendarMgr.SendCalendarEventInviteRemoveAlert(inviteItr->second->InviteeGuid, this, CALENDAR_STATUS_REMOVED);
+    CalendarInvite* invite = sCalendarMgr.GetInviteById(inviteId);
+    if (!invite)
+        return;
 
-        sCalendarMgr.SendCalendarEventInviteRemove(inviteItr->second, this, Flags);
+    // TODO: check why only send alert if its not guild event
+    if (!IsGuildEvent())
+        sCalendarMgr.SendCalendarEventInviteRemoveAlert(invite->InviteeGuid, this, CALENDAR_STATUS_REMOVED);
 
-        inviteItr->second->AddFlag(CALENDAR_STATE_FLAG_DELETED);
-        return ++inviteItr;
-    }
-    return m_Invitee.end();
+    sCalendarMgr.SendCalendarEventInviteRemove(invite, this, Flags);
+
+    invite->AddFlag(CALENDAR_STATE_FLAG_DELETED);
 }
 
 void CalendarEvent::RemoveInviteByGuid(ObjectGuid const& playerGuid)
 {
-    CalendarInviteMap::iterator iter = m_Invitee.begin();
-    while (iter != m_Invitee.end())
+    if (playerGuid.IsEmpty() || !playerGuid.IsPlayer())
+        return;
+
+    for (GuidSet::const_iterator itr = m_Invitee.begin(); itr != m_Invitee.end(); ++itr)
     {
-        if (iter->second->InviteeGuid == playerGuid && !IsDeletedInvite(iter))
-        {
-            iter = RemoveInviteByItr(iter);
+        CalendarInvite* invite = sCalendarMgr.GetInviteById(*itr);
+        if (!invite)
             continue;
-        }
-        ++iter;
+
+        if (invite->InviteeGuid == playerGuid)
+            RemoveInviteById(*itr);
     }
 }
 
@@ -131,17 +141,43 @@ bool CalendarEvent::RemoveInviteById(ObjectGuid inviteId, ObjectGuid const& remo
 
     // TODO: Send mail to invitee if needed
 
-    RemoveInviteByItr(m_Invitee.find(inviteId));
-
+    RemoveInviteById(inviteId);
     return true;
 }
 
 void CalendarEvent::RemoveAllInvite()
 {
-    CalendarInviteMap::iterator itr = m_Invitee.begin();
-    while (itr != m_Invitee.end())
+    for (GuidSet::const_iterator itr = m_Invitee.begin(); itr != m_Invitee.end(); ++itr)
     {
-        itr = RemoveInviteByItr(itr);
+        CalendarInvite* invite = sCalendarMgr.GetInviteById(*itr);
+        if (!invite)
+            continue;
+        RemoveInviteById(*itr);
+    }
+}
+
+void CalendarEvent::SendMailOnRemoveEvent(ObjectGuid const& removerGuid)
+{
+    // only event creator in list
+    if (m_Invitee.size() <= 1)
+        return;
+
+    // build mail title
+    std::ostringstream title;
+    title << removerGuid << ':' << Title;
+
+    // build mail body
+    std::ostringstream body;
+    body << secsToTimeBitFields(time(NULL));
+
+    // creating mail draft
+    MailDraft draft(title.str(), body.str());
+
+    for (GuidSet::const_iterator itr = m_Invitee.begin(); itr != m_Invitee.end(); ++itr)
+    {
+        CalendarInvite* invite = sCalendarMgr.GetInviteById(*itr);
+        if (invite && invite->InviteeGuid != removerGuid)
+            draft.SendMailTo(MailReceiver(invite->InviteeGuid), this, MAIL_CHECK_MASK_COPIED);
     }
 }
 
@@ -150,7 +186,7 @@ void CalendarEvent::RemoveAllInvite()
 //////////////////////////////////////////////////////////////////////////
 
 CalendarInvite::CalendarInvite(CalendarEvent* event, ObjectGuid inviteId, ObjectGuid senderGuid, ObjectGuid inviteeGuid, time_t statusTime, CalendarInviteStatus status, CalendarModerationRank rank, std::string text) :
-    InviteId(inviteId), SenderGuid(senderGuid), InviteeGuid(inviteeGuid), LastUpdateTime(statusTime), Status(status), Rank(rank), Text(text)
+    InviteId(inviteId), InviteeGuid(inviteeGuid), SenderGuid(senderGuid), LastUpdateTime(statusTime), Status(status), Rank(rank), Text(text), m_flags(0)
 {
     // only for pre invite case
     if (!event)
@@ -177,18 +213,20 @@ CalendarMgr::CalendarMgr()
 
 CalendarMgr::~CalendarMgr()
 {
+   m_InviteStore.clear();
+   m_EventStore.clear();
 }
 
 CalendarEvent* CalendarMgr::GetEventById(ObjectGuid const& eventId)
 {
-    ReadGuard guard(GetLock());
+    //ReadGuard guard(GetLock());
     CalendarEventStore::iterator iter = m_EventStore.find(eventId);
     return IsValidEvent(iter) ? &iter->second : NULL;
 }
 
 CalendarInvite* CalendarMgr::GetInviteById(ObjectGuid const& inviteId)
 {
-    ReadGuard guard(GetLock());
+    //ReadGuard guard(GetLock());
     CalendarInviteStore::iterator iter = m_InviteStore.find(inviteId);
     return IsValidInvite(iter) ? &iter->second : NULL;
 }
@@ -237,19 +275,26 @@ CalendarInvitesList* CalendarMgr::GetPlayerInvitesList(ObjectGuid const& guid)
     for (CalendarEventStore::iterator iter = m_EventStore.begin(); iter != m_EventStore.end(); ++iter)
     {
         CalendarEvent& event = iter->second;
+
+        if (event.HasFlag(CALENDAR_STATE_FLAG_DELETED))
+            continue;
+
         if (event.IsGuildAnnouncement())
             continue;
 
-        CalendarInviteMap const* cInvMap = event.GetInviteMap();
-        CalendarInviteMap::const_iterator ci_itr = cInvMap->begin();
-        while (ci_itr != cInvMap->end())
+        GuidSet const* cInvMap = event.GetInvites();
+
+        for (GuidSet::const_iterator itr = cInvMap->begin(); itr != cInvMap->end(); ++itr)
         {
-            if (ci_itr->second->InviteeGuid == guid)
+            CalendarInvite* invite = sCalendarMgr.GetInviteById(*itr);
+            if (!invite)
+                continue;
+
+            if (invite->InviteeGuid == guid)
             {
-                invites->insert(ci_itr->second);
+                invites->insert(invite);
                 break;
             }
-            ++ci_itr;
         }
     }
     return invites;
@@ -281,17 +326,12 @@ CalendarEvent* CalendarMgr::AddEvent(ObjectGuid const& guid, std::string title, 
 
     uint32 guild = ((flags & CALENDAR_FLAG_GUILD_EVENT) || (flags && CALENDAR_FLAG_GUILD_ANNOUNCEMENT)) ? player->GetGuildId() : 0;
 
-    // FIXME - need lock and constructor usage in this place
-    m_EventStore[eventGuid].EventId = eventGuid;
-    m_EventStore[eventGuid].CreatorGuid = guid;
-    m_EventStore[eventGuid].Title = title;
-    m_EventStore[eventGuid].Description = description;
-    m_EventStore[eventGuid].Type = (CalendarEventType) type;
-    m_EventStore[eventGuid].Repeatable = (CalendarRepeatType) repeatable;
-    m_EventStore[eventGuid].DungeonId = dungeonId;
-    m_EventStore[eventGuid].EventTime = eventTime;
-    m_EventStore[eventGuid].Flags = flags;
-    m_EventStore[eventGuid].GuildId = guild;
+    {
+        WriteGuard guard(GetLock());
+        m_EventStore.insert(CalendarEventStore::value_type(eventGuid,
+            CalendarEvent(eventGuid, guid, guild, CalendarEventType(type), dungeonId, eventTime, flags, unkTime, title, description)));
+    }
+
     return &m_EventStore[eventGuid];
 }
 
@@ -304,7 +344,16 @@ void CalendarMgr::RemoveEvent(ObjectGuid const& eventId, ObjectGuid const& remov
         return;
     }
 
+    if (remover != event->CreatorGuid)
+    {
+        // only creator can remove his event
+        SendCalendarCommandResult(remover, CALENDAR_ERROR_PERMISSIONS);
+        return;
+    }
+
     SendCalendarEventRemovedAlert(event);
+
+    event->SendMailOnRemoveEvent(remover);
     event->AddFlag(CALENDAR_STATE_FLAG_DELETED);
 }
 
@@ -320,33 +369,34 @@ CalendarInvite* CalendarMgr::AddInvite(CalendarEvent* event, ObjectGuid const& s
         WriteGuard guard(GetLock());
         m_InviteStore.insert(CalendarInviteStore::value_type(inviteGuid, CalendarInvite(event, inviteGuid, senderGuid, inviteeGuid, statusTime, status, rank, text)));
     }
-    CalendarInvite* calendarInvite = &m_InviteStore[inviteGuid];
+
+    CalendarInvite& calendarInvite = m_InviteStore[inviteGuid];
 
     if (!event->IsGuildAnnouncement())
-        SendCalendarEventInvite(calendarInvite);
+        SendCalendarEventInvite(&calendarInvite);
 
-    if (!event->IsGuildEvent() || calendarInvite->InviteeGuid == event->CreatorGuid)
-        SendCalendarEventInviteAlert(calendarInvite);
+    if (!event->IsGuildEvent() || calendarInvite.InviteeGuid == event->CreatorGuid)
+        SendCalendarEventInviteAlert(&calendarInvite);
 
     if (event->IsGuildAnnouncement())
     {
-        calendarInvite->AddFlag(CALENDAR_STATE_FLAG_DELETED);
+        calendarInvite.AddFlag(CALENDAR_STATE_FLAG_DELETED);
         return NULL;
     }
 
     DEBUG_FILTER_LOG(LOG_FILTER_CALENDAR, "CalendarMgr::AddInvite eventId[%u], senderGuid[%u], inviteGuid[%u], Status[%u], rank[%u], text[%s], time[%u]", (uint32)event->EventId, senderGuid.GetCounter(), inviteeGuid.GetCounter(), status, rank, text.c_str(), (uint32)statusTime);
 
-    if (!event->AddInvite(calendarInvite))
+    if (!event->AddInvite(&calendarInvite))
     {
         sLog.outError("CalendarEvent::AddInvite Fail adding invite!");
-        calendarInvite->AddFlag(CALENDAR_STATE_FLAG_DELETED);
+        calendarInvite.AddFlag(CALENDAR_STATE_FLAG_DELETED);
         return NULL;
     }
 
-    calendarInvite->RemoveFlag(CALENDAR_STATE_FLAG_SAVED);
-    calendarInvite->AddFlag(CALENDAR_STATE_FLAG_UPDATED);
+    calendarInvite.RemoveFlag(CALENDAR_STATE_FLAG_SAVED);
+    calendarInvite.AddFlag(CALENDAR_STATE_FLAG_UPDATED);
 
-    return calendarInvite;
+    return &calendarInvite;
 }
 
 bool CalendarMgr::RemoveInvite(ObjectGuid const& eventId, ObjectGuid const& inviteId, ObjectGuid const& removerGuid)
@@ -402,25 +452,27 @@ void CalendarMgr::CopyEvent(ObjectGuid const& eventId, time_t newTime, ObjectGui
     else
     {
         // copy all invitees, set new owner as the one who make the copy, set invitees status to invited
-        CalendarInviteMap const* cInvMap = event->GetInviteMap();
-        CalendarInviteMap::const_iterator ci_itr = cInvMap->begin();
 
-        while (ci_itr != cInvMap->end())
+        GuidSet const* cInvMap = event->GetInvites();
+        for (GuidSet::const_iterator itr = cInvMap->begin(); itr != cInvMap->end(); ++itr)
         {
-            if (ci_itr->second->InviteeGuid == guid)
+            CalendarInvite* invite = sCalendarMgr.GetInviteById(*itr);
+            if (!invite)
+                continue;
+
+            if (invite->InviteeGuid == guid)
             {
-                AddInvite(newEvent, guid, ci_itr->second->InviteeGuid,  CALENDAR_STATUS_CONFIRMED, CALENDAR_RANK_OWNER, "", time(NULL));
+                AddInvite(newEvent, guid, invite->InviteeGuid,  CALENDAR_STATUS_CONFIRMED, CALENDAR_RANK_OWNER, "", time(NULL));
             }
             else
             {
                 CalendarModerationRank rank = CALENDAR_RANK_PLAYER;
                 // copy moderator rank
-                if (ci_itr->second->Rank == CALENDAR_RANK_MODERATOR)
+                if (invite->Rank == CALENDAR_RANK_MODERATOR)
                     rank = CALENDAR_RANK_MODERATOR;
 
-                AddInvite(newEvent, guid, ci_itr->second->InviteeGuid,  CALENDAR_STATUS_INVITED, rank, "", time(NULL));
+                AddInvite(newEvent, guid, invite->InviteeGuid,  CALENDAR_STATUS_INVITED, rank, "", time(NULL));
             }
-            ++ci_itr;
         }
     }
     newEvent->AddFlag(CALENDAR_STATE_FLAG_UPDATED);
@@ -431,36 +483,129 @@ void CalendarMgr::CopyEvent(ObjectGuid const& eventId, time_t newTime, ObjectGui
 
 void CalendarMgr::RemovePlayerCalendar(ObjectGuid const& playerGuid)
 {
-    for (CalendarEventStore::iterator iter = m_EventStore.begin(); iter != m_EventStore.end();)
+    for (CalendarEventStore::iterator iter = m_EventStore.begin(); iter != m_EventStore.end(); ++iter)
     {
         CalendarEvent& event = iter->second;
-        ObjectGuid const& eventId = iter->first;
-
         if (event.CreatorGuid == playerGuid && !IsDeletedEvent(iter))
         {
             event.RemoveInviteByGuid(playerGuid);
             event.AddFlag(CALENDAR_STATE_FLAG_DELETED);
-            continue;
         }
-        ++iter;
     }
 }
 
 void CalendarMgr::RemoveGuildCalendar(ObjectGuid const& playerGuid, uint32 GuildId)
 {
-    for (CalendarEventStore::iterator iter = m_EventStore.begin(); iter != m_EventStore.end();)
+    for (CalendarEventStore::iterator iter = m_EventStore.begin(); iter != m_EventStore.end(); ++iter)
     {
         CalendarEvent& event = iter->second;
-        ObjectGuid const& eventId = iter->first;
-
         if (event.CreatorGuid == playerGuid && (event.IsGuildEvent() || event.IsGuildAnnouncement()) && !IsDeletedEvent(iter))
         {
             event.RemoveInviteByGuid(playerGuid);
             event.AddFlag(CALENDAR_STATE_FLAG_DELETED);
-            continue;
         }
-        ++iter;
     }
+}
+
+void CalendarMgr::DBRemap(TRemapAction remapAction, TRemapData& remapData, bool& dbTransactionUsed)
+{
+    // use not static SqlStatementID because this function
+    // used only on core start and not needed after
+    SqlStatementID stmtEventID;
+    SqlStatementID stmtInviteID;
+
+    if (!dbTransactionUsed)
+    {
+        dbTransactionUsed = true;
+        CharacterDatabase.BeginTransaction();
+    }
+
+    switch (remapAction)
+    {
+        case RA_DEL_EXPIRED:
+        {
+            SqlStatement delEventStmt = CharacterDatabase.CreateStatement(stmtEventID, "DELETE FROM calendar_events WHERE eventId = ?");
+            SqlStatement delInviteStmt = CharacterDatabase.CreateStatement(stmtInviteID, "DELETE FROM calendar_invites WHERE eventId = ?");
+            for (TRemapData::const_iterator itr = remapData.begin(); itr != remapData.end(); ++itr)
+            {
+                if (itr->second != DELETED_ID)
+                    continue;
+                delEventStmt.PExecute(itr->first);
+                delInviteStmt.PExecute(itr->first);
+            }
+            break;
+        }
+        case RA_REMAP_EVENTS:
+        {
+            SqlStatement updEventStmt = CharacterDatabase.CreateStatement(stmtEventID, "UPDATE calendar_events SET eventId = ? WHERE eventId = ?");
+            SqlStatement updInviteStmt = CharacterDatabase.CreateStatement(stmtInviteID, "UPDATE calendar_invites SET eventId = ? WHERE eventId = ?");
+            for (TRemapData::const_iterator itr = remapData.begin(); itr != remapData.end(); ++itr)
+            {
+                updEventStmt.PExecute(itr->second, itr->first);
+                updInviteStmt.PExecute(itr->second, itr->first);
+            }
+            break;
+        }
+        case RA_REMAP_INVITES:
+        {
+            SqlStatement updInviteStmt = CharacterDatabase.CreateStatement(stmtInviteID, "UPDATE calendar_invites SET inviteId = ? WHERE inviteId = ?");
+            for (TRemapData::const_iterator itr = remapData.begin(); itr != remapData.end(); ++itr)
+                updInviteStmt.PExecute(itr->second, itr->first);
+            break;
+        }
+    }
+}
+
+void CalendarMgr::DBRemoveExpiredEventsAndRemapData()
+{
+    QueryResult* result = CharacterDatabase.Query("SELECT eventTime, eventId FROM calendar_events ORDER BY eventId");
+    if (!result)
+        return;
+
+    // prepare data
+    uint32 remapId = 1;
+    TRemapData remapData;
+    do
+    {
+        Field* field = result->Fetch();
+        bool removeEvent = IsEventReadyForRemove(time_t(field[0].GetUInt32()));
+        remapData.push_back(TRemapGee(field[1].GetUInt32(), removeEvent ? DELETED_ID : remapId++));
+    }
+    while (result->NextRow());
+    delete result;
+
+    bool dbTransactionUsed = false;
+
+    // delete expired events (and related invites)
+    if (remapId <= remapData.size())
+        DBRemap(RA_DEL_EXPIRED, remapData, dbTransactionUsed);
+
+    // remap eventId
+    remapData.remove_if(IsNotRemap());
+    if (!remapData.empty())
+        DBRemap(RA_REMAP_EVENTS, remapData, dbTransactionUsed);
+
+    // remap inviteId
+    if (result = CharacterDatabase.Query("SELECT inviteId FROM calendar_invites ORDER BY inviteId"))
+    {
+        remapId = 1;
+        remapData.clear();
+        do
+        {
+            uint32 inviteId = result->Fetch()[0].GetUInt32();
+            if (inviteId != remapId)
+                remapData.push_back(TRemapGee(inviteId, remapId));
+            ++remapId;
+        }
+        while (result->NextRow());
+        delete result;
+
+        if (!remapData.empty())
+            DBRemap(RA_REMAP_INVITES, remapData, dbTransactionUsed);
+    }
+
+    if (dbTransactionUsed)
+        CharacterDatabase.CommitTransaction();
 }
 
 void CalendarMgr::LoadFromDB()
@@ -471,6 +616,9 @@ void CalendarMgr::LoadFromDB()
     // For reload case
     m_EventStore.clear();
     m_InviteStore.clear();
+
+    // before fill
+    DBRemoveExpiredEventsAndRemapData();
 
     sLog.outString("Loading Calendar Events...");
     //                                                          0        1            2        3     4      5          6          7      8
@@ -493,22 +641,26 @@ void CalendarMgr::LoadFromDB()
             uint32 eventId = field[0].GetUInt32();
             ObjectGuid eventGuid = ObjectGuid(HIGHGUID_CALENDAR_EVENT, eventId);
 
-            m_EventStore[eventGuid].EventId       = eventGuid;
-            m_EventStore[eventGuid].CreatorGuid   = ObjectGuid(HIGHGUID_PLAYER, field[1].GetUInt32());
-            m_EventStore[eventGuid].GuildId       = field[2].GetUInt32();
-            m_EventStore[eventGuid].Type          = CalendarEventType(field[3].GetUInt8());
-            m_EventStore[eventGuid].Flags         = field[4].GetUInt32();
-            m_EventStore[eventGuid].DungeonId     = field[5].GetInt32();
-            m_EventStore[eventGuid].EventTime     = time_t(field[6].GetUInt32());
-            m_EventStore[eventGuid].Title         = field[7].GetString();
-            m_EventStore[eventGuid].Description   = field[8].GetString();
+            m_EventStore.insert(CalendarEventStore::value_type(eventGuid,
+                CalendarEvent(eventGuid,
+                    ObjectGuid(HIGHGUID_PLAYER, field[1].GetUInt32()),
+                    field[2].GetUInt32(),
+                    CalendarEventType(field[3].GetUInt8()),
+                    field[5].GetInt32(),
+                    time_t(field[6].GetUInt32()),
+                    field[4].GetUInt32(),
+                    time_t(time(NULL)),
+                    field[7].GetString(),
+                    field[8].GetString())));
 
             maxEventId = (maxEventId < eventId) ? eventId : maxEventId;
+            CalendarEvent& event = m_EventStore[eventGuid];
 
-            m_EventStore[eventGuid].RemoveFlag(CALENDAR_STATE_FLAG_UPDATED);
-            m_EventStore[eventGuid].AddFlag(CALENDAR_STATE_FLAG_SAVED);
+            event.RemoveFlag(CALENDAR_STATE_FLAG_UPDATED);
+            event.AddFlag(CALENDAR_STATE_FLAG_SAVED);
+        }
+        while (eventsQuery->NextRow());
 
-        } while (eventsQuery->NextRow());
         sLog.outString();
         sLog.outString(">> Loaded %u events!", uint32(eventsQuery->GetRowCount()));
         someEventExist = true;
@@ -551,18 +703,18 @@ void CalendarMgr::LoadFromDB()
                 std::string _text           = field[7].GetString();
 
                 m_InviteStore.insert(CalendarInviteStore::value_type(inviteGuid, CalendarInvite(event, inviteGuid, senderGuid, inviteeGuid, lastUpdateTime, status, rank, _text)));
-                CalendarInvite* invite = &m_InviteStore[inviteGuid];
+                CalendarInvite& invite = m_InviteStore[inviteGuid];
 
-                invite->RemoveFlag(CALENDAR_STATE_FLAG_UPDATED);
-                invite->AddFlag(CALENDAR_STATE_FLAG_SAVED);
+                invite.RemoveFlag(CALENDAR_STATE_FLAG_UPDATED);
+                invite.AddFlag(CALENDAR_STATE_FLAG_SAVED);
 
                 if (!event)
                 {
                     // delete invite
-                    invite->AddFlag(CALENDAR_STATE_FLAG_DELETED);
+                    invite.AddFlag(CALENDAR_STATE_FLAG_DELETED);
                 }
                 else
-                    event->AddInvite(invite);
+                    event->AddInvite(&invite);
 
                 maxInviteId = (maxInviteId < inviteGuid.GetCounter()) ? inviteGuid.GetCounter() : maxEventId;
 
@@ -725,18 +877,19 @@ void CalendarMgr::Update()
         for (CalendarEventStore::iterator itr = m_EventStore.begin(); itr != m_EventStore.end(); ++itr)
         {
             CalendarEvent* event = &itr->second;
-            if (!event)
+            if (!event || event->HasFlag(CALENDAR_STATE_FLAG_DELETED))
                 continue;
 
-            if (event->GetInviteMap()->empty())
+            // Event expired or empty, remove it
+            if (IsEventReadyForRemove(event->EventTime) ||
+                event->GetInvites()->empty())
                 event->AddFlag(CALENDAR_STATE_FLAG_DELETED);
-            // Place check for expireable here
         }
 
         for (CalendarInviteStore::iterator itr = m_InviteStore.begin(); itr != m_InviteStore.end(); ++itr)
         {
             CalendarInvite* invite = &itr->second;
-            if (!invite)
+            if (!invite || invite->HasFlag(CALENDAR_STATE_FLAG_DELETED))
                 continue;
 
             if (invite->GetEventGuid().IsEmpty() || !invite->GetCalendarEvent())
@@ -754,7 +907,7 @@ void CalendarMgr::SendCalendarEventInviteAlert(CalendarInvite const* invite)
     DEBUG_LOG("WORLD: SMSG_CALENDAR_EVENT_INVITE_ALERT");
 
     CalendarEvent const* event = invite->GetCalendarEvent();
-    if (!event)
+    if (!event || event->HasFlag(CALENDAR_STATE_FLAG_DELETED))
         return;
 
     WorldPacket data(SMSG_CALENDAR_EVENT_INVITE_ALERT);
@@ -886,11 +1039,16 @@ void CalendarMgr::SendCalendarEvent(ObjectGuid const& guid, CalendarEvent const*
     data.AppendPackedTime(event->UnknownTime);
     data << event->GuildId;
 
-    CalendarInviteMap const* cInvMap = event->GetInviteMap();
-    data << (uint32)cInvMap->size();
-    for (CalendarInviteMap::const_iterator itr = cInvMap->begin(); itr != cInvMap->end(); ++itr)
+    GuidSet const* cInvMap = event->GetInvites();
+    size_t pos = data.wpos();
+    data << uint32(0);                                  // size of list, placeholder
+    uint32 _count = 0;
+    for (GuidSet::const_iterator itr = cInvMap->begin(); itr != cInvMap->end(); ++itr)
     {
-        CalendarInvite const* calendarInvite = itr->second;
+        CalendarInvite const* calendarInvite = sCalendarMgr.GetInviteById(*itr);
+        if (!calendarInvite)
+            continue;
+
         ObjectGuid inviteeGuid = calendarInvite->InviteeGuid;
         Player* invitee = sObjectMgr.GetPlayer(inviteeGuid);
 
@@ -902,14 +1060,16 @@ void CalendarMgr::SendCalendarEvent(ObjectGuid const& guid, CalendarEvent const*
         data << uint8(calendarInvite->Status);
         data << uint8(calendarInvite->Rank);
         data << uint8(event->IsGuildEvent() && event->GuildId == inviteeGuildId);
-        data << uint64(itr->first);
+        data << calendarInvite->GetObjectGuid();
         data.AppendPackedTime(calendarInvite->LastUpdateTime);
         data << calendarInvite->Text;
 
         DEBUG_FILTER_LOG(LOG_FILTER_CALENDAR, "CalendarMgr::SendCalendarEvent InviteId[%u], InviteLvl[%u], Status[%u], Rank[%u],  GuildEvent[%s], Text[%s]",
             uint32(calendarInvite->InviteId), uint32(inviteeLevel), uint32(calendarInvite->Status), uint32(calendarInvite->Rank),
             (event->IsGuildEvent() && event->GuildId == inviteeGuildId) ? "true" : "false", calendarInvite->Text.c_str());
+        ++_count;
     }
+    data.put<uint32>(pos, _count);
     //data.hexlike();
     player->SendDirectMessage(&data);
 }
@@ -1012,11 +1172,12 @@ void CalendarMgr::SendPacketToAllEventRelatives(WorldPacket packet, CalendarEven
             guild->BroadcastPacket(&packet);
 
     // Send packet to all invitees if event is non-guild, in other case only to non-guild invitees (packet was broadcasted for them)
-    CalendarInviteMap const* cInvMap = event->GetInviteMap();
-    for (CalendarInviteMap::const_iterator itr = cInvMap->begin(); itr != cInvMap->end(); ++itr)
-        if (Player* player = sObjectMgr.GetPlayer(itr->second->InviteeGuid))
-            if (!event->IsGuildEvent() || (event->IsGuildEvent() && player->GetGuildId() != event->GuildId))
-                player->SendDirectMessage(&packet);
+    GuidSet const* cInvMap = event->GetInvites();
+    for (GuidSet::const_iterator itr = cInvMap->begin(); itr != cInvMap->end(); ++itr)
+        if (CalendarInvite const* calendarInvite = sCalendarMgr.GetInviteById(*itr))
+            if (Player* player = sObjectMgr.GetPlayer(calendarInvite->InviteeGuid))
+                if (!event->IsGuildEvent() || (event->IsGuildEvent() && player->GetGuildId() != event->GuildId))
+                    player->SendDirectMessage(&packet);
 }
 
 void CalendarMgr::SendCalendarRaidLockoutRemove(ObjectGuid const& guid, DungeonPersistentState const* save)

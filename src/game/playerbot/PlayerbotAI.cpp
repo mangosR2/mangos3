@@ -856,6 +856,8 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
                     break;
                 case BUY_ERR_REPUTATION_REQUIRE:
                     break;
+                default:
+                    break;
             }
             return;
         }
@@ -899,6 +901,8 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
                     out << "|cffff0000|hI cannot bid on my own auctions!|h|r";
                     break;
                 }
+                default:
+                    break;
             }
             TellMaster(out.str().c_str());
             return;
@@ -1548,6 +1552,8 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
 
             return;
         }
+        default:
+            break;
 
             /* uncomment this and your bots will tell you all their outgoing packet opcode names
                case SMSG_MONSTER_MOVE:
@@ -3171,9 +3177,8 @@ void PlayerbotAI::UpdateAI(const uint32 /*p_time*/)
             m_bot->SetBotDeathTimer();
             m_bot->BuildPlayerRepop();
             // relocate ghost
-            WorldLocation loc;
             Corpse* corpse = m_bot->GetCorpse();
-            corpse->GetPosition(loc);
+            WorldLocation loc = corpse->GetPosition();
             m_bot->TeleportTo(loc);
             // set state to released
             SetState(BOTSTATE_DEADRELEASED);

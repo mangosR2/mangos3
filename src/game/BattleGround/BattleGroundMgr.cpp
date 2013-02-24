@@ -45,7 +45,7 @@
 #include "Formulas.h"
 #include "WorldObjectEvents.h"
 
-#include "Policies/SingletonImp.h"
+#include "Policies/Singleton.h"
 
 INSTANTIATE_SINGLETON_1(BattleGroundMgr);
 
@@ -1364,6 +1364,7 @@ void BattleGroundMgr::BuildPvpLogDataPacket(WorldPacket* data, BattleGround* bg)
     }
 
     data->WriteBits(bg->GetPlayerScoresSize(), 21);
+
     for (BattleGround::BattleGroundScoreMap::const_iterator itr = bg->GetPlayerScoresBegin(); itr != bg->GetPlayerScoresEnd(); ++itr)
     {
         ObjectGuid memberGuid = itr->first;

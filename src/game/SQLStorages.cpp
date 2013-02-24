@@ -46,6 +46,7 @@ const char SpellDbcTemplatedstfmt[] = "iiiiiiiiiiiiiiixixiiiiiiiiiiiiixiiiiiiiii
 
 const char VehicleAccessorySrcFmt[] = "iiiiffffx";
 const char VehicleAccessoryDstFmt[] = "iiiiffff";
+const char SpellScriptTargetFmt[] = "iiii";
 
 const char CreatureTemplateSpellsFmt[] = "iiiiiiiii";
 
@@ -67,3 +68,4 @@ SQLHashStorage sSpellTemplate(SpellTemplatesrcfmt, SpellTemplatedstfmt, "id", "s
 //SQLHashStorage sCreatureTemplateSpellsStorage(CreatureTemplateSpellsFmt, "entry", "creature_template_spells");
 
 SQLMultiStorage sVehicleAccessoryStorage(VehicleAccessorySrcFmt, VehicleAccessoryDstFmt, "vehicle_entry", "vehicle_accessory");
+SQLMultiStorage sSpellScriptTargetStorage(SpellScriptTargetFmt, "entry", "spell_script_target");

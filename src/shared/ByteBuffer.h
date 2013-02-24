@@ -673,9 +673,9 @@ class ByteBuffer
             return f;
         }
 
-        uint32 ReadPackedTime();
+        time_t ReadPackedTime();
 
-        ByteBuffer& ReadPackedTime(uint32& time)
+        ByteBuffer& ReadPackedTime(time_t& time)
         {
             time = ReadPackedTime();
             return *this;

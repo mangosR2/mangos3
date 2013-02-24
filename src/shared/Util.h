@@ -44,6 +44,9 @@ std::string TimeToTimestampStr(time_t t);
 
 std::string MoneyToString(uint64 money);
 
+time_t timeBitFieldsToTimeStamp(uint32 bits);
+uint32 secsToTimeBitFields(time_t secs);
+
 /* Return a random number in the range min..max; (max-min) must be smaller than 32768. */
 MANGOS_DLL_SPEC int32 irand(int32 min, int32 max);
 

@@ -256,8 +256,8 @@ bool VehicleKit::AddPassenger(Unit* passenger, int8 seatId)
         // make passenger attackable in some vehicles and allow him to cast when sitting on vehicle
         switch (GetBase()->GetEntry())
         {
-            case 30234:        // Nexus Lord's Hover Disk (Eye ofEternity, Malygos Encounter)
-            case 30248:        // Scion's of Eternity Hover Disk (Eye ofEternity, Malygos Encounter)
+            case 30234:        // Nexus Lord's Hover Disk (Eye of Eternity, Malygos Encounter)
+            case 30248:        // Scion's of Eternity Hover Disk (Eye of Eternity, Malygos Encounter)
             case 33118:        // Ignis (Ulduar)
             case 33432:        // Leviathan MX
             case 33651:        // VX 001
@@ -609,12 +609,19 @@ void VehicleKit::Dismount(Unit* passenger, VehicleSeatEntry const* seatInfo)
 
     float ox, oy, oz/*, oo*/;
 
-    Unit* base = GetBase()->GetVehicle() ? GetBase()->GetVehicle()->GetBase() : GetBase();
+    Unit* base = (GetBase()->GetVehicle() && GetBase()->GetVehicle()->GetBase()) ? GetBase()->GetVehicle()->GetBase() : GetBase();
 
     base->GetPosition(ox, oy, oz);
     // oo = base->GetOrientation();
+    float tRadius = base->GetObjectBoundingRadius();
+    if (tRadius < 1.0f || tRadius > 10.0f)
+        tRadius = 1.0f;
 
-    if (b_dstSet)
+    if (base->GetMap()->IsInUnloading())
+    {
+        // Do not change passenger location, changing to unloaded gride cause crash.
+    }
+    else if (b_dstSet)
     {
         // parabolic traectory (catapults, explode, other effects). mostly set destination in DummyEffect.
         // destination Z not checked in this case! only limited on 8.0 delta. requred full correct set in spelleffects.
@@ -635,7 +642,7 @@ void VehicleKit::Dismount(Unit* passenger, VehicleSeatEntry const* seatInfo)
             horisontalSpeed = BASE_CHARGE_SPEED;
 
         // may be under water
-        base->GetClosePoint(m_dst_x, m_dst_y, m_dst_z, base->GetObjectBoundingRadius(), frand(2.0f, 3.0f), frand(M_PI_F / 2.0f, 3.0f * M_PI_F / 2.0f), passenger);
+        base->GetClosePoint(m_dst_x, m_dst_y, m_dst_z, tRadius, frand(2.0f, 3.0f), frand(M_PI_F / 2.0f, 3.0f * M_PI_F / 2.0f), passenger);
         if (m_dst_z < oz)
             m_dst_z = oz;
 
@@ -644,7 +651,7 @@ void VehicleKit::Dismount(Unit* passenger, VehicleSeatEntry const* seatInfo)
     else
     {
         // jump from vehicle without seatInfo (? error case)
-        base->GetClosePoint(m_dst_x, m_dst_y, m_dst_z, base->GetObjectBoundingRadius(), 2.0f, M_PI_F, passenger);
+        base->GetClosePoint(m_dst_x, m_dst_y, m_dst_z, tRadius, 2.0f, M_PI_F, passenger);
         passenger->UpdateAllowedPositionZ(m_dst_x, m_dst_y, m_dst_z);
         if (m_dst_z < oz)
             m_dst_z = oz;

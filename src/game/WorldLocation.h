@@ -1,6 +1,5 @@
 /*
- * Copyright (C) 2005-2012 MaNGOS <http://getmangos.com/>
- * Copyright (C) 2011-2012 MangosR2 <http://mangosr2.2x2forum.com/>
+ * Copyright (C) 2012-2013 /dev/rsa for MangosR2 <http://github.com/mangosR2>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,6 +20,7 @@
 #define _WORLDLOCATION_H
 
 #include "Common.h"
+#include "SharedDefines.h"
 #include <G3D/Vector3.h>
 
 using G3D::Vector3;
@@ -53,6 +53,10 @@ struct MANGOS_DLL_SPEC Location : public Vector3
     Location& operator = (Location const& loc);
     bool operator == (Location const& loc) const;
 
+    float GetDistance(Location const& loc) const;
+
+    bool IsEmpty() const;
+
     union
     {
         float orientation;
@@ -63,15 +67,23 @@ struct MANGOS_DLL_SPEC Location : public Vector3
 struct MANGOS_DLL_SPEC Position : public Location
 {
     Position() 
-        : Location(), coord_x(x), coord_y(y), coord_z(z)
+        : Location(), coord_x(x), coord_y(y), coord_z(z), m_phaseMask(PHASEMASK_NORMAL)
     {};
 
     Position(float _x, float _y, float _z, float _o = 0.0f)
-        : Location(_x, _y, _z, _o), coord_x(x), coord_y(y), coord_z(z)
+        : Location(_x, _y, _z, _o), coord_x(x), coord_y(y), coord_z(z), m_phaseMask(PHASEMASK_NORMAL)
+    {};
+
+    Position(float _x, float _y, float _z, float _o, uint32 phaseMask)
+        : Location(_x, _y, _z, _o), coord_x(x), coord_y(y), coord_z(z), m_phaseMask(phaseMask)
     {};
 
     Position(Position const &pos)
-        : Location(pos.x, pos.y, pos.z, pos.orientation), coord_x(x), coord_y(y), coord_z(z)
+        : Location(pos.x, pos.y, pos.z, pos.orientation), coord_x(x), coord_y(y), coord_z(z), m_phaseMask(pos.GetPhaseMask())
+    {}
+
+    Position(Position const &pos, uint32 phaseMask)
+        : Location(pos.x, pos.y, pos.z, pos.orientation), coord_x(x), coord_y(y), coord_z(z), m_phaseMask(phaseMask)
     {}
 
     virtual ~Position()
@@ -81,10 +93,17 @@ struct MANGOS_DLL_SPEC Position : public Location
     float& coord_y;
     float& coord_z;
 
+    uint32 m_phaseMask;
+
+    virtual void SetPhaseMask(uint32 newPhaseMask) { m_phaseMask = newPhaseMask; };
+    uint32 GetPhaseMask() const { return m_phaseMask; }
+
     virtual bool HasMap() const { return false; };
 
     Position& operator = (Position const& pos);
     bool operator == (Position const& pos) const;
+
+    float GetDistance(Position const& pos) const;
 };
 
 class WorldObject;
@@ -144,6 +163,10 @@ struct MANGOS_DLL_SPEC WorldLocation : public Position
     void SetOrientation(float value);
 
     WorldLocation& operator = (WorldLocation const& loc);
+
+    float GetDistance(WorldLocation const& loc) const;
+
+    float GetDistance(Location const& loc) const;
 
     private:
     int32     mapid;                      // mapid    = -1 for not fully initialized WorldLocation

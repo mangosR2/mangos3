@@ -422,6 +422,7 @@ Player::Player (WorldSession *session): Unit(), m_mover(this), m_camera(NULL), m
 
     m_zoneUpdateId = 0;
     m_zoneUpdateTimer = 0;
+    m_positionStatusUpdateTimer = 0;
 
     m_areaUpdateId = 0;
 
@@ -565,10 +566,6 @@ Player::Player (WorldSession *session): Unit(), m_mover(this), m_camera(NULL), m
 
     // Player summoning
     m_summon_expire = 0;
-    m_summon_mapid = 0;
-    m_summon_x = 0.0f;
-    m_summon_y = 0.0f;
-    m_summon_z = 0.0f;
 
     m_contestedPvPTimer = 0;
 
@@ -1355,6 +1352,14 @@ void Player::Update(uint32 update_diff, uint32 p_time)
             m_regenTimer -= update_diff;
     }
 
+    if (m_positionStatusUpdateTimer)
+    {
+        if (update_diff >= m_positionStatusUpdateTimer)
+            m_positionStatusUpdateTimer = 0;
+        else
+            m_positionStatusUpdateTimer -= update_diff;
+    }
+
     if (m_weaponChangeTimer > 0)
     {
         if (update_diff >= m_weaponChangeTimer)
@@ -1877,12 +1882,12 @@ bool Player::TeleportTo(WorldLocation const& loc, uint32 options)
         SetSemaphoreTeleportFar(false);
 
         // try preload grid, targeted for teleport
-        if (!(options & TELE_TO_NODELAY) && !GetMap()->PreloadGrid(loc.coord_x, loc.coord_y))
+        if (!(options & TELE_TO_NODELAY) && !GetMap()->PreloadGrid(loc.x, loc.y))
         {
             // If loading grid not finished, delay teleport on one update tick
             AddEvent(new TeleportDelayEvent(*this, loc, options),
                 sWorld.getConfig(CONFIG_UINT32_INTERVAL_MAPUPDATE));
-            DEBUG_LOG("Player::TeleportTo grid (map %u, instance %u, X%f Y%f) not fully loaded, near teleport %s delayed.", loc.GetMapId(), GetInstanceId(), loc.coord_x, loc.coord_y, GetName());
+            DEBUG_LOG("Player::TeleportTo grid (map %u, instance %u, X%f Y%f) not fully loaded, near teleport %s delayed.", loc.GetMapId(), GetInstanceId(), loc.x, loc.y, GetName());
             SetSemaphoreTeleportDelayEvent(true);
             m_teleport_dest = loc;
             return true;
@@ -1917,7 +1922,7 @@ bool Player::TeleportTo(WorldLocation const& loc, uint32 options)
 
         // this will be used instead of the current location in SaveToDB
         m_teleport_dest = loc;
-        SetFallInformation(0, loc.coord_z);
+        SetFallInformation(0, loc.z);
 
         // code for finish transfer called in WorldSession::HandleMovementOpcodes()
         // at client packet CMSG_MOVE_TELEPORT_ACK
@@ -1969,13 +1974,13 @@ bool Player::TeleportTo(WorldLocation const& loc, uint32 options)
             }
 
             // try preload grid, targeted for teleport
-            if (!(options & TELE_TO_NODELAY) && !map->PreloadGrid(loc.coord_x, loc.coord_y))
+            if (!(options & TELE_TO_NODELAY) && !map->PreloadGrid(loc.x, loc.y))
             {
                 // If loading grid not finished, delay teleport 5 map update ticks
-                AddEvent(new TeleportDelayEvent(*this, WorldLocation(loc.coord_x, loc.coord_y, loc.coord_z, loc.orientation, loc.GetMapId(), map->GetInstanceId(), sWorld.getConfig(CONFIG_UINT32_REALMID)), options),
+                AddEvent(new TeleportDelayEvent(*this, WorldLocation(loc.x, loc.y, loc.z, loc.orientation, loc.GetMapId(), map->GetInstanceId(), sWorld.getConfig(CONFIG_UINT32_REALMID)), options),
                     5 * sWorld.getConfig(CONFIG_UINT32_INTERVAL_MAPUPDATE));
 
-                DEBUG_LOG("Player::TeleportTo grid (map %u, instance %u, X%f Y%f) not fully loaded, far teleport %s delayed.", loc.GetMapId(), map->GetInstanceId(), loc.coord_x, loc.coord_y, GetName());
+                DEBUG_LOG("Player::TeleportTo grid (map %u, instance %u, X%f Y%f) not fully loaded, far teleport %s delayed.", loc.GetMapId(), map->GetInstanceId(), loc.x, loc.y, GetName());
                 SetSemaphoreTeleportDelayEvent(true);
                 m_teleport_dest = loc;
                 return true;
@@ -2055,9 +2060,9 @@ bool Player::TeleportTo(WorldLocation const& loc, uint32 options)
                 oldmap->Remove(this, false);
 
             // new final coordinates
-            float final_x = loc.coord_x;
-            float final_y = loc.coord_y;
-            float final_z = loc.coord_z;
+            float final_x = loc.x;
+            float final_y = loc.y;
+            float final_z = loc.z;
             float final_o = loc.orientation;
 
             if (IsOnTransport())
@@ -2193,7 +2198,6 @@ void Player::AddToWorld()
         if (m_items[i])
             m_items[i]->AddToWorld();
     }
-    SetViewPoint(NULL);
 }
 
 void Player::RemoveFromWorld(bool remove)
@@ -3154,7 +3158,8 @@ void Player::SendInitialSpells()
 
     uint16 spellCount = 0;
 
-    WorldPacket data(SMSG_INITIAL_SPELLS, (1+2+4*m_spells.size()+2+m_spellCooldowns.size()*(2+2+2+4+4)));
+    size_t cooldownMapSize = GetSpellCooldownMap()->size();
+    WorldPacket data(SMSG_INITIAL_SPELLS, (1+2+4*m_spells.size()+2+cooldownMapSize*(2+2+2+4+4)));
     data << uint8(0);
 
     size_t countPos = data.wpos();
@@ -3176,9 +3181,9 @@ void Player::SendInitialSpells()
 
     data.put<uint16>(countPos,spellCount);                  // write real count value
 
-    uint16 spellCooldowns = m_spellCooldowns.size();
+    uint16 spellCooldowns = GetSpellCooldownMap()->size();
     data << uint16(spellCooldowns);
-    for (SpellCooldowns::const_iterator itr=m_spellCooldowns.begin(); itr!=m_spellCooldowns.end(); ++itr)
+    for (SpellCooldowns::const_iterator itr= GetSpellCooldownMap()->begin(); itr!= GetSpellCooldownMap()->end(); ++itr)
     {
         SpellEntry const *sEntry = sSpellStore.LookupEntry(itr->first);
         if (!sEntry)
@@ -3949,47 +3954,12 @@ void Player::removeSpell(uint32 spell_id, bool disabled, bool learn_low_rank, bo
         SpellRemovedQuestCheck(spell_id);
 }
 
-void Player::RemoveSpellCooldown(uint32 spell_id, bool update /* = false */)
-{
-    MAPLOCK_WRITE(this, MAP_LOCK_TYPE_DEFAULT);
-    m_spellCooldowns.erase(spell_id);
-
-    if (update)
-        SendClearCooldown(spell_id, this);
-}
-
-void Player::RemoveSpellCategoryCooldown(uint32 cat, bool update /* = false */)
-{
-    if (m_spellCooldowns.empty())
-        return;
-
-    SpellCategoryStore::const_iterator ct = sSpellCategoryStore.find(cat);
-    if (ct == sSpellCategoryStore.end())
-        return;
-
-    const SpellCategorySet& ct_set = ct->second;
-    SpellCategorySet current_set;
-    SpellCategorySet intersection_set;
-    {
-        MAPLOCK_READ(this, MAP_LOCK_TYPE_DEFAULT);
-        std::transform(m_spellCooldowns.begin(), m_spellCooldowns.end(), std::inserter(current_set, current_set.begin()), select1st<SpellCooldowns::value_type>());
-    }
-
-    std::set_intersection(ct_set.begin(),ct_set.end(), current_set.begin(),current_set.end(),std::inserter(intersection_set,intersection_set.begin()));
-
-    if (intersection_set.empty())
-        return;
-
-    for (SpellCategorySet::const_iterator itr = intersection_set.begin(); itr != intersection_set.end(); ++itr)
-        RemoveSpellCooldown(*itr, update);
-}
-
 void Player::RemoveArenaSpellCooldowns()
 {
     // remove cooldowns on spells that has < 15 min CD
-    SpellCooldowns::iterator itr, next;
+    SpellCooldowns::const_iterator itr, next;
     // iterate spell cooldowns
-    for (itr = m_spellCooldowns.begin();itr != m_spellCooldowns.end(); itr = next)
+    for (itr = GetSpellCooldownMap()->begin();itr != GetSpellCooldownMap()->end(); itr = next)
     {
         next = itr;
         ++next;
@@ -4006,37 +3976,7 @@ void Player::RemoveArenaSpellCooldowns()
 
     if (Pet *pet = GetPet())
     {
-        // notify player
-        for (CreatureSpellCooldowns::const_iterator itr = pet->m_CreatureSpellCooldowns.begin(); itr != pet->m_CreatureSpellCooldowns.end(); ++itr)
-            SendClearCooldown(itr->first, pet);
-
-        // actually clear cooldowns
-        pet->m_CreatureSpellCooldowns.clear();
-    }
-}
-
-void Player::RemoveAllSpellCooldown()
-{
-    if (!m_spellCooldowns.empty())
-    {
-        ObjectGuid guid = GetObjectGuid();
-
-        WorldPacket data(SMSG_CLEAR_COOLDOWNS, 1 + 8 + m_spellCooldowns.size() * 4);
-        data.WriteGuidMask<1, 3, 6>(guid);
-        data.WriteBits(m_spellCooldowns.size(), 24);      // cooldown count
-        data.WriteGuidMask<7, 5, 2, 4, 0>(guid);
-
-        data.WriteGuidBytes<7, 2, 4, 5, 1, 3>(guid);
-
-        for (SpellCooldowns::const_iterator itr = m_spellCooldowns.begin();itr != m_spellCooldowns.end(); ++itr)
-            data << uint32(itr->first);
-
-        data.WriteGuidBytes<0, 6>(guid);
-
-        SendDirectMessage(&data);
-
-        MAPLOCK_WRITE(this, MAP_LOCK_TYPE_DEFAULT);
-        m_spellCooldowns.clear();
+        pet->RemoveAllSpellCooldown();
     }
 }
 
@@ -4090,21 +4030,14 @@ void Player::_SaveSpellCooldowns()
     time_t infTime = curTime + infinityCooldownDelayCheck;
 
     // remove outdated and save active
-    for (SpellCooldowns::iterator itr = m_spellCooldowns.begin();itr != m_spellCooldowns.end();)
+    RemoveOutdatedSpellCooldowns();
+    for (SpellCooldowns::const_iterator itr = GetSpellCooldownMap()->begin();itr != GetSpellCooldownMap()->end(); ++itr)
     {
-        if (itr->second.end <= curTime)
-        {
-            MAPLOCK_WRITE(this, MAP_LOCK_TYPE_DEFAULT);
-            m_spellCooldowns.erase(itr++);
-        }
-        else if (itr->second.end <= infTime)                 // not save locked cooldowns, it will be reset or set at reload
+        if (itr->second.end <= infTime)                 // not save locked cooldowns, it will be reset or set at reload
         {
             stmt = CharacterDatabase.CreateStatement(insertSpellCooldown, "INSERT INTO character_spell_cooldown (guid,spell,item,time) VALUES(?, ?, ?, ?)");
             stmt.PExecute(GetGUIDLow(), itr->first, itr->second.itemid, uint64(itr->second.end));
-            ++itr;
         }
-        else
-            ++itr;
     }
 }
 
@@ -6490,18 +6423,26 @@ ActionButton const* Player::GetActionButton(uint8 button)
 
 bool Player::SetPosition(float x, float y, float z, float orientation, bool teleport)
 {
+    bool groupUpdate = (GetGroup() && (teleport || abs(GetPositionX() - x) > 1.0f || abs(GetPositionY() - y) > 1.0f));
+
     if (!Unit::SetPosition(x, y, z, orientation, teleport))
         return false;
-
-    // group update
-    if (GetGroup())
-        SetGroupUpdateFlag(GROUP_UPDATE_FLAG_POSITION);
 
     if (GetTrader() && !IsWithinDistInMap(GetTrader(), INTERACTION_DISTANCE))
         GetSession()->SendCancelTrade();   // will close both side trade windows
 
+    if (m_positionStatusUpdateTimer)                        // Update position's state only on interval
+        return true;
+    m_positionStatusUpdateTimer = 100;
+
+    // group update
+    if (groupUpdate)
+        SetGroupUpdateFlag(GROUP_UPDATE_FLAG_POSITION);
+
     // code block for underwater state update
     UpdateUnderwaterState(GetMap(), x, y, z);
+
+    // code block for outdoor state and area-explore check
     CheckAreaExploreAndOutdoor();
 
     return true;
@@ -15745,13 +15686,13 @@ bool Player::LoadFromDB(ObjectGuid guid, SqlQueryHolder *holder)
         sLog.outError("Player::LoadFromDB player %s have invalid coordinates (map: %u X: %f Y: %f Z: %f O: %f). Teleport to default race/class locations.",
             guid.GetString().c_str(),
             savedLocation.GetMapId(),
-            savedLocation.coord_x,
-            savedLocation.coord_y,
-            savedLocation.coord_z,
+            savedLocation.x,
+            savedLocation.y,
+            savedLocation.z,
             savedLocation.orientation);
         RelocateToHomebind();
 
-        GetPosition(savedLocation);                          // reset saved position to homebind
+        savedLocation = GetPosition();                          // reset saved position to homebind
 
         transGUID = 0;
         m_movementInfo.ClearTransportData();
@@ -15785,7 +15726,7 @@ bool Player::LoadFromDB(ObjectGuid guid, SqlQueryHolder *holder)
             SetInviteForBattleGroundQueueType(bgQueueTypeId,currentBg->GetInstanceID());
 
             SetLocationMapId(savedLocation.GetMapId());
-            Relocate(savedLocation.coord_x, savedLocation.coord_y, savedLocation.coord_z, savedLocation.orientation);
+            Relocate(savedLocation);
         }
         else
         {
@@ -15798,7 +15739,7 @@ bool Player::LoadFromDB(ObjectGuid guid, SqlQueryHolder *holder)
             // move to bg enter point
             const WorldLocation& _loc = GetBattleGroundEntryPoint();
             SetLocationMapId(_loc.GetMapId());
-            Relocate(_loc.coord_x, _loc.coord_y, _loc.coord_z, _loc.orientation);
+            Relocate(_loc);
 
             // We are not in BG anymore
             SetBattleGroundId(0, BATTLEGROUND_TYPE_NONE);
@@ -15823,7 +15764,7 @@ bool Player::LoadFromDB(ObjectGuid guid, SqlQueryHolder *holder)
             else
             {
                 SetLocationMapId(_loc.GetMapId());
-                Relocate(_loc.coord_x, _loc.coord_y, _loc.coord_z, _loc.orientation);
+                Relocate(_loc);
             }
 
             // We are not in BG anymore
@@ -15837,7 +15778,7 @@ bool Player::LoadFromDB(ObjectGuid guid, SqlQueryHolder *holder)
             _SaveBGData(true);
             // Saved location checked before
             SetLocationMapId(savedLocation.GetMapId());
-            Relocate(savedLocation.coord_x, savedLocation.coord_y, savedLocation.coord_z, savedLocation.orientation);
+            Relocate(savedLocation);
         }
         else if (mapEntry->IsDungeon())
         {
@@ -15848,12 +15789,12 @@ bool Player::LoadFromDB(ObjectGuid guid, SqlQueryHolder *holder)
                 if (state && time(NULL) - time_t(fields[22].GetUInt64()) < 30)
                 {
                     SetLocationMapId(savedLocation.GetMapId());
-                    Relocate(savedLocation.coord_x, savedLocation.coord_y, savedLocation.coord_z, savedLocation.orientation);
+                    Relocate(savedLocation);
                 }
                 else
                 {
-                    SetLocationMapId(at->target_mapId);
-                    Relocate(at->target_X, at->target_Y, at->target_Z, at->target_Orientation);
+                    SetLocationMapId(at->loc.GetMapId());
+                    Relocate(at->loc);
                 }
             }
             else
@@ -16394,7 +16335,7 @@ void Player::_LoadAuras(QueryResult *result, uint32 timediff)
 
             if (caster_guid.IsEmpty() || !caster_guid.IsUnit())
             {
-                sLog.outError("Player::LoadAuras Unknown caster %u, ignore.",fields[0].GetUInt64());
+                sLog.outError("Player::LoadAuras Unknown caster %lu, ignore.",fields[0].GetUInt64());
                 continue;
             }
 
@@ -17585,17 +17526,14 @@ bool Player::_LoadHomeBind(QueryResult *result)
     if (result)
     {
         Field* fields = result->Fetch();
-        m_homebindMapId = fields[0].GetUInt32();
-        m_homebindAreaId = fields[1].GetUInt16();
-        m_homebindX = fields[2].GetFloat();
-        m_homebindY = fields[3].GetFloat();
-        m_homebindZ = fields[4].GetFloat();
+        m_homebind  = WorldLocation(fields[0].GetUInt32(), fields[2].GetFloat(), fields[3].GetFloat(), fields[4].GetFloat());
+        // m_homebindAreaId = fields[1].GetUInt16();
         delete result;
 
-        MapEntry const* bindMapEntry = sMapStore.LookupEntry(m_homebindMapId);
+        MapEntry const* bindMapEntry = sMapStore.LookupEntry(m_homebind.GetMapId());
 
         // accept saved data only for valid position (and non instanceable), and accessable
-        if (MapManager::IsValidMapCoord(m_homebindMapId,m_homebindX,m_homebindY,m_homebindZ) &&
+        if (MapManager::IsValidMapCoord(m_homebind) &&
             !bindMapEntry->Instanceable() && GetSession()->Expansion() >= bindMapEntry->Expansion())
         {
             ok = true;
@@ -17605,18 +17543,10 @@ bool Player::_LoadHomeBind(QueryResult *result)
     }
 
     if (!ok)
-    {
-        m_homebindMapId = info->mapId;
-        m_homebindAreaId = info->areaId;
-        m_homebindX = info->positionX;
-        m_homebindY = info->positionY;
-        m_homebindZ = info->positionZ;
-
-        CharacterDatabase.PExecute("INSERT INTO character_homebind (guid,map,zone,position_x,position_y,position_z) VALUES ('%u', '%u', '%u', '%f', '%f', '%f')", GetGUIDLow(), m_homebindMapId, (uint32)m_homebindAreaId, m_homebindX, m_homebindY, m_homebindZ);
-    }
+        SetHomebindToLocation(WorldLocation(info->mapId, info->positionX, info->positionY, info->positionZ));
 
     DEBUG_LOG("Setting player home position: mapid is: %u, zoneid is %u, X is %f, Y is %f, Z is %f",
-        m_homebindMapId, m_homebindAreaId, m_homebindX, m_homebindY, m_homebindZ);
+        m_homebind.GetMapId(), m_homebind.GetAreaId(), m_homebind.x, m_homebind.y, m_homebind.z);
 
     return true;
 }
@@ -17700,9 +17630,9 @@ void Player::SaveToDB()
     {
         uberInsert.addUInt32(GetTeleportDest().GetMapId());
         uberInsert.addUInt32(GetDifficulty());
-        uberInsert.addFloat(finiteAlways(GetTeleportDest().coord_x));
-        uberInsert.addFloat(finiteAlways(GetTeleportDest().coord_y));
-        uberInsert.addFloat(finiteAlways(GetTeleportDest().coord_z));
+        uberInsert.addFloat(finiteAlways(GetTeleportDest().x));
+        uberInsert.addFloat(finiteAlways(GetTeleportDest().y));
+        uberInsert.addFloat(finiteAlways(GetTeleportDest().z));
         uberInsert.addFloat(finiteAlways(GetTeleportDest().orientation));
     }
 
@@ -18390,8 +18320,11 @@ void Player::_SaveSpells()
     SqlStatement stmtDel = CharacterDatabase.CreateStatement(delSpells, "DELETE FROM character_spell WHERE guid = ? and spell = ?");
     SqlStatement stmtIns = CharacterDatabase.CreateStatement(insSpells, "INSERT INTO character_spell (guid,spell,active,disabled) VALUES (?, ?, ?, ?)");
 
-    for (PlayerSpellMap::iterator itr = m_spells.begin(), next = m_spells.begin(); itr != m_spells.end();)
+    PlayerSpellMap::iterator itr, next;
+    for (itr = m_spells.begin(); itr != m_spells.end(); itr = next)
     {
+        next = itr;
+        ++next;
         uint32 talentCosts = GetTalentSpellCost(itr->first);
 
         if (!talentCosts)
@@ -18405,13 +18338,11 @@ void Player::_SaveSpells()
         }
 
         if (itr->second.state == PLAYERSPELL_REMOVED)
-            m_spells.erase(itr++);
+            m_spells.erase(itr);
         else
         {
             itr->second.state = PLAYERSPELL_UNCHANGED;
-            ++itr;
         }
-
     }
 }
 
@@ -18958,29 +18889,32 @@ void Player::PetSpellInitialize()
 
     data.put<uint8>(spellsCountPos, addlist);
 
-    uint8 cooldownsCount = pet->m_CreatureSpellCooldowns.size() + pet->m_CreatureCategoryCooldowns.size();
+    uint8 cooldownsCount = pet->GetSpellCooldownMap()->size();
     data << uint8(cooldownsCount);
 
     time_t curTime = time(NULL);
 
-    for (CreatureSpellCooldowns::const_iterator itr = pet->m_CreatureSpellCooldowns.begin(); itr != pet->m_CreatureSpellCooldowns.end(); ++itr)
+    for (SpellCooldowns::const_iterator itr = pet->GetSpellCooldownMap()->begin(); itr != pet->GetSpellCooldownMap()->end(); ++itr)
     {
-        time_t cooldown = (itr->second > curTime) ? (itr->second - curTime) * IN_MILLISECONDS : 0;
+        SpellEntry const *sEntry = sSpellStore.LookupEntry(itr->first);
+        if (!sEntry)
+            continue;
+
+        time_t cooldown = (itr->second.end > curTime) ? (itr->second.end - curTime) * IN_MILLISECONDS : 0;
 
         data << uint32(itr->first);                         // spellid
-        data << uint16(0);                                  // spell category?
-        data << uint32(cooldown);                           // cooldown
-        data << uint32(0);                                  // category cooldown
-    }
+        data << uint16(sEntry->GetCategory());                   // spell category
 
-    for (CreatureSpellCooldowns::const_iterator itr = pet->m_CreatureCategoryCooldowns.begin(); itr != pet->m_CreatureCategoryCooldowns.end(); ++itr)
-    {
-        time_t cooldown = (itr->second > curTime) ? (itr->second - curTime) * IN_MILLISECONDS : 0;
-
-        data << uint32(itr->first);                         // spellid
-        data << uint16(0);                                  // spell category?
-        data << uint32(0);                                  // cooldown
-        data << uint32(cooldown);                           // category cooldown
+        if (sEntry->GetCategory())                                // may be wrong, but anyway better than nothing...
+        {
+            data << uint32(0);                              // cooldown
+            data << uint32(cooldown);                       // category cooldown
+        }
+        else
+        {
+            data << uint32(cooldown);                       // cooldown
+            data << uint32(0);                              // category cooldown
+        }
     }
 
     GetSession()->SendPacket(&data);
@@ -19043,7 +18977,7 @@ void Player::VehicleSpellInitialize()
         return;
     }
 
-    size_t cooldownsCount = charm->m_CreatureSpellCooldowns.size() + charm->m_CreatureCategoryCooldowns.size();
+    size_t cooldownsCount = charm->GetSpellCooldownMap()->size() + charm->GetSpellCooldownMap()->size();
 
     WorldPacket data(SMSG_PET_SPELLS, 8+2+4+4+4*MAX_UNIT_ACTION_BAR_INDEX+1+1+cooldownsCount*(4+2+4+4));
     data << charm->GetObjectGuid();
@@ -19058,24 +18992,27 @@ void Player::VehicleSpellInitialize()
 
     time_t curTime = time(NULL);
 
-    for (CreatureSpellCooldowns::const_iterator itr = charm->m_CreatureSpellCooldowns.begin(); itr != charm->m_CreatureSpellCooldowns.end(); ++itr)
+    for (SpellCooldowns::const_iterator itr = charm->GetSpellCooldownMap()->begin(); itr != charm->GetSpellCooldownMap()->end(); ++itr)
     {
-        time_t cooldown = (itr->second > curTime) ? (itr->second - curTime) * IN_MILLISECONDS : 0;
+        SpellEntry const *sEntry = sSpellStore.LookupEntry(itr->first);
+        if (!sEntry)
+            continue;
+
+        time_t cooldown = (itr->second.end > curTime) ? (itr->second.end - curTime) * IN_MILLISECONDS : 0;
 
         data << uint32(itr->first);                         // spellid
-        data << uint16(0);                                  // spell category?
-        data << uint32(cooldown);                           // cooldown
-        data << uint32(0);                                  // category cooldown
-    }
+        data << uint16(sEntry->GetCategory());                   // spell category
 
-    for (CreatureSpellCooldowns::const_iterator itr = charm->m_CreatureCategoryCooldowns.begin(); itr != charm->m_CreatureCategoryCooldowns.end(); ++itr)
-    {
-        time_t cooldown = (itr->second > curTime) ? (itr->second - curTime) * IN_MILLISECONDS : 0;
-
-        data << uint32(itr->first);                         // spellid
-        data << uint16(0);                                  // spell category?
-        data << uint32(0);                                  // cooldown
-        data << uint32(cooldown);                           // category cooldown
+        if (sEntry->GetCategory())                                // may be wrong, but anyway better than nothing...
+        {
+            data << uint32(0);                              // cooldown
+            data << uint32(cooldown);                       // category cooldown
+        }
+        else
+        {
+            data << uint32(cooldown);                       // cooldown
+            data << uint32(0);                              // category cooldown
+        }
     }
 
     GetSession()->SendPacket(&data);
@@ -19628,7 +19565,7 @@ void Player::ProhibitSpellSchool(SpellSchoolMask idSchoolMask, uint32 unTimeMs)
         if (spellInfo->HasAttribute(SPELL_ATTR_DISABLED_WHILE_ACTIVE))
             continue;
 
-        if ((idSchoolMask & GetSpellSchoolMask(spellInfo)) && GetSpellCooldownDelay(unSpellId) < unTimeMs)
+        if ((idSchoolMask & GetSpellSchoolMask(spellInfo)) && GetSpellCooldownDelay(spellInfo) < unTimeMs)
         {
             data << uint32(unSpellId);
             data << uint32(unTimeMs);                       // in m.secs
@@ -19644,7 +19581,7 @@ void Player::SendModifyCooldown(uint32 spell_id, int32 delta)
     if (!spellInfo)
         return;
 
-    uint32 cooldown = GetSpellCooldownDelay(spell_id);
+    uint32 cooldown = GetSpellCooldownDelay(spellInfo);
     if (cooldown == 0 && delta < 0)
         return;
 
@@ -19896,11 +19833,17 @@ bool Player::BuyItemFromVendorSlot(ObjectGuid vendorGuid, uint32 vendorslot, uin
         }
     }
 
-    uint64 price = (crItem->ExtendedCost == 0 || pProto->Flags2 & ITEM_FLAG2_EXT_COST_REQUIRES_GOLD) ? pProto->BuyPrice * count : 0;
+    if (crItem->conditionId && !isGameMaster() && !sObjectMgr.IsPlayerMeetToCondition(crItem->conditionId, this, pCreature->GetMap(), pCreature, CONDITION_FROM_VENDOR))
+    {
+        SendBuyError(BUY_ERR_CANT_FIND_ITEM, pCreature, item, 0);
+        return false;
+    }
+
+    uint32 price = (crItem->ExtendedCost == 0 || pProto->Flags2 & ITEM_FLAG2_EXT_COST_REQUIRES_GOLD) ? pProto->BuyPrice * count : 0;
 
     // reputation discount
     if (price)
-        price = uint64(floor(price * GetReputationPriceDiscount(pCreature)));
+        price = uint32(floor(price * GetReputationPriceDiscount(pCreature)));
 
     if (GetMoney() < price)
     {
@@ -20185,111 +20128,7 @@ void Player::UpdatePvP(bool state, bool ovrride)
     }
 }
 
-void Player::AddSpellAndCategoryCooldowns(SpellEntry const* spellInfo, uint32 itemId, bool infinityCooldown)
-{
-    // init cooldown values
-    uint32 cat   = 0;
-    int32 rec    = -1;
-    int32 catrec = -1;
-
-    // some special item spells without correct cooldown in SpellInfo
-    // cooldown information stored in item prototype
-
-    if (itemId)
-    {
-        if (ItemPrototype const* proto = ObjectMgr::GetItemPrototype(itemId))
-        {
-            for (int idx = 0; idx < MAX_ITEM_PROTO_SPELLS; ++idx)
-            {
-                if (proto->Spells[idx].SpellId == spellInfo->Id)
-                {
-                    cat    = proto->Spells[idx].SpellCategory;
-                    rec    = proto->Spells[idx].SpellCooldown;
-                    catrec = proto->Spells[idx].SpellCategoryCooldown;
-                    break;
-                }
-            }
-        }
-    }
-
-    // if no cooldown found above then base at DBC data
-    if (rec < 0 && catrec < 0)
-    {
-        cat = spellInfo->GetCategory();
-        rec = spellInfo->GetRecoveryTime();
-        catrec = spellInfo->GetCategoryRecoveryTime();
-    }
-
-    time_t curTime = time(NULL);
-
-    time_t catrecTime;
-    time_t recTime;
-
-    // overwrite time for selected category
-    if (infinityCooldown)
-    {
-        // use +MONTH as infinity mark for spell cooldown (will checked as MONTH/2 at save ans skipped)
-        // but not allow ignore until reset or re-login
-        catrecTime = catrec > 0 ? curTime+infinityCooldownDelay : 0;
-        recTime    = rec    > 0 ? curTime+infinityCooldownDelay : catrecTime;
-    }
-    else
-    {
-        // shoot spells used equipped item cooldown values already assigned in GetAttackTime(RANGED_ATTACK)
-        // prevent 0 cooldowns set by another way
-        if (rec <= 0 && catrec <= 0 && (cat == 76 || (IsAutoRepeatRangedSpell(spellInfo) && spellInfo->Id != SPELL_ID_AUTOSHOT)))
-            rec = GetAttackTime(RANGED_ATTACK);
-
-        // Now we have cooldown data (if found any), time to apply mods
-        if (rec > 0)
-            ApplySpellMod(spellInfo->Id, SPELLMOD_COOLDOWN, rec);
-
-        if (catrec > 0)
-            ApplySpellMod(spellInfo->Id, SPELLMOD_COOLDOWN, catrec);
-
-        // replace negative cooldowns by 0
-        if (rec < 0) rec = 0;
-        if (catrec < 0) catrec = 0;
-
-        // no cooldown after applying spell mods
-        if (rec == 0 && catrec == 0)
-            return;
-
-        catrecTime = catrec ? curTime+catrec/IN_MILLISECONDS : 0;
-        recTime    = rec ? curTime+rec/IN_MILLISECONDS : catrecTime;
-    }
-
-    // self spell cooldown
-    if (recTime > 0)
-        AddSpellCooldown(spellInfo->Id, itemId, recTime);
-
-    // category spells
-    if (cat && catrec > 0)
-    {
-        SpellCategoryStore::const_iterator i_scstore = sSpellCategoryStore.find(cat);
-        if (i_scstore != sSpellCategoryStore.end())
-        {
-            for (SpellCategorySet::const_iterator i_scset = i_scstore->second.begin(); i_scset != i_scstore->second.end(); ++i_scset)
-            {
-                if (*i_scset == spellInfo->Id)              // skip main spell, already handled above
-                    continue;
-
-                AddSpellCooldown(*i_scset, itemId, catrecTime);
-            }
-        }
-    }
-}
-
-void Player::AddSpellCooldown(uint32 spellid, uint32 itemid, time_t end_time)
-{
-    SpellCooldown sc;
-    sc.end = end_time;
-    sc.itemid = itemid;
-    MAPLOCK_WRITE(this, MAP_LOCK_TYPE_DEFAULT);
-    m_spellCooldowns[spellid] = sc;
-}
-
-void Player::SendCooldownEvent(SpellEntry const *spellInfo, uint32 itemId, Spell* spell)
+void Player::SendCooldownEvent(SpellEntry const *spellInfo, uint32 itemId)
 {
     // start cooldowns at server side, if any
     AddSpellAndCategoryCooldowns(spellInfo, itemId);
@@ -20535,7 +20374,7 @@ void Player::SetBattleGroundEntryPoint(bool forLFG)
     }
 
     // In error cases use homebind position
-    m_bgData.joinPos = WorldLocation(m_homebindMapId, m_homebindX, m_homebindY, m_homebindZ, 0.0f);
+    m_bgData.joinPos = m_homebind;
     m_bgData.m_needSave = true;
 }
 
@@ -20841,9 +20680,9 @@ void Player::SendInitialPacketsBeforeAddToMap()
 
     // Homebind
     WorldPacket data(SMSG_BINDPOINTUPDATE, 5*4);
-    data << m_homebindX << m_homebindY << m_homebindZ;
-    data << (uint32) m_homebindMapId;
-    data << (uint32) m_homebindAreaId;
+    data << m_homebind.x << m_homebind.y << m_homebind.z;
+    data << (uint32)m_homebind.GetMapId();
+    data << (uint32)m_homebind.GetAreaId();
     GetSession()->SendPacket(&data);
 
     // SMSG_SET_PROFICIENCY
@@ -20891,6 +20730,7 @@ void Player::SendInitialPacketsBeforeAddToMap()
     SendCurrencies();
 
     SetMover(this);
+    SetViewPoint(NULL);
 }
 
 void Player::SendInitialPacketsAfterAddToMap()
@@ -21170,7 +21010,7 @@ void Player::learnSkillRewardedSpells(uint32 skill_id, uint32 skill_value)
     }
 }
 
-void Player::SendAurasForTarget(Unit *target)
+void Player::SendAurasForTarget(Unit* target)
 {
     if (!target)
         return;
@@ -21178,11 +21018,11 @@ void Player::SendAurasForTarget(Unit *target)
     WorldPacket data(SMSG_AURA_UPDATE_ALL);
     data << target->GetPackGUID();
 
-    Unit::VisibleAuraMap const& visibleAuras = target->GetVisibleAuras();
-    for (size_t i = 0; i < MAX_AURAS && i < visibleAuras.size() ; ++i)
+    for (uint8 slot = 0; slot < MAX_AURAS; ++slot)
     {
-        if (visibleAuras[i])
-            visibleAuras[i]->BuildUpdatePacket(data);
+        SpellAuraHolderPtr const vAura = target->GetVisibleAura(slot);
+        if (vAura)
+            vAura->BuildUpdatePacket(data);
     }
 
     GetSession()->SendPacket(&data);
@@ -21461,14 +21301,15 @@ void Player::SummonIfPossible(bool agree)
 
     // drop flag at summon
     // this code can be reached only when GM is summoning player who carries flag, because player should be immune to summoning spells when he carries flag
-    if (BattleGround *bg = GetBattleGround())
+    if (BattleGround* bg = GetBattleGround())
         bg->EventPlayerDroppedFlag(this);
 
     m_summon_expire = 0;
 
     GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_ACCEPTED_SUMMONINGS, 1);
 
-    TeleportTo(m_summon_mapid, m_summon_x, m_summon_y, m_summon_z,GetOrientation());
+    m_summon_loc.SetOrientation(GetOrientation());
+    TeleportTo(m_summon_loc);
 }
 
 void Player::RemoveItemDurations(Item* item)
@@ -22071,10 +21912,10 @@ void Player::UpdateUnderwaterState(Map* m, float x, float y, float z)
         m_MirrorTimerFlags &= ~(UNDERWATER_INWATER | UNDERWATER_INLAVA | UNDERWATER_INSLIME | UNDERWATER_INDARKWATER);
         if (m_lastLiquid && m_lastLiquid->SpellId)
         {
-            RemoveAurasDueToSpell(m_lastLiquid->SpellId);
+            RemoveAurasDueToSpell(m_lastLiquid->SpellId == 37025 ? 37284 : m_lastLiquid->SpellId);
             if (GetVehicle() && GetVehicle()->GetBase())
             {
-                GetVehicle()->GetBase()->RemoveAurasDueToSpell(m_lastLiquid->SpellId);
+                GetVehicle()->GetBase()->RemoveAurasDueToSpell(m_lastLiquid->SpellId == 37025 ? 37284 : m_lastLiquid->SpellId);
             }
         }
         m_lastLiquid = NULL;
@@ -22097,21 +21938,39 @@ void Player::UpdateUnderwaterState(Map* m, float x, float y, float z)
 
         if (liquid && liquid->SpellId)
         {
+            // Exception for SSC water
+            uint32 liquidSpellId = liquid->SpellId == 37025 ? 37284 : liquid->SpellId;
+
             if (res & (LIQUID_MAP_UNDER_WATER | LIQUID_MAP_IN_WATER))
             {
-                if (SpellEntry const *pSpellEntry = sSpellStore.LookupEntry(liquid->SpellId))
+                if (SpellEntry const *pSpellEntry = sSpellStore.LookupEntry(liquidSpellId))
                 {
-                    // check aura for no double cast
+                    // check aura for no double cast (FIXME! seems as big hack...)
                     if (!HasAura(liquid->SpellId))
                     {
-                        if (SpellMgr::IsTargetMatchedWithCreatureType(pSpellEntry, this))
+                        if (InstanceData* pInst = GetInstanceData())
+                        {
+                            if (pInst->CheckConditionCriteriaMeet(this, INSTANCE_CONDITION_ID_LURKER, NULL, CONDITION_FROM_HARDCODED))
+                            {
+                                if (pInst->CheckConditionCriteriaMeet(this, INSTANCE_CONDITION_ID_SCALDING_WATER, NULL, CONDITION_FROM_HARDCODED))
+                                    CastSpell(this, liquidSpellId, true);
+                                else
+                                {
+                                    SummonCreature(21508, 0, 0, 0, 0, TEMPSUMMON_TIMED_OOC_DESPAWN, 2000);
+                                    // Special update timer for the SSC water
+                                    m_positionStatusUpdateTimer = 2000;
+                                }
+                            }
+                        }
+                        else if (SpellMgr::IsTargetMatchedWithCreatureType(pSpellEntry, this))
                         {
                             CastSpell(this, pSpellEntry, true);
                         }
+
                     }
                     if (GetVehicle() && GetVehicle()->GetBase())
                     {
-                        if (!GetVehicle()->GetBase()->HasAura(liquid->SpellId))
+                        if (!GetVehicle()->GetBase()->HasAura(liquidSpellId))
                         {
                             if (SpellMgr::IsTargetMatchedWithCreatureType(pSpellEntry, GetVehicle()->GetBase()))
                             {
@@ -22124,10 +21983,10 @@ void Player::UpdateUnderwaterState(Map* m, float x, float y, float z)
             else
             {
                 // Player is above Water or walk on Water
-                RemoveAurasDueToSpell(liquid->SpellId);
+                RemoveAurasDueToSpell(liquidSpellId);
                 if (GetVehicle() && GetVehicle()->GetBase())
                 {
-                    GetVehicle()->GetBase()->RemoveAurasDueToSpell(liquid->SpellId);
+                    GetVehicle()->GetBase()->RemoveAurasDueToSpell(liquidSpellId);
                 }
             }
         }
@@ -22137,11 +21996,12 @@ void Player::UpdateUnderwaterState(Map* m, float x, float y, float z)
     else if (m_lastLiquid && m_lastLiquid->SpellId)
     {
         // Player change to no specific LiquidEntry (= 0)
-        RemoveAurasDueToSpell(m_lastLiquid->SpellId);
+        RemoveAurasDueToSpell(m_lastLiquid->SpellId == 37025 ? 37284 : m_lastLiquid->SpellId);
         if (GetVehicle() && GetVehicle()->GetBase())
         {
-            GetVehicle()->GetBase()->RemoveAurasDueToSpell(m_lastLiquid->SpellId);
+            GetVehicle()->GetBase()->RemoveAurasDueToSpell(m_lastLiquid->SpellId == 37025 ? 37284 : m_lastLiquid->SpellId);
         }
+        m_lastLiquid = NULL;
     }
 
     // All liquids type - check under water position
@@ -23618,9 +23478,9 @@ void Player::_SaveBGData(bool forceClean)
         stmt.addUInt32(GetGUIDLow());
         stmt.addUInt32(m_bgData.bgInstanceID);
         stmt.addUInt32(uint32(m_bgData.bgTeam));
-        stmt.addFloat(m_bgData.joinPos.coord_x);
-        stmt.addFloat(m_bgData.joinPos.coord_y);
-        stmt.addFloat(m_bgData.joinPos.coord_z);
+        stmt.addFloat(m_bgData.joinPos.x);
+        stmt.addFloat(m_bgData.joinPos.y);
+        stmt.addFloat(m_bgData.joinPos.z);
         stmt.addFloat(m_bgData.joinPos.orientation);
         stmt.addUInt32(m_bgData.joinPos.GetMapId());
         stmt.addUInt32(m_bgData.taxiPath[0]);
@@ -23927,17 +23787,21 @@ bool Player::IsImmuneToSpellEffect(SpellEntry const* spellInfo, SpellEffectIndex
     return Unit::IsImmuneToSpellEffect(spellInfo, index);
 }
 
-void Player::SetHomebindToLocation(WorldLocation const& loc, uint32 area_id)
+void Player::SetHomebindToLocation(WorldLocation const& loc)
 {
-    m_homebindMapId = loc.GetMapId();
-    m_homebindAreaId = area_id;
-    m_homebindX = loc.coord_x;
-    m_homebindY = loc.coord_y;
-    m_homebindZ = loc.coord_z;
+    m_homebind = loc;
 
     // update sql homebind
-    CharacterDatabase.PExecute("UPDATE character_homebind SET map = '%u', zone = '%u', position_x = '%f', position_y = '%f', position_z = '%f' WHERE guid = '%u'",
-        m_homebindMapId, m_homebindAreaId, m_homebindX, m_homebindY, m_homebindZ, GetGUIDLow());
+    static SqlStatementID saveHomebind;
+    SqlStatement stmt = CharacterDatabase.CreateStatement(saveHomebind, "REPLACE INTO character_homebind (guid, map, zone, position_x, position_y, position_z) VALUES (?, ?, ?, ?, ?, ?)");
+
+    stmt.addUInt32(GetGUIDLow());
+    stmt.addUInt32(m_homebind.GetMapId());
+    stmt.addUInt32(m_homebind.GetAreaId());
+    stmt.addFloat(m_homebind.x);
+    stmt.addFloat(m_homebind.y);
+    stmt.addFloat(m_homebind.z);
+    stmt.Execute();
 }
 
 Object* Player::GetObjectByTypeMask(ObjectGuid guid, TypeMask typemask)
@@ -24185,18 +24049,18 @@ void Player::LoadAccountLinkedState()
     if (referredAccounts)
     {
         if (referredAccounts->size() > sWorld.getConfig(CONFIG_UINT32_RAF_MAXREFERERS))
-            sLog.outError("Player:RAF:Warning: loaded %u referred accounts instead of %u for player %s",referredAccounts->size(),sWorld.getConfig(CONFIG_UINT32_RAF_MAXREFERERS),GetObjectGuid().GetString().c_str());
+            sLog.outError("Player:RAF:Warning: loaded "SIZEFMTD" referred accounts instead of %u for player %s",referredAccounts->size(),sWorld.getConfig(CONFIG_UINT32_RAF_MAXREFERERS),GetObjectGuid().GetString().c_str());
         else
-            DEBUG_LOG("Player:RAF: loaded %u referred accounts for player %s",referredAccounts->size(),GetObjectGuid().GetString().c_str());
+            DEBUG_LOG("Player:RAF: loaded "SIZEFMTD" referred accounts for player %s",referredAccounts->size(),GetObjectGuid().GetString().c_str());
     }
 
     RafLinkedList const* referalAccounts = sAccountMgr.GetRAFAccounts(GetSession()->GetAccountId(), false);
     if (referalAccounts)
     {
         if (referalAccounts->size() > sWorld.getConfig(CONFIG_UINT32_RAF_MAXREFERALS))
-            sLog.outError("Player:RAF:Warning: loaded %u referal accounts instead of %u for player %s",referalAccounts->size(),sWorld.getConfig(CONFIG_UINT32_RAF_MAXREFERALS),GetObjectGuid().GetString().c_str());
+            sLog.outError("Player:RAF:Warning: loaded "SIZEFMTD" referal accounts instead of %u for player %s",referalAccounts->size(),sWorld.getConfig(CONFIG_UINT32_RAF_MAXREFERALS),GetObjectGuid().GetString().c_str());
         else
-            DEBUG_LOG("Player:RAF: loaded %u referal accounts for player %s",referalAccounts->size(),GetObjectGuid().GetString().c_str());
+            DEBUG_LOG("Player:RAF: loaded "SIZEFMTD" referal accounts for player %s",referalAccounts->size(),GetObjectGuid().GetString().c_str());
     }
 }
 
@@ -24228,11 +24092,11 @@ AreaLockStatus Player::GetAreaTriggerLockStatus(AreaTrigger const* at, Difficult
     if (!at)
         return AREA_LOCKSTATUS_UNKNOWN_ERROR;
 
-    MapEntry const* mapEntry = sMapStore.LookupEntry(at->target_mapId);
+    MapEntry const* mapEntry = sMapStore.LookupEntry(at->loc.GetMapId());
     if (!mapEntry)
         return AREA_LOCKSTATUS_UNKNOWN_ERROR;
 
-    MapDifficultyEntry const* mapDiff = GetMapDifficultyData(at->target_mapId,difficulty);
+    MapDifficultyEntry const* mapDiff = GetMapDifficultyData(at->loc.GetMapId(),difficulty);
     if (mapEntry->IsDungeon() && !mapDiff)
         return AREA_LOCKSTATUS_MISSING_DIFFICULTY;
 
@@ -24316,8 +24180,8 @@ AreaLockStatus Player::GetAreaTriggerLockStatus(AreaTrigger const* at, Difficult
     }
 
     // If the map is not created, assume it is possible to enter it.
-    DungeonPersistentState* state = GetBoundInstanceSaveForSelfOrGroup(at->target_mapId);
-    Map* map = sMapMgr.FindMap(at->target_mapId, state ? state->GetInstanceId() : 0);
+    DungeonPersistentState* state = GetBoundInstanceSaveForSelfOrGroup(at->loc.GetMapId());
+    Map* map = sMapMgr.FindMap(at->loc.GetMapId(), state ? state->GetInstanceId() : 0);
 
     if (map && at->combatMode == 1)
     {
@@ -24333,7 +24197,7 @@ AreaLockStatus Player::GetAreaTriggerLockStatus(AreaTrigger const* at, Difficult
         if (((DungeonMap*)map)->GetPlayersCountExceptGMs() >= ((DungeonMap*)map)->GetMaxPlayers())
             return AREA_LOCKSTATUS_INSTANCE_IS_FULL;
 
-        InstancePlayerBind* pBind = GetBoundInstance(at->target_mapId, GetDifficulty(mapEntry->IsRaid()));
+        InstancePlayerBind* pBind = GetBoundInstance(at->loc.GetMapId(), GetDifficulty(mapEntry->IsRaid()));
         if (pBind && pBind->perm && pBind->state != state)
             return AREA_LOCKSTATUS_HAS_BIND;
 
@@ -24395,10 +24259,10 @@ bool Player::CheckTransferPossibility(AreaTrigger const*& at, bool b_onlyMainReq
     if (!at)
         return false;
 
-    if (at->target_mapId == GetMapId())
+    if (at->loc.GetMapId() == GetMapId())
         return true;
 
-    MapEntry const* targetMapEntry = sMapStore.LookupEntry(at->target_mapId);
+    MapEntry const* targetMapEntry = sMapStore.LookupEntry(at->loc.GetMapId());
 
     if (!targetMapEntry)
         return false;
@@ -24434,11 +24298,11 @@ bool Player::CheckTransferPossibility(AreaTrigger const*& at, bool b_onlyMainReq
             }
 
             // need find areatrigger to inner dungeon for landing point
-            if (at->target_mapId != corpseMapId)
+            if (at->loc.GetMapId() != corpseMapId)
             {
                 if (AreaTrigger const* corpseAt = sObjectMgr.GetMapEntranceTrigger(corpseMapId))
                 {
-                    targetMapEntry = sMapStore.LookupEntry(corpseAt->target_mapId);
+                    targetMapEntry = sMapStore.LookupEntry(corpseAt->loc.GetMapId());
                     at = corpseAt;
                 }
             }
@@ -24451,7 +24315,7 @@ bool Player::CheckTransferPossibility(AreaTrigger const*& at, bool b_onlyMainReq
 
     AreaLockStatus status = GetAreaTriggerLockStatus(at, GetDifficulty(targetMapEntry->IsRaid()));
 
-    DEBUG_LOG("Player::CheckTransferPossibility %s check lock status of map %u (difficulty %u), result is %u", GetGuidStr().c_str(), at->target_mapId, GetDifficulty(targetMapEntry->IsRaid()), status);
+    DEBUG_LOG("Player::CheckTransferPossibility %s check lock status of map %u (difficulty %u), result is %u", GetGuidStr().c_str(), at->loc.GetMapId(), GetDifficulty(targetMapEntry->IsRaid()), status);
 
     if (b_onlyMainReq)
     {
@@ -24476,13 +24340,13 @@ bool Player::CheckTransferPossibility(AreaTrigger const*& at, bool b_onlyMainReq
             GetSession()->SendAreaTriggerMessage(GetSession()->GetMangosString(LANG_LEVEL_MINREQUIRED), at->requiredLevel);
             return false;
         case AREA_LOCKSTATUS_ZONE_IN_COMBAT:
-            SendTransferAborted(at->target_mapId, TRANSFER_ABORT_ZONE_IN_COMBAT);
+            SendTransferAborted(at->loc.GetMapId(), TRANSFER_ABORT_ZONE_IN_COMBAT);
             return false;
         case AREA_LOCKSTATUS_INSTANCE_IS_FULL:
-            SendTransferAborted(at->target_mapId, TRANSFER_ABORT_MAX_PLAYERS);
+            SendTransferAborted(at->loc.GetMapId(), TRANSFER_ABORT_MAX_PLAYERS);
             return false;
         case AREA_LOCKSTATUS_QUEST_NOT_COMPLETED:
-            if (at->target_mapId == 269)
+            if (at->loc.GetMapId() == 269)
             {
                 GetSession()->SendAreaTriggerMessage(GetSession()->GetMangosString(LANG_TELEREQ_QUEST_BLACK_MORASS));
                 return false;
@@ -24502,25 +24366,25 @@ bool Player::CheckTransferPossibility(AreaTrigger const*& at, bool b_onlyMainReq
         case AREA_LOCKSTATUS_MISSING_DIFFICULTY:
             {
                 Difficulty difficulty = GetDifficulty(targetMapEntry->IsRaid());
-                SendTransferAborted(at->target_mapId, TRANSFER_ABORT_DIFFICULTY, difficulty > RAID_DIFFICULTY_10MAN_HEROIC ? RAID_DIFFICULTY_10MAN_HEROIC : difficulty);
+                SendTransferAborted(at->loc.GetMapId(), TRANSFER_ABORT_DIFFICULTY, difficulty > RAID_DIFFICULTY_10MAN_HEROIC ? RAID_DIFFICULTY_10MAN_HEROIC : difficulty);
                 return false;
             }
         case AREA_LOCKSTATUS_INSUFFICIENT_EXPANSION:
-            SendTransferAborted(at->target_mapId, TRANSFER_ABORT_INSUF_EXPAN_LVL, targetMapEntry->Expansion());
+            SendTransferAborted(at->loc.GetMapId(), TRANSFER_ABORT_INSUF_EXPAN_LVL, targetMapEntry->Expansion());
             return false;
         case AREA_LOCKSTATUS_NOT_ALLOWED:
         case AREA_LOCKSTATUS_HAS_BIND:
-            SendTransferAborted(at->target_mapId, TRANSFER_ABORT_MAP_NOT_ALLOWED);
+            SendTransferAborted(at->loc.GetMapId(), TRANSFER_ABORT_MAP_NOT_ALLOWED);
             return false;
         // TODO: messages for other cases
         case AREA_LOCKSTATUS_RAID_LOCKED:
-            SendTransferAborted(at->target_mapId, TRANSFER_ABORT_NEED_GROUP);
+            SendTransferAborted(at->loc.GetMapId(), TRANSFER_ABORT_NEED_GROUP);
             return false;
         // TODO: messages for other cases
         case AREA_LOCKSTATUS_UNKNOWN_ERROR:
         default:
-            SendTransferAborted(at->target_mapId, TRANSFER_ABORT_ERROR);
-            sLog.outError("Player::CheckTransferPossibility player %s has unhandled AreaLockStatus %u in map %u (difficulty %u), do nothing", GetGuidStr().c_str(), status, at->target_mapId, GetDifficulty(targetMapEntry->IsRaid()));
+            SendTransferAborted(at->loc.GetMapId(), TRANSFER_ABORT_ERROR);
+            sLog.outError("Player::CheckTransferPossibility player %s has unhandled AreaLockStatus %u in map %u (difficulty %u), do nothing", GetGuidStr().c_str(), status, at->loc.GetMapId(), GetDifficulty(targetMapEntry->IsRaid()));
             return false;
     }
 

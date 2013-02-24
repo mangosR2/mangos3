@@ -580,3 +580,23 @@ float GetFloatValueFromArray(Tokens const& data, uint16 index)
 
     return result;
 }
+
+time_t timeBitFieldsToTimeStamp(uint32 bits)
+{
+    time_t tim = time(NULL);
+    tm* t = localtime(&tim);
+    t->tm_min = bits & 0x3F;
+    t->tm_sec = 0;
+    t->tm_hour = bits >> 6 & 0x1F;
+    t->tm_mday = (bits >> 14 & 0x3F) + 1;
+    t->tm_mon = bits >> 20 & 0xF;
+    t->tm_year = (bits >> 24 & 0xFF) + 100;
+
+    return mktime(t);
+}
+
+uint32 secsToTimeBitFields(time_t secs)
+{
+    tm* lt = localtime(&secs);
+    return (lt->tm_year - 100) << 24 | lt->tm_mon  << 20 | (lt->tm_mday - 1) << 14 | lt->tm_wday << 11 | lt->tm_hour << 6 | lt->tm_min;
+}

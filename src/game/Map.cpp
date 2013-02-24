@@ -78,7 +78,7 @@ Map::Map(uint32 id, time_t expiry, uint32 InstanceId, uint8 SpawnMode)
   m_VisibleDistance(DEFAULT_VISIBILITY_DISTANCE),
   m_activeNonPlayersIter(m_activeNonPlayers.end()),
   i_gridExpiry(expiry), m_TerrainData(sTerrainMgr.LoadTerrain(id)),
-  i_data(NULL), i_script_id(0)
+  i_data(NULL), i_script_id(0), m_Unloading(false)
 {
     m_CreatureGuids.Set(sObjectMgr.GetFirstTemporaryCreatureLowGuid());
     m_GameObjectGuids.Set(sObjectMgr.GetFirstTemporaryGameObjectLowGuid());
@@ -858,7 +858,6 @@ void Map::Relocation(GameObject* go, float x, float y, float z, float orientatio
 
     Cell old_cell(old_val);
     Cell new_cell(new_val);
-    bool same_cell = (new_cell == old_cell);
 
     go->Relocate(x, y, z, orientation);
 
@@ -988,6 +987,8 @@ bool Map::UnloadGrid(const uint32 &x, const uint32 &y, bool pForce)
 
 void Map::UnloadAll(bool pForce)
 {
+    SetIsInUnloading();
+
     while (!IsLoadingObjectsQueueEmpty())
     {
         if (LoadingObjectQueueMember* member = GetNextLoadingObject())
@@ -2437,8 +2438,7 @@ void Map::ForcedUnload()
 
         if (player->IsBeingTeleportedFar())
         {
-            WorldLocation old_loc;
-            player->GetPosition(old_loc);
+            WorldLocation old_loc = player->GetPosition();
             if (!player->TeleportTo(old_loc, TELE_TO_NODELAY))
             {
                 DETAIL_LOG("Map::ForcedUnload: %s is in teleport state, cannot be ported to his previous place, teleporting him to his homebind place...",
@@ -2581,6 +2581,8 @@ template<class T> void Map::LoadObjectToGrid(uint32& guid, GridType& grid, Battl
 
     if (bg)
         bg->OnObjectDBLoad(obj);
+
+    obj->UpdateObjectVisibility();
 }
 
 WorldObjectEventProcessor* Map::GetEvents()

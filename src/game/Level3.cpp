@@ -303,6 +303,7 @@ bool ChatHandler::HandleReloadAllScriptsCommand(char* /*args*/)
     }
 
     sLog.outString("Re-Loading Scripts...");
+    HandleReloadDBScriptsOnCreatureDeathCommand((char*)"a");
     HandleReloadDBScriptsOnGoUseCommand((char*)"a");
     HandleReloadDBScriptsOnGossipCommand((char*)"a");
     HandleReloadDBScriptsOnEventCommand((char*)"a");
@@ -1004,6 +1005,26 @@ bool ChatHandler::HandleReloadDBScriptsOnGoUseCommand(char* args)
 
     if (*args != 'a')
         SendGlobalSysMessage("DB table `dbscripts_on_go[_template]_use` reloaded.");
+
+    return true;
+}
+
+bool ChatHandler::HandleReloadDBScriptsOnCreatureDeathCommand(char* args)
+{
+    if (sScriptMgr.IsScriptScheduled())
+    {
+        SendSysMessage("DB scripts used currently, please attempt reload later.");
+        SetSentErrorMessage(true);
+        return false;
+    }
+
+    if (*args != 'a')
+        sLog.outString("Re-Loading Scripts from `dbscripts_on_creature_death`...");
+
+    sScriptMgr.LoadCreatureDeathScripts();
+
+    if (*args != 'a')
+        SendGlobalSysMessage("DB table `dbscripts_on_creature_death` reloaded.");
 
     return true;
 }
@@ -4417,7 +4438,7 @@ bool ChatHandler::HandleNpcInfoCommand(char* /*args*/)
     else if (target->HasAIName())
         PSendSysMessage("AI name: %s", target->GetAIName().c_str());
 
-    PSendSysMessage("Phasemask %u, has %u active events, %u SpellAuraHolders, %u unit states",
+    PSendSysMessage("Phasemask %u, has %u active events, "SIZEFMTD" SpellAuraHolders, "SIZEFMTD" unit states",
         phaseMask,
         target->GetEvents()->size(),
         target->GetSpellAuraHolderMap().size(),
@@ -4956,12 +4977,8 @@ bool ChatHandler::HandleTeleAddCommand(char* args)
         return false;
     }
 
-    GameTele tele;
-    tele.position_x  = player->GetPositionX();
-    tele.position_y  = player->GetPositionY();
-    tele.position_z  = player->GetPositionZ();
-    tele.orientation = player->GetOrientation();
-    tele.mapId       = player->GetMapId();
+    GameTele tele; 
+    tele.loc         = player->GetPosition();
     tele.name        = name;
 
     if (sObjectMgr.AddGameTele(tele))
@@ -6975,6 +6992,9 @@ bool ChatHandler::HandleSendMassMailCommand(char* args)
     if (!ExtractRaceMask(&args, raceMask, &name))
         return false;
 
+    Gender gender;
+    ExtractGender(&args, gender);
+
     // need dynamic object because it trasfered to mass mailer
     MailDraft* draft = new MailDraft;
 
@@ -6988,13 +7008,11 @@ bool ChatHandler::HandleSendMassMailCommand(char* args)
     // from console show nonexistent sender
     MailSender sender(MAIL_NORMAL, m_session ? m_session->GetPlayer()->GetObjectGuid().GetCounter() : 0, MAIL_STATIONERY_GM);
 
-    sMassMailMgr.AddMassMailTask(draft, sender, raceMask);
+    sMassMailMgr.AddMassMailTask(draft, sender, raceMask, gender);
 
     PSendSysMessage(LANG_MAIL_SENT, name);
     return true;
 }
-
-
 
 bool ChatHandler::HandleSendItemsHelper(MailDraft& draft, char* args)
 {
@@ -7110,9 +7128,11 @@ bool ChatHandler::HandleSendMassItemsCommand(char* args)
     if (!ExtractRaceMask(&args, raceMask, &name))
         return false;
 
+    Gender gender;
+    ExtractGender(&args, gender);
+
     // need dynamic object because it trasfered to mass mailer
     MailDraft* draft = new MailDraft;
-
 
     // fill mail
     if (!HandleSendItemsHelper(*draft, args))
@@ -7124,7 +7144,7 @@ bool ChatHandler::HandleSendMassItemsCommand(char* args)
     // from console show nonexistent sender
     MailSender sender(MAIL_NORMAL, m_session ? m_session->GetPlayer()->GetObjectGuid().GetCounter() : 0, MAIL_STATIONERY_GM);
 
-    sMassMailMgr.AddMassMailTask(draft, sender, raceMask);
+    sMassMailMgr.AddMassMailTask(draft, sender, raceMask, gender);
 
     PSendSysMessage(LANG_MAIL_SENT, name);
     return true;
@@ -7191,6 +7211,9 @@ bool ChatHandler::HandleSendMassMoneyCommand(char* args)
     if (!ExtractRaceMask(&args, raceMask, &name))
         return false;
 
+    Gender gender;
+    ExtractGender(&args, gender);
+
     // need dynamic object because it trasfered to mass mailer
     MailDraft* draft = new MailDraft;
 
@@ -7204,7 +7227,7 @@ bool ChatHandler::HandleSendMassMoneyCommand(char* args)
     // from console show nonexistent sender
     MailSender sender(MAIL_NORMAL, m_session ? m_session->GetPlayer()->GetObjectGuid().GetCounter() : 0, MAIL_STATIONERY_GM);
 
-    sMassMailMgr.AddMassMailTask(draft, sender, raceMask);
+    sMassMailMgr.AddMassMailTask(draft, sender, raceMask, gender);
 
     PSendSysMessage(LANG_MAIL_SENT, name);
     return true;
@@ -7389,7 +7412,7 @@ bool ChatHandler::HandleAccountFriendListCommand(char* args)
 
     if (!referredAccounts->empty())
     {
-        PSendSysMessage("Account %u (%s) has %u referred accounts:",targetAccountId, account_name.c_str(), referredAccounts->size());
+        PSendSysMessage("Account %u (%s) has "SIZEFMTD" referred accounts:",targetAccountId, account_name.c_str(), referredAccounts->size());
         for (RafLinkedList::const_iterator itr = referredAccounts->begin(); itr != referredAccounts->end(); ++itr)
         {
             uint32 accId = *itr;
@@ -7400,7 +7423,7 @@ bool ChatHandler::HandleAccountFriendListCommand(char* args)
     }
     if (!referalAccounts->empty())
     {
-        PSendSysMessage("Account %u (%s) has %u referral accounts:",targetAccountId, account_name.c_str(), referalAccounts->size());
+        PSendSysMessage("Account %u (%s) has "SIZEFMTD" referral accounts:",targetAccountId, account_name.c_str(), referalAccounts->size());
         for (RafLinkedList::const_iterator itr = referalAccounts->begin(); itr != referalAccounts->end(); ++itr)
         {
             uint32 accId = *itr;
@@ -7477,7 +7500,7 @@ bool ChatHandler::HandleMmapTestArea(char* args)
 
     if (!creatureList.empty())
     {
-        PSendSysMessage("Found " SIZEFMTD " Creatures.", creatureList.size());
+        PSendSysMessage("Found "SIZEFMTD" Creatures.", creatureList.size());
 
         uint32 paths = 0;
         uint32 uStartTime = WorldTimer::getMSTime();
@@ -7534,7 +7557,7 @@ bool ChatHandler::HandleTransportListCommand(char* args)
         if (!gInfo)
             continue;
 
-        PSendSysMessage("Transport: %s on map %u (%s), %s, passengers %u, current coords %f %f %f",
+        PSendSysMessage("Transport: %s on map %u (%s), %s, passengers "SIZEFMTD", current coords %f %f %f",
             transport->GetObjectGuid().GetString().c_str(), 
             mapID,
             name.c_str(),
@@ -7665,18 +7688,19 @@ bool ChatHandler::HandleTransportPathCommand(char* args)
             return true;
         }
     }
-    PSendSysMessage("Transport: %s on map %u (%s), %s, passengers %u, current time %u (map %u xyz %f %f %f)",
+    PSendSysMessage("Transport: %s on map %u (%s), %s, passengers "SIZEFMTD", current time %u (map %u xyz %f %f %f)",
             transport->GetObjectGuid().GetString().c_str(), 
             map->GetId(),
             transport->GetName(),
             transport->isActiveObject() ? "active" : "passive",
             transport->GetPassengers().size(),
             transport->GetCurrent()->first,
+            transport->GetCurrent()->second.mapid,
             transport->GetCurrent()->second.x,
             transport->GetCurrent()->second.y,
             transport->GetCurrent()->second.z
         );
-    PSendSysMessage("Transport: %s on map %u (%s), %s, passengers %u, next time %u (map %u xyz %f %f %f)",
+    PSendSysMessage("Transport: %s on map %u (%s), %s, passengers "SIZEFMTD", next time %u (map %u xyz %f %f %f)",
             transport->GetObjectGuid().GetString().c_str(), 
             map->GetId(),
             transport->GetName(),
@@ -7731,7 +7755,7 @@ bool ChatHandler::HandleTransportCommand(char* args)
         }
     }
 
-    PSendSysMessage("Transport: %s on map %u (%s), %s, passengers %u, current coords %f %f %f",
+    PSendSysMessage("Transport: %s on map %u (%s), %s, passengers "SIZEFMTD", current coords %f %f %f",
             transport->GetObjectGuid().GetString().c_str(), 
             map->GetId(),
             transport->GetName(),
