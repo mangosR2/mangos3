@@ -2271,9 +2271,9 @@ void Unit::CalculateDamageAbsorbAndResist(Unit* pCaster, DamageInfo* damageInfo,
             float levelDiff = selfLevel - float(pCaster->GetLevelForTarget(this));
 
             // Get base resistance for schoolmask
-            float resistance = float(GetResistance(damageInfo->schoolMask));
+            float resistance = float(GetResistance(damageInfo->SchoolMask()));
             // Ignore resistance by self SPELL_AURA_MOD_TARGET_RESISTANCE aura
-            resistance += float(pCaster->GetTotalAuraModifierByMiscMask(SPELL_AURA_MOD_TARGET_RESISTANCE, damageInfo->schoolMask));
+            resistance += float(pCaster->GetTotalAuraModifierByMiscMask(SPELL_AURA_MOD_TARGET_RESISTANCE, damageInfo->SchoolMask()));
 
             // Calculate effective resistance
             float casterPen = pCaster->GetTypeId() == TYPEID_PLAYER ? float(((Player*)pCaster)->GetSpellPenetrationItemMod()) : 0.0f;
