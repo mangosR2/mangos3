@@ -2206,12 +2206,15 @@ void Unit::CalculateDamageAbsorbAndResist(Unit* pCaster, DamageInfo* damageInfo,
                 else
                     break;
             }
-
             if (damageInfo->damageType == DOT && m == 4)
                 damageInfo->resist += uint32(damageInfo->damage);
                 // need make more correct this hack.
             else
                 damageInfo->resist += uint32(damageInfo->damage * m / 4);
+
+            // full resist mode granted
+            if (damageInfo->resist > damageInfo->damage)
+                damageInfo->resist = damageInfo->damage;
         }
         // WOTLK: tested. Krahken version
         else if (calcMethod == 1)
@@ -2232,7 +2235,7 @@ void Unit::CalculateDamageAbsorbAndResist(Unit* pCaster, DamageInfo* damageInfo,
             float ran = (float)urand(0, 100);
             int maxcoeff = (int)(tmpvalue2*10)+2;
 
-            for (uint8 i = 0; i < 4; ++i) //Inverser la resist
+            for (uint8 i = 0; i < 5; ++i) //Inverser la resist
             {
                 float resis = 0.1f * (float)(maxcoeff-i);
                 float proba = 0.5f - 2.5f * abs(resis - tmpvalue2);
@@ -2255,48 +2258,50 @@ void Unit::CalculateDamageAbsorbAndResist(Unit* pCaster, DamageInfo* damageInfo,
                 damageInfo->resist += uint32(damageInfo->damage);
             else
                 damageInfo->resist += uint32(damageInfo->damage * tmpvalue2);
+
+            // full resist mode granted
+            if (damageInfo->resist > damageInfo->damage)
+                damageInfo->resist = damageInfo->damage;
         }
         // WOTLK: tested. boxa version
         else if (calcMethod == 2)
         {
             // Get levels
-            uint32 selfLevel = GetLevelForTarget(pCaster);
-            int32 levelDiff  = selfLevel - pCaster->GetLevelForTarget(this);
+            float selfLevel = float(GetLevelForTarget(pCaster));
+            float levelDiff = selfLevel - float(pCaster->GetLevelForTarget(this));
 
             // Get base resistance for schoolmask
-            int32 resistance = int32(GetResistance(damageInfo->schoolMask));
+            float resistance = float(GetResistance(damageInfo->SchoolMask()));
             // Ignore resistance by self SPELL_AURA_MOD_TARGET_RESISTANCE aura
-            resistance += pCaster->GetTotalAuraModifierByMiscMask(SPELL_AURA_MOD_TARGET_RESISTANCE, damageInfo->schoolMask);
+            resistance += float(pCaster->GetTotalAuraModifierByMiscMask(SPELL_AURA_MOD_TARGET_RESISTANCE, damageInfo->SchoolMask()));
 
             // Calculate effective resistance
-            int32 casterPen = pCaster->GetTypeId() == TYPEID_PLAYER ? ((Player*)pCaster)->GetSpellPenetrationItemMod() : 0;
-            int32 effResist = resistance + std::max(levelDiff * 5, 0) - std::min(casterPen, resistance);
+            float casterPen = pCaster->GetTypeId() == TYPEID_PLAYER ? float(((Player*)pCaster)->GetSpellPenetrationItemMod()) : 0.0f;
+            float effResist = resistance + std::max(levelDiff * 5.0f, 0.0f) - std::min(casterPen, resistance);
 
-            if (effResist > 0)
+            // Calculate mitigation
+            float magicK = selfLevel > 80 ? 400.0f + ceil(36.6f * float(selfLevel - 80)) : 400.0f;
+            float avrgMitigation = effResist / (magicK + effResist);
+
+            // Search applicable section 100%, 90%, 80% ... 10%
+            float chance = rand_norm_f();
+            uint32 resPct = 100;
+            do
             {
-                // Calculate mitigation
-                uint32 magicK = selfLevel > 80 ? 400 + ceil(36.6f * float(selfLevel - 80)) : 400;
-                float avrgMitigation = float(effResist / (magicK + effResist));
-
-                // Search applicable section 100%, 90%, 80% ... 10%
-                float chance = rand_norm_f();
-                uint32 resPct = 100;
-                do
-                {
-                    if (0.5f - 2.5f * (0.01f * float(resPct) - avrgMitigation) > chance)
-                    {
-                        damageInfo->resist += uint32(damageInfo->damage * resPct / 100);
-                        break;
-                    }
-                    resPct -= 10;
-                }
-                while (resPct > 0);
+                if (0.5f - 2.5f * (0.01f * float(resPct) - avrgMitigation) >= chance)
+                    break;
+                resPct -= 10;
             }
-        }
+            while (resPct > 0);
 
-        // Limit resistance to damage
-        if (damageInfo->resist > damageInfo->damage)
-            damageInfo->resist = damageInfo->damage;
+            // Apply if found
+            if (resPct > 0)
+                damageInfo->resist += uint32(damageInfo->damage * resPct / 100);
+
+            // Limit resistance to damage
+            if (damageInfo->resist > damageInfo->damage)
+                damageInfo->resist = damageInfo->damage;
+        }
     }
     else
         damageInfo->resist = 0;
