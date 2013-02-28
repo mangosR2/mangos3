@@ -272,7 +272,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleUnused,                                    //214 Tamed Pet Passive (single test like spell 20782, also single for 157 aura)
     &Aura::HandleArenaPreparation,                          //215 SPELL_AURA_ARENA_PREPARATION
     &Aura::HandleModCastingSpeed,                           //216 SPELL_AURA_HASTE_SPELLS
-    &Aura::HandleUnused,                                    //217 8 spells in 4.3.4 melee haste related
+    &Aura::HandleModMeleeSpeedPct,                          //217 SPELL_AURA_MOD_MELEE_HASTE_2
     &Aura::HandleAuraModRangedHaste,                        //218 SPELL_AURA_HASTE_RANGED
     &Aura::HandleModManaRegen,                              //219 SPELL_AURA_MOD_MANA_REGEN_FROM_STAT
     &Aura::HandleModRatingFromStat,                         //220 SPELL_AURA_MOD_RATING_FROM_STAT
@@ -374,8 +374,8 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleUnused,                                    //316 old SPELL_AURA_MOD_PERIODIC_HASTE 0 spells in 4.3.4
     &Aura::HandleModIncreaseSpellPowerPct,                  //317 SPELL_AURA_MOD_INCREASE_SPELL_POWER_PCT 13 spells in 4.3.4, implemented in Unit::SpellBaseDamageBonusDone and Unit::SpellBaseHealingBonusDone
     &Aura::HandleAuraMastery,                               //318 SPELL_AURA_MASTERY 12 spells in 4.3
-    &Aura::HandleModMeleeSpeedPct,                          //319 SPELL_AURA_MOD_MELEE_ATTACK_SPEED 47 spells in 4.3.4
-    &Aura::HandleAuraModRangedHaste,                        //320 SPELL_AURA_MOD_RANGED_ATTACK_SPEED 5 spells in 4.3.4
+    &Aura::HandleModMeleeSpeedPct,                          //319 SPELL_AURA_MOD_MELEE_HASTE_3 47 spells in 4.3.4
+    &Aura::HandleAuraModRangedHaste,                        //320 SPELL_AURA_MOD_RANGED_HASTE_2 5 spells in 4.3.4
     &Aura::HandleNULL,                                      //321 1 spells in 4.3 Hex
     &Aura::HandleAuraInterfereTargeting,                    //322 SPELL_AURA_INTERFERE_TARGETING 6 spells in 4.3
     &Aura::HandleUnused,                                    //323 0 spells in 4.3.4
@@ -6853,6 +6853,28 @@ void Aura::HandleAuraPeriodicDummy(bool apply, bool Real)
                 m_modifier.m_amount += int32(caster->GetTotalAttackPowerValue(RANGED_ATTACK) * 14 / 100);
             break;
         }
+        case SPELLFAMILY_DEATHKNIGHT:
+        {
+            // Reaping and Blood Rites
+            if (GetSpellProto()->GetSpellIconID() == 22 || GetSpellProto()->GetSpellIconID() == 2724)
+            {
+                if (apply)
+                    break;
+
+                if (m_spellEffect->EffectApplyAuraName != SPELL_AURA_PERIODIC_DUMMY)
+                    break;
+
+                if (target->GetTypeId() != TYPEID_PLAYER)
+                    break;
+
+                if (((Player*)target)->getClass() != CLASS_DEATH_KNIGHT)
+                    break;
+
+                // aura removed - remove death runes
+                ((Player*)target)->RemoveRunesByAuraEffect(this);
+            }
+            break;
+        }
         default:
             break;
     }
@@ -10724,6 +10746,18 @@ void Aura::PeriodicDummyTick()
             // Summon Gargoyle
 //            if (spell->GetSpellFamilyFlags().test<CF_DEATHKNIGHT_SUMMON_GARGOYLE>())
 //                return;
+            // Reaping and Blood Rites
+            if (spell->GetSpellIconID() == 22 || spell->GetSpellIconID() == 2724)
+            {
+                if (target->GetTypeId() != TYPEID_PLAYER)
+                    return;
+
+                if (((Player*)target)->getClass() != CLASS_DEATH_KNIGHT)
+                    return;
+
+                // timer expired - remove death runes
+                ((Player*)target)->RemoveRunesByAuraEffect(this);
+            }
             // Bladed Armor
             if (spell->GetSpellIconID() == 2653)
             {
@@ -10734,7 +10768,6 @@ void Aura::PeriodicDummyTick()
                 return;
             }
             // Death Rune Mastery
-            // Reaping
             // Blood of the North
             if (spell->GetSpellIconID() == 3041 || (spell->GetSpellIconID() == 22 && spell->GetSpellIconID() == 62459) || spell->GetSpellIconID() == 2622)
             {
@@ -11104,37 +11137,29 @@ void Aura::HandleAuraConvertRune(bool apply, bool Real)
     if (GetTarget()->GetTypeId() != TYPEID_PLAYER)
         return;
 
-    Player *plr = (Player*)GetTarget();
+    Player* plr = (Player*)GetTarget();
 
     if (plr->getClass() != CLASS_DEATH_KNIGHT)
         return;
 
-    RuneType runeFrom = RuneType(m_spellEffect->EffectMiscValue);
-    RuneType runeTo   = RuneType(m_spellEffect->EffectMiscValueB);
-
+    uint32 runes = GetModifier()->m_amount;
+    // convert number of runes specified in aura amount of rune type in miscvalue to runetype in miscvalueb
     if (apply)
     {
-        for(uint32 i = 0; i < MAX_RUNES; ++i)
+        for (uint32 i = 0; i < MAX_RUNES && runes; ++i)
         {
-            if (plr->GetCurrentRune(i) == runeFrom && !plr->GetRuneCooldown(i))
+            if (GetMiscValue() != plr->GetCurrentRune(i))
+                continue;
+
+            if (!plr->GetRuneCooldown(i))
             {
-                plr->ConvertRune(i, runeTo, GetId());
-                break;
+                plr->AddRuneByAuraEffect(i, RuneType(GetMiscBValue()), this);
+                --runes;
             }
         }
     }
     else
-    {
-        for(uint32 i = 0; i < MAX_RUNES; ++i)
-        {
-            if (plr->GetCurrentRune(i) == runeTo && plr->GetBaseRune(i) == runeFrom)
-            {
-                plr->ConvertRune(i, runeFrom);
-                plr->ClearConvertedBy(i);
-                break;
-            }
-        }
-    }
+        plr->RemoveRunesByAuraEffect(this);
 }
 
 void Aura::HandlePhase(bool apply, bool Real)

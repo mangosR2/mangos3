@@ -432,7 +432,12 @@ struct Areas
 };
 
 #define MAX_RUNES       6
-#define RUNE_COOLDOWN   (2*5*IN_MILLISECONDS)                // msec
+
+enum RuneCooldowns
+{
+    RUNE_BASE_COOLDOWN  = 10000,
+    RUNE_MISS_COOLDOWN  = 1500     // cooldown applied on runes when the spell misses
+};
 
 enum RuneType
 {
@@ -447,8 +452,10 @@ struct RuneInfo
 {
     uint8  BaseRune;
     uint8  CurrentRune;
+    uint16 BaseCooldown;
     uint16 Cooldown;                                        // msec
     uint32 ConvertedBy;
+    Aura const* ConvertAura;
 };
 
 struct Runes
@@ -456,6 +463,7 @@ struct Runes
     RuneInfo runes[MAX_RUNES];
     uint8 runeState;                                        // mask of available runes
     uint8 needConvert;                                      // mask of runes that need to be converted
+    uint32 lastUsedRuneMask;
 
     void SetRuneState(uint8 index, bool set = true)
     {
@@ -2629,10 +2637,22 @@ class MANGOS_DLL_SPEC Player : public Unit
         RuneType GetBaseRune(uint8 index) const { return RuneType(m_runes->runes[index].BaseRune); }
         RuneType GetCurrentRune(uint8 index) const { return RuneType(m_runes->runes[index].CurrentRune); }
         uint16 GetRuneCooldown(uint8 index) const { return m_runes->runes[index].Cooldown; }
+        uint16 GetBaseRuneCooldown(uint8 index) const { return m_runes->runes[index].BaseCooldown; }
+        uint16 CalculateRuneBaseCooldown(uint8 index) const { return CalculateRuneTypeBaseCooldown(GetBaseRune(index)); }
+        uint16 CalculateRuneTypeBaseCooldown(RuneType runeType) const;
         bool IsBaseRuneSlotsOnCooldown(RuneType runeType) const;
+        void ClearLastUsedRuneMask() { m_runes->lastUsedRuneMask = 0; }
+        uint32 GetLastUsedRuneMask() const { return m_runes->lastUsedRuneMask; }
+        bool IsLastUsedRune(uint8 index) const { return m_runes->lastUsedRuneMask & (1 << index); }
+        void SetLastUsedRune(RuneType type);
         void SetBaseRune(uint8 index, RuneType baseRune) { m_runes->runes[index].BaseRune = baseRune; }
         void SetCurrentRune(uint8 index, RuneType currentRune) { m_runes->runes[index].CurrentRune = currentRune; }
         void SetRuneCooldown(uint8 index, uint16 cooldown) { m_runes->runes[index].Cooldown = cooldown; m_runes->SetRuneState(index, (cooldown == 0) ? true : false); }
+        void SetBaseRuneCooldown(uint8 index, uint16 cooldown) { m_runes->runes[index].BaseCooldown = cooldown; }
+        void SetRuneConvertAura(uint8 index, Aura const* aura);
+        void AddRuneByAuraEffect(uint8 index, RuneType newType, Aura const* aura);
+        void RemoveRunesByAuraEffect(Aura const* aura);
+        void RestoreBaseRune(uint8 index);
         void ConvertRune(uint8 index, RuneType newType, uint32 spellid = 0);
         void SetConvertedBy(uint8 index, uint32 spellid) { m_runes->runes[index].ConvertedBy = spellid; }
         void ClearConvertedBy(uint8 index) { m_runes->runes[index].ConvertedBy = 0; }
@@ -2647,7 +2667,6 @@ class MANGOS_DLL_SPEC Player : public Unit
             if (spellid != 0)
                 SetConvertedBy(index, spellid);
         }
-        bool ActivateRunes(RuneType type, uint32 count);
         void ResyncRunes();
         void AddRunePower(uint8 index);
         void InitRunes();

@@ -2372,14 +2372,19 @@ void Player::RegenerateAll(uint32 diff)
 void Player::Regenerate(Powers power, uint32 diff)
 {
     uint32 powerIndex = GetPowerIndex(power);
-    if (powerIndex == INVALID_POWER_INDEX)
-        return;
+    uint32 maxValue, curValue;
 
-    uint32 maxValue = GetMaxPowerByIndex(powerIndex);
-    if (!maxValue)
-        return;
+    if (power != POWER_RUNE)
+    {
+        if (powerIndex == INVALID_POWER_INDEX)
+            return;
 
-    uint32 curValue = GetPowerByIndex(powerIndex);
+        maxValue = GetMaxPowerByIndex(powerIndex);
+        if (!maxValue)
+            return;
+
+        curValue = GetPowerByIndex(powerIndex);
+    }
 
     float addvalue = 0.0f;
 
@@ -2434,40 +2439,24 @@ void Player::Regenerate(Powers power, uint32 diff)
         case POWER_RUNE:
         {
             if (getClass() != CLASS_DEATH_KNIGHT)
-                break;
+                return;
 
-            for (uint32 rune = 0; rune < MAX_RUNES; ++rune)
+            for(uint32 rune = 0; rune < MAX_RUNES; rune += 2)
             {
-                if (uint16 cd = GetRuneCooldown(rune))       // if we have cooldown, reduce it...
+                uint8 runeToRegen = rune;
+                uint32 cd = GetRuneCooldown(rune);
+                uint32 secondRuneCd = GetRuneCooldown(rune + 1);
+                // Regenerate second rune of the same type only after first rune is off the cooldown
+                if (secondRuneCd && (cd > secondRuneCd || !cd))
                 {
-                    uint32 cd_diff = diff;
-                    AuraList const& ModPowerRegenPCTAuras = GetAurasByType(SPELL_AURA_MOD_POWER_REGEN_PERCENT);
-                    for (AuraList::const_iterator i = ModPowerRegenPCTAuras.begin(); i != ModPowerRegenPCTAuras.end(); ++i)
-                    {
-                        if ((*i)->GetModifier()->m_miscvalue == int32(power) && (*i)->GetMiscBValue() == GetCurrentRune(rune))
-                            cd_diff = cd_diff * ((*i)->GetModifier()->m_amount + 100) / 100;
-                    }
-
-                    SetRuneCooldown(rune, (cd < cd_diff) ? 0 : cd - cd_diff);
-
-                    // check if we don't have cooldown, need convert and that our rune wasn't already converted
-                    if (cd < cd_diff && m_runes->IsRuneNeedsConvert(rune) && GetBaseRune(rune) == GetCurrentRune(rune))
-                    {
-                        // currently all delayed rune converts happen with rune death
-                        // ConvertedBy was initialized at proc
-                        ConvertRune(rune, RUNE_DEATH);
-                        SetNeedConvertRune(rune, false);
-                    }
+                    runeToRegen = rune + 1;
+                    cd = secondRuneCd;
                 }
-                else if (m_runes->IsRuneNeedsConvert(rune) && GetBaseRune(rune) == GetCurrentRune(rune))
-                {
-                    // currently all delayed rune converts happen with rune death
-                    // ConvertedBy was initialized at proc
-                    ConvertRune(rune, RUNE_DEATH);
-                    SetNeedConvertRune(rune, false);
-                }
+
+                if (cd)
+                    SetRuneCooldown(runeToRegen, (cd > diff) ? cd - diff : 0);
             }
-            break;
+            return;
         }
         case POWER_HEALTH:
         default:
@@ -22856,6 +22845,79 @@ void Player::SetTitle(CharTitlesEntry const* title, bool lost)
     GetSession()->SendPacket(&data);
 }
 
+uint16 Player::CalculateRuneTypeBaseCooldown(RuneType runeType) const
+{
+    float cooldown = RUNE_BASE_COOLDOWN;
+    float hastePct = 0.0f;
+
+    Unit::AuraList const& regenAura = GetAurasByType(SPELL_AURA_MOD_POWER_REGEN_PERCENT);
+    for (Unit::AuraList::const_iterator i = regenAura.begin();i != regenAura.end(); ++i)
+        if ((*i)->GetMiscValue() == POWER_RUNE && (*i)->GetSpellEffect()->EffectMiscValueB == runeType)
+            cooldown *= 1.0f - (*i)->GetModifier()->m_amount / 100.0f;
+
+    // Runes cooldown are now affected by player's haste from equipment ...
+    hastePct = GetRatingBonusValue(CR_HASTE_MELEE);
+
+    // ... and some auras.
+    hastePct += GetTotalAuraModifier(SPELL_AURA_MOD_MELEE_HASTE);
+    hastePct += GetTotalAuraModifier(SPELL_AURA_MOD_MELEE_HASTE_2);
+    hastePct += GetTotalAuraModifier(SPELL_AURA_MOD_MELEE_HASTE_3);
+
+    cooldown *=  1.0f - (hastePct / 100.0f);
+    if (cooldown < 0.0f)
+        return 0;
+
+    return cooldown;
+}
+
+void Player::SetLastUsedRune(RuneType rune)
+{
+    m_runes->lastUsedRuneMask |= 1 << uint32(rune);
+}
+
+void Player::SetRuneConvertAura(uint8 index, Aura const* aura)
+{
+    m_runes->runes[index].ConvertAura = aura;
+}
+
+void Player::AddRuneByAuraEffect(uint8 index, RuneType newType, Aura const* aura)
+{
+    SetRuneConvertAura(index, aura); ConvertRune(index, newType);
+}
+
+void Player::RemoveRunesByAuraEffect(Aura const* aura)
+{
+    for (uint8 i = 0; i < MAX_RUNES; ++i)
+    {
+        if (m_runes->runes[i].ConvertAura == aura)
+        {
+            ConvertRune(i, GetBaseRune(i));
+            SetRuneConvertAura(i, NULL);
+        }
+    }
+}
+
+void Player::RestoreBaseRune(uint8 index)
+{
+    Aura const* aura = m_runes->runes[index].ConvertAura;
+    // If rune was converted by a non-pasive aura that still active we should keep it converted
+    if (aura && !(aura->GetSpellProto()->Attributes & SPELL_ATTR_PASSIVE))
+        return;
+
+    ConvertRune(index, GetBaseRune(index));
+    SetRuneConvertAura(index, NULL);
+    // Don't drop passive talents providing rune convertion
+    if (!aura || aura->GetModifier()->m_auraname != SPELL_AURA_CONVERT_RUNE)
+        return;
+
+    for (uint8 i = 0; i < MAX_RUNES; ++i)
+        if (aura == m_runes->runes[i].ConvertAura)
+            return;
+
+    if (Unit* target = aura->GetTarget())
+        target->RemoveSpellAuraHolder(const_cast<Aura*>(aura)->GetHolder());
+}
+
 void Player::ConvertRune(uint8 index, RuneType newType, uint32 spellid)
 {
     SetCurrentRune(index, newType);
@@ -22869,22 +22931,6 @@ void Player::ConvertRune(uint8 index, RuneType newType, uint32 spellid)
     GetSession()->SendPacket(&data);
 }
 
-bool Player::ActivateRunes(RuneType type, uint32 count)
-{
-    bool modify = false;
-    for (uint32 j = 0; count > 0 && j < MAX_RUNES; ++j)
-    {
-        if (GetCurrentRune(j) == type && GetRuneCooldown(j) > 0)
-        {
-            SetRuneCooldown(j, 0);
-            --count;
-            modify = true;
-        }
-    }
-
-    return modify;
-}
-
 void Player::ResyncRunes()
 {
     WorldPacket data(SMSG_RESYNC_RUNES, 4 + MAX_RUNES * 2);
@@ -22892,7 +22938,14 @@ void Player::ResyncRunes()
     for (uint32 i = 0; i < MAX_RUNES; ++i)
     {
         data << uint8(GetCurrentRune(i));                   // rune type
-        data << uint8(255 - ((GetRuneCooldown(i) / REGEN_TIME_FULL) * 51));     // passed cooldown time (0-255)
+        // float casts ensure the division is performed on floats as we need float result
+        uint16 baseCd = GetBaseRuneCooldown(i);
+        if (!baseCd || !GetRuneCooldown(i))
+            data << uint8(255);
+        else if (baseCd == GetRuneCooldown(i))
+            data << uint8(0);
+        else
+            data << uint8(float(baseCd - GetRuneCooldown(i)) / baseCd * 255); // rune cooldown passed
     }
     GetSession()->SendPacket(&data);
 }
@@ -22923,6 +22976,7 @@ void Player::InitRunes()
 
     m_runes->runeState = 0;
     m_runes->needConvert = 0;
+    m_runes->lastUsedRuneMask = 0;
 
     for (uint32 i = 0; i < MAX_RUNES; ++i)
     {
@@ -22930,6 +22984,7 @@ void Player::InitRunes()
         SetCurrentRune(i, runeSlotTypes[i]);                // init current types
         SetRuneCooldown(i, 0);                              // reset cooldowns
         SetConvertedBy(i, 0);                               // init spellid
+        SetBaseRuneCooldown(i, 0);
         m_runes->SetRuneState(i);
     }
 
@@ -24418,6 +24473,15 @@ void Player::SendClearCooldown(uint32 spell_id, Unit* target)
     data.WriteGuidBytes<0, 6>(guid);
 
     SendDirectMessage(&data);
+
+    if (getClass() == CLASS_DEATH_KNIGHT)
+    {
+        for (uint32 j = 0; j < MAX_RUNES; ++j)
+            if (GetRuneCooldown(j))
+                SetRuneCooldown(j, 0);
+
+        ResyncRunes();
+    }
 }
 
 bool Player::HasMovementFlag(MovementFlags f) const

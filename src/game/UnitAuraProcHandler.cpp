@@ -5756,62 +5756,55 @@ SpellAuraProcResult Unit::HandlePeriodicDummyAuraProc(Unit* /*pVictim*/, DamageI
         }
         case SPELLFAMILY_DEATHKNIGHT:
         {
-            switch (spellProto->GetSpellIconID())
+            // Reaping
+            // Blood Rites
+            if (spellProto->GetSpellIconID() == 22 || spellProto->GetSpellIconID() == 2724)
             {
-                // Reaping
-                // Death Rune Mastery
-                // Blood of the North
-                case 22:
-                case 2622:
-                case 3041:
+                if (GetTypeId() == TYPEID_PLAYER)
                 {
-                    if(!procSpell)
+                    Player* player = (Player*)this;
+
+                    if (player->getClass() != CLASS_DEATH_KNIGHT)
                         return SPELL_AURA_PROC_FAILED;
 
-                    if (getClass() != CLASS_DEATH_KNIGHT)
+                    uint32 runeMask = player->GetLastUsedRuneMask();
+                    // cant proc only from death runes
+                    if ((runeMask & ~(1 << RUNE_DEATH)) == 0)
                         return SPELL_AURA_PROC_FAILED;
 
-                    Player * plr = GetTypeId() == TYPEID_PLAYER? ((Player*)this) : NULL;
-                    if (!plr)
-                        return SPELL_AURA_PROC_FAILED;
+                    // Reset amplitude - set death rune remove timer to 30s
+                    // ToDo: error: passing ‘const Aura’ as ‘this’ argument of ‘void Aura::ResetPeriodic(bool)’ discards qualifiers
+                    // triggeredByAura->ResetPeriodic(true);
 
-                    //get spell rune cost
-                    SpellRuneCostEntry const *runeCost = sSpellRuneCostStore.LookupEntry(procSpell->runeCostID);
-                    if (!runeCost)
-                        return SPELL_AURA_PROC_FAILED;
+                    uint32 runesLeft;
 
-                    //convert runes to death
-                    for (uint32 i = 0; i < NUM_RUNE_TYPES -1/*don't count death rune*/; ++i)
+                    // Blood Strike or Pestilence
+                    if (procSpell->Id == 45902 || procSpell->Id == 50842)
+                        runesLeft = 1;
+                    else
+                        runesLeft = 2;
+
+                    for (uint8 i = 0; i < MAX_RUNES && runesLeft; ++i)
                     {
-                        uint32 remainingCost = runeCost->RuneCost[i];
+                        RuneType rune = player->GetCurrentRune(i);
+                        if (rune == RUNE_DEATH)
+                            continue;
 
-                        while(remainingCost)
-                        {
-                            int32  convertedRuneCooldown = -1;
-                            uint32 convertedRune = i;
-                            for(uint32 j = 0; j < MAX_RUNES; ++j)
-                            {
-                                // convert only valid runes
-                                if (RuneType(i) != plr->GetCurrentRune(j) &&
-                                    RuneType(i) != plr->GetBaseRune(j))
-                                    continue;
+                        if (player->GetRuneCooldown(i) != player->GetBaseRuneCooldown(i))
+                            continue;
 
-                                // select rune with longest cooldown
-                                if (convertedRuneCooldown < plr->GetRuneCooldown(j))
-                                {
-                                    convertedRuneCooldown = int32(plr->GetRuneCooldown(j));
-                                    convertedRune = j;
-                                }
-                            }
-                            if (convertedRuneCooldown >= 0)
-                                plr->ConvertRune(convertedRune, RUNE_DEATH);
-                            --remainingCost;
-                        }
+                        if ((runeMask & (1 << rune)) == 0)
+                            continue;
+
+                        --runesLeft;
+                        runeMask &= ~(1 << rune);
+
+                        // Mark aura as used
+                        player->AddRuneByAuraEffect(i, RUNE_DEATH, triggeredByAura);
                     }
                     return SPELL_AURA_PROC_OK;
                 }
-                default:
-                    break;
+                return SPELL_AURA_PROC_FAILED;
             }
             break;
         }

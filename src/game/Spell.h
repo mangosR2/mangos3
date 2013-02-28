@@ -454,7 +454,8 @@ class Spell
         SpellCastResult CheckItems();
         SpellCastResult CheckRange(bool strict, WorldObject* target = NULL);
         SpellCastResult CheckPower();
-        SpellCastResult CheckOrTakeRunePower(bool take);
+        SpellCastResult CheckRunePower();
+        void TakeRunePower(bool hit);
         SpellCastResult CheckCasterAuras() const;
         SpellCastResult CheckCastTargets() const;
 
