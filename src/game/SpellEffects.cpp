@@ -5788,12 +5788,6 @@ void Spell::EffectTriggerSpell(SpellEffectEntry const* effect)
             unitTarget->RemoveSpellsCausingAura(SPELL_AURA_MOD_DECREASE_SPEED);
             unitTarget->RemoveSpellsCausingAura(SPELL_AURA_MOD_STALKED);
 
-            uint32 spellId = 1784;
-            // reset cooldown on it if needed
-            if (unitTarget->HasSpellCooldown(spellId))
-                unitTarget->RemoveSpellCooldown(spellId);
-
-            m_caster->CastSpell(unitTarget, spellId, true);
             return;
         }
         // just skip

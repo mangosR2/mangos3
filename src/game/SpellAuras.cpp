@@ -5731,6 +5731,17 @@ void Aura::HandleModStealth(bool apply, bool Real)
     }
     else
     {
+        // Vanish
+        if (Real && GetId() == 11327)
+        {
+            // cast Stealth at remove
+            if (target->GetTypeId() == TYPEID_PLAYER)
+                if (((Player*)target)->HasSpellCooldown(1784))
+                    ((Player*)target)->RemoveSpellCooldown(1784);
+
+            target->_AddAura(1784, 0);
+        }
+
         // only at real aura remove of _last_ SPELL_AURA_MOD_STEALTH
         if (Real && !target->HasAuraType(SPELL_AURA_MOD_STEALTH))
         {
