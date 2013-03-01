@@ -951,9 +951,9 @@ bool Map::UnloadGrid(const uint32 &x, const uint32 &y, bool pForce)
         if (!pForce && ActiveObjectsNearGrid(x, y))
             return false;
 
-        DEBUG_LOG("Map::UnloadGrid Unloading grid[%u,%u] for map %u", x,y, GetId());
-
         SetGridObjectDataLoaded(false, grid);
+
+        DEBUG_FILTER_LOG(LOG_FILTER_MAP_LOADING, "Unloading grid[%u,%u] for map %u", x, y, GetId());
         ObjectGridUnloader unloader(*grid);
 
         // Finish remove and delete all creatures with delayed remove before moving to respawn grids
@@ -971,6 +971,7 @@ bool Map::UnloadGrid(const uint32 &x, const uint32 &y, bool pForce)
         WriteGuard Guard(GetLock(MAP_LOCK_TYPE_MAPOBJECTS));
         delete getNGrid(x, y);
         setNGrid(NULL, x, y);
+        DEBUG_FILTER_LOG(LOG_FILTER_MAP_LOADING, "Unloading grid[%u,%u] for map %u finished", x, y, GetId());
     }
     else
         sLog.outError("Map::UnloadGrid trying unload grid[%u,%u] for map %u, but grid not created!", x,y, GetId());
@@ -985,6 +986,7 @@ bool Map::UnloadGrid(const uint32 &x, const uint32 &y, bool pForce)
         m_bLoadedGrids[gx][gy] = false;
         m_TerrainData->Unload(gx, gy);
     }
+
     return true;
 }
 
