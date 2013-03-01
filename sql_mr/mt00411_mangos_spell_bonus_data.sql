@@ -1,4 +1,5 @@
 -- 4.3.4 15595 spell_bonus_data
+-- Paladin
 REPLACE INTO `spell_bonus_data` (`entry`, `direct_bonus`, `dot_bonus`, `ap_bonus`, `ap_dot_bonus`, `comments`) VALUES
 (879, 0, 0, 0, 0, 'Paladin - Exorcism'),
 (8092, 1.104, 0, 0, 0, 'Priest - Mind Blast'),
@@ -54,3 +55,7 @@ REPLACE INTO `spell_bonus_data` (`entry`, `direct_bonus`, `dot_bonus`, `ap_bonus
 (8676, 0, 0, 0.171, 0, 'Rogue - Ambush'),
 (51723, 0, 0, 0.129, 0, 'Rogue - Fan of Knives'),
 (84617, 0, 0, 0.114, 0, 'Rogue - Revealing Strike');
+
+-- Death Knight
+REPLACE INTO `spell_bonus_data` (`entry`, `direct_bonus`, `dot_bonus`, `ap_bonus`, `ap_dot_bonus`, `comments`) VALUES
+(48721, 0, 0, 0.096, 0, 'Death Knight - Blood Boil');

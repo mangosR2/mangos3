@@ -2760,11 +2760,17 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
                     targetUnitMap.push_back(m_caster);
                     break;
                 default:
+                {
+                    // Blood Boil
+                    if (m_spellInfo->Id == 48721)
+                        m_targets.setDestination(m_caster->GetPosition());
+
                     FillAreaTargets(targetUnitMap, radius, PUSH_DEST_CENTER, SPELL_TARGETS_AOE_DAMAGE);
                     // Jinx: Curse of the Elements
                     if (m_spellInfo->Id == 85547 || m_spellInfo->Id == 86105)
                         targetUnitMap.remove(m_targets.getUnitTarget());
                     break;
+                }
             }
             break;
         }
