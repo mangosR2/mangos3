@@ -3669,6 +3669,7 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, DamageInfo* damageI
                 // Must Dual Wield
                 if (!procSpell || !haveOffhandWeapon())
                     return SPELL_AURA_PROC_FAILED;
+
                 // Chance as basepoints for dummy aura
                 if (!roll_chance_i(triggerAmount))
                     return SPELL_AURA_PROC_FAILED;
@@ -3676,67 +3677,17 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, DamageInfo* damageI
                 switch (procSpell->Id)
                 {
                     // Obliterate
-                    case 49020:                             // Rank 1
-                        triggered_spell_id = 66198; break;
-                    case 51423:                             // Rank 2
-                        triggered_spell_id = 66972; break;
-                    case 51424:                             // Rank 3
-                        triggered_spell_id = 66973; break;
-                    case 51425:                             // Rank 4
-                        triggered_spell_id = 66974; break;
+                    case 49020: triggered_spell_id = 66198; break;
                     // Frost Strike
-                    case 49143:                             // Rank 1
-                        triggered_spell_id = 66196; break;
-                    case 51416:                             // Rank 2
-                        triggered_spell_id = 66958; break;
-                    case 51417:                             // Rank 3
-                        triggered_spell_id = 66959; break;
-                    case 51418:                             // Rank 4
-                        triggered_spell_id = 66960; break;
-                    case 51419:                             // Rank 5
-                        triggered_spell_id = 66961; break;
-                    case 55268:                             // Rank 6
-                        triggered_spell_id = 66962; break;
+                    case 49143: triggered_spell_id = 66196; break;
                     // Plague Strike
-                    case 45462:                             // Rank 1
-                        triggered_spell_id = 66216; break;
-                    case 49917:                             // Rank 2
-                        triggered_spell_id = 66988; break;
-                    case 49918:                             // Rank 3
-                        triggered_spell_id = 66989; break;
-                    case 49919:                             // Rank 4
-                        triggered_spell_id = 66990; break;
-                    case 49920:                             // Rank 5
-                        triggered_spell_id = 66991; break;
-                    case 49921:                             // Rank 6
-                        triggered_spell_id = 66992; break;
+                    case 45462: triggered_spell_id = 66216; break;
                     // Death Strike
-                    case 49998:                             // Rank 1
-                        triggered_spell_id = 66188; break;
-                    case 49999:                             // Rank 2
-                        triggered_spell_id = 66950; break;
-                    case 45463:                             // Rank 3
-                        triggered_spell_id = 66951; break;
-                    case 49923:                             // Rank 4
-                        triggered_spell_id = 66952; break;
-                    case 49924:                             // Rank 5
-                        triggered_spell_id = 66953; break;
+                    case 49998: triggered_spell_id = 66188; break;
                     // Rune Strike
-                    case 56815:
-                        triggered_spell_id = 66217; break;
+                    case 56815: triggered_spell_id = 66217; break;
                     // Blood Strike
-                    case 45902:                             // Rank 1
-                        triggered_spell_id = 66215; break;
-                    case 49926:                             // Rank 2
-                        triggered_spell_id = 66975; break;
-                    case 49927:                             // Rank 3
-                        triggered_spell_id = 66976; break;
-                    case 49928:                             // Rank 4
-                        triggered_spell_id = 66977; break;
-                    case 49929:                             // Rank 5
-                        triggered_spell_id = 66978; break;
-                    case 49930:                             // Rank 6
-                        triggered_spell_id = 66979; break;
+                    case 45902: triggered_spell_id = 66215; break;
                     default:
                         return SPELL_AURA_PROC_FAILED;
                 }

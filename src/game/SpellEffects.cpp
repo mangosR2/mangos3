@@ -8950,16 +8950,20 @@ void Spell::EffectWeaponDmg(SpellEffectEntry const* effect)
 
                 if (count)
                 {
-                    // Effect 1(for Blood-Caked Strike)/3(other) damage is bonus
-                    float bonus = count * CalculateDamage(m_spellInfo->GetSpellIconID() == 1736 ? EFFECT_INDEX_0 : EFFECT_INDEX_2, unitTarget) / 100.0f;
-                    // Blood Strike, Blood-Caked Strike and Obliterate store bonus*2
-                    if ((classOptions && classOptions->GetSpellFamilyFlags().test<CF_DEATHKNIGHT_BLOOD_STRIKE, CF_DEATHKNIGHT_OBLITERATE>()) ||
-                        m_spellInfo->GetSpellIconID() == 1736)
-                        bonus /= 2.0f;
-                    if (Aura const* dummy = m_caster->GetDummyAura(64736)) // Item - Death Knight T8 Melee 4P Bonus
-                        bonus += (dummy->GetModifier()->m_amount * count) / 100.0f;
+                    float bonus;
+                    if (m_spellInfo->SpellIconID != 1736) // Blood Strike, Heart Strike, Obliterate
+                    {
+                        // Effect 3 damage is bonus
+                        bonus = count * CalculateDamage(EFFECT_INDEX_2, unitTarget) / 100.0f;
+                        // Obliterate store bonus * 2
+                        if (m_spellInfo->Id == 49020)
+                           bonus /= 2.0f;
+                        // Blood Strike store bonus * 10
+                        else if (m_spellInfo->Id == 45902)
+                            bonus /= 10.0f;
 
-                    totalDamagePercentMod *= 1.0f + bonus;
+                        totalDamagePercentMod *= 1.0f + bonus;
+                    }
                 }
 
                 // Heart Strike secondary target
