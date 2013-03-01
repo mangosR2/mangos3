@@ -7031,24 +7031,7 @@ void Aura::HandlePeriodicDamage(bool apply, bool Real)
                 break;
             }
             case SPELLFAMILY_ROGUE:
-            {
-                // Rupture
-                if (spellProto->GetSpellFamilyFlags().test<CF_ROGUE_RUPTURE>())
-                {
-                    if (caster->GetTypeId() != TYPEID_PLAYER)
-                        break;
-                    //1 point : ${($m1+$b1*1+0.015*$AP)*4} damage over 8 secs
-                    //2 points: ${($m1+$b1*2+0.024*$AP)*5} damage over 10 secs
-                    //3 points: ${($m1+$b1*3+0.03*$AP)*6} damage over 12 secs
-                    //4 points: ${($m1+$b1*4+0.03428571*$AP)*7} damage over 14 secs
-                    //5 points: ${($m1+$b1*5+0.0375*$AP)*8} damage over 16 secs
-                    float AP_per_combo[6] = {0.0f, 0.015f, 0.024f, 0.03f, 0.03428571f, 0.0375f};
-                    uint8 cp = caster->GetComboPoints();
-                    if (cp > 5) cp = 5;
-                    m_modifier.m_amount += int32(caster->GetTotalAttackPowerValue(BASE_ATTACK) * AP_per_combo[cp]);
-                }
                 break;
-            }
             case SPELLFAMILY_PALADIN:
             {
                 // Holy Vengeance / Blood Corruption
