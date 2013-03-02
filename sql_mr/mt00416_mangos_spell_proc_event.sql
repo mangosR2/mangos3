@@ -486,3 +486,12 @@ INSERT INTO `spell_proc_event` (`entry`, `SchoolMask`, `procEx`) VALUE
 DELETE FROM `spell_proc_event` WHERE `entry` = 77616;
 INSERT INTO `spell_proc_event` (`entry`, `SchoolMask`, `procEx`) VALUE
 (77616, 127, 65536);
+
+-- Runic Empowerment
+DELETE FROM `spell_proc_event` WHERE `entry` = 81229;
+INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskB0`, `SpellFamilyMaskC0`) VALUE
+(81229, 15, 536870912+4, 1);
+
+-- DELETE FROM `spell_proc_event` WHERE `entry` = 81229;
+-- INSERT INTO `spell_proc_event` (`entry`, `SchoolMask`, `CustomChance`) VALUE
+-- (81229, 127, 100);

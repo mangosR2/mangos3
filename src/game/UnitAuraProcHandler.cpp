@@ -3752,6 +3752,38 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, DamageInfo* damageI
                 }
                 return SPELL_AURA_PROC_OK;
             }
+            // Runic Empowerment
+            else if (dummySpell->Id == 81229)
+            {
+                if (GetTypeId() != TYPEID_PLAYER)
+                    return SPELL_AURA_PROC_FAILED;
+
+                Player* player = (Player*)this;
+
+                std::vector<uint8> cdRunes;
+                for (uint8 i = 0; i < MAX_RUNES; i += 2)
+                {
+                    uint16 cd1 = player->GetRuneCooldown(i);
+                    uint16 cd2 = player->GetRuneCooldown(i + 1);
+                    // Runic Empowerment can only activate a rune if both runes of that type are currently on cooldown.
+                    if (cd1 && cd2)
+                    {
+                        // find fully depleted runes
+                        // do not activate runes that were used by proc spell
+                        if (cd1 == player->GetBaseRuneCooldown(i) && (player->GetLastUsedRuneMask() & (1 << i)) == 0)
+                            cdRunes.push_back(i);
+                        else if (cd2 == player->GetBaseRuneCooldown(i + 1) && (player->GetLastUsedRuneMask() & (1 << (i + 1))) == 0)
+                            cdRunes.push_back(i + 1);
+                    }
+                }
+                if (!cdRunes.empty())
+                {
+                    uint8 i = urand(0, cdRunes.size() - 1);
+                    player->SetRuneCooldown(cdRunes[i], 0);
+                    player->ResyncRunes();
+                }
+                return SPELL_AURA_PROC_OK;
+            }
             // Wandering Plague
             if (dummySpell->GetSpellIconID() == 1614)
             {

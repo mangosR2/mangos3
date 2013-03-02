@@ -14414,13 +14414,13 @@ void Spell::EffectActivateRune(SpellEffectEntry const* effect)
                     ++l;
                 plr->SetRuneCooldown(l, 0);
                 --count;
-                // is needed to push through to the client that the rune is active
-                plr->ResyncRunes();
             }
             else
                 break;
         }
     }
+
+    plr->ResyncRunes();
 }
 
 void Spell::EffectTitanGrip(SpellEffectEntry const* effect)

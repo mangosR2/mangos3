@@ -2441,7 +2441,7 @@ void Player::Regenerate(Powers power, uint32 diff)
             if (getClass() != CLASS_DEATH_KNIGHT)
                 return;
 
-            for(uint32 rune = 0; rune < MAX_RUNES; rune += 2)
+            for (uint8 rune = 0; rune < MAX_RUNES; rune += 2)
             {
                 uint8 runeToRegen = rune;
                 uint32 cd = GetRuneCooldown(rune);
