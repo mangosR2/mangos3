@@ -625,7 +625,7 @@ SpellSpecific GetSpellSpecific(uint32 spellId)
 
             // skip Heart of the Crusader and Judgements of the Just that have also same spell family mask
             if (spellInfo->GetSpellFamilyFlags().test<CF_PALADIN_JUDGEMENT_OF_RIGHT, CF_PALADIN_JUDGEMENT_OF_WISDOM_LIGHT, CF_PALADIN_JUDGEMENT_OF_JUSTICE, CF_PALADIN_HEART_OF_THE_CRUSADER, CF_PALADIN_JUDGEMENT_OF_BLOOD_MARTYR>() &&
-                (spellInfo->HasAttribute(SPELL_ATTR_EX3_UNK9) && !spellInfo->GetSpellFamilyFlags().test<CF_PALADIN_HEART_OF_THE_CRUSADER,CF_PALADIN_JUDGEMENT_OF_JUST>()))
+                (spellInfo->HasAttribute(SPELL_ATTR_EX3_TRIGGERED_CAN_TRIGGER_PROC_2) && !spellInfo->GetSpellFamilyFlags().test<CF_PALADIN_HEART_OF_THE_CRUSADER,CF_PALADIN_JUDGEMENT_OF_JUST>()))
                 return SPELL_JUDGEMENT;
 
             // only paladin auras have this (for palaldin class family)

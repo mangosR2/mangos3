@@ -360,7 +360,7 @@ enum SpellAttributesEx2
     SPELL_ATTR_EX2_UNK27                       = 0x08000000,            // 27
     SPELL_ATTR_EX2_UNK28                       = 0x10000000,            // 28 no breaks stealth if it fails??
     SPELL_ATTR_EX2_CANT_CRIT                   = 0x20000000,            // 29 Spell can't crit
-    SPELL_ATTR_EX2_UNK30                       = 0x40000000,            // 30
+    SPELL_ATTR_EX2_TRIGGERED_CAN_TRIGGER_PROC  = 0x40000000,            // 30 spell can trigger even if triggered
     SPELL_ATTR_EX2_FOOD_BUFF                   = 0x80000000,            // 31 Food or Drink Buff (like Well Fed)
 };
 
@@ -375,14 +375,14 @@ enum SpellAttributesEx3
     SPELL_ATTR_EX3_UNK6                        = 0x00000040,            // 6
     SPELL_ATTR_EX3_STACK_FOR_DIFF_CASTERS      = 0x00000080,            // 7 create a separate (de)buff stack for each caster
     SPELL_ATTR_EX3_TARGET_ONLY_PLAYER          = 0x00000100,            // 8 Can target only player
-    SPELL_ATTR_EX3_UNK9                        = 0x00000200,            // 9
+    SPELL_ATTR_EX3_TRIGGERED_CAN_TRIGGER_PROC_2= 0x00000200,            // 9 triggered from effect?
     SPELL_ATTR_EX3_MAIN_HAND                   = 0x00000400,            // 10 Main hand weapon required
     SPELL_ATTR_EX3_BATTLEGROUND                = 0x00000800,            // 11 Can casted only on battleground
     SPELL_ATTR_EX3_CAST_ON_DEAD                = 0x00001000,            // 12 target is a dead player (not every spell has this flag)
     SPELL_ATTR_EX3_UNK13                       = 0x00002000,            // 13
     SPELL_ATTR_EX3_UNK14                       = 0x00004000,            // 14 "Honorless Target" only this spells have this flag
     SPELL_ATTR_EX3_UNK15                       = 0x00008000,            // 15 Auto Shoot, Shoot, Throw,  - this is autoshot flag
-    SPELL_ATTR_EX3_CANT_TRIGGER_PROC           = 0x00010000,            // 16 no triggers effects that trigger on casting a spell??
+    SPELL_ATTR_EX3_CANT_TRIGGER_PROC           = 0x00010000,            // 16 confirmed with many patchnotes
     SPELL_ATTR_EX3_NO_INITIAL_AGGRO            = 0x00020000,            // 17 Causes no aggro if not missed
     SPELL_ATTR_EX3_CANT_MISS                   = 0x00040000,            // 18 Spell should always hit its target
     SPELL_ATTR_EX3_IMPROVER                    = 0x00080000,            // 19 only spells, that improve other spells
@@ -392,7 +392,7 @@ enum SpellAttributesEx3
     SPELL_ATTR_EX3_UNK23                       = 0x00800000,            // 23
     SPELL_ATTR_EX3_REQ_OFFHAND                 = 0x01000000,            // 24 Req offhand weapon
     SPELL_ATTR_EX3_UNK25                       = 0x02000000,            // 25 no cause spell pushback ?
-    SPELL_ATTR_EX3_CAN_PROC_WITH_TRIGGERED     = 0x04000000,            // 26 auras with this attribute can proc from triggered spell casts (?)
+    SPELL_ATTR_EX3_CAN_PROC_WITH_TRIGGERED     = 0x04000000,            // 26 auras with this attribute can proc from triggered spell casts with SPELL_ATTR3_TRIGGERED_CAN_TRIGGER_PROC_2 (67736 + 52999)
     SPELL_ATTR_EX3_UNK27                       = 0x08000000,            // 27
     SPELL_ATTR_EX3_UNK28                       = 0x10000000,            // 28
     SPELL_ATTR_EX3_DISABLE_MODS                = 0x20000000,            // 29 Client doesn't apply spellmods for those spells (mostly mounting and like this spells)
@@ -406,7 +406,7 @@ enum SpellAttributesEx4
     SPELL_ATTR_EX4_UNK1                        = 0x00000002,            // 1 proc on finishing move?
     SPELL_ATTR_EX4_UNK2                        = 0x00000004,            // 2
     SPELL_ATTR_EX4_UNK3                        = 0x00000008,            // 3
-    SPELL_ATTR_EX4_UNK4                        = 0x00000010,            // 4 This will no longer cause guards to attack on use??
+    SPELL_ATTR_EX4_TRIGGERED                   = 0x00000010,            // 4 spells forced to be triggered
     SPELL_ATTR_EX4_UNK5                        = 0x00000020,            // 5
     SPELL_ATTR_EX4_NOT_STEALABLE               = 0x00000040,            // 6 although such auras might be dispellable, they cannot be stolen
     SPELL_ATTR_EX4_FORCE_TRIGGERED             = 0x00000080,            // 7 forced triggered?
