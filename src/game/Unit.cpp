@@ -2233,13 +2233,13 @@ void Unit::CalculateResistance(Unit* pCaster, DamageInfo* damageInfo)
 
         if (effResist > 0)
         {
-            // Calculate mitigation
+            // Calculate average mitigation
             uint32 magicK = casterLevel > 80 ? 400 + ceil(36.6f * float(casterLevel - 80)) : 400;
             float avrgMitigation = float(effResist) / (magicK + effResist);
 
             // Search applicable section 100%, 90%, 80% ... 10%
             float chance = rand_norm_f();
-            float maxProb = 0.0f;
+            float maxProb = FLT_MIN;
 
             for (float resPct = 1.0f; resPct > 0.0f; resPct -= 0.1f)
             {
