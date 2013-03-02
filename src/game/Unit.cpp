@@ -2239,18 +2239,22 @@ void Unit::CalculateResistance(Unit* pCaster, DamageInfo* damageInfo)
 
             // Search applicable section 100%, 90%, 80% ... 10%
             float chance = rand_norm_f();
-            for (uint32 resPct = 100; resPct > 0; resPct -= 10)
+            float maxProb = 0.0f;
+
+            for (float resPct = 1.0f; resPct > 0.0f; resPct -= 0.1f)
             {
-                if (0.5f - 2.5f * abs(0.01f * float(resPct) - avrgMitigation) > chance)
+                float probability = 0.5f - 2.5f * abs(resPct - avrgMitigation);
+                if (probability < maxProb)
+                    break;
+                if (probability > chance)
                 {
-                    damageInfo->resist = uint32(damageInfo->damage * resPct / 100);
+                    damageInfo->resist = uint32(float(damage) * resPct);
                     break;
                 }
+                maxProb = probability;
             }
         }
     }
-    else
-        sLog.outError("Unit::CalculateResistance: unknown calculate method %u", calcMethod);
 }
 
 void Unit::CalculateDamageAbsorbAndResist(Unit* pCaster, DamageInfo* damageInfo, bool canReflect)
