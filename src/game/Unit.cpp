@@ -2248,7 +2248,7 @@ void Unit::CalculateResistance(Unit* pCaster, DamageInfo* damageInfo)
                     break;
                 if (probability > chance)
                 {
-                    damageInfo->resist = uint32(float(damage) * resPct);
+                    damageInfo->resist = uint32(float(damageInfo->damage) * resPct);
                     break;
                 }
                 maxProb = probability;
