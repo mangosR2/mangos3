@@ -9337,15 +9337,6 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     caster->RemoveSpellCategoryCooldown(82, true);
                     return;
                 }
-                case 50810:                                 // Shatter (Krystallus)
-                case 61546:                                 // Shatter (h) (Krystallus)
-                {
-                    if (!unitTarget)
-                        return;
-
-                    unitTarget->CastSpell(unitTarget, m_spellInfo->Id + 1, true, NULL, NULL, m_caster->GetObjectGuid());
-                    return;
-                }
                 case 50742:                                 // Ooze Combine
                 {
                     if (!unitTarget || unitTarget->GetTypeId() != TYPEID_UNIT)
