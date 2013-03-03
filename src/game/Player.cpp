@@ -6527,6 +6527,17 @@ void Player::CheckAreaExploreAndOutdoor()
                 SetRestType(REST_TYPE_NO);
             }
         }
+        // Check if we need to reaply outdoor only passive spells
+        const PlayerSpellMap& sp_list = GetSpellMap();
+        for (PlayerSpellMap::const_iterator itr = sp_list.begin(); itr != sp_list.end(); ++itr)
+        {
+            if (itr->second.state == PLAYERSPELL_REMOVED)
+                continue;
+            SpellEntry const* spellInfo = sSpellStore.LookupEntry(itr->first);
+            if (!spellInfo || !IsNeedCastSpellAtOutdoor(spellInfo) || HasAura(itr->first))
+                continue;
+            CastSpell(this, itr->first, true, NULL);
+        }
     }
     else if (sWorld.getConfig(CONFIG_BOOL_VMAP_INDOOR_CHECK) && !isGameMaster())
         RemoveAurasWithAttribute(SPELL_ATTR_OUTDOORS_ONLY);
@@ -12880,14 +12891,17 @@ void Player::PrepareGossipMenu(WorldObject* pSource, uint32 menuId)
     for (GossipMenuItemsMap::const_iterator itr = pMenuItemBounds.first; itr != pMenuItemBounds.second; ++itr)
     {
         bool hasMenuItem = true;
+        bool isGMSkipConditionCheck = false;
 
-        if (!isGameMaster())                                // Let GM always see menu items regardless of conditions
+        if (itr->second.conditionId && !sObjectMgr.IsPlayerMeetToCondition(itr->second.conditionId, this, GetMap(), pSource, CONDITION_FROM_GOSSIP_OPTION))
         {
-            if (itr->second.conditionId && !sObjectMgr.IsPlayerMeetToCondition(itr->second.conditionId, this, GetMap(), pSource, CONDITION_FROM_GOSSIP_OPTION))
+            if (isGameMaster())                             // Let GM always see menu items regardless of conditions
+                isGMSkipConditionCheck = true;
+            else
             {
                 if (itr->second.option_id == GOSSIP_OPTION_QUESTGIVER)
                     canSeeQuests = false;
-                continue;
+                continue;                                   // Skip this option
             }
         }
 
@@ -13013,6 +13027,13 @@ void Player::PrepareGossipMenu(WorldObject* pSource, uint32 menuId)
                     if (no->BoxText.size() > (size_t)loc_idx && !no->BoxText[loc_idx].empty())
                         strBoxText = no->BoxText[loc_idx];
                 }
+            }
+
+            if (isGMSkipConditionCheck)
+            {
+                strOptionText.append(" (");
+                strOptionText.append(GetSession()->GetMangosString(LANG_GM_ON));
+                strOptionText.append(")");
             }
 
             pMenu->GetGossipMenu().AddMenuItem(itr->second.option_icon, strOptionText, 0, itr->second.option_id, strBoxText, itr->second.box_money, itr->second.box_coded);

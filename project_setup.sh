@@ -18,7 +18,7 @@ mkdir build &&
 cd build &&
 
 cmake .. ${CONF_OPTS} \
-    -DPREFIX="${PREFIX}" \
+    -DCMAKE_INSTALL_PREFIX="${PREFIX}" \
     -DLIB_INSTALL_DIR="${LIB_INSTALL_DIR}" \
     -DINCLUDE_INSTALL_DIR="${INCLUDE_INSTALL_DIR}" \
     -DCMAKE_C_FLAGS="${CFLAGS}" \

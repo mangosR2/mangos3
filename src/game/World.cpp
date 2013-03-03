@@ -1133,6 +1133,10 @@ void World::LoadConfigSettings(bool reload)
     // calendar
     int32 delayHours = sConfig.GetIntDefault("Calendar.RemoveExpiredEvents", -1);
     setConfig(CONFIG_INT32_CALENDAR_REMOVE_EXPIRED_EVENTS_DELAY, delayHours < 0 ? -1 : delayHours * HOUR /*convert to sec.*/);
+
+    // resistance calculation options
+    setConfigMinMax(CONFIG_UINT32_RESIST_CALC_METHOD, "Resistance.CalculationMethod", 1, 0, 1);
+    setConfig(CONFIG_BOOL_RESIST_ADD_BY_OVER_LEVEL, "Resistance.AddByOverLevel", false);
 }
 
 extern void LoadGameObjectModelList();

@@ -1663,6 +1663,8 @@ BattleGround* BattleGroundMgr::CreateNewBattleGround(BattleGroundTypeId bgTypeId
         return NULL;
     }
 
+    bool isArena = false;
+
     // for arenas there is random map used
     if (bg_template->isArena())
     {
@@ -1674,6 +1676,7 @@ BattleGround* BattleGroundMgr::CreateNewBattleGround(BattleGroundTypeId bgTypeId
             sLog.outError("BattleGround: CreateNewBattleGround - bg template not found for %u", bgTypeId);
             return NULL;
         }
+        isArena = true;
     }
 
     bool isRandom = false;
@@ -1759,7 +1762,7 @@ BattleGround* BattleGroundMgr::CreateNewBattleGround(BattleGroundTypeId bgTypeId
     bg->SetArenaType(arenaType);
     bg->SetRated(isRated);
     bg->SetRandom(isRandom);
-    bg->SetTypeID(isRandom ? BATTLEGROUND_RB : bgTypeId);
+    bg->SetTypeID(isRandom ? BATTLEGROUND_RB : isArena ? BATTLEGROUND_AA : bgTypeId);
     bg->SetRandomTypeID(bgTypeId);
 
     return bg;

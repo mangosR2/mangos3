@@ -971,6 +971,15 @@ LexicsCutterNoActionOnGM = 1
 #    Realm.AlwaysMaxExpansion - player always has max expansion in server
 #        Default: 0 - false (standart)
 #                 1 - true -> not blizzlike
+#    Resistance.CalculationMethod
+#        Method of resistance calculation.
+#                 0 (TBC,   resistance chance - 0%, 25%, 50%, 75% or 100%)
+#        Default: 1 (WOTLK, flat resistance chance - 0%, 10%, 20%, 30% ... 100%)
+#
+#    Resistance.AddByOverLevel
+#        If the target level is greater than caster level, add to target additional resistance points.
+#        Default: 0 - disabled (don't add additional resistance points)
+#                 1 - enabled  (add to target 5 resistance points on each target over level)
 #
 ###################################################################################################################
 
@@ -1053,6 +1062,8 @@ ResilenceAlternativeCalculation = 0
 BlinkAnimationType = 0
 FactiomAndRaceChangeWithoutRenaming = 0
 Realm.AlwaysMaxExpansion = 0
+Resistance.CalculationMethod = 1
+Resistance.AddByOverLevel = 0
 
 ###################################################################################################################
 # PLAYER INTERACTION

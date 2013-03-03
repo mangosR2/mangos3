@@ -2437,17 +2437,22 @@ uint32 Unit::CalcArmorReducedDamage(Unit* pVictim, const uint32 damage)
     return (newdamage > 1) ? newdamage : 1;
 }
 
-void Unit::CalculateDamageAbsorbAndResist(Unit *pCaster, DamageInfo* damageInfo, bool canReflect)
+void Unit::CalculateResistance(Unit* pCaster, DamageInfo* damageInfo)
 {
-    if(!pCaster || !isAlive() || !damageInfo || damageInfo->damage == 0)
+    // Only for magic damage
+    if ((damageInfo->SchoolMask() & SPELL_SCHOOL_MASK_NORMAL) ||
+        damageInfo->IsMeleeDamage() ||
+        damageInfo->GetSpellProto()->HasAttribute(SPELL_ATTR_EX4_IGNORE_RESISTANCES) ||
+        IsBinaryResistedSpell(damageInfo->GetSpellProto()))
+    {
+        damageInfo->resist = 0;
         return;
+    }
 
-    // Magic damage, check for resists
-    if (!(damageInfo->SchoolMask() & SPELL_SCHOOL_MASK_NORMAL) &&
-        !damageInfo->IsMeleeDamage() &&
-        !damageInfo->GetSpellProto()->HasAttribute(SPELL_ATTR_EX4_IGNORE_RESISTANCES) &&
-        !IsBinaryResistedSpell(damageInfo->GetSpellProto())
-        )
+    uint32 calcMethod = sWorld.getConfig(CONFIG_UINT32_RESIST_CALC_METHOD);
+
+    // TBC (0%, 25%, 50%, 75% or 100%)
+    if (calcMethod == 0)
     {
         // Get base resistance for schoolmask
         float tmpvalue2 = (float)GetResistance(damageInfo->SchoolMask());
@@ -2468,24 +2473,71 @@ void Unit::CalculateDamageAbsorbAndResist(Unit *pCaster, DamageInfo* damageInfo,
         float Binom = 0.0f;
         for (uint8 i = 0; i < 4; ++i)
         {
-            Binom += 2400 *( pow(tmpvalue2, float(i)) * pow( (1-tmpvalue2), float(4-i)))/faq[i];
-            if (ran > Binom )
+            Binom += 2400 * (pow(tmpvalue2, float(i)) * pow((1 - tmpvalue2), float(4-i))) / faq[i];
+            if (ran > Binom)
                 ++m;
             else
                 break;
         }
+
         if (damageInfo->damageType == DOT && m == 4)
-            damageInfo->resist += uint32(damageInfo->damage);
+            damageInfo->resist = damageInfo->damage;
             // need make more correct this hack.
         else
-            damageInfo->resist += uint32(damageInfo->damage * m / 4);
-
-        // full resist mode granted
-        if (damageInfo->resist > damageInfo->damage)
-            damageInfo->resist = damageInfo->damage;
+            damageInfo->resist = uint32(damageInfo->damage * m / 4);
     }
-    else
-        damageInfo->resist = 0;
+    // WOTLK (0%, 10%, 20%, 30% ... 100%)
+    else if (calcMethod == 1)
+    {
+        // Get levels with use boss dynamic level
+        int32 casterLevel = int32(pCaster->GetLevelForTarget(this));
+        int32 extraRes = sWorld.getConfig(CONFIG_BOOL_RESIST_ADD_BY_OVER_LEVEL) ?
+            std::max(int32(GetLevelForTarget(pCaster) - casterLevel) * 5, 0) : 0;
+
+        // Get base resistance for schoolmask
+        int32 resistance = int32(GetResistance(damageInfo->SchoolMask()));
+        // Ignore resistance by self SPELL_AURA_MOD_TARGET_RESISTANCE aura
+        resistance += pCaster->GetTotalAuraModifierByMiscMask(SPELL_AURA_MOD_TARGET_RESISTANCE, damageInfo->SchoolMask());
+
+        // Calculate effective resistance
+        int32 casterPen = pCaster->GetTypeId() == TYPEID_PLAYER ? ((Player*)pCaster)->GetSpellPenetrationItemMod() : 0;
+        int32 effResist = resistance + extraRes - std::min(casterPen, resistance);
+
+        if (effResist > 0)
+        {
+            // Calculate average mitigation
+            uint32 magicK = casterLevel > 80 ? 400 + ceil(36.6f * float(casterLevel - 80)) : 400;
+            float avrgMitigation = float(effResist) / (magicK + effResist);
+
+            // Search applicable section 100%, 90%, 80% ... 10%
+            float globalChance = rand_norm_f();
+            if (avrgMitigation > globalChance)
+            {
+                float maxProb = FLT_MIN;
+                for (float resPct = 1.0f; resPct > 0.0f; resPct -= 0.1f)
+                {
+                    float probability = 0.5f - 2.5f * abs(resPct - avrgMitigation);
+                    if (probability < maxProb)
+                        break;
+                    if (probability > globalChance)
+                    {
+                        damageInfo->resist = uint32(float(damageInfo->damage) * resPct);
+                        break;
+                    }
+                    maxProb = probability;
+                }
+            }
+        }
+    }
+}
+
+void Unit::CalculateDamageAbsorbAndResist(Unit* pCaster, DamageInfo* damageInfo, bool canReflect)
+{
+    if (!pCaster || !isAlive() || !damageInfo || !damageInfo->damage)
+        return;
+
+    // Calculate resistance if needed
+    CalculateResistance(pCaster, damageInfo);
 
     int32 RemainingDamage = damageInfo->damage - damageInfo->resist;
 
