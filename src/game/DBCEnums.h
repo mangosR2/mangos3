@@ -564,7 +564,9 @@ enum SpellFamily
     // 14 - unused
     SPELLFAMILY_DEATHKNIGHT = 15,
     // 16 - unused
-    SPELLFAMILY_PET         = 17
+    SPELLFAMILY_PET         = 17,
+    //
+    SPELLFAMILY_MINIGAME    = 50,
 };
 
 enum VehicleFlags
