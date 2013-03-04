@@ -13174,14 +13174,19 @@ void Unit::SetPhaseMask(uint32 newPhaseMask, bool update)
 
 void Unit::NearTeleportTo( float x, float y, float z, float orientation, bool casting /*= false*/ )
 {
+    NearTeleportTo(WorldLocation(GetMapId(), x, y, z, orientation, GetPhaseMask()), TELE_TO_NOT_LEAVE_TRANSPORT | TELE_TO_NOT_LEAVE_COMBAT | TELE_TO_NOT_UNSUMMON_PET | (casting ? TELE_TO_SPELL : 0));
+}
+
+void Unit::NearTeleportTo(WorldLocation const& loc, uint32 options)
+{
     DisableSpline();
 
     if (GetTypeId() == TYPEID_PLAYER)
-        ((Player*)this)->TeleportTo(GetMapId(), x, y, z, orientation, TELE_TO_NOT_LEAVE_TRANSPORT | TELE_TO_NOT_LEAVE_COMBAT | TELE_TO_NOT_UNSUMMON_PET | (casting ? TELE_TO_SPELL : 0));
+        ((Player*)this)->TeleportTo(loc, options);
     else
     {
         ExitVehicle(true);
-        GetMap()->Relocation((Creature*)this, x, y, z, orientation);
+        GetMap()->Relocation((Creature*)this, loc.x, loc.y, loc.z, loc.orientation);
         SendHeartBeat();
     }
 }

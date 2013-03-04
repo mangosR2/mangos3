@@ -116,8 +116,8 @@ struct MANGOS_DLL_SPEC WorldLocation : public Position
         : Position(), mapid(-1), instance(0), realmid(0)
     {}
 
-    WorldLocation(uint32 _mapid, float _x, float _y, float _z, float _o = 0)
-        : Position(_x, _y, _z, _o), mapid(_mapid), instance(0), realmid(0)
+    WorldLocation(uint32 _mapid, float _x, float _y, float _z, float _o = 0, uint32 phaseMask = PHASEMASK_NORMAL)
+        : Position(_x, _y, _z, _o, phaseMask), mapid(_mapid), instance(0), realmid(0)
     {}
 
     WorldLocation(uint32 _mapid, uint32 _instance, uint32 _realmid)

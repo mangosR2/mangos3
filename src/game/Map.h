@@ -466,7 +466,7 @@ class MANGOS_DLL_SPEC WorldMap : public Map
         using Map::GetPersistentState;                      // hide in subclass for overwrite
     public:
         WorldMap(uint32 id, time_t expiry) : Map(id, expiry, 0, REGULAR_DIFFICULTY) {}
-        ~WorldMap() {}
+        virtual ~WorldMap() {}
 
         // can't be NULL for loaded map
         WorldPersistentState* GetPersistanceState() const;
@@ -478,7 +478,7 @@ class MANGOS_DLL_SPEC DungeonMap : public Map
         using Map::GetPersistentState;                      // hide in subclass for overwrite
     public:
         DungeonMap(uint32 id, time_t, uint32 InstanceId, uint8 SpawnMode);
-        ~DungeonMap();
+        virtual ~DungeonMap();
         bool Add(Player *);
         void Remove(Player *, bool);
         void Update(const uint32&);
@@ -504,7 +504,7 @@ class MANGOS_DLL_SPEC BattleGroundMap : public Map
         using Map::GetPersistentState;                      // hide in subclass for overwrite
     public:
         BattleGroundMap(uint32 id, time_t, uint32 InstanceId, uint8 spawnMode);
-        ~BattleGroundMap();
+        virtual ~BattleGroundMap();
 
         void Update(const uint32&);
         bool Add(Player *);

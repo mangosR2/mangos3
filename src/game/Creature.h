@@ -498,6 +498,7 @@ class MANGOS_DLL_SPEC Creature : public Unit
         void SetRespawnCoord(float x, float y, float z, float ori) { m_respawnPos.x = x; m_respawnPos.y = y; m_respawnPos.z = z; m_respawnPos.o = ori; }
         void SetRespawnCoord(CreatureCreatePos const& pos) { m_respawnPos = pos.m_pos; }
         void ResetRespawnCoord();
+        WorldLocation const& GetRespawnCoord() const { return m_respawnPos; };
 
         uint32 GetEquipmentId() const { return m_equipmentId; }
 
@@ -704,8 +705,9 @@ class MANGOS_DLL_SPEC Creature : public Unit
                 return m_charmInfo->GetCharmSpell(pos)->GetAction();
         }
 
-        void SetCombatStartPosition(float x, float y, float z) { m_combatStartX = x; m_combatStartY = y; m_combatStartZ = z; }
-        void GetCombatStartPosition(float& x, float& y, float& z) { x = m_combatStartX; y = m_combatStartY; z = m_combatStartZ; }
+        void SetCombatStartPosition(float x, float y, float z) { m_combatStart = WorldLocation(GetMapId(), x, y, z); }
+        void GetCombatStartPosition(float& x, float& y, float& z) { x = m_combatStart.x; y = m_combatStart.y; z = m_combatStart.z; }
+        WorldLocation const& GetCombatStartPosition() const { return m_combatStart; };
 
         void SetDeadByDefault(bool death_state) { m_isDeadByDefault = death_state; }
 
@@ -761,11 +763,8 @@ class MANGOS_DLL_SPEC Creature : public Unit
         SpellSchoolMask m_meleeDamageSchoolMask;
         uint32 m_originalEntry;
 
-        float m_combatStartX;
-        float m_combatStartY;
-        float m_combatStartZ;
-
-        Position m_respawnPos;
+        WorldLocation m_combatStart;
+        WorldLocation m_respawnPos;
 
         CreatureSpellsList m_spellOverride;
 
