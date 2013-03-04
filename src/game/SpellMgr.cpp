@@ -2966,7 +2966,10 @@ bool SpellMgr::IsStackableSpellAuraHolder(SpellEntry const* spellInfo)
             case SPELL_AURA_POWER_BURN_MANA:
             case SPELL_AURA_CONTROL_VEHICLE:
             case SPELL_AURA_MOD_STUN:
+            case SPELL_AURA_PERIODIC_DUMMY:
                 return true;
+            default:
+                continue;
         }
     }
 
