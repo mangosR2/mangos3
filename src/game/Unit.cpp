@@ -3540,10 +3540,6 @@ SpellMissInfo Unit::MagicSpellHitResult(Unit* pVictim, SpellEntry const* spell, 
     if (!IsNonPositiveSpell(spell) && IsFriendlyTo(pVictim))
         return SPELL_MISS_NONE;
 
-    // Chaos Bolt cannot be deflected
-    if (spell->SpellFamilyName == SPELLFAMILY_WARLOCK && spell->SpellIconID == 3178)
-        return SPELL_MISS_NONE;
-
     SpellSchoolMask schoolMask = GetSpellSchoolMask(spell);
     // PvP - PvE spell misschances per leveldif > 2
     // int32 lchance = pVictim->GetTypeId() == TYPEID_PLAYER ? 7 : 11;
