@@ -8522,13 +8522,13 @@ void Aura::PeriodicTick()
     if (target->IsImmuneToSpell(spellProto, GetAffectiveCaster() ? GetAffectiveCaster()->IsFriendlyTo(target) : true))
         return;
 
-    switch(m_modifier.m_auraname)
+    switch (m_modifier.m_auraname)
     {
         case SPELL_AURA_PERIODIC_DAMAGE:
         case SPELL_AURA_PERIODIC_DAMAGE_PERCENT:
         {
             // don't damage target if not alive, possible death persistent effects
-            if (!target->IsInWorld() ||  !target->isAlive())
+            if (!target->IsInWorld() || !target->isAlive())
                 return;
 
             Unit* pCaster = GetAffectiveCaster();
@@ -8539,7 +8539,7 @@ void Aura::PeriodicTick()
                 return;
 
             if (spellProto->Effect[GetEffIndex()] == SPELL_EFFECT_PERSISTENT_AREA_AURA &&
-                pCaster->SpellHitResult(target, spellProto) != SPELL_MISS_NONE)
+                pCaster->SpellHitResult(target, spellProto, true) != SPELL_MISS_NONE)
                 return;
 
             // Check for immune (not use charges)
@@ -8560,7 +8560,7 @@ void Aura::PeriodicTick()
                 case 71316:
                 case 71317:
                 {
-                    if (target->GetHealth() == target->GetMaxHealth() )
+                    if (target->GetHealth() == target->GetMaxHealth())
                     {
                         target->RemoveAurasDueToSpell(GetId());
                         return;
@@ -8573,7 +8573,7 @@ void Aura::PeriodicTick()
                         GetEffIndex() < EFFECT_INDEX_2 && spellProto->Effect[GetEffIndex()] == SPELL_EFFECT_DUMMY ?
                         pCaster->CalculateSpellDamage(target, spellProto, SpellEffectIndex(GetEffIndex() + 1)) :
                         100;
-                    if (target->GetHealth() * 100 >= target->GetMaxHealth() * percent )
+                    if (target->GetHealth() * 100 >= target->GetMaxHealth() * percent)
                     {
                         target->RemoveAurasDueToSpell(GetId());
                         return;
@@ -8769,10 +8769,10 @@ void Aura::PeriodicTick()
         case SPELL_AURA_PERIODIC_HEALTH_FUNNEL:
         {
             // don't damage target if not alive, possible death persistent effects
-            if (!target->IsInWorld() ||  !target->isAlive())
+            if (!target->IsInWorld() || !target->isAlive())
                 return;
 
-            Unit *pCaster = GetAffectiveCaster();
+            Unit* pCaster = GetAffectiveCaster();
             if (!pCaster)
                 return;
 
@@ -8780,7 +8780,7 @@ void Aura::PeriodicTick()
                 return;
 
             if (spellProto->Effect[GetEffIndex()] == SPELL_EFFECT_PERSISTENT_AREA_AURA &&
-                pCaster->SpellHitResult(target, spellProto) != SPELL_MISS_NONE)
+                pCaster->SpellHitResult(target, spellProto, true) != SPELL_MISS_NONE)
                 return;
 
             // Check for immune
@@ -9011,7 +9011,7 @@ void Aura::PeriodicTick()
                 return;
 
             if (GetSpellProto()->Effect[GetEffIndex()] == SPELL_EFFECT_PERSISTENT_AREA_AURA &&
-                pCaster->SpellHitResult(target, spellProto) != SPELL_MISS_NONE)
+                pCaster->SpellHitResult(target, spellProto, true) != SPELL_MISS_NONE)
                 return;
 
             // Check for immune (not use charges)
