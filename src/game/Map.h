@@ -268,24 +268,24 @@ class MANGOS_DLL_SPEC Map : public GridRefManager<NGridType>
         // must called with RemoveFromWorld
         void RemoveFromActive(WorldObject* obj);
 
-        Player* GetPlayer(ObjectGuid guid, bool globalSearch = false);
-        Creature* GetCreature(ObjectGuid guid);
-        Pet* GetPet(ObjectGuid guid);
-        Creature* GetAnyTypeCreature(ObjectGuid guid);      // normal creature or pet or vehicle
-        GameObject* GetGameObject(ObjectGuid guid);
-        DynamicObject* GetDynamicObject(ObjectGuid guid);
-        Transport* GetTransport(ObjectGuid guid);
-        Corpse* GetCorpse(ObjectGuid guid);                 // !!! find corpse can be not in world
-        Unit* GetUnit(ObjectGuid guid);                     // only use if sure that need objects at current map, specially for player case
-        WorldObject* GetWorldObject(ObjectGuid guid);       // only use if sure that need objects at current map, specially for player case
+        Player* GetPlayer(ObjectGuid const& guid, bool globalSearch = false);
+        Creature* GetCreature(ObjectGuid  const& guid);
+        Pet* GetPet(ObjectGuid const& guid);
+        Creature* GetAnyTypeCreature(ObjectGuid const& guid);      // normal creature or pet or vehicle
+        GameObject* GetGameObject(ObjectGuid const& guid);
+        DynamicObject* GetDynamicObject(ObjectGuid const& guid);
+        Transport* GetTransport(ObjectGuid const& guid);
+        Corpse* GetCorpse(ObjectGuid const& guid);                 // !!! find corpse can be not in world
+        Unit* GetUnit(ObjectGuid const& guid);                     // only use if sure that need objects at current map, specially for player case
+        WorldObject* GetWorldObject(ObjectGuid const& guid);       // only use if sure that need objects at current map, specially for player case
 
         // Container maked without any locks (for faster search), need make external locks!
         typedef UNORDERED_MAP<ObjectGuid, WorldObject*> MapStoredObjectTypesContainer;
         MapStoredObjectTypesContainer const& GetObjectsStore() { return m_objectsStore; }
         void InsertObject(WorldObject* object);
         void EraseObject(WorldObject* object);
-        void EraseObject(ObjectGuid guid);
-        WorldObject* FindObject(ObjectGuid guid);
+        void EraseObject(ObjectGuid const& guid);
+        WorldObject* FindObject(ObjectGuid const& guid);
 
         // Manipulation with objects update queue
         void AddUpdateObject(ObjectGuid const& guid);
@@ -314,12 +314,12 @@ class MANGOS_DLL_SPEC Map : public GridRefManager<NGridType>
         void UpdateWorldState(uint32 state, uint32 value);
 
         // Attacker per-map storage operations
-        void AddAttackerFor(ObjectGuid targetGuid, ObjectGuid attackerGuid);
-        void RemoveAttackerFor(ObjectGuid targetGuid, ObjectGuid attackerGuid);
-        void RemoveAllAttackersFor(ObjectGuid targetGuid);
-        GuidSet& GetAttackersFor(ObjectGuid targetGuid);
-        void CreateAttackersStorageFor(ObjectGuid targetGuid);
-        void RemoveAttackersStorageFor(ObjectGuid targetGuid);
+        void AddAttackerFor(ObjectGuid const& targetGuid, ObjectGuid const& attackerGuid);
+        void RemoveAttackerFor(ObjectGuid const& targetGuid, ObjectGuid const& attackerGuid);
+        void RemoveAllAttackersFor(ObjectGuid const& targetGuid);
+        GuidSet& GetAttackersFor(ObjectGuid const& targetGuid);
+        void CreateAttackersStorageFor(ObjectGuid const& targetGuid);
+        void RemoveAttackersStorageFor(ObjectGuid const& targetGuid);
 
         // multithread locking
         ObjectLockType& GetLock(MapLockType _locktype = MAP_LOCK_TYPE_DEFAULT) { return i_lock[_locktype]; }
