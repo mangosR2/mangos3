@@ -2219,7 +2219,7 @@ void Unit::CalculateResistance(Unit* pCaster, DamageInfo* damageInfo)
     {
         // Get levels with use boss dynamic level
         int32 casterLevel = int32(pCaster->GetLevelForTarget(this));
-        int32 extraRes = sWorld.getConfig(CONFIG_BOOL_RESIST_ADD_BY_OVER_LEVEL) ?
+        int32 extraResist = sWorld.getConfig(CONFIG_BOOL_RESIST_ADD_BY_OVER_LEVEL) ?
             std::max(int32(GetLevelForTarget(pCaster) - casterLevel) * 5, 0) : 0;
 
         // Get base resistance for schoolmask
@@ -2229,7 +2229,7 @@ void Unit::CalculateResistance(Unit* pCaster, DamageInfo* damageInfo)
 
         // Calculate effective resistance
         int32 casterPen = pCaster->GetTypeId() == TYPEID_PLAYER ? ((Player*)pCaster)->GetSpellPenetrationItemMod() : 0;
-        int32 effResist = resistance + extraRes - std::min(casterPen, resistance);
+        int32 effResist = resistance + extraResist - std::min(casterPen, resistance);
 
         if (effResist > 0)
         {
@@ -2238,22 +2238,17 @@ void Unit::CalculateResistance(Unit* pCaster, DamageInfo* damageInfo)
             float avrgMitigation = float(effResist) / (magicK + effResist);
 
             // Search applicable section 100%, 90%, 80% ... 10%
-            float globalChance = rand_norm_f();
-            if (avrgMitigation > globalChance)
+            float chance = rand_norm_f();
+            float resPct = std::min(1.0f, floor(10.0f * avrgMitigation + 2.0f) / 10.0f);
+            for (; resPct > 0.0f; resPct -= 0.1f)
             {
-                float maxProb = FLT_MIN;
-                for (float resPct = 1.0f; resPct > 0.0f; resPct -= 0.1f)
+                float probability = 0.5f - 2.5f * abs(resPct - avrgMitigation);
+                if (probability > chance)
                 {
-                    float probability = 0.5f - 2.5f * abs(resPct - avrgMitigation);
-                    if (probability < maxProb)
-                        break;
-                    if (probability > globalChance)
-                    {
-                        damageInfo->resist = uint32(float(damageInfo->damage) * resPct);
-                        break;
-                    }
-                    maxProb = probability;
+                    damageInfo->resist = uint32(float(damageInfo->damage) * resPct);
+                    break;
                 }
+                chance -= probability;
             }
         }
     }
