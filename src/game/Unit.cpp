@@ -2239,7 +2239,7 @@ void Unit::CalculateResistance(Unit* pCaster, DamageInfo* damageInfo)
 
             // Search applicable section 100%, 90%, 80% ... 10%
             float chance = rand_norm_f();
-            float resPct = std::min(1.0f, floor(10.0f * avrgMitigation + 2.0f) / 10.0f);
+            float resPct = std::min(1.0f, float(floor(10.0f * avrgMitigation + 2.0f) / 10.0f));
             for (; resPct > 0.0f; resPct -= 0.1f)
             {
                 float probability = 0.5f - 2.5f * abs(resPct - avrgMitigation);
