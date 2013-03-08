@@ -336,14 +336,12 @@ WeaponAttackType GetWeaponAttackType(SpellEntry const *spellInfo)
 bool IsPassiveSpell(uint32 spellId)
 {
     SpellEntry const *spellInfo = sSpellStore.LookupEntry(spellId);
-    if (!spellInfo)
-        return false;
     return IsPassiveSpell(spellInfo);
 }
 
-bool IsPassiveSpell(SpellEntry const *spellInfo)
+bool IsPassiveSpell(SpellEntry const* spellInfo)
 {
-    return spellInfo->HasAttribute(SPELL_ATTR_PASSIVE);
+    return spellInfo ? spellInfo->HasAttribute(SPELL_ATTR_PASSIVE) : false;
 }
 
 bool IsNoStackAuraDueToAura(uint32 spellId_1, uint32 spellId_2)

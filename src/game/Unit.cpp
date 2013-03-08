@@ -5823,6 +5823,40 @@ void Unit::RemoveNotOwnTrackedTargetAuras(uint32 newPhase)
     }
 }
 
+void Unit::TriggerPassiveAurasWithAttribute(bool active, uint32 flags)
+{
+    AuraList triggerAuraList;
+    {
+        MAPLOCK_READ(this,MAP_LOCK_TYPE_AURAS);
+        SpellAuraHolderMap const& holdersMap = GetSpellAuraHolderMap();
+        for (SpellAuraHolderMap::const_iterator iter = holdersMap.begin(); iter != holdersMap.end(); ++iter)
+        {
+            if (!iter->second || 
+                iter->second->IsDeleted() ||
+                !IsPassiveSpell(iter->second->GetSpellProto()) ||
+                !iter->second->GetSpellProto()->HasAttribute((SpellAttributes)flags)
+                )
+                continue;
+
+            for (uint8 i = EFFECT_INDEX_0; i < MAX_EFFECT_INDEX; ++i)
+                if (Aura* aura = iter->second->GetAuraByEffectIndex(SpellEffectIndex(i)))
+                    if (aura->IsActive() != active)
+                        triggerAuraList.push_back(AuraPair(aura));
+
+        }
+    }
+
+    if (!triggerAuraList.empty())
+    {
+        for(AuraList::iterator i = triggerAuraList.begin(); i != triggerAuraList.end(); ++i)
+        {
+            DEBUG_FILTER_LOG(LOG_FILTER_SPELL_CAST,"Unit::TriggerPassiveAurasWithAttribute %s try make %s aura %u index %u",
+                GetObjectGuid().GetString().c_str(), active ? "active" : "passive", (*i)->GetId(), (*i)->GetEffIndex());
+            (*i)()->ApplyModifier(active, true);
+        }
+    }
+}
+
 void Unit::RemoveSpellAuraHolder(SpellAuraHolderPtr holder, AuraRemoveMode mode)
 {
     if (!AddSpellAuraHolderToRemoveList(holder))

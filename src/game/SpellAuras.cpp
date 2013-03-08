@@ -378,7 +378,7 @@ static AuraType const frozenAuraTypes[] = { SPELL_AURA_MOD_ROOT, SPELL_AURA_MOD_
 Aura::Aura(AuraClassType type, SpellEntry const* spellproto, SpellEffectIndex eff, int32 *currentBasePoints, SpellAuraHolderPtr holder, Unit *target, Unit *caster, Item* castItem) :
 m_periodicTimer(0), m_periodicTick(0), m_removeMode(AURA_REMOVE_BY_DEFAULT),
 m_effIndex(eff), m_deleted(false), m_positive(false), m_isPeriodic(false), m_isAreaAura(false),
-m_isPersistent(false), m_spellAuraHolder(holder), m_classType(type)
+m_isPersistent(false), m_isActive(false), m_spellAuraHolder(holder), m_classType(type)
 {
     MANGOS_ASSERT(target);
     MANGOS_ASSERT(spellproto && spellproto == sSpellStore.LookupEntry( spellproto->Id ) && "`info` must be pointer to sSpellStore element");
@@ -998,9 +998,14 @@ void Aura::ApplyModifier(bool apply, bool Real)
 {
     AuraType aura = m_modifier.m_auraname;
 
+    MANGOS_ASSERT(aura < TOTAL_AURAS);
+
     GetHolder()->SetInUse(true);
-    if (aura < TOTAL_AURAS)
-        (*this.*AuraHandler [aura])(apply, Real);
+
+    (*this.*AuraHandler [aura])(apply, Real);
+
+    m_isActive = apply;
+
     GetHolder()->SetInUse(false);
 }
 

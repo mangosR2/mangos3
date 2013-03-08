@@ -6386,6 +6386,9 @@ void Player::CheckAreaExploreAndOutdoor()
     else if (sWorld.getConfig(CONFIG_BOOL_VMAP_INDOOR_CHECK) && !isGameMaster())
         RemoveAurasWithAttribute(SPELL_ATTR_OUTDOORS_ONLY, SPELL_ATTR_PASSIVE);
 
+    if (sWorld.getConfig(CONFIG_BOOL_VMAP_INDOOR_CHECK))
+        TriggerPassiveAurasWithAttribute(isOutdoor, SPELL_ATTR_OUTDOORS_ONLY);
+
     if (areaFlag==0xffff)
         return;
     int offset = areaFlag / 32;
