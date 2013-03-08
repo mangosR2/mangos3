@@ -9119,8 +9119,12 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     return;
                 }
                 case 47958:                                 // Crystal Spikes
+                case 57083:                                 // Crystal Spikes (h2)
                 {
+                    if (!unitTarget)
+                        return;
                     // Summon Crystal Spike
+
                     m_caster->CastSpell(m_caster, 47954, true);
                     m_caster->CastSpell(m_caster, 47955, true);
                     m_caster->CastSpell(m_caster, 47956, true);
@@ -9675,6 +9679,17 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
 
                     unitTarget->CastSpell(unitTarget, m_spellInfo->CalculateSimpleValue(eff_idx), true);
                     break;
+                }
+                case 57082:                                 // Crystal Spikes (h1)
+                {
+                    if (!unitTarget)
+                        return;
+
+                    unitTarget->CastSpell(unitTarget, 57077, true);
+                    unitTarget->CastSpell(unitTarget, 57078, true);
+                    unitTarget->CastSpell(unitTarget, 57080, true);
+                    unitTarget->CastSpell(unitTarget, 57081, true);
+                    return;
                 }
                 case 57337:                                 // Great Feast
                 {
