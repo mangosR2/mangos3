@@ -1053,53 +1053,55 @@ void World::LoadConfigSettings(bool reload)
     }
 
     // read chat log parameters
-    sChatLog.ChatLogEnable = sConfig.GetBoolDefault("ChatLogEnable", false);
-    sChatLog.ChatLogDateSplit = sConfig.GetBoolDefault("ChatLogDateSplit", false);
-    sChatLog.ChatLogUTFHeader = sConfig.GetBoolDefault("ChatLogUTFHeader", false);
-    sChatLog.ChatLogIgnoreUnprintable = sConfig.GetBoolDefault("ChatLogIgnoreUnprintable", false);
+    sChatLog.m_bChatLogEnable            = sConfig.GetBoolDefault("ChatLogEnable",            false);
+    sChatLog.m_bChatLogDateSplit         = sConfig.GetBoolDefault("ChatLogDateSplit",         true);
+    sChatLog.m_bChatLogUTFHeader         = sConfig.GetBoolDefault("ChatLogUTFHeader",         true);
+    sChatLog.m_bChatLogIgnoreUnprintable = sConfig.GetBoolDefault("ChatLogIgnoreUnprintable", true);
 
     // read chat log file names
-    sChatLog.names[CHAT_LOG_CHAT] = sConfig.GetStringDefault("ChatLogChatFile", "");
-    sChatLog.names[CHAT_LOG_PARTY] = sConfig.GetStringDefault("ChatLogPartyFile", "");
-    sChatLog.names[CHAT_LOG_GUILD] = sConfig.GetStringDefault("ChatLogGuildFile", "");
-    sChatLog.names[CHAT_LOG_WHISPER] = sConfig.GetStringDefault("ChatLogWhisperFile", "");
-    sChatLog.names[CHAT_LOG_CHANNEL] = sConfig.GetStringDefault("ChatLogChannelFile", "");
-    sChatLog.names[CHAT_LOG_RAID] = sConfig.GetStringDefault("ChatLogRaidFile", "");
-    sChatLog.names[CHAT_LOG_BATTLEGROUND] = sConfig.GetStringDefault("ChatLogBattleGroundFile", "");
+    sChatLog.m_sLogsDir                             = sConfig.GetStringDefault("ChatLogsDirectory",       "");
+    sChatLog.m_sLogFileNames[CHAT_LOG_CHAT]         = sConfig.GetStringDefault("ChatLogChatFile",         "main_chat-$d.log");
+    sChatLog.m_sLogFileNames[CHAT_LOG_PARTY]        = sConfig.GetStringDefault("ChatLogPartyFile",        "party_chat-$d.log");
+    sChatLog.m_sLogFileNames[CHAT_LOG_GUILD]        = sConfig.GetStringDefault("ChatLogGuildFile",        "guild_chat-$d.log");
+    sChatLog.m_sLogFileNames[CHAT_LOG_WHISPER]      = sConfig.GetStringDefault("ChatLogWhisperFile",      "whisper_chat-$d.log");
+    sChatLog.m_sLogFileNames[CHAT_LOG_CHANNEL]      = sConfig.GetStringDefault("ChatLogChannelFile",      "channel_chat-$d.log");
+    sChatLog.m_sLogFileNames[CHAT_LOG_RAID]         = sConfig.GetStringDefault("ChatLogRaidFile",         "raid_chat-$d.log");
+    sChatLog.m_sLogFileNames[CHAT_LOG_BATTLEGROUND] = sConfig.GetStringDefault("ChatLogBattleGroundFile", "bg_chat-$d.log");
 
     // read screen log flags
-    sChatLog.screenflag[CHAT_LOG_CHAT] = sConfig.GetBoolDefault("ChatLogChatScreen", false);
-    sChatLog.screenflag[CHAT_LOG_PARTY] = sConfig.GetBoolDefault("ChatLogPartyScreen", false);
-    sChatLog.screenflag[CHAT_LOG_GUILD] = sConfig.GetBoolDefault("ChatLogGuildScreen", false);
-    sChatLog.screenflag[CHAT_LOG_WHISPER] = sConfig.GetBoolDefault("ChatLogWhisperScreen", false);
-    sChatLog.screenflag[CHAT_LOG_CHANNEL] = sConfig.GetBoolDefault("ChatLogChannelScreen", false);
-    sChatLog.screenflag[CHAT_LOG_RAID] = sConfig.GetBoolDefault("ChatLogRaidScreen", false);
-    sChatLog.screenflag[CHAT_LOG_BATTLEGROUND] = sConfig.GetBoolDefault("ChatLogBattleGroundScreen", false);
-
-    // lexics cutter
-    sChatLog.LexicsCutterEnable = sConfig.GetBoolDefault("LexicsCutterEnable", false);
+    sChatLog.m_bScreenFlag[CHAT_LOG_CHAT]         = sConfig.GetBoolDefault("ChatLogChatScreen",         false);
+    sChatLog.m_bScreenFlag[CHAT_LOG_PARTY]        = sConfig.GetBoolDefault("ChatLogPartyScreen",        false);
+    sChatLog.m_bScreenFlag[CHAT_LOG_GUILD]        = sConfig.GetBoolDefault("ChatLogGuildScreen",        false);
+    sChatLog.m_bScreenFlag[CHAT_LOG_WHISPER]      = sConfig.GetBoolDefault("ChatLogWhisperScreen",      false);
+    sChatLog.m_bScreenFlag[CHAT_LOG_CHANNEL]      = sConfig.GetBoolDefault("ChatLogChannelScreen",      false);
+    sChatLog.m_bScreenFlag[CHAT_LOG_RAID]         = sConfig.GetBoolDefault("ChatLogRaidScreen",         false);
+    sChatLog.m_bScreenFlag[CHAT_LOG_BATTLEGROUND] = sConfig.GetBoolDefault("ChatLogBattleGroundScreen", false);
 
     // initialize lexics cutter parameters
-    sChatLog.LexicsCutterInnormativeCut = sConfig.GetBoolDefault("LexicsCutterInnormativeCut", true);
-    sChatLog.LexicsCutterNoActionOnGM = sConfig.GetBoolDefault("LexicsCutterNoActionOnGM", true);
-    sChatLog.LexicsCutterScreenLog = sConfig.GetBoolDefault("LexicsCutterScreenLog", false);
-    sChatLog.LexicsCutterCutReplacement = sConfig.GetStringDefault("LexicsCutterCutReplacement", "&!@^%!^&*!!! [gibberish]");
-    sChatLog.LexicsCutterAction = sConfig.GetIntDefault("LexicsCutterAction", 0);
-    sChatLog.LexicsCutterActionDuration = sConfig.GetIntDefault("LexicsCutterActionDuration", 60000);
-    sChatLog.LexicsCutterIgnoreLetterRepeat = sConfig.GetBoolDefault("LexicsCutterIgnoreRepeats", true);
-    sChatLog.LexicsCutterIgnoreMiddleSpaces = sConfig.GetBoolDefault("LexicsCutterIgnoreSpaces", true);
-    sChatLog.fn_analogsfile = sConfig.GetStringDefault("LexicsCutterAnalogsFile", "");
-    sChatLog.fn_wordsfile = sConfig.GetStringDefault("LexicsCutterWordsFile", "");
-    sChatLog.fn_innormative = sConfig.GetStringDefault("LexicsCutterLogFile", "");
+    sChatLog.m_bLexicsCutterEnable         = sConfig.GetBoolDefault("LexicsCutterEnable",         false);
+    sChatLog.m_bLexicsCutterInnormativeCut = sConfig.GetBoolDefault("LexicsCutterInnormativeCut", true);
+    sChatLog.m_bLexicsCutterNoActionOnGM   = sConfig.GetBoolDefault("LexicsCutterNoActionOnGM",   true);
+    sChatLog.m_bLexicsCutterScreenLog      = sConfig.GetBoolDefault("LexicsCutterScreenLog",      false);
+
+    sChatLog.m_iLexicsCutterAction         = sConfig.GetIntDefault("LexicsCutterAction",         LEXICS_ACTION_LOG);
+    sChatLog.m_iLexicsCutterActionDuration = sConfig.GetIntDefault("LexicsCutterActionDuration", 60000);
+
+    sChatLog.m_bLexicsCutterIgnoreLetterRepeat = sConfig.GetBoolDefault("LexicsCutterIgnoreRepeats", true);
+    sChatLog.m_bLexicsCutterIgnoreMiddleSpaces = sConfig.GetBoolDefault("LexicsCutterIgnoreSpaces",  true);
+
+    sChatLog.m_sLexicsCutterCutReplacement = sConfig.GetStringDefault("LexicsCutterCutReplacement", "&!@^%!^&*!!!");
+    sChatLog.m_sAnalogsFileName            = sConfig.GetStringDefault("LexicsCutterAnalogsFile",    "letter_analogs.txt");
+    sChatLog.m_sWordsFileName              = sConfig.GetStringDefault("LexicsCutterWordsFile",      "innormative_words.txt");
+    sChatLog.m_sInnormativeFileName        = sConfig.GetStringDefault("LexicsCutterLogFile",        "innormative-$d.log");
 
     // read lexics cutter flags
-    sChatLog.cutflag[CHAT_LOG_CHAT] = sConfig.GetBoolDefault("LexicsCutInChat", true);
-    sChatLog.cutflag[CHAT_LOG_PARTY] = sConfig.GetBoolDefault("LexicsCutInParty", true);
-    sChatLog.cutflag[CHAT_LOG_GUILD] = sConfig.GetBoolDefault("LexicsCutInGuild", true);
-    sChatLog.cutflag[CHAT_LOG_WHISPER] = sConfig.GetBoolDefault("LexicsCutInWhisper", true);
-    sChatLog.cutflag[CHAT_LOG_CHANNEL] = sConfig.GetBoolDefault("LexicsCutInChannel", true);
-    sChatLog.cutflag[CHAT_LOG_RAID] = sConfig.GetBoolDefault("LexicsCutInRaid", true);
-    sChatLog.cutflag[CHAT_LOG_BATTLEGROUND] = sConfig.GetBoolDefault("LexicsCutInBattleGround", true);
+    sChatLog.m_bCutFlag[CHAT_LOG_CHAT]         = sConfig.GetBoolDefault("LexicsCutInChat",         true);
+    sChatLog.m_bCutFlag[CHAT_LOG_PARTY]        = sConfig.GetBoolDefault("LexicsCutInParty",        true);
+    sChatLog.m_bCutFlag[CHAT_LOG_GUILD]        = sConfig.GetBoolDefault("LexicsCutInGuild",        true);
+    sChatLog.m_bCutFlag[CHAT_LOG_WHISPER]      = sConfig.GetBoolDefault("LexicsCutInWhisper",      true);
+    sChatLog.m_bCutFlag[CHAT_LOG_CHANNEL]      = sConfig.GetBoolDefault("LexicsCutInChannel",      true);
+    sChatLog.m_bCutFlag[CHAT_LOG_RAID]         = sConfig.GetBoolDefault("LexicsCutInRaid",         true);
+    sChatLog.m_bCutFlag[CHAT_LOG_BATTLEGROUND] = sConfig.GetBoolDefault("LexicsCutInBattleGround", true);
 
     // initialize chat logs (and lexics cutter)
     sChatLog.Initialize();
