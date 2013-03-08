@@ -1053,7 +1053,8 @@ void World::LoadConfigSettings(bool reload)
     }
 
     // read chat log parameters
-    sChatLog.m_bChatLogEnable            = sConfig.GetBoolDefault("ChatLogEnable",            false);
+    sChatLog.m_uiChatLogMethod = (ChatLogMethod)sConfig.GetIntDefault("ChatLogMethod", 0);
+
     sChatLog.m_bChatLogDateSplit         = sConfig.GetBoolDefault("ChatLogDateSplit",         true);
     sChatLog.m_bChatLogUTFHeader         = sConfig.GetBoolDefault("ChatLogUTFHeader",         true);
     sChatLog.m_bChatLogIgnoreUnprintable = sConfig.GetBoolDefault("ChatLogIgnoreUnprintable", true);

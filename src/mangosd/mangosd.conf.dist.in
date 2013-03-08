@@ -446,9 +446,10 @@ LogColors = ""
 ###################################################################################################################
 # CHAT LOG AND LEXICS CUTTER SYSTEM
 #
-#    ChatLogEnable
+#    ChatLogMethod
 #        Default: 0 (Disabled)
-#                 1 (Enabled)
+#                 1 (Log to files)
+#                 2 (Log to DB by SQL)
 #
 #    ChatLogDateSplit
 #        If this is enabled, all $d in file names are replaced with current date
@@ -572,7 +573,7 @@ LogColors = ""
 #
 ###################################################################################################################
 
-ChatLogEnable = 0
+ChatLogMethod = 0
 ChatLogDateSplit = 1
 ChatLogUTFHeader = 1
 ChatLogIgnoreUnprintable = 1

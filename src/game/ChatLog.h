@@ -24,6 +24,13 @@
 #include "ObjectMgr.h"
 #include "Policies/Singleton.h"
 
+enum ChatLogMethod
+{
+    CHAT_LOG_METHOD_NONE = 0,
+    CHAT_LOG_METHOD_FILE = 1,
+    CHAT_LOG_METHOD_SQL  = 2
+};
+
 enum ChatLogFiles
 {
     CHAT_LOG_CHAT = 0,
@@ -70,7 +77,8 @@ class ChatLog : public MaNGOS::Singleton<ChatLog, MaNGOS::ClassLevelLockable<Cha
 
         std::string m_sLogsDir;
 
-        bool m_bChatLogEnable;
+        ChatLogMethod m_uiChatLogMethod;
+
         bool m_bChatLogDateSplit;
         bool m_bChatLogUTFHeader;
         bool m_bChatLogIgnoreUnprintable;

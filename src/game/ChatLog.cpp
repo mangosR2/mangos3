@@ -51,30 +51,38 @@ ChatLog::~ChatLog()
 void ChatLog::Initialize()
 {
     if (m_sAnalogsFileName == "" || m_sWordsFileName == "")
-    {
         m_bLexicsCutterEnable = false;
-    }
 
     if (m_bLexicsCutterEnable)
     {
         // initialize lexics cutter
         Lexics = new LexicsCutter;
-        if (Lexics)
+        if (Lexics && Lexics->Read_Letter_Analogs(m_sAnalogsFileName) && Lexics->Read_Innormative_Words(m_sWordsFileName))
         {
-            Lexics->Read_Letter_Analogs(m_sAnalogsFileName);
-            Lexics->Read_Innormative_Words(m_sWordsFileName);
             Lexics->Map_Innormative_Words();
             // read additional parameters
             Lexics->IgnoreLetterRepeat = m_bLexicsCutterIgnoreLetterRepeat;
             Lexics->IgnoreMiddleSpaces = m_bLexicsCutterIgnoreMiddleSpaces;
         }
+        else
+        {
+            m_bLexicsCutterEnable = false;
+            if (Lexics)
+            {
+                delete Lexics;
+                Lexics = NULL;
+            }
+        }
     }
 
-    // open all files (with aliasing)
-    OpenAllFiles();
+    if (m_bLexicsCutterEnable || m_uiChatLogMethod == CHAT_LOG_METHOD_FILE)
+    {
+        // open all files (with aliasing)
+        OpenAllFiles();
 
-    // write timestamps (init)
-    WriteInitStamps();
+        // write timestamps (init)
+        WriteInitStamps();
+    }
 }
 
 void ChatLog::Uninitialize()
@@ -94,7 +102,7 @@ bool ChatLog::_ChatCommon(ChatLogFiles ChatType, Player* player, std::string& ms
     if (m_bLexicsCutterEnable && Lexics && m_bCutFlag[ChatType] && Lexics->Check_Lexics(msg))
         ChatBadLexicsAction(player, msg);
 
-    if (!m_bChatLogEnable)
+    if (m_uiChatLogMethod == CHAT_LOG_METHOD_NONE)
         return false;
 
     if (m_bChatLogIgnoreUnprintable)
@@ -116,6 +124,15 @@ void ChatLog::ChatMsg(Player* player, std::string& msg, uint32 type)
 {
     if (!_ChatCommon(CHAT_LOG_CHAT, player, msg))
         return;
+
+    if (m_uiChatLogMethod == CHAT_LOG_METHOD_SQL)
+    {
+        std::string sChat = msg;
+        CharacterDatabase.escape_string(sChat);
+        CharacterDatabase.PExecute("INSERT INTO `chat_log_chat` SET `date_time` = NOW(), `type` = %u, `pname` = '%s', `msg` = '%s', `level` = %u, `account_id` = %u",
+                                    type, player->GetName(), sChat.c_str(), player->getLevel() ,player->GetSession()->GetAccountId());
+        return;
+    }
 
     CheckDateSwitch();
 
@@ -156,6 +173,36 @@ void ChatLog::PartyMsg(Player* player, std::string& msg)
     if (!_ChatCommon(CHAT_LOG_PARTY, player, msg))
         return;
 
+    if (m_uiChatLogMethod == CHAT_LOG_METHOD_SQL)
+    {
+        std::string group_str = "";
+        Group* group = player->GetGroup();
+        if (!group)
+            group_str.append("[unknown party]");
+        else
+        {
+            Player* gm_member;
+            Group::MemberSlotList g_members = group->GetMemberSlots();
+            for (Group::member_citerator itr = g_members.begin(); itr != g_members.end(); itr++)
+            {
+                gm_member = sObjectMgr.GetPlayer(itr->guid);
+                if (gm_member)
+                {
+                    group_str.append(itr->name);
+                    group_str.append(",");
+                }
+            }
+            if (group_str.length() > 1)
+                group_str.erase(group_str.length() - 1);
+        }
+
+        std::string sChat = msg;
+        CharacterDatabase.escape_string(sChat);
+        CharacterDatabase.PExecute("INSERT INTO `chat_log_party` SET `date_time` = NOW(), `pname` = '%s', `msg` = '%s', `level` = %u, `account_id` = %u, `members` = '%s'",
+                                    player->GetName(), sChat.c_str(), player->getLevel(), player->GetSession()->GetAccountId(), group_str.c_str());
+        return;
+    }
+
     CheckDateSwitch();
 
     std::string log_str = "";
@@ -175,9 +222,8 @@ void ChatLog::PartyMsg(Player* player, std::string& msg)
         log_str.append("[");
 
         ObjectGuid gm_leader_GUID = group->GetLeaderGuid();
-        Player* gm_member;
 
-        gm_member = sObjectMgr.GetPlayer(gm_leader_GUID);
+        Player* gm_member = sObjectMgr.GetPlayer(gm_leader_GUID);
         if (gm_member)
         {
             log_str.append(gm_member->GetName());
@@ -222,6 +268,29 @@ void ChatLog::GuildMsg(Player* player, std::string& msg, bool officer)
 {
     if (!_ChatCommon(CHAT_LOG_GUILD, player, msg))
         return;
+
+    if (m_uiChatLogMethod == CHAT_LOG_METHOD_SQL)
+    {
+        std::string guild_str = "";
+        if (!player->GetGuildId())
+            guild_str.append("[unknown guild]");
+        else
+        {
+            Guild* guild = sGuildMgr.GetGuildById(player->GetGuildId());
+            if (!guild)
+                guild_str.append("[unknown guild]");
+            else
+                guild_str.append(guild->GetName());
+            if (officer)
+                guild_str.append("(officer)");
+        }
+        std::string sChat = msg;
+        CharacterDatabase.escape_string(sChat);
+        CharacterDatabase.escape_string(guild_str);
+        CharacterDatabase.PExecute("INSERT INTO `chat_log_guild` SET `date_time` = NOW(), `pname` = '%s', `msg` = '%s', `level` = %u, `account_id` = %u, `guild` = '%s'",
+                                    player->GetName(), sChat.c_str(), player->getLevel(), player->GetSession()->GetAccountId(), guild_str.c_str());
+        return;
+    }
 
     CheckDateSwitch();
 
@@ -270,6 +339,15 @@ void ChatLog::WhisperMsg(Player* player, std::string& to, std::string& msg)
     if (!_ChatCommon(CHAT_LOG_WHISPER, player, msg))
         return;
 
+    if (m_uiChatLogMethod == CHAT_LOG_METHOD_SQL)
+    {
+        std::string sChat = msg;
+        CharacterDatabase.escape_string(sChat);
+        CharacterDatabase.PExecute("INSERT INTO `chat_log_whisper` SET `date_time` = NOW(), `pname` = '%s', `msg` = '%s', `level` = %u, `account_id` = %u, `to` = '%s'",
+                                    player->GetName(), sChat.c_str(), player->getLevel(), player->GetSession()->GetAccountId(), to.c_str());
+        return;
+    }
+
     CheckDateSwitch();
 
     std::string log_str = "";
@@ -309,6 +387,22 @@ void ChatLog::ChannelMsg(Player* player, std::string& channel, std::string& msg)
     if (!_ChatCommon(CHAT_LOG_CHANNEL, player, msg))
         return;
 
+    if (m_uiChatLogMethod == CHAT_LOG_METHOD_SQL)
+    {
+        std::string channel_str = "";
+        if (channel.size() == 0)
+            channel_str.append("[unknown channel]");
+        else
+            channel_str.append(channel);
+
+        std::string sChat = msg;
+        CharacterDatabase.escape_string(sChat);
+        CharacterDatabase.escape_string(channel_str);
+        CharacterDatabase.PExecute("INSERT INTO `chat_log_channel` SET `date_time` = NOW(), `pname` = '%s', `msg` = '%s', `level` = %u, `account_id` = %u, `channel` = '%s'",
+                                    player->GetName(), sChat.c_str(), player->getLevel(), player->GetSession()->GetAccountId(), channel_str.c_str());
+        return;
+    }
+
     CheckDateSwitch();
 
     std::string log_str = "";
@@ -347,6 +441,36 @@ void ChatLog::RaidMsg(Player* player, std::string& msg, uint32 type)
 {
     if (!_ChatCommon(CHAT_LOG_RAID, player, msg))
         return;
+
+    if (m_uiChatLogMethod == CHAT_LOG_METHOD_SQL)
+    {
+        std::string group_str = "";
+        Group* group = player->GetGroup();
+        if (!group)
+            group_str.append("[unknown raid]");
+        else
+        {
+            Player* gm_member;
+            Group::MemberSlotList g_members = group->GetMemberSlots();
+            for (Group::member_citerator itr = g_members.begin(); itr != g_members.end(); itr++)
+            {
+                gm_member = sObjectMgr.GetPlayer(itr->guid);
+                if (gm_member)
+                {
+                    group_str.append(itr->name);
+                    group_str.append(",");
+                }
+            }
+            if (group_str.length() > 1)
+                group_str.erase(group_str.length() - 1);
+        }
+
+        std::string sChat = msg;
+        CharacterDatabase.escape_string(sChat);
+        CharacterDatabase.PExecute("INSERT INTO `chat_log_raid` SET `date_time` = NOW(), `type` = %u, `pname` = '%s', `msg` = '%s', `level` = %u, `account_id` = %u, `members` = '%s'",
+                                    type, player->GetName(), sChat.c_str(), player->getLevel(), player->GetSession()->GetAccountId(), group_str.c_str());
+        return;
+    }
 
     CheckDateSwitch();
 
@@ -433,6 +557,35 @@ void ChatLog::BattleGroundMsg(Player* player, std::string& msg, uint32 type)
     if (!_ChatCommon(CHAT_LOG_BATTLEGROUND, player, msg))
         return;
 
+    if (m_uiChatLogMethod == CHAT_LOG_METHOD_SQL)
+    {
+        std::string group_str = "";
+        Group* group = player->GetGroup();
+        if (!group)
+            group_str.append("[unknown group]");
+        else
+        {
+            Player* gm_member;
+            Group::MemberSlotList g_members = group->GetMemberSlots();
+            for (Group::member_citerator itr = g_members.begin(); itr != g_members.end(); itr++)
+            {
+                gm_member = sObjectMgr.GetPlayer(itr->guid);
+                if (gm_member)
+                {
+                    group_str.append(itr->name);
+                    group_str.append(",");
+                }
+            }
+            if (group_str.length() > 1)
+                group_str.erase(group_str.length() - 1);
+        }
+        std::string sChat = msg;
+        CharacterDatabase.escape_string(sChat);
+        CharacterDatabase.PExecute("INSERT INTO `chat_log_bg` SET `date_time` = NOW(), `type` = %u, `pname` = '%s', `msg` = '%s', `level` = %u, `account_id` = %u, `members` = '%s'",
+                                    type, player->GetName(), sChat.c_str(), player->getLevel(), player->GetSession()->GetAccountId(), group_str.c_str());
+        return;
+    }
+
     CheckDateSwitch();
 
     std::string log_str = "";
@@ -511,6 +664,9 @@ void ChatLog::BattleGroundMsg(Player* player, std::string& msg, uint32 type)
 
 void ChatLog::OpenAllFiles()
 {
+    if (!m_bLexicsCutterEnable && m_uiChatLogMethod != CHAT_LOG_METHOD_FILE)
+        return;
+
     std::string tempname;
     char dstr[12];
 
@@ -521,7 +677,7 @@ void ChatLog::OpenAllFiles()
         sprintf(dstr, "%-4d-%02d-%02d", aTm->tm_year + 1900, aTm->tm_mon + 1, aTm->tm_mday);
     }
 
-    if(!m_sLogsDir.empty())
+    if (!m_sLogsDir.empty())
     {
         switch (m_sLogsDir[m_sLogsDir.size() - 1])
         {
@@ -533,7 +689,7 @@ void ChatLog::OpenAllFiles()
         }
     }
 
-    if (m_bChatLogEnable)
+    if (m_uiChatLogMethod == CHAT_LOG_METHOD_FILE)
     {
         for (int8 i = 0; i < CHATLOG_CHAT_TYPES_COUNT; ++i)
         {
@@ -631,6 +787,9 @@ void ChatLog::CheckDateSwitch()
 
 void ChatLog::WriteInitStamps()
 {
+    if (!m_bLexicsCutterEnable && m_uiChatLogMethod != CHAT_LOG_METHOD_FILE)
+        return;
+
     // remember date
     time_t t = time(NULL);
     tm* aTm = localtime(&t);
