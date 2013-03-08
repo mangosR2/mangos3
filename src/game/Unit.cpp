@@ -5718,7 +5718,7 @@ void Unit::RemoveAurasWithInterruptFlags(uint32 flags)
     }
 }
 
-void Unit::RemoveAurasWithAttribute(uint32 flags)
+void Unit::RemoveAurasWithAttribute(uint32 flags, uint32 exclude /* = 0*/)
 {
     SpellIdSet spellsToRemove;
     {
@@ -5729,7 +5729,8 @@ void Unit::RemoveAurasWithAttribute(uint32 flags)
             if (!iter->second || iter->second->IsDeleted() || !iter->second->GetSpellProto())
                 continue;
 
-            if (iter->second->GetSpellProto()->HasAttribute((SpellAttributes)flags))
+            if (iter->second->GetSpellProto()->HasAttribute((SpellAttributes)flags) &&
+                (exclude == 0 || !iter->second->GetSpellProto()->HasAttribute((SpellAttributes)exclude)))
                 spellsToRemove.insert(iter->first);
         }
     }
