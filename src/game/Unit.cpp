@@ -1404,10 +1404,10 @@ void Unit::CastSpell(Unit* Victim, SpellEntry const *spellInfo, bool triggered, 
     targets.setUnitTarget( Victim );
 
     if (spellInfo->Targets & TARGET_FLAG_DEST_LOCATION)
-        targets.setDestination(Victim->GetPositionX(), Victim->GetPositionY(), Victim->GetPositionZ());
+        targets.setDestination(Victim->GetPosition());
     if (spellInfo->Targets & TARGET_FLAG_SOURCE_LOCATION)
         if (WorldObject* caster = spell->GetCastingObject())
-            targets.setSource(caster->GetPositionX(), caster->GetPositionY(), caster->GetPositionZ());
+            targets.setSource(caster->GetPosition());
 
     spell->m_CastItem = castItem;
     spell->prepare(&targets, triggeredByAura);
@@ -1488,16 +1488,16 @@ void Unit::CastCustomSpell(Unit* Victim, SpellEntry const *spellInfo, int32 cons
     spell->m_CastItem = castItem;
 
     if (spellInfo->Targets & TARGET_FLAG_DEST_LOCATION)
-        targets.setDestination(Victim->GetPositionX(), Victim->GetPositionY(), Victim->GetPositionZ());
+        targets.setDestination(Victim->GetPosition());
     if (spellInfo->Targets & TARGET_FLAG_SOURCE_LOCATION)
         if (WorldObject* caster = spell->GetCastingObject())
-            targets.setSource(caster->GetPositionX(), caster->GetPositionY(), caster->GetPositionZ());
+            targets.setSource(caster->GetPosition());
 
     spell->prepare(&targets, triggeredByAura);
 }
 
 // used for scripting
-void Unit::CastSpell(float x, float y, float z, uint32 spellId, bool triggered, Item *castItem, Aura const* triggeredByAura, ObjectGuid originalCaster, SpellEntry const* triggeredBy)
+void Unit::CastSpell(float x, float y, float z, uint32 spellId, bool triggered, Item* castItem, Aura const* triggeredByAura, ObjectGuid originalCaster, SpellEntry const* triggeredBy)
 {
     SpellEntry const *spellInfo = sSpellStore.LookupEntry(spellId);
 
@@ -1510,13 +1510,63 @@ void Unit::CastSpell(float x, float y, float z, uint32 spellId, bool triggered, 
         return;
     }
 
-    CastSpell(x, y, z, spellInfo, triggered, castItem, triggeredByAura, originalCaster, triggeredBy);
+    WorldLocation loc = GetPosition();
+    loc.x = x;
+    loc.y = y;
+    loc.z = z;
+
+    CastSpell(loc, spellInfo, triggered, castItem, triggeredByAura, originalCaster, triggeredBy);
 }
 
 // used for scripting
-void Unit::CastSpell(float x, float y, float z, SpellEntry const *spellInfo, bool triggered, Item *castItem, Aura const* triggeredByAura, ObjectGuid originalCaster, SpellEntry const* triggeredBy)
+void Unit::CastSpell(WorldLocation const& loc, uint32 spellId, bool triggered, Item* castItem, Aura const* triggeredByAura, ObjectGuid originalCaster, SpellEntry const* triggeredBy)
+{
+    SpellEntry const *spellInfo = sSpellStore.LookupEntry(spellId);
+
+    if(!spellInfo)
+    {
+        if (triggeredByAura)
+            sLog.outError("CastSpell(x,y,z): unknown spell id %i by caster: %s triggered by aura %u (eff %u)", spellId, GetGuidStr().c_str(), triggeredByAura->GetId(), triggeredByAura->GetEffIndex());
+        else
+            sLog.outError("CastSpell(x,y,z): unknown spell id %i by caster: %s", spellId, GetGuidStr().c_str());
+        return;
+    }
+
+    CastSpell(loc, spellInfo, triggered, castItem, triggeredByAura, originalCaster, triggeredBy);
+}
+
+// used for scripting
+void Unit::CastSpell(float x, float y, float z, SpellEntry const* spellInfo, bool triggered, Item* castItem, Aura const* triggeredByAura, ObjectGuid originalCaster, SpellEntry const* triggeredBy)
 {
     if(!spellInfo)
+    {
+        if (triggeredByAura)
+            sLog.outError("CastSpell(x,y,z): unknown spell by caster: %s triggered by aura %u (eff %u)", GetGuidStr().c_str(), triggeredByAura->GetId(), triggeredByAura->GetEffIndex());
+        else
+            sLog.outError("CastSpell(x,y,z): unknown spell by caster: %s", GetGuidStr().c_str());
+        return;
+    }
+
+    if (triggeredByAura)
+    {
+        if (!originalCaster)
+            originalCaster = triggeredByAura->GetCasterGuid();
+
+        triggeredBy = triggeredByAura->GetSpellProto();
+    }
+
+    WorldLocation loc = GetPosition();
+    loc.x = x;
+    loc.y = y;
+    loc.z = z;
+
+    CastSpell(loc, spellInfo, triggered, castItem, triggeredByAura, originalCaster, triggeredBy);
+}
+
+// used for scripting
+void Unit::CastSpell(WorldLocation const& loc, SpellEntry const* spellInfo, bool triggered, Item* castItem, Aura const* triggeredByAura, ObjectGuid originalCaster, SpellEntry const* triggeredBy)
+{
+    if (!spellInfo)
     {
         if (triggeredByAura)
             sLog.outError("CastSpell(x,y,z): unknown spell by caster: %s triggered by aura %u (eff %u)", GetGuidStr().c_str(), triggeredByAura->GetId(), triggeredByAura->GetEffIndex());
@@ -1539,18 +1589,18 @@ void Unit::CastSpell(float x, float y, float z, SpellEntry const *spellInfo, boo
         triggeredBy = triggeredByAura->GetSpellProto();
     }
 
-    Spell *spell = new Spell(this, spellInfo, triggered, originalCaster, triggeredBy);
+    Spell* spell = new Spell(this, spellInfo, triggered, originalCaster, triggeredBy);
 
     SpellCastTargets targets;
 
     if (spellInfo->Targets & TARGET_FLAG_DEST_LOCATION)
-        targets.setDestination(x, y, z);
+        targets.setDestination(loc);
     if (spellInfo->Targets & TARGET_FLAG_SOURCE_LOCATION)
-        targets.setSource(x, y, z);
+        targets.setSource(loc);
 
     // Spell cast with x,y,z but without dbc target-mask, set only destination!
     if (!(targets.m_targetMask & (TARGET_FLAG_DEST_LOCATION | TARGET_FLAG_SOURCE_LOCATION)))
-        targets.setDestination(x, y, z);
+        targets.setDestination(loc);
 
     spell->m_CastItem = castItem;
     spell->prepare(&targets, triggeredByAura);

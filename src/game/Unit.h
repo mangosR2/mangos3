@@ -1598,6 +1598,8 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         void CastCustomSpell(Unit* Victim,SpellEntry const *spellInfo, int32 const* bp0, int32 const* bp1, int32 const* bp2, bool triggered, Item *castItem= NULL, Aura const* triggeredByAura = NULL, ObjectGuid originalCaster = ObjectGuid(), SpellEntry const* triggeredBy = NULL);
         void CastSpell(float x, float y, float z, uint32 spellId, bool triggered, Item *castItem = NULL, Aura const* triggeredByAura = NULL, ObjectGuid originalCaster = ObjectGuid(), SpellEntry const* triggeredBy = NULL);
         void CastSpell(float x, float y, float z, SpellEntry const *spellInfo, bool triggered, Item *castItem = NULL, Aura const* triggeredByAura = NULL, ObjectGuid originalCaster = ObjectGuid(), SpellEntry const* triggeredBy = NULL);
+        void CastSpell(WorldLocation const& loc, uint32 spellId, bool triggered, Item *castItem = NULL, Aura const* triggeredByAura = NULL, ObjectGuid originalCaster = ObjectGuid(), SpellEntry const* triggeredBy = NULL);
+        void CastSpell(WorldLocation const& loc, SpellEntry const *spellInfo, bool triggered, Item *castItem = NULL, Aura const* triggeredByAura = NULL, ObjectGuid originalCaster = ObjectGuid(), SpellEntry const* triggeredBy = NULL);
 
         void DeMorph();
 
@@ -2361,6 +2363,10 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         void CastSpell(float x, float y, float z, uint32 spell, TR triggered);
         template <typename TR>
         void CastSpell(float x, float y, float z, SpellEntry const* spell, TR triggered);
+        template <typename TR>
+        void CastSpell(WorldLocation const& loc, uint32 spell, TR triggered);
+        template <typename TR>
+        void CastSpell(WorldLocation const& loc, SpellEntry const* spell, TR triggered);
 };
 
 template<typename Func>
