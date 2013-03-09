@@ -1637,6 +1637,31 @@ CREATE TABLE `db_version` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Table structure for table `dbscripts_on_creature_movement`
+--
+
+DROP TABLE IF EXISTS `dbscripts_on_creature_movement`;
+CREATE TABLE `dbscripts_on_creature_movement` (
+  `id` mediumint(8) unsigned NOT NULL default '0',
+  `delay` int(10) unsigned NOT NULL default '0',
+  `command` mediumint(8) unsigned NOT NULL default '0',
+  `datalong` mediumint(8) unsigned NOT NULL default '0',
+  `datalong2` int(10) unsigned NOT NULL default '0',
+  `buddy_entry` int(10) unsigned NOT NULL default '0',
+  `search_radius` int(10) unsigned NOT NULL default '0',
+  `data_flags` tinyint(3) unsigned NOT NULL default '0',
+  `dataint` int(11) NOT NULL default '0',
+  `dataint2` int(11) NOT NULL default '0',
+  `dataint3` int(11) NOT NULL default '0',
+  `dataint4` int(11) NOT NULL default '0',
+  `x` float NOT NULL default '0',
+  `y` float NOT NULL default '0',
+  `z` float NOT NULL default '0',
+  `o` float NOT NULL default '0',
+  `comments` varchar(255) NOT NULL
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+--
 -- Table structure of `dbscripts_on_event`, `dbscripts_on_go_use`, `dbscripts_on_go_template_use`,
 --                    `dbscripts_on_gossip`, `dbscripts_on_quest_end`, `dbscripts_on_quest_start`,
 --                    `dbscripts_on_spell`, `dbscripts_on_creature_death`
@@ -2553,6 +2578,32 @@ CREATE TABLE `instance_encounters` (
   PRIMARY KEY (`entry`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `locales_item`
+--
+
+DROP TABLE IF EXISTS `locales_item`;
+CREATE TABLE `locales_item` (
+  `entry` mediumint(8) unsigned NOT NULL default '0',
+  `name_loc1` varchar(100) NOT NULL default '',
+  `name_loc2` varchar(100) NOT NULL default '',
+  `name_loc3` varchar(100) NOT NULL default '',
+  `name_loc4` varchar(100) NOT NULL default '',
+  `name_loc5` varchar(100) NOT NULL default '',
+  `name_loc6` varchar(100) NOT NULL default '',
+  `name_loc7` varchar(100) NOT NULL default '',
+  `name_loc8` varchar(100) NOT NULL default '',
+  `description_loc1` varchar(255) default NULL,
+  `description_loc2` varchar(255) default NULL,
+  `description_loc3` varchar(255) default NULL,
+  `description_loc4` varchar(255) default NULL,
+  `description_loc5` varchar(255) default NULL,
+  `description_loc6` varchar(255) default NULL,
+  `description_loc7` varchar(255) default NULL,
+  `description_loc8` varchar(255) default NULL,
+  PRIMARY KEY  (`entry`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `locales_item`
