@@ -5712,13 +5712,20 @@ SpellCastResult Spell::CheckCast(bool strict)
 
                 SQLMultiStorage::SQLMSIteratorBounds<SpellTargetEntry> bounds = sSpellScriptTargetStorage.getBounds<SpellTargetEntry>(m_spellInfo->Id);
 
+                WorldLocation const* targetLoc = sSpellMgr.GetSpellTargetPosition(m_spellInfo->Id);
+
                 if (bounds.first == bounds.second)
                 {
                     if (m_spellInfo->EffectImplicitTargetA[j] == TARGET_SCRIPT || m_spellInfo->EffectImplicitTargetB[j] == TARGET_SCRIPT)
                         sLog.outErrorDb("Spell entry %u, effect %i has EffectImplicitTargetA/EffectImplicitTargetB = TARGET_SCRIPT, but creature are not defined in `spell_script_target`", m_spellInfo->Id, j);
 
                     if (m_spellInfo->EffectImplicitTargetA[j] == TARGET_SCRIPT_COORDINATES || m_spellInfo->EffectImplicitTargetB[j] == TARGET_SCRIPT_COORDINATES)
-                        sLog.outErrorDb("Spell entry %u, effect %i has EffectImplicitTargetA/EffectImplicitTargetB = TARGET_SCRIPT_COORDINATES, but gameobject or creature are not defined in `spell_script_target`", m_spellInfo->Id, j);
+                    {
+                        if (!targetLoc)
+                            sLog.outErrorDb("Spell entry %u, effect %i has EffectImplicitTargetA/EffectImplicitTargetB = TARGET_SCRIPT_COORDINATES, but gameobject or creature are not defined in `spell_script_target` and target location not defined in `spell_target_position`", m_spellInfo->Id, j);
+                        else
+                            DEBUG_FILTER_LOG(LOG_FILTER_DB_STRICTED_CHECK,"Spell entry %u, effect %i has EffectImplicitTargetA/EffectImplicitTargetB = TARGET_SCRIPT_COORDINATES, but gameobject or creature are not defined in `spell_script_target` and target location defined in `spell_target_position`", m_spellInfo->Id, j);
+                    }
 
                     if (m_spellInfo->EffectImplicitTargetA[j] == TARGET_FOCUS_OR_SCRIPTED_GAMEOBJECT)
                         sLog.outErrorDb("Spell entry %u, effect %i has EffectImplicitTargetA/EffectImplicitTargetB = TARGET_FOCUS_OR_SCRIPTED_GAMEOBJECT, but gameobject are not defined in `spell_script_target`", m_spellInfo->Id, j);
@@ -5859,6 +5866,25 @@ SpellCastResult Spell::CheckCast(bool strict)
                         if (m_spellInfo->EffectImplicitTargetA[j] == TARGET_FOCUS_OR_SCRIPTED_GAMEOBJECT ||
                             m_spellInfo->EffectImplicitTargetB[j] == TARGET_FOCUS_OR_SCRIPTED_GAMEOBJECT)
                             AddGOTarget(goScriptTarget, SpellEffectIndex(j));
+                    }
+                }
+                else if (targetLoc)
+                {
+                    // Coordinates for spell stored in `spell_target_position` table.
+                    // store coordinates for TARGET_SCRIPT_COORDINATES
+                    if (m_spellInfo->EffectImplicitTargetA[j] == TARGET_SCRIPT_COORDINATES ||
+                        m_spellInfo->EffectImplicitTargetB[j] == TARGET_SCRIPT_COORDINATES)
+                    {
+                        m_targets.setDestination(*targetLoc);
+                        AddUnitTarget(GetAffectiveCaster(), SpellEffectIndex(j));
+                    }
+                    else
+                    {
+                        // not report target not existence for triggered spells
+                        if (m_triggeredByAuraSpell || m_IsTriggeredSpell)
+                            return SPELL_FAILED_DONT_REPORT;
+                        else
+                            return SPELL_FAILED_BAD_TARGETS;
                     }
                 }
                 //Missing DB Entry or targets for this spellEffect.

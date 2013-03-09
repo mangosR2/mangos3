@@ -1226,7 +1226,7 @@ void SpellMgr::LoadSpellTargetPositions()
             continue;
         }
 
-        if (fabs(st.x) < M_NULL_F && fabs(st.y) < M_NULL_F && fabs(st.z) < M_NULL_F)
+        if (st.IsEmpty())
         {
             sLog.outErrorDb("Spell (ID:%u) target coordinates not provided.",Spell_ID);
             continue;
@@ -1242,11 +1242,14 @@ void SpellMgr::LoadSpellTargetPositions()
         bool found = false;
         for(int i = 0; i < MAX_EFFECT_INDEX; ++i)
         {
-            if (spellInfo->EffectImplicitTargetA[i] == TARGET_TABLE_X_Y_Z_COORDINATES || spellInfo->EffectImplicitTargetB[i] == TARGET_TABLE_X_Y_Z_COORDINATES ||
+            if (spellInfo->EffectImplicitTargetA[i] == TARGET_TABLE_X_Y_Z_COORDINATES || 
+                spellInfo->EffectImplicitTargetB[i] == TARGET_TABLE_X_Y_Z_COORDINATES ||
+                spellInfo->EffectImplicitTargetA[i] == TARGET_SCRIPT_COORDINATES || 
+                spellInfo->EffectImplicitTargetB[i] == TARGET_SCRIPT_COORDINATES ||
                 spellInfo->EffectImplicitTargetB[i] == TARGET_SELF2)
             {
                 // additional requirements
-                if (spellInfo->Effect[i]==SPELL_EFFECT_BIND && spellInfo->EffectMiscValue[i])
+                if (spellInfo->Effect[i] == SPELL_EFFECT_BIND && spellInfo->EffectMiscValue[i])
                 {
                     uint32 zone_id = st.GetZoneId();
                     if (int32(zone_id) != spellInfo->EffectMiscValue[i])
