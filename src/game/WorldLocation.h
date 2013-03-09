@@ -57,6 +57,11 @@ struct MANGOS_DLL_SPEC Location : public Vector3
 
     bool IsEmpty() const;
 
+    float const& getX() const { return x; };
+    float const& getY() const { return y; };
+    float const& getZ() const { return z; };
+    float const& getO() const { return orientation; };
+
     union
     {
         float orientation;
