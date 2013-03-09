@@ -747,8 +747,12 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
         }
     }
 
-    if (pCurrChar->NeedGoingToHomebind() || !pCurrChar->GetMap()->Add(pCurrChar))
-        pCurrChar->TeleportToHomebind(TELE_TO_NODELAY | TELE_TO_CHECKED);
+    if (pCurrChar->NeedEjectFromThisMap() || !pCurrChar->GetMap()->Add(pCurrChar))
+    {
+        AreaTrigger const* at = sObjectMgr.GetGoBackTrigger(pCurrChar->GetMapId());
+        if (!at || !pCurrChar->TeleportTo(at->loc))
+            pCurrChar->TeleportToHomebind();
+    }
 
     sObjectAccessor.AddObject(pCurrChar);
     // DEBUG_LOG("Player %s added to Map.",pCurrChar->GetName());

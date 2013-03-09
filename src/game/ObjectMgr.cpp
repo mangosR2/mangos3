@@ -5989,34 +5989,26 @@ AreaTrigger const* ObjectMgr::GetGoBackTrigger(uint32 mapId) const
         }
     }
 
-    AreaTrigger const* compareTrigger = NULL;
     for (AreaTriggerMap::const_iterator itr = mAreaTriggers.begin(); itr != mAreaTriggers.end(); ++itr)
     {
-        if (itr->second.loc.GetMapId() == ghost_entrance_map)
-        {
-            if (!compareTrigger || itr->second.IsLessOrEqualThan(compareTrigger))
-            {
-                if (itr->second.IsMinimal())
-                    return &itr->second;
-
-                compareTrigger = &itr->second;
-            }
-        }
+        if (itr->second.loc.GetMapId() != ghost_entrance_map)
+            continue;
+        AreaTriggerEntry const* atEntry = sAreaTriggerStore.LookupEntry(itr->first);
+        if (!atEntry || atEntry->mapid != mapId)
+            continue;
+        return &itr->second;
     }
 
-    if (!compareTrigger && sWorld.getConfig(CONFIG_BOOL_ALLOW_CUSTOM_MAPS))
+    if (sWorld.getConfig(CONFIG_BOOL_ALLOW_CUSTOM_MAPS))
     {
         for (AreaTriggerMap::const_iterator itr = mAreaTriggers.begin(); itr != mAreaTriggers.end(); ++itr)
         {
             if (itr->second.loc.GetMapId() == ghost_entrance_map)
-            {
-                compareTrigger = &itr->second;
-                break;
-            }
+                return &itr->second;
         }
     }
 
-    return compareTrigger;
+    return NULL;
 }
 
 /**

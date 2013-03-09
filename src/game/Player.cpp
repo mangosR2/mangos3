@@ -21354,6 +21354,88 @@ bool Player::HasItemFitToSpellReqirements(SpellEntry const* spellInfo, Item cons
     return false;
 }
 
+bool Player::HasItemFitToAreaTriggerReqirements(AreaTrigger const* at) const
+{
+    if (at->requiredItem)
+    {
+        if (!HasItemCount(at->requiredItem, 1) && (!at->requiredItem2 || !HasItemCount(at->requiredItem2, 1)))
+            return false;
+    }
+    else if (at->requiredItem2 && !HasItemCount(at->requiredItem2, 1))
+        return false;
+
+    return true;
+}
+
+bool Player::HasHeroicKeyFitToAreaTriggerReqirements(AreaTrigger const* at) const
+{
+    if (at->heroicKey)
+    {
+        if (!HasItemCount(at->heroicKey, 1) && (!at->heroicKey2 || !HasItemCount(at->heroicKey2, 1)))
+            return false;
+    }
+    else if (at->heroicKey2 && !HasItemCount(at->heroicKey2, 1))
+        return false;
+
+    return true;
+}
+
+bool Player::HasQuestFitToAreaTriggerReqirements(AreaTrigger const* at, bool isRegularTargetMap) const
+{
+    if (GetTeam() == ALLIANCE)
+    {
+        if ((!isRegularTargetMap &&
+            (at->requiredQuestHeroicA && !GetQuestRewardStatus(at->requiredQuestHeroicA))) ||
+            (isRegularTargetMap &&
+            (at->requiredQuestA && !GetQuestRewardStatus(at->requiredQuestA))))
+        {
+            return false;
+        }
+    }
+    else if (GetTeam() == HORDE)
+    {
+        if ((!isRegularTargetMap &&
+            (at->requiredQuestHeroicH && !GetQuestRewardStatus(at->requiredQuestHeroicH))) ||
+            (isRegularTargetMap &&
+            (at->requiredQuestH && !GetQuestRewardStatus(at->requiredQuestH))))
+        {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+bool Player::HasAchievementFitToAreaTriggerReqirements(AreaTrigger const* at, Difficulty difficulty)
+{
+    uint32 uiAchievementID = 0;
+    if (difficulty == RAID_DIFFICULTY_10MAN_HEROIC)
+        uiAchievementID = at->achiev0;
+    else if (difficulty == RAID_DIFFICULTY_25MAN_HEROIC)
+        uiAchievementID = at->achiev1;
+
+    if (!uiAchievementID)
+        return true;
+
+    if (GetAchievementMgr().HasAchievement(uiAchievementID))
+        return true;
+
+    if (Group* group = GetGroup())
+    {
+        for (GroupReference* itr = group->GetFirstMember(); itr != NULL; itr = itr->next())
+        {
+            Player* member = itr->getSource();
+            if (member && member->IsInWorld())
+            {
+                if (member->GetAchievementMgr().HasAchievement(uiAchievementID))
+                    return true;
+            }
+        }
+    }
+
+    return false;
+}
+
 bool Player::CanNoReagentCast(SpellEntry const* spellInfo) const
 {
     // don't take reagents for spells with SPELL_ATTR_EX5_NO_REAGENT_WHILE_PREP
@@ -23989,70 +24071,19 @@ AreaLockStatus Player::GetAreaTriggerLockStatus(AreaTrigger const* at, Difficult
             return AREA_LOCKSTATUS_RAID_LOCKED;
 
     // must have one or the other, report the first one that's missing
-    if (at->requiredItem)
-    {
-        if (!HasItemCount(at->requiredItem, 1) &&
-            (!at->requiredItem2 || !HasItemCount(at->requiredItem2, 1)))
-            return AREA_LOCKSTATUS_MISSING_ITEM;
-    }
-    else if (at->requiredItem2 && !HasItemCount(at->requiredItem2, 1))
+    if (!HasItemFitToAreaTriggerReqirements(at))
         return AREA_LOCKSTATUS_MISSING_ITEM;
 
     bool isRegularTargetMap = GetDifficulty(mapEntry->IsRaid()) == REGULAR_DIFFICULTY;
 
-    if (!isRegularTargetMap)
-    {
-        if (at->heroicKey)
-        {
-            if (!HasItemCount(at->heroicKey, 1) &&
-                (!at->heroicKey2 || !HasItemCount(at->heroicKey2, 1)))
-                return AREA_LOCKSTATUS_MISSING_ITEM;
-        }
-        else if (at->heroicKey2 && !HasItemCount(at->heroicKey2, 1))
-            return AREA_LOCKSTATUS_MISSING_ITEM;
-    }
+    if (!isRegularTargetMap && !HasHeroicKeyFitToAreaTriggerReqirements(at))
+        return AREA_LOCKSTATUS_MISSING_ITEM;
 
-    if (GetTeam() == ALLIANCE)
-    {
-        if ((!isRegularTargetMap &&
-            (at->requiredQuestHeroicA && !GetQuestRewardStatus(at->requiredQuestHeroicA))) ||
-            (isRegularTargetMap &&
-            (at->requiredQuestA && !GetQuestRewardStatus(at->requiredQuestA))))
-            return AREA_LOCKSTATUS_QUEST_NOT_COMPLETED;
-    }
-    else if (GetTeam() == HORDE)
-    {
-        if ((!isRegularTargetMap &&
-            (at->requiredQuestHeroicH && !GetQuestRewardStatus(at->requiredQuestHeroicH))) ||
-            (isRegularTargetMap &&
-            (at->requiredQuestH && !GetQuestRewardStatus(at->requiredQuestH))))
-            return AREA_LOCKSTATUS_QUEST_NOT_COMPLETED;
-    }
+    if (!HasQuestFitToAreaTriggerReqirements(at, isRegularTargetMap))
+        return AREA_LOCKSTATUS_QUEST_NOT_COMPLETED;
 
-    uint32 achievCheck = 0;
-    if (difficulty == RAID_DIFFICULTY_10MAN_HEROIC)
-        achievCheck = at->achiev0;
-    else if (difficulty == RAID_DIFFICULTY_25MAN_HEROIC)
-        achievCheck = at->achiev1;
-
-    if (achievCheck)
-    {
-        bool bHasAchiev = false;
-        if (GetAchievementMgr().HasAchievement(achievCheck))
-            bHasAchiev = true;
-        else if (Group* group = GetGroup())
-        {
-            for (GroupReference* itr = group->GetFirstMember(); itr != NULL; itr = itr->next())
-            {
-                Player* member = itr->getSource();
-                if (member && member->IsInWorld())
-                    if (member->GetAchievementMgr().HasAchievement(achievCheck))
-                        bHasAchiev = true;
-            }
-        }
-        if (!bHasAchiev)
-            return AREA_LOCKSTATUS_QUEST_NOT_COMPLETED;
-    }
+    if (!HasAchievementFitToAreaTriggerReqirements(at, difficulty))
+        return AREA_LOCKSTATUS_QUEST_NOT_COMPLETED;
 
     // If the map is not created, assume it is possible to enter it.
     DungeonPersistentState* state = GetBoundInstanceSaveForSelfOrGroup(at->loc.GetMapId());
@@ -24069,7 +24100,7 @@ AreaLockStatus Player::GetAreaTriggerLockStatus(AreaTrigger const* at, Difficult
     if (map && map->IsDungeon())
     {
         // cannot enter if the instance is full (player cap), GMs don't count
-        if (((DungeonMap*)map)->GetPlayersCountExceptGMs() >= ((DungeonMap*)map)->GetMaxPlayers())
+        if (((DungeonMap*)map)->isFull())
             return AREA_LOCKSTATUS_INSTANCE_IS_FULL;
 
         InstancePlayerBind* pBind = GetBoundInstance(at->loc.GetMapId(), GetDifficulty(mapEntry->IsRaid()));
@@ -24266,7 +24297,7 @@ bool Player::CheckTransferPossibility(AreaTrigger const*& at, bool b_onlyMainReq
     return false;
 };
 
-bool Player::NeedGoingToHomebind()
+bool Player::NeedEjectFromThisMap()
 {
     MapEntry const* mapEntry = sMapStore.LookupEntry(GetMapId());
 
@@ -24296,7 +24327,7 @@ bool Player::NeedGoingToHomebind()
         if (!isAlive())
             return false;
 
-        if (((DungeonMap*)map)->GetPlayersCountExceptGMs() >= ((DungeonMap*)map)->GetMaxPlayers())
+        if (((DungeonMap*)map)->isFull())
             return true;
 
         InstancePlayerBind* pBind = GetBoundInstance(GetMapId(), GetDifficulty(mapEntry->IsRaid()));
@@ -24305,6 +24336,25 @@ bool Player::NeedGoingToHomebind()
 
         if ((mapEntry->IsRaid() && !sWorld.getConfig(CONFIG_BOOL_INSTANCE_IGNORE_RAID)) && (!GetGroup() || !GetGroup()->isRaidGroup()))
             return true;
+
+        AreaTrigger const* at = sObjectMgr.GetMapEntranceTrigger(GetMapId());
+        if (at)
+        {
+            if (!HasItemFitToAreaTriggerReqirements(at))
+                return true;
+
+            Difficulty difficulty = GetDifficulty(mapEntry->IsRaid());
+
+            if (difficulty != REGULAR_DIFFICULTY && !HasHeroicKeyFitToAreaTriggerReqirements(at))
+                return true;
+
+            if (!HasQuestFitToAreaTriggerReqirements(at, difficulty == REGULAR_DIFFICULTY))
+                return true;
+
+            if (!HasAchievementFitToAreaTriggerReqirements(at, difficulty))
+                return true;
+        }
+
     }
 
     return false;
