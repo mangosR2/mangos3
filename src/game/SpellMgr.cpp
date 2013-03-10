@@ -2644,25 +2644,39 @@ uint32 SpellMgr::GetSpellMaxTargetsWithCustom(SpellEntry const* spellInfo, Unit 
                 case 73144:
                 case 69140:                                 // Coldflame (ICC, Marrowgar)
                 case 69674:                                 // Mutated Infection (ICC, Rotface)
+                case 71224:                                 // Mutated Infection
+                case 73022:                                 // Mutated Infection
+                case 73023:                                 // Mutated Infection
+                case 70447:                                 // Volatile Ooze Adhesive (ICC -Putricide)
+                case 72836:
+                case 72837:
+                case 72838:
                 case 70450:                                 // Blood Mirror
                 case 70837:                                 // Blood Mirror
+                case 70672:                                 // Gaseous Bloat (ICC, Professor Putricide)
+                case 72455:
+                case 72832:
+                case 72833:
                 case 70882:                                 // Slime Spray Summon Trigger (ICC, Rotface)
+                case 70911:                                 // Unbound Plague (ICC, Putricide)
+                case 72854:
+                case 72855:
+                case 72856:
                 case 70920:                                 // Unbound Plague Search Effect (ICC, Putricide)
-                case 71224:                                 // Mutated Infection (Mode 1)
                 case 71445:                                 // Twilight Bloodbolt
                 case 71471:                                 // Twilight Bloodbolt
                 case 71837:                                 // Vampiric Bite
                 case 71861:                                 // Swarming Shadows
                 case 72091:                                 // Frozen Orb (Vault of Archavon, Toravon)
                 case 72254:                                 // Mark of the fallen Champion Search Spell
+                case 72295:                                 // Malleable Goo (ICC -Professor Putricide)
+                case 74280:
                 case 72378:                                 // Blood Nova (Saurfang)
                 case 73058:
                 case 72385:                                 // Boiling Blood
                 case 72441:
                 case 72442:
                 case 72443:
-                case 73022:                                 // Mutated Infection (Mode 2)
-                case 73023:                                 // Mutated Infection (Mode 3)
                     unMaxTargets = 1;
                     break;
                 case 28542:                                 // Life Drain
@@ -2675,6 +2689,9 @@ uint32 SpellMgr::GetSpellMaxTargetsWithCustom(SpellEntry const* spellInfo, Unit 
                 case 69055:                                 // Bone Slice (ICC, Lord Marrowgar)
                 case 69278:                                 // Gas spore (ICC, Festergut)
                 case 70341:                                 // Slime Puddle (ICC, Putricide)
+                case 71424:                                 // Slime Puddle (ICC, Putricide) Search Spell
+                case 72615:                                 // Malleable Goo (ICC -Professor Putricide)
+                case 74281:
                     unMaxTargets = 2;
                     break;
                 case 28796:                                 // Poison Bolt Volley
