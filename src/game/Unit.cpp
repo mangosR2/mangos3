@@ -2292,7 +2292,7 @@ void Unit::CalculateDamageAbsorbAndResist(Unit* pCaster, DamageInfo* damageInfo,
         return;
     }
 
-    // full absorb cases (by chance)
+    // full and PcT absorb cases (by chance)
     AuraList const& vAbsorb = GetAurasByType(SPELL_AURA_SCHOOL_ABSORB);
     for(AuraList::const_iterator i = vAbsorb.begin(); i != vAbsorb.end() && RemainingDamage > 0; ++i)
     {
@@ -2302,6 +2302,14 @@ void Unit::CalculateDamageAbsorbAndResist(Unit* pCaster, DamageInfo* damageInfo,
             continue;
 
         SpellEntry const* i_spellProto = (*i)->GetSpellProto();
+
+        // PCT Absorb
+        if (i_spellProto->HasAttribute(SPELL_ATTR_EX6_PCT_ABSORB))
+        {
+            RemainingDamage -= RemainingDamage * ((float)i_mod->m_amount/100.0f);
+        }
+
+        // Full Absorb
         // Fire Ward or Frost Ward
         if (i_spellProto->SpellFamilyName == SPELLFAMILY_MAGE && i_spellProto->GetSpellFamilyFlags().test<CF_MAGE_FIRE_WARD, CF_MAGE_FROST_WARD>())
         {
