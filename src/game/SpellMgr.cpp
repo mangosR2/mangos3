@@ -2234,8 +2234,6 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
     if (!spellInfo_1 || !spellInfo_2)
         return false;
 
-    #define MatchedPair(Id_1, Id_2) ((spellInfo_1->Id == Id_1 && spellInfo_2->Id == Id_2) || (spellInfo_1->Id == Id_2 && spellInfo_2->Id == Id_1))
-
     // Specific spell family spells
     // also some SpellIconID exceptions related to late checks (isModifier)
     switch (spellInfo_1->SpellFamilyName)
@@ -2243,15 +2241,18 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
         case SPELLFAMILY_GENERIC:
         {
             // BG_WS_SPELL_FOCUSED_ASSAULT & BG_WS_SPELL_BRUTAL_ASSAULT
-            if (MatchedPair(46392, 46393))
+            if ((spellInfo_1->Id == 46392 && spellInfo_2->Id == 46393) ||
+                (spellInfo_1->Id == 46393 && spellInfo_2->Id == 46392))
                 return true;
 
             // Dark Essence & Light Essence
-            if (MatchedPair(65684, 65686))
+            if ((spellInfo_1->Id == 65684 && spellInfo_2->Id == 65686) ||
+                (spellInfo_2->Id == 65684 && spellInfo_1->Id == 65686))
                 return true;
 
             //Potent Fungus and Mini must remove each other (Amanitar encounter, Ahn'kahet)
-            if (MatchedPair(57055, 56648))
+            if ((spellInfo_1->Id == 57055 && spellInfo_2->Id == 56648) ||
+                (spellInfo_2->Id == 57055 && spellInfo_1->Id == 56648))
                 return true;
 
             // Mirrored Soul (FoS - Devourer) - and other Boss spells
@@ -2270,7 +2271,8 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
             if (spellInfo_2->SpellFamilyName == SPELLFAMILY_WARLOCK)
             {
                 // Corruption & Seed of corruption
-                if (MatchedPair(313, 1932))
+                if ((spellInfo_1->SpellIconID == 313 && spellInfo_2->SpellIconID == 1932) ||
+                    (spellInfo_2->SpellIconID == 313 && spellInfo_1->SpellIconID == 1932))
                 {
                     if (spellInfo_1->SpellVisual[0] != 0 && spellInfo_2->SpellVisual[0] != 0)
                         return true;                        // can't be stacked
@@ -2318,7 +2320,8 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
             if (spellInfo_2->SpellFamilyName == SPELLFAMILY_DEATHKNIGHT)
             {
                 // Crypt Fever and Ebon Plague
-                if (MatchedPair(264, 1933))
+                if((spellInfo_1->SpellIconID == 264 && spellInfo_2->SpellIconID == 1933) ||
+                   (spellInfo_2->SpellIconID == 264 && spellInfo_1->SpellIconID == 1933))
                     return true;
             }
             break;
