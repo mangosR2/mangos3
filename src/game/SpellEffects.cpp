@@ -10349,6 +10349,16 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     return;
                 }
                 case 69171:                                 // Low Plague Blight Visual Cancel (Festergut)
+                {
+                    if (unitTarget)
+                    {
+                        // remove Visual Auras
+                        unitTarget->RemoveAurasDueToSpell(69126);
+                        unitTarget->RemoveAurasDueToSpell(69152);
+                        unitTarget->RemoveAurasDueToSpell(69154);
+                    }
+                    return;
+                }
                 case 69298:                                 // Cancel Resistant to Blight (Festergut)
                 {
                     if (unitTarget)
