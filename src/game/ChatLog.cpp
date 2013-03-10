@@ -127,10 +127,14 @@ void ChatLog::ChatMsg(Player* player, std::string& msg, uint32 type)
 
     if (m_uiChatLogMethod == CHAT_LOG_METHOD_SQL)
     {
-        std::string sChat = msg;
-        CharacterDatabase.escape_string(sChat);
-        CharacterDatabase.PExecute("INSERT INTO `chat_log_chat` SET `date_time` = NOW(), `type` = %u, `pname` = '%s', `msg` = '%s', `level` = %u, `account_id` = %u",
-                                    type, player->GetName(), sChat.c_str(), player->getLevel() ,player->GetSession()->GetAccountId());
+        static SqlStatementID insChat;
+        SqlStatement stmt = CharacterDatabase.CreateStatement(insChat, "INSERT INTO `chat_log_chat` (`date_time`,`type`,`pname`,`msg`,`level`,`account_id`) VALUES (NOW(), ?, ?, ?, ?, ?)");
+        stmt.addUInt32(type);
+        stmt.addString(player->GetName());
+        stmt.addString(msg.c_str());
+        stmt.addUInt32(player->getLevel());
+        stmt.addUInt32(player->GetSession()->GetAccountId());
+        stmt.Execute();
         return;
     }
 
@@ -196,10 +200,14 @@ void ChatLog::PartyMsg(Player* player, std::string& msg)
                 group_str.erase(group_str.length() - 1);
         }
 
-        std::string sChat = msg;
-        CharacterDatabase.escape_string(sChat);
-        CharacterDatabase.PExecute("INSERT INTO `chat_log_party` SET `date_time` = NOW(), `pname` = '%s', `msg` = '%s', `level` = %u, `account_id` = %u, `members` = '%s'",
-                                    player->GetName(), sChat.c_str(), player->getLevel(), player->GetSession()->GetAccountId(), group_str.c_str());
+        static SqlStatementID insChat;
+        SqlStatement stmt = CharacterDatabase.CreateStatement(insChat, "INSERT INTO `chat_log_party` (`date_time`,`pname`,`msg`,`level`,`account_id`,`members`) VALUES (NOW(), ?, ?, ?, ?, ?)");
+        stmt.addString(player->GetName());
+        stmt.addString(msg.c_str());
+        stmt.addUInt32(player->getLevel());
+        stmt.addUInt32(player->GetSession()->GetAccountId());
+        stmt.addString(group_str.c_str());
+        stmt.Execute();
         return;
     }
 
@@ -284,11 +292,15 @@ void ChatLog::GuildMsg(Player* player, std::string& msg, bool officer)
             if (officer)
                 guild_str.append("(officer)");
         }
-        std::string sChat = msg;
-        CharacterDatabase.escape_string(sChat);
-        CharacterDatabase.escape_string(guild_str);
-        CharacterDatabase.PExecute("INSERT INTO `chat_log_guild` SET `date_time` = NOW(), `pname` = '%s', `msg` = '%s', `level` = %u, `account_id` = %u, `guild` = '%s'",
-                                    player->GetName(), sChat.c_str(), player->getLevel(), player->GetSession()->GetAccountId(), guild_str.c_str());
+
+        static SqlStatementID insChat;
+        SqlStatement stmt = CharacterDatabase.CreateStatement(insChat, "INSERT INTO `chat_log_guild` (`date_time`,`pname`,`msg`,`level`,`account_id`,`guild`) VALUES (NOW(), ?, ?, ?, ?, ?)");
+        stmt.addString(player->GetName());
+        stmt.addString(msg.c_str());
+        stmt.addUInt32(player->getLevel());
+        stmt.addUInt32(player->GetSession()->GetAccountId());
+        stmt.addString(guild_str.c_str());
+        stmt.Execute();
         return;
     }
 
@@ -341,10 +353,14 @@ void ChatLog::WhisperMsg(Player* player, std::string& to, std::string& msg)
 
     if (m_uiChatLogMethod == CHAT_LOG_METHOD_SQL)
     {
-        std::string sChat = msg;
-        CharacterDatabase.escape_string(sChat);
-        CharacterDatabase.PExecute("INSERT INTO `chat_log_whisper` SET `date_time` = NOW(), `pname` = '%s', `msg` = '%s', `level` = %u, `account_id` = %u, `to` = '%s'",
-                                    player->GetName(), sChat.c_str(), player->getLevel(), player->GetSession()->GetAccountId(), to.c_str());
+        static SqlStatementID insChat;
+        SqlStatement stmt = CharacterDatabase.CreateStatement(insChat, "INSERT INTO `chat_log_whisper` (`date_time`,`pname`,`msg`,`level`,`account_id`,`to`) VALUES (NOW(), ?, ?, ?, ?, ?)");
+        stmt.addString(player->GetName());
+        stmt.addString(msg.c_str());
+        stmt.addUInt32(player->getLevel());
+        stmt.addUInt32(player->GetSession()->GetAccountId());
+        stmt.addString(to.c_str());
+        stmt.Execute();
         return;
     }
 
@@ -395,11 +411,14 @@ void ChatLog::ChannelMsg(Player* player, std::string& channel, std::string& msg)
         else
             channel_str.append(channel);
 
-        std::string sChat = msg;
-        CharacterDatabase.escape_string(sChat);
-        CharacterDatabase.escape_string(channel_str);
-        CharacterDatabase.PExecute("INSERT INTO `chat_log_channel` SET `date_time` = NOW(), `pname` = '%s', `msg` = '%s', `level` = %u, `account_id` = %u, `channel` = '%s'",
-                                    player->GetName(), sChat.c_str(), player->getLevel(), player->GetSession()->GetAccountId(), channel_str.c_str());
+        static SqlStatementID insChat;
+        SqlStatement stmt = CharacterDatabase.CreateStatement(insChat, "INSERT INTO `chat_log_channel` (`date_time`,`pname`,`msg`,`level`,`account_id`,`channel`) VALUES (NOW(), ?, ?, ?, ?, ?)");
+        stmt.addString(player->GetName());
+        stmt.addString(msg.c_str());
+        stmt.addUInt32(player->getLevel());
+        stmt.addUInt32(player->GetSession()->GetAccountId());
+        stmt.addString(channel_str.c_str());
+        stmt.Execute();
         return;
     }
 
@@ -465,10 +484,15 @@ void ChatLog::RaidMsg(Player* player, std::string& msg, uint32 type)
                 group_str.erase(group_str.length() - 1);
         }
 
-        std::string sChat = msg;
-        CharacterDatabase.escape_string(sChat);
-        CharacterDatabase.PExecute("INSERT INTO `chat_log_raid` SET `date_time` = NOW(), `type` = %u, `pname` = '%s', `msg` = '%s', `level` = %u, `account_id` = %u, `members` = '%s'",
-                                    type, player->GetName(), sChat.c_str(), player->getLevel(), player->GetSession()->GetAccountId(), group_str.c_str());
+        static SqlStatementID insChat;
+        SqlStatement stmt = CharacterDatabase.CreateStatement(insChat, "INSERT INTO `chat_log_raid` (`date_time`,`type`,`pname`,`msg`,`level`,`account_id`,`members`) VALUES (NOW(), ?, ?, ?, ?, ?, ?)");
+        stmt.addUInt32(type);
+        stmt.addString(player->GetName());
+        stmt.addString(msg.c_str());
+        stmt.addUInt32(player->getLevel());
+        stmt.addUInt32(player->GetSession()->GetAccountId());
+        stmt.addString(group_str.c_str());
+        stmt.Execute();
         return;
     }
 
@@ -579,10 +603,16 @@ void ChatLog::BattleGroundMsg(Player* player, std::string& msg, uint32 type)
             if (group_str.length() > 1)
                 group_str.erase(group_str.length() - 1);
         }
-        std::string sChat = msg;
-        CharacterDatabase.escape_string(sChat);
-        CharacterDatabase.PExecute("INSERT INTO `chat_log_bg` SET `date_time` = NOW(), `type` = %u, `pname` = '%s', `msg` = '%s', `level` = %u, `account_id` = %u, `members` = '%s'",
-                                    type, player->GetName(), sChat.c_str(), player->getLevel(), player->GetSession()->GetAccountId(), group_str.c_str());
+
+        static SqlStatementID insChat;
+        SqlStatement stmt = CharacterDatabase.CreateStatement(insChat, "INSERT INTO `chat_log_bg` (`date_time`,`type`,`pname`,`msg`,`level`,`account_id`,`members`) VALUES (NOW(), ?, ?, ?, ?, ?, ?)");
+        stmt.addUInt32(type);
+        stmt.addString(player->GetName());
+        stmt.addString(msg.c_str());
+        stmt.addUInt32(player->getLevel());
+        stmt.addUInt32(player->GetSession()->GetAccountId());
+        stmt.addString(group_str.c_str());
+        stmt.Execute();
         return;
     }
 
