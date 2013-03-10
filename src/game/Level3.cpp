@@ -4876,7 +4876,7 @@ bool ChatHandler::HandleTeleAddCommand(char* args)
         return false;
     }
 
-    GameTele tele; 
+    GameTele tele;
     tele.loc         = player->GetPosition();
     tele.name        = name;
 
