@@ -667,7 +667,7 @@ bool ChatHandler::HandleRecallCommand(char* args)
         return false;
     }
 
-    return HandleGoHelper(target, target->m_recallMap, target->m_recallX, target->m_recallY, &target->m_recallZ, &target->m_recallO);
+    return HandleGoHelper(target, target->m_recall.GetMapId(), target->m_recall.getX(), target->m_recall.getY(), &target->m_recall.z, &target->m_recall.o);
 }
 
 // Edit Player HP
