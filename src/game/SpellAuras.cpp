@@ -9215,7 +9215,7 @@ void Aura::PeriodicTick()
             if (powerType == POWER_MANA)
                 damageInfo.damage -= target->GetSpellCritDamageReduction(damageInfo.damage);
 
-            damageInfo.cleanDamage = abs(target->ModifyPower(powerType, -damageInfo.damage));
+            damageInfo.cleanDamage = abs(target->ModifyPower(powerType, -int32(damageInfo.damage)));
 
             damageInfo.damage = uint32(damageInfo.cleanDamage * spellProto->EffectMultipleValue[GetEffIndex()]);
 

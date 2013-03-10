@@ -7227,8 +7227,7 @@ SpellCastResult Spell::CheckPower()
     }
 
     // Check power amount
-    Powers powerType = Powers(m_spellInfo->powerType);
-    if (m_powerCost > 0 && (int32)m_caster->GetPower(powerType) < m_powerCost)
+    if (m_powerCost > 0 && (int32(m_caster->GetPower(Powers(m_spellInfo->powerType))) < m_powerCost))
         return SPELL_FAILED_NO_POWER;
 
     return SPELL_CAST_OK;
