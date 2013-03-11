@@ -646,7 +646,8 @@ SpellSpecific GetSpellSpecific(uint32 spellId)
             return sSpellMgr.GetSpellElixirSpecific(spellInfo->Id);
 
         case SPELLFAMILY_DEATHKNIGHT:
-            if (spellInfo->GetCategory() == 47)
+            // Blood Presence, Unholy Presence, Frost Presence
+            if (spellInfo->Id == 48263 || spellInfo->Id == 48265 || spellInfo->Id == 48266)
                 return SPELL_PRESENCE;
             break;
 

@@ -12976,10 +12976,10 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
                 case 48266:                                 // Blood Presence
                 {
                     // else part one per 3 pair
-                    if (GetId()==48263 || GetId()==48265)   // Frost Presence or Unholy Presence
+                    if (GetId() == 48266 || GetId() == 48265)   // Frost Presence or Unholy Presence
                     {
                         // Improved Blood Presence
-                        int32 heal_pct = 0;
+                        int32 reduce_pct = 0;
                         if (apply)
                         {
                             Unit::AuraList const& bloodAuras = m_target->GetAurasByType(SPELL_AURA_DUMMY);
@@ -12987,26 +12987,29 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
                             {
                                 // skip same icon
                                 if ((*itr)->GetSpellProto()->GetSpellFamilyName() == SPELLFAMILY_DEATHKNIGHT &&
-                                    (*itr)->GetSpellProto()->GetSpellIconID() == 2636)
+                                    (*itr)->GetSpellProto()->GetSpellIconID() == 2636 &&
+                                    (*itr)->GetEffIndex() == EFFECT_INDEX_0)
                                 {
-                                    heal_pct = (*itr)->GetModifier()->m_amount;
+                                    reduce_pct = -(*itr)->GetModifier()->m_amount;
                                     break;
                                 }
                             }
                         }
 
-                        if (heal_pct)
-                            m_target->CastCustomSpell(m_target, 63611, &heal_pct, NULL, NULL, true, NULL, NULL, GetCasterGuid());
+                        if (reduce_pct)
+                            m_target->CastCustomSpell(m_target, 61261, &reduce_pct, NULL, NULL, true, NULL, NULL, GetCasterGuid());
                         else
-                            m_target->RemoveAurasDueToSpell(63611);
+                            m_target->RemoveAurasDueToSpell(61261);
                     }
-                    else
-                        spellId1 = 63611;                   // Improved Blood Presence, trigger for heal
+                    else if (apply)
+                        m_target->CastSpell(m_target, 61261, true, NULL, NULL, GetCasterGuid());
+                    else 
+                        m_target->RemoveAurasDueToSpell(61261);
 
-                    if (GetId()==48263 || GetId()==48266)   // Frost Presence or Blood Presence
+                    if (GetId() == 48263 || GetId() == 48266)   // Frost Presence or Blood Presence
                     {
                         // Improved Unholy Presence
-                        int32 power_pct = 0;
+                        int32 speed_pct = 0;
                         if (apply)
                         {
                             Unit::AuraList const& unholyAuras = m_target->GetAurasByType(SPELL_AURA_DUMMY);
@@ -13016,21 +13019,26 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
                                 if ((*itr)->GetSpellProto()->GetSpellFamilyName() == SPELLFAMILY_DEATHKNIGHT &&
                                     (*itr)->GetSpellProto()->GetSpellIconID() == 2633)
                                 {
-                                    power_pct = (*itr)->GetModifier()->m_amount;
+                                    speed_pct = (*itr)->GetModifier()->m_amount;
                                     break;
                                 }
                             }
                         }
-                        if (power_pct || !apply)
-                            spellId2 = 49772;                   // Unholy Presence, speed part, spell1 used for Improvement presence fit to own presence
-                    }
-                    else
-                        spellId1 = 49772;                       // Unholy Presence move speed
 
-                    if (GetId()==48265 || GetId()==48266)       // Unholy Presence or Blood Presence
+                        if (speed_pct)
+                            m_target->CastCustomSpell(m_target, 63622, &speed_pct, NULL, NULL, true, NULL, NULL, GetCasterGuid());        // Unholy Presence, speed part, spell1 used for Improvement presence fit to own presence
+                        else
+                            m_target->RemoveAurasDueToSpell(63622);
+                    }
+                    else if(apply)
+                        m_target->CastSpell(m_target, 63622, true, NULL, NULL, GetCasterGuid());
+                    else
+                        m_target->RemoveAurasDueToSpell(63622);
+
+                    if (GetId() == 48265 || GetId() == 48263)   // Unholy Presence or Blood Presence
                     {
                         // Improved Frost Presence
-                        int32 stamina_pct = 0;
+                        int32 regen_pct = 0;
                         if (apply)
                         {
                             Unit::AuraList const& frostAuras = m_target->GetAurasByType(SPELL_AURA_DUMMY);
@@ -13040,51 +13048,21 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
                                 if ((*itr)->GetSpellProto()->GetSpellFamilyName() == SPELLFAMILY_DEATHKNIGHT &&
                                     (*itr)->GetSpellProto()->GetSpellIconID() == 2632)
                                 {
-                                    stamina_pct = (*itr)->GetModifier()->m_amount;
+                                    regen_pct = (*itr)->GetModifier()->m_amount;
                                     break;
                                 }
                             }
                         }
 
-                        if (stamina_pct)
-                            m_target->CastCustomSpell(m_target, 61261, &stamina_pct, NULL, NULL, true, NULL, NULL, GetCasterGuid());
+                        if (regen_pct)
+                            m_target->CastCustomSpell(m_target, 63621, &regen_pct, NULL, NULL, true, NULL, NULL, GetCasterGuid());
                         else
-                            m_target->RemoveAurasDueToSpell(61261);
+                            m_target->RemoveAurasDueToSpell(63621);
                     }
+                    else if (apply)
+                        m_target->CastSpell(m_target, 63621, true, NULL, NULL, GetCasterGuid());
                     else
-                        spellId1 = 61261;                   // Frost Presence, stamina
-
-                    if (GetId()==48265)                     // Unholy Presence
-                    {
-                        // Improved Unholy Presence, special case for own presence
-                        int32 power_pct = 0;
-                        if (apply)
-                        {
-                            Unit::AuraList const& unholyAuras = m_target->GetAurasByType(SPELL_AURA_DUMMY);
-                            for(Unit::AuraList::const_iterator itr = unholyAuras.begin(); itr != unholyAuras.end(); ++itr)
-                            {
-                                // skip same icon
-                                if ((*itr)->GetSpellProto()->GetSpellFamilyName() == SPELLFAMILY_DEATHKNIGHT &&
-                                    (*itr)->GetSpellProto()->GetSpellIconID() == 2633)
-                                {
-                                    power_pct = (*itr)->GetModifier()->m_amount;
-                                    break;
-                                }
-                            }
-                        }
-
-                        if (power_pct)
-                        {
-                            int32 bp = 5;
-                            m_target->CastCustomSpell(m_target, 63622, &bp, &bp, &bp, true, NULL, NULL, GetCasterGuid());
-                            m_target->CastCustomSpell(m_target, 65095, &bp, NULL, NULL, true, NULL, NULL, GetCasterGuid());
-                        }
-                        else
-                        {
-                            m_target->RemoveAurasDueToSpell(63622);
-                            m_target->RemoveAurasDueToSpell(65095);
-                        }
-                    }
+                        m_target->RemoveAurasDueToSpell(63621);
                     break;
                 }
             }
@@ -13093,17 +13071,17 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
             if (GetSpellProto()->GetSpellIconID() == 2636 && m_isPassive)
             {
                 // if presence active: Frost Presence or Unholy Presence
-                if (apply && (m_target->HasAura(48263) || m_target->HasAura(48265)))
+                if (apply && (m_target->HasAura(48266) || m_target->HasAura(48265)))
                 {
                     Aura* aura = GetAuraByEffectIndex(EFFECT_INDEX_0);
                     if (!aura)
                         return;
 
-                    int32 bp = aura->GetModifier()->m_amount;
-                    m_target->CastCustomSpell(m_target, 63611, &bp, NULL, NULL, true, NULL, NULL, GetCasterGuid());
+                    int32 bp = -aura->GetModifier()->m_amount;
+                    m_target->CastCustomSpell(m_target, 61261, &bp, NULL, NULL, true, NULL, NULL, GetCasterGuid());
                 }
                 else
-                    m_target->RemoveAurasDueToSpell(63611);
+                    m_target->RemoveAurasDueToSpell(61261);
                 return;
             }
 
@@ -13111,43 +13089,36 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
             if (GetSpellProto()->GetSpellIconID() == 2632 && m_isPassive)
             {
                 // if presence active: Unholy Presence or Blood Presence
-                if (apply && (m_target->HasAura(48265) || m_target->HasAura(48266)))
+                if (apply && (m_target->HasAura(48265) || m_target->HasAura(48263)))
                 {
                     Aura* aura = GetAuraByEffectIndex(EFFECT_INDEX_0);
                     if (!aura)
                         return;
 
-                    int32 bp0 = aura->GetModifier()->m_amount;
-                    int32 bp1 = 0;                          // disable threat mod part for not Frost Presence case
-                    m_target->CastCustomSpell(m_target, 61261, &bp0, &bp1, NULL, true, NULL, NULL, GetCasterGuid());
+                    int32 bp = aura->GetModifier()->m_amount;
+                    m_target->CastCustomSpell(m_target, 63621, &bp, NULL, NULL, true, NULL, NULL, GetCasterGuid());
                 }
                 else
-                    m_target->RemoveAurasDueToSpell(61261);
+                    m_target->RemoveAurasDueToSpell(63621);
                 return;
             }
 
             // Improved Unholy Presence
             if (GetSpellProto()->GetSpellIconID() == 2633 && m_isPassive)
             {
-                // if presence active: Unholy Presence
-                if (apply && m_target->HasAura(48265))
-                {
-                    int32 bp = 5;
-                    m_target->CastCustomSpell(m_target, 63622, &bp, &bp, &bp, true, NULL, NULL, GetCasterGuid());
-                    m_target->CastCustomSpell(m_target, 65095, &bp, NULL, NULL, true, NULL, NULL, GetCasterGuid());
-                }
-                else
-                {
-                    m_target->RemoveAurasDueToSpell(63622);
-                    m_target->RemoveAurasDueToSpell(65095);
-                }
-
                 // if presence active: Frost Presence or Blood Presence
-                if (!apply || m_target->HasAura(48263) || m_target->HasAura(48266))
-                    spellId1 = 49772;
+                if (apply && (m_target->HasAura(48263) || m_target->HasAura(48266)))
+                {
+                    Aura* aura = GetAuraByEffectIndex(EFFECT_INDEX_0);
+                    if (!aura)
+                        return;
+
+                    int32 bp = aura->GetModifier()->m_amount;
+                    m_target->CastCustomSpell(m_target, 63622, &bp, NULL, NULL, true, NULL, NULL, GetCasterGuid());
+                }
                 else
-                    return;
-                break;
+                    m_target->RemoveAurasDueToSpell(63622);
+                return;
             }
             break;
         }
