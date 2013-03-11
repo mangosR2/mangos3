@@ -1258,25 +1258,6 @@ void WorldSession::HandleAlterAppearanceOpcode(WorldPacket& recv_data)
     _player->SetStandState(0);                              // stand up
 }
 
-void WorldSession::HandleRemoveGlyphOpcode(WorldPacket& recv_data)
-{
-    uint32 slot;
-    recv_data >> slot;
-
-    if (slot >= MAX_GLYPH_SLOT_INDEX)
-    {
-        DEBUG_LOG("Client sent wrong glyph slot number in opcode CMSG_REMOVE_GLYPH %u", slot);
-        return;
-    }
-
-    if (_player->GetGlyph(slot))
-    {
-        _player->ApplyGlyph(slot, false);
-        _player->SetGlyph(slot, 0);
-        _player->SendTalentsInfoData(false);
-    }
-}
-
 void WorldSession::HandleCharFactionOrRaceChangeOpcode(WorldPacket& recv_data)
 {
     ObjectGuid guid;
