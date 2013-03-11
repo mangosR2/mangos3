@@ -22901,7 +22901,11 @@ void Player::RestoreBaseRune(uint8 index)
 {
     Aura const* aura = m_runes->runes[index].ConvertAura;
     // If rune was converted by a non-pasive aura that still active we should keep it converted
-    if (aura && !(aura->GetSpellProto()->Attributes & SPELL_ATTR_PASSIVE))
+    if (aura && !IsPassiveSpell(aura->GetSpellProto()))
+        return;
+
+    // Blood of the North
+    if (aura->GetId() == 54637 && HasAura(54637))
         return;
 
     ConvertRune(index, GetBaseRune(index));

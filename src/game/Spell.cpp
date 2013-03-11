@@ -5000,10 +5000,16 @@ void Spell::SendSpellGo()
         castFlags |= CAST_FLAG_PREDICTED_RUNES;             // rune cooldowns list
     }
 
+    if (IsSpellHaveEffect(m_spellInfo, SPELL_EFFECT_ACTIVATE_RUNE))
+    {
+        castFlags |= CAST_FLAG_PREDICTED_RUNES;             // rune cooldowns list
+        castFlags |= CAST_FLAG_UNKNOWN19;                   // same as in SMSG_SPELL_START
+    }
+
     if ((m_targets.m_targetMask & TARGET_FLAG_DEST_LOCATION) && (m_targets.GetSpeed() > M_NULL_F || m_targets.GetElevation() > M_NULL_F))
         castFlags |= CAST_FLAG_ADJUST_MISSILE;             // spell has trajectory (guess parameters)
 
-    Unit *caster = m_triggeredByAuraSpell && IsChanneledSpell(m_triggeredByAuraSpell) ? GetAffectiveCaster() : m_caster;
+    Unit* caster = m_triggeredByAuraSpell && IsChanneledSpell(m_triggeredByAuraSpell) ? GetAffectiveCaster() : m_caster;
 
     if (!caster)
         caster = m_caster;                                  // temporary. TODO - need find source of problem.
@@ -5814,6 +5820,7 @@ void Spell::TakeRunePower(bool hit)
         // you can gain some runic power when use runes
         float rp = float(src->runePowerGain);
         rp *= sWorld.getConfig(CONFIG_FLOAT_RATE_POWER_RUNICPOWER_INCOME);
+        rp += m_caster->GetTotalAuraModifier(SPELL_AURA_MOD_RUNIC_POWER_GAIN) * rp / 100;
         plr->ModifyPower(POWER_RUNIC_POWER, (int32)rp);
     }
 
@@ -8253,7 +8260,7 @@ SpellCastResult Spell::CheckPower()
         return SPELL_CAST_OK;
 
     // Do precise power regen on spell cast
-    if (m_powerCost > 0 && m_caster->GetTypeId() == TYPEID_PLAYER)
+    if (m_powerCost > 0 && m_caster->GetTypeId() == TYPEID_PLAYER && m_spellInfo->powerType != POWER_RUNE)
     {
         Player* playerCaster = (Player*)m_caster;
         uint32 lastRegenInterval = playerCaster->IsUnderLastManaUseEffect() ? REGEN_TIME_PRECISE : REGEN_TIME_FULL;
