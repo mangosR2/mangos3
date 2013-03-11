@@ -1520,7 +1520,7 @@ bool Item::CheckRefundExpired(Player* owner)
 
 bool Item::IsEligibleForSoulboundTrade(AllowedLooterSet* allowedLooters) const
 {
-    if (!allowedLooters || allowedLooters.size() < 2)
+    if (!allowedLooters || allowedLooters->size() < 2)
         return false;
 
     ItemPrototype const* proto = GetProto();
