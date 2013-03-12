@@ -15494,30 +15494,11 @@ uint32 DamageInfo::AddAbsorb(uint32 addvalue)
     damage -= realabsorb;
     return realabsorb - addvalue;
 }
+
 void DamageInfo::AddPctAbsorb(float aborbPct)
 {
     uint32 realabsorb = damage * aborbPct/100.0f;
     AddAbsorb(realabsorb);
-}
-
-void Unit::SetLastManaUse()
-{
-    if (GetTypeId() == TYPEID_PLAYER &&
-        !IsUnderLastManaUseEffect() &&
-        HasFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_REGENERATE_POWER))
-        RemoveFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_REGENERATE_POWER);
-
-    uint32 lastRegenInterval = IsUnderLastManaUseEffect() ? REGEN_TIME_PRECISE : REGEN_TIME_FULL;
-
-    m_lastManaUseTimer = 5000;
-
-    // Do first interrupted powers regen (not only PRECIZE interval), also set player mana regenerate interval to PRECIZE
-    if (GetTypeId() == TYPEID_PLAYER)
-    {
-        int32 diff = lastRegenInterval - ((Player*)this)->GetRegenTimer();
-        if (diff > 0)
-            ((Player*)this)->RegenerateAll(diff);
-    }
 }
 
 bool Unit::IsSplineEnabled() const

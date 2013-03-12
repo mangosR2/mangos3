@@ -419,8 +419,12 @@ Player::Player(WorldSession* session): Unit(), m_mover(this), m_camera(NULL), m_
     m_questRewardTalentCount = 0;
     m_freeTalentPoints = 0;
 
-    m_regenTimer = REGEN_TIME_FULL;
+    m_regenTimer = 0;
     m_holyPowerRegenTimer = REGEN_TIME_HOLY_POWER;
+    m_focusRegenTimer = REGEN_TIME_PLAYER_FOCUS;
+    for (uint8 i = 0; i < MAX_STORED_POWERS; ++i)
+        m_powerFraction[i] = 0;
+
     m_weaponChangeTimer = 0;
 
     m_zoneUpdateId = 0;
@@ -1355,14 +1359,6 @@ void Player::Update(uint32 update_diff, uint32 p_time)
         }
     }
 
-    if (m_regenTimer)
-    {
-        if (update_diff >= m_regenTimer)
-            m_regenTimer = 0;
-        else
-            m_regenTimer -= update_diff;
-    }
-
     if (m_positionStatusUpdateTimer)
     {
         if (update_diff >= m_positionStatusUpdateTimer)
@@ -1415,8 +1411,7 @@ void Player::Update(uint32 update_diff, uint32 p_time)
         if (!HasAuraType(SPELL_AURA_STOP_NATURAL_MANA_REGEN))
             SetFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_REGENERATE_POWER);
 
-        if (!m_regenTimer)
-            RegenerateAll(IsUnderLastManaUseEffect() ? REGEN_TIME_PRECISE : REGEN_TIME_FULL);
+        RegenerateAll(p_time);
     }
 
     if (!isAlive() && !HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_GHOST) && getDeathState() != GHOULED)
@@ -2325,17 +2320,23 @@ void Player::RewardRage(uint32 damage, uint32 weaponSpeedHitFactor, bool attacke
 
 void Player::RegenerateAll(uint32 diff)
 {
-    // Not in combat or they have regeneration
-    if (!isInCombat() || HasAuraType(SPELL_AURA_MOD_REGEN_DURING_COMBAT) ||
-        HasAuraType(SPELL_AURA_MOD_HEALTH_REGEN_IN_COMBAT) || IsPolymorphed() || m_baseHealthRegen)
+    m_regenTimer += diff;
+
+    if (m_regenTimer >= REGEN_TIME_FULL)
     {
-        RegenerateHealth(diff);
-        if (!isInCombat() && !HasAuraType(SPELL_AURA_INTERRUPT_REGEN))
+        // Not in combat or they have regeneration
+        if (!isInCombat() || HasAuraType(SPELL_AURA_MOD_REGEN_DURING_COMBAT) ||
+                HasAuraType(SPELL_AURA_MOD_HEALTH_REGEN_IN_COMBAT) || IsPolymorphed() || m_baseHealthRegen)
         {
-            Regenerate(POWER_RAGE, diff);
-            if (getClass() == CLASS_DEATH_KNIGHT)
-                Regenerate(POWER_RUNIC_POWER, diff);
+            RegenerateHealth(diff);
+            if (!isInCombat() && !HasAuraType(SPELL_AURA_INTERRUPT_REGEN))
+            {
+                Regenerate(POWER_RAGE, diff);
+                if(getClass() == CLASS_DEATH_KNIGHT)
+                    Regenerate(POWER_RUNIC_POWER, diff);
+            }
         }
+        m_regenTimer -= REGEN_TIME_FULL;
     }
 
     Regenerate(POWER_ENERGY, diff);
@@ -2345,9 +2346,19 @@ void Player::RegenerateAll(uint32 diff)
     if (getClass() == CLASS_DEATH_KNIGHT)
         Regenerate(POWER_RUNE, diff);
 
-    m_regenTimer = IsUnderLastManaUseEffect() ? REGEN_TIME_PRECISE : REGEN_TIME_FULL;
     if (getClass() == CLASS_HUNTER)
-        Regenerate(POWER_FOCUS, diff);
+    {
+        if (m_focusRegenTimer <= diff)
+            m_focusRegenTimer = 0;
+        else
+            m_focusRegenTimer -= diff;
+
+        if (!m_focusRegenTimer)
+        {
+            Regenerate(POWER_FOCUS, diff);
+            m_focusRegenTimer = REGEN_TIME_PLAYER_FOCUS;
+        }
+    }
 
     if (getClass() == CLASS_PALADIN)
     {
@@ -2364,8 +2375,6 @@ void Player::RegenerateAll(uint32 diff)
             ResetHolyPowerRegenTimer();
         }
     }
-
-    m_regenTimer = REGEN_TIME_FULL;
 }
 
 // diff contains the time in milliseconds since last regen.
@@ -2396,44 +2405,45 @@ void Player::Regenerate(Powers power, uint32 diff)
                 break;
 
             float ManaIncreaseRate = sWorld.getConfig(CONFIG_FLOAT_RATE_POWER_MANA);
-            if (IsUnderLastManaUseEffect())
+            if (isInCombat())
             {
                 // Mangos Updates Mana in intervals of 2s, which is correct
-                addvalue += GetFloatValue(UNIT_FIELD_POWER_REGEN_INTERRUPTED_FLAT_MODIFIER) *  ManaIncreaseRate * (float)REGEN_TIME_FULL/IN_MILLISECONDS;
+                addvalue += GetFloatValue(UNIT_FIELD_POWER_REGEN_INTERRUPTED_FLAT_MODIFIER) *  ManaIncreaseRate * (float)diff/IN_MILLISECONDS;
             }
             else
             {
-                addvalue += GetFloatValue(UNIT_FIELD_POWER_REGEN_FLAT_MODIFIER) * ManaIncreaseRate * (float)REGEN_TIME_FULL/IN_MILLISECONDS;
+                addvalue += GetFloatValue(UNIT_FIELD_POWER_REGEN_FLAT_MODIFIER) * ManaIncreaseRate * (float)diff/IN_MILLISECONDS;
             }
             break;
         }
         case POWER_RAGE:                                    // Regenerate rage
         {
             float RageDecreaseRate = sWorld.getConfig(CONFIG_FLOAT_RATE_POWER_RAGE_LOSS);
-            addvalue += 20 * RageDecreaseRate;              // 2 rage by tick (= 2 seconds => 1 rage/sec)
+            addvalue += -25 * RageDecreaseRate;             // 2 rage by tick (= 2 seconds => 1.25 rage/sec)
             break;
         }
         case POWER_FOCUS:
         {
-            addvalue = 12;
+            if (!m_focusRegenTimer)
+                addvalue += 6.0f * sWorld.getConfig(CONFIG_FLOAT_RATE_POWER_FOCUS);
             break;
         }
         case POWER_HOLY_POWER:
             if (!m_holyPowerRegenTimer)
-                addvalue = 1;
+                addvalue = -1.0f;
             else
                 return;
             break;
         case POWER_ENERGY:                                  // Regenerate energy
         {
             float EnergyRate = sWorld.getConfig(CONFIG_FLOAT_RATE_POWER_ENERGY);
-            addvalue += 20 * EnergyRate;
+            addvalue += 10 * float(diff) / IN_MILLISECONDS * EnergyRate;
             break;
         }
         case POWER_RUNIC_POWER:
         {
             float RunicPowerDecreaseRate = sWorld.getConfig(CONFIG_FLOAT_RATE_POWER_RUNICPOWER_LOSS);
-            addvalue += 30 * RunicPowerDecreaseRate;         // 3 RunicPower by tick
+            addvalue = -30 * RunicPowerDecreaseRate;        // 3 RunicPower by tick
             break;
         }
         case POWER_RUNE:
@@ -2471,25 +2481,58 @@ void Player::Regenerate(Powers power, uint32 diff)
         for (AuraList::const_iterator i = ModPowerRegenPCTAuras.begin(); i != ModPowerRegenPCTAuras.end(); ++i)
             if ((*i)->GetModifier()->m_miscvalue == int32(power))
                 addvalue *= ((*i)->GetModifier()->m_amount + 100) / 100.0f;
+
+        // Butchery requires combat for this effect
+        if (power != POWER_RUNIC_POWER || isInCombat())
+            addvalue += GetTotalAuraModifierByMiscValue(SPELL_AURA_MOD_POWER_REGEN, power) * ((power != POWER_ENERGY) ? m_regenTimer : diff) / (5 * IN_MILLISECONDS);
     }
 
-    // addvalue computed on a 2sec basis. => update to diff time
-    uint32 _addvalue = ceil(fabs(addvalue * float(diff) / (float)REGEN_TIME_FULL));
-
-    if (power != POWER_RAGE && power != POWER_RUNIC_POWER && power != POWER_HOLY_POWER)
+    if (addvalue < 0.0f)
     {
-        curValue += _addvalue;
-        if (curValue > maxValue)
-            curValue = maxValue;
+        if (curValue == 0)
+            return;
+    }
+    else if (addvalue > 0.0f)
+    {
+        if (curValue == maxValue)
+            return;
+    }
+    else
+        return;
+
+    addvalue += m_powerFraction[powerIndex];
+    uint32 integerValue = uint32(fabs(addvalue));
+
+    if (addvalue < 0.0f)
+    {
+        if (curValue > integerValue)
+        {
+            curValue -= integerValue;
+            m_powerFraction[powerIndex] = addvalue + integerValue;
+        }
+        else
+        {
+            curValue = 0;
+            m_powerFraction[powerIndex] = 0;
+        }
     }
     else
     {
-        if (curValue <= _addvalue)
-            curValue = 0;
+        curValue += integerValue;
+
+        if (curValue > maxValue)
+        {
+            curValue = maxValue;
+            m_powerFraction[powerIndex] = 0;
+        }
         else
-            curValue -= _addvalue;
+            m_powerFraction[powerIndex] = addvalue - integerValue;
     }
-    SetPower(power, curValue);
+
+    if (m_regenTimer >= REGEN_TIME_FULL)
+        SetPower(power, curValue);
+    else
+        UpdateUInt32Value(UNIT_FIELD_POWER1 + powerIndex, curValue);
 }
 
 void Player::RegenerateHealth(uint32 diff)
@@ -2539,8 +2582,6 @@ void Player::RegenerateHealth(uint32 diff)
 
     if (addvalue < 0)
         addvalue = 0;
-
-    addvalue *= (float)diff / REGEN_TIME_FULL;
 
     ModifyHealth(int32(addvalue));
 }

@@ -4915,7 +4915,7 @@ void Aura::HandleAuraTransform(bool apply, bool Real)
             // for players, start regeneration after 1s (in polymorph fast regeneration case)
             // only if caster is Player (after patch 2.4.2)
             if (GetCasterGuid().IsPlayer())
-                ((Player*)target)->setRegenTimer(1*IN_MILLISECONDS);
+                ((Player*)target)->setRegenTimer(1 * IN_MILLISECONDS);
 
             //dismount polymorphed target (after patch 2.4.2)
             if (target->IsMounted())
@@ -11249,8 +11249,8 @@ void Aura::HandleAuraStopNaturalManaRegen(bool apply, bool Real)
 {
     if (!Real)
         return;
-    if (GetTarget()->getClass() != CLASS_DEATH_KNIGHT)
-        GetTarget()->ApplyModFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_REGENERATE_POWER, !apply && !GetTarget()->IsUnderLastManaUseEffect());
+
+    GetTarget()->ApplyModFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_REGENERATE_POWER, !apply);
 }
 
 void Aura::HandleAuraMastery(bool apply, bool Real)

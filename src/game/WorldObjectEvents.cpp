@@ -272,7 +272,6 @@ void RelocationNotifyEvent::Abort(uint64)
 
 bool ManaUseEvent::Execute(uint64 /*e_time*/, uint32 /*p_time*/)
 {
-    m_caster.SetLastManaUse();
     return true;
 }
 

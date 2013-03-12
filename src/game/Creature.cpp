@@ -153,6 +153,7 @@ Creature::Creature(CreatureSubtype subtype) : Unit(),
 {
     m_regenTimer = 200;
     m_holyPowerRegenTimer = REGEN_TIME_HOLY_POWER;
+    m_focusRegenTimer = REGEN_TIME_PET_FOCUS;
     m_valuesCount = UNIT_END;
 
     SetWalk(true, true);
@@ -627,18 +628,15 @@ void Creature::Regenerate(Powers power)
         case POWER_MANA:
         {
             // Combat and any controlled creature
-            if (isInCombat() || !GetCharmerOrOwnerGuid().IsEmpty())
+            if (isInCombat() || GetCharmerOrOwnerGuid())
             {
-                if (!IsUnderLastManaUseEffect())
-                {
-                    float ManaIncreaseRate = sWorld.getConfig(CONFIG_FLOAT_RATE_POWER_MANA);
-                    float Spirit = GetStat(STAT_SPIRIT);
+               float ManaIncreaseRate = sWorld.getConfig(CONFIG_FLOAT_RATE_POWER_MANA);
+               float Spirit = GetStat(STAT_SPIRIT);
 
-                    addvalue = int32((Spirit / 5.0f + 17.0f) * ManaIncreaseRate);
-                }
+               addvalue = uint32((Spirit / 5.0f + 17.0f) * ManaIncreaseRate);
             }
             else
-                addvalue = maxValue / 3.0f;
+                addvalue = maxValue / 3;
             break;
         }
         case POWER_ENERGY:

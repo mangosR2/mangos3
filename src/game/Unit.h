@@ -1341,8 +1341,9 @@ typedef std::map<uint32, SpellCooldown> SpellCooldowns;
 
 // Regeneration defines
 #define REGEN_TIME_FULL         2000                        // This determines how often regen value is computed
-#define REGEN_TIME_PRECISE  500                             // Used in Spell::CheckPower for precise regeneration in spell cast time
 #define REGEN_TIME_HOLY_POWER   10000                       // This determines how often holy power regen is processed
+#define REGEN_TIME_PET_FOCUS    2000
+#define REGEN_TIME_PLAYER_FOCUS 1000
 
 // delay time for evading
 #define EVADE_TIME_DELAY     500
@@ -2193,9 +2194,6 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         SpellAuraProcResult HandleDropChargeByDamageProc(Unit *pVictim, DamageInfo* damageInfo, Aura const* triggeredByAura, SpellEntry const *procSpell, uint32 procFlag, uint32 procEx, uint32 cooldown);
         SpellAuraProcResult HandleIgnoreUnitStateAuraProc(Unit *pVictim, DamageInfo* damageInfo, Aura const* triggeredByAura, SpellEntry const *procSpell, uint32 procFlag, uint32 procEx, uint32 cooldown);
 
-        void SetLastManaUse();
-        bool IsUnderLastManaUseEffect() const { return bool(m_lastManaUseTimer > 0); }
-
         SpellAuraProcResult HandleVengeanceProc(Unit* pVictim, int32 damage, int32 triggerAmount);
 
         uint32 GetRegenTimer() const { return m_regenTimer; }
@@ -2415,8 +2413,9 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
 
         uint32 m_reactiveTimer[MAX_REACTIVE];
         uint32 m_regenTimer;
-        uint32 m_lastManaUseTimer;
+        uint32 m_focusRegenTimer;
         uint32 m_holyPowerRegenTimer;
+        float m_powerFraction[MAX_STORED_POWERS];
 
         // Frozen Mod
         bool m_spoofSamePlayerFaction : 1;
