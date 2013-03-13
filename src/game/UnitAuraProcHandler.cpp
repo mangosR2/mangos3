@@ -4842,8 +4842,15 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(Unit *pVictim, DamageIn
         }
         case SPELLFAMILY_DEATHKNIGHT:
         {
+            // Will of the Necropolis
+            if (auraSpellInfo->GetSpellIconID() == 1762)
+            {
+                if (GetHealthPercent() > 30.0f)
+                    return SPELL_AURA_PROC_FAILED;
+                break;
+            }
             // Acclimation
-            if (auraSpellInfo->GetSpellIconID() == 1930)
+            else if (auraSpellInfo->GetSpellIconID() == 1930)
             {
                 if (!procSpell)
                     return SPELL_AURA_PROC_FAILED;

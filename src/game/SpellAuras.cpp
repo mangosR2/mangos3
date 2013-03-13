@@ -6976,6 +6976,13 @@ void Aura::HandleDamagePercentTaken(bool apply, bool Real)
                 if (Aura* aur = target->GetAura(63225, EFFECT_INDEX_0))
                     m_modifier.m_amount -= aur->GetModifier()->m_amount;
         }
+        // Will of the Necropolis
+        else if (GetId() == 81162)
+        {
+            if (target->GetTypeId() == TYPEID_PLAYER)
+                ((Player*)target)->RemoveSpellCooldown(48982, true);
+            target->CastSpell(target, 96171, true);
+        }
     }
 }
 

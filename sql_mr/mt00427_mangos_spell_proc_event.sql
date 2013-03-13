@@ -505,3 +505,13 @@ INSERT INTO `spell_proc_event` (`entry`, `SchoolMask`) VALUE
 DELETE FROM `spell_proc_event` WHERE `entry` = 49222;
 INSERT INTO `spell_proc_event` (`entry`, `SchoolMask`, `Cooldown`) VALUE
 (49222, 127, 3);
+
+-- Will of the Necropolis
+DELETE FROM `spell_proc_event` WHERE `entry` = 52284;
+INSERT INTO `spell_proc_event` (`entry`, `SchoolMask`, `Cooldown`) VALUE
+(52284, 127, 45);
+
+-- Will of the Necropolis (blood tap aura)
+DELETE FROM `spell_proc_event` WHERE `entry` = 96171;
+INSERT INTO `spell_proc_event` (`entry`, `procEx`) VALUE
+(96171, 524288);
