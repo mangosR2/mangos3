@@ -585,6 +585,8 @@ Unit::Unit() :
 
     for (int i = 0; i < MAX_DAMAGE_COUNTERS; ++i)
         m_damage_counters[i].push_front(0);
+
+    m_boneShieldCooldown = time(NULL);
 }
 
 Unit::~Unit()

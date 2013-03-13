@@ -5729,6 +5729,21 @@ SpellAuraProcResult Unit::HandleModDamagePercentDoneAuraProc(Unit* /*pVictim*/, 
     else if (spellInfo->Id == 16246)
         // Shaman clearcasting - must proc only first effect
         return SPELL_AURA_PROC_CANT_TRIGGER;
+    // Bone Shield
+    else if (spellInfo->Id == 49222)
+    {
+        if (cooldown)
+        {
+            time_t now = time(NULL);
+            if (now >= m_boneShieldCooldown)
+            {
+                m_boneShieldCooldown = time_t(now + cooldown);
+                return SPELL_AURA_PROC_OK;
+            }
+
+            return SPELL_AURA_PROC_FAILED;
+        }
+    }
 
     return SPELL_AURA_PROC_OK;
 }

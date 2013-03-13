@@ -495,8 +495,13 @@ INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskB0`,
 -- DELETE FROM `spell_proc_event` WHERE `entry` = 81229;
 -- INSERT INTO `spell_proc_event` (`entry`, `SchoolMask`, `CustomChance`) VALUE
 -- (81229, 127, 100);
--- Glyph of Dark Succor
 
+-- Glyph of Dark Succor
 DELETE FROM `spell_proc_event` WHERE `entry` = 96279;
 INSERT INTO `spell_proc_event` (`entry`, `SchoolMask`) VALUE
 (96279, 127);
+
+-- Bone Shield
+DELETE FROM `spell_proc_event` WHERE `entry` = 49222;
+INSERT INTO `spell_proc_event` (`entry`, `SchoolMask`, `Cooldown`) VALUE
+(49222, 127, 3);
