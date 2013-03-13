@@ -1349,6 +1349,16 @@ typedef std::map<uint32, SpellCooldown> SpellCooldowns;
 
 #define MAX_OBJECT_SLOT 5
 
+#define MAX_DAMAGE_LOG_SECS     120
+
+enum
+{
+    DAMAGE_DONE_COUNTER     = 0,
+    DAMAGE_TAKEN_COUNTER    = 1,
+    HEALING_DONE_COUNTER    = 2,
+    MAX_DAMAGE_COUNTERS     = 3,
+};
+
 struct SpellProcEventEntry;                                 // used only privately
 class  VehicleKit;
 
@@ -2337,6 +2347,10 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         void RemoveSpellCategoryCooldown(uint32 cat, bool update = false);
 
         void KillSelf(uint32 keepHealthPoints = 0); // used instead ForcedDespawn() when not need despawn unit
+
+        std::deque<uint32> m_damage_counters[MAX_DAMAGE_COUNTERS];
+        int32 m_damage_counter_timer;
+        uint32 GetDamageCounterInPastSecs(uint32 secs, int type);
 
     protected:
         explicit Unit ();
