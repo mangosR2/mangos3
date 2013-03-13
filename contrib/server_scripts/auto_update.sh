@@ -155,6 +155,7 @@ if [[ $dbcheck != $mangosdb ]];
         echo "Install database "$ytdbLastsql
         _rc=$(db_run  $mangoshost $mangosport $mangosuser $mangospass $mangosdb $ytdbLastsql)
         rm $ytdbLastsql
+        _rc=$(db_run  $mangoshost $mangosport $mangosuser $mangospass $mangosdb $r2searchDir"/custom_mangos_full_ytdb.sql")
     else
     echo "Mangos world DB $mangosdb found! try update to current revision."
 fi
