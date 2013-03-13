@@ -5514,38 +5514,52 @@ void Spell::EffectDummy(SpellEffectEntry const* effect)
                 return;
             }
             // Death Strike
-            else if (dkClassOptions && dkClassOptions->SpellFamilyFlags & UI64LIT(0x0000000000000010))
+            else if (m_spellInfo->Id == 49998 || m_spellInfo->Id == 66188)
             {
-                uint32 count = 0;
-                Unit::SpellAuraHolderMap const& auras = unitTarget->GetSpellAuraHolderMap();
-                for(Unit::SpellAuraHolderMap::const_iterator itr = auras.begin(); itr!=auras.end(); ++itr)
-                {
-                    if (itr->second->GetSpellProto()->GetDispel() == DISPEL_DISEASE &&
-                        itr->second->GetCasterGuid() == m_caster->GetObjectGuid())
-                    {
-                        ++count;
-                        // max. 15%
-                        if (count == 3)
-                            break;
-                    }
-                }
+                // minimum of at least $s3% of your maximum health
+                int32 minHeal = damage * m_caster->GetMaxHealth() / 100;
+                // TODO: replace 20% magic number
+                int32 heal = int32(m_caster->GetDamageCounterInPastSecs(5, DAMAGE_TAKEN_COUNTER) * 0.2f);
 
-                SpellEffectEntry const* dsSpellEffect = m_spellInfo->GetSpellEffect(EFFECT_INDEX_0);
-                int32 bp = int32(count * m_caster->GetMaxHealth() * (dsSpellEffect ? dsSpellEffect->DmgMultiplier : 0.0f) / 100);
-
-                // Improved Death Strike (percent stored in nonexistent EFFECT_INDEX_2 effect base points)
-                Unit::AuraList const& auraMod = m_caster->GetAurasByType(SPELL_AURA_ADD_FLAT_MODIFIER);
-                for(Unit::AuraList::const_iterator iter = auraMod.begin(); iter != auraMod.end(); ++iter)
+                // Improved Death Strike
+                Unit::AuraList const& dummyAuras = m_caster->GetAurasByType(SPELL_AURA_DUMMY);
+                for (Unit::AuraList::const_iterator itr = dummyAuras.begin(); itr != dummyAuras.end(); ++itr)
                 {
-                    // only required spell have spellicon for SPELL_AURA_ADD_FLAT_MODIFIER
-                    if ((*iter)->GetSpellProto()->GetSpellIconID() == 2751 && (*iter)->GetSpellProto()->GetSpellFamilyName() == SPELLFAMILY_DEATHKNIGHT)
+                    if ((*itr)->GetSpellProto()->GetSpellIconID() == 2751 && (*itr)->GetSpellProto()->GetSpellFamilyName() == SPELLFAMILY_DEATHKNIGHT &&
+                        (*itr)->GetEffIndex() == EFFECT_INDEX_2)
                     {
-                        bp += (*iter)->GetSpellProto()->CalculateSimpleValue(EFFECT_INDEX_2) * bp / 100;
+                        heal = int32(heal * (*itr)->GetModifier()->m_amount / 100.0f);
                         break;
                     }
                 }
 
-                m_caster->CastCustomSpell(m_caster, 45470, &bp, NULL, NULL, true);
+                // Dark Succor
+                if (Aura const* succor = m_caster->GetAura(101568, EFFECT_INDEX_0))
+                {
+                    // Frost or Unholy Presence
+                    if (m_caster->HasAura(48266) || m_caster->HasAura(48265))
+                        minHeal = succor->GetModifier()->m_amount;
+                }
+
+                heal = std::max(heal, minHeal);
+
+                // correct for threat of Tassarian
+                if (m_caster->haveOffhandWeapon())
+                    heal /= 2;
+
+                if (heal)
+                {
+                    // Blood Shield
+                    if (Aura const* bloodShield = m_caster->GetAura(77513, EFFECT_INDEX_0))
+                    {
+                        int32 bp = int32(heal * bloodShield->GetModifier()->m_amount / 100.0f);
+                        if (Aura* oldShield = m_caster->GetAura(77535, EFFECT_INDEX_0))
+                            bp += oldShield->GetModifier()->m_amount;
+
+                        m_caster->CastCustomSpell(m_caster, 77535, &bp, NULL, NULL, true);
+                    }
+                    m_caster->CastCustomSpell(m_caster, 45470, &heal, NULL, NULL, true);
+                }
                 return;
             }
             // Death Grip
