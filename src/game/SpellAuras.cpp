@@ -12986,7 +12986,7 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
                             for(Unit::AuraList::const_iterator itr = bloodAuras.begin(); itr != bloodAuras.end(); ++itr)
                             {
                                 // skip same icon
-                                if ((*itr)->GetSpellProto()->GetSpellFamilyName() == SPELLFAMILY_DEATHKNIGHT &&
+                                if ((*itr)->GetSpellProto()->GetSpellFamilyName() == SPELLFAMILY_GENERIC &&
                                     (*itr)->GetSpellProto()->GetSpellIconID() == 2636 &&
                                     (*itr)->GetEffIndex() == EFFECT_INDEX_0)
                                 {
@@ -13068,7 +13068,7 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
             }
 
             // Improved Blood Presence
-            if (GetSpellProto()->GetSpellIconID() == 2636 && m_isPassive)
+            if (GetId() == 50365 || GetId() == 50371)
             {
                 // if presence active: Frost Presence or Unholy Presence
                 if (apply && (m_target->HasAura(48266) || m_target->HasAura(48265)))
