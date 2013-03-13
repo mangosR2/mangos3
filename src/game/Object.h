@@ -497,7 +497,7 @@ class MANGOS_DLL_SPEC WorldObject : public Object
             GetNearPoint(obj, x, y, z, bounding_radius, distance2d, GetOrientation() + angle);
         }
 
-        WorldLocation const& GetClosePoint(float bounding_radius, float distance2d = 0.0f, float angle = 0.0f, WorldObject const* obj = NULL)
+        WorldLocation GetClosePoint(float bounding_radius, float distance2d = 0.0f, float angle = 0.0f, WorldObject const* obj = NULL)
         {
             WorldLocation loc = GetPosition();
             GetNearPoint(obj, loc.x, loc.y, loc.z, bounding_radius, distance2d, loc.o + angle);
