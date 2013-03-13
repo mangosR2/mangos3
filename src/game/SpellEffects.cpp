@@ -8997,9 +8997,11 @@ void Spell::EffectWeaponDmg(SpellEffectEntry const* effect)
                 m_caster->HasAura(59336))
             {
                 int32 rp = m_caster->GetPower(POWER_RUNIC_POWER) / 10;
-                if (rp > 25)
-                    rp = 25;
-                totalDamagePercentMod *= 1.0f + rp / 100.0f;
+                if (rp > 100)
+                    rp = 100;
+                rp /= 5;
+
+                totalDamagePercentMod *= 1.0f + 2.0f * rp / 100.0f;
             }
             // Glyph of Plague Strike
             if( classOptions && classOptions->SpellFamilyFlags & UI64LIT(0x0000000000000001) &&
