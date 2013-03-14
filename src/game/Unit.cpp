@@ -8591,49 +8591,6 @@ void Unit::SpellDamageBonusDone(DamageInfo* damageInfo, uint32 stack)
                 DoneTotal+=(*i)->GetModifier()->m_amount;
                 break;
             }
-            // Tundra Stalker
-            // Merciless Combat
-            case 7277:
-            {
-                // Merciless Combat
-                if ((*i)->GetSpellProto()->GetSpellIconID() == 2656)
-                {
-                    if (pVictim->HasAuraState(AURA_STATE_HEALTHLESS_35_PERCENT))
-                        DoneTotalMod *= (100.0f+(*i)->GetModifier()->m_amount)/100.0f;
-                }
-                else // Tundra Stalker
-                {
-                    // Frost Fever (target debuff)
-                    if (pVictim->GetAura<SPELL_AURA_MOD_MELEE_HASTE, SPELLFAMILY_DEATHKNIGHT, CF_DEATHKNIGHT_FF_BP_ACTIVE>())
-                        DoneTotalMod *= ((*i)->GetModifier()->m_amount+100.0f)/100.0f;
-                    break;
-                }
-                break;
-            }
-            case 7293: // Rage of Rivendare
-            {
-                if (pVictim->GetAura<SPELL_AURA_PERIODIC_DAMAGE, SPELLFAMILY_DEATHKNIGHT, CF_DEATHKNIGHT_BLOOD_PLAGUE>())
-                    DoneTotalMod *= ((*i)->GetSpellProto()->CalculateSimpleValue(EFFECT_INDEX_1)*2+100.0f)/100.0f;
-                break;
-            }
-            // Twisted Faith
-            case 7377:
-            {
-                if (pVictim->GetAura<SPELL_AURA_PERIODIC_DAMAGE, SPELLFAMILY_PRIEST, CF_PRIEST_SHADOW_WORD_PAIN>(GetObjectGuid()))
-                    DoneTotalMod *= ((*i)->GetModifier()->m_amount+100.0f)/100.0f;
-                break;
-            }
-            // Marked for Death
-            case 7598:
-            case 7599:
-            case 7600:
-            case 7601:
-            case 7602:
-            {
-                if (pVictim->GetAura<SPELL_AURA_MOD_STALKED, SPELLFAMILY_HUNTER, CF_HUNTER_HUNTERS_MARK>())
-                    DoneTotalMod *= ((*i)->GetModifier()->m_amount+100.0f)/100.0f;
-                break;
-            }
         }
     }
 
@@ -8833,38 +8790,30 @@ void Unit::SpellDamageBonusDone(DamageInfo* damageInfo, uint32 stack)
         }
         case SPELLFAMILY_DEATHKNIGHT:
         {
-            // Icy Touch and Howling Blast
-            if (damageInfo->GetSpellProto()->GetSpellFamilyFlags().test<CF_DEATHKNIGHT_ICY_TOUCH_TALONS, CF_DEATHKNIGHT_HOWLING_BLAST>())
-            {
-                // search disease
-                bool found = false;
-                Unit::SpellAuraHolderMap const& auras = pVictim->GetSpellAuraHolderMap();
-                for(Unit::SpellAuraHolderMap::const_iterator itr = auras.begin(); itr!=auras.end(); ++itr)
-                {
-                    if(itr->second->GetSpellProto()->GetDispel() == DISPEL_DISEASE)
-                    {
-                        found = true;
-                        break;
-                    }
-                }
-
-                // search for Glacier Rot and  Improved Icy Touch dummy aura
-                bool isIcyTouch = damageInfo->GetSpellProto()->GetSpellFamilyFlags().test<CF_DEATHKNIGHT_ICY_TOUCH_TALONS>();
-                Unit::AuraList const& dummyAuras = GetAurasByType(SPELL_AURA_DUMMY);
-                for(Unit::AuraList::const_iterator i = dummyAuras.begin(); i != dummyAuras.end(); ++i)
-                {
-                    if (found && (((*i)->GetSpellProto()->GetEffectMiscValue((*i)->GetEffIndex()) == 7244) ||
-                        (isIcyTouch && (*i)->GetSpellProto()->GetSpellIconID() == 2721)))                       //Improved Icy Touch
-                    {
-                        DoneTotalMod *= ((*i)->GetModifier()->m_amount+100.0f) / 100.0f;
-                    }
-                }
-            }
             // Death Coil (bonus from Item - Death Knight T8 DPS Relic)
-            else if (damageInfo->GetSpellProto()->GetSpellFamilyFlags().test<CF_DEATHKNIGHT_DEATH_COIL>())
+            if (classOptions && classOptions->SpellFamilyFlags & UI64LIT(0x00002000))
             {
                  if (Aura const* sigil = GetDummyAura(64962))
                     DoneTotal += sigil->GetModifier()->m_amount;
+            }
+
+            // Icy Touch, Howling Blast, Obliterate, Frost Strike
+            if (classOptions && classOptions->IsFitToFamilyMask(UI64LIT(0x2000600000002)))
+            {
+                if (pVictim->HasAuraState(AURA_STATE_HEALTHLESS_35_PERCENT))
+                {
+                    // search for Merciless Combat
+                    Unit::AuraList const& dummyAuras = GetAurasByType(SPELL_AURA_DUMMY);
+                    for (Unit::AuraList::const_iterator i = dummyAuras.begin(); i != dummyAuras.end(); ++i)
+                    {
+                        if ((*i)->GetSpellProto()->GetSpellIconID() == 2656 && (*i)->GetEffIndex() == EFFECT_INDEX_0 &&
+                            (*i)->GetSpellProto()->GetSpellFamilyName() == SPELLFAMILY_DEATHKNIGHT)
+                        {
+                            DoneTotalMod *= ((*i)->GetModifier()->m_amount + 100.0f) / 100.0f;
+                            break;
+                        }
+                    }
+                }
             }
             break;
         }
@@ -9962,62 +9911,16 @@ void Unit::MeleeDamageBonusDone(DamageInfo* damageInfo, uint32 stack)
     }
 
     // ..done (class scripts)
-    if (damageInfo->GetSpellProto())
-    {
-        AuraList const& mOverrideClassScript= owner->GetAurasByType(SPELL_AURA_OVERRIDE_CLASS_SCRIPTS);
-        for(AuraList::const_iterator i = mOverrideClassScript.begin(); i != mOverrideClassScript.end(); ++i)
-        {
-            if (!(*i))
-                continue;
-
-            SpellAuraHolderPtr holder = (*i)->GetHolder();  // lock holder
-            if (!holder || holder->IsDeleted())
-                continue;
-
-            if (!(*i)->isAffectedOnSpell(damageInfo->GetSpellProto()))
-                continue;
-
-            switch((*i)->GetModifier()->m_miscvalue)
-            {
-                // Tundra Stalker
-                // Merciless Combat
-                case 7277:
-                {
-                    // Merciless Combat
-                    if ((*i)->GetSpellProto()->GetSpellIconID() == 2656)
-                    {
-                        if (pVictim->HasAuraState(AURA_STATE_HEALTHLESS_35_PERCENT))
-                            DonePercent *= (100.0f+(*i)->GetModifier()->m_amount)/100.0f;
-                    }
-                    else // Tundra Stalker
-                    {
-                        // Frost Fever (target debuff)
-                        if (pVictim->GetAura<SPELL_AURA_MOD_MELEE_HASTE, SPELLFAMILY_DEATHKNIGHT, CF_DEATHKNIGHT_FF_BP_ACTIVE>())
-                            DonePercent *= ((*i)->GetModifier()->m_amount+100.0f)/100.0f;
-                        break;
-                    }
-                    break;
-                }
-                case 7293: // Rage of Rivendare
-                {
-                    if (pVictim->GetAura<SPELL_AURA_PERIODIC_DAMAGE, SPELLFAMILY_DEATHKNIGHT, CF_DEATHKNIGHT_BLOOD_PLAGUE>())
-                        DonePercent *= ((*i)->GetSpellProto()->CalculateSimpleValue(EFFECT_INDEX_1)*2+100.0f)/100.0f;
-                    break;
-                }
-                // Marked for Death
-                case 7598:
-                case 7599:
-                case 7600:
-                case 7601:
-                case 7602:
-                {
-                    if (pVictim->GetAura<SPELL_AURA_MOD_STALKED, SPELLFAMILY_HUNTER, CF_HUNTER_HUNTERS_MARK>())
-                        DonePercent *= ((*i)->GetModifier()->m_amount+100.0f)/100.0f;
-                    break;
-                }
-            }
-        }
-    }
+    // currently unused
+    //if(spellProto)
+    //{
+    //    AuraList const& mOverrideClassScript= owner->GetAurasByType(SPELL_AURA_OVERRIDE_CLASS_SCRIPTS);
+    //    for(AuraList::const_iterator i = mOverrideClassScript.begin(); i != mOverrideClassScript.end(); ++i)
+    //    {
+    //        if (!(*i)->isAffectedOnSpell(spellProto))
+    //            continue;
+    //    }
+    //}
 
     // .. done (class scripts)
     //AuraList const& mclassScritAuras = GetAurasByType(SPELL_AURA_OVERRIDE_CLASS_SCRIPTS);
@@ -10028,37 +9931,27 @@ void Unit::MeleeDamageBonusDone(DamageInfo* damageInfo, uint32 stack)
     if (damageInfo->GetSpellProto())
     {
         SpellClassOptionsEntry const* classOptions = damageInfo->GetSpellProto()->GetSpellClassOptions();
-        // Frost Strike
-        if (damageInfo->GetSpellProto()->GetSpellFamilyName() == SPELLFAMILY_DEATHKNIGHT && damageInfo->GetSpellProto()->GetSpellFamilyFlags().test<CF_DEATHKNIGHT_FROST_STRIKE>())
+        // Icy Touch, Howling Blast, Obliterate, Frost Strike
+        if (classOptions && classOptions->IsFitToFamily(SPELLFAMILY_DEATHKNIGHT, UI64LIT(0x2000600000002)))
         {
-            // search disease
-            bool found = false;
-            Unit::SpellAuraHolderMap const& auras = pVictim->GetSpellAuraHolderMap();
-            for(Unit::SpellAuraHolderMap::const_iterator itr = auras.begin(); itr!=auras.end(); ++itr)
+            if (pVictim->HasAuraState(AURA_STATE_HEALTHLESS_35_PERCENT))
             {
-                if(itr->second->GetSpellProto()->GetDispel() == DISPEL_DISEASE)
-                {
-                    found = true;
-                    break;
-                }
-            }
-
-            if (found)
-            {
-                // search for Glacier Rot dummy aura
+                // search for Merciless Combat
                 Unit::AuraList const& dummyAuras = GetAurasByType(SPELL_AURA_DUMMY);
-                for(Unit::AuraList::const_iterator i = dummyAuras.begin(); i != dummyAuras.end(); ++i)
+                for (Unit::AuraList::const_iterator i = dummyAuras.begin(); i != dummyAuras.end(); ++i)
                 {
-                    if ((*i)->GetSpellEffect()->EffectMiscValue == 7244)
+                    if ((*i)->GetSpellProto()->GetSpellIconID() == 2656 && (*i)->GetEffIndex() == EFFECT_INDEX_0 &&
+                        (*i)->GetSpellProto()->GetSpellFamilyName() == SPELLFAMILY_DEATHKNIGHT)
                     {
-                        DonePercent *= ((*i)->GetModifier()->m_amount+100.0f) / 100.0f;
+                        DonePercent *= ((*i)->GetModifier()->m_amount + 100.0f) / 100.0f;
                         break;
                     }
                 }
             }
         }
+
         // Glyph of Steady Shot (Steady Shot check)
-        else if (damageInfo->GetSpellProto()->GetSpellFamilyName() == SPELLFAMILY_HUNTER && damageInfo->GetSpellProto()->GetSpellFamilyFlags().test<CF_HUNTER_STEADY_SHOT>())
+        if (classOptions && classOptions->IsFitToFamily(SPELLFAMILY_HUNTER, UI64LIT(0x0000000100000000)))
         {
             // search for glyph dummy aura
             if (Aura const* aur = GetDummyAura(56826))
@@ -10067,9 +9960,9 @@ void Unit::MeleeDamageBonusDone(DamageInfo* damageInfo, uint32 stack)
                     DonePercent *= (aur->GetModifier()->m_amount+100.0f) / 100.0f;
         }
 
+        // Revealing Strike
         if (damageInfo->GetSpellProto()->IsFitToFamily(SPELLFAMILY_ROGUE, UI64LIT(0xB20000)))
         {
-            // Revealing Strike
             if (SpellAuraHolderPtr holder = pVictim->GetSpellAuraHolder(84617, GetObjectGuid()))
                 if (Aura const* aura = holder->GetAuraByEffectIndex(EFFECT_INDEX_2))
                     DonePercent *= (aura->GetModifier()->m_amount + 100.0f) / 100.0f;
