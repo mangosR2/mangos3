@@ -780,7 +780,7 @@ namespace MaNGOS
                 case PUSH_SELF_CENTER:
                     if (i_castingObject)
                     {
-                        i_center =  WorldLocation(*i_castingObject);
+                        i_center =  WorldLocation(i_castingObject->GetPosition());
                     }
                     break;
                 case PUSH_DEST_CENTER:
@@ -794,7 +794,7 @@ namespace MaNGOS
                 case PUSH_TARGET_CENTER:
                     if (Unit* target = i_spell.m_targets.getUnitTarget())
                     {
-                        i_center =  WorldLocation(*target);
+                        i_center =  WorldLocation(target->GetPosition());
                     }
                     break;
                 default:

@@ -71,10 +71,7 @@ float Position::GetDistance(Position const& pos) const
         MAX_VISIBILITY_DISTANCE + 1.0f;
 };
 
-WorldLocation::WorldLocation(WorldObject const& object)
-    : WorldLocation(object.GetPosition())
-{
-};
+WorldLocation const WorldLocation::Null = WorldLocation();
 
 WorldLocation::WorldLocation(uint32 _mapid, float _x, float _y, float _z, float _o, uint32 phaseMask, uint32 _instance, uint32 _realmid)
     : Position(_x, _y, _z, _o, phaseMask), mapid(_mapid), instance(_instance), realmid(_realmid), m_Tpos(Position())

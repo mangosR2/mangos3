@@ -131,10 +131,10 @@ struct MANGOS_DLL_SPEC WorldLocation : public Position
         : Position(loc.x, loc.y, loc.z, loc.orientation, loc.GetPhaseMask()), mapid(loc.mapid), instance(loc.instance), realmid(loc.realmid), m_Tpos(loc.m_Tpos)
     {}
 
-    WorldLocation(WorldObject const& object);
-
     virtual ~WorldLocation() 
     {};
+
+    static WorldLocation const Null;
 
     bool operator == (WorldLocation const& loc) const;
 

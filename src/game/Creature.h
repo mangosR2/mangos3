@@ -427,7 +427,7 @@ struct CreatureCreatePos
             }
         // if dist == 0.0f -> exactly object coordinates used, in other case close point to object (CONTACT_DIST can be used as minimal distances)
         CreatureCreatePos(WorldObject* closeObject, float ori, float dist = 0.0f, float angle = 0.0f)
-            : m_pos(*closeObject), m_map(closeObject->GetMap()), m_closeObject(closeObject),
+            : m_pos(closeObject->GetPosition()), m_map(closeObject->GetMap()), m_closeObject(closeObject),
                 m_angle(angle), m_dist(dist)
             {
                 m_pos.o = ori;

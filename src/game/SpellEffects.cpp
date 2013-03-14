@@ -12974,8 +12974,6 @@ void Spell::EffectSuspendGravity(SpellEffectIndex eff_idx)
     if (!unitTarget)
         return;
 
-    float x,y,z;
-
     WorldLocation loc = (m_targets.m_targetMask & TARGET_FLAG_DEST_LOCATION) ?
                         m_targets.getDestination() :
                         m_caster->GetPosition();

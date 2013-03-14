@@ -136,7 +136,7 @@ void SpellCastTargets::setUnitTarget(Unit* target)
         return;
 
     if (target && !(m_targetMask & TARGET_FLAG_DEST_LOCATION))
-        m_dest = WorldLocation(*target);
+        m_dest = WorldLocation(target->GetPosition());
 
     m_unitTarget = target;
 
@@ -231,7 +231,7 @@ void SpellCastTargets::read(ByteBuffer& data, Unit* caster)
 
     if (m_targetMask == TARGET_FLAG_SELF)
     {
-        m_dest = WorldLocation(*caster);
+        m_dest = caster->GetPosition();
         m_unitTarget = caster;
         m_unitTargetGUID = caster->GetObjectGuid();
         return;
@@ -252,7 +252,7 @@ void SpellCastTargets::read(ByteBuffer& data, Unit* caster)
 
     if (m_targetMask & TARGET_FLAG_SOURCE_LOCATION)
     {
-        m_src = WorldLocation(*caster);
+        m_src = caster->GetPosition();
         data >> m_srcTransportGUID.ReadAsPacked();
         data >> m_src.x >> m_src.y >> m_src.z;
         if(!MaNGOS::IsValidMapCoord(getSource().x, getSource().y, getSource().z))
@@ -261,7 +261,7 @@ void SpellCastTargets::read(ByteBuffer& data, Unit* caster)
 
     if (m_targetMask & TARGET_FLAG_DEST_LOCATION)
     {
-        m_dest = WorldLocation(*caster);
+        m_dest = caster->GetPosition();
         data >> m_destTransportGUID.ReadAsPacked();
         data >> m_dest.x >> m_dest.y >> m_dest.z;
         if(!MaNGOS::IsValidMapCoord(getDestination().x, getDestination().y, getDestination().z))
@@ -361,7 +361,7 @@ WorldLocation const& SpellCastTargets::GetLocation() const
     else if (m_targetMask & TARGET_FLAG_SOURCE_LOCATION)
         return getSource();
     // Possible need substitution for another cases
-    return WorldLocation();
+    return WorldLocation::Null;
 }
 
 Spell::Spell( Unit* caster, SpellEntry const *info, bool triggered, ObjectGuid originalCasterGUID, SpellEntry const* triggeredBy )
