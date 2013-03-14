@@ -63,4 +63,5 @@ REPLACE INTO `spell_bonus_data` (`entry`, `direct_bonus`, `dot_bonus`, `ap_bonus
 (47633, 0, 0, 0.805, 0, 'Death Knight - Death Coil heal'),
 (48721, 0, 0, 0.096, 0, 'Death Knight - Blood Boil'),
 (49998, 0, 0, 0.236, 0, 'Death Knight - Death Strike'),
-(52212, 0, 0, 0.064, 0, 'Death Knight - Death and Decay Triggered');
+(52212, 0, 0, 0.064, 0, 'Death Knight - Death and Decay Triggered'),
+(55050, 0, 0, 0.236, 0, 'Death Knight - Heart Strike');

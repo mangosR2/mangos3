@@ -8983,7 +8983,23 @@ void Spell::EffectWeaponDmg(SpellEffectEntry const* effect)
                 // Heart Strike secondary target
                 if (m_spellInfo->GetSpellIconID() == 3145)
                     if (m_targets.getUnitTarget() != unitTarget)
-                        weaponDamagePercentMod /= 2.0f;
+                    {
+                        int8 mod = 0;
+                        for (TargetList::const_iterator itr = m_UniqueTargetInfo.begin(); itr != m_UniqueTargetInfo.end(); ++itr)
+                        {
+                            if ((itr->effectMask & (1 << effect->EffectIndex)) == 0)
+                                continue;
+
+                            if (itr->targetGUID == unitTarget->GetObjectGuid())
+                            {
+                                mod += 1;
+                                break;
+                            }
+                        }
+
+                        while (mod--)
+                            weaponDamagePercentMod *= 0.75f ;
+                    }
             }
             // Glyph of Blood Strike
             if( classOptions && classOptions->SpellFamilyFlags & UI64LIT(0x0000000000400000) &&
