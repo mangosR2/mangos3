@@ -5096,13 +5096,6 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(Unit *pVictim, DamageIn
 
             break;
         }
-        // Freezing Fog (Rime triggered)
-        case 59052:
-        {
-            // Howling Blast cooldown reset
-            RemoveSpellCategoryCooldown(1248, true);
-            break;
-        }
         // Druid - Savage Defense
         case 62606:
         {
