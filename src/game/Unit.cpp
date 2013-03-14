@@ -11733,6 +11733,10 @@ int32 Unit::CalculateSpellDamage(Unit const* target, SpellEntry const* spellProt
                     break;
             }
 
+            // Hungering Cold and Wywern Sting
+            if (spellProto->Id == 49203 || spellProto->IsFitToFamily(SPELLFAMILY_HUNTER, UI64LIT(0x100000000000)))
+                return 1;
+
             int32 amount;
             if (spellEffect->EffectApplyAuraName == SPELL_AURA_MOD_ROOT)
                 amount = target->GetMaxHealth() * 20.0f / 100;

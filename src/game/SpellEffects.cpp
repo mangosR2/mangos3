@@ -5507,12 +5507,6 @@ void Spell::EffectDummy(SpellEffectEntry const* effect)
                 }
                 return;
             }
-            // Hungering Cold
-            else if (dkClassOptions && dkClassOptions->SpellFamilyFlags & UI64LIT(0x0000100000000000))
-            {
-                m_caster->CastSpell(m_caster, 51209, true);
-                return;
-            }
             // Death Strike
             else if (m_spellInfo->Id == 49998 || m_spellInfo->Id == 66188)
             {
