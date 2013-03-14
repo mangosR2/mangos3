@@ -6268,10 +6268,23 @@ void Aura::HandleModMechanicImmunity(bool apply, bool /*Real*/)
 void Aura::HandleModMechanicImmunityMask(bool apply, bool /*Real*/)
 {
     uint32 mechanic  = m_modifier.m_miscvalue;
+    Unit *target = GetTarget();
 
     if (apply && GetSpellProto()->HasAttribute(SPELL_ATTR_EX_DISPEL_AURAS_ON_IMMUNITY))
-        GetTarget()->RemoveAurasAtMechanicImmunity(mechanic,GetId());
+        target->RemoveAurasAtMechanicImmunity(mechanic,GetId());
 
+    // Pillar of Frost
+    else if (GetId() == 51271)
+    {
+        m_modifier.m_miscvalue = (1 << (MECHANIC_GRIP - 1));
+
+        target->ApplySpellImmune(GetId(), IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, apply);
+    }
+    // Pillar of Frost (from glyph)
+    else if (GetId() == 90259)
+    {
+        m_modifier.m_miscvalue = IMMUNE_TO_MOVEMENT_IMPAIRMENT_AND_LOSS_CONTROL_MASK;
+    }
     // check implemented in Unit::IsImmuneToSpell and Unit::IsImmuneToSpellEffect
 }
 
