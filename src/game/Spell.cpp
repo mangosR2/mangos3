@@ -5829,10 +5829,17 @@ void Spell::TakeRunePower(bool hit)
     if (hit)
     {
         // you can gain some runic power when use runes
-        float rp = float(src->runePowerGain);
-        rp *= sWorld.getConfig(CONFIG_FLOAT_RATE_POWER_RUNICPOWER_INCOME);
-        rp += m_caster->GetTotalAuraModifier(SPELL_AURA_MOD_RUNIC_POWER_GAIN) * rp / 100;
-        plr->ModifyPower(POWER_RUNIC_POWER, (int32)rp);
+        int32 rp = int32(src->runePowerGain);
+        if (rp)
+        {
+            if (Player* modOwner = m_caster->GetSpellModOwner())
+                modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_COST, rp, this);
+
+            rp = int32(sWorld.getConfig(CONFIG_FLOAT_RATE_POWER_RUNICPOWER_INCOME) * rp);
+            rp += m_caster->GetTotalAuraModifier(SPELL_AURA_MOD_RUNIC_POWER_GAIN) * rp / 100;
+            if (rp > 0)
+                plr->ModifyPower(POWER_RUNIC_POWER, (int32)rp);
+        }
     }
 
     return;
