@@ -72,9 +72,15 @@ float Position::GetDistance(Position const& pos) const
 };
 
 WorldLocation::WorldLocation(WorldObject const& object)
-    : Position(object.GetPositionX(), object.GetPositionY(), object.GetPositionZ(), object.GetOrientation(), object.GetPhaseMask()),
-        mapid(object.GetMapId()), instance(object.GetInstanceId()), realmid(sWorld.getConfig(CONFIG_UINT32_REALMID))
+    : WorldLocation(object.GetPosition())
 {
+};
+
+WorldLocation::WorldLocation(uint32 _mapid, float _x, float _y, float _z, float _o, uint32 phaseMask, uint32 _instance, uint32 _realmid)
+    : Position(_x, _y, _z, _o, phaseMask), mapid(_mapid), instance(_instance), realmid(_realmid), m_Tpos(Position())
+{
+    if (realmid == 0)
+        SetRealmId(sWorld.getConfig(CONFIG_UINT32_REALMID));
 };
 
 bool WorldLocation::IsValidMapCoord(WorldLocation const& loc)
@@ -111,18 +117,27 @@ void WorldLocation::SetOrientation(float value)
 
 WorldLocation& WorldLocation::operator = (WorldLocation const& loc)
 {
-
     //if (!IsValidMapCoord(loc))
     //    sLog.outError("WorldLocation::operator = try set invalid location!");
 
     mapid       = loc.mapid;
     instance    = loc.instance;
+    m_Tpos      = loc.m_Tpos;
     x           = loc.x;
     y           = loc.y;
     z           = loc.z;
     orientation = loc.orientation;
     m_phaseMask = loc.GetPhaseMask();
+    return *this;
+}
 
+WorldLocation& WorldLocation::operator = (Position const& pos)
+{
+    x           = pos.x;
+    y           = pos.y;
+    z           = pos.z;
+    orientation = pos.orientation;
+    m_phaseMask = pos.GetPhaseMask();
     return *this;
 }
 
@@ -144,7 +159,7 @@ uint32 WorldLocation::GetZoneId() const
 
 float WorldLocation::GetDistance(WorldLocation const& loc) const
 {
-    return (!HasMap() || !loc.HasMap() || (GetMapId() == loc.GetMapId() && GetInstanceId() == loc.GetInstanceId())) ?
+    return (!HasMap() || !loc.HasMap() || ((GetMapId() == loc.GetMapId()) && (GetInstanceId() == loc.GetInstanceId()))) ?
         ((Position)*this).GetDistance((Position)loc) :
         MAX_VISIBILITY_DISTANCE + 1.0f;
 };

@@ -1052,7 +1052,7 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         bool TeleportTo(uint32 mapid, float x, float y, float z, float orientation, uint32 options = 0)
         {
-            return TeleportTo(WorldLocation(x, y, z, orientation, mapid, 0, sWorld.getConfig(CONFIG_UINT32_REALMID)), options);
+            return TeleportTo(WorldLocation(mapid, x, y, z, orientation, GetPhaseMask()), options);
         }
 
         bool TeleportTo(WorldLocation const& loc, uint32 options = 0);
