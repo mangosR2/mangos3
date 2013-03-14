@@ -1476,6 +1476,13 @@ void Spell::EffectSchoolDMG(SpellEffectEntry const* effect)
                     damage += damage / 2;
                     damage += int32(m_caster->GetTotalAttackPowerValue(BASE_ATTACK)* 0.035f);
                 }
+                // Howling Blast
+                else if (m_spellInfo->Id == 49143)
+                {
+                    // half damage to secondary targets
+                    if (unitTarget != m_targets.getUnitTarget())
+                        damage /= 2;
+                }
                 break;
             }
             case SPELLFAMILY_SHAMAN:
