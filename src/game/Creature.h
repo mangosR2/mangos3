@@ -434,7 +434,7 @@ struct CreatureCreatePos
             }
         // Constructor for use with casttarget
         CreatureCreatePos(Map* map, WorldLocation const& loc)
-            : m_map(map), m_pos(loc), m_closeObject(NULL), m_angle(0.0f), m_dist(0.0f)
+            : m_pos(loc), m_map(map), m_closeObject(NULL), m_angle(0.0f), m_dist(0.0f)
             {
             }
     public:
