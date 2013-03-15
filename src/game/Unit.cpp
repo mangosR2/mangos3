@@ -5932,6 +5932,29 @@ void Unit::RemoveAuraHolderDueToSpellByDispel(uint32 spellId, uint32 stackAmount
         RemoveAuraHolderFromStack(spellId, stackAmount, casterGuid, AURA_REMOVE_BY_DISPEL);
         return;
     }
+    // Blood Plague or Frost Fever
+    else if (spellId == 55078 || spellId == 55095)
+    {
+        if (Unit* caster = GetMap()->GetUnit(casterGuid))
+        {
+            // Search for Resilient Infection
+            Unit::AuraList const& auras = caster->GetAurasByType(SPELL_AURA_DUMMY);
+            for (Unit::AuraList::const_iterator i = auras.begin(); i != auras.end(); ++i)
+            {
+                if ((*i)->GetSpellProto()->SpellIconID == 1910 && (*i)->GetSpellProto()->GetSpellFamilyName() == SPELLFAMILY_GENERIC)
+                {
+                    if (roll_chance_i((*i)->GetModifier()->m_amount))
+                    {
+                        int bp0 = spellId == 55078 ? 0 : 1;
+                        int bp1 = spellId == 55078 ? 1 : 0;
+                        // activate rune
+                        caster->CastCustomSpell(caster, 90721, &bp0, &bp1, NULL, true);
+                    }
+                    break;
+                }
+            }
+        }
+    }
     // Necrotic Plague (Lich King)
     // this hack needs correct implementation
     else if (spellId == 70338 || spellId == 73785 || spellId == 73786 || spellId == 73787)
