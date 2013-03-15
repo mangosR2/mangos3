@@ -4868,6 +4868,13 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(Unit *pVictim, DamageIn
                         return SPELL_AURA_PROC_FAILED;
                 }
             }
+            // Desecration
+            else if (auraSpellInfo->GetSpellIconID() == 2296)
+            {
+                if (!pVictim || pVictim->IsImmuneToSpellEffect(sSpellStore.LookupEntry(trigger_spell_id), EFFECT_INDEX_0))
+                    return SPELL_AURA_PROC_FAILED;
+                break;
+            }
             // Crimson Scourge
             else if (auraSpellInfo->GetSpellIconID() ==  2725)
             {
