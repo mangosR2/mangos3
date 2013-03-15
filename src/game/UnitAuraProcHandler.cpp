@@ -3649,17 +3649,6 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, DamageInfo* damageI
                 target = this;
                 break;
             }
-            // Necrosis
-            if (dummySpell->GetSpellIconID() == 2709)
-            {
-                // only melee auto attack affected and Rune Strike
-                if (procSpell && procSpell->Id != 56815)
-                    return SPELL_AURA_PROC_FAILED;
-
-                basepoints[0] = triggerAmount * damage / 100;
-                triggered_spell_id = 51460;
-                break;
-            }
             // Threat of Thassarian
             if (dummySpell->GetSpellIconID() == 2023)
             {
@@ -3757,27 +3746,51 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, DamageInfo* damageI
 
                 Player* player = (Player*)this;
 
-                std::vector<uint8> cdRunes;
-                for (uint8 i = 0; i < MAX_RUNES; i += 2)
+                int32 runicCorruptionBp = 0;
+                // Search Runic Corruption
+                Unit::AuraList const& dummyAuras = GetAurasByType(SPELL_AURA_DUMMY);
+                for (Unit::AuraList::const_iterator itr = dummyAuras.begin(); itr != dummyAuras.end(); ++itr)
                 {
-                    uint16 cd1 = player->GetRuneCooldown(i);
-                    uint16 cd2 = player->GetRuneCooldown(i + 1);
-                    // Runic Empowerment can only activate a rune if both runes of that type are currently on cooldown.
-                    if (cd1 && cd2)
+                    if ((*itr)->GetSpellProto()->SpellIconID == 4068 && (*itr)->GetSpellProto()->GetSpellFamilyName() == SPELLFAMILY_DEATHKNIGHT)
                     {
-                        // find fully depleted runes
-                        // do not activate runes that were used by proc spell
-                        if (cd1 == player->GetBaseRuneCooldown(i) && (player->GetLastUsedRuneMask() & (1 << i)) == 0)
-                            cdRunes.push_back(i);
-                        else if (cd2 == player->GetBaseRuneCooldown(i + 1) && (player->GetLastUsedRuneMask() & (1 << (i + 1))) == 0)
-                            cdRunes.push_back(i + 1);
+                        runicCorruptionBp = (*itr)->GetModifier()->m_amount;
+                        break;
                     }
                 }
-                if (!cdRunes.empty())
+
+                if (runicCorruptionBp)
+                    CastCustomSpell(this, 51460, &runicCorruptionBp, &runicCorruptionBp, NULL, true);
+                else
                 {
-                    uint8 i = urand(0, cdRunes.size() - 1);
-                    player->SetRuneCooldown(cdRunes[i], 0);
-                    player->ResyncRunes();
+                    std::vector<uint8> cdRunes;
+                    for (uint8 i = 0; i < MAX_RUNES; i += 2)
+                    {
+                        uint16 cd1 = player->GetRuneCooldown(i);
+                        uint16 cd2 = player->GetRuneCooldown(i + 1);
+                        // Runic Empowerment can only activate a rune if both runes of that type are currently on cooldown.
+                        if (cd1 && cd2)
+                        {
+                            // find fully depleted runes
+                            // do not activate runes that were used by proc spell
+                            if (cd1 == player->GetBaseRuneCooldown(i))
+                                cdRunes.push_back(i);
+                            else if (cd2 == player->GetBaseRuneCooldown(i + 1))
+                                cdRunes.push_back(i + 1);
+                        }
+                    }
+                    if (!cdRunes.empty())
+                    {
+                        uint8 i = urand(0, cdRunes.size() - 1);
+                        uint32 spellId = 0;
+                        if (runeSlotTypes[i] == RUNE_BLOOD)
+                            spellId = 81166;
+                        else if (runeSlotTypes[i] == RUNE_UNHOLY)
+                            spellId = 81169;
+                        else// if (runeSlotTypes[i] == RUNE_FROST)
+                            spellId = 81168;
+
+                        CastSpell(this, spellId, true);
+                    }
                 }
                 return SPELL_AURA_PROC_OK;
             }

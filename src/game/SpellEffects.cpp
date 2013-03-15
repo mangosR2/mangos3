@@ -14436,8 +14436,21 @@ void Spell::EffectActivateRune(SpellEffectEntry const* effect)
 
     for (uint32 j = 0; j < MAX_RUNES && count > 0; ++j)
     {
-        if (plr->GetRuneCooldown(j) && plr->GetCurrentRune(j) == RuneType(effect->EffectMiscValue))
+        if (plr->GetRuneCooldown(j))
         {
+            // Energize Blood, Frost, Unholy Rune
+            // these spells activate fully depleted runes depending on base rune
+            if (m_spellInfo->Id == 81166 || m_spellInfo->Id == 81168 || m_spellInfo->Id == 81169)
+            {
+                if (plr->GetBaseRune(j) != RuneType(effect->EffectMiscValue))
+                    continue;
+
+                if (plr->GetRuneCooldown(j) != plr->GetBaseRuneCooldown(j))
+                    continue;
+            }
+            else if (plr->GetCurrentRune(j) != RuneType(effect->EffectMiscValue))
+                continue;
+
             // Blood Tap
             if (m_spellInfo->Id == 45529)
                 if (plr->GetBaseRune(j) != RuneType(effect->EffectMiscValueB))
