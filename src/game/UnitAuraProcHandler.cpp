@@ -5575,6 +5575,16 @@ SpellAuraProcResult Unit::HandleAddFlatModifierAuraProc(Unit* pVictim, DamageInf
             CastCustomSpell(pVictim, 68055, &bp, NULL, NULL, true, NULL, triggeredByAura);
             break;
         }
+        case SPELLFAMILY_DEATHKNIGHT:
+        {
+            // Unholy Command
+            if (spellInfo->GetSpellIconID() == 2723)
+            {
+                if (GetTypeId() == TYPEID_PLAYER)
+                    ((Player*)this)->RemoveSpellCooldown(49576, true);
+            }
+            break;
+        }
         default:
             break;
     }
