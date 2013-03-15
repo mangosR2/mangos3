@@ -1874,7 +1874,7 @@ bool Player::TeleportTo(WorldLocation const& loc, uint32 options)
         if (!GetSession()->PlayerLogout())
         {
             WorldPacket data;
-            BuildTeleportAckMsg(data, loc.coord_x, loc.coord_y, loc.coord_z, loc.orientation);
+            BuildTeleportAckMsg(data, loc.getX(), loc.getY(), loc.getZ(), loc.orientation);
             GetSession()->SendPacket(&data);
         }
     }

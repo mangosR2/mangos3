@@ -85,7 +85,7 @@ bool WorldLocation::IsValidMapCoord(WorldLocation const& loc)
     if (loc.HasMap())
         return MapManager::IsValidMapCoord(loc);
     else
-        return MaNGOS::IsValidMapCoord(loc.coord_x, loc.coord_y, loc.coord_z, loc.orientation);
+        return MaNGOS::IsValidMapCoord(loc.getX(), loc.getY(), loc.getZ(), loc.getO());
 }
 
 bool WorldLocation::operator == (WorldLocation const& loc) const
@@ -143,7 +143,7 @@ uint32 WorldLocation::GetAreaId() const
     if (!HasMap())
         return 0;
 
-    return sTerrainMgr.GetAreaId(GetMapId(), coord_x, coord_y, coord_z);
+    return sTerrainMgr.GetAreaId(GetMapId(), getX(), getY(), getZ());
 }
 
 uint32 WorldLocation::GetZoneId() const
@@ -151,7 +151,7 @@ uint32 WorldLocation::GetZoneId() const
     if (!HasMap())
         return 0;
 
-    return sTerrainMgr.GetZoneId(GetMapId(), coord_x, coord_y, coord_z);
+    return sTerrainMgr.GetZoneId(GetMapId(), getX(), getY(), getZ());
 }
 
 float WorldLocation::GetDistance(WorldLocation const& loc) const
