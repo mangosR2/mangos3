@@ -3134,7 +3134,7 @@ void Spell::EffectDummy(SpellEffectEntry const* effect)
                         return;
 
                     // check for Dark Transformation
-                    m_caster->CastSpell(unitTarget, m_caster->HasAura(63560) ? 91809 : 91802, true);
+                    m_caster->CastSpell(unitTarget, m_caster->HasAura(63560) ? 91802 : 91809, true);
                     return;
                 }
                 case 47484:                                 // Huddle

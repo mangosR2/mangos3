@@ -5732,7 +5732,7 @@ void Aura::HandleModStealth(bool apply, bool Real)
     else
     {
         // Vanish
-        if (Real && GetId() == 11327)
+        if (Real && GetId() == 11327 && m_removeMode == AURA_REMOVE_BY_EXPIRE)
         {
             // cast Stealth at remove
             if (target->GetTypeId() == TYPEID_PLAYER)
