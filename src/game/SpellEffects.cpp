@@ -3119,6 +3119,33 @@ void Spell::EffectDummy(SpellEffectEntry const* effect)
                     }
                     break;
                 }
+                case 47468:                                 // Claw
+                {
+                    if (!unitTarget)
+                        return;
+
+                    // check for Dark Transformation
+                    m_caster->CastSpell(unitTarget, m_caster->HasAura(63560) ? 91778 : 91776, true);
+                    return;
+                }
+                case 47482:                                 // Leap
+                {
+                    if (!unitTarget)
+                        return;
+
+                    // check for Dark Transformation
+                    m_caster->CastSpell(unitTarget, m_caster->HasAura(63560) ? 91809 : 91802, true);
+                    return;
+                }
+                case 47484:                                 // Huddle
+                {
+                    if (!unitTarget)
+                        return;
+
+                    // check for Dark Transformation
+                    m_caster->CastSpell(unitTarget, m_caster->HasAura(63560) ? 91837 : 91838, true);
+                    return;
+                }
                 case 48046:                                 // Use Camera
                 {
                     if (!unitTarget)
@@ -5475,6 +5502,38 @@ void Spell::EffectDummy(SpellEffectEntry const* effect)
         case SPELLFAMILY_DEATHKNIGHT:
         {
             SpellClassOptionsEntry const* dkClassOptions = m_spellInfo->GetSpellClassOptions();
+            switch(m_spellInfo->Id)
+            {
+                // Gnaw
+                case 47481:
+                {
+                    if (!unitTarget)
+                        return;
+
+                    // check for Dark Transformation
+                    m_caster->CastSpell(unitTarget, m_caster->HasAura(63560) ? 91797 : 91800, true);
+                    return;
+                }
+                // Death Grip
+                case 49576:
+                {
+                    if (!unitTarget)
+                        return;
+
+                    m_caster->CastSpell(unitTarget, 49560, true);
+                    return;
+                }
+                // Death Grip
+                case 49560:
+                {
+                    if (!unitTarget || unitTarget == m_caster)
+                        return;
+
+                    uint32 spellId = m_spellInfo->CalculateSimpleValue(EFFECT_INDEX_0);
+                    unitTarget->CastSpell(m_caster->GetPositionX(), m_caster->GetPositionY(), m_caster->GetPositionZ(), spellId, true);
+                    return;
+                }
+            }
             // Corpse Explosion
             if (m_spellInfo->GetSpellIconID() == 1737)
             {
@@ -5487,6 +5546,7 @@ void Spell::EffectDummy(SpellEffectEntry const* effect)
                     unitTarget->CastSpell(unitTarget,43999,true);
                     ((Pet*)unitTarget)->Unsummon(PET_SAVE_AS_DELETED);
                 }
+                // Death Grip
                 else if (!unitTarget->isAlive())
                 {
                     m_caster->CastSpell(unitTarget, 50444, true, NULL, NULL, m_caster->GetObjectGuid());

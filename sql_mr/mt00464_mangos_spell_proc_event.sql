@@ -550,3 +550,8 @@ INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`,
 DELETE FROM `spell_proc_event` WHERE `entry` = 76243;
 INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskB0`, `procFlags`, `procEx`) VALUE
 (76243, 15, 65536, 65536, 524288);
+
+-- Shadow Infusion
+DELETE FROM `spell_proc_event` WHERE `entry` = 48965;
+INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`, `SpellFamilyMaskC0`) VALUE
+(48965, 15, 2147483648, 1);

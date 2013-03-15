@@ -4852,8 +4852,21 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(Unit *pVictim, DamageIn
         }
         case SPELLFAMILY_DEATHKNIGHT:
         {
+            // Shadow Infusion
+            if (auraSpellInfo->GetSpellIconID() == 152)
+            {
+                Unit* pet = GetPet();
+                if (!pet || !pet->IsInWorld() || pet->isDead())
+                    return SPELL_AURA_PROC_FAILED;
+
+                // Dark Transformation
+                if (pet->HasAura(63560))
+                    return SPELL_AURA_PROC_FAILED;
+
+                break;
+            }
             // Will of the Necropolis
-            if (auraSpellInfo->GetSpellIconID() == 1762)
+            else if (auraSpellInfo->GetSpellIconID() == 1762)
             {
                 if (GetHealthPercent() > 30.0f)
                     return SPELL_AURA_PROC_FAILED;
