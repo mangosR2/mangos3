@@ -3591,8 +3591,14 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, DamageInfo* damageI
         }
         case SPELLFAMILY_DEATHKNIGHT:
         {
+            // Ebon Plaguebringer
+            if (dummySpell->GetSpellIconID() == 1766)
+            {
+                basepoints[0] = triggerAmount;
+                triggered_spell_id = 65142;
+            }
             // Butchery
-            if (dummySpell->GetSpellIconID() == 2664)
+            else if (dummySpell->GetSpellIconID() == 2664)
             {
                 basepoints[0] = triggerAmount;
                 triggered_spell_id = 50163;

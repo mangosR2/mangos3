@@ -560,3 +560,20 @@ INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`,
 DELETE FROM `spell_proc_event` WHERE `entry` = 49194;
 INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskC0`) VALUE
 (49194, 15, 1);
+
+-- Sudden Doom
+DELETE FROM `spell_proc_event` WHERE `entry` = 81340;
+INSERT INTO `spell_proc_event` (`entry`, `procEx`) VALUE
+(81340, 524288);
+
+-- Sudden Doom
+DELETE FROM `spell_proc_event` WHERE `entry` IN (49018, 49529, 49530);
+INSERT INTO `spell_proc_event` (`entry`, `SchoolMask`, `ppmRate`) VALUE
+(49018, 127, 1.76),
+(49529, 127, 3.37),
+(49530, 127, 4.96);
+
+-- Ebon Plaguebringer
+DELETE FROM `spell_proc_event` WHERE `entry` = 51099;
+INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`, `SpellFamilyMaskC0`) VALUE
+(51099, 15, 1+2+4, 4096);

@@ -8092,6 +8092,11 @@ void Aura::HandleModAttackSpeed(bool apply, bool /*Real*/)
 
 void Aura::HandleModMeleeSpeedPct(bool apply, bool /*Real*/)
 {
+    // auras below are rune related
+    if (m_modifier.m_auraname == SPELL_AURA_MOD_MELEE_HASTE &&
+        (m_modifier.m_miscvalue == 2 || m_modifier.m_miscvalue == 5))
+        return;
+
     Unit *target = GetTarget();
 
     if (IsStacking())
