@@ -4909,6 +4909,32 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(Unit *pVictim, DamageIn
                     return SPELL_AURA_PROC_FAILED;
                 break;
             }
+            // Death's Advance
+            else if (auraSpellInfo->GetSpellIconID() == 3315)
+            {
+                if (!procSpell || GetTypeId() != TYPEID_PLAYER)
+                    return SPELL_AURA_PROC_FAILED;
+
+                Player* player = (Player*)this;
+
+                if ((player->GetLastUsedRuneMask() & (1 << RUNE_UNHOLY)) == 0)
+                    return SPELL_AURA_PROC_FAILED;
+
+                uint8 cd = 0;
+                for (uint8 i = 0; i < MAX_RUNES; ++i)
+                {
+                    if (player->GetBaseRune(i) != RUNE_UNHOLY)
+                        continue;
+
+                    if (player->GetRuneCooldown(i))
+                        ++cd;
+                }
+
+                if (cd >= 2)
+                    break;
+
+                return SPELL_AURA_PROC_FAILED;
+            }
             // Might of the Frozen Wastes
             else if (auraSpellInfo->GetSpellIconID() == 4444)
             {
