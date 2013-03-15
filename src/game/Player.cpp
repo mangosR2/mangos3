@@ -13195,6 +13195,12 @@ void Player::SendNewItem(Item *item, uint32 count, bool received, bool created, 
         GetGroup()->BroadcastPacket(&data, true);
     else
         GetSession()->SendPacket(&data);
+
+    if (HasPendingBind())
+    {
+        BindToInstance();
+        SetPendingBind(NULL, 0);
+    }
 }
 
 /*********************************************************/
