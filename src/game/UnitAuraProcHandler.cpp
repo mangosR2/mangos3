@@ -1480,11 +1480,8 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, DamageInfo* damageI
                         return SPELL_AURA_PROC_FAILED;
 
                     SpellAuraHolderPtr holder;
-                    // Missile Barrage
-                    if (SpellAuraHolderPtr _holder = GetSpellAuraHolder(44401, GetObjectGuid()))
-                        holder = _holder;
                     // Hot Streak
-                    else if (SpellAuraHolderPtr _holder = GetSpellAuraHolder(48108, GetObjectGuid()))
+                    if (SpellAuraHolderPtr _holder = GetSpellAuraHolder(48108, GetObjectGuid()))
                         holder = _holder;
                     // Brain Freeze
                     else if (SpellAuraHolderPtr _holder = GetSpellAuraHolder(57761, GetObjectGuid()))
