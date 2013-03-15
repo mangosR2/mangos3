@@ -10834,14 +10834,6 @@ void Aura::PeriodicDummyTick()
             }
 //            if (spell->GetSpellIconID() == 30412)
 //                return;
-            // Hysteria
-            if (spell->GetSpellFamilyFlags().test<CF_DEATHKNIGHT_HYSTERIA>())
-            {
-                // damage not expected to be show in logs, not any damage spell related to damage apply
-                uint32 deal = m_modifier.m_amount * target->GetMaxHealth() / 100;
-                target->DealDamage(target, deal, NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
-                return;
-            }
             break;
         }
         case SPELLFAMILY_PALADIN:

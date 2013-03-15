@@ -545,3 +545,8 @@ INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskB0`)
 DELETE FROM `spell_proc_event` WHERE `entry` = 55666;
 INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`, `SpellFamilyMaskB0`, `SpellFamilyMaskC0`) VALUE
 (55666, 15, 1, 134217728, 8192);
+
+-- Pestilence dot reducer
+DELETE FROM `spell_proc_event` WHERE `entry` = 76243;
+INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskB0`, `procFlags`, `procEx`) VALUE
+(76243, 15, 65536, 65536, 524288);
