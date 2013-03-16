@@ -2454,8 +2454,8 @@ void Player::Regenerate(Powers power, uint32 diff)
             for (uint8 rune = 0; rune < MAX_RUNES; rune += 2)
             {
                 uint8 runeToRegen = rune;
-                uint32 cd = GetRuneCooldown(rune);
-                uint32 secondRuneCd = GetRuneCooldown(rune + 1);
+                uint16 cd = GetRuneCooldown(rune);
+                uint16 secondRuneCd = GetRuneCooldown(rune + 1);
                 // Regenerate second rune of the same type only after first rune is off the cooldown
                 if (secondRuneCd && (cd > secondRuneCd || !cd))
                 {
@@ -2464,7 +2464,14 @@ void Player::Regenerate(Powers power, uint32 diff)
                 }
 
                 if (cd)
-                    SetRuneCooldown(runeToRegen, (cd > diff) ? cd - diff : 0);
+                {
+                    if (cd == GetBaseRuneCooldown(runeToRegen))
+                        UpdateRuneRegen(runeSlotTypes[runeToRegen]);
+
+                    uint16 mod = uint32(diff * GetFloatValue(PLAYER_RUNE_REGEN_1 + uint8(GetCurrentRune(runeToRegen))) / 0.1f);
+                    uint16 newCd = (cd > mod) ? cd - mod : 0;
+                    SetRuneCooldown(runeToRegen, newCd);
+                }
             }
             return;
         }
@@ -22887,29 +22894,75 @@ void Player::SetTitle(CharTitlesEntry const* title, bool lost)
     GetSession()->SendPacket(&data);
 }
 
-uint16 Player::CalculateRuneTypeBaseCooldown(RuneType runeType) const
+void Player::UpdateRuneRegen(RuneType rune)
 {
-    float cooldown = RUNE_BASE_COOLDOWN;
-    float hastePct = 0.0f;
-    float mod = 1.0f;
+    if (rune >= RUNE_DEATH)
+        return;
 
+    RuneType actualRune = rune;
+    float cooldown = RUNE_BASE_COOLDOWN;
+    for (uint8 i = 0; i < MAX_RUNES; i += 2)
+    {
+        if (GetBaseRune(i) != rune)
+            continue;
+
+        uint32 cd = GetRuneCooldown(i);
+        uint32 secondRuneCd = GetRuneCooldown(i + 1);
+        if (!cd && !secondRuneCd)
+            actualRune = GetCurrentRune(i);
+        else if (secondRuneCd && (cd > secondRuneCd || !cd))
+        {
+            cooldown = GetBaseRuneCooldown(i + 1);
+            actualRune = GetCurrentRune(i + 1);
+        }
+        else
+        {
+            cooldown = GetBaseRuneCooldown(i);
+            actualRune = GetCurrentRune(i);
+        }
+
+        break;
+    }
+
+    float auraMod = 1.0f;
     Unit::AuraList const& regenAuras = GetAurasByType(SPELL_AURA_MOD_POWER_REGEN_PERCENT);
     for (Unit::AuraList::const_iterator i = regenAuras.begin(); i != regenAuras.end(); ++i)
-        if ((*i)->GetMiscValue() == POWER_RUNE && (*i)->GetSpellEffect()->EffectMiscValueB == runeType)
-            mod *= (100.0f + (*i)->GetModifier()->m_amount) / 100.0f;
+        if ((*i)->GetMiscValue() == POWER_RUNE && (*i)->GetSpellEffect()->EffectMiscValueB == rune)
+            auraMod *= (100.0f + (*i)->GetModifier()->m_amount) / 100.0f;
 
-    // ... and some auras.
-    mod *= GetTotalAuraMultiplier(SPELL_AURA_MOD_MELEE_HASTE);
+    // Unholy Presence
+    if (Aura* aura = GetAura(48265, EFFECT_INDEX_0))
+        auraMod *= (100.0f + aura->GetModifier()->m_amount) / 100.0f;
 
-    cooldown /= mod;
+    // Runic Corruption
+    if (Aura* aura = GetAura(51460, EFFECT_INDEX_0))
+        auraMod *= (100.0f + aura->GetModifier()->m_amount) / 100.0f;
 
-    // Runes cooldown are now affected by player's haste from equipment ...
-    hastePct = GetRatingBonusValue(CR_HASTE_MELEE);
-    cooldown *=  1.0f - (hastePct / 100.0f);
-    if (cooldown < 0.0f)
+    float hastePct = (100.0f - GetRatingBonusValue(CR_HASTE_MELEE)) / 100.0f;
+    if (hastePct < 0)
+        hastePct = 1.0f;
+
+    cooldown *= hastePct / auraMod;
+
+    float value = float(1 * IN_MILLISECONDS) / cooldown;
+    SetFloatValue(PLAYER_RUNE_REGEN_1 + uint8(actualRune), value);
+}
+
+void Player::UpdateRuneRegen()
+{
+    for (uint8 i = 0; i < NUM_RUNE_TYPES; ++i)
+        UpdateRuneRegen(RuneType(i));
+}
+
+uint8 Player::GetRuneCooldownFraction(uint8 index) const
+{
+    uint16 baseCd = GetBaseRuneCooldown(index);
+    if (!baseCd || !GetRuneCooldown(index))
+        return 255;
+    else if (baseCd == GetRuneCooldown(index))
         return 0;
 
-    return cooldown;
+    return uint8(float(baseCd - GetRuneCooldown(index)) / baseCd * 255);
 }
 
 void Player::SetLastUsedRune(RuneType rune)
@@ -22984,14 +23037,7 @@ void Player::ResyncRunes()
     for (uint32 i = 0; i < MAX_RUNES; ++i)
     {
         data << uint8(GetCurrentRune(i));                   // rune type
-        // float casts ensure the division is performed on floats as we need float result
-        uint16 baseCd = GetBaseRuneCooldown(i);
-        if (!baseCd || !GetRuneCooldown(i))
-            data << uint8(255);
-        else if (baseCd == GetRuneCooldown(i))
-            data << uint8(0);
-        else
-            data << uint8(float(baseCd - GetRuneCooldown(i)) / baseCd * 255); // rune cooldown passed
+        data << uint8(GetRuneCooldownFraction(i));
     }
     GetSession()->SendPacket(&data);
 }

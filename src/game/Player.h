@@ -2647,8 +2647,9 @@ class MANGOS_DLL_SPEC Player : public Unit
         RuneType GetCurrentRune(uint8 index) const { return RuneType(m_runes->runes[index].CurrentRune); }
         uint16 GetRuneCooldown(uint8 index) const { return m_runes->runes[index].Cooldown; }
         uint16 GetBaseRuneCooldown(uint8 index) const { return m_runes->runes[index].BaseCooldown; }
-        uint16 CalculateRuneBaseCooldown(uint8 index) const { return CalculateRuneTypeBaseCooldown(GetBaseRune(index)); }
-        uint16 CalculateRuneTypeBaseCooldown(RuneType runeType) const;
+        uint8 GetRuneCooldownFraction(uint8 index) const;
+        void UpdateRuneRegen(RuneType rune);
+        void UpdateRuneRegen();
         bool IsBaseRuneSlotsOnCooldown(RuneType runeType) const;
         void ClearLastUsedRuneMask() { m_runes->lastUsedRuneMask = 0; }
         uint32 GetLastUsedRuneMask() const { return m_runes->lastUsedRuneMask; }

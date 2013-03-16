@@ -7618,12 +7618,15 @@ void Aura::HandleModPowerRegenPCT(bool /*apply*/, bool Real)
     if (!Real)
         return;
 
-    if (GetTarget()->GetTypeId() != TYPEID_PLAYER)
+    Unit* target = GetTarget();
+    if (target->GetTypeId() != TYPEID_PLAYER)
         return;
 
     // Update manaregen value
     if (m_modifier.m_miscvalue == POWER_MANA)
-        ((Player*)GetTarget())->UpdateManaRegen();
+        ((Player*)target)->UpdateManaRegen();
+    else if (m_modifier.m_miscvalue == POWER_RUNE)
+        ((Player*)target)->UpdateRuneRegen(RuneType(GetMiscBValue()));
 }
 
 void Aura::HandleModManaRegen(bool /*apply*/, bool Real)
@@ -8092,12 +8095,18 @@ void Aura::HandleModAttackSpeed(bool apply, bool /*Real*/)
 
 void Aura::HandleModMeleeSpeedPct(bool apply, bool /*Real*/)
 {
-    // auras below are rune related
-    if ((m_modifier.m_auraname == SPELL_AURA_MOD_MELEE_HASTE || m_modifier.m_auraname == SPELL_AURA_MOD_MELEE_HASTE_3) &&
-        (m_modifier.m_miscvalue == 2 || m_modifier.m_miscvalue == 5))
-        return;
+    Unit* target = GetTarget();
 
-    Unit *target = GetTarget();
+    // auras below are rune related
+    // special check for Unholy Presence
+    if ((m_modifier.m_auraname == SPELL_AURA_MOD_MELEE_HASTE || m_modifier.m_auraname == SPELL_AURA_MOD_MELEE_HASTE_3) &&
+        (GetId() == 48265 || m_modifier.m_miscvalue == 2 || m_modifier.m_miscvalue == 5))
+    {
+        if (target->GetTypeId() == TYPEID_PLAYER)
+            ((Player*)target)->UpdateRuneRegen();
+        return;
+    }
+
 
     if (IsStacking())
     {
