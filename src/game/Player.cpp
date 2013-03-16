@@ -22891,26 +22891,20 @@ uint16 Player::CalculateRuneTypeBaseCooldown(RuneType runeType) const
 {
     float cooldown = RUNE_BASE_COOLDOWN;
     float hastePct = 0.0f;
+    float mod = 1.0f;
 
     Unit::AuraList const& regenAuras = GetAurasByType(SPELL_AURA_MOD_POWER_REGEN_PERCENT);
-    for (Unit::AuraList::const_iterator i = regenAuras.begin();i != regenAuras.end(); ++i)
+    for (Unit::AuraList::const_iterator i = regenAuras.begin(); i != regenAuras.end(); ++i)
         if ((*i)->GetMiscValue() == POWER_RUNE && (*i)->GetSpellEffect()->EffectMiscValueB == runeType)
-            cooldown *= 1.0f - (*i)->GetModifier()->m_amount / 100.0f;
+            mod *= (100.0f + (*i)->GetModifier()->m_amount) / 100.0f;
+
+    // ... and some auras.
+    mod *= GetTotalAuraMultiplier(SPELL_AURA_MOD_MELEE_HASTE);
+
+    cooldown /= mod;
 
     // Runes cooldown are now affected by player's haste from equipment ...
     hastePct = GetRatingBonusValue(CR_HASTE_MELEE);
-
-    // ... and some auras.
-    Unit::AuraList const& hasteAuras = GetAurasByType(SPELL_AURA_MOD_MELEE_HASTE);
-    for (Unit::AuraList::const_iterator i = hasteAuras.begin();i != hasteAuras.end(); ++i)
-        if ((*i)->GetMiscValue() == 2 || (*i)->GetMiscValue() == 5)
-            cooldown /= 1.0f + (*i)->GetModifier()->m_amount / 100.0f;
-        else
-            cooldown *= 1.0f - (*i)->GetModifier()->m_amount / 100.0f;
-
-    hastePct += GetTotalAuraModifier(SPELL_AURA_MOD_MELEE_HASTE_2);
-    hastePct += GetTotalAuraModifier(SPELL_AURA_MOD_MELEE_HASTE_3);
-
     cooldown *=  1.0f - (hastePct / 100.0f);
     if (cooldown < 0.0f)
         return 0;

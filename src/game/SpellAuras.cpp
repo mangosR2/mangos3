@@ -8093,7 +8093,7 @@ void Aura::HandleModAttackSpeed(bool apply, bool /*Real*/)
 void Aura::HandleModMeleeSpeedPct(bool apply, bool /*Real*/)
 {
     // auras below are rune related
-    if (m_modifier.m_auraname == SPELL_AURA_MOD_MELEE_HASTE &&
+    if ((m_modifier.m_auraname == SPELL_AURA_MOD_MELEE_HASTE || m_modifier.m_auraname == SPELL_AURA_MOD_MELEE_HASTE_3) &&
         (m_modifier.m_miscvalue == 2 || m_modifier.m_miscvalue == 5))
         return;
 
@@ -10840,17 +10840,7 @@ void Aura::PeriodicDummyTick()
 
                 Player* player = (Player*)target;
 
-                uint8 cd = 0;
-                for (uint8 i = 0; i < MAX_RUNES; ++i)
-                {
-                    if (player->GetBaseRune(i) != RUNE_UNHOLY)
-                        continue;
-
-                    if (player->GetRuneCooldown(i))
-                        ++cd;
-                }
-
-                if (cd < 2)
+                if (!player->IsBaseRuneSlotsOnCooldown(RUNE_UNHOLY))
                     target->RemoveAurasDueToSpell(GetId());
                 else
                     GetHolder()->RefreshHolder();
