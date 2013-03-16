@@ -8624,7 +8624,7 @@ void Unit::SpellDamageBonusDone(DamageInfo* damageInfo, uint32 stack)
             {
                 if (pVictim->isFrozen() || IsIgnoreUnitState(damageInfo->GetSpellProto(), IGNORE_UNIT_TARGET_NON_FROZEN))
                 {
-                    float multiplier = 3.0f;
+                    float multiplier = 2.0f;
 
                     // if target have higher level
                     if (pVictim->getLevel() > getLevel())
