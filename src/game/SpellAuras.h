@@ -413,6 +413,7 @@ class MANGOS_DLL_SPEC Aura
         void HandleAuraPreventResurrection(bool apply, bool Real);
         void HandleAuraOverrideActionbarSpells(bool apply, bool Real);
         void HandleAuraInterfereTargeting(bool apply, bool Real);
+        void HandleAuraSeeWhileInvisible(bool apply, bool Real);
 
         virtual ~Aura();
 
