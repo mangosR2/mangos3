@@ -65,7 +65,8 @@ REPLACE INTO `spell_bonus_data` (`entry`, `direct_bonus`, `dot_bonus`, `ap_bonus
 (49184, 0, 0, 0.44, 0, 'Death Knight - Howling Blast'),
 (49998, 0, 0, 0.236, 0, 'Death Knight - Death Strike'),
 (52212, 0, 0, 0.064, 0, 'Death Knight - Death and Decay Triggered'),
-(55050, 0, 0, 0.236, 0, 'Death Knight - Heart Strike');
+(55050, 0, 0, 0.236, 0, 'Death Knight - Heart Strike'),
+(85948, 0, 0, 0.236, 0, 'Death Knight - Festering Strike');
 
 -- Mague
 REPLACE INTO `spell_bonus_data` (`entry`, `direct_bonus`, `dot_bonus`, `ap_bonus`, `ap_dot_bonus`, `comments`) VALUES

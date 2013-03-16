@@ -12801,6 +12801,25 @@ void Spell::EffectScriptEffect(SpellEffectEntry const* effect)
                 default:
                     break;
             }
+            // Festering Strike
+            case 85948:
+            {
+                // Blood Plague, Frost Fever, Chains of Ice
+                uint32 spells[3] = { 55078, 55095, 45524 };
+                
+                for (int i = 0; i < 3; ++i)
+                {
+                    if (SpellAuraHolderPtr holder = unitTarget->GetSpellAuraHolder(spells[i]))
+                    {
+                        int32 newDuration = holder->GetAuraDuration() + damage * IN_MILLISECONDS;
+                        if (newDuration > holder->GetAuraMaxDuration())
+                            newDuration = holder->GetAuraMaxDuration();
+                        holder->SetAuraDuration(newDuration);
+                        holder->SendAuraUpdate(false);
+                    }
+                }
+                return;
+            }
             break;
         }
         case SPELLFAMILY_WARRIOR:
