@@ -4490,6 +4490,22 @@ void Spell::EffectDummy(SpellEffectEntry const* effect)
         {
             switch(m_spellInfo->Id)
             {
+                case 1459:                                  // Arcane Brilliance
+                {
+                    Unit* target = unitTarget;
+                    if (!target)
+                        target = m_caster;
+
+                    uint32 spellId;
+                    if (m_caster->GetTypeId() != TYPEID_PLAYER || target->GetTypeId() != TYPEID_PLAYER
+                        || ((Player*)m_caster)->GetGroup() != ((Player*)target)->GetGroup())
+                        spellId = 79057;
+                    else
+                        spellId = 79058;
+
+                    m_caster->CastSpell(target, spellId, true);
+                    return;
+                }
                 case 11958:                                 // Cold Snap
                 {
                     // immediately finishes the cooldown on Frost spells
@@ -4544,7 +4560,7 @@ void Spell::EffectDummy(SpellEffectEntry const* effect)
                         m_caster->CastSpell(unitTarget, 38203, true);
                     return;
                 }
-                case 42955: // Conjure refreshment dummy
+                case 42955:                                 // Conjure Refreshment
                 {
                     if (m_caster->GetTypeId() != TYPEID_PLAYER)
                         return;
@@ -4776,10 +4792,14 @@ void Spell::EffectDummy(SpellEffectEntry const* effect)
                 if (!target)
                     target = m_caster;
 
-                if (m_caster->GetTypeId() != TYPEID_PLAYER || target->GetTypeId() != TYPEID_PLAYER)
-                    return;
+                uint32 spellId;
+                if (m_caster->GetTypeId() != TYPEID_PLAYER || target->GetTypeId() != TYPEID_PLAYER
+                    || ((Player*)m_caster)->GetGroup() != ((Player*)target)->GetGroup())
+                    spellId = 79104;
+                else
+                    spellId = 79105;
 
-                m_caster->CastSpell(target, ((Player*)m_caster)->GetGroup() != ((Player*)target)->GetGroup() ? 79104 : 79105, true);
+                m_caster->CastSpell(target, spellId, true);
                 return;
             }
             // Shadow Protection
@@ -4789,10 +4809,14 @@ void Spell::EffectDummy(SpellEffectEntry const* effect)
                 if (!target)
                     target = m_caster;
 
-                if (m_caster->GetTypeId() != TYPEID_PLAYER || target->GetTypeId() != TYPEID_PLAYER)
-                    return;
+                uint32 spellId;
+                if (m_caster->GetTypeId() != TYPEID_PLAYER || target->GetTypeId() != TYPEID_PLAYER
+                    || ((Player*)m_caster)->GetGroup() != ((Player*)target)->GetGroup())
+                    spellId = 79106;
+                else
+                    spellId = 79107;
 
-                m_caster->CastSpell(target, ((Player*)m_caster)->GetGroup() != ((Player*)target)->GetGroup() ? 79106 : 79107, true);
+                m_caster->CastSpell(target, spellId, true);
                 return;
             }
             break;
@@ -5196,10 +5220,14 @@ void Spell::EffectDummy(SpellEffectEntry const* effect)
                     if (!target)
                         target = m_caster;
 
-                    if (m_caster->GetTypeId() != TYPEID_PLAYER || target->GetTypeId() != TYPEID_PLAYER)
-                        return;
+                    uint32 spellId;
+                    if (m_caster->GetTypeId() != TYPEID_PLAYER || target->GetTypeId() != TYPEID_PLAYER
+                        || ((Player*)m_caster)->GetGroup() != ((Player*)target)->GetGroup())
+                        spellId = 79101;
+                    else
+                        spellId = 79102;
 
-                    m_caster->CastSpell(target, ((Player*)m_caster)->GetGroup() != ((Player*)target)->GetGroup() ? 79101 : 79102, true);
+                    m_caster->CastSpell(target, spellId, true);
                     return;
                 }
                 case 20217:                                 // Blessing of Kings
@@ -5208,10 +5236,14 @@ void Spell::EffectDummy(SpellEffectEntry const* effect)
                     if (!target)
                         target = m_caster;
 
-                    if (m_caster->GetTypeId() != TYPEID_PLAYER || target->GetTypeId() != TYPEID_PLAYER)
-                        return;
+                    uint32 spellId;
+                    if (m_caster->GetTypeId() != TYPEID_PLAYER || target->GetTypeId() != TYPEID_PLAYER
+                        || ((Player*)m_caster)->GetGroup() != ((Player*)target)->GetGroup())
+                        spellId = 79062;
+                    else
+                        spellId = 79063;
 
-                    m_caster->CastSpell(target, ((Player*)m_caster)->GetGroup() != ((Player*)target)->GetGroup() ? 79062 : 79063, true);
+                    m_caster->CastSpell(target, spellId, true);
                     return;
                 }
                 case 31789:                                 // Righteous Defense (step 1)
