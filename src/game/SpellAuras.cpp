@@ -12471,6 +12471,19 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
                 spellId1 = 79808;
                 break;
             }
+            // Time Warp
+            else if (m_spellProto->Id == 80353)
+            {
+                if (apply)
+                {
+                    Unit* caster = GetCaster();
+                    if (!caster)
+                        return;
+
+                    caster->CastSpell(m_target, 80354, true);
+                    return;
+                }
+            }
             // Ice Barrier (non stacking from one caster)
             else if (m_spellProto->GetSpellIconID() == 32)
             {
@@ -12959,6 +12972,20 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
                 case 34460:
                     spellId1 = 75447;
                     break;
+                // Ancient Hysteria
+                case 90355:
+                {
+                    if (apply)
+                    {
+                        Unit* caster = GetCaster();
+                        if (!caster)
+                            return;
+
+                        caster->CastSpell(m_target, 57724, true);
+                        return;
+                    }
+                    return;
+                }
                 default:
                     // Freezing Trap Effect
                     if (m_spellProto->GetSpellFamilyFlags().test<CF_HUNTER_FREEZING_TRAP_EFFECT>())

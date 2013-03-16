@@ -5943,6 +5943,12 @@ void Unit::RemoveAuraHolderDueToSpellByDispel(uint32 spellId, uint32 stackAmount
     RemoveAuraHolderFromStack(spellId, stackAmount, casterGuid, AURA_REMOVE_BY_DISPEL);
 }
 
+bool Unit::HasSatedAura() const
+{
+    // Exhaustion, Sated, Temporal Displacement
+    return HasAura(57723) || HasAura(57724) || HasAura(80354);
+}
+
 void Unit::RemoveAurasDueToSpellBySteal(uint32 spellId, ObjectGuid casterGuid, Unit *stealer)
 {
     SpellAuraHolderPtr holder = GetSpellAuraHolder(spellId, casterGuid);
