@@ -9027,13 +9027,8 @@ void Aura::HandleSchoolAbsorb(bool apply, bool Real)
 
                     break;
                 case SPELLFAMILY_MAGE:
-                    // Frost Ward, Fire Ward
-                    if (spellProto->GetSpellFamilyFlags().test<CF_MAGE_FIRE_WARD, CF_MAGE_FROST_WARD>())
-                        //+10% from +spell bonus
-                        DoneActualBenefit = caster->SpellBaseDamageBonusDone(GetSpellSchoolMask(spellProto)) * 0.1f;
-                    // Ice Barrier
-                    else if (spellProto->GetSpellFamilyFlags().test<CF_MAGE_ICE_BARRIER>())
-                        //+80.67% from +spell bonus
+                    if (spellProto->IsFitToFamilyMask(UI64LIT(0x0000000100000000)))
+                        // +80.67% from +spell bonus
                         DoneActualBenefit = caster->SpellBaseDamageBonusDone(GetSpellSchoolMask(spellProto)) * 0.8067f;
                     // Mage Ward
                     else if (spellProto->Id == 543)
@@ -11030,16 +11025,7 @@ void Aura::HandleManaShield(bool apply, bool Real)
             switch(GetSpellProto()->GetSpellFamilyName())
             {
                 case SPELLFAMILY_MAGE:
-                {
-                    if (GetSpellProto()->GetSpellFamilyFlags().test<CF_MAGE_MANA_SHIELD>())
-                    {
-                        // Mana Shield
-                        // +50% from +spd bonus
-                        DoneActualBenefit = caster->SpellBaseDamageBonusDone(GetSpellSchoolMask(GetSpellProto())) * 0.5f;
-                        break;
-                    }
                     break;
-                }
                 default:
                     break;
             }

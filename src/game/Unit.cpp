@@ -2804,51 +2804,18 @@ void Unit::CalculateDamageAbsorbAndResist(Unit* pCaster, DamageInfo* damageInfo,
     }
 
     // full and PcT absorb cases (by chance)
-    AuraList const& vAbsorb = GetAurasByType(SPELL_AURA_SCHOOL_ABSORB);
-    for(AuraList::const_iterator i = vAbsorb.begin(); i != vAbsorb.end() && RemainingDamage > 0; ++i)
-    {
-        // only work with proper school mask damage
-        Modifier const* i_mod = (*i)->GetModifier();
-        if (!(i_mod->m_miscvalue & damageInfo->GetSchoolMask()))
-            continue;
+    //AuraList const& vAbsorb = GetAurasByType(SPELL_AURA_SCHOOL_ABSORB);
+    //for(AuraList::const_iterator i = vAbsorb.begin(); i != vAbsorb.end() && RemainingDamage > 0; ++i)
+    //{
+    //    // only work with proper school mask damage
+    //    Modifier* i_mod = (*i)->GetModifier();
+    //    if (!(i_mod->m_miscvalue & schoolMask))
+    //        continue;
 
-        SpellEntry const* i_spellProto = (*i)->GetSpellProto();
-        SpellClassOptionsEntry const* adsClassOptions = i_spellProto->GetSpellClassOptions();
+    //    SpellEntry const* i_spellProto = (*i)->GetSpellProto();
+    //    SpellClassOptionsEntry const* adsClassOptions = i_spellProto->GetSpellClassOptions();
 
-        // PCT Absorb
-        if (i_spellProto->HasAttribute(SPELL_ATTR_EX6_PCT_ABSORB))
-        {
-            RemainingDamage -= RemainingDamage * ((float)i_mod->m_amount/100.0f);
-        }
-
-        // Full Absorb
-        // Fire Ward or Frost Ward
-        if (i_spellProto->GetSpellFamilyName() == SPELLFAMILY_MAGE && i_spellProto->GetSpellFamilyFlags().test<CF_MAGE_FIRE_WARD, CF_MAGE_FROST_WARD>())
-        {
-            int chance = 0;
-            Unit::AuraList const& auras = GetAurasByType(SPELL_AURA_ADD_PCT_MODIFIER);
-            for (Unit::AuraList::const_iterator itr = auras.begin(); itr != auras.end(); ++itr)
-            {
-                SpellEntry const* itr_spellProto = (*itr)->GetSpellProto();
-                // Frost Warding (chance full absorb)
-                if (itr_spellProto->GetSpellFamilyName() == SPELLFAMILY_MAGE && itr_spellProto->GetSpellIconID() == 501)
-                {
-                    // chance stored in next dummy effect
-                    chance = itr_spellProto->CalculateSimpleValue(EFFECT_INDEX_1);
-                    break;
-                }
-            }
-            if (roll_chance_i(chance))
-            {
-                int32 amount = RemainingDamage;
-                RemainingDamage = 0;
-
-                // Frost Warding (mana regen)
-                CastCustomSpell(this, 57776, &amount, NULL, NULL, true, NULL, (*i)());
-                break;
-            }
-        }
-    }
+    //}
 
     // Incanter's Absorption, for converting to spell power
     int32 incanterAbsorption = 0;

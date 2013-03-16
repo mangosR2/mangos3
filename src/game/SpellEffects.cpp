@@ -4581,6 +4581,19 @@ void Spell::EffectDummy(SpellEffectEntry const* effect)
                         m_caster->CastSpell(unitTarget, 92739, true); // conjure refreshment, rank 1
                     return;
                 }
+                case 43987:                                 // Ritual of Refreshment
+                {
+                    if (m_caster->GetTypeId() != TYPEID_PLAYER)
+                        return;
+
+                    if (m_caster->getLevel() < 80)
+                        m_caster->CastSpell(unitTarget, 74650, true);   // Ritual of Refreshment (Rank 1)
+                    else if (m_caster->getLevel() < 85)
+                        m_caster->CastSpell(unitTarget, 92824, true);   // Ritual of Refreshment (Rank 2)
+                    else
+                        m_caster->CastSpell(unitTarget, 92827, true);   // Ritual of Refreshment (Rank 3)
+                    return;
+                }
             }
 
             // Conjure Mana Gem
