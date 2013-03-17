@@ -1378,7 +1378,6 @@ void Aura::HandleAddModifier(bool apply, bool Real)
             case 22008:                                     // Netherwind Focus
             case 34936:                                     // Backlash
             case 47283:                                     // Empowered Imp
-            case 48108:                                     // Hot Streak
             case 51124:                                     // Killing Machine
             case 54741:                                     // Firestarter
             case 57761:                                     // Fireball!
@@ -12625,22 +12624,6 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
 
             switch(GetId())
             {
-                case 11129:                                 // Combustion (remove triggered aura stack)
-                {
-                    if (!apply)
-                        spellId1 = 28682;
-                    else
-                        return;
-                    break;
-                }
-                case 28682:                                 // Combustion (remove main aura)
-                {
-                    if (!apply)
-                        spellId1 = 11129;
-                    else
-                        return;
-                    break;
-                }
                 case 48108:                                 // Hot Streak (triggered)
                 case 57761:                                 // Fireball! (Brain Freeze triggered)
                 {
@@ -14037,10 +14020,23 @@ void Aura::HandleAuraOverrideActionbarSpells(bool apply, bool Real)
 {
     Unit* target = GetTarget();
 
-    if (GetId() == 86211 && !apply && target->GetTypeId() == TYPEID_PLAYER)
+    if (apply)
     {
-        ((Player*)target)->m_soulSwapData.spells.clear();
-        ((Player*)target)->m_soulSwapData.swapTarget.Clear();
+        // Hot Streak!
+        if (GetId() == 48108)
+            GetHolder()->SetAuraCharges(1);
+    }
+    else
+    {
+        // Soul Swap
+        if (GetId() == 86211)
+        {
+            if (target->GetTypeId() == TYPEID_PLAYER)
+            {
+                ((Player*)target)->m_soulSwapData.spells.clear();
+                ((Player*)target)->m_soulSwapData.swapTarget.Clear();
+            }
+        }
     }
 }
 

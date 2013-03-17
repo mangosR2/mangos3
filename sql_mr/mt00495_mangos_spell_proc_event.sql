@@ -626,3 +626,18 @@ INSERT INTO `spell_proc_event` (`entry`, `SchoolMask`, `procEx`) VALUE
 DELETE FROM `spell_proc_event` WHERE `entry` = 11119;
 INSERT INTO `spell_proc_event` (`entry`, `SchoolMask`, `procEx`) VALUE
 (11119, 4, 2);
+
+-- Hot Streak
+DELETE FROM `spell_proc_event` WHERE `entry` = 44445;
+INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`, `SpellFamilyMaskB0`, `SpellFamilyMaskC0`, `procEx`) VALUE
+(44445, 3, 1 + 16 + 2, 4096, 4096, 2);
+
+-- Improved Hot Streak
+DELETE FROM `spell_proc_event` WHERE `entry` = 44446;
+INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`, `SpellFamilyMaskB0`, `SpellFamilyMaskC0`, `procEx`) VALUE
+(44446, 3, 1 + 16 + 2, 4096, 4096, 0); -- < 0 here
+
+-- Hot Streak!
+DELETE FROM `spell_proc_event` WHERE `entry` = 48108;
+INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`, `procFlags`, `procEx`) VALUE
+(48108, 3, 4194304, 65536, 524288);

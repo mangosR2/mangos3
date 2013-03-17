@@ -1318,19 +1318,8 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, DamageInfo* damageI
                 triggered_spell_id = 29077;
                 break;
             }
-            // Nether Vortex
-            else if (dummySpell->GetSpellIconID() == 2294)
-            {
-                // ...if no target is currently affected by Slow
-                if (GetSingleCastSpellTarget(31589))
-                    return SPELL_AURA_PROC_FAILED;
-
-                triggered_spell_id = 31589;
-                break;
-            }
-
             // Arcane Potency
-            if (dummySpell->GetSpellIconID() == 2120)
+            else if (dummySpell->GetSpellIconID() == 2120)
             {
                 if (!procSpell || procSpell->Id == 44401)
                     return SPELL_AURA_PROC_FAILED;
@@ -1350,12 +1339,31 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, DamageInfo* damageI
                 }
                 break;
             }
+            // Nether Vortex
+            else if (dummySpell->GetSpellIconID() == 2294)
+            {
+                // ...if no target is currently affected by Slow
+                if (GetSingleCastSpellTarget(31589))
+                    return SPELL_AURA_PROC_FAILED;
 
+                triggered_spell_id = 31589;
+                break;
+            }
             // Hot Streak
-            if (dummySpell->GetSpellIconID() == 2999)
+            else if (dummySpell->Id == 44445)
+            {
+                if (effIndex != EFFECT_INDEX_0 || !roll_chance_i(triggerAmount))
+                    return SPELL_AURA_PROC_FAILED;
+
+                triggered_spell_id = 48108;
+                break;
+            }
+            // Improved Hot Streak
+            else if (dummySpell->Id == 44446 || dummySpell->Id == 44448)
             {
                 if (effIndex != EFFECT_INDEX_0)
                     return SPELL_AURA_PROC_OK;
+
                 Aura *counter = GetAura(triggeredByAura->GetId(), EFFECT_INDEX_1);
                 if (!counter)
                     return SPELL_AURA_PROC_OK;
@@ -1364,7 +1372,7 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, DamageInfo* damageI
                 Modifier *mod = counter->GetModifier();
                 if (procEx & PROC_EX_CRITICAL_HIT)
                 {
-                    mod->m_amount *=2;
+                    mod->m_amount *= 2;
                     if (mod->m_amount < 100) // not enough
                         return SPELL_AURA_PROC_OK;
                     // Critical counted -> roll chance
@@ -4308,6 +4316,10 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(Unit *pVictim, DamageIn
                 if (!HasSpell(5143))
                     return SPELL_AURA_PROC_FAILED;
 
+                // do not proc with Hot Streak talent
+                if (HasSpell(44445))
+                    return SPELL_AURA_PROC_FAILED;
+
                 // do not proc from Arane Missiles themselves
                 if (!procSpell || procSpell->IsFitToFamily(SPELLFAMILY_MAGE, UI64LIT(0x200800)))
                     return SPELL_AURA_PROC_FAILED;
@@ -5678,19 +5690,7 @@ SpellAuraProcResult Unit::HandleAddPctModifierAuraProc(Unit* pVictim, DamageInfo
     switch(spellInfo->GetSpellFamilyName())
     {
         case SPELLFAMILY_MAGE:
-        {
-            // Combustion
-            if (spellInfo->Id == 11129)
-            {
-                //last charge and crit
-                if (triggeredByAura->GetHolder()->GetAuraCharges() <= 1 && (procEx & PROC_EX_CRITICAL_HIT) )
-                    return SPELL_AURA_PROC_OK;                        // charge counting (will removed)
-
-                CastSpell(this, 28682, true, castItem, triggeredByAura);
-                return (procEx & PROC_EX_CRITICAL_HIT) ? SPELL_AURA_PROC_OK : SPELL_AURA_PROC_FAILED; // charge update only at crit hits, no hidden cooldowns
-            }
             break;
-        }
         case SPELLFAMILY_WARLOCK:
         {
             // Soulburn

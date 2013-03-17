@@ -71,4 +71,5 @@ REPLACE INTO `spell_bonus_data` (`entry`, `direct_bonus`, `dot_bonus`, `ap_bonus
 -- Mague
 REPLACE INTO `spell_bonus_data` (`entry`, `direct_bonus`, `dot_bonus`, `ap_bonus`, `ap_dot_bonus`, `comments`) VALUES
 (543, 0.807, 0, 0, 0, 'Mage - Mage Ward'),
-(30455, 0.378, 0, 0, 0, 'Mage - Ice Lance');
+(30455, 0.378, 0, 0, 0, 'Mage - Ice Lance'),
+(87023, 0, 0, 0, 0, 'Mage - Cauterize');

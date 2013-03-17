@@ -2932,6 +2932,22 @@ void Unit::CalculateDamageAbsorbAndResist(Unit* pCaster, DamageInfo* damageInfo,
                         // always skip this spell in charge dropping, absorb amount calculation since it has chance as m_amount and doesn't need to absorb any damage
                         continue;
                     }
+                    // Cauterize
+                    else if (spellProto->GetSpellIconID() == 3878)
+                    {
+                        if (!preventDeathSpell &&
+                            GetTypeId() == TYPEID_PLAYER &&     // Only players
+                            !((Player*)this)->HasSpellCooldown(87023) &&
+                                                                // Only if no cooldown
+                            roll_chance_i((*i)->GetModifier()->m_amount))
+                                                                // Only if roll
+
+                        {
+                            preventDeathSpell = (*i)->GetSpellProto();
+                        }
+                        // always skip this spell in charge dropping, absorb amount calculation since it has chance as m_amount and doesn't need to absorb any damage
+                        continue;
+                    }
                     break;
                 }
                 case SPELLFAMILY_PALADIN:
@@ -3241,6 +3257,14 @@ void Unit::CalculateDamageAbsorbAndResist(Unit* pCaster, DamageInfo* damageInfo,
                     // with health > 10% lost health until health==10%, in other case no losses
                     uint32 health10 = GetMaxHealth() / 10;
                     RemainingDamage = GetHealth() > health10 ? GetHealth() - health10 : 0;
+                }
+                // Cauterize
+                else if (preventDeathSpell->GetSpellIconID() == 3878)
+                {
+                    int32 bp = int32(preventDeathSpell->CalculateSimpleValue(EFFECT_INDEX_1) * GetMaxHealth() / 100.0f);
+                    CastCustomSpell(this, 87023, NULL, &bp, NULL, true);
+                    ((Player*)this)->AddSpellCooldown(87023, 0, time(NULL) + 60);
+                    RemainingDamage = 0;
                 }
                 break;
             }
