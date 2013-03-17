@@ -2740,6 +2740,8 @@ class MANGOS_DLL_SPEC Player : public Unit
             ObjectGuid swapTarget;
         } m_soulSwapData;
 
+        std::deque<ObjectGuid> m_livingBombTargets;
+
     protected:
 
         uint32 m_contestedPvPTimer;

@@ -5502,6 +5502,30 @@ bool Unit::AddSpellAuraHolder(SpellAuraHolderPtr holder)
             }
         }
     }
+    // Living Bomb special handling
+    else if (holder->GetId() == 44457)
+    {
+        Unit* caster = holder->GetCaster();
+        if (caster && caster->GetTypeId() == TYPEID_PLAYER)
+        {
+            Player* player = (Player*)caster;
+
+            std::deque<ObjectGuid>::iterator curr = std::find(player->m_livingBombTargets.begin(), player->m_livingBombTargets.end(), GetObjectGuid());
+            if (curr != player->m_livingBombTargets.end())
+                player->m_livingBombTargets.erase(curr);
+
+            // Living Bomb can only be at 3 targets at once
+            while (player->m_livingBombTargets.size() >= 3)
+            {
+                if (Unit* toRemove = GetMap()->GetUnit(player->m_livingBombTargets[0]))
+                    toRemove->RemoveAurasByCasterSpell(holder->GetId(), caster->GetObjectGuid());
+
+                player->m_livingBombTargets.pop_front();
+            }
+
+            player->m_livingBombTargets.push_back(GetObjectGuid());
+        }
+    }
 
     holder->HandleSpellSpecificBoostsForward(true);
 
