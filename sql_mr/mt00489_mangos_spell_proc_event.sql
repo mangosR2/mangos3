@@ -611,3 +611,8 @@ DELETE FROM `spell_proc_event` WHERE `entry` = 57531;
 INSERT INTO `spell_proc_event` (`entry`, `procEx`) VALUES
 (57529, 524288),
 (57531, 524288);
+
+-- Improved Mana Gem
+DELETE FROM `spell_proc_event` WHERE `entry` = 31584;
+INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskB0`, `procFlags`, `CustomChance`) VALUE
+(31584, 3, 0x100, 16384, 100);
