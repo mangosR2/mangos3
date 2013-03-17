@@ -616,3 +616,8 @@ INSERT INTO `spell_proc_event` (`entry`, `procEx`) VALUES
 DELETE FROM `spell_proc_event` WHERE `entry` = 31584;
 INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskB0`, `procFlags`, `CustomChance`) VALUE
 (31584, 3, 0x100, 16384, 100);
+
+-- Master of Elements
+DELETE FROM `spell_proc_event` WHERE `entry` = 29074;
+INSERT INTO `spell_proc_event` (`entry`, `SchoolMask`, `procEx`) VALUE
+(29074, 126, 2);

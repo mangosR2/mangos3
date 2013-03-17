@@ -1307,10 +1307,11 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, DamageInfo* damageI
                 if (!procSpell)
                     return SPELL_AURA_PROC_FAILED;
 
-                // mana cost save
+                // _base_ mana cost save
                 int32 cost = procSpell->GetManaCost() + procSpell->GetManaCostPercentage() * GetCreateMana() / 100;
-                basepoints[0] = cost * triggerAmount/100;
-                if (basepoints[0] <=0)
+
+                basepoints[0] = cost * triggerAmount / 100;
+                if (basepoints[0] <= 0)
                     return SPELL_AURA_PROC_FAILED;
 
                 target = this;
