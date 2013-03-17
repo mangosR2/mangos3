@@ -9277,8 +9277,19 @@ void Spell::EffectInterruptCast(SpellEffectEntry const* effect)
 
     if (spellSchoolMask && m_caster->GetTypeId() == TYPEID_PLAYER)
     {
+        // Counterspell
+        if (m_spellInfo->Id == 2139)
+        {
+            // Invocation
+            if (SpellEntry const * spellProto = ((Player*)m_caster)->GetKnownTalentRankById(10864))
+                if (SpellEffectEntry const * effect = spellProto->GetSpellEffect(EFFECT_INDEX_0))
+                {
+                    int32 bp = effect->CalculateSimpleValue();
+                    m_caster->CastCustomSpell(m_caster, effect->EffectTriggerSpell, &bp, NULL, NULL, true);
+                }
+        }
         // Pummel
-        if (m_spellInfo->Id == 6552)
+        else if (m_spellInfo->Id == 6552)
         {
             // Rude Interruption
             if (SpellEntry const * spellProto = ((Player*)m_caster)->GetKnownTalentRankById(11415))
