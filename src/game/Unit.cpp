@@ -8604,7 +8604,7 @@ void Unit::SpellDamageBonusDone(DamageInfo* damageInfo, uint32 stack)
     SpellClassOptionsEntry const* classOptions = damageInfo->GetSpellProto()->GetSpellClassOptions();
 
      // Custom scripted damage
-    switch(damageInfo->GetSpellProto()->GetSpellFamilyName())
+    switch (damageInfo->GetSpellProto()->GetSpellFamilyName())
     {
         case SPELLFAMILY_GENERIC:
         {
@@ -8635,22 +8635,29 @@ void Unit::SpellDamageBonusDone(DamageInfo* damageInfo, uint32 stack)
                     DoneTotalMod *= multiplier;
                 }
             }
-            // Torment the weak affected (Arcane Barrage, Arcane Blast, Frostfire Bolt, Arcane Missiles, Fireball, Pyroblast)
-            if (damageInfo->GetSpellProto()->GetSpellFamilyFlags().test<CF_MAGE_FIREBALL, CF_MAGE_FROSTBOLT, CF_MAGE_ARCANE_MISSILES2, CF_MAGE_ARCANE_BLAST, CF_MAGE_FROSTFIRE_BOLT, CF_MAGE_ARCANE_BARRAGE>())
+
+            bool snaredOrSlowed = pVictim->HasAuraType(SPELL_AURA_MOD_DECREASE_SPEED);
+            if (!snaredOrSlowed)
             {
-                //Search for Torment the weak dummy aura
-                if (Aura* ttwAura = GetAuraByEffectMask(SPELL_AURA_DUMMY,SPELLFAMILY_GENERIC,ClassFamilyMask(0x00240000,0,0),GetObjectGuid()))
-                {
-                    Unit::SpellAuraHolderMap const& holderMap = pVictim->GetSpellAuraHolderMap();
-                    for (Unit::SpellAuraHolderMap::const_iterator itr = holderMap.begin(); itr != holderMap.end(); ++itr)
+                Unit::AuraList const& hasteAllAuras = GetAurasByType(SPELL_AURA_HASTE_ALL);
+                for (Unit::AuraList::const_iterator i = hasteAllAuras.begin(); i != hasteAllAuras.end(); ++i)
+                    if ((*i)->GetModifier()->m_amount < 0)
                     {
-                        if (itr->second &&
-                            !itr->second->IsDeleted() &&
-                            itr->second->HasMechanic(ttwAura->GetModifier()->m_miscvalue))
-                        {
-                            DoneTotalMod *= ((float)ttwAura->GetModifier()->m_amount + 100.0f) / 100.0f;
-                            break;
-                        }
+                        snaredOrSlowed = true;
+                        break;
+                    }
+            }
+
+            if (snaredOrSlowed)
+            {
+                // Search for Torment the Weak dummy aura
+                Unit::AuraList const& ttw = GetAurasByType(SPELL_AURA_DUMMY);
+                for (Unit::AuraList::const_iterator i = ttw.begin(); i != ttw.end(); ++i)
+                {
+                    if ((*i)->GetSpellProto()->GetSpellIconID() == 3263 && (*i)->GetSpellProto()->GetSpellFamilyName() == SPELLFAMILY_GENERIC)
+                    {
+                        DoneTotalMod *= ((*i)->GetModifier()->m_amount + 100.0f) / 100.0f;
+                        break;
                     }
                 }
             }
