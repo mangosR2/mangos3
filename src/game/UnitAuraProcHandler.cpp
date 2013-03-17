@@ -5948,8 +5948,35 @@ SpellAuraProcResult Unit::HandleRemoveByDamageProc(Unit* pVictim, DamageInfo* da
     SpellAuraHolderPtr holder    = triggeredByAura->GetHolder();
     SpellEntry const*  spellInfo = triggeredByAura->GetSpellProto();
 
+    // Polymorph
+    if (GetSpellSpecific(triggeredByAura->GetId()) == SPELL_MAGE_POLYMORPH)
+    {
+        // Improved Polymorph Marker
+        if (!HasAura(87515))
+        {
+            if (Unit* caster = triggeredByAura->GetCaster())
+            {
+                if (caster->GetTypeId() == TYPEID_PLAYER)
+                {
+                    // find Improved Polymorph
+                    if (SpellEntry const * ip = ((Player*)caster)->GetKnownTalentRankById(9142))
+                    {
+                        // Improved Polymorph (Rank 1)
+                        if (ip->Id == 11210)
+                            CastSpell(this, 83046, true, NULL, triggeredByAura, caster->GetObjectGuid());
+                        // Improved Polymorph (Rank 2)
+                        else if (ip->Id == 12592)
+                            CastSpell(this, 83047, true, NULL, triggeredByAura, caster->GetObjectGuid());
+
+                        // Improved Polymorph Marker
+                        CastSpell(this, 87515, true);
+                    }
+                }
+            }
+        }
+    }
     // Hungering Cold - not break from diseases
-    if (spellInfo->GetSpellIconID() == 2797)
+    else if (spellInfo->GetSpellIconID() == 2797)
     {
         if (procSpell && procSpell->GetDispel() == DISPEL_DISEASE)
             return SPELL_AURA_PROC_FAILED;
@@ -6123,7 +6150,6 @@ SpellAuraProcResult Unit::IsTriggeredAtCustomProcEvent(Unit *pVictim, SpellAuraH
         return SPELL_AURA_PROC_FAILED;
 
     uint32 EventProcFlag = GetProcFlag(spellProto);
-
     for (int32 i = 0; i < MAX_EFFECT_INDEX; ++i)
     {
         if (Aura* aura = holder->GetAuraByEffectIndex(SpellEffectIndex(i)))
