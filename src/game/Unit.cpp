@@ -3091,7 +3091,7 @@ void Unit::CalculateDamageAbsorbAndResist(Unit* pCaster, DamageInfo* damageInfo,
 
             RemainingDamage -= currentAbsorb;
 
-            // Fire Ward or Frost Ward or Ice Barrier (or Mana Shield)
+            // Mage Ward or Ice Barrier (or Mana Shield)
             // for Incanter's Absorption converting to spell power
             if (spellProto->IsFitToFamily<SPELLFAMILY_MAGE, CF_MAGE_MISC>())
                 incanterAbsorption += currentAbsorb;
