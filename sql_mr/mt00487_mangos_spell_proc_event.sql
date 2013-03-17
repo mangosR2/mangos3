@@ -589,3 +589,13 @@ INSERT INTO `spell_proc_event` (`entry`, `SchoolMask`, `CustomChance`) VALUE
 DELETE FROM `spell_proc_event` WHERE `entry` = 79683;
 INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`, `procEx`) VALUE
 (79683, 3, 2048, 0x0080000);
+
+-- Nether Vortex
+DELETE FROM `spell_proc_event` WHERE `entry` = 86181;
+INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`) VALUE
+(86181, 3, 536870912);
+
+-- Nether Vortex (buff)
+DELETE FROM `spell_proc_event` WHERE `entry` = 86262;
+INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `procFlags`, `SpellFamilyMaskC0`, `SpellFamilyMaskC1`) VALUE
+(86262, 3, 65536, 256, 256);

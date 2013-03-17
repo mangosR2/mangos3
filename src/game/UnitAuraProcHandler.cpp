@@ -1309,6 +1309,16 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, DamageInfo* damageI
                 triggered_spell_id = 29077;
                 break;
             }
+            // Nether Vortex
+            else if (dummySpell->GetSpellIconID() == 2294)
+            {
+                // ...if no target is currently affected by Slow
+                if (GetSingleCastSpellTarget(31589))
+                    return SPELL_AURA_PROC_FAILED;
+
+                triggered_spell_id = 31589;
+                break;
+            }
 
             // Arcane Potency
             if (dummySpell->GetSpellIconID() == 2120)

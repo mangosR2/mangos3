@@ -3996,6 +3996,12 @@ void Spell::cast(bool skipCheck)
                     m_caster->RemoveSpellsCausingAura(SPELL_AURA_HASTE_SPELLS);
                 }
             }
+            // Slow
+            else if (m_spellInfo->Id == 31589)
+            {
+                if (IsTriggeredSpell())
+                    AddPrecastSpell(86262);     // Nether Vortex
+            }
             // Fingers of Frost
             else if (m_spellInfo->Id == 44544)
                 AddPrecastSpell(74396);                     // Fingers of Frost
