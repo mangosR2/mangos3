@@ -646,3 +646,13 @@ INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`,
 DELETE FROM `spell_proc_event` WHERE `entry` = 54741;
 INSERT INTO `spell_proc_event` (`entry`, `procFlags`, `procEx`, `CustomChance`) VALUES
 (54741, 65536, 524288, 100);
+
+-- Impact
+DELETE FROM `spell_proc_event` WHERE `entry` = 11103;
+INSERT INTO `spell_proc_event` (`entry`, `SchoolMask`, `CustomChance`) VALUE
+(11103, 126, 1);
+
+-- Impact
+DELETE FROM `spell_proc_event` WHERE `entry` = 64343;
+INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`) VALUE
+(64343, 3, 2);

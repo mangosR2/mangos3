@@ -9584,6 +9584,60 @@ void Spell::EffectScriptEffect(SpellEffectEntry const* effect)
                     m_caster->CastSpell(m_caster,spell_id,true,NULL);
                     return;
                 }
+                case 12355: // Impact
+                {
+                    if (!unitTarget)
+                        return;
+
+                    Unit* mainTarget = m_targets.getUnitTarget();
+                    if (!mainTarget)
+                        return;
+
+                    // Pyroblast
+                    if (SpellAuraHolderPtr holder = mainTarget->GetSpellAuraHolder(11366, m_caster->GetObjectGuid()))
+                    {
+                        if (Aura const* aura = holder->GetAuraByEffectIndex(EFFECT_INDEX_1))
+                        {
+                            int32 bp = aura->GetModifier()->m_amount;
+                            m_caster->m_nextCustomSpellData.SetFlag(CUSTOM_SPELL_FLAG_NO_COST);
+                            m_caster->CastCustomSpell(unitTarget, holder->GetId(), NULL, &bp, NULL, true);
+                        }
+                    }
+
+                    // Ignite
+                    if (SpellAuraHolderPtr holder = mainTarget->GetSpellAuraHolder(12654, m_caster->GetObjectGuid()))
+                    {
+                        if (Aura const* aura = holder->GetAuraByEffectIndex(EFFECT_INDEX_0))
+                        {
+                            int32 bp = aura->GetModifier()->m_amount;
+                            m_caster->m_nextCustomSpellData.SetFlag(CUSTOM_SPELL_FLAG_NO_COST);
+                            m_caster->CastCustomSpell(unitTarget, holder->GetId(), &bp, NULL, NULL, true);
+                        }
+                    }
+
+                    // Living Bomb
+                    if (SpellAuraHolderPtr holder = mainTarget->GetSpellAuraHolder(44457, m_caster->GetObjectGuid()))
+                    {
+                        if (Aura const* aura = holder->GetAuraByEffectIndex(EFFECT_INDEX_0))
+                        {
+                            int32 bp = aura->GetModifier()->m_amount;
+                            m_caster->m_nextCustomSpellData.SetFlag(CUSTOM_SPELL_FLAG_NO_COST);
+                            m_caster->CastCustomSpell(unitTarget, holder->GetId(), &bp, NULL, NULL, true);
+                        }
+                    }
+
+                    // Combustion
+                    if (SpellAuraHolderPtr holder = mainTarget->GetSpellAuraHolder(83853, m_caster->GetObjectGuid()))
+                    {
+                        if (Aura const* aura = holder->GetAuraByEffectIndex(EFFECT_INDEX_0))
+                        {
+                            int32 bp = aura->GetModifier()->m_amount;
+                            m_caster->m_nextCustomSpellData.SetFlag(CUSTOM_SPELL_FLAG_NO_COST);
+                            m_caster->CastCustomSpell(unitTarget, holder->GetId(), &bp, NULL, NULL, true);
+                        }
+                    }
+                    return;
+                }
                 case 17512:                                 // Piccolo of the Flaming Fire
                 {
                     if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
@@ -12968,10 +13022,62 @@ void Spell::EffectScriptEffect(SpellEffectEntry const* effect)
             }
             break;
         }
+        case SPELLFAMILY_MAGE:
+        {
+            switch (m_spellInfo->Id)
+            {
+                case 11129:                                     // Combustion
+                {
+                    if (!unitTarget)
+                        return;
+
+                    // Ignite, Pyroblast, Living Bomb
+                    uint32 spellIds[3] = { 12654, 11366, 44457 };
+
+                    int32 bp = 0;
+                    for (uint8 i = 0; i < 3; ++i)
+                    {
+                        if (SpellAuraHolderPtr holder = unitTarget->GetSpellAuraHolder(spellIds[i], m_caster->GetObjectGuid()))
+                        {
+                            for (int j = 0; j < MAX_EFFECT_INDEX; ++j)
+                            {
+                                if (Aura const* aura = holder->GetAuraByEffectIndex(SpellEffectIndex(j)))
+                                {
+                                    if (aura->GetModifier()->m_auraname != SPELL_AURA_PERIODIC_DAMAGE)
+                                        continue;
+
+                                    int32 mod = aura->GetModifier()->m_amount;
+                                    uint32 dmgClass = holder->GetSpellProto()->GetDmgClass();
+
+                                    //add spell damage bonus
+                                    if (dmgClass == SPELL_DAMAGE_CLASS_NONE || dmgClass == SPELL_DAMAGE_CLASS_MAGIC)
+                                    {
+                                        // ToDo: Take in consideration mod, DOT in DamageInfo struct
+                                        //unitTarget->SpellDamageBonusTaken(m_caster, holder->GetSpellProto(), mod, DOT, holder->GetStackAmount());
+                                        DamageInfo combustionDamageInfo =  DamageInfo(m_caster, unitTarget, holder->GetSpellProto(), damage);
+                                        combustionDamageInfo.damageType = SPELL_DIRECT_DAMAGE;
+
+                                        unitTarget->SpellDamageBonusTaken(&combustionDamageInfo, holder->GetStackAmount());
+                                        // mod = combustionDamageInfo->?????;
+                                    }
+
+                                    bp += mod * IN_MILLISECONDS / aura->GetModifier()->periodictime;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+
+                    if (bp)
+                        m_caster->CastCustomSpell(unitTarget, 83853, &bp, NULL, NULL, true);
+                    return;
+                }
+            }
+            break;
+        }
         default:
             break;
     }
-
 
     // normal DB scripted effect
     if (!unitTarget)
