@@ -604,6 +604,8 @@ Player::Player(WorldSession* session): Unit(), m_mover(this), m_camera(NULL), m_
     memset(m_voidStorageItems, NULL, VOID_STORAGE_MAX_SLOT * sizeof(VoidStorageItem*));
 
     m_maxPersonalRatedRating = 0;
+
+    m_pyromaniacCounter = 0;
 }
 
 Player::~Player()

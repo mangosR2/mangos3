@@ -8552,12 +8552,12 @@ void Unit::SpellDamageBonusDone(DamageInfo* damageInfo, uint32 stack)
             continue;
         switch((*i)->GetModifier()->m_miscvalue)
         {
-            case 4920: // Molten Fury
-            case 4919:
+            case 4919: // Molten Fury
+            case 4920:
             case 12368:
             {
                 if (pVictim->HasAuraState(AURA_STATE_HEALTHLESS_35_PERCENT))
-                    DoneTotalMod *= (100.0f+(*i)->GetModifier()->m_amount)/100.0f;
+                    DoneTotalMod *= (100.0f + (*i)->GetModifier()->m_amount) / 100.0f;
                 break;
             }
             case 6917: // Death's Embrace

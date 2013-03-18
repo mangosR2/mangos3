@@ -7998,8 +7998,24 @@ void Aura::HandleModCastingSpeed(bool apply, bool /*Real*/)
 {
     Unit *target = GetTarget();
 
-    if(IsStacking())
+    if (IsStacking())
+    {
         target->ApplyCastTimePercentMod(float(m_modifier.m_amount),apply);
+
+        if (apply)
+        {
+            // Pyromaniac
+            if (GetId() == 83582)
+            {
+                if (Unit* caster = GetCaster())
+                {
+                    if (caster->GetTypeId() == TYPEID_PLAYER)
+                        if (((Player*)caster)->m_pyromaniacCounter < 3)
+                            caster->RemoveAurasDueToSpell(GetId());
+                }
+            }
+        }
+    }
     else
     {
         float amount = float(m_modifier.m_amount);
@@ -12484,6 +12500,39 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
         }
         case SPELLFAMILY_MAGE:
         {
+            // Pyromaniac check
+            if (Unit* caster = GetCaster())
+            {
+                if (caster->GetTypeId() == TYPEID_PLAYER)
+                {
+                    Player* player = (Player*)caster;
+                    if (SpellEntry const * tal = player->GetKnownTalentRankById(10559))
+                    {
+                        if (IsSpellHaveAura(GetSpellProto(), SPELL_AURA_PERIODIC_DAMAGE) ||
+                            IsSpellHaveAura(GetSpellProto(), SPELL_AURA_PERIODIC_DAMAGE_PERCENT) ||
+                            IsSpellHaveAura(GetSpellProto(), SPELL_AURA_PERIODIC_LEECH))
+                        {
+                            if (!apply)
+                            {
+                                if (player->m_pyromaniacCounter > 0)
+                                    --player->m_pyromaniacCounter;
+
+                                if (player->m_pyromaniacCounter < 3)
+                                    caster->RemoveAurasDueToSpell(83582);
+                            }
+                            else
+                            {
+                                ++player->m_pyromaniacCounter;
+                                if (player->m_pyromaniacCounter >= 3 && !caster->HasAura(83582))
+                                {
+                                    int32 bp = tal->CalculateSimpleValue(EFFECT_INDEX_0);
+                                    caster->CastCustomSpell(caster, 83582, &bp, NULL, NULL, true);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
             // Arcane Missiles!
             if (m_spellProto->Id == 79683)
             {
