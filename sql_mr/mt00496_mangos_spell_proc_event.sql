@@ -641,3 +641,8 @@ INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`,
 DELETE FROM `spell_proc_event` WHERE `entry` = 48108;
 INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`, `procFlags`, `procEx`) VALUE
 (48108, 3, 4194304, 65536, 524288);
+
+-- Firestarter
+DELETE FROM `spell_proc_event` WHERE `entry` = 54741;
+INSERT INTO `spell_proc_event` (`entry`, `procFlags`, `procEx`, `CustomChance`) VALUES
+(54741, 65536, 524288, 100);

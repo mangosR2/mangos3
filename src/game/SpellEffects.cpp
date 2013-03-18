@@ -853,11 +853,62 @@ void Spell::EffectSchoolDMG(SpellEffectEntry const* effect)
                 break;
             }
             case SPELLFAMILY_MAGE:
+            {
                 // remove Arcane Blast buffs at any non-Arcane Blast arcane damage spell.
                 // NOTE: it removed at hit instead cast because currently spell done-damage calculated at hit instead cast
                 if ((m_spellInfo->GetSchoolMask() & SPELL_SCHOOL_MASK_ARCANE) && !(classOptions && classOptions->SpellFamilyFlags & UI64LIT(0x20000000)))
                     m_caster->RemoveAurasDueToSpell(36032); // Arcane Blast buff
+
+                switch (m_spellInfo->Id)
+                {
+                    case 11113:         // Blast Wave
+                    {
+                        // Search Improved Firestarter talent
+                        int32 ifsChance = 0;
+
+                        Unit::AuraList const& mDummyAuras = m_caster->GetAurasByType(SPELL_AURA_DUMMY);
+                        for (Unit::AuraList::const_iterator itr = mDummyAuras.begin(); itr != mDummyAuras.end(); ++itr)
+                        {
+                            if ((*itr)->GetSpellProto()->SpellIconID == 37 && (*itr)->GetSpellProto()->GetSpellFamilyName() == SPELLFAMILY_MAGE &&
+                                (*itr)->GetEffIndex() == EFFECT_INDEX_0)
+                            {
+                                ifsChance = (*itr)->GetModifier()->m_amount;
+                                break;
+                            }
+                        }
+
+                        if (roll_chance_i(ifsChance))
+                        {
+                            int32 count = 0;
+                            bool needBreak = false;
+
+                            // count affected targets, only for first affected
+                            for (TargetList::iterator itr = m_UniqueTargetInfo.begin(); itr != m_UniqueTargetInfo.end(); ++itr)
+                            {
+                                if ((itr->effectMask & (1 << effect->EffectIndex)) == 0)
+                                    continue;
+
+                                if (itr->targetGUID == unitTarget->GetObjectGuid() && count > 0)
+                                {
+                                    needBreak = true;
+                                    break;
+                                }
+
+                                ++count;
+                            }
+
+                            if (needBreak)
+                                break;
+
+                            // cast Flame Strike
+                            if (count >= 2)
+                                m_caster->CastSpell(m_targets.getDestination(), 2120, true);
+                        }
+                        break;
+                    }
+                }
                 break;
+            }
             case SPELLFAMILY_WARRIOR:
             {
                 // Bloodthirst
