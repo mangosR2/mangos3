@@ -77,6 +77,7 @@ ScriptMgr::ScriptMgr() :
     m_pOnEffectDummyCreature(NULL),
     m_pOnEffectDummyGO(NULL),
     m_pOnEffectDummyItem(NULL),
+    m_pOnEffectScriptEffectCreature(NULL),
     m_pOnAuraDummy(NULL)
 {
 }
