@@ -2939,7 +2939,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
                     case TARGET_LEFT_FROM_VICTIM:   angle = M_PI_F / 2;   break;
                 }
 
-                WorldLocation loc = pTarget->GetClosePoint(pTarget->GetObjectBoundingRadius(), dist, radius, m_caster);
+                WorldLocation loc = pTarget->GetClosePoint(pTarget->GetObjectBoundingRadius(), radius, angle, m_caster);
                 if (pTarget->IsWithinLOS(loc.x, loc.y, loc.z))
                 {
                     targetUnitMap.push_back(m_caster);

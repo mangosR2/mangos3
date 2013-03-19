@@ -2910,7 +2910,7 @@ float SpellMgr::GetSpellRadiusWithCustom(SpellEntry const* spellInfo, Unit const
         }
         case SPELLFAMILY_DRUID:
         {
-            switch (m_spellInfo->Id)
+            switch (spellInfo->Id)
             {
                 case 49376:                                 // Feral Charge - Cat
                     // No default radius for this spell, so we need to use the contact distance
