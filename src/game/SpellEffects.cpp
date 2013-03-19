@@ -6760,7 +6760,7 @@ void Spell::DoSummonWild(SpellEffectIndex eff_idx, uint32 forceFaction)
     {
         WorldLocation p = center;
         // If dest location if present
-        if (m_targets.m_targetMask & TARGET_FLAG_DEST_LOCATION)
+        if (m_targets.m_targetMask & TARGET_FLAG_DEST_LOCATION && !p.IsEmpty())
         {
             m_caster->GetRandomPoint(center.x, center.y, center.z, radius, p.x, p.y, p.z);
             m_caster->GetMap()->GetHitPosition(center.x,center.y,center.z, p.x, p.y, p.z, m_caster->GetPhaseMask(),-0.1f);
@@ -6769,13 +6769,13 @@ void Spell::DoSummonWild(SpellEffectIndex eff_idx, uint32 forceFaction)
         // Summon if dest location not present near caster
         else
         {
-            if (radius > 0.0f)
+            if (radius > M_NULL_F && radius < m_caster->GetMap()->GetVisibilityDistance())
             {
                 // not using bounding radius of caster here
-                m_caster->GetClosePoint(p.x, p.y, p.z, p.o, radius);
+                p = m_caster->GetClosePoint(M_NULL_F, radius);
                 WorldLocation const& loc = m_caster->GetPosition();
                 m_caster->GetMap()->GetHitPosition(loc.x, loc.y, loc.z, p.x, p.y, p.z, m_caster->GetPhaseMask(),-0.1f);
-                m_caster->UpdateAllowedPositionZ(p.x,p.y,p.z);
+                m_caster->UpdateAllowedPositionZ(p.x, p.y, p.z);
             }
             else
             {
