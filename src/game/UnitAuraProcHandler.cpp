@@ -1281,8 +1281,15 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, DamageInfo* damageI
         }
         case SPELLFAMILY_MAGE:
         {
+            // Permafrost
+            if (dummySpell->Id == 143)
+            {
+                basepoints[0] = int32(triggerAmount * (damage + damageInfo->absorb) / 100.0f);
+                triggered_spell_id = 91394;
+                break;
+            }
             // Magic Absorption
-            if (dummySpell->GetSpellIconID() == 459)             // only this spell have SpellIconID == 459 and dummy aura
+            else if (dummySpell->GetSpellIconID() == 459)            // only this spell have SpellIconID == 459 and dummy aura
             {
                 if (getPowerType() != POWER_MANA)
                     return SPELL_AURA_PROC_FAILED;

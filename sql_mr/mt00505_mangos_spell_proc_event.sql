@@ -666,3 +666,8 @@ INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`,
 DELETE FROM `spell_proc_event` WHERE `entry` = 83156;
 INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`, `procFlags`, `procEx`, `CustomChance`) VALUES
 (83156, 3, 32, 65536, 2, 100);
+
+-- Permafrost
+DELETE FROM `spell_proc_event` WHERE `entry` = 11175;
+INSERT INTO `spell_proc_event` (`entry`, `SchoolMask`) VALUES
+(11175, 126);
