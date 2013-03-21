@@ -5589,20 +5589,13 @@ SpellAuraProcResult Unit::HandleAddFlatModifierAuraProc(Unit* pVictim, DamageInf
         {
             switch (spellInfo->Id)
             {
-                case 53257:                             // Cobra strike
-                case 55166:                             // Tidal Force
+                case 83049:                         // Early Frost
+                case 83050:
                 {
-                    SpellAuraHolderPtr holder = triggeredByAura->GetHolder();
-                    if (!holder || holder->IsDeleted())
+                    if (triggeredByAura->GetEffIndex() != EFFECT_INDEX_0)
                         return SPELL_AURA_PROC_FAILED;
 
-                    if (holder->ModStackAmount(-1))
-                    {
-                        RemoveSpellAuraHolder(holder);
-                        return SPELL_AURA_PROC_OK;
-                    }
-                    else
-                        return SPELL_AURA_PROC_CANT_TRIGGER;
+                    CastSpell(this, spellInfo->Id == 83049 ? 83162 : 83239, true);
                     break;
                 }
             }

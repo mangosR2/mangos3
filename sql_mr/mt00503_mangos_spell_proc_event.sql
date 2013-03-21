@@ -578,7 +578,7 @@ DELETE FROM `spell_proc_event` WHERE `entry` = 51099;
 INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`, `SpellFamilyMaskC0`) VALUE
 (51099, 15, 1+2+4, 4096);
 
-### Mague ###
+### Mage ###
 
 -- Offensive State (DND)
 DELETE FROM `spell_proc_event` WHERE `entry` = 79684;
@@ -656,3 +656,8 @@ INSERT INTO `spell_proc_event` (`entry`, `SchoolMask`, `CustomChance`) VALUE
 DELETE FROM `spell_proc_event` WHERE `entry` = 64343;
 INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`) VALUE
 (64343, 3, 2);
+
+-- Early Frost
+DELETE FROM `spell_proc_event` WHERE `entry` = 83049;
+INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`, `procFlags`, `procEx`, `CustomChance`) VALUES
+(83049, 3, 32, 65536, 524288, 100);
