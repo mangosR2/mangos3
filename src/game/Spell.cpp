@@ -4003,9 +4003,6 @@ void Spell::cast(bool skipCheck)
                 if (IsTriggeredSpell())
                     AddPrecastSpell(86262);     // Nether Vortex
             }
-            // Fingers of Frost
-            else if (m_spellInfo->Id == 44544)
-                AddPrecastSpell(74396);                     // Fingers of Frost
             break;
         }
         case SPELLFAMILY_WARRIOR:

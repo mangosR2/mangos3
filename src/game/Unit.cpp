@@ -8709,6 +8709,10 @@ void Unit::SpellDamageBonusDone(DamageInfo* damageInfo, uint32 stack)
 
                     DoneTotalMod *= multiplier;
                 }
+
+                // Fingers of Frost
+                if (HasAura(44544))
+                    DoneTotalMod *= 1.25f;
             }
 
             bool snaredOrSlowed = pVictim->HasAuraType(SPELL_AURA_MOD_DECREASE_SPEED);

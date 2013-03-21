@@ -4281,7 +4281,13 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(Unit *pVictim, DamageIn
                         return SPELL_AURA_PROC_FAILED;
                 }
             }
-            else if (auraSpellInfo->GetSpellIconID() == 4623)// Invocation
+            else if (auraSpellInfo->GetSpellIconID() == 2947)    // Fingers of Frost
+            {
+                if (!roll_chance_i(triggerAmount))
+                    return SPELL_AURA_PROC_FAILED;
+                break;
+            }
+            else if (auraSpellInfo->GetSpellIconID() == 4623)    // Invocation
             {
                 // done in other way
                 return SPELL_AURA_PROC_FAILED;
@@ -5342,13 +5348,6 @@ SpellAuraProcResult Unit::HandleOverrideClassScriptAuraProc(Unit *pVictim, Damag
             triggered_spell_id = 12485;
             break;
         }
-        case 989:                                           // Improved Blizzard (Rank 3)
-        {
-            if (!procSpell || procSpell->GetSpellVisual() != 9487)
-                return SPELL_AURA_PROC_FAILED;
-            triggered_spell_id = 12486;
-            break;
-        }
         case 4086:                                          // Improved Mend Pet (Rank 1)
         case 4087:                                          // Improved Mend Pet (Rank 2)
         {
@@ -5577,6 +5576,18 @@ SpellAuraProcResult Unit::HandleModDamageFromCasterAuraProc(Unit* pVictim, Damag
                 }
                 else
                     CastSpell(this, 96215, false);  // Charge cooldown
+            }
+            break;
+        }
+        case SPELLFAMILY_MAGE:
+        {
+            // Fingers of Frost
+            if (spellProto->Id == 44544)
+            {
+                Unit* target = triggeredByAura->GetTarget();
+                // Remove only single aura from stack
+                if (triggeredByAura->GetHolder()->ModStackAmount(-1))
+                    target->RemoveSpellAuraHolder(triggeredByAura->GetHolder());
             }
             break;
         }

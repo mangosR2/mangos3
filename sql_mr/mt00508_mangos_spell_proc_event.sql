@@ -671,3 +671,19 @@ INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`,
 DELETE FROM `spell_proc_event` WHERE `entry` = 11175;
 INSERT INTO `spell_proc_event` (`entry`, `SchoolMask`) VALUES
 (11175, 126);
+
+-- Ice Shards
+DELETE FROM `spell_proc_event` WHERE `entry` = 11185;
+INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`, `procFlags`, `CustomChance`) VALUE
+(11185, 3, 128, 327680, 100);
+
+-- Finger of Frost
+DELETE FROM `spell_proc_event` WHERE `entry` IN (44543, 44545);
+INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`, `SpellFamilyMaskB0`) VALUES
+(44543, 3, 34603680, 4096);
+
+-- Finger of Frost proc
+DELETE FROM `spell_proc_event` WHERE `entry` = 44544;
+INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`, `SpellFamilyMaskB0`, `procFlags`) VALUES
+(44544, 3, 131072, 1048576, 0x10000);
+
