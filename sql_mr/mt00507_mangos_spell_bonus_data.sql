@@ -68,8 +68,9 @@ REPLACE INTO `spell_bonus_data` (`entry`, `direct_bonus`, `dot_bonus`, `ap_bonus
 (55050, 0, 0, 0.236, 0, 'Death Knight - Heart Strike'),
 (85948, 0, 0, 0.236, 0, 'Death Knight - Festering Strike');
 
--- Mague
+-- Mage
 REPLACE INTO `spell_bonus_data` (`entry`, `direct_bonus`, `dot_bonus`, `ap_bonus`, `ap_dot_bonus`, `comments`) VALUES
+(120, 0.214, 0, 0, 0, 'Mage - Cone of Cold'),
 (543, 0.807, 0, 0, 0, 'Mage - Mage Ward'),
 (11129, 0.429, 0, 0, 0, 'Mage - Combustion'),
 (30455, 0.378, 0, 0, 0, 'Mage - Ice Lance'),
