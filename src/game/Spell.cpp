@@ -2776,8 +2776,8 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
                         m_targets.setDestination(m_caster->GetPosition());
 
                     FillAreaTargets(targetUnitMap, radius, PUSH_DEST_CENTER, SPELL_TARGETS_AOE_DAMAGE);
-                    // Jinx: Curse of the Elements
-                    if (m_spellInfo->Id == 85547 || m_spellInfo->Id == 86105)
+                    // Jinx: Curse of the Elements, Piercing Chill
+                    if (m_spellInfo->Id == 85547 || m_spellInfo->Id == 86105 || m_spellInfo->Id == 83154)
                         targetUnitMap.remove(m_targets.getUnitTarget());
                     break;
                 }
@@ -10438,6 +10438,28 @@ bool Spell::FillCustomTargetMap(SpellEffectEntry const* effect, UnitList& target
         }
         default:
             return false;
+    }
+
+    switch (m_spellInfo->GetSpellFamilyName())
+    {
+        case SPELLFAMILY_GENERIC:
+        {
+            break;
+        }
+        case SPELLFAMILY_MAGE:
+        {
+            switch(m_spellInfo->Id)
+            {
+                case 38194:                     // Blink
+                case 82734:                     // Flame Orb DMG Spell
+                    unMaxTargets = 1;
+                    break;
+                case 83154:                     // Piercing Chill
+                    unMaxTargets = m_caster->HasAura(83157) ? 2 : 1;
+                    break;
+            }
+            break;
+        }
     }
 
     if (targetUnitMap.empty())
