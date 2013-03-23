@@ -1282,7 +1282,7 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, DamageInfo* damageI
         case SPELLFAMILY_MAGE:
         {
             // Permafrost
-            if (dummySpell->Id == 143)
+            if (dummySpell->GetSpellIconID() == 143)
             {
                 basepoints[0] = int32(triggerAmount * (damage + damageInfo->absorb) / 100.0f);
                 triggered_spell_id = 91394;
@@ -1354,6 +1354,12 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, DamageInfo* damageI
                     return SPELL_AURA_PROC_FAILED;
 
                 triggered_spell_id = 31589;
+                break;
+            }
+            // Piercing Chill
+            else if (dummySpell->GetSpellIconID() == 4625)
+            {
+                triggered_spell_id = 83154;
                 break;
             }
             // Hot Streak
