@@ -702,3 +702,7 @@ DELETE FROM `spell_proc_event` WHERE `entry` = 83049;
 INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`, `procFlags`, `procEx`, `CustomChance`) VALUES
 (83049, 3, 32, 65536, 524288, 100);
 
+-- Reactive Barrier
+DELETE FROM `spell_proc_event` WHERE `entry` = 86347;
+INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskB0`, `procFlags`) VALUES
+(86347, 3, 1, 16384);

@@ -4271,6 +4271,23 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(Unit *pVictim, DamageIn
                     }
                     break;
                 }
+                case 86303:                                 // Reactive Barrier
+                case 86304:
+                {
+                    if (GetTypeId() != TYPEID_PLAYER)
+                        return SPELL_AURA_PROC_FAILED;
+
+                    if (GetHealthPercent() > 50.0f)
+                        return SPELL_AURA_PROC_FAILED;
+
+                    trigger_spell_id = 11426;
+                    if (HasAura(trigger_spell_id) || ((Player*)this)->HasSpellCooldown(trigger_spell_id))
+                        return SPELL_AURA_PROC_FAILED;
+
+                    // mana cost spellmod spell
+                    CastSpell(this, 86347, true);
+                    break;
+                }
             }
             break;
         case SPELLFAMILY_MAGE:
