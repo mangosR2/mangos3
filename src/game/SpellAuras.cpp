@@ -12602,18 +12602,21 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
             // Ice Barrier (non stacking from one caster)
             else if (m_spellProto->GetSpellIconID() == 32)
             {
-                if ((!apply && m_removeMode == AURA_REMOVE_BY_DISPEL) || m_removeMode == AURA_REMOVE_BY_SHIELD_BREAK)
+                if (!apply && (m_removeMode == AURA_REMOVE_BY_DISPEL || m_removeMode == AURA_REMOVE_BY_SHIELD_BREAK))
                 {
                     Unit::AuraList const& dummyAuras = m_target->GetAurasByType(SPELL_AURA_DUMMY);
                     for(Unit::AuraList::const_iterator itr = dummyAuras.begin(); itr != dummyAuras.end(); ++itr)
                     {
                         // Shattered Barrier
-                        if ((*itr)->GetSpellProto()->GetSpellIconID() == 2945)
+                        if ((*itr)->GetSpellProto()->GetSpellIconID() == 3260 && (*itr)->GetSpellProto()->GetSpellFamilyName() == SPELLFAMILY_MAGE)
                         {
                             cast_at_remove = true;
-                            // first rank have 50% chance
-                            if ((*itr)->GetId() != 44745 || roll_chance_i(50))
+                            // Rank 1
+                            if ((*itr)->GetId() == 44745)
                                 spellId1 = 55080;
+                            // Rank 2
+                            else if ((*itr)->GetId() == 54787)
+                                spellId1 = 83073;
                             break;
                         }
                     }
