@@ -47,3 +47,13 @@ DELETE FROM `spell_dbc` WHERE `Id` = 50536;
 --      spell->speed = 24.0f;
 --      break;
 --  }
+
+-- Fingers of Frost
+DELETE FROM `spell_dbc` WHERE `Id` = 44544;
+--    case 44544:                         // Fingers of Frost
+--    {
+--      if (SpellEffectEntry* eff = (SpellEffectEntry*)spell->GetSpellEffect(EFFECT_INDEX_0))
+--            eff->EffectSpellClassMask.Flags |= UI64LIT(0x20000);    // Ice Lance mask
+--        break;
+--    }
+

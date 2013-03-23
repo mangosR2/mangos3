@@ -687,3 +687,18 @@ DELETE FROM `spell_proc_event` WHERE `entry` = 44544;
 INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`, `SpellFamilyMaskB0`, `procFlags`) VALUES
 (44544, 3, 131072, 1048576, 0x10000);
 
+-- Brain Freeze
+DELETE FROM `spell_proc_event` WHERE `entry` = 44546;
+INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`) VALUES
+(44546, 3, 33555104);
+
+-- Brain Freeze proc
+DELETE FROM `spell_proc_event` WHERE `entry` = 57761;
+INSERT INTO `spell_proc_event` (`entry`, `procFlags`, `procEx`, `CustomChance`) VALUES
+(57761, 65536, 524288, 100);
+
+-- Early Frost
+DELETE FROM `spell_proc_event` WHERE `entry` = 83049;
+INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`, `procFlags`, `procEx`, `CustomChance`) VALUES
+(83049, 3, 32, 65536, 524288, 100);
+

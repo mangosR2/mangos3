@@ -15030,14 +15030,9 @@ bool Unit::IsIgnoreUnitState(SpellEntry const *spell, IgnoreUnitState ignoreStat
     for(Unit::AuraList::const_iterator itr = stateAuras.begin(); itr != stateAuras.end(); ++itr)
     {
         if ((*itr)->GetModifier()->m_miscvalue == ignoreState)
-        {
-            // frozen state absent ignored for all spells
-            if (ignoreState == IGNORE_UNIT_TARGET_NON_FROZEN)
+            // exception for Frostfire Bolt when Brain Freeze is active
+            if ((*itr)->isAffectedOnSpell(spell) || spell->Id == 44614 && HasAura(57761))
                 return true;
-
-            if ((*itr)->isAffectedOnSpell(spell))
-                return true;
-        }
     }
 
     return false;

@@ -4333,6 +4333,10 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(Unit *pVictim, DamageIn
                 if (HasSpell(44445))
                     return SPELL_AURA_PROC_FAILED;
 
+                // do not proc with Brain Freeze talent
+                if (HasSpell(44546) || HasSpell(44548) || HasSpell(44549))
+                    return SPELL_AURA_PROC_FAILED;
+
                 // do not proc from Arane Missiles themselves
                 if (!procSpell || procSpell->IsFitToFamily(SPELLFAMILY_MAGE, UI64LIT(0x200800)))
                     return SPELL_AURA_PROC_FAILED;
@@ -5613,7 +5617,16 @@ SpellAuraProcResult Unit::HandleAddFlatModifierAuraProc(Unit* pVictim, DamageInf
                     if (triggeredByAura->GetEffIndex() != EFFECT_INDEX_0)
                         return SPELL_AURA_PROC_FAILED;
 
-                    CastSpell(this, spellInfo->Id == 83049 ? 83162 : 83239, true);
+                    uint32 triggered_spell_id = 0;
+                    // Rank 1
+                    if (spellInfo->Id == 83049)
+                        triggered_spell_id = 83162;
+                    // Rank 2
+                    else if (spellInfo->Id == 83050)
+                        triggered_spell_id = 83239;
+
+                    if (!HasAura(triggered_spell_id))
+                        CastSpell(this, triggered_spell_id, true);
                     break;
                 }
             }
