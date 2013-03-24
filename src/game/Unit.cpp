@@ -11754,6 +11754,15 @@ int32 Unit::CalculateSpellDamage(Unit const* target, SpellEntry const* spellProt
                         return 88625;
                     break;
                 }
+                case 94338:         // Eclipse (Solar)
+                {
+                    // Sunfire
+                    if (HasAura(93401))
+                        return 93402;   // Sunfire
+                    else
+                        return 8921;    // Moonfire
+                    break;
+                }
             }
             break;
         }

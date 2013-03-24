@@ -12946,6 +12946,9 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
                     spellId2 = 51185;                       // King of the Jungle (Enrage damage aura)
                 }
             }
+            // Eclipse (Solar)
+            else if (GetId() == 48517)
+                spellId1 = 94338;
             // Berserk
             else if (GetId() == 50334)
                 spellId1 = 58923;                           // Berserk (Mangle (Bear) modifier)

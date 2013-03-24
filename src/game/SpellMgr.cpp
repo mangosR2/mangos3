@@ -2546,6 +2546,10 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
                 // Repentance removes Righteous Vengeance
                 if (spellInfo_1->Id == 20066 && spellInfo_2->Id == 61840)
                     return true;
+
+                // Eclipse (Solar)
+                if (spellInfo_1->GetSpellIconID() == 3449 && spellInfo_2->GetSpellIconID() == 3449)
+                    return false;
             }
             // Blessing of Forgotten Kings and (Greater) Blessing of Kings
             if (spellInfo_1->GetSpellFamilyFlags().test<CF_PALADIN_BLESSING_OF_KINGS>())
