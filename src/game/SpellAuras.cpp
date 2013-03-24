@@ -1387,6 +1387,7 @@ void Aura::HandleAddModifier(bool apply, bool Real)
             case 88819:                                     // Daybreak
             case 89485:                                     // Inner Focus
             case 90174:                                     // Divine Purpose
+            case 93400:                                     // Shooting Stars
                 GetHolder()->SetAuraCharges(1);
                 break;
             default:
@@ -1422,6 +1423,12 @@ void Aura::HandleAddModifier(bool apply, bool Real)
                 if (SpellAuraHolderPtr holder = target->GetSpellAuraHolder(73651))
                     holder->RefreshHolder();
             }
+            break;
+        }
+        case 93400:     // Shooting Stars
+        {
+            if (apply && target->GetTypeId() == TYPEID_PLAYER)
+                ((Player*)target)->RemoveSpellCooldown(78674, true);
             break;
         }
         case 93622:     // Berserk
@@ -6650,9 +6657,6 @@ void Aura::HandlePeriodicEnergize(bool apply, bool Real)
                 ChangeAmount(target->GetCreateMana() * GetBasePoints() / 100 / GetAuraMaxTicks());
                 break;
             }
-            case 48391:                                     // Owlkin Frenzy 2% base mana
-                ChangeAmount(target->GetCreateMana() * 2 / 100);
-                break;
             case 57669:                                     // Replenishment (1% from max)
                 ChangeAmount(target->GetMaxPower(POWER_MANA) / 100 / GetAuraMaxTicks());
                 break;
