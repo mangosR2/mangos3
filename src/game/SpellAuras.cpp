@@ -10675,6 +10675,13 @@ void Aura::PeriodicDummyTick()
                 // Force of Nature
                 case 33831:
                     return;
+                // Solar Beam
+                case 78675:
+                {
+                    if (DynamicObject* dynObj = target->GetDynObject(spell->Id))
+                        target->CastSpell(dynObj->GetPositionX(), dynObj->GetPositionY(), dynObj->GetPositionZ(), 81261, true, NULL, this, GetCasterGuid());
+                    return;
+                }
                 default:
                     break;
             }
