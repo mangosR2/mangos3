@@ -1584,6 +1584,22 @@ void Unit::JustKilledCreature(Creature* victim, Player* responsiblePlayer)
     if (victim->AI())
         victim->AI()->JustDied(this);
 
+    // Treants hack
+    if (victim->GetEntry() == 1964)
+    {
+        if (Unit* creator = victim->GetCreator())
+        {
+            uint32 fungal = 0;
+            if (creator->HasAura(78788))        // Fungal Growth Rank 1
+                fungal = 81291;
+            else if (creator->HasAura(78789))   // Fungal Growth Rank 2
+                fungal = 81283;
+
+            if (fungal)
+                creator->CastSpell(victim, fungal, true);
+        }
+    }
+
     // Inform Owner
     Unit* pOwner = victim->GetCharmerOrOwner();
     if (victim->IsTemporarySummon())

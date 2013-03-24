@@ -6530,8 +6530,8 @@ SpellAuraProcResult Unit::HandleAuraProcOnPowerAmount(Unit* /*pVictim*/, DamageI
                 if (!HasAura(markerSpellAdd))
                     CastSpell(this, markerSpellAdd, true);
             }
-            // Marker caster only on Starfire and Wrath
-            else if (!hasMarker && (procSpell->Id == 2912 || procSpell->Id == 5176))
+            // Marker casted only when not by Starsurge
+            else if (!hasMarker && procSpell->Id != 78674)
             {
                 uint32 markerSpellAdd, markerSpellRemove;
                 // solar marker or lunar marker
