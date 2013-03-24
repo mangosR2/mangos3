@@ -739,3 +739,8 @@ INSERT INTO `spell_proc_event` (`entry`, `procEx`) VALUES
 DELETE FROM `spell_proc_event` WHERE `entry` = 16880;
 INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`, `Cooldown`) VALUES
 (16880, 7, 2097152 + 2 + 64, 60);
+
+-- Eclipse Mastery Driver Passive
+DELETE FROM `spell_proc_event` WHERE `entry` = 79577;
+INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`, `SpellFamilyMaskC0`, `SpellFamilyMaskA1`, `SpellFamilyMaskC1`) VALUES
+(79577, 7, 5 + 2, 33554432, 5 + 2, 33554432);
