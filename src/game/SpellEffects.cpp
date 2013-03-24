@@ -9653,6 +9653,14 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     unitTarget->RemoveAurasDueToSpell(m_spellInfo->CalculateSimpleValue(eff_idx));
                     break;
                 }
+                case 56072:                                 // Ride Red Dragon Buddy
+                {
+                    if (!unitTarget)
+                        return;
+
+                    m_caster->CastSpell(unitTarget, m_spellInfo->CalculateSimpleValue(eff_idx), true);
+                    break;
+                }
                 case 56659:                                 //  Build Demolisher (Force)
                 case 56662:                                 //  Build Siege Vehicle (Force) - alliance
                 case 56664:                                 //  Build Catapult (Force)
