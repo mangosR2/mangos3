@@ -7419,6 +7419,22 @@ void Aura::HandleModTotalPercentStat(bool apply, bool /*Real*/)
     uint32 curHPValue = target->GetHealth();
     uint32 maxHPValue = target->GetMaxHealth();
 
+
+    // Heart of the Wild - stamina
+    // Bear Form (Passive)
+    if (apply && GetId() == 1178 && target->GetTypeId() == TYPEID_PLAYER && target->getClass() == CLASS_DRUID && target->GetShapeshiftForm() && m_modifier.m_miscvalue == STAT_STAMINA)
+    {
+        switch (target->GetShapeshiftForm())
+        {
+            case FORM_BEAR:
+            {
+                if (SpellEntry const* spellInfo = ((Player*)target)->GetKnownTalentRankById(11715))
+                    m_modifier.m_amount += spellInfo->CalculateSimpleValue(EFFECT_INDEX_2);
+                break;
+            }
+        }
+    }
+
     for (int32 i = STAT_STRENGTH; i < MAX_STATS; ++i)
     {
         if ((miscValueB & (1 << i)) || miscValueB == 0)
