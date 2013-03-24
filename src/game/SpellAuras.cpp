@@ -6637,7 +6637,24 @@ void Aura::HandlePeriodicEnergize(bool apply, bool Real)
             {
                 if (Unit* caster = GetCaster())
                 {
-                    int32 percent = (caster == target ? 15 : (caster->HasAura(54832) ? 10 : 0));
+                    int32 percent = 0;
+                    if (caster == target)
+                    {
+                        percent = 15;
+                        // search Dreamstate
+                        Unit::AuraList const& mDummyAuras = caster->GetAurasByType(SPELL_AURA_DUMMY);
+                        for (Unit::AuraList::const_iterator itr = mDummyAuras.begin(); itr != mDummyAuras.end(); ++itr)
+                        {
+                            if ((*itr)->GetSpellProto()->GetSpellIconID() == 2255 && (*itr)->GetEffIndex() == EFFECT_INDEX_0 &&
+                                (*itr)->GetSpellProto()->GetSpellFamilyName() == SPELLFAMILY_DRUID)
+                            {
+                                percent += (*itr)->GetModifier()->m_amount;
+                                break;
+                            }
+                        }
+                    }
+                    else if (caster->HasAura(54832))
+                        percent = 10;
 
                     if (percent)
                         caster->CastCustomSpell(caster, 54833, &percent, 0, 0, true, NULL, this);
