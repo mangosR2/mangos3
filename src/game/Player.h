@@ -1215,6 +1215,8 @@ typedef std::set<uint32> ResearchProjectSet;
 
 #define MAX_RESEARCH_SITES 16
 
+typedef std::list<Unit*> SummonUnitList;
+
 class MANGOS_DLL_SPEC Player : public Unit
 {
     friend class WorldSession;
@@ -1280,14 +1282,11 @@ class MANGOS_DLL_SPEC Player : public Unit
         ChatTagFlags GetChatTag() const;
         std::string autoReplyMsg;
 
-        typedef std::list<Unit*> SummonUnitList;
         SummonUnitList m_summonList;
         void AddSummonUnit(Unit* summon);
-        void RemoveSummonUnit(uint32 spellid);
-        void RemoveSummonUnit(Unit* summon); 
+        void RemoveSummonUnit(Unit* summon);
         Unit* GetSummonUnit(uint32 spellId) const;
-        uint32 GetSummonUnitCount() const;
-        uint32 GetSummonUnitCountBySpell(uint32 spellId) const;
+        SummonUnitList& GetSummonUnitList() { return m_summonList; }
 
         uint32 GetBarberShopCost(uint8 newhairstyle, uint8 newhaircolor, uint8 newfacialhair, uint32 newskintone);
 
@@ -3099,7 +3098,6 @@ class MANGOS_DLL_SPEC Player : public Unit
         uint32 _pendingBindTimer;
 
         uint8  m_cachedTC[3];
-
         uint32 m_cachedGS;
 };
 

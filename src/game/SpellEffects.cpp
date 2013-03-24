@@ -4991,31 +4991,28 @@ void Spell::EffectDummy(SpellEffectEntry const* effect)
                     if (m_caster->GetTypeId() != TYPEID_PLAYER)
                         return;
 
-                    uint32 fungal = NULL;
+                    uint32 fungal = 0;
                     if (m_caster->HasAura(78788)) // Fungal Growth Rank 1
                         fungal = 81291;
                     else if (m_caster->HasAura(78789)) // Fungal Growth Rank 2
                         fungal = 81283;
 
-                    std::list<Creature*> list;
-                    std::list<TemporarySummon*> summonList;
+                    SummonUnitList& mushroomList = ((Player*)m_caster)->GetSummonUnitList();
+                    SummonUnitList tempList;
+
                     float spellRange = GetSpellMaxRange(sSpellRangeStore.LookupEntry(m_spellInfo->rangeIndex), true);
-                    m_caster->GetCreatureListWithEntryInGrid(list, 47649, spellRange);
     
-                    for (std::list<Creature*>::const_iterator i = list.begin(); i != list.end(); ++i)
+                    for (SummonUnitList::const_iterator i = mushroomList.begin(); i != mushroomList.end(); ++i)
                     {
-                        if ((*i)->IsTemporarySummon() && (*i)->GetCreator() == m_caster && (*i)->isAlive())
+                        if ((*i)->isAlive() && (*i)->GetEntry() == 47649)
                         {
-                            summonList.push_back((TemporarySummon*)(*i));
-                            if (summonList.size() >= 3) // max 3 mushroom (buggers?)
+                            tempList.push_back(*i);
+                            if (tempList.size() >= 3) // max 3 mushroom (buggers?)
                                 break;
                         }
                     }
 
-                    std::list<TemporarySummon*> mushroomList;
-                    mushroomList = summonList;
-
-                    for (std::list<TemporarySummon*>::const_iterator i = mushroomList.begin(); i != mushroomList.end(); ++i)
+                    for (SummonUnitList::const_iterator i = tempList.begin(); i != tempList.end(); ++i)
                     {
                         if (!m_caster->IsWithinDist3d((*i)->GetPositionX(), (*i)->GetPositionY(), (*i)->GetPositionZ(), spellRange))
                             continue;
@@ -8134,7 +8131,7 @@ void Spell::EffectTeleUnitsFaceCaster(SpellEffectEntry const* effect)
     unitTarget->NearTeleportTo(loc, unitTarget == m_caster ? TELE_TO_SPELL : 0);
 }
 
-void Spell::DoSummonWild(SpellEffectEntry const* effect, uint32 forceFaction)
+void Spell::DoSummonWild(SpellEffectEntry const* effect, uint32 forceFaction, bool unlimited)
 {
     uint32 creature_entry = effect->EffectMiscValue;
     if (!creature_entry)
@@ -8161,9 +8158,31 @@ void Spell::DoSummonWild(SpellEffectEntry const* effect, uint32 forceFaction)
 
     uint32 uDuration = m_duration > 0 ? uint32(m_duration) : 0;
 
-    int32 amount = effect->EffectRealPointsPerLevel ? effect->EffectRealPointsPerLevel : m_currentBasePoints[effect->GetIndex()];
-    if (amount <= 0)
-        amount = 1;
+    int32 amount = damage > 0 ? damage : 1;
+
+    if (!unlimited && m_caster->GetTypeId() == TYPEID_PLAYER)
+    {
+        SummonUnitList& summonList = ((Player*)m_caster)->GetSummonUnitList();
+        SummonUnitList list;
+
+        for (SummonUnitList::const_iterator i = summonList.begin(); i != summonList.end(); ++i)
+        {
+            if ((*i)->GetTypeId() != TYPEID_UNIT)
+                continue;
+
+            Creature* creature = (Creature*)*i;
+
+            if (creature->IsTemporarySummon() && (*i)->isAlive() &&
+                creature->GetEntry() == creature_entry)
+                list.push_back(*i);
+        }
+
+        while (list.size() > amount - 1)
+        {
+            ((TemporarySummon*)list.front())->UnSummon();
+            list.remove(list.front());
+        }
+    }
 
     for(int32 count = 0; count < amount; ++count)
     {

@@ -470,7 +470,7 @@ class Spell
 
         void DoCreateItem(SpellEffectEntry const* effect, uint32 itemtype);
         void DoSummonGroupPets(SpellEffectEntry const* effect);
-        void DoSummonWild(SpellEffectEntry const* effect, uint32 forceFaction = 0);
+        void DoSummonWild(SpellEffectEntry const* effect, uint32 forceFaction = 0, bool unlimited = false);
         void DoSummonGuardian(SpellEffectEntry const* effect, uint32 forceFaction = 0);
         void DoSummonTotem(SpellEffectEntry const* effect, uint8 slot_dbc = 0);
         void DoSummonCritter(SpellEffectEntry const* effect, uint32 forceFaction = 0);

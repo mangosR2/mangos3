@@ -2208,7 +2208,7 @@ void Aura::TriggerSpell()
                         {
                             if (caster->GetTypeId() == TYPEID_PLAYER)
                             {
-                                if (Unit* ring = ((Player *) GetCaster())->GetSummonUnit(auraId))
+                                if (Unit* ring = ((Player *)GetCaster())->GetSummonUnit(auraId))
                                 {
                                     trigger_spell_id = 82691;
                                     triggerTarget = ring;
