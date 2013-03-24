@@ -6494,6 +6494,10 @@ SpellAuraProcResult Unit::HandleAuraProcOnPowerAmount(Unit* /*pVictim*/, DamageI
             uint32 markerSpellAdd, markerSpellRemove;
             if (newPower == triggerAmount)
             {
+                // Remove Nature's Grace Cooldown
+                if (GetTypeId() == TYPEID_PLAYER)
+                    ((Player*)this)->RemoveSpellCooldown(16880, true);
+
                 // cast Eclipse
                 CastSpell(this, triggeredByAura->GetSpellEffect()->EffectTriggerSpell, true);
 

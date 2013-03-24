@@ -734,3 +734,8 @@ INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`,
 DELETE FROM `spell_proc_event` WHERE `entry` = 93622;
 INSERT INTO `spell_proc_event` (`entry`, `procEx`) VALUES
 (93622, 524288);
+
+-- Nature's Grace
+DELETE FROM `spell_proc_event` WHERE `entry` = 16880;
+INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`, `Cooldown`) VALUES
+(16880, 7, 2097152 + 2 + 64, 60);
