@@ -2916,14 +2916,6 @@ void Unit::CalculateDamageAbsorbAndResist(Unit* pCaster, DamageInfo* damageInfo,
                             RemainingDamage -= RemainingDamage * currentAbsorb / 100;
                         continue;
                     }
-                    // Moonkin Form passive
-                    if (spellProto->Id == 69366)
-                    {
-                        //reduces all damage taken while Stunned
-                        if (unitflag & UNIT_FLAG_STUNNED)
-                            RemainingDamage -= RemainingDamage * currentAbsorb / 100;
-                        continue;
-                    }
                     break;
                 }
                 case SPELLFAMILY_ROGUE:
@@ -8352,7 +8344,7 @@ void Unit::SendHealSpellLog(Unit* pVictim, uint32 SpellID, uint32 Damage, uint32
     SendMessageToSet(&data, true);
 }
 
-void Unit::SendEnergizeSpellLog(Unit *pVictim, uint32 SpellID, int32 Damage, Powers powertype)
+void Unit::SendEnergizeSpellLog(Unit* pVictim, uint32 SpellID, int32 Damage, Powers powertype)
 {
     WorldPacket data(SMSG_SPELLENERGIZELOG, pVictim->GetPackGUID().size() + GetPackGUID().size() + 4 + 4 + 4);
     data << pVictim->GetPackGUID();
