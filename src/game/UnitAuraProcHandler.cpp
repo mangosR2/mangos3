@@ -6434,6 +6434,22 @@ SpellAuraProcResult Unit::HandleAuraProcOnPowerAmount(Unit* /*pVictim*/, DamageI
             // Wrath
             else if (procSpell->Id == 5176)
                 powerMod = -procSpell->CalculateSimpleValue(EFFECT_INDEX_1);
+            // Moonfire or Sunfire
+            else if (procSpell->Id == 8921 || procSpell->Id == 93402)
+            {
+                // search Lunar Shower buff
+                Unit::AuraList const& pctModAuras = GetAurasByType(SPELL_AURA_ADD_PCT_MODIFIER);
+                for (Unit::AuraList::const_iterator itr = pctModAuras.begin(); itr != pctModAuras.end(); ++itr)
+                {
+                    if ((*itr)->GetSpellProto()->GetSpellIconID() == 3698 && (*itr)->GetEffIndex() == EFFECT_INDEX_0 &&
+                        (*itr)->GetSpellProto()->GetSpellFamilyName() == SPELLFAMILY_DRUID)
+                    {
+                        if (SpellEntry const * spell = sSpellStore.LookupEntry(33603))
+                            powerMod = spell->CalculateSimpleValue(EFFECT_INDEX_2) * (procSpell->Id == 8921 ? 1 : -1);
+                        break;
+                    }
+                }
+            }
             // Starsurge
             else if (procSpell->Id == 78674)
                 powerMod = direction * procSpell->CalculateSimpleValue(EFFECT_INDEX_1);

@@ -754,3 +754,8 @@ INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`)
 DELETE FROM `spell_proc_event` WHERE `entry` = 93400;
 INSERT INTO `spell_proc_event` (`entry`, `procFlags`, `procEx`, `CustomChance`) VALUES
 (93400, 65536, 524288, 100);
+
+-- Lunar Shower
+DELETE FROM `spell_proc_event` WHERE `entry` = 33603;
+INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`) VALUES
+(33603, 7, 2);
