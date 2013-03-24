@@ -2771,14 +2771,18 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
                     break;
                 default:
                 {
-                    // Blood Boil
-                    if (m_spellInfo->Id == 48721)
+                    // War Stomp & Blood Boil
+                    if (m_spellInfo->Id == 20549 || m_spellInfo->Id == 48721)
                         m_targets.setDestination(m_caster->GetPosition());
 
                     FillAreaTargets(targetUnitMap, radius, PUSH_DEST_CENTER, SPELL_TARGETS_AOE_DAMAGE);
                     // Jinx: Curse of the Elements, Piercing Chill
                     if (m_spellInfo->Id == 85547 || m_spellInfo->Id == 86105 || m_spellInfo->Id == 83154)
                         targetUnitMap.remove(m_targets.getUnitTarget());
+
+                    // Flame Orb and Frostfire Orb, Piercing Chill
+                    if (m_spellInfo->Id == 82734 || m_spellInfo->Id == 84718 || m_spellInfo->Id == 83154)
+                        targetUnitMap.sort(TargetDistanceOrderNear(m_caster));
                     break;
                 }
             }
