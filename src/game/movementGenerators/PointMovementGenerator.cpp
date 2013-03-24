@@ -71,6 +71,12 @@ bool PointMovementGenerator<T>::Update(T &unit, const uint32 &diff)
         return true;
     }
 
+    if (i_recalculateTravel)
+    {
+        i_recalculateTravel = false;
+        Initialize(unit);
+    }
+
     unit.addUnitState(UNIT_STAT_ROAMING_MOVE);
     return !unit.movespline->Finalized();
 }

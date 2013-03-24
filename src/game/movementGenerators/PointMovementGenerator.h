@@ -29,13 +29,15 @@ class MANGOS_DLL_SPEC PointMovementGenerator
 {
     public:
         PointMovementGenerator(uint32 _id, float _x, float _y, float _z, bool _generatePath) :
-          id(_id), i_x(_x), i_y(_y), i_z(_z), m_generatePath(_generatePath) {}
+          id(_id), i_x(_x), i_y(_y), i_z(_z), m_generatePath(_generatePath), i_recalculateTravel(false) {}
 
         void Initialize(T &);
         void Finalize(T &);
         void Interrupt(T &);
         void Reset(T &unit);
         bool Update(T &, const uint32 &diff);
+
+        void unitSpeedChanged() { i_recalculateTravel=true; }
 
         void MovementInform(T &);
 
@@ -47,6 +49,7 @@ class MANGOS_DLL_SPEC PointMovementGenerator
         uint32 id;
         float i_x,i_y,i_z;
         bool m_generatePath;
+        bool i_recalculateTravel;
 };
 
 class MANGOS_DLL_SPEC AssistanceMovementGenerator
