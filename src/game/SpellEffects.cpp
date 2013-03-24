@@ -4931,15 +4931,12 @@ void Spell::EffectDummy(SpellEffectEntry const* effect)
                 }
 
                 //Any effect which causes you to lose control of your character will supress the starfall effect.
-                if (m_caster->hasUnitState(UNIT_STAT_CAN_NOT_REACT))
+                if (m_caster->hasUnitState(UNIT_STAT_CAN_NOT_REACT_OR_LOST_CONTROL))
                     return;
 
-                switch(m_spellInfo->Id)
+                switch (m_spellInfo->Id)
                 {
                     case 50286: m_caster->CastSpell(unitTarget, 50288, true); return;
-                    case 53196: m_caster->CastSpell(unitTarget, 53191, true); return;
-                    case 53197: m_caster->CastSpell(unitTarget, 53194, true); return;
-                    case 53198: m_caster->CastSpell(unitTarget, 53195, true); return;
                     default:
                         sLog.outError("Spell::EffectDummy: Unhandeled Starfall spell rank %u",m_spellInfo->Id);
                         return;
