@@ -2451,6 +2451,8 @@ class MANGOS_DLL_SPEC Player : public Unit
         uint32 GetSaveTimer() const { return m_nextSave; }
         void   SetSaveTimer(uint32 timer) { m_nextSave = timer; }
 
+        void RemoveSpecDependentAuras();
+
         // Recall position
         WorldLocation m_recall;
         void   SaveRecallPosition();

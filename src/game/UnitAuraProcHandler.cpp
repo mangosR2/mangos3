@@ -360,8 +360,8 @@ pAuraProcHandler AuraProcHandler[TOTAL_AURAS]=
     &Unit::HandleNULLProc,                                  //325 0 spells in 4.3.4
     &Unit::HandleNULLProc,                                  //326 SPELL_AURA_PHASE_2 24 spells in 4.3.4
     &Unit::HandleNULLProc,                                  //327 0 spells in 4.3.4
-    &Unit::HandleNULLProc,                                  //328 SPELL_AURA_PROC_ON_POWER_AMOUNT 3 spells in 4.3.4 Eclipse Mastery Driver Passive
-    &Unit::HandleNULLProc,                                  //329 SPELL_AURA_MOD_RUNIC_POWER_REGEN 3 spells in 4.3.4
+    &Unit::HandleAuraProcOnPowerAmount,                     //328 SPELL_AURA_PROC_ON_TARGET_AMOUNT 2 spells in 4.3.4 Eclipse Mastery Driver Passive
+    &Unit::HandleNULLProc,                                  //329 SPELL_AURA_MOD_RUNIC_POWER_GAIN 3 spells in 4.3.4
     &Unit::HandleNULLProc,                                  //330 SPELL_AURA_ALLOW_CAST_WHILE_MOVING 16 spells in 4.3.4
     &Unit::HandleNULLProc,                                  //331 SPELL_AURA_MOD_WEATHER 10 spells in 4.3.4
     &Unit::HandleNULLProc,                                  //332 SPELL_AURA_OVERRIDE_ACTIONBAR_SPELLS 16 spells in 4.3.4
@@ -5710,4 +5710,106 @@ SpellAuraProcResult Unit::HandleIgnoreUnitStateAuraProc(Unit* /*pVictim*/, Damag
     }
 
     return SPELL_AURA_PROC_FAILED;
+}
+
+SpellAuraProcResult Unit::HandleAuraProcOnPowerAmount(Unit* /*pVictim*/, DamageInfo* /*damageInfo*/, Aura const* triggeredByAura, SpellEntry const *procSpell, uint32 /*procFlag*/, uint32 /*procEx*/, uint32 /*cooldown*/)
+{
+    SpellEntry const* spellProto = triggeredByAura->GetSpellProto();
+    int32 triggerAmount = triggeredByAura->GetModifier()->m_amount;
+
+    Powers powerType = Powers(triggeredByAura->GetModifier()->m_miscvalue);
+    if (GetPowerIndex(powerType) == INVALID_POWER_INDEX)
+        return SPELL_AURA_PROC_FAILED;
+
+    int32 powerAmount = GetPower(powerType);
+
+    switch (spellProto->Id)
+    {
+        case 79577:         // Eclipse Mastery Driver Passive
+        {
+            if (!procSpell)
+                return SPELL_AURA_PROC_FAILED;
+
+            // forbid proc when not in balance spec
+            if (!HasSpell(78674))
+                return SPELL_AURA_PROC_FAILED;
+
+            bool hasMarker = false;
+            int32 direction = 1;
+            // lunar Eclipse Marker
+            if (HasAura(67484))
+            {
+                hasMarker = true;
+                direction = -1;
+            }
+            // solar Eclipse Marker
+            else if (HasAura(67483))
+                hasMarker = true;
+
+            int32 powerMod = 0;
+            // Starfire
+            if (procSpell->Id == 2912)
+                powerMod = procSpell->CalculateSimpleValue(EFFECT_INDEX_1);
+            // Wrath
+            else if (procSpell->Id == 5176)
+                powerMod = -procSpell->CalculateSimpleValue(EFFECT_INDEX_1);
+            // Starsurge
+            else if (procSpell->Id == 78674)
+                powerMod = direction * procSpell->CalculateSimpleValue(EFFECT_INDEX_1);
+
+            // proc failed if wrong spell or spell direction does not match marker direction
+            if (!powerMod || hasMarker && direction * powerMod < 0)
+                return SPELL_AURA_PROC_FAILED;
+
+            if (powerMod > 0 && triggeredByAura->GetEffIndex() != EFFECT_INDEX_0)
+                return SPELL_AURA_PROC_FAILED;
+            else if (powerMod < 0 && triggeredByAura->GetEffIndex() != EFFECT_INDEX_1)
+                return SPELL_AURA_PROC_FAILED;
+
+            ModifyPower(powerType, powerMod);
+            int32 newPower = GetPower(powerType);
+
+            if (newPower == powerAmount)
+                return SPELL_AURA_PROC_FAILED;
+
+            // Eclipse is cleared when eclipse power reaches 0
+            if (powerAmount * newPower <= 0)
+            {
+                RemoveAurasDueToSpell(48517);
+                RemoveAurasDueToSpell(48518);
+            }
+
+            uint32 markerSpellAdd, markerSpellRemove;
+            if (newPower == triggerAmount)
+            {
+                // cast Eclipse
+                CastSpell(this, triggeredByAura->GetSpellEffect()->EffectTriggerSpell, true);
+
+                // solar marker or lunar marker
+                markerSpellAdd = triggeredByAura->GetEffIndex() == EFFECT_INDEX_0 ? 67484 : 67483;
+                markerSpellRemove = triggeredByAura->GetEffIndex() == EFFECT_INDEX_0 ? 67483 : 67484;
+
+                RemoveAurasDueToSpell(markerSpellRemove);
+                if (!HasAura(markerSpellAdd))
+                    CastSpell(this, markerSpellAdd, true);
+            }
+            // Marker caster only on Starfire and Wrath
+            else if (!hasMarker && (procSpell->Id == 2912 || procSpell->Id == 5176))
+            {
+                uint32 markerSpellAdd, markerSpellRemove;
+                // solar marker or lunar marker
+                markerSpellAdd = powerMod > 0 ? 67483 : 67484;
+                markerSpellRemove = powerMod < 0 ? 67483 : 67484;
+
+                RemoveAurasDueToSpell(markerSpellRemove);
+                if (!HasAura(markerSpellAdd))
+                    CastSpell(this, markerSpellAdd, true);
+            }
+            break;
+        }
+        default:
+            break;
+    }
+
+    return SPELL_AURA_PROC_OK;
 }

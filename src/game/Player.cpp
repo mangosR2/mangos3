@@ -4109,6 +4109,8 @@ bool Player::resetTalents(bool no_cost, bool all_specs)
     if (HasAtLoginFlag(AT_LOGIN_RESET_TALENTS) && all_specs)
         RemoveAtLoginFlag(AT_LOGIN_RESET_TALENTS, true);
 
+    RemoveSpecDependentAuras();
+
     if (m_usedTalentCount == 0 && !all_specs)
     {
         UpdateFreeTalentPoints(false);                      // for fix if need counter
@@ -17974,7 +17976,12 @@ void Player::SaveToDB()
 
     static_assert(MAX_STORED_POWERS == 5, "Query not updated.");
     for (uint32 i = 0; i < MAX_STORED_POWERS; ++i)
-        uberInsert.addUInt32(GetPowerByIndex(i));
+    {
+        if (getPowerType(i) != POWER_ECLIPSE)
+            uberInsert.addInt32(GetPowerByIndex(i));
+        else
+            uberInsert.addInt32(0);
+    }
 
     uberInsert.addUInt32(uint32(m_specsCount));
     uberInsert.addUInt32(uint32(m_activeSpec));
@@ -18140,6 +18147,20 @@ void Player::_SaveAuras()
 
     for (SpellAuraHolderMap::const_iterator itr = auraHolders.begin(); itr != auraHolders.end(); ++itr)
     {
+        SpellAuraHolderPtr holder = itr->second;
+
+        // below auras are not saved
+        switch (holder->GetId())
+        {
+            case 48517: // Eclipse (Solar)
+            case 48518: // Eclipse (Lunar)
+            case 67483: // Eclipse Marker
+            case 67484: // Eclipse Marker
+                continue;
+            default:
+                break;
+        }
+
         // skip all holders from spells that are passive or channeled
         // save singleTarget auras if self cast.
         bool selfCastHolder = itr->second->GetCasterGuid() == GetObjectGuid();
@@ -24186,6 +24207,9 @@ void Player::ActivateSpec(uint8 specNum)
 
     SetPower(pw, 0);
 
+    SetPower(POWER_HOLY_POWER, 0);
+    SetPower(POWER_ECLIPSE, 0);
+
     if (m_talentsPrimaryTree[m_activeSpec] && !sTalentTabStore.LookupEntry(m_talentsPrimaryTree[m_activeSpec]))
         resetTalents(true);
 
@@ -24193,6 +24217,8 @@ void Player::ActivateSpec(uint8 specNum)
     UpdateManaRegen();
 
     UpdateArmorSpecializations();
+
+    RemoveSpecDependentAuras();
 }
 
 void Player::UpdateSpecCount(uint8 count)
@@ -26390,4 +26416,16 @@ VoidStorageItem* Player::GetVoidStorageItem(uint64 id, uint8& slot) const
     }
 
     return NULL;
+}
+
+void Player::RemoveSpecDependentAuras()
+{
+    std::vector<uint32> auras2remove;
+    SpellAuraHolderMap const& vAuras = GetSpellAuraHolderMap();
+    for (SpellAuraHolderMap::const_iterator i = vAuras.begin(); i != vAuras.end(); ++i)
+        if (!i->second->IsPassive() && i->second->GetCasterGuid() == GetObjectGuid() && i->second->GetSpellProto()->HasAttribute(SPELL_ATTR_EX6_REMOVED_AT_SPEC_SWITCH))
+            auras2remove.push_back(i->second->GetId());
+
+    for (size_t i = 0; i < auras2remove.size(); ++i)
+        RemoveAurasDueToSpell(auras2remove[i]);
 }

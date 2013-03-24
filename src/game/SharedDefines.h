@@ -480,7 +480,7 @@ enum SpellAttributesEx6
     SPELL_ATTR_EX6_UNK3                        = 0x00000008,            // 3
     SPELL_ATTR_EX6_UNK4                        = 0x00000010,            // 4
     SPELL_ATTR_EX6_UNK5                        = 0x00000020,            // 5
-    SPELL_ATTR_EX6_UNK6                        = 0x00000040,            // 6
+    SPELL_ATTR_EX6_REMOVED_AT_SPEC_SWITCH      = 0x00000040,            // 6
     SPELL_ATTR_EX6_UNK7                        = 0x00000080,            // 7
     SPELL_ATTR_EX6_IGNORE_CCED_TARGETS         = 0x00000100,            // 8
     SPELL_ATTR_EX6_IGNORE_DETECTION            = 0x00000200,            // 9 many spells, ignored unit detections/phasing.
