@@ -719,7 +719,7 @@ bool ChatHandler::HandleModifyHolyPowerCommand(char* args)
     if (HasLowerSecurity(chr))
         return false;
 
-    int32 maxPower = int32(chr->GetMaxPower(POWER_HOLY_POWER));
+    int32 maxPower = chr->GetMaxPower(POWER_HOLY_POWER);
     if (power > maxPower)
     {
         SendSysMessage(LANG_BAD_VALUE);

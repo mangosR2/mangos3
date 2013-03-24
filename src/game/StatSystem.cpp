@@ -278,7 +278,7 @@ void Player::UpdateMaxPower(Powers power)
 
     UnitMods unitMod = UnitMods(UNIT_MOD_POWER_START + power);
 
-    uint32 create_power = GetCreateMaxPowers(power);
+    int32 create_power = GetCreateMaxPowers(power);
 
     // ignore classes without mana
     float bonusPower = (power == POWER_MANA && create_power > 0) ? GetManaBonusFromIntellect() : 0;
@@ -288,7 +288,7 @@ void Player::UpdateMaxPower(Powers power)
     value += GetModifierValue(unitMod, TOTAL_VALUE) +  bonusPower;
     value *= GetModifierValue(unitMod, TOTAL_PCT);
 
-    SetMaxPower(power, uint32(value));
+    SetMaxPower(power, int32(value));
 }
 
 void Player::UpdateAttackPowerAndDamage(bool ranged)
@@ -1093,7 +1093,7 @@ void Pet::UpdateMaxPower(Powers power)
     value += GetModifierValue(unitMod, TOTAL_VALUE);
     value *= GetModifierValue(unitMod, TOTAL_PCT);
 
-    SetMaxPower(power, uint32(value));
+    SetMaxPower(power, int32(value));
 }
 
 void Pet::UpdateAttackPowerAndDamage(bool ranged)

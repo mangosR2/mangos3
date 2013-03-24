@@ -1508,8 +1508,10 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         void setPowerType(Powers power);
         int32 GetPower(Powers power) const;
         int32 GetPowerByIndex(uint32 index) const;
-        uint32 GetMaxPower(Powers power) const;
-        uint32 GetMaxPowerByIndex(uint32 index) const;
+        int32 GetMinPowerByIndex(uint32 index) const;
+        int32 GetMinPower(Powers power) const;
+        int32 GetMaxPower(Powers power) const;
+        int32 GetMaxPowerByIndex(uint32 index) const;
         void SetPowerByIndex(uint32 power, int32 val);
         void SetMaxPowerByIndex(uint32 power, int32 val);
         void SetPower(Powers power, int32 val);
@@ -1926,8 +1928,8 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         uint32 GetCreateHealth() const { return GetUInt32Value(UNIT_FIELD_BASE_HEALTH); }
         void SetCreateMana(uint32 val) { SetUInt32Value(UNIT_FIELD_BASE_MANA, val); }
         uint32 GetCreateMana() const { return GetUInt32Value(UNIT_FIELD_BASE_MANA); }
-        uint32 GetCreatePowers(Powers power) const;
-        uint32 GetCreateMaxPowers(Powers power) const;
+        int32 GetCreatePowers(Powers power) const;
+        int32 GetCreateMaxPowers(Powers power) const;
         float GetPosStat(Stats stat) const { return GetFloatValue(UNIT_FIELD_POSSTAT0+stat); }
         float GetNegStat(Stats stat) const { return GetFloatValue(UNIT_FIELD_NEGSTAT0+stat); }
         float GetCreateStat(Stats stat) const { return m_createStats[stat]; }

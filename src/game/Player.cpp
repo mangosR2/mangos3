@@ -2298,7 +2298,7 @@ void Player::RewardRage(uint32 damage, uint32 weaponSpeedHitFactor, bool attacke
 
     addRage *= sWorld.getConfig(CONFIG_FLOAT_RATE_POWER_RAGE_INCOME);
 
-    ModifyPower(POWER_RAGE, uint32(addRage*10));
+    ModifyPower(POWER_RAGE, int32(addRage*10));
 }
 
 void Player::RegenerateAll(uint32 diff)
@@ -5008,10 +5008,13 @@ void Player::ResurrectPlayer(uint32 restorePercent, bool applySickness)
     // set health/powers (0- will be set in caller)
     if (restorePercent > 0)
     {
-        SetHealth(GetMaxHealth() * restorePercent / 100);
-        SetPower(POWER_MANA, GetMaxPower(POWER_MANA) * restorePercent / 100);
+        SetHealth(uint32(GetMaxHealth() * restorePercent));
+        SetPower(POWER_MANA, int32(GetMaxPower(POWER_MANA) * restorePercent));
         SetPower(POWER_RAGE, 0);
-        SetPower(POWER_ENERGY, GetMaxPower(POWER_ENERGY) * restorePercent / 100);
+        SetPower(POWER_ENERGY, int32(GetMaxPower(POWER_ENERGY) * restorePercent));
+        SetPower(POWER_SOUL_SHARDS, 0);
+        SetPower(POWER_FOCUS, int32(GetMaxPower(POWER_FOCUS) * restorePercent));
+        SetPower(POWER_HOLY_POWER, 0);
     }
 
     // trigger update zone for alive state zone updates
@@ -16410,8 +16413,10 @@ bool Player::LoadFromDB(ObjectGuid guid, SqlQueryHolder* holder)
     static_assert(MAX_STORED_POWERS == 5, "Query not updated.");
     for (uint32 i = 0; i < MAX_STORED_POWERS; ++i)
     {
-        uint32 savedpower = fields[47 + i].GetUInt32();
-        SetPowerByIndex(i, std::min(savedpower, GetMaxPowerByIndex(i)));
+        int32 savedpower = fields[47 + i].GetInt32();
+        savedpower = std::min(savedpower, GetMaxPowerByIndex(i));
+        savedpower = std::max(GetMinPowerByIndex(i), savedpower);
+        SetPowerByIndex(i, savedpower);
     }
 
     DEBUG_FILTER_LOG(LOG_FILTER_PLAYER_STATS, "The value of player %s after load item and aura is: ", m_name.c_str());
@@ -22310,6 +22315,11 @@ void Player::ResurectUsingRequestData()
     SetPower(POWER_RAGE, 0);
 
     SetPower(POWER_ENERGY, GetMaxPower(POWER_ENERGY));
+
+    SetPower(POWER_ECLIPSE, 0);
+    SetPower(POWER_SOUL_SHARDS, 0);
+    SetPower(POWER_HOLY_POWER, 0);
+    SetPower(POWER_FOCUS, GetMaxPower(POWER_FOCUS));
 
     if (m_resurrectAura)
         CastSpell(this, m_resurrectAura, true);

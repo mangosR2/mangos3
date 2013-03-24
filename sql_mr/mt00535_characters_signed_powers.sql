@@ -1,0 +1,5 @@
+ALTER TABLE `characters` MODIFY COLUMN `power1` int(10) NOT NULL DEFAULT '0';
+ALTER TABLE `characters` MODIFY COLUMN `power2` int(10) NOT NULL DEFAULT '0';
+ALTER TABLE `characters` MODIFY COLUMN `power3` int(10) NOT NULL DEFAULT '0';
+ALTER TABLE `characters` MODIFY COLUMN `power4` int(10) NOT NULL DEFAULT '0';
+ALTER TABLE `characters` MODIFY COLUMN `power5` int(10) NOT NULL DEFAULT '0';

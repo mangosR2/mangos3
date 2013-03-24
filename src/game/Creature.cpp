@@ -616,8 +616,8 @@ void Creature::RegenerateAll(uint32 update_diff)
 
 void Creature::Regenerate(Powers power)
 {
-    uint32 curValue = GetPower(power);
-    uint32 maxValue = GetMaxPower(power);
+    int32 curValue = GetPower(power);
+    int32 maxValue = GetMaxPower(power);
 
     if (curValue >= maxValue)
         return;

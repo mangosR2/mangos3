@@ -60,7 +60,7 @@ class PrioritizeManaUnitWraper
     public:
         explicit PrioritizeManaUnitWraper(Unit* unit) : i_unit(unit)
         {
-            uint32 maxmana = unit->GetMaxPower(POWER_MANA);
+            int32 maxmana = unit->GetMaxPower(POWER_MANA);
             i_percent = maxmana ? unit->GetPower(POWER_MANA) * 100 / maxmana : 101;
         }
         Unit* getUnit() const { return i_unit; }
@@ -5635,11 +5635,11 @@ void Spell::TakePower()
             // Divine Purpose
             if (m_caster->HasAura(90174))
             {
-                m_usedHolyPower = m_caster->GetMaxPower(POWER_HOLY_POWER);
+                m_usedHolyPower = uint32(m_caster->GetMaxPower(POWER_HOLY_POWER));
                 return;
             }
             else
-                m_usedHolyPower = m_caster->GetPower(POWER_HOLY_POWER);
+                m_usedHolyPower = uint32(m_caster->GetPower(POWER_HOLY_POWER));
         }
 
         // Zealotry - does not take power
