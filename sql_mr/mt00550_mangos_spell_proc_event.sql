@@ -774,3 +774,8 @@ INSERT INTO `spell_proc_event` (`entry`, `procFlags`, `procEx`, `CustomChance`) 
 DELETE FROM `spell_proc_event` WHERE `entry` = 48539;
 INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`, `SpellFamilyMaskB0`, `procEx`, `Cooldown`) VALUES
 (48539, 7, 16, 16, 262144, 12);
+
+-- Empowered Touch
+DELETE FROM `spell_proc_event` WHERE `entry` = 33879;
+INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA1`, `SpellFamilyMaskB1`, `procFlags`, `CustomChance`) VALUES
+(33879, 7, 32+64, 33554432, 16384, 100);

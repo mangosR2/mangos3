@@ -2268,8 +2268,16 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, DamageInfo* damageI
                 case 84840:
                     return HandleVengeanceProc(pVictim, damage, triggerAmount);
             }
+            // Empowered Touch
+            if (dummySpell->GetSpellIconID() == 2251)
+            {
+                if (!roll_chance_i(triggerAmount))
+                    return SPELL_AURA_PROC_FAILED;
+
+                triggered_spell_id = 88433;
+            }
             // King of the Jungle
-            if (dummySpell->GetSpellIconID() == 2850)
+            else if (dummySpell->GetSpellIconID() == 2850)
             {
                 if (!procSpell)
                     return SPELL_AURA_PROC_FAILED;
