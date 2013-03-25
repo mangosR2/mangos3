@@ -794,7 +794,6 @@ void PetAI::UpdateAI(const uint32 diff)
 
             if (b_castOk)
             {
-                m_creature->AddSpellAndCategoryCooldowns(spellInfo);
                 if (m_creature->IsPet())
                 {
                     if(((Pet*)m_creature)->getPetType() == SUMMON_PET && (urand(0, 100) < 10))
