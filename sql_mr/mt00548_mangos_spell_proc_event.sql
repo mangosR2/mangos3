@@ -759,3 +759,13 @@ INSERT INTO `spell_proc_event` (`entry`, `procFlags`, `procEx`, `CustomChance`) 
 DELETE FROM `spell_proc_event` WHERE `entry` = 33603;
 INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`) VALUES
 (33603, 7, 2);
+
+-- Fury of Stormrage
+DELETE FROM `spell_proc_event` WHERE `entry` = 17104;
+INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`) VALUES
+(17104, 7, 1);
+
+-- Fury of Stormrage (proc)
+DELETE FROM `spell_proc_event` WHERE `entry` = 81093;
+INSERT INTO `spell_proc_event` (`entry`, `procFlags`, `procEx`, `CustomChance`) VALUES
+(81093, 65536, 524288, 100);
