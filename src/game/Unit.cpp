@@ -8182,9 +8182,9 @@ void Unit::SpellDamageBonusDone(DamageInfo* damageInfo, uint32 stack)
         SpellEquippedItemsEntry const* spellEquip = (*i)->GetSpellProto()->GetSpellEquippedItems();
 
         if (!spellEquip ||
-            spellEquip->EquippedItemClass != -1 ||
+            spellEquip->EquippedItemClass != -1 &&
                                                             // -1 == any item class (not wand then)
-            spellEquip->EquippedItemInventoryTypeMask != 0)
+            spellEquip->EquippedItemInventoryTypeMask == 0)
                                                             // 0 == any inventory type (not wand then)
             continue;
 
@@ -8669,8 +8669,8 @@ int32 Unit::SpellBaseDamageBonusDone(SpellSchoolMask schoolMask)
     {
         SpellEquippedItemsEntry const* spellEquip = (*i)->GetSpellProto()->GetSpellEquippedItems();
         if (((*i)->GetModifier()->m_miscvalue & schoolMask) != 0 &&
-            spellEquip && spellEquip->EquippedItemClass == -1 &&        // -1 == any item class (not wand then)
-            spellEquip->EquippedItemInventoryTypeMask == 0)             //  0 == any inventory type (not wand then)
+            (!spellEquip || spellEquip->EquippedItemClass == -1 &&      // -1 == any item class (not wand then)
+            spellEquip->EquippedItemInventoryTypeMask == 0))            //  0 == any inventory type (not wand then)
                 DoneAdvertisedBenefit += (*i)->GetModifier()->m_amount;
     }
 

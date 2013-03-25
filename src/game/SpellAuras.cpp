@@ -7864,7 +7864,7 @@ void Aura::HandleModDamageDone(bool apply, bool Real)
     if((m_modifier.m_miscvalue & SPELL_SCHOOL_MASK_NORMAL) != 0)
     {
         // apply generic physical damage bonuses including wand case
-        if (equippedItems && (equippedItems->EquippedItemClass == -1 || target->GetTypeId() != TYPEID_PLAYER))
+        if (!equippedItems || equippedItems->EquippedItemClass == -1 || target->GetTypeId() != TYPEID_PLAYER)
         {
             target->HandleStatModifier(UNIT_MOD_DAMAGE_MAINHAND, TOTAL_VALUE, float(m_modifier.m_amount), apply);
             target->HandleStatModifier(UNIT_MOD_DAMAGE_OFFHAND, TOTAL_VALUE, float(m_modifier.m_amount), apply);
@@ -7953,7 +7953,7 @@ void Aura::HandleModDamagePercentDone(bool apply, bool Real)
     if((m_modifier.m_miscvalue & SPELL_SCHOOL_MASK_NORMAL) != 0)
     {
         // apply generic physical damage bonuses including wand case
-        if (equippedItems && (equippedItems->EquippedItemClass == -1 || target->GetTypeId() != TYPEID_PLAYER))
+        if (!equippedItems || equippedItems->EquippedItemClass == -1 || target->GetTypeId() != TYPEID_PLAYER)
         {
             target->HandleStatModifier(UNIT_MOD_DAMAGE_MAINHAND, TOTAL_PCT, float(m_modifier.m_amount), apply);
             target->HandleStatModifier(UNIT_MOD_DAMAGE_OFFHAND, TOTAL_PCT, float(m_modifier.m_amount), apply);

@@ -4385,7 +4385,7 @@ void Spell::SendCastResult(Player* caster, SpellEntry const* spellInfo, uint8 ca
         case SPELL_FAILED_EQUIPPED_ITEM_CLASS:
             {
                 SpellEquippedItemsEntry const* eqItems = spellInfo->GetSpellEquippedItems();
-                data << uint32(eqItems ? eqItems->EquippedItemClass : 0);
+                data << uint32(eqItems ? eqItems->EquippedItemClass : -1);
                 data << uint32(eqItems ? eqItems->EquippedItemSubClassMask : 0);
                 //data << uint32(eqItems ? eqItems->EquippedItemInventoryTypeMask : 0);
             }
@@ -4394,7 +4394,7 @@ void Spell::SendCastResult(Player* caster, SpellEntry const* spellInfo, uint8 ca
         case SPELL_FAILED_EQUIPPED_ITEM_CLASS_OFFHAND:
         {
             SpellEquippedItemsEntry const* eqItems = spellInfo->GetSpellEquippedItems();
-            data << uint32(eqItems ? eqItems->EquippedItemClass : 0);
+            data << uint32(eqItems ? eqItems->EquippedItemClass : -1);
             data << uint32(eqItems ? eqItems->EquippedItemSubClassMask : 0);
             break;
         }
