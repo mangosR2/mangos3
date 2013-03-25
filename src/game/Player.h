@@ -2741,6 +2741,7 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         std::deque<ObjectGuid> m_livingBombTargets;
         int32 m_pyromaniacCounter;
+        int32 m_naturesBountyCounter;
 
     protected:
 

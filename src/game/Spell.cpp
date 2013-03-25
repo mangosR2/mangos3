@@ -4143,6 +4143,16 @@ void Spell::cast(bool skipCheck)
             // Berserk (Bear Mangle part)
             else if (m_spellInfo->Id == 50334)
                 AddTriggeredSpell(58923);
+            // Lifebloom
+            else if (m_spellInfo->Id == 33763 || m_spellInfo->Id == 94447)
+            {
+                // Revitalize
+                if (m_caster->GetTypeId() == TYPEID_PLAYER && ((Player*)m_caster)->GetKnownTalentRankById(8269))
+                {
+                    // Replenishment
+                    AddTriggeredSpell(57669);
+                }
+            }
             break;
         }
         case SPELLFAMILY_HUNTER:
