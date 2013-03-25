@@ -10896,6 +10896,26 @@ void SpellAuraHolder::_AddSpellAuraHolder()
     }
 
     uint8 flags = GetAuraFlags() | ((GetCasterGuid() == GetTarget()->GetObjectGuid()) ? AFLAG_NOT_CASTER : AFLAG_NONE) | ((GetSpellMaxDuration(m_spellProto) > 0 && !m_spellProto->HasAttribute(SPELL_ATTR_EX5_NO_DURATION)) ? AFLAG_DURATION : AFLAG_NONE) | (IsPositive() ? AFLAG_POSITIVE : AFLAG_NEGATIVE);
+    for (int32 i = 0; i < MAX_EFFECT_INDEX; ++i)
+    {
+        if (Aura* aura = GetAuraByEffectIndex(i))
+        {
+            if (aura->GetModifier()->m_amount)
+            {
+                switch (aura->GetModifier()->m_auraname)
+                {
+                    case SPELL_AURA_SCHOOL_ABSORB:
+                    case SPELL_AURA_OVERRIDE_ACTIONBAR_SPELLS:
+                    case SPELL_AURA_OVERRIDE_ACTIONBAR_SPELLS_2:
+                        flags |= AFLAG_EFFECT_AMOUNT_SEND;
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+    }
+
     SetAuraFlags(flags);
 
     SetAuraLevel(caster ? caster->getLevel() : sWorld.getConfig(CONFIG_UINT32_MAX_PLAYER_LEVEL));
