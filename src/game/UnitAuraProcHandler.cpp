@@ -2268,8 +2268,29 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, DamageInfo* damageI
                 case 84840:
                     return HandleVengeanceProc(pVictim, damage, triggerAmount);
             }
+            // Nature's Ward
+            if (dummySpell->GetSpellIconID() == 2250)
+            {
+                if (GetTypeId() != TYPEID_PLAYER)
+                    return SPELL_AURA_PROC_FAILED;
+
+                if (GetHealthPercent() > 50.0f)
+                    return SPELL_AURA_PROC_FAILED;
+
+                if (!roll_chance_i(triggerAmount))
+                    return SPELL_AURA_PROC_FAILED;
+
+                triggered_spell_id = 774;
+                target = this;
+                if (GetSpellAuraHolder(triggered_spell_id, GetObjectGuid()))
+                    return SPELL_AURA_PROC_FAILED;
+
+                // mana cost spellmod spell
+                CastSpell(this, 45281, true);
+                break;
+            }
             // Empowered Touch
-            if (dummySpell->GetSpellIconID() == 2251)
+            else if (dummySpell->GetSpellIconID() == 2251)
             {
                 if (!roll_chance_i(triggerAmount))
                     return SPELL_AURA_PROC_FAILED;

@@ -779,3 +779,8 @@ INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`,
 DELETE FROM `spell_proc_event` WHERE `entry` = 33879;
 INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA1`, `SpellFamilyMaskB1`, `procFlags`, `CustomChance`) VALUES
 (33879, 7, 32+64, 33554432, 16384, 100);
+
+-- Nature's Ward
+DELETE FROM `spell_proc_event` WHERE `entry` = 33881;
+INSERT INTO `spell_proc_event` (`entry`, `SchoolMask`) VALUES
+(33881, 127);
