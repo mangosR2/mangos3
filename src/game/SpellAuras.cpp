@@ -2312,18 +2312,6 @@ void Aura::TriggerSpell()
                     case 768:                               // Cat Form
                         // trigger_spell_id not set and unknown effect triggered in this case, ignoring for while
                         return;
-                    case 22842:                             // Frenzied Regeneration
-                    {
-                        int32 LifePerRage = GetModifier()->m_amount;
-
-                        int32 lRage = target->GetPower(POWER_RAGE);
-                        if (lRage > 100)                    // rage stored as rage*10
-                            lRage = 100;
-                        target->ModifyPower(POWER_RAGE, -lRage);
-                        int32 FRTriggerBasePoints = int32(lRage*LifePerRage/10);
-                        target->CastCustomSpell(target, 22845, &FRTriggerBasePoints, NULL, NULL, true, NULL, this);
-                        return;
-                    }
                     default:
                         break;
                 }
@@ -7741,6 +7729,15 @@ void Aura::HandleAuraModIncreaseHealth(bool apply, bool Real)
             }
             return;
         }
+        case 22842:                                         // Frenzied Regeneration (Bear Form)
+        {
+            if (apply)
+                if (target->GetHealthPercent() < m_modifier.m_amount)
+                    target->SetHealthPercent(m_modifier.m_amount);
+
+            target->HandleStatModifier(UNIT_MOD_HEALTH, TOTAL_PCT, float(m_modifier.m_amount), apply);
+            return;
+        }
         // generic case
         default:
             target->HandleStatModifier(UNIT_MOD_HEALTH, TOTAL_VALUE, float(m_modifier.m_amount), apply);
@@ -10658,15 +10655,17 @@ void Aura::PeriodicDummyTick()
                     // Should be manauser
                     if (target->getPowerType() != POWER_RAGE)
                         return;
-                    uint32 rage = target->GetPower(POWER_RAGE);
+
+                    int32 rage = std::min(target->GetPower(POWER_RAGE), 100);
+
                     // Nothing todo
                     if (rage == 0)
                         return;
-                    int32 mod = (rage < 100) ? rage : 100;
-                    int32 points = target->CalculateSpellDamage(target, spell, EFFECT_INDEX_1);
-                    int32 regen = target->GetMaxHealth() * (mod * points / 10) / 1000;
+
+                    float healthPerRage = target->CalculateSpellDamage(target, spell, EFFECT_INDEX_1) / 100.0f;
+                    int32 regen = int32(target->GetMaxHealth() * rage * healthPerRage / 100 / 10);
                     target->CastCustomSpell(target, 22845, &regen, NULL, NULL, true, NULL, this);
-                    target->SetPower(POWER_RAGE, rage-mod);
+                    target->ModifyPower(POWER_RAGE, -rage);
                     return;
                 }
                 // Force of Nature
