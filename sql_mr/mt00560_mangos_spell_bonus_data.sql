@@ -80,6 +80,8 @@ REPLACE INTO `spell_bonus_data` (`entry`, `direct_bonus`, `dot_bonus`, `ap_bonus
 REPLACE INTO `spell_bonus_data` (`entry`, `direct_bonus`, `dot_bonus`, `ap_bonus`, `ap_dot_bonus`, `comments`) VALUES
 (779, 0, 0, 0.123, 0, 'Druid - Swipe'),
 (1822, 0, 0, 0.147, 0.147, 'Druid - Rake'),
+(6785, 0, 0, 0.071, 0, 'Druid - Ravage'),
 (80313, 0, 0, 0.071, 0, 'Druid - Pulverize'),
+(81170, 0, 0, 0.071, 0, 'Druid - Ravage!'),
 (81269, 0, 0, 0, 0, 'Druid - Efflorescence'),
 (93402, 0.18, 0.18, 0, 0, 'Druid - Sunfire');

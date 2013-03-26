@@ -9373,42 +9373,44 @@ bool Unit::IsSpellCrit(Unit *pVictim, SpellEntry const *spellProto, SpellSchoolM
         }
         case SPELL_DAMAGE_CLASS_MELEE:
         {
-            // Custom crit by class
-            switch (spellProto->GetSpellFamilyName())
+            if (pVictim)
             {
-                case SPELLFAMILY_WARRIOR:
+                // Ravage (Cat Form) and Ravage (Stampede)
+                if (spellProto->Id == 6785 || spellProto->Id == 81170)
                 {
-                    // Victory Rush
-                    if (spellProto->GetSpellFamilyFlags().test<CF_WARRIOR_VICTORY_RUSH>())
-                    {
-                        // Glyph of Victory Rush
-                        if (Aura* aura = GetAura(58382, EFFECT_INDEX_0))
-                            crit_chance += aura->GetModifier()->m_amount;
-                    }
-                    break;
-                }
-                case SPELLFAMILY_DRUID:
-                {
-                    // Rend and Tear crit chance with Ferocious Bite on bleeding target
-                    if (spellProto->GetSpellFamilyFlags().test<CF_DRUID_RIP_BITE>())
-                    {
-                        if (pVictim && pVictim->HasAuraState(AURA_STATE_BLEEDING))
+                    // Search Predatory Strikes
+                    Unit::AuraList const& mDummyAuras = GetAurasByType(SPELL_AURA_DUMMY);
+                    for (Unit::AuraList::const_iterator i = mDummyAuras.begin(); i != mDummyAuras.end(); ++i)
+                        if ((*i)->GetSpellProto()->GetSpellFamilyName() == SPELLFAMILY_DRUID && (*i)->GetSpellProto()->GetSpellIconID() == 1563 &&
+                            (*i)->GetEffIndex() == EFFECT_INDEX_0)
                         {
-                            Unit::AuraList const& aura = GetAurasByType(SPELL_AURA_DUMMY);
-                            for(Unit::AuraList::const_iterator itr = aura.begin(); itr != aura.end(); ++itr)
-                            {
-                                if ((*itr)->GetSpellProto()->GetSpellIconID() == 2859 && (*itr)->GetEffIndex() == 1)
-                                {
-                                    crit_chance += (*itr)->GetModifier()->m_amount;
-                                    break;
-                                }
-                            }
+                            if (pVictim->GetHealthPercent() > (*i)->GetSpellProto()->CalculateSimpleValue(EFFECT_INDEX_1))
+                                crit_chance += (*i)->GetModifier()->m_amount;
+                            break;
                         }
-                    }
-                    break;
                 }
-                default:
-                    break;
+                break;
+            }
+            // Rend and Tear - crit bonus to Ferocious Bite
+            else if (pVictim && spellProto->IsFitToFamily(SPELLFAMILY_DRUID, UI64LIT(0x0000000000800000)) && spellProto->GetSpellIconID() == 1680)
+            {
+                if (pVictim->HasAuraState(AURA_STATE_BLEEDING))
+                {
+                    Unit::AuraList const& mDummyAuras = GetAurasByType(SPELL_AURA_DUMMY);
+                    for (Unit::AuraList::const_iterator i = mDummyAuras.begin(); i != mDummyAuras.end(); ++i)
+                        if ((*i)->GetSpellProto()->GetSpellFamilyName() == SPELLFAMILY_DRUID && (*i)->GetSpellProto()->GetSpellIconID() == 2859 && (*i)->GetEffIndex() == 1)
+                        {
+                            crit_chance += (*i)->GetModifier()->m_amount;
+                            break;
+                        }
+                }
+            }
+            // Victory Rush
+            if (spellProto->GetSpellFamilyFlags().test<CF_WARRIOR_VICTORY_RUSH>())
+            {
+                // Glyph of Victory Rush
+                if (Aura* aura = GetAura(58382, EFFECT_INDEX_0))
+                    crit_chance += aura->GetModifier()->m_amount;
             }
             /* no break */
         }

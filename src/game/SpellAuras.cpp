@@ -4091,13 +4091,6 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                 return;
             }
 
-            // Predatory Strikes
-            if (target->GetTypeId()==TYPEID_PLAYER && GetSpellProto()->GetSpellIconID() == 1563)
-            {
-                ((Player*)target)->UpdateAttackPowerAndDamage();
-                return;
-            }
-
             break;
         }
         case SPELLFAMILY_ROGUE:
