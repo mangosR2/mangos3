@@ -799,3 +799,8 @@ INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA1`,
 DELETE FROM `spell_proc_event` WHERE `entry` = 77495;
 INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`, `SpellFamilyMaskB0`, `procFlags`, `CustomChance`) VALUES
 (77495, 7, 32 + 64, 2 + 33554432, 16384, 100);
+
+-- Savage Defense
+DELETE FROM `spell_proc_event` WHERE `entry` = 62600;
+INSERT INTO `spell_proc_event` (`entry`, `SchoolMask`, `procEx`) VALUES
+(62600, 127, 2);
