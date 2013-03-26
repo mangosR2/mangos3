@@ -784,3 +784,8 @@ INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA1`,
 DELETE FROM `spell_proc_event` WHERE `entry` = 33881;
 INSERT INTO `spell_proc_event` (`entry`, `SchoolMask`) VALUES
 (33881, 127);
+
+-- Efflorescence
+DELETE FROM `spell_proc_event` WHERE `entry` = 34151;
+INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskB0`) VALUES
+(34151, 7, 2);

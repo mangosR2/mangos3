@@ -10689,6 +10689,14 @@ void Aura::PeriodicDummyTick()
                         target->CastSpell(dynObj->GetPositionX(), dynObj->GetPositionY(), dynObj->GetPositionZ(), 81261, true, NULL, this, GetCasterGuid());
                     return;
                 }
+                // Efflorescence
+                case 81262:
+                {
+                    int32 bp = m_modifier.m_amount;
+                    if (DynamicObject* dynObj = target->GetDynObject(spell->Id))
+                        target->CastCustomSpell(dynObj->GetPosition(), 81269, &bp, NULL, NULL, true, NULL, this, GetCasterGuid());
+                    return;
+                }
                 default:
                     break;
             }

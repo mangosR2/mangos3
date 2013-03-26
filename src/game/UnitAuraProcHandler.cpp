@@ -4635,8 +4635,14 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(Unit *pVictim, DamageIn
                     return SPELL_AURA_PROC_FAILED;
                 break;
             }
+            // Efflorescense
+            else if (auraSpellInfo->GetSpellIconID() == 2886)
+            {
+                basepoints[1] = int32(triggerAmount * damage / 100.0f);
+                break;
+            }
             // Druid Forms Trinket
-            if (auraSpellInfo->Id==37336)
+            else if (auraSpellInfo->Id==37336)
             {
                 switch(GetShapeshiftForm())
                 {
