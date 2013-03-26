@@ -4410,7 +4410,9 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
         case FORM_MOONKIN:
         {
             // remove movement affects
-            target->RemoveSpellsCausingAura(SPELL_AURA_MOD_ROOT, GetHolder());
+            // check Disentaglement
+            if (form == FORM_MOONKIN || target->HasAura(96429))
+                target->RemoveSpellsCausingAura(SPELL_AURA_MOD_ROOT, GetHolder());
             std::set<uint32> toRemoveSpellList;
             Unit::AuraList const& slowingAuras = target->GetAurasByType(SPELL_AURA_MOD_DECREASE_SPEED);
             for (Unit::AuraList::const_iterator iter = slowingAuras.begin(); iter != slowingAuras.end(); ++iter)
@@ -4441,11 +4443,6 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
 
             for (std::set<uint32>::iterator i = toRemoveSpellList.begin(); i != toRemoveSpellList.end(); ++i)
                 target->RemoveAurasDueToSpellByCancel(*i);
-
-            // and polymorphic affects
-            if (target->IsPolymorphed())
-                target->RemoveAurasDueToSpell(target->getTransForm());
-
             break;
         }
         default:
