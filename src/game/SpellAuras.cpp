@@ -331,7 +331,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleNoImmediateEffect,                         //273 SPELL_AURA_X_RAY (client side implementation)
     &Aura::HandleNULL,                                      //274 proc free shot?
     &Aura::HandleNoImmediateEffect,                         //275 SPELL_AURA_MOD_IGNORE_SHAPESHIFT Use SpellClassMask for spell select
-    &Aura::HandleNULL,                                      //276 SPELL_AURA_MOD_DAMAGE_DONE_BY_MECHANIC
+    &Aura::HandleNoImmediateEffect,                         //276 SPELL_AURA_MOD_DAMAGE_DONE_BY_MECHANIC
     &Aura::HandleUnused,                                    //277 old SPELL_AURA_MOD_MAX_AFFECTED_TARGETS
     &Aura::HandleAuraModDisarm,                             //278 SPELL_AURA_MOD_DISARM_RANGED disarm ranged weapon
     &Aura::HandleInitializeImages,                          //279 aura for initialization mirror images (copy name)
