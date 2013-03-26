@@ -5889,6 +5889,18 @@ SpellAuraProcResult Unit::HandleAddPctModifierAuraProc(Unit* pVictim, DamageInfo
                 return SPELL_AURA_PROC_CANT_TRIGGER;
             break;
         }
+        case SPELLFAMILY_DRUID:
+        {
+            // Harmony
+            if (spellInfo->Id == 77495)
+            {
+                int32 bp = triggeredByAura->GetModifier()->m_amount;
+                // Harmony
+                CastCustomSpell(this, 100977, &bp, &bp, NULL, true);
+                return SPELL_AURA_PROC_OK;
+            }
+            break;
+        }
         case SPELLFAMILY_HUNTER:
         {
             // Lock and load triggered
