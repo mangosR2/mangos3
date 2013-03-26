@@ -16049,3 +16049,34 @@ bool Unit::IsVisionObscured(Unit* target) const
 
     return false;
 }
+
+void Unit::RemoveRootsAndSnares(ShapeshiftForm form, SpellAuraHolderPtr except)
+{
+    // remove movement affects
+    // check Disentaglement
+    if (form == FORM_NONE || form == FORM_MOONKIN || HasAura(96429))
+        RemoveSpellsCausingAura(SPELL_AURA_MOD_ROOT, except);
+
+    std::set<uint32> toRemoveSpellList;
+    Unit::AuraList const& slowingAuras = GetAurasByType(SPELL_AURA_MOD_DECREASE_SPEED);
+    for (Unit::AuraList::const_iterator iter = slowingAuras.begin(); iter != slowingAuras.end(); ++iter)
+    {
+        SpellEntry const* aurSpellInfo = (*iter)->GetSpellProto();
+
+        uint32 aurMechMask = GetAllSpellMechanicMask(aurSpellInfo);
+
+        // If spell that caused this aura has Croud Control or Daze effect
+        if ((aurMechMask & (1 << (MECHANIC_SNARE-1))) == 0 &&
+            // some Daze spells have these parameters instead of MECHANIC_DAZE (skip snare spells)
+            (aurMechMask & MECHANIC_NOT_REMOVED_BY_SHAPESHIFT) || aurSpellInfo->GetSpellIconID() == 15 && aurSpellInfo->GetDispel() == 0)
+        {
+            continue;
+        }
+
+        // All OK, remove aura now
+        toRemoveSpellList.insert(aurSpellInfo->Id);
+    }
+
+    for (std::set<uint32>::iterator i = toRemoveSpellList.begin(); i != toRemoveSpellList.end(); ++i)
+        RemoveAurasDueToSpellByCancel(*i);
+}

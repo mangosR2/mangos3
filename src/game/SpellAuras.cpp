@@ -4390,40 +4390,7 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
         case FORM_FLIGHT:
         case FORM_MOONKIN:
         {
-            // remove movement affects
-            // check Disentaglement
-            if (form == FORM_MOONKIN || target->HasAura(96429))
-                target->RemoveSpellsCausingAura(SPELL_AURA_MOD_ROOT, GetHolder());
-            std::set<uint32> toRemoveSpellList;
-            Unit::AuraList const& slowingAuras = target->GetAurasByType(SPELL_AURA_MOD_DECREASE_SPEED);
-            for (Unit::AuraList::const_iterator iter = slowingAuras.begin(); iter != slowingAuras.end(); ++iter)
-            {
-                if (iter->IsEmpty())
-                    continue;
-
-                SpellAuraHolderPtr holder = iter->GetHolder();
-                if (!holder || holder->IsDeleted())
-                    continue;
-
-                SpellEntry const* aurSpellInfo = holder->GetSpellProto();
-
-                uint32 aurMechMask = GetAllSpellMechanicMask(aurSpellInfo);
-
-                // If spell that caused this aura has Croud Control or Daze effect
-                if ((aurMechMask & MECHANIC_NOT_REMOVED_BY_SHAPESHIFT) ||
-                    // some Daze spells have these parameters instead of MECHANIC_DAZE (skip snare spells)
-                    (aurSpellInfo->GetSpellIconID() == 15 && aurSpellInfo->GetDispel() == 0 &&
-                    (aurMechMask & (1 << (MECHANIC_SNARE-1))) == 0))
-                {
-                    continue;
-                }
-
-                // All OK, remove aura now
-                toRemoveSpellList.insert(aurSpellInfo->Id);
-            }
-
-            for (std::set<uint32>::iterator i = toRemoveSpellList.begin(); i != toRemoveSpellList.end(); ++i)
-                target->RemoveAurasDueToSpellByCancel(*i);
+            target->RemoveRootsAndSnares(form, GetHolder());
             break;
         }
         default:
@@ -4471,7 +4438,7 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
                     Unit::AuraList const& mDummy = target->GetAurasByType(SPELL_AURA_DUMMY);
                     for (Unit::AuraList::const_iterator i = mDummy.begin(); i != mDummy.end(); ++i)
                     {
-                        if ((*i)->GetSpellProto()->GetSpellIconID() == 238)
+                        if ((*i)->GetSpellProto()->GetSpellIconID() == 238 && (*i)->GetSpellProto()->GetSpellFamilyName() == SPELLFAMILY_DRUID)
                         {
                             furorChance = (*i)->GetModifier()->m_amount;
                             break;
@@ -6045,10 +6012,29 @@ void Aura::HandleAuraModIncreaseSpeed(bool apply, bool Real)
 
     Unit* target = GetTarget();
 
-    target->UpdateSpeed(MOVE_RUN, true);
+    if (apply)
+    {
+        // Ranger: Spirit Walk - Removes all movement impairing effects
+        if (GetId() == 58875)
+            target->CastSpell(target, 58876, true);
+        // Dash or Stampeding Roar (Bear Form)
+        else if (GetId() == 1850 || GetId() == 77761)
+        {
+            if (Unit* caster = GetCaster())
+            {
+                if (caster->GetTypeId() == TYPEID_PLAYER)
+                {
+                    // search Feral Swiftness
+                    if (SpellEntry const* talent = ((Player*)caster)->GetKnownTalentRankById(8295))
+                        if (roll_chance_i(talent->CalculateSimpleValue(EFFECT_INDEX_1)))
+                            // cast Feral Swiftness Clear
+                            caster->CastSpell(target, 97985, true);
+                }
+            }
+        }
+    }
 
-    if (apply && GetSpellProto()->Id == 58875)
-        target->CastSpell(target, 58876, true);
+    target->UpdateSpeed(MOVE_RUN, true);
 }
 
 void Aura::HandleAuraModIncreaseMountedSpeed(bool apply, bool Real)

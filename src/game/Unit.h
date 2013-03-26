@@ -2389,6 +2389,8 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         int32 m_damage_counter_timer;
         uint32 GetDamageCounterInPastSecs(uint32 secs, int type);
 
+        void RemoveRootsAndSnares(ShapeshiftForm form = FORM_NONE, SpellAuraHolderPtr except = SpellAuraHolderPtr(NULL));
+
         // hack here
         time_t m_boneShieldCooldown;
 

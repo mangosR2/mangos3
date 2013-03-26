@@ -6073,7 +6073,17 @@ void Spell::EffectTriggerSpell(SpellEffectEntry const* effect)
             m_caster->CastSpell(m_caster, triggered_spell_id, false);
             return;
         }
+        // Stampeding Roar (Cat Form)
+        case 77764:
+        {
+            if (m_caster->GetTypeId() == TYPEID_PLAYER)
+                // search Feral Swiftness
+                if (SpellEntry const* talent = ((Player*)m_caster)->GetKnownTalentRankById(8295))
+                    if (roll_chance_i(talent->CalculateSimpleValue(EFFECT_INDEX_1)))
+                        break;
 
+            return;
+        }
     }
 
     // normal case
@@ -12556,6 +12566,14 @@ void Spell::EffectScriptEffect(SpellEffectEntry const* effect)
                     // get Rip
                     if (SpellAuraHolderPtr holder = unitTarget->GetSpellAuraHolder(1079, m_caster->GetObjectGuid()))
                         holder->RefreshHolder();
+                    return;
+                }
+                case 97985:                                 // Feral Swiftness Clear
+                {
+                    if (!unitTarget)
+                        return;
+
+                    unitTarget->RemoveRootsAndSnares();
                     return;
                 }
             }
