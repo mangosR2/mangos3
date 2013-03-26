@@ -1443,7 +1443,7 @@ void WorldSession::HandleCharFactionOrRaceChangeOpcode(WorldPacket& recv_data)
                 CharacterDatabase.PExecute("UPDATE IGNORE `character_inventory` set item = '%u' where item = '%u' AND guid = '%u'",
                     newTeam == TEAM_INDEX_ALLIANCE ? item_alliance : item_horde, newTeam == TEAM_INDEX_ALLIANCE ? item_horde : item_alliance, guid.GetCounter());
 
-                CharacterDatabase.PExecute("UPDATE IGNORE `item_instance` SET `data`=CONCAT(CAST(SUBSTRING_INDEX(`data`, ' ', 3) AS CHAR), ' ', '%u', ' ', CAST(SUBSTRING_INDEX(`data`, ' ', (4-64))AS CHAR)) WHERE CAST(SUBSTRING_INDEX(SUBSTRING_INDEX(`data`, ' ', 4), ' ', '-1') AS UNSIGNED) = '%u' AND owner_guid = '%u'",
+                CharacterDatabase.PExecute("UPDATE IGNORE `item_instance` SET `data`=CONCAT(CAST(SUBSTRING_INDEX(`data`, ' ', 3) AS CHAR), ' ', '%u', ' ', CAST(SUBSTRING_INDEX(TRIM(`data`), ' ', (4-64))AS CHAR)) WHERE CAST(SUBSTRING_INDEX(SUBSTRING_INDEX(`data`, ' ', 4), ' ', '-1') AS UNSIGNED) = '%u' AND owner_guid = '%u'",
                         newTeam == TEAM_INDEX_ALLIANCE ? item_alliance : item_horde, newTeam == TEAM_INDEX_ALLIANCE ? item_horde : item_alliance, guid.GetCounter());
             }
             while (result2->NextRow());
