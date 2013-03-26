@@ -75,3 +75,8 @@ REPLACE INTO `spell_bonus_data` (`entry`, `direct_bonus`, `dot_bonus`, `ap_bonus
 (11129, 0.429, 0, 0, 0, 'Mage - Combustion'),
 (30455, 0.378, 0, 0, 0, 'Mage - Ice Lance'),
 (87023, 0, 0, 0, 0, 'Mage - Cauterize');
+
+-- Druid
+REPLACE INTO `spell_bonus_data` (`entry`, `direct_bonus`, `dot_bonus`, `ap_bonus`, `ap_dot_bonus`, `comments`) VALUES
+(779, 0, 0, 0.123, 0, 'Druid - Swipe'),
+(1822, 0, 0, 0.147, 0.147, 'Druid - Rake');
