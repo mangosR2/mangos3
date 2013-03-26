@@ -9595,7 +9595,7 @@ void Aura::PeriodicTick()
                     funneldamageInfo.damage = gain;
                     funneldamageInfo.damageType = DOT;
                     pCaster->DealDamageMods(&funneldamageInfo);
-                    pCaster->SendSpellNonMeleeDamageLog(pCaster, GetId(), funneldamageInfo.damage, GetSpellSchoolMask(spellProto), funneldamageInfo.GetAbsorb(), 0, false, 0, false);
+                    pCaster->SendSpellNonMeleeDamageLog(pCaster, GetId(), funneldamageInfo.damage, GetSpellSchoolMask(spellProto), funneldamageInfo.GetAbsorb(), 0, false, 0, isCrit);
                     pCaster->DealDamage(pCaster, &funneldamageInfo, true);
                 }
             }
