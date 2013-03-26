@@ -9645,6 +9645,19 @@ uint32 Unit::SpellHealingBonusDone(Unit *pVictim, SpellEntry const *spellProto, 
             }
         }
     }
+    // Lifebloom final heal
+    else if (spellProto->Id == 33778)
+    {
+        // search Gift of the Earthmother
+        Unit::AuraList const& mDummyAuras = owner->GetAurasByType(SPELL_AURA_DUMMY);
+        for (Unit::AuraList::const_iterator itr = mDummyAuras.begin(); itr != mDummyAuras.end(); ++itr)
+            if ((*itr)->GetSpellProto()->GetSpellIconID() == 3186 && (*itr)->GetEffIndex() == EFFECT_INDEX_0 &&
+                (*itr)->GetSpellProto()->GetSpellFamilyName() == SPELLFAMILY_DRUID)
+            {
+                DoneTotalMod *= (100.0f + (*itr)->GetModifier()->m_amount) / 100.0f;
+                break;
+            }
+    }
 
     // Done fixed damage bonus auras
     int32 DoneAdvertisedBenefit  = SpellBaseHealingBonusDone(GetSpellSchoolMask(spellProto));

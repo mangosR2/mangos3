@@ -789,3 +789,9 @@ INSERT INTO `spell_proc_event` (`entry`, `SchoolMask`) VALUES
 DELETE FROM `spell_proc_event` WHERE `entry` = 34151;
 INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskB0`) VALUES
 (34151, 7, 2);
+
+-- Gift of the Earthmother
+DELETE FROM `spell_proc_event` WHERE `entry` = 51179;
+INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA1`, `procFlags`, `CustomChance`) VALUES
+(51179, 7, 16, 16384, 100);
+
