@@ -1320,14 +1320,11 @@ void Spell::EffectSchoolDMG(SpellEffectEntry const* effect)
                 // Ferocious Bite
                 if (m_caster->GetTypeId() == TYPEID_PLAYER && (classOptions && classOptions->GetSpellFamilyFlags().test<CF_DRUID_RIP_BITE>()) && m_spellInfo->GetSpellVisual() == 6587)
                 {
-                    // converts up to 30 points of energy into ($f1+$AP/410) additional damage
-                    float ap = m_caster->GetTotalAttackPowerValue(BASE_ATTACK);
-                    float multiple = ap / 410 + effect->DmgMultiplier;
-                    damage += int32(m_caster->GetComboPoints() * ap * 7 / 100);
-                    uint32 energy = m_caster->GetPower(POWER_ENERGY);
-                    uint32 used_energy = energy > 30 ? 30 : energy;
-                    damage += int32(used_energy * multiple);
-                    m_caster->SetPower(POWER_ENERGY,energy-used_energy);
+                    // converts up to 35 points to up to 100% damage
+                    int32 energy = std::min(m_caster->GetPower(POWER_ENERGY), 35);
+                    damage += int32(damage * energy / 35);
+
+                    m_caster->ModifyPower(POWER_ENERGY, -energy);
                 }
                 break;
             }
