@@ -729,3 +729,8 @@ DELETE FROM `spell_proc_event` WHERE `entry` IN (80318, 80319);
 INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`, `procFlags`, `CustomChance`) VALUES
 (80318, 7, 8388608, 16, 50),
 (80319, 7, 8388608, 16, 100);
+
+-- Berserk
+DELETE FROM `spell_proc_event` WHERE `entry` = 93622;
+INSERT INTO `spell_proc_event` (`entry`, `procEx`) VALUES
+(93622, 524288);

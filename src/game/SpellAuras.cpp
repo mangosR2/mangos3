@@ -1424,6 +1424,13 @@ void Aura::HandleAddModifier(bool apply, bool Real)
             }
             break;
         }
+        case 93622:     // Berserk
+        {
+            if (apply && target->GetTypeId() == TYPEID_PLAYER)
+                // remove Mangle (Bear) cooldown
+                ((Player*)target)->RemoveSpellCooldown(33878, true);
+            break;
+        }
         default:
             break;
     }
@@ -9393,8 +9400,19 @@ void Aura::PeriodicTick()
             {
                 damageInfo.procVictim |= PROC_FLAG_TAKEN_ANY_DAMAGE;
                 damageInfo.procEx     |= PROC_EX_DIRECT_DAMAGE;
+                // Lacerate
+                if (GetId() == 33745)
+                {
+                    if (Unit* caster = GetCaster())
+                    {
+                        // Berserk passive - removes Mangle (Bear) cooldown on Lacerate tick
+                        // original spell missing in dbc
+                        if (caster->HasSpell(50334) && roll_chance_i(50))
+                            caster->CastSpell(caster, 93622, true);
+                    }
+                }
             }
-
+            
             pCaster->ProcDamageAndSpell(&damageInfo);
             pCaster->DealDamage(target, &damageInfo, true);
 
@@ -12976,6 +12994,9 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
                     spellId2 = 51185;                       // King of the Jungle (Enrage damage aura)
                 }
             }
+            // Berserk
+            else if (GetId() == 50334)
+                spellId1 = 58923;                           // Berserk (Mangle (Bear) modifier)
             // Stampede
             else if (GetId() == 81021 || GetId() == 81022)
                 spellId1 = 109881;                          // Stampede Ravage Marker
