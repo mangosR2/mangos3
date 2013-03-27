@@ -4083,31 +4083,6 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                 return;
             }
 
-            // Improved Moonkin Form
-            if (GetSpellProto()->GetSpellIconID() == 2855)
-            {
-                uint32 spell_id;
-                switch(GetId())
-                {
-                    case 48384: spell_id = 50170; break;    //Rank 1
-                    case 48395: spell_id = 50171; break;    //Rank 2
-                    case 48396: spell_id = 50172; break;    //Rank 3
-                    default:
-                        sLog.outError("HandleAuraDummy: Not handled rank of IMF (Spell: %u)",GetId());
-                        return;
-                }
-
-                if (apply)
-                {
-                    if (target->GetShapeshiftForm() != FORM_MOONKIN)
-                        return;
-
-                    target->CastSpell(target, spell_id, true);
-                }
-                else
-                    target->RemoveAurasDueToSpell(spell_id);
-                return;
-            }
             break;
         }
         case SPELLFAMILY_ROGUE:
@@ -8659,50 +8634,6 @@ void Aura::HandleShapeshiftBoosts(bool apply)
             // remove Vengeance Buff on entering cat form
             if (form == FORM_CAT)
                 target->RemoveAurasDueToSpell(76691);
-
-            // Survival of the Fittest (Armor part)
-            if (form == FORM_BEAR)
-            {
-                Unit::AuraList const& modAuras = target->GetAurasByType(SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE);
-                for (Unit::AuraList::const_iterator i = modAuras.begin(); i != modAuras.end(); ++i)
-                {
-                    if ((*i)->GetSpellProto()->GetSpellFamilyName() == SPELLFAMILY_DRUID &&
-                        (*i)->GetSpellProto()->GetSpellIconID() == 961)
-                    {
-                        int32 bp = (*i)->GetSpellProto()->CalculateSimpleValue(EFFECT_INDEX_2);
-                        if (bp)
-                            target->CastCustomSpell(target, 62069, &bp, NULL, NULL, true, NULL, this);
-                        break;
-                    }
-                }
-            }
-
-            // Improved Moonkin Form
-            if (form == FORM_MOONKIN)
-            {
-                Unit::AuraList const& dummyAuras = target->GetAurasByType(SPELL_AURA_DUMMY);
-                for(Unit::AuraList::const_iterator i = dummyAuras.begin(); i != dummyAuras.end(); ++i)
-                {
-                    if ((*i)->GetSpellProto()->GetSpellFamilyName()==SPELLFAMILY_DRUID &&
-                        (*i)->GetSpellProto()->GetSpellIconID() == 2855)
-                    {
-                        uint32 spell_id = 0;
-                        switch((*i)->GetId())
-                        {
-                            case 48384:spell_id=50170;break;//Rank 1
-                            case 48395:spell_id=50171;break;//Rank 2
-                            case 48396:spell_id=50172;break;//Rank 3
-                            default:
-                                sLog.outError("Aura::HandleShapeshiftBoosts: Not handled rank of IMF (Spell: %u)",(*i)->GetId());
-                                break;
-                        }
-
-                        if (spell_id)
-                            target->CastSpell(target, spell_id, true, NULL, this);
-                        break;
-                    }
-                }
-            }
 
             // Heart of the Wild
             if (HotWSpellId)
