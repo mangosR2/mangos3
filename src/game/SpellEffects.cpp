@@ -4968,9 +4968,21 @@ void Spell::EffectDummy(SpellEffectEntry const* effect)
                     if (!unitTarget)
                         return;
 
-                    m_caster->CastSpell(unitTarget, 93983, true);
-                    m_caster->CastSpell(unitTarget, 93985, true);
-                    m_caster->CastSpell(unitTarget, 82365, true);
+                    m_caster->CastSpell(unitTarget, 93983, true);   // charge
+                    m_caster->CastSpell(unitTarget, 93985, true);   // interrupt
+
+                    // search Brutal Impact
+                    Unit::AuraList const& flatModAuras = m_caster->GetAurasByType(SPELL_AURA_ADD_FLAT_MODIFIER);
+                    for (Unit::AuraList::const_iterator itr = flatModAuras.begin(); itr != flatModAuras.end(); ++itr)
+                    {
+                        if ((*itr)->GetSpellProto()->GetSpellIconID() == 473 && (*itr)->GetEffIndex() == EFFECT_INDEX_0 &&
+                            (*itr)->GetSpellProto()->GetSpellFamilyName() == SPELLFAMILY_DRUID)
+                        {
+                            // cast mana cost increase spell
+                            m_caster->CastSpell(unitTarget, (*itr)->GetId() == 16940 ? 82364 : 82365, true);
+                            break;
+                        }
+                    }
                     return;
                 }
                 // Wild Mushroom : Detonate
