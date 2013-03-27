@@ -723,3 +723,9 @@ INSERT INTO `spell_proc_event` (`entry`, `SchoolMask`, `procFlags`, `procEx`, `C
 DELETE FROM `spell_proc_event` WHERE `entry` = 80316;
 INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`, `SpellFamilyMaskC0`) VALUES
 (80316, 7, 524288, 2147483712);
+
+-- Blood in the Water
+DELETE FROM `spell_proc_event` WHERE `entry` IN (80318, 80319);
+INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`, `procFlags`, `CustomChance`) VALUES
+(80318, 7, 8388608, 16, 50),
+(80319, 7, 8388608, 16, 100);

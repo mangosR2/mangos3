@@ -2373,6 +2373,17 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, DamageInfo* damageI
                 }
                 break;
             }
+            // Blood in the Water
+            else if (dummySpell->GetSpellIconID() == 4399)
+            {
+                if (!pVictim || pVictim->GetHealthPercent() > triggerAmount)
+                    return SPELL_AURA_PROC_FAILED;
+
+                // Rip and Ferocius Bite have intersecting class masks
+                if (!procSpell || procSpell->Id != 22568)
+                    return SPELL_AURA_PROC_FAILED;
+                break;
+            }
             break;
         }
         case SPELLFAMILY_ROGUE:
@@ -4639,6 +4650,17 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(Unit *pVictim, DamageIn
                     default:
                         return SPELL_AURA_PROC_FAILED;
                 }
+            }
+            // Blood in the Water
+            else if (auraSpellInfo->GetSpellIconID() == 4399)
+            {
+                if (!pVictim || pVictim->GetHealthPercent() > triggerAmount)
+                    return SPELL_AURA_PROC_FAILED;
+
+                // Rip and Ferocius Bite have intersecting class masks
+                if (!procSpell || procSpell->Id != 22568)
+                    return SPELL_AURA_PROC_FAILED;
+                break;
             }
             // Druid T9 Feral Relic (Lacerate, Swipe, Mangle, and Shred)
             else if (auraSpellInfo->Id==67353)

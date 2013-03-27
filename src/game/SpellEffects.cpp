@@ -12522,6 +12522,16 @@ void Spell::EffectScriptEffect(SpellEffectEntry const* effect)
 
                     unitTarget->CastSpell(m_caster, effect->CalculateSimpleValue(), true);
                 }
+                case 80863:                                 // Blood in the Water
+                {
+                    if (!unitTarget)
+                        return;
+
+                    // get Rip
+                    if (SpellAuraHolderPtr holder = unitTarget->GetSpellAuraHolder(1079, m_caster->GetObjectGuid()))
+                        holder->RefreshHolder();
+                    return;
+                }
             }
             break;
         }
