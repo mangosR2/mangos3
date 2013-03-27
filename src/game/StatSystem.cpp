@@ -213,6 +213,22 @@ void Player::UpdateArmor()
 
     value *= GetModifierValue(unitMod, TOTAL_PCT);
 
+    ShapeshiftForm form = GetShapeshiftForm();
+    if (form == FORM_BEAR)
+    {
+        // search Thick Hide
+        Unit::AuraList const& dummyAuras = GetAurasByType(SPELL_AURA_DUMMY);
+        for (Unit::AuraList::const_iterator itr = dummyAuras.begin(); itr != dummyAuras.end(); ++itr)
+        {
+            if ((*itr)->GetSpellProto()->GetSpellIconID() == 1558 && (*itr)->GetEffIndex() == EFFECT_INDEX_0 &&
+                (*itr)->GetSpellProto()->GetSpellFamilyName() == SPELLFAMILY_GENERIC)
+            {
+                value *= (100.0f + (*itr)->GetModifier()->m_amount) / 100.0f;
+                break;
+            }
+        }
+    }
+
     SetArmor(int32(value));
 
     UpdateAttackPowerAndDamage();                           // armor dependent auras update for SPELL_AURA_MOD_ATTACK_POWER_OF_ARMOR
