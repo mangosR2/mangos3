@@ -7026,6 +7026,13 @@ SpellCastResult Spell::CheckCast(bool strict)
                     return SPELL_FAILED_DONT_REPORT;
                 }
 
+                PetSaveMode slot = plrCaster->GetFreeStableSlot();
+                if (slot == PET_SAVE_NOT_IN_SLOT)
+                {
+                    plrCaster->SendPetTameFailure(PETTAME_TOOMANY);
+                    return SPELL_FAILED_DONT_REPORT;
+                }
+
                 break;
             }
             case SPELL_EFFECT_LEARN_SPELL:

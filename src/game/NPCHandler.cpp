@@ -37,6 +37,7 @@
 
 enum StableResultCode
 {
+    STABLE_ERR_NONE         = 0x00,                         // does nothing, just resets stable states
     STABLE_ERR_MONEY        = 0x01,                         // "you don't have enough money"
     STABLE_INVALID_SLOT     = 0x03,
     STABLE_ERR_STABLE       = 0x06,                         // currently used in most fail cases
@@ -601,24 +602,13 @@ void WorldSession::SendStablePet( ObjectGuid guid )
     size_t wpos = data.wpos();
     data << uint8(0);                                       // place holder for slot show number
 
-    data << uint8(GetPlayer()->m_stableSlots);
+    data << uint8(MAX_PET_STABLES);
 
     uint8 num = 0;                                          // counter for place holder
 
-    // not let move dead pet in slot
-    if(pet && pet->isAlive() && pet->getPetType()==HUNTER_PET)
-    {
-        data << uint32(pet->GetCharmInfo()->GetPetNumber());
-        data << uint32(pet->GetEntry());
-        data << uint32(pet->getLevel());
-        data << pet->GetName();                             // petname
-        data << uint8(1);                                   // 1 = current, 2/3 = in stable (any from 4,5,... create problems with proper show)
-        ++num;
-    }
-
-    //                                                     0      1   2      3      4
-    QueryResult* result = CharacterDatabase.PQuery("SELECT owner, id, entry, level, name FROM character_pet WHERE owner = '%u' AND slot >= '%u' AND slot <= '%u' ORDER BY slot",
-        _player->GetGUIDLow(),PET_SAVE_FIRST_STABLE_SLOT,PET_SAVE_LAST_STABLE_SLOT);
+    //                                                     0      1   2      3      4     5
+    QueryResult* result = CharacterDatabase.PQuery("SELECT owner, id, entry, level, name, actual_slot FROM character_pet WHERE owner = '%u' AND actual_slot >= '%u' AND actual_slot <= '%u' ORDER BY actual_slot",
+        _player->GetGUIDLow(), PET_SAVE_AS_CURRENT, PET_SAVE_LAST_STABLE_SLOT);
 
     if(result)
     {
@@ -630,7 +620,7 @@ void WorldSession::SendStablePet( ObjectGuid guid )
             data << uint32(fields[2].GetUInt32());          // creature entry
             data << uint32(fields[3].GetUInt32());          // level
             data << fields[4].GetString();                  // name
-            data << uint8(2);                               // 1 = current, 2/3 = in stable (any from 4,5,... create problems with proper show)
+            data << uint8(fields[5].GetUInt32() < PET_SAVE_FIRST_STABLE_SLOT ? 1 : 3);  // 1 = current, 2/3 = in stable (any from 4,5,... create problems with proper show)
 
             ++num;
         }
@@ -641,6 +631,8 @@ void WorldSession::SendStablePet( ObjectGuid guid )
 
     data.put<uint8>(wpos, num);                             // set real data to placeholder
     SendPacket(&data);
+
+    SendStableResult(STABLE_ERR_NONE);
 }
 
 void WorldSession::SendStableResult(uint8 res)

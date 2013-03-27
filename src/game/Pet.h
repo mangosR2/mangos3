@@ -45,7 +45,6 @@ enum PetSaveMode
     PET_SAVE_LAST_STABLE_SLOT  =  MAX_PET_STABLES + PET_SAVE_FIRST_STABLE_SLOT - 1, // last in DB stable slot index (including), all higher have same meaning as PET_SAVE_NOT_IN_SLOT
     PET_SAVE_NOT_IN_SLOT       =  100,                      // for avoid conflict with stable size grow will use 100
     PET_SAVE_REAGENTS          =  101,                      // PET_SAVE_NOT_IN_SLOT with reagents return
-    PET_SAVE_FIRST_AVAILABLE   =  102,
 };
 
 enum PetSpellState
@@ -160,7 +159,7 @@ class MANGOS_DLL_SPEC Pet : public Creature
 
         bool Create (uint32 guidlow, CreatureCreatePos& cPos, CreatureInfo const* cinfo, uint32 pet_number, Unit* owner);
         bool CreateBaseAtCreature(Creature* creature, Unit* owner);
-        bool LoadPetFromDB( Player* owner,uint32 petentry = 0,uint32 petnumber = 0, bool current = false, CreatureCreatePos* pos = NULL );
+        bool LoadPetFromDB(Player* owner, uint32 petentry = 0, uint32 petnumber = 0, bool current = false, CreatureCreatePos* pos = NULL, PetSaveMode slot = PET_SAVE_NOT_IN_SLOT);
         void SavePetToDB(PetSaveMode mode);
         void Unsummon(PetSaveMode mode, Unit* owner = NULL);
         static void DeleteFromDB(uint32 guidlow, bool separate_transaction = true);
@@ -285,6 +284,9 @@ class MANGOS_DLL_SPEC Pet : public Creature
 
         bool    m_removed;                                  // prevent overwrite pet state in DB at next Pet::Update if pet already removed(saved)
         bool    m_updated;                                  // pet updated now
+
+        PetSaveMode m_actualSlot;
+
     protected:
         PetType m_petType;
         int32   m_duration;                                 // time until unsummon (used mostly for summoned guardians and not used for controlled pets)

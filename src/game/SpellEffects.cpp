@@ -8706,6 +8706,10 @@ void Spell::EffectTameCreature(SpellEffectEntry const* /*effect*/)
     //SendChannelUpdate(0);
     finish();
 
+    PetSaveMode slot = plr->GetFreeStableSlot();
+    if (slot == PET_SAVE_NOT_IN_SLOT)
+        return;
+
     Pet* pet = new Pet(HUNTER_PET);
 
     pet->SetCreateSpellID(m_spellInfo->Id);
@@ -8735,12 +8739,23 @@ void Spell::EffectTameCreature(SpellEffectEntry const* /*effect*/)
     creatureTarget->ForcedDespawn();
 
     // visual effect for levelup
-    pet->SetLevel(level);
+    pet->SetUInt32Value(UNIT_FIELD_LEVEL, level);
+
+    pet->m_actualSlot = slot;
+
+    // caster have pet now
+    plr->SetPet(pet);
+
+    pet->SavePetToDB(PET_SAVE_AS_CURRENT);
+    plr->PetSpellInitialize();
 }
 
 void Spell::EffectSummonPet(SpellEffectEntry const* effect)
 {
+    PetSaveMode slot = PET_SAVE_NOT_IN_SLOT;
     uint32 petentry = effect->EffectMiscValue;
+    if (!petentry && m_spellInfo->GetSpellFamilyName() == SPELLFAMILY_GENERIC)
+        slot = PetSaveMode(damage);
 
     Pet* OldSummon = m_caster->GetPet();
 
@@ -8795,7 +8810,7 @@ void Spell::EffectSummonPet(SpellEffectEntry const* effect)
     CreatureCreatePos pos = CreatureCreatePos(m_caster->GetMap(), loc);
 
     // petentry==0 for hunter "call pet" (current pet summoned if any)
-    if (m_caster->GetTypeId() == TYPEID_PLAYER && NewSummon->LoadPetFromDB((Player*)m_caster, petentry, 0, false, &pos))
+    if (m_caster->GetTypeId() == TYPEID_PLAYER && NewSummon->LoadPetFromDB((Player*)m_caster, petentry, 0, false, &pos, slot))
         return;
 
     // not error in case fail hunter call pet

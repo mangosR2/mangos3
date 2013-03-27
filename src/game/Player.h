@@ -2478,6 +2478,8 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         void RemoveSpecDependentAuras();
 
+        PetSaveMode GetFreeStableSlot() const;
+
         // Recall position
         WorldLocation m_recall;
         void   SaveRecallPosition();
