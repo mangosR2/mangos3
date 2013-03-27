@@ -713,3 +713,8 @@ INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskB0`,
 DELETE FROM `spell_proc_event` WHERE `entry` = 78892;
 INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskC0`, `SpellFamilyMaskC1`, `procFlags`, `CustomChance`) VALUES
 (78892, 7, 16, 32+2048, 65536+16384, 100);
+
+-- Leader of the Pack
+DELETE FROM `spell_proc_event` WHERE `entry` = 24932;
+INSERT INTO `spell_proc_event` (`entry`, `SchoolMask`, `procFlags`, `procEx`, `Cooldown`, `CustomChance`) VALUES
+(24932, 127, 0x00001154, 2, 6, 100);

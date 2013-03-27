@@ -2118,28 +2118,26 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, DamageInfo* damageI
                 // Leader of the Pack
                 case 24932:
                 {
-                    // dummy m_amount store health percent (!=0 if Improved Leader of the Pack applied)
+                    // dummy m_amount store health percent
                     int32 heal_percent = triggeredByAura->GetModifier()->m_amount;
-                    if (!heal_percent)
-                        return SPELL_AURA_PROC_FAILED;
 
                     // check explicitly only to prevent mana cast when halth cast cooldown
                     if (cooldown && HasSpellCooldown(34299))
                         return SPELL_AURA_PROC_FAILED;
 
+                    if (triggeredByAura->GetCasterGuid() != GetObjectGuid())
+                        return SPELL_AURA_PROC_FAILED;
+
                     // health
                     triggered_spell_id = 34299;
-                    basepoints[0] = GetMaxHealth() * heal_percent / 100;
+                    basepoints[0] = int32(GetMaxHealth() * heal_percent / 100);
                     target = this;
 
-                    // mana to caster
-                    if (triggeredByAura->GetCasterGuid() == GetObjectGuid())
+                    if (SpellEntry const* manaSpell = sSpellStore.LookupEntry(17007))
                     {
-                        if (SpellEntry const* manaCastEntry = sSpellStore.LookupEntry(60889))
-                        {
-                            int32 mana_percent = manaCastEntry->CalculateSimpleValue(EFFECT_INDEX_0) * heal_percent;
-                            CastCustomSpell(this, manaCastEntry, &mana_percent, NULL, NULL, true, castItem, triggeredByAura);
-                        }
+                        // mana
+                        int32 mana = int32(GetMaxPower(POWER_MANA) * manaSpell->CalculateSimpleValue(EFFECT_INDEX_0) / 100);
+                        CastCustomSpell(this, 68285, &mana, NULL, NULL, true, castItem, triggeredByAura);
                     }
                     break;
                 }
