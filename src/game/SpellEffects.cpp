@@ -9254,9 +9254,36 @@ void Spell::EffectWeaponDmg(SpellEffectEntry const* effect)
                 fixed_bonus += CalculateDamage(SpellEffectIndex(j), unitTarget);
                 break;
             case SPELL_EFFECT_NORMALIZED_WEAPON_DMG:
-                fixed_bonus += CalculateDamage(SpellEffectIndex(j), unitTarget);
+            {
+                // Pulverize
+                if (m_spellInfo->Id == 80313)
+                {
+                    int32 normalizedMod = 1;
+                    if (unitTarget)
+                    {
+                        normalizedMod = 0;
+                        if (SpellAuraHolderPtr holder = unitTarget->GetSpellAuraHolder(33745, m_caster->GetObjectGuid()))
+                        {
+                            normalizedMod = holder->GetStackAmount();
+                            unitTarget->RemoveSpellAuraHolder(holder);
+
+                            // crit bonus
+                            if (SpellEntry const* spellInfo = sSpellStore.LookupEntry(80951))
+                            {
+                                int32 bp =  spellInfo->CalculateSimpleValue(EFFECT_INDEX_0) * normalizedMod;
+                                m_caster->CastCustomSpell(m_caster, spellInfo, &bp, NULL, NULL, true);
+                            }
+                        }
+                    }
+
+                    fixed_bonus += CalculateDamage(SpellEffectIndex(j), unitTarget) * normalizedMod * 6 / 10;
+                }
+                else
+                    fixed_bonus += CalculateDamage(SpellEffectIndex(j), unitTarget);
+
                 normalized = true;
                 break;
+            }
             case SPELL_EFFECT_WEAPON_PERCENT_DAMAGE:
                 weaponDamagePercentMod *= float(CalculateDamage(SpellEffectIndex(j), unitTarget)) / 100.0f;
 
