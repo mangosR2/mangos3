@@ -609,9 +609,6 @@ class MANGOS_DLL_SPEC WorldSession
         void HandleNpcTextQueryOpcode(WorldPacket& recvPacket);
         void HandleBinderActivateOpcode(WorldPacket& recvPacket);
         void HandleListStabledPetsOpcode(WorldPacket& recvPacket);
-        void HandleStablePet(WorldPacket& recvPacket);
-        void HandleUnstablePet(WorldPacket& recvPacket);
-        void HandleBuyStableSlot(WorldPacket& recvPacket);
         void HandleStableRevivePet(WorldPacket& recvPacket);
         void HandleStableSwapPet(WorldPacket& recvPacket);
 
