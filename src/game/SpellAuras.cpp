@@ -7363,6 +7363,26 @@ void Aura::HandleModResistancePercent(bool apply, bool /*Real*/)
                 target->ApplyResistanceBuffModsPercentMod(SpellSchools(i), m_modifier.m_amount > 0, change, apply);
         }
     }
+
+    // Faerie Fire
+    if (GetId() == 91565)
+    {
+        if (Unit* caster = GetCaster())
+        {
+            // search Feral Aggression
+            Unit::AuraList const& mDummyAuras = caster->GetAurasByType(SPELL_AURA_DUMMY);
+            for (Unit::AuraList::const_iterator itr = mDummyAuras.begin(); itr != mDummyAuras.end(); ++itr)
+            {
+                SpellEntry const* spell = (*itr)->GetSpellProto();
+                if (spell->GetSpellIconID() == 960 && spell->GetSpellFamilyName() == SPELLFAMILY_DRUID &&
+                    (*itr)->GetEffIndex() == EFFECT_INDEX_0)
+                {
+                    GetHolder()->SetStackAmount((*itr)->GetModifier()->m_amount);
+                    break;
+                }
+            }
+        }
+    }
 }
 
 void Aura::HandleModBaseResistance(bool apply, bool /*Real*/)
@@ -7400,7 +7420,7 @@ void Aura::HandleAuraModStat(bool apply, bool /*Real*/)
                 if (Unit* caster = GetCaster())
                 {
                     if (Unit* owner = caster->GetOwner())
-                        m_modifier.m_amount = int32(owner->GetTotalStatValue(STAT_SPIRIT) * m_modifier.m_amount / 100.0f);
+                        ChangeAmount(int32(owner->GetTotalStatValue(STAT_SPIRIT) * m_modifier.m_amount / 100.0f));
                 }
                 break;
             }
