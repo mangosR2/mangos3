@@ -706,3 +706,10 @@ INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`,
 DELETE FROM `spell_proc_event` WHERE `entry` = 86347;
 INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskB0`, `procFlags`) VALUES
 (86347, 3, 1, 16384);
+
+### Druid ###
+
+-- Stampede
+DELETE FROM `spell_proc_event` WHERE `entry` = 78892;
+INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskC0`, `SpellFamilyMaskC1`, `procFlags`, `CustomChance`) VALUES
+(78892, 7, 16, 32+2048, 65536+16384, 100);

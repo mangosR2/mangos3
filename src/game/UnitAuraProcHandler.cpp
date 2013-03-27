@@ -2355,6 +2355,26 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, DamageInfo* damageI
                 basepoints[0] = triggerAmount * damage / 100;
                 break;
             }
+            // Stampede
+            else if (dummySpell->GetSpellIconID() == 3930)
+            {
+                switch (effIndex)
+                {
+                    case EFFECT_INDEX_0:    // Feral Charge (Bear)
+                    {
+                        triggered_spell_id = dummySpell->Id == 78892 ? 81016 : 81017;
+                        break;
+                    }
+                    case EFFECT_INDEX_1:    // Feral Charge (Cat)
+                    {
+                        triggered_spell_id = dummySpell->Id == 78892 ? 81021 : 81022;
+                        break;
+                    }
+                    default:
+                        return SPELL_AURA_PROC_FAILED;
+                }
+                break;
+            }
             break;
         }
         case SPELLFAMILY_ROGUE:

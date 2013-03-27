@@ -12959,6 +12959,9 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
                     spellId2 = 51185;                       // King of the Jungle (Enrage damage aura)
                 }
             }
+            // Stampede
+            else if (GetId() == 81021 || GetId() == 81022)
+                spellId1 = 109881;                          // Stampede Ravage Marker
             else
                 return;
             break;
