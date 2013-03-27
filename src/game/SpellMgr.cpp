@@ -2530,6 +2530,10 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
                 if (classOptions_1->IsFitToFamily<SPELLFAMILY_DRUID, CF_DRUID_MARK_OF_THE_WILD>() &&
                     classOptions_2->IsFitToFamily<SPELLFAMILY_DRUID, CF_DRUID_MARK_OF_THE_WILD>())
                     return true;
+
+                // Tiger's Fury, Primal Madness, etc
+                if (spellInfo_1->GetSpellIconID() == 1181 && spellInfo_2->GetSpellIconID() == 1181)
+                    return false;
             }
             break;
         case SPELLFAMILY_PALADIN:

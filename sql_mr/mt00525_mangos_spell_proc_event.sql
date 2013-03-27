@@ -718,3 +718,8 @@ INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskC0`,
 DELETE FROM `spell_proc_event` WHERE `entry` = 24932;
 INSERT INTO `spell_proc_event` (`entry`, `SchoolMask`, `procFlags`, `procEx`, `Cooldown`, `CustomChance`) VALUES
 (24932, 127, 0x00001154, 2, 6, 100);
+
+-- Primal Madness
+DELETE FROM `spell_proc_event` WHERE `entry` = 80316;
+INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`, `SpellFamilyMaskC0`) VALUES
+(80316, 7, 524288, 2147483712);

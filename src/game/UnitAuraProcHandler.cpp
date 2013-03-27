@@ -4618,6 +4618,14 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(Unit *pVictim, DamageIn
         }
         case SPELLFAMILY_DRUID:
         {
+            // Primal Madness
+            if (auraSpellInfo->GetSpellIconID() == 1181)
+            {
+                // proc only from Berserk and Enrage
+                if (!procSpell || procSpell->GetSpellIconID() != 961 && procSpell->GetSpellIconID() != 2852)
+                    return SPELL_AURA_PROC_FAILED;
+                break;
+            }
             // Druid Forms Trinket
             if (auraSpellInfo->Id==37336)
             {
