@@ -2580,6 +2580,14 @@ uint32 SpellMgr::GetSpellMaxTargetsWithCustom(SpellEntry const* spellInfo, Unit 
                 case 44869:                                 // Spectral Blast
                 case 45892:                                 // Sinister Reflection (SWP, Kil'jaeden)
                 case 45976:                                 // Open Portal
+                case 46293:                                 // Corrosive Poison
+                case 46294:                                 // Fevered Fatigue
+                case 46295:                                 // Hex
+                case 46296:                                 // Necrotic Poison
+                case 46297:                                 // Piercing Shadow
+                case 46298:                                 // Shrink
+                case 46299:                                 // Wavering Will
+                case 46300:                                 // Withered Touch
                 case 47669:                                 // Wakeup Subboss (Utgarde Pinnacle)
                 case 48278:                                 // Paralyze (Utgarde Pinnacle)
                 case 50988:                                 // Glare of the Tribunal (Halls of Stone)

@@ -2429,7 +2429,7 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                             return;                         // Crazy :)
                     }
 
-                    unitTarget->CastSpell(unitTarget, spellId, true);
+                    m_caster->CastSpell(m_caster, spellId, true);
 
                     break;
                 }
