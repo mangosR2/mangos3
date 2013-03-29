@@ -1991,13 +1991,16 @@ void Aura::TriggerSpell()
 //                    case 67546: break;
                     case 69012:                             // Explosive Barrage - Krick and Ick
                     {
-                        if (triggerTarget->GetTypeId() == TYPEID_UNIT)
-                        {
-                            if (Unit* pTarget = ((Creature*)triggerTarget)->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-                            {
-                                triggerTarget->CastSpell(pTarget, 69015, true);
-                            }
-                        }
+                       // Summon an Exploding Orb for each player in combat with the caster 
+                        ThreatList const& threatList = target->getThreatManager().getThreatList(); 
+                        for (ThreatList::const_iterator itr = threatList.begin(); itr != threatList.end(); ++itr) 
+                        { 
+                            if (Unit* expectedTarget = target->GetMap()->GetUnit((*itr)->getUnitGuid())) 
+                            { 
+                                if (expectedTarget->GetTypeId() == TYPEID_PLAYER) 
+                                    target->CastSpell(expectedTarget, 69015, true); 
+                            } 
+                        } 
                         return;
                     }
                     case 70017:                             // Gunship Cannon Fire
@@ -3677,9 +3680,22 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                             target->PlayDirectSound(14971, (Player *)target);
                         // Play part 3
                         else
-                            target->PlayDirectSound(14972, (Player *)target);
+                            target->PlayDirectSound(14972, (Player*)target);
+                        return;
                     }
-                    return;
+                case 68987:                                 // Pursuit 
+                { 
+                    Unit* caster = GetCaster(); 
+                    if (!caster || target->GetTypeId() != TYPEID_PLAYER) 
+                        return; 
+ 
+                    if (apply) 
+                        caster->FixateTarget(target); 
+                    else if (target->GetObjectGuid() == caster->GetFixatedTargetGuid()) 
+                        caster->FixateTarget(NULL); 
+ 
+                    return; 
+                }
                 case 27978:
                 case 40131:
                     if (apply)
