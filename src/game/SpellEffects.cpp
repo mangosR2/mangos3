@@ -5097,6 +5097,32 @@ void Spell::EffectTeleportUnits(SpellEffectIndex eff_idx)   // TODO - Use target
             if (unitTarget->GetTypeId() != TYPEID_PLAYER)
                 return;
 
+            switch (m_spellInfo->Id)
+            {
+                case 48129:                                 // Scroll of Recall
+                case 60320:                                 // Scroll of Recall II
+                case 60321:                                 // Scroll of Recall III
+                {
+                    uint32 charLevel = 0;
+                    switch (m_spellInfo->Id)
+                    {
+                        case 48129: charLevel = 40; break;
+                        case 60320: charLevel = 70; break;
+                        case 60321: charLevel = 80; break;
+                        default: break;
+                    }
+
+                    if (((Player*)unitTarget)->getLevel() > charLevel)
+                    {
+                        unitTarget->CastSpell(unitTarget, 60444, true);
+                        return;
+                    }
+                }
+                default:
+                    break;
+            }
+
+
             ((Player*)unitTarget)->TeleportToHomebind(unitTarget == m_caster ? TELE_TO_SPELL|TELE_TO_CHECKED : TELE_TO_CHECKED);
             return;
         }

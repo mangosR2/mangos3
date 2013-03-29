@@ -2678,6 +2678,13 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                     case 54729:                             // Winged Steed of the Ebon Blade
                         Spell::SelectMountByAreaAndSkill(target, GetSpellProto(), 0, 0, 54726, 54727, 0);
                         return;
+                    case 60444:                                // Lost!
+                        if (target && target->GetTypeId() == TYPEID_PLAYER)
+                        {
+                            uint32 spell_id = (((Player*)target)->GetTeam() == ALLIANCE ? 60323 : 60328);
+                            target->CastSpell(target, spell_id + urand(0, 7), true);
+                            return;
+                        }
                     case 62061:                             // Festive Holiday Mount
                         if (target->HasAuraType(SPELL_AURA_MOUNTED))
                             // Reindeer Transformation
