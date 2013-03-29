@@ -13153,7 +13153,7 @@ void CharmInfo::SetSpellAutocast( uint32 spell_id, bool state )
     }
 }
 
-void Unit::DoPetAction( Player* owner, uint8 flag, uint32 spellid, ObjectGuid petGuid, ObjectGuid targetGuid)
+void Unit::DoPetAction(Player* owner, uint8 flag, uint32 spellid, ObjectGuid petGuid, ObjectGuid targetGuid)
 {
     if (!IsInWorld() ||
     (GetTypeId() == TYPEID_UNIT && ((Creature*)this)->IsPet() &&  !GetCharmInfo()))
@@ -13267,7 +13267,12 @@ void Unit::DoPetAction( Player* owner, uint8 flag, uint32 spellid, ObjectGuid pe
                     {
                         Pet* p = (Pet*)this;
                         if (p->getPetType() == HUNTER_PET)
+                        {
+                            if (p->m_actualSlot < PET_SAVE_FIRST_STABLE_SLOT)
+                                ((Player*)owner)->GetSession()->HandleSendPetSlotUpdated(p->GetObjectGuid().GetEntry(), p->m_actualSlot, -1, 0);
+
                             p->Unsummon(PET_SAVE_AS_DELETED, owner);
+                        }
                         else
                             //dismissing a summoned pet is like killing them (this prevents returning a soulshard...)
                             p->SetDeathState(CORPSE);

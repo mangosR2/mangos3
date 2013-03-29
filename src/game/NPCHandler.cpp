@@ -739,6 +739,12 @@ void WorldSession::HandleSetPetSlotOpcode(WorldPacket& recv_data)
 
     DEBUG_LOG("PetNumber: %u slot: %u guid: %s", petNumber, newSlot, guid.GetString().c_str());
 
+    if (!_player->isAlive())
+    {
+        SendStableResult(STABLE_ERR_STABLE);
+        return;
+    }
+
     if (!CheckStableMaster(guid))
     {
         SendStableResult(STABLE_ERR_STABLE);

@@ -2053,6 +2053,7 @@ void InitializeOpcodes()
     OPCODE(SMSG_RAID_MARKERS_CHANGED,                    STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
     OPCODE(CMSG_SET_EVERYONE_IS_ASSISTANT,               STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandeSetEveryoneIsAssistant     );
     OPCODE(CMSG_SET_PET_SLOT,                            STATUS_LOGGEDIN, PROCESS_INPLACE,      &WorldSession::HandleSetPetSlotOpcode          );
+    OPCODE(SMSG_PET_SLOT_UPDATED,                        STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
 
     OPCODE(NUM_MSG_TYPES,                                STATUS_UNHANDLED,PROCESS_INPLACE,      &WorldSession::Handle_NULL             );
 };

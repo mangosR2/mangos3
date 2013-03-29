@@ -395,6 +395,14 @@ void WorldSession::HandlePetAbandon(WorldPacket& recv_data)
     {
         if (pet->IsPet())
         {
+            Pet* p = (Pet*)pet;
+            if (p->m_actualSlot < PET_SAVE_FIRST_STABLE_SLOT)
+                HandleSendPetSlotUpdated(p->GetObjectGuid().GetEntry(), p->m_actualSlot, -1, 0);
+
+            p->Unsummon(PET_SAVE_AS_DELETED, _player);
+        }
+        else if (pet->GetObjectGuid() == _player->GetCharmGuid())
+        {
             ((Pet*)pet)->Unsummon(PET_SAVE_AS_DELETED, GetPlayer());
         }
         else if (pet->GetObjectGuid() == GetPlayer()->GetCharmGuid())
@@ -568,4 +576,15 @@ void WorldSession::HandleDismissCritter(WorldPacket& recvData)
         if (pet->GetTypeId() == TYPEID_UNIT && ((Creature*)pet)->IsTemporarySummon())
             ((TemporarySummon*)pet)->UnSummon();
     }
+}
+
+void WorldSession::HandleSendPetSlotUpdated(uint32 petNumber, int32 srcSlot, int32 dstSlot, int32 unk)
+{
+    WorldPacket data(SMSG_PET_SLOT_UPDATED, 16);
+    data << int32(dstSlot);     // dest slot
+    data << int32(srcSlot);     // src slot?
+    data << uint32(petNumber);  // pet number
+    data << uint32(0);          // unk
+
+    SendPacket(&data);
 }

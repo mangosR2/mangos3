@@ -765,6 +765,7 @@ class MANGOS_DLL_SPEC WorldSession
         void HandleLearnPreviewTalentsPet( WorldPacket& recvPacket );
         void HandleDismissCritter(WorldPacket& recvData);
         void HandleSetPetSlotOpcode(WorldPacket& recv_data);
+        void HandleSendPetSlotUpdated(uint32 petNumber, int32 srcSlot, int32 dstSlot, int32 unk);
 
         void HandleSetActionBarTogglesOpcode(WorldPacket& recv_data);
 
