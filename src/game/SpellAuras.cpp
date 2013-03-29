@@ -499,10 +499,10 @@ void Aura::AreaAura(SpellEntry const* spellproto, SpellEffectIndex eff, int32 *c
     switch(spellproto->Effect[eff])
     {
         case SPELL_EFFECT_APPLY_AREA_AURA_PARTY:
-            m_areaAuraType = AREA_AURA_PARTY;
+            m_areaAuraType = caster_ptr->IsCharmerOrOwnerPlayerOrPlayerItself() ? AREA_AURA_PARTY : AREA_AURA_FRIEND;
             break;
         case SPELL_EFFECT_APPLY_AREA_AURA_RAID:
-            m_areaAuraType = AREA_AURA_RAID;
+            m_areaAuraType = caster_ptr->IsCharmerOrOwnerPlayerOrPlayerItself() ? AREA_AURA_RAID : AREA_AURA_FRIEND;
             // Light's Beacon not applied to caster itself (TODO: more generic check for another similar spell if any?)
             if (target == caster_ptr && spellproto->Id == 53651)
                 m_modifier.m_auraname = SPELL_AURA_NONE;
@@ -524,7 +524,7 @@ void Aura::AreaAura(SpellEntry const* spellproto, SpellEffectIndex eff, int32 *c
                 m_modifier.m_auraname = SPELL_AURA_NONE;
             break;
         default:
-            sLog.outError("Wrong spell effect in AreaAura constructor");
+            sLog.outError("Aura::AreaAura Wrong spell effect %u in AreaAura constructor", spellproto->Effect[eff]);
             MANGOS_ASSERT(false);
             break;
     }
