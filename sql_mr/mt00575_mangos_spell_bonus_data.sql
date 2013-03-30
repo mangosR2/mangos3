@@ -87,6 +87,12 @@ REPLACE INTO `spell_bonus_data` (`entry`, `direct_bonus`, `dot_bonus`, `ap_bonus
 (81269, 0, 0, 0, 0, 'Druid - Efflorescence'),
 (93402, 0.18, 0.18, 0, 0, 'Druid - Sunfire');
 
+-- Hunter
+REPLACE INTO `spell_bonus_data` (`entry`, `direct_bonus`, `dot_bonus`, `ap_bonus`, `ap_dot_bonus`, `comments`) VALUES
+(53351, 0, 0, 0.5, 0, 'Hunter - Kill Shot'),
+(56641, 0, 0, 221, 0, 'Hunter - Steady Shot'),
+(77767, 0, 0, 500, 0, 'Hunter - Cobra Shot');
+
 -- Goblin
 REPLACE INTO `spell_bonus_data` (`entry`, `direct_bonus`, `dot_bonus`, `ap_bonus`, `ap_dot_bonus`, `comments`) VALUES
 (69041, 0.429, 0, 0.25, 0, 'Rocket Barrage (Racial)');

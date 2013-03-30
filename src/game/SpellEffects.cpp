@@ -1445,15 +1445,6 @@ void Spell::EffectSchoolDMG(SpellEffectEntry const* effect)
                     if (m_caster->HasAura(57627))           // Charge 6 sec post-affect
                         damage *= 2;
                 }
-                // Steady Shot
-                else if (classOptions && classOptions->SpellFamilyFlags & UI64LIT(0x100000000))
-                {
-                    int32 base = irand((int32)m_caster->GetWeaponDamageRange(RANGED_ATTACK, MINDAMAGE),(int32)m_caster->GetWeaponDamageRange(RANGED_ATTACK, MAXDAMAGE));
-                    float rap = m_caster->GetTotalAttackPowerValue(RANGED_ATTACK);
-                    rap += unitTarget->GetTotalAuraModifier(SPELL_AURA_RANGED_ATTACK_POWER_ATTACKER_BONUS);
-                    rap += m_caster->GetTotalAuraModifierByMiscMask(SPELL_AURA_MOD_RANGED_ATTACK_POWER_VERSUS, unitTarget->GetCreatureTypeMask());
-                    damage += int32(float(base)/m_caster->GetAttackTime(RANGED_ATTACK)*2800 + rap*0.1f);
-                }
                 // Kill Command
                 if (m_spellInfo->Id == 83381)
                 {
@@ -5226,6 +5217,13 @@ void Spell::EffectDummy(SpellEffectEntry const* effect)
                         m_caster->DoPetCastSpell(m_caster, 54045);
                     else
                         m_caster->CastSpell(m_caster, 54045, false);
+                    return;
+                }
+                // Steady Shot
+                case 56641:
+                {
+                    // energize
+                    m_caster->CastSpell(m_caster, 77443, true);
                     return;
                 }
             }
@@ -9113,7 +9111,21 @@ void Spell::EffectWeaponDmg(SpellEffectEntry const* effect)
             break;
         }
         case SPELLFAMILY_HUNTER:
+        {
+            // Arcane Shot
+            if (m_spellInfo->Id == 3044)
+                spell_bonus += int32(0.248f * m_caster->GetTotalAttackPowerValue(RANGED_ATTACK));
+            // Kill Shot
+            else if (m_spellInfo->Id == 53351)
+                spell_bonus += int32(0.45f * m_caster->GetTotalAttackPowerValue(RANGED_ATTACK));
+            // Steady Shot
+            else if (m_spellInfo->Id == 56641)
+                spell_bonus += int32(0.221f * m_caster->GetTotalAttackPowerValue(RANGED_ATTACK));
+            // Cobra Shot
+            else if (m_spellInfo->Id == 77767)
+                spell_bonus += int32(0.217f * m_caster->GetTotalAttackPowerValue(RANGED_ATTACK));
             break;
+        }
         case SPELLFAMILY_SHAMAN:
         {
             // Skyshatter Harness item set bonus
@@ -12952,6 +12964,28 @@ void Spell::EffectScriptEffect(SpellEffectEntry const* effect)
                     }
                     else
                         SendCastResult(SPELL_FAILED_CASTER_AURASTATE);
+                    return;
+                }
+                case 77767:                                 // Cobra Shot
+                {
+                    // energize
+                    m_caster->CastSpell(m_caster, 77443, true);
+
+                    if (!unitTarget)
+                        return;
+
+                    // get Serpent Sting
+                    if (SpellAuraHolderPtr holder = unitTarget->GetSpellAuraHolder(77767, m_caster->GetObjectGuid()))
+                    {
+                        int32 maxDuration = holder->GetAuraMaxDuration();
+                        int32 newDuration = std::min(holder->GetAuraDuration() + damage * IN_MILLISECONDS, maxDuration);
+
+                        if (newDuration != maxDuration)
+                        {
+                            holder->SetAuraDuration(newDuration);
+                            holder->SendAuraUpdate(false);
+                        }
+                    }
                     return;
                 }
                 default:

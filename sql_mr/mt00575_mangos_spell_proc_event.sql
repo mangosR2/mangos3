@@ -811,3 +811,7 @@ INSERT INTO `spell_proc_event` (`entry`, `SchoolMask`, `procEx`) VALUES
 DELETE FROM `spell_proc_event` WHERE `entry` = 82661;
 INSERT INTO `spell_proc_event` (`entry`, `SchoolMask`) VALUE
 (82661, 127);
+
+-- Improved Steady Shot
+DELETE FROM `spell_proc_event` WHERE `entry` = 53220;
+
