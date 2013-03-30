@@ -12824,6 +12824,18 @@ void Spell::EffectScriptEffect(SpellEffectEntry const* effect)
         {
             switch(m_spellInfo->Id)
             {
+                case 34026:                                 // Kill Command
+                {
+                    if (!unitTarget)
+                        return;
+
+                    Unit* victim = unitTarget->getVictim();
+                    if (!victim)
+                        return;
+
+                    m_caster->CastSpell(victim, damage, true, NULL, NULL, unitTarget->GetObjectGuid(), NULL);
+                    return;
+                }
                 case 53209:                                 // Chimera Shot
                 {
                     if (!unitTarget)
