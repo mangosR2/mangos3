@@ -10082,16 +10082,6 @@ void Unit::MeleeDamageBonusDone(DamageInfo* damageInfo, uint32 stack)
             }
         }
 
-        // Glyph of Steady Shot (Steady Shot check)
-        if (classOptions && classOptions->IsFitToFamily(SPELLFAMILY_HUNTER, UI64LIT(0x0000000100000000)))
-        {
-            // search for glyph dummy aura
-            if (Aura const* aur = GetDummyAura(56826))
-                // check for Serpent Sting at target
-                if (pVictim->GetAura<SPELL_AURA_PERIODIC_DAMAGE, SPELLFAMILY_HUNTER, CF_HUNTER_SERPENT_STING>())
-                    DonePercent *= (aur->GetModifier()->m_amount+100.0f) / 100.0f;
-        }
-
         // Revealing Strike
         if (damageInfo->GetSpellProto()->IsFitToFamily(SPELLFAMILY_ROGUE, UI64LIT(0xB20000)))
         {
