@@ -4182,7 +4182,10 @@ void Spell::cast(bool skipCheck)
         {
             // Deterrence
             if (m_spellInfo->Id == 19263)
+            {
                 AddPrecastSpell(67801);
+                AddPrecastSpell(114406);
+            }
             // Kill Command
             else if (m_spellInfo->Id == 34026)
             {
