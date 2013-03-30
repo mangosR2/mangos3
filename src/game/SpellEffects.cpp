@@ -13832,7 +13832,14 @@ void Spell::EffectFeedPet(SpellEffectEntry const* effect)
     _player->DestroyItemCount(foodItem,count,true);
     // TODO: fix crash when a spell has two effects, both pointed at the same item target
 
-    m_caster->CastCustomSpell(pet, effect->EffectTriggerSpell, &benefit, NULL, NULL, true);
+    SpellEntry const* triggeredSpell = sSpellStore.LookupEntry(effect->EffectTriggerSpell);
+    if (!triggeredSpell)
+        return;
+
+    if (IsSpellHaveAura(triggeredSpell, SPELL_AURA_PERIODIC_ENERGIZE))
+        m_caster->CastCustomSpell(pet, triggeredSpell, &benefit, NULL, NULL, true);
+    else
+        m_caster->CastSpell(pet, triggeredSpell, true);
 
     SendEffectLogExecute(effect, ObjectGuid(), entry);
 }

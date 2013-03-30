@@ -804,3 +804,10 @@ INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`,
 DELETE FROM `spell_proc_event` WHERE `entry` = 62600;
 INSERT INTO `spell_proc_event` (`entry`, `SchoolMask`, `procEx`) VALUES
 (62600, 127, 2);
+
+### Hunter ###
+
+-- Aspect of the Fox
+DELETE FROM `spell_proc_event` WHERE `entry` = 82661;
+INSERT INTO `spell_proc_event` (`entry`, `SchoolMask`) VALUE
+(82661, 127);
