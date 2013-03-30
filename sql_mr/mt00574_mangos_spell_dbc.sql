@@ -57,3 +57,11 @@ DELETE FROM `spell_dbc` WHERE `Id` = 44544;
 --        break;
 --    }
 
+-- Multi-Shot
+-- DELETE FROM `spell_dbc` WHERE `Id` = 2643;
+-- case 2643:                          // Multi-Shot
+-- {
+--    if (SpellEffectEntry* eff = (SpellEffectEntry*)spell->GetSpellEffect(EFFECT_INDEX_0))
+--        eff->Effect = 0;
+--    break;
+-- }
