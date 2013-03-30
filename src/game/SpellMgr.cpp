@@ -5551,6 +5551,9 @@ DiminishingGroup GetDiminishingReturnsGroupForSpell(SpellEntry const* spellproto
             // Hunters Mark - limit to 2 minutes in PvP
             else if (spellproto->GetSpellFamilyFlags().test<CF_HUNTER_HUNTERS_MARK>())
                 return DIMINISHING_LIMITONLY;
+            // Widow Venom
+            else if (spellproto->Id == 82654)
+                return DIMINISHING_LIMITONLY;
             break;
         }
         case SPELLFAMILY_PALADIN:
@@ -5687,6 +5690,9 @@ int32 GetDiminishingReturnsLimitDuration(DiminishingGroup group, SpellEntry cons
             // Hunters Mark - limit to 2 minutes in PvP
             else if (spellproto->GetSpellFamilyFlags().test<CF_HUNTER_HUNTERS_MARK>())
                 return 120000;
+            // Widow Venom
+            else if (spellproto->Id == 82654)
+                return 10000;
             break;
         }
         case SPELLFAMILY_PALADIN:

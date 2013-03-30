@@ -2631,12 +2631,6 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, DamageInfo* damageI
                 }
                 break;
             }
-            // Glyph of Mend Pet
-            if ( dummySpell->Id == 57870)
-            {
-                pVictim->CastSpell(pVictim, 57894, true, NULL, NULL, GetObjectGuid());
-                return SPELL_AURA_PROC_OK;
-            }
             // Misdirection
             else if (dummySpell->Id == 34477)
             {
