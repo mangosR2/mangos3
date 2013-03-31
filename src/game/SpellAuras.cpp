@@ -6987,6 +6987,13 @@ void Aura::HandleDamagePercentTaken(bool apply, bool Real)
             target->CastSpell(target, 96171, true);
         }
     }
+
+    // Deterrence
+    if (GetId() == 114406)
+        if (apply)
+            target->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PACIFIED);
+        else
+            target->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PACIFIED);
 }
 
 void Aura::HandlePeriodicDamage(bool apply, bool Real)
