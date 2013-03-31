@@ -1504,7 +1504,7 @@ float Creature::GetAttackDistance(Unit const* pPlayer) const
     // radius grow if playerLevel < creatureLevel
     retDistance -= float(levelDiff);
 
-    if (creatureLevel + 5 <= sWorld.getConfig(CONFIG_UINT32_MAX_PLAYER_LEVEL))
+    if (creatureLevel <= sWorld.getConfig(CONFIG_UINT32_MAX_PLAYER_LEVEL))
     {
         // detect range auras
         retDistance += GetTotalAuraModifier(SPELL_AURA_MOD_DETECT_RANGE);
