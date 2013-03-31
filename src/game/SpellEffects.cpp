@@ -12967,26 +12967,6 @@ void Spell::EffectScriptEffect(SpellEffectEntry const* effect)
 
                     return;
                 }
-                case 53412:                                 // Invigoration (pet triggered script, master targeted)
-                {
-                    if (!unitTarget)
-                        return;
-
-                    Unit::AuraList const& auras = unitTarget->GetAurasByType(SPELL_AURA_DUMMY);
-                    for(Unit::AuraList::const_iterator i = auras.begin();i != auras.end(); ++i)
-                    {
-                        // Invigoration (master talent)
-                        if ((*i)->GetModifier()->m_miscvalue == 8 && (*i)->GetSpellProto()->GetSpellIconID() == 3487)
-                        {
-                            if (roll_chance_i((*i)->GetModifier()->m_amount))
-                            {
-                                unitTarget->CastSpell(unitTarget, 53398, true, NULL, (*i)(), m_caster->GetObjectGuid());
-                                break;
-                            }
-                        }
-                    }
-                    return;
-                }
                 case 53271:                                 // Master's Call
                 {
                     if (!unitTarget)
@@ -12994,6 +12974,25 @@ void Spell::EffectScriptEffect(SpellEffectEntry const* effect)
 
                     // script effect have in value, but this outdated removed part
                     unitTarget->CastSpell(unitTarget, 62305, true);
+                    return;
+                }
+                case 53412:                                 // Invigoration (pet triggered script, master targeted)
+                {
+                    if (!unitTarget)
+                        return;
+
+                    Unit::AuraList const& auras = unitTarget->GetAurasByType(SPELL_AURA_DUMMY);
+                    for (Unit::AuraList::const_iterator i = auras.begin();i != auras.end(); ++i)
+                    {
+                        // Invigoration (master talent)
+                        if ((*i)->GetSpellProto()->GetSpellIconID() == 3487 && (*i)->GetSpellProto()->GetSpellFamilyName() == SPELLFAMILY_HUNTER)
+                        {
+                            int32 bp = (*i)->GetModifier()->m_amount;
+                            //no known conversion for argument 8 from ‘const AuraPair’ to ‘const Aura*’   *i
+                            //unitTarget->CastCustomSpell(unitTarget, 53398, &bp, NULL, NULL, true, NULL, *i, m_caster->GetObjectGuid());
+                            break;
+                        }
+                    }
                     return;
                 }
                 case 55709:                                 // Heart of the phoenix

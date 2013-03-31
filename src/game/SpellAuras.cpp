@@ -6199,8 +6199,8 @@ void Aura::HandleModMechanicImmunity(bool apply, bool /*Real*/)
         if (GetId() == 54508)
             mechanic = (1<<(MECHANIC_ROOT-1))|(1<<(MECHANIC_SNARE-1))|(1<<(MECHANIC_STUN-1))|
             (1<<(MECHANIC_BANISH-1))|(1<<(MECHANIC_HORROR-1))|(1<<(MECHANIC_FEAR-1));
-        // Bestial Wrath and The Beast Within
-        else if (GetId() == 19574 || GetId() == 34471)
+        // Bestial Wrath
+        else if (GetId() == 19574)
             mechanic = IMMUNE_TO_MOVEMENT_IMPAIRMENT_AND_LOSS_CONTROL_MASK;
         target->RemoveAurasAtMechanicImmunity(mechanic, GetId());
     }
@@ -6218,25 +6218,16 @@ void Aura::HandleModMechanicImmunity(bool apply, bool /*Real*/)
                 ((Player*)target)->TeleportTo(obj->GetMapId(),obj->GetPositionX(),obj->GetPositionY(),obj->GetPositionZ(),obj->GetOrientation(), TELE_TO_NOT_LEAVE_COMBAT);
     }
 
-    // Bestial Wrath
-    if (GetSpellProto()->GetSpellFamilyName() == SPELLFAMILY_HUNTER && GetSpellProto()->GetSpellIconID() == 1680)
+    // The Beast Within cast on owner if talent present
+    if (GetId() == 19574)
     {
-        // The Beast Within cast on owner if talent present
         if (Unit* owner = target->GetOwner())
         {
             // Search talent The Beast Within
-            Unit::AuraList const& dummyAuras = owner->GetAurasByType(SPELL_AURA_MOD_DAMAGE_PERCENT_DONE);
-            for(Unit::AuraList::const_iterator i = dummyAuras.begin(); i != dummyAuras.end(); ++i)
-            {
-                if ((*i)->GetSpellProto()->GetSpellIconID() == 2229)
-                {
-                    if (apply)
-                        owner->CastSpell(owner, 34471, true, NULL, this);
-                    else
-                        owner->RemoveAurasDueToSpell(34471);
-                    break;
-                }
-            }
+            if (apply && owner->HasAura(34692))
+                owner->CastSpell(owner, 34471, true, NULL, this);
+            else
+                owner->RemoveAurasDueToSpell(34471);
         }
     }
     // Heroic Fury (Intercept cooldown remove)

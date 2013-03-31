@@ -834,3 +834,8 @@ INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`)
 DELETE FROM `spell_proc_event` WHERE `entry` = 77769;
 INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`) VALUE
 (77769, 9, 128);
+
+-- Invigoration
+DELETE FROM `spell_proc_event` WHERE `entry` = 53397;
+INSERT INTO `spell_proc_event` (`entry`, `SchoolMask`, `procEx`) VALUE
+(53397, 127, 2);
