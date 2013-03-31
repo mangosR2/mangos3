@@ -351,8 +351,8 @@ pAuraProcHandler AuraProcHandler[TOTAL_AURAS]=
     &Unit::HandleNULLProc,                                  //316 old SPELL_AURA_MOD_PERIODIC_HASTE 0 spells in 4.3.4
     &Unit::HandleNULLProc,                                  //317 SPELL_AURA_MOD_INCREASE_SPELL_POWER_PCT 13 spells in 4.3.4
     &Unit::HandleNULLProc,                                  //318 SPELL_AURA_MASTERY 12 spells in 4.3
-    &Unit::HandleNULLProc,                                  //319 SPELL_AURA_MOD_MELEE_ATTACK_SPEED 47 spells in 4.3.4
-    &Unit::HandleNULLProc,                                  //320 SPELL_AURA_MOD_RANGED_ATTACK_SPEED 5 spells in 4.3.4
+    &Unit::HandleNULLProc,                                  //319 SPELL_AURA_MOD_MELEE_HASTE_3 47 spells in 4.3.4
+    &Unit::HandleModRangedHasteAuraProc,                    //320 SPELL_AURA_MOD_RANGED_HASTE_2 5 spells in 4.3.4
     &Unit::HandleNULLProc,                                  //321 1 spells in 4.3 Hex
     &Unit::HandleNULLProc,                                  //322 SPELL_AURA_INTERFERE_TARGETING 6 spells in 4.3
     &Unit::HandleNULLProc,                                  //323 0 spells in 4.3.4
@@ -2599,6 +2599,24 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, DamageInfo* damageI
                 triggered_spell_id = 57669;
                 target = this;
                 break;
+            }
+            // Improved Steady Shot
+            else if (dummySpell->GetSpellIconID() == 3409)
+            {
+                basepoints[0] = triggeredByAura->GetSpellProto()->CalculateSimpleValue(EFFECT_INDEX_0);
+
+                Modifier const* mod = triggeredByAura->GetModifier();
+                if (procSpell->Id == 56641)
+                {
+                    mod->m_amount *= 2;
+                    if (mod->m_amount <= basepoints[0] * 2)
+                        return SPELL_AURA_PROC_OK;
+
+                    CastCustomSpell(this, 53220, &basepoints[0], NULL, NULL, true, NULL, triggeredByAura);
+                }
+
+                mod->m_amount = basepoints[0];
+                return SPELL_AURA_PROC_OK;
             }
             // Rapid Recuperation
             if (dummySpell->GetSpellIconID() == 3560)
@@ -6769,6 +6787,15 @@ SpellAuraProcResult Unit::HandleSpellAuraOverrideActionbarSpellsProc(Unit* /*pVi
         if (!procSpell || procSpell->Id != triggerAmount)
             return SPELL_AURA_PROC_FAILED;
     }
+
+    return SPELL_AURA_PROC_OK;
+}
+
+SpellAuraProcResult Unit::HandleModRangedHasteAuraProc(Unit* /*pVictim*/, DamageInfo* /*damageInfo*/, Aura const* triggeredByAura, SpellEntry const* /*procSpell*/, uint32 /*procFlag*/, uint32 /*procEx*/, uint32 /*cooldown*/)
+{
+    // Improved Steady Shot
+    if (triggeredByAura->GetId() == 53220)
+        return SPELL_AURA_PROC_FAILED;
 
     return SPELL_AURA_PROC_OK;
 }

@@ -2204,6 +2204,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         SpellAuraProcResult HandleAuraProcOnPowerAmount(Unit *pVictim, DamageInfo* damage, Aura const* triggeredByAura, SpellEntry const *procSpell, uint32 procFlag, uint32 procEx, uint32 cooldown);
         SpellAuraProcResult HandleHasteAllProc(Unit* pVictim, DamageInfo* damageInfo, Aura const* triggeredByAura, SpellEntry const *procSpell, uint32 procFlag, uint32 procEx, uint32 cooldown);
         SpellAuraProcResult HandleSpellAuraOverrideActionbarSpellsProc(Unit* pVictim, DamageInfo* damageInfo, Aura const* triggeredByAura, SpellEntry const *procSpell, uint32 procFlag, uint32 procEx, uint32 cooldown);
+        SpellAuraProcResult HandleModRangedHasteAuraProc(Unit* pVictim, DamageInfo* damageInfo, Aura const* triggeredByAura, SpellEntry const *procSpell, uint32 procFlag, uint32 procEx, uint32 cooldown);
         SpellAuraProcResult HandleNULLProc(Unit* /*pVictim*/, DamageInfo* /*damage*/, Aura const* /*triggeredByAura*/, SpellEntry const* /*procSpell*/, uint32 /*procFlag*/, uint32 /*procEx*/, uint32 /*cooldown*/)
         {
             // no proc handler for this aura type

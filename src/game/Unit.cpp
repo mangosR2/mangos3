@@ -9428,6 +9428,24 @@ bool Unit::IsSpellCrit(Unit *pVictim, SpellEntry const *spellProto, SpellSchoolM
                 crit_chance += GetUnitCriticalChance(attackType, pVictim);
 
             crit_chance += GetTotalAuraModifierByMiscMask(SPELL_AURA_MOD_SPELL_CRIT_CHANCE_SCHOOL, schoolMask);
+
+            // Steady Shot, Aimed Shot and Cobra Shot
+            if (spellProto->IsFitToFamily(SPELLFAMILY_HUNTER, UI64LIT(0x100020000), 0x400000))
+            {
+                if (pVictim)
+                {
+                    // search Careful Aim
+                    Unit::AuraList const& mDummyAuras = GetAurasByType(SPELL_AURA_DUMMY);
+                    for (Unit::AuraList::const_iterator i = mDummyAuras.begin(); i != mDummyAuras.end(); ++i)
+                        if ((*i)->GetSpellProto()->GetSpellFamilyName() == SPELLFAMILY_HUNTER && (*i)->GetSpellProto()->GetSpellIconID() == 2222 &&
+                            (*i)->GetEffIndex() == EFFECT_INDEX_0)
+                        {
+                            if (pVictim->GetHealthPercent() > (*i)->GetSpellProto()->CalculateSimpleValue(EFFECT_INDEX_1))
+                                crit_chance += (*i)->GetModifier()->m_amount;
+                            break;
+                        }
+                }
+            }
             break;
         }
         default:
