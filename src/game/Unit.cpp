@@ -3340,6 +3340,8 @@ void Unit::AttackerStateUpdate(Unit* pVictim, WeaponAttackType attType, bool ext
     if (!pVictim || !pVictim->isAlive())
         return;
 
+    RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_MELEE_ATTACK);
+
     if (IsNonMeleeSpellCasted(false))
         return;
 

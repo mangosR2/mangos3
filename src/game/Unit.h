@@ -60,9 +60,9 @@ enum SpellChannelInterruptFlags
 
 enum SpellAuraInterruptFlags
 {
-    AURA_INTERRUPT_FLAG_SPELLHIT                    = 0x00000001,   // 0    removed when getting hit by a negative spell?
-    AURA_INTERRUPT_FLAG_DAMAGE                      = 0x00000002,   // 1    removed by take any damage
-    AURA_INTERRUPT_FLAG_CAST                        = 0x00000004,   // 2    removed by cast any spell
+    AURA_INTERRUPT_FLAG_UNK0                        = 0x00000001,   // 0    removed when getting hit by a negative spell?
+    AURA_INTERRUPT_FLAG_DAMAGE                      = 0x00000002,   // 1    removed by any damage
+    AURA_INTERRUPT_FLAG_CAST                        = 0x00000004,   // 2
     AURA_INTERRUPT_FLAG_MOVE                        = 0x00000008,   // 3    removed by any movement
     AURA_INTERRUPT_FLAG_TURNING                     = 0x00000010,   // 4    removed by any turning
     AURA_INTERRUPT_FLAG_ENTER_COMBAT                = 0x00000020,   // 5    removed by entering combat
@@ -71,9 +71,9 @@ enum SpellAuraInterruptFlags
     AURA_INTERRUPT_FLAG_NOT_UNDERWATER              = 0x00000100,   // 8    removed by leaving water
     AURA_INTERRUPT_FLAG_NOT_SHEATHED                = 0x00000200,   // 9    removed by unsheathing
     AURA_INTERRUPT_FLAG_ACTION                      = 0x00000400,   // 10   removed by any action (talk/loot/gossip)
-    AURA_INTERRUPT_FLAG_USE                         = 0x00000800,   // 11   removed by use (or casting open spell)
-    AURA_INTERRUPT_FLAG_MELEE_ATTACK                = 0x00001000,   // 12   removed by melee attack?
-    AURA_INTERRUPT_FLAG_SPELL_ATTACK                = 0x00002000,   // 13   removed by spell attack?
+    AURA_INTERRUPT_FLAG_USE                         = 0x00000800,   // 11   removed by casting a spell
+    AURA_INTERRUPT_FLAG_MELEE_ATTACK                = 0x00001000,   // 12   removed by attack?
+    AURA_INTERRUPT_FLAG_SPELL_ATTACK                = 0x00002000,   // 13
     AURA_INTERRUPT_FLAG_UNK14                       = 0x00004000,   // 14
     AURA_INTERRUPT_FLAG_TRANSFORM                   = 0x00008000,   // 15   removed by casting a transform spell?
     AURA_INTERRUPT_FLAG_UNK16                       = 0x00010000,   // 16
@@ -1719,6 +1719,8 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         bool IsWalking() const { return m_movementInfo.HasMovementFlag(MOVEFLAG_WALK_MODE); }
         bool IsRooted() const { return m_movementInfo.HasMovementFlag(MOVEFLAG_ROOT); }
         bool IsSwimming() const { return m_movementInfo.HasMovementFlag(MOVEFLAG_SWIMMING); }
+        bool isMoving() const { return m_movementInfo.HasMovementFlag(movementFlagsMask); }
+        bool isMovingOrTurning() const { return m_movementInfo.HasMovementFlag(movementOrTurningFlagsMask); }
 
         virtual void SetRoot(bool enabled, uint32 val = 0) {}
         virtual void SetWaterWalk(bool enabled, uint32 val = 0) {}
