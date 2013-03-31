@@ -12884,7 +12884,7 @@ void Spell::EffectScriptEffect(SpellEffectEntry const* effect)
                     if (!victim)
                         return;
 
-                    m_caster->CastSpell(victim, damage, true, NULL, NULL, unitTarget->GetObjectGuid(), NULL);
+                    unitTarget->CastSpell(victim, damage, true, NULL, NULL, m_caster->GetObjectGuid(), NULL);
                     return;
                 }
                 case 53209:                                 // Chimera Shot
@@ -12988,7 +12988,7 @@ void Spell::EffectScriptEffect(SpellEffectEntry const* effect)
                         if ((*i)->GetSpellProto()->GetSpellIconID() == 3487 && (*i)->GetSpellProto()->GetSpellFamilyName() == SPELLFAMILY_HUNTER)
                         {
                             int32 bp = (*i)->GetModifier()->m_amount;
-                            //no known conversion for argument 8 from â€˜const AuraPairâ€™ to â€˜const Aura*â€™   *i
+                            //no known conversion for argument 8 from ‘const AuraPair’ to ‘const Aura*’   *i
                             //unitTarget->CastCustomSpell(unitTarget, 53398, &bp, NULL, NULL, true, NULL, *i, m_caster->GetObjectGuid());
                             break;
                         }
