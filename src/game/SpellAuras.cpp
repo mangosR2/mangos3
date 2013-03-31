@@ -408,7 +408,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleNoImmediateEffect,                         //350 SPELL_AURA_MOD_ITEM_LOOT 1 spells in 4.3.4
     &Aura::HandleNoImmediateEffect,                         //351 SPELL_AURA_MOD_CURRENCY_LOOT 8 spells in 4.3.4
     &Aura::HandleNULL,                                      //352 SPELL_AURA_ALLOW_WORGEN_TRANSFORM 1 spells in 4.3.4 enables worgen<>human form switches
-    &Aura::HandleNULL,                                      //353 SPELL_AURA_MOD_CAMOUFLAGE 3 spells in 4.3.4
+    &Aura::HandleNULL,                                      //353 SPELL_AURA_CAMOUFLAGE 3 spells in 4.3.4
     &Aura::HandleNoImmediateEffect,                         //354 SPELL_AURA_MOD_HEALING_DONE_FROM_PCT_HEALTH 2 spells in 4.3.4
     &Aura::HandleUnused,                                    //355 0 spells in 4.3.4
     &Aura::HandleNoImmediateEffect,                         //356 SPELL_AURA_MOD_DAMAGE_DONE_FROM_PCT_POWER 2 spells in 4.3.4, imlemented in Unit::SpellDamageBonusDone
@@ -2556,6 +2556,12 @@ void Aura::TriggerSpell()
                 int32 bp0 = triggerTarget->GetMap()->GetDifficulty() >= RAID_DIFFICULTY_10MAN_HEROIC ? 4600 : 1610;
                 bp0 = int32(bp0 + (floor(multiplier / 10.0f)) * 1000);
                 triggerTarget->CastCustomSpell(triggerTarget, 71341, &bp0, 0, 0, true);
+                break;
+            }
+            case 80326:                                     // Camouflage
+            {
+                if (target->isMoving())
+                    return;
                 break;
             }
             // Power Word: Barrier
@@ -13101,6 +13107,11 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
                 case 34460:
                     spellId1 = 75447;
                     break;
+                case 51755:                                 // Camouflage
+                {
+                    spellId1 = 80326;                       // Camouflage
+                    break;
+                }
                 // Ancient Hysteria
                 case 90355:
                 {

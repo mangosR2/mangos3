@@ -385,7 +385,7 @@ pAuraProcHandler AuraProcHandler[TOTAL_AURAS]=
     &Unit::HandleNULLProc,                                  //350 SPELL_AURA_MOD_ITEM_LOOT 1 spells in 4.3.4
     &Unit::HandleNULLProc,                                  //351 SPELL_AURA_MOD_CURRENCY_LOOT 8 spells in 4.3.4
     &Unit::HandleNULLProc,                                  //352 SPELL_AURA_ALLOW_WORGEN_TRANSFORM 1 spells in 4.3.4 enables worgen<>human form switches
-    &Unit::HandleNULLProc,                                  //353 SPELL_AURA_MOD_CAMOUFLAGE 3 spells in 4.3.4
+    &Unit::HandleNULLProc,                                  //353 SPELL_AURA_CAMOUFLAGE 3 spells in 4.3.4
     &Unit::HandleNULLProc,                                  //354 SPELL_AURA_MOD_HEALING_DONE_FROM_PCT_HEALTH 2 spells in 4.3.4
     &Unit::HandleNULLProc,                                  //355 0 spells in 4.3.4
     &Unit::HandleNULLProc,                                  //356 SPELL_AURA_MOD_DAMAGE_DONE_FROM_PCT_POWER 2 spells in 4.3.4

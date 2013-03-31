@@ -2556,6 +2556,10 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
             {
                 if (spellInfo_2->Id == 72586)
                     return true;
+
+                // Camouflage
+                if (spellInfo_1->GetSpellIconID() == 2227 && spellInfo_2->GetSpellIconID() == 2227)
+                    return false;
             }
 
             break;
