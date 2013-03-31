@@ -844,3 +844,8 @@ INSERT INTO `spell_proc_event` (`entry`, `SchoolMask`, `procEx`) VALUE
 DELETE FROM `spell_proc_event` WHERE `entry` = 82748;
 INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskB0`, `procFlags`, `CustomChance`) VALUES
 (82748, 9, 2048, 16, 100);
+
+-- Sic 'Em!
+DELETE FROM `spell_proc_event` WHERE `entry` = 83340;
+INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`, `SpellFamilyMaskB0`, `procEx`) VALUES
+(83340, 9, 2048 + 131072, 2147483648, 2);

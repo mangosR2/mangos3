@@ -1384,6 +1384,7 @@ void Aura::HandleAddModifier(bool apply, bool Real)
             case 64823:                                     // Elune's Wrath (Balance druid t8 set
             case 74434:                                     // Soulburn
             case 81093:                                     // Fury of Stormrage
+            case 83359:                                     // Sic 'Em!
             case 88688:                                     // Surge of Light
             case 88819:                                     // Daybreak
             case 89485:                                     // Inner Focus
