@@ -824,3 +824,8 @@ INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `procFlags`, `procEx
 DELETE FROM `spell_proc_event` WHERE `entry` = 53256;
 INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`) VALUES
 (53256, 9, 2048);
+
+-- Trap Launcher
+DELETE FROM `spell_proc_event` WHERE `entry` = 77769;
+INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`) VALUE
+(77769, 9, 128);

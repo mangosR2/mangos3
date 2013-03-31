@@ -13129,8 +13129,12 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
                     }
                     return;
                 }
-                // Ancient Hysteria
-                case 90355:
+                case 77769:                                 // Trap Launcher
+                {
+                    spellId1 = 82946;
+                    break;
+                }
+                case 90355:                                 // Ancient Hysteria
                 {
                     if (apply)
                     {
