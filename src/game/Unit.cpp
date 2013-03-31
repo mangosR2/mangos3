@@ -9397,6 +9397,21 @@ bool Unit::IsSpellCrit(Unit *pVictim, SpellEntry const *spellProto, SpellSchoolM
                             break;
                         }
                 }
+                // Kill Command
+                else if (spellProto->Id == 83381)
+                {
+                    if (Unit* owner = GetOwner())
+                    {
+                        // search Improved Kill Command
+                        Unit::AuraList const& mDummyAuras = owner->GetAurasByType(SPELL_AURA_DUMMY);
+                        for (Unit::AuraList::const_iterator i = mDummyAuras.begin(); i != mDummyAuras.end(); ++i)
+                            if ((*i)->GetSpellProto()->GetSpellFamilyName() == SPELLFAMILY_HUNTER && (*i)->GetSpellProto()->GetSpellIconID() == 2221)
+                            {
+                                crit_chance += (*i)->GetModifier()->m_amount;
+                                break;
+                            }
+                    }
+                }
             }
             // Victory Rush
             if (spellProto->GetSpellFamilyFlags().test<CF_WARRIOR_VICTORY_RUSH>())
