@@ -503,6 +503,13 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
 
     targets.ReadAdditionalData(recvPacket, cast_flags);
 
+    // Multi-Shot hack
+    if (!targets.getUnitTarget() && spellId == 2643)
+    {
+        if (Unit* target = _player->GetMap()->GetUnit(_player->GetSelectionGuid()))
+            targets.setUnitTarget(target);
+    }
+
     // auto-selection buff level base at target level (in spellInfo)
     if (Unit* target = targets.getUnitTarget())
     {
