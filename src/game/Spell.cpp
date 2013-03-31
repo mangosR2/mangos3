@@ -4195,6 +4195,9 @@ void Spell::cast(bool skipCheck)
             // Lock and Load
             else if (m_spellInfo->Id == 56453)
                 AddPrecastSpell(67544);                     // Lock and Load Marker
+            // Fervor
+            else if (m_spellInfo->Id == 82726)
+                AddTriggeredSpell(82728);                   // Fervor
             break;
         }
         case SPELLFAMILY_PALADIN:
