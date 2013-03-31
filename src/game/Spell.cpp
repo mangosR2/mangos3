@@ -7479,6 +7479,16 @@ SpellCastResult Spell::CheckCast(bool strict)
                         if (m_caster->GetTypeId() != TYPEID_PLAYER || !((Player*)m_caster)->IsInFeralForm())
                             return SPELL_FAILED_ONLY_SHAPESHIFT;
                         break;
+                    case 82692:                             // Focus Fire
+                    {
+                        Pet* pet = m_caster->GetPet();
+                        if (!pet || !pet->isAlive())
+                            return SPELL_FAILED_NO_PET;
+
+                        if (!pet->HasAura(19615))
+                            return SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW;
+                        break;
+                    }
                     default:
                         break;
                 }

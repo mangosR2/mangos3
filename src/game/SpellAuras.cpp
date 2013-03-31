@@ -3191,7 +3191,15 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                 break;
             }
             case SPELLFAMILY_HUNTER:
+            {
+                // Focus Fire
+                if (GetId() == 82692)
+                {
+                    int32 bp = m_modifier.m_amount;
+                    target->CastCustomSpell(target, 83468, &bp, NULL, NULL, true);
+                }
                 break;
+            }
             case SPELLFAMILY_SHAMAN:
             {
                 switch(GetId())
@@ -8130,6 +8138,23 @@ void Aura::HandleModMeleeSpeedPct(bool apply, bool /*Real*/)
         return;
     }
 
+    // Frenzy Effect
+    if (GetId() == 19615)
+    {
+        if (apply)
+        {
+            if (GetStackAmount() >= GetSpellProto()->GetStackAmount())
+                if (Unit* owner = target->GetOwner())
+                    owner->CastSpell(owner, 88843, true);   // Focus Fire!
+
+        }
+        else
+        {
+            if (GetStackAmount() < GetSpellProto()->GetStackAmount())
+                if (Unit* owner = target->GetOwner())
+                    owner->RemoveAurasDueToSpell(88843);    // Focus Fire!
+        }
+    }
 
     if (IsStacking())
     {
@@ -8170,7 +8195,17 @@ void Aura::HandleModMeleeSpeedPct(bool apply, bool /*Real*/)
 
 void Aura::HandleAuraModRangedHaste(bool apply, bool /*Real*/)
 {
-    GetTarget()->ApplyAttackTimePercentMod(RANGED_ATTACK, float(m_modifier.m_amount), apply);
+    Unit* target = GetTarget();
+
+    // Focus Fire
+    if (apply && GetId() == 82692)
+    {
+        if (Pet* pet = target->GetPet())
+            if (Aura* aura = pet->GetAura(19615, EFFECT_INDEX_0))
+                ChangeAmount(m_modifier.m_amount * aura->GetStackAmount());
+    }
+
+    target->ApplyAttackTimePercentMod(RANGED_ATTACK, float(m_modifier.m_amount), apply);
 }
 
 /********************************/
