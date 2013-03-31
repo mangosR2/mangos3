@@ -2733,6 +2733,11 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, DamageInfo* damageI
                 triggered_spell_id = 99289;
                 break;
             }
+            case 82897:                                     // Resistance is Futile!
+            {
+                triggered_spell_id = 86316;
+                break;
+            }
             break;
         }
         case SPELLFAMILY_PALADIN:

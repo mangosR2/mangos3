@@ -2206,6 +2206,20 @@ void Aura::TriggerSpell()
 //                    case 71706: break;
 //                    // Summon Broken Frostmourne
 //                    case 74081: break;
+                    case 83676:                             // Resistance is Futile
+                    {
+                        Unit* caster = GetCaster();
+                        if (!caster || caster->GetTypeId() != TYPEID_PLAYER)
+                            return;
+
+                        if (!target->isMoving())
+                            return;
+
+                        if (SpellEntry const* talent = ((Player*)caster)->GetKnownTalentRankById(9420))
+                            if (roll_chance_i(talent->CalculateSimpleValue(EFFECT_INDEX_0)))
+                                caster->CastSpell(caster, 82897, true);
+                        return;
+                    }
                     default:
                         break;
                 }
@@ -13102,6 +13116,26 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
         {
             switch (GetId())
             {
+                case 1130:                                  // Hunter's Mark
+                case 88691:                                 // Marked for Death
+                {
+                    Unit* caster = GetCaster();
+                    if (!caster)
+                        return;
+
+                    if (caster->GetTypeId() != TYPEID_PLAYER)
+                        return;
+
+                    if (apply)
+                    {
+                        // search Resistance is Futile
+                        if (SpellEntry const* talent = ((Player*)caster)->GetKnownTalentRankById(9420))
+                            caster->CastSpell(m_target, 83676, true);
+                    }
+                    else
+                        m_target->RemoveAurasByCasterSpell(83676, caster->GetObjectGuid());
+                    return;
+                }
                 case 13161:                                 // Aspect of the Beast
                 {
                     if (Pet* pet = m_target->GetPet())
