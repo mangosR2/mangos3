@@ -859,3 +859,8 @@ INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskB0`,
 DELETE FROM `spell_proc_event` WHERE `entry` = 53228;
 INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`, `SpellFamilyMaskB1`) VALUES
 (53228, 9, 32, 16777216);
+
+-- Wild Quiver
+DELETE FROM `spell_proc_event` WHERE `entry` = 76659;
+INSERT INTO `spell_proc_event` (`entry`, `SchoolMask`) VALUE
+(76659, 127);

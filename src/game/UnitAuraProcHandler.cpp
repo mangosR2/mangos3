@@ -2593,6 +2593,18 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, DamageInfo* damageI
                 triggered_spell_id = 34720;
                 break;
             }
+            // Wild Quiver
+            else if (dummySpell->GetSpellIconID() == 2935)
+            {
+                if (triggeredByAura->GetEffIndex() != EFFECT_INDEX_0)
+                    return SPELL_AURA_PROC_FAILED;
+
+                if (!roll_chance_i(triggerAmount))
+                    return SPELL_AURA_PROC_FAILED;
+
+                triggered_spell_id = 76663;
+                break;
+            }
             // Hunting Party
             if (dummySpell->GetSpellIconID() == 3406)
             {
