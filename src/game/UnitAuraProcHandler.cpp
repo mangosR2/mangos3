@@ -2600,17 +2600,6 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, DamageInfo* damageI
                 target = this;
                 break;
             }
-            // Lock and Load
-            if (dummySpell->GetSpellIconID() == 3579)
-            {
-                // Proc only from periodic (from trap activation proc another aura of this spell)
-                if (!(procFlag & PROC_FLAG_ON_DO_PERIODIC) || !roll_chance_i(triggerAmount))
-                    return SPELL_AURA_PROC_FAILED;
-
-                triggered_spell_id = 56453;
-                target = this;
-                break;
-            }
             // Rapid Recuperation
             if (dummySpell->GetSpellIconID() == 3560)
             {
@@ -2630,6 +2619,38 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, DamageInfo* damageI
                         break;
                 }
                 break;
+            }
+            // Lock and Load
+            else if (dummySpell->GetSpellIconID() == 3579)
+            {
+                // Proc only from periodic (from trap activation proc another aura of this spell)
+                if (!(procFlag & PROC_FLAG_ON_DO_PERIODIC) || !roll_chance_i(triggerAmount))
+                    return SPELL_AURA_PROC_FAILED;
+                triggered_spell_id = 56453;
+                target = this;
+                break;
+            }
+            // Crouching Tiger, Hidden Chimera
+            else if (dummySpell->GetSpellIconID() == 4752)
+            {
+                if (GetTypeId() != TYPEID_PLAYER)
+                    return SPELL_AURA_PROC_FAILED;
+
+                if (triggeredByAura->GetEffIndex() == EFFECT_INDEX_0 &&
+                    (procFlag & (PROC_FLAG_TAKEN_MELEE_HIT | PROC_FLAG_TAKEN_MELEE_SPELL_HIT)) == 0)
+                    return SPELL_AURA_PROC_FAILED;
+                else if (triggeredByAura->GetEffIndex() == EFFECT_INDEX_1 &&
+                    (procFlag & (PROC_FLAG_TAKEN_MELEE_HIT | PROC_FLAG_TAKEN_MELEE_SPELL_HIT)) != 0)
+                    return SPELL_AURA_PROC_FAILED;
+
+                if (((Player*)this)->HasSpellCooldown(dummySpell->Id))
+                    return SPELL_AURA_PROC_FAILED;
+
+                ((Player*)this)->AddSpellCooldown(dummySpell->Id, 0, time(NULL) + 2);
+
+                // modify cooldown of Disengage or Deterrence
+                ((Player*)this)->SendModifyCooldown(triggeredByAura->GetEffIndex() == EFFECT_INDEX_0 ? 781 : 19263, -triggerAmount);
+                return SPELL_AURA_PROC_OK;
             }
             // Misdirection
             else if (dummySpell->Id == 34477)
