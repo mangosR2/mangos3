@@ -854,3 +854,8 @@ INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`,
 DELETE FROM `spell_proc_event` WHERE `entry` = 82897;
 INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskB0`, `procFlags`, `procEx`) VALUES
 (82897, 9, 2048, 16, 65536);
+
+-- Rapid Recuperation
+DELETE FROM `spell_proc_event` WHERE `entry` = 53228;
+INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`, `SpellFamilyMaskB1`) VALUES
+(53228, 9, 32, 16777216);
