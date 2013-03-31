@@ -839,3 +839,8 @@ INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`)
 DELETE FROM `spell_proc_event` WHERE `entry` = 53397;
 INSERT INTO `spell_proc_event` (`entry`, `SchoolMask`, `procEx`) VALUE
 (53397, 127, 2);
+
+-- Killing Streak
+DELETE FROM `spell_proc_event` WHERE `entry` = 82748;
+INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskB0`, `procFlags`, `CustomChance`) VALUES
+(82748, 9, 2048, 16, 100);

@@ -2652,6 +2652,28 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, DamageInfo* damageI
                 ((Player*)this)->SendModifyCooldown(triggeredByAura->GetEffIndex() == EFFECT_INDEX_0 ? 781 : 19263, -triggerAmount);
                 return SPELL_AURA_PROC_OK;
             }
+            // Killing Streak
+            else if (dummySpell->GetSpellIconID() == 4980)
+            {
+                if (triggeredByAura->GetEffIndex() != EFFECT_INDEX_0)
+                    return SPELL_AURA_PROC_OK;
+
+                // Count spell criticals in a row
+                Modifier const* mod = triggeredByAura->GetModifier();
+                if (procEx & PROC_EX_CRITICAL_HIT)
+                {
+                    mod->m_amount *= 2;
+                    if (mod->m_amount < 60) // not enough
+                        return SPELL_AURA_PROC_OK;
+
+                    uint32 spellId = dummySpell->Id == 82748 ? 94006 : 94007;
+                    CastSpell(this, spellId, true, NULL, triggeredByAura);
+                }
+
+                mod->m_amount = 15;
+                return SPELL_AURA_PROC_OK;
+            }
+
             // Misdirection
             else if (dummySpell->Id == 34477)
             {
