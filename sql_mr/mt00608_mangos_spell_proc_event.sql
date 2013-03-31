@@ -879,3 +879,8 @@ INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskB1`,
 DELETE FROM `spell_proc_event` WHERE `entry` = 53241;
 INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`, `SpellFamilyMaskC0`, `procFlags`, `CustomChance`) VALUES
 (53241, 9, 2048, 1, 256, 100);
+
+-- Improved Serpent Sting
+DELETE FROM `spell_proc_event` WHERE `entry` = 19464;
+INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`, `procFlags`, `procEx`, `CustomChance`) VALUES
+(19464, 9, 16384, 256, 0, 100);

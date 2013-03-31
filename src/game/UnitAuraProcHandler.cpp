@@ -2577,8 +2577,19 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, DamageInfo* damageI
         }
         case SPELLFAMILY_HUNTER:
         {
+            // Improved Serpent Sting
+            if (dummySpell->GetSpellIconID() == 536)
+            {
+                if (!procSpell)
+                    return SPELL_AURA_PROC_FAILED;
+
+                triggered_spell_id = 83077;
+                basepoints[0] = int32(triggerAmount * damage / 100);
+                basepoints[0] *= GetSpellAuraMaxTicks(procSpell);
+                break;
+            }
             // Thrill of the Hunt
-            if (dummySpell->GetSpellIconID() == 2236)
+            else if (dummySpell->GetSpellIconID() == 2236)
             {
                 if (!procSpell)
                     return SPELL_AURA_PROC_FAILED;
