@@ -5227,8 +5227,28 @@ void Spell::EffectDummy(SpellEffectEntry const* effect)
                 // Steady Shot
                 case 56641:
                 {
-                    // energize
-                    m_caster->CastSpell(m_caster, 77443, true);
+                    if (SpellEntry const* spellEntry = sSpellStore.LookupEntry(77443))
+                    {
+                        int32 bp = spellEntry->CalculateSimpleValue(EFFECT_INDEX_0);
+
+                        if (unitTarget)
+                        {
+                            // search Termination
+                            Unit::AuraList const& mDummyAuras = m_caster->GetAurasByType(SPELL_AURA_DUMMY);
+                            for (Unit::AuraList::const_iterator itr = mDummyAuras.begin(); itr != mDummyAuras.end(); ++itr)
+                            {
+                                if ((*itr)->GetSpellProto()->GetSpellIconID() == 2008 && (*itr)->GetSpellProto()->GetSpellFamilyName() == SPELLFAMILY_HUNTER)
+                                {
+                                    if (unitTarget->GetHealthPercent() < (*itr)->GetSpellProto()->CalculateSimpleValue(EFFECT_INDEX_1))
+                                        bp += (*itr)->GetModifier()->m_amount;
+                                    break;
+                                }
+                            }
+                        }
+
+                        // energize
+                        m_caster->CastCustomSpell(m_caster, spellEntry, &bp, NULL, NULL, true);
+                    }
                     return;
                 }
             }
@@ -13037,8 +13057,28 @@ void Spell::EffectScriptEffect(SpellEffectEntry const* effect)
                 }
                 case 77767:                                 // Cobra Shot
                 {
-                    // energize
-                    m_caster->CastSpell(m_caster, 77443, true);
+                    if (SpellEntry const* spellEntry = sSpellStore.LookupEntry(77443))
+                    {
+                        int32 bp = spellEntry->CalculateSimpleValue(EFFECT_INDEX_0);
+
+                        if (unitTarget)
+                        {
+                            // search Termination
+                            Unit::AuraList const& mDummyAuras = m_caster->GetAurasByType(SPELL_AURA_DUMMY);
+                            for (Unit::AuraList::const_iterator itr = mDummyAuras.begin(); itr != mDummyAuras.end(); ++itr)
+                            {
+                                if ((*itr)->GetSpellProto()->SpellIconID == 2008 && (*itr)->GetSpellProto()->GetSpellFamilyName() == SPELLFAMILY_HUNTER)
+                                {
+                                    if (unitTarget->GetHealthPercent() < (*itr)->GetSpellProto()->CalculateSimpleValue(EFFECT_INDEX_1))
+                                        bp += (*itr)->GetModifier()->m_amount;
+                                    break;
+                                }
+                            }
+                        }
+
+                        // energize
+                        m_caster->CastCustomSpell(m_caster, spellEntry, &bp, NULL, NULL, true);
+                    }
 
                     if (!unitTarget)
                         return;
