@@ -363,7 +363,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleAuraModIncreaseSpeed,                      //305 SPELL_AURA_MOD_MINIMUM_SPEED
     &Aura::HandleUnused,                                    //306 0 spells in 4.3.4
     &Aura::HandleUnused,                                    //307 0 spells in 4.3.4
-    &Aura::HandleNULL,                                      //308 new aura for hunter traps
+    &Aura::HandleNULL,                                      //308 SPELL_AURA_MOD_CRIT_FROM_CASTER
     &Aura::HandleNULL,                                      //309 0 spells in 4.3.4
     &Aura::HandleNoImmediateEffect,                         //310 SPELL_AURA_MOD_PET_AOE_DAMAGE_AVOIDANCE implemented in Unit::SpellDamageBonusTaken
     &Aura::HandleNULL,                                      //311 2 spells in 4.3.4 some kind of stun effect

@@ -1311,6 +1311,10 @@ void Spell::EffectSchoolDMG(SpellEffectEntry const* effect)
 
                         m_caster->RemoveSpellAuraHolder(orb);
                     }
+
+                    // remove Mind Spike buff (Mind Blast crit chance)
+                    if (SpellAuraHolderPtr holder = unitTarget->GetSpellAuraHolder(87178, m_caster->GetObjectGuid()))
+                        unitTarget->RemoveSpellAuraHolder(holder);
                 }
                 break;
             }

@@ -9451,6 +9451,23 @@ bool Unit::IsSpellCrit(Unit *pVictim, SpellEntry const *spellProto, SpellSchoolM
         default:
             return false;
     }
+
+    if (pVictim)
+    {
+        // hunter trap auras
+        Unit::AuraList const& m308auras = pVictim->GetAurasByType(SPELL_AURA_MOD_CRIT_FROM_CASTER);
+        for (Unit::AuraList::const_iterator itr = m308auras.begin(); itr != m308auras.end(); ++itr)
+        {
+            if ((*itr)->GetCasterGuid() != GetObjectGuid())
+                continue;
+
+            if (!(*itr)->isAffectedOnSpell(spellProto))
+                continue;
+
+            crit_chance += (*itr)->GetModifier()->m_amount;
+        }
+    }
+
     // percent done
     // only players use intelligence for critical chance computations
     if (applySpellMod)

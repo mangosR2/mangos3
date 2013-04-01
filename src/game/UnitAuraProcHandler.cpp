@@ -340,7 +340,7 @@ pAuraProcHandler AuraProcHandler[TOTAL_AURAS]=
     &Unit::HandleNULLProc,                                  //305 SPELL_AURA_MOD_MINIMUM_SPEED
     &Unit::HandleNULLProc,                                  //306 0 spells in 4.3.4
     &Unit::HandleNULLProc,                                  //307 0 spells in 4.3.4
-    &Unit::HandleNULLProc,                                  //308 new aura for hunter traps
+    &Unit::HandleNULLProc,                                  //308 SPELL_AURA_MOD_CRIT_FROM_CASTER
     &Unit::HandleNULLProc,                                  //309 0 spells in 4.3.4
     &Unit::HandleNULLProc,                                  //310 SPELL_AURA_MOD_PET_AOE_DAMAGE_AVOIDANCE
     &Unit::HandleNULLProc,                                  //311 2 spells in 4.3.4 some kind of stun effect
