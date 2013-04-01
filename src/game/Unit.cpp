@@ -13623,7 +13623,7 @@ void Unit::ProcDamageAndSpellFor(bool isVictim, DamageInfo* damageInfo)
         }
 */
         // If exist crit/parry/dodge/block need update aura state (for victim and attacker)
-        if (procExtra & (PROC_EX_CRITICAL_HIT|PROC_EX_PARRY|PROC_EX_DODGE|PROC_EX_BLOCK))
+        if (procExtra & (PROC_EX_CRITICAL_HIT|PROC_EX_PARRY|PROC_EX_DODGE|PROC_EX_BLOCK|PROC_EX_DEFLECT))
         {
             // for victim
             if (isVictim)
@@ -13658,6 +13658,16 @@ void Unit::ProcDamageAndSpellFor(bool isVictim, DamageInfo* damageInfo)
                 {
                     ModifyAuraState(AURA_STATE_DEFENSE,true);
                     StartReactiveTimer( REACTIVE_DEFENSE );
+                }
+                // if victim and deflect attack
+                if (procExtra & PROC_EX_DEFLECT)
+                {
+                    // For Hunters only Counterattack (skip Mongoose bite)
+                    if (getClass() == CLASS_HUNTER)
+                    {
+                        ModifyAuraState(AURA_STATE_HUNTER_PARRY, true);
+                        StartReactiveTimer(REACTIVE_HUNTER_PARRY);
+                    }
                 }
             }
             else //For attacker
