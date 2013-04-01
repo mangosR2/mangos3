@@ -2595,12 +2595,22 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, DamageInfo* damageI
                     return SPELL_AURA_PROC_FAILED;
 
                 // mana cost save
-                int32 mana = procSpell->GetManaCost() + procSpell->GetManaCostPercentage() * GetCreateMana() / 100;
-                basepoints[0] = mana * 40/100;
+                float focus = procSpell->GetManaCost() + procSpell->GetManaCostPercentage() * GetCreatePowers(POWER_FOCUS) / 100;
+
+                // Black Arrow and Explosive Shot returns only part of $triggerAmount% per critical
+                if (procSpell->Id == 3674 || procSpell->Id == 53301)
+                {
+                    if ((procFlag & PROC_FLAG_ON_DO_PERIODIC) == 0)
+                        return SPELL_AURA_PROC_FAILED;
+
+                    if (int32 ticks = GetSpellAuraMaxTicks(procSpell->Id))
+                        focus /= ticks;
+                }
+
+                basepoints[0] = int32(focus * triggerAmount / 100);
                 if (basepoints[0] <= 0)
                     return SPELL_AURA_PROC_FAILED;
 
-                target = this;
                 triggered_spell_id = 34720;
                 break;
             }
@@ -4855,7 +4865,7 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(Unit *pVictim, DamageIn
                     return SPELL_AURA_PROC_FAILED;
             }
             // Entrapment correction
-            else if ((auraSpellInfo->Id == 19184 || auraSpellInfo->Id == 19387 || auraSpellInfo->Id == 19388) &&
+            else if ((auraSpellInfo->Id == 19184 || auraSpellInfo->Id == 19387) &&
                 !procSpell->GetSpellFamilyFlags().test<CF_HUNTER_SNAKE_TRAP_EFFECT, CF_HUNTER_FROST_TRAP>())
                     return SPELL_AURA_PROC_FAILED;
             // Lock and Load

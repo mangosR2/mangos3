@@ -884,3 +884,8 @@ INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`,
 DELETE FROM `spell_proc_event` WHERE `entry` = 19464;
 INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`, `procFlags`, `procEx`, `CustomChance`) VALUES
 (19464, 9, 16384, 256, 0, 100);
+
+-- Thrill of he Hunt
+DELETE FROM `spell_proc_event` WHERE `entry` = 34497;
+INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`, `SpellFamilyMaskB0`, `CustomChance`) VALUES
+(34497, 9, 2048, 2147483648 + 134217728, 100);

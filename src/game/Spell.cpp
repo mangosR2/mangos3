@@ -9439,7 +9439,6 @@ bool Spell::FillCustomTargetMap(SpellEffectEntry const* effect, UnitList& target
         }
         case 19185: // Entrapment
         case 64803:
-        case 64804:
         {
             FillAreaTargets(targetUnitMap, radius, PUSH_DEST_CENTER, SPELL_TARGETS_AOE_DAMAGE);
             break;
