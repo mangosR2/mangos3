@@ -889,3 +889,8 @@ INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`,
 DELETE FROM `spell_proc_event` WHERE `entry` = 34497;
 INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`, `SpellFamilyMaskB0`, `CustomChance`) VALUES
 (34497, 9, 2048, 2147483648 + 134217728, 100);
+
+-- Lock and Load
+DELETE FROM `spell_proc_event` WHERE `entry` = 56342;
+INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`, `SpellFamilyMaskB0`, `SpellFamilyMaskC0`, `procEx`) VALUES
+(56342, 9, 24, 134217728, 131072 + 16384, 65536);
