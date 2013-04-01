@@ -2626,13 +2626,6 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, DamageInfo* damageI
                 triggered_spell_id = 76663;
                 break;
             }
-            // Hunting Party
-            if (dummySpell->GetSpellIconID() == 3406)
-            {
-                triggered_spell_id = 57669;
-                target = this;
-                break;
-            }
             // Improved Steady Shot
             else if (dummySpell->GetSpellIconID() == 3409)
             {
