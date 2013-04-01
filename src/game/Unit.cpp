@@ -6000,6 +6000,23 @@ void Unit::RemoveAuraHolderDueToSpellByDispel(uint32 spellId, uint32 stackAmount
             }
         }
     }
+    // Wyvern Sting
+    else if (spellId == 19386)
+    {
+        if (Unit* caster = GetMap()->GetUnit(casterGuid))
+        {
+            // search Noxious Stings
+            Unit::AuraList const& auras = caster->GetAurasByType(SPELL_AURA_OVERRIDE_CLASS_SCRIPTS);
+            for (Unit::AuraList::const_iterator i = auras.begin(); i != auras.end(); ++i)
+            {
+                if ((*i)->GetSpellProto()->GetSpellIconID() == 3521 && (*i)->GetSpellProto()->GetSpellFamilyName() == SPELLFAMILY_HUNTER)
+                {
+                    caster->CastSpell(dispeller, spellId, true);
+                    break;
+                }
+            }
+        }
+    }
     // Necrotic Plague (Lich King)
     // this hack needs correct implementation
     else if (spellId == 70338 || spellId == 73785 || spellId == 73786 || spellId == 73787)
@@ -12157,8 +12174,25 @@ int32 Unit::CalculateAuraDuration(SpellEntry const* spellProto, uint32 effectMas
         }
     }
 
+    // Wyvern Sting
+    if (spellProto->Id == 19386)
+    {
+        if (spell->IsTriggeredSpell())
+        {
+            // search Noxious Stings
+            Unit::AuraList const& auras = spell->GetAffectiveCaster()->GetAurasByType(SPELL_AURA_OVERRIDE_CLASS_SCRIPTS);
+            for (Unit::AuraList::const_iterator i = auras.begin(); i != auras.end(); ++i)
+            {
+                if ((*i)->GetSpellProto()->GetSpellIconID() == 3521 && (*i)->GetSpellProto()->GetSpellFamilyName() == SPELLFAMILY_HUNTER)
+                {
+                    duration = duration * (*i)->GetModifier()->m_amount / 100;
+                    break;
+                }
+            }
+        }
+    }
     // Kidney Shot and Expose Armor
-    if (spellProto->IsFitToFamily(SPELLFAMILY_ROGUE, UI64LIT(0x280000)))
+    else if (spellProto->IsFitToFamily(SPELLFAMILY_ROGUE, UI64LIT(0x280000)))
     {
         // Revealig Strike
         if (SpellAuraHolderPtr holder = GetSpellAuraHolder(84617, caster->GetObjectGuid()))
