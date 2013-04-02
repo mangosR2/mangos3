@@ -9568,8 +9568,15 @@ void Spell::EffectInterruptCast(SpellEffectEntry const* effect)
 
     if (spellSchoolMask && m_caster->GetTypeId() == TYPEID_PLAYER)
     {
+        // Kick
+        if (m_spellInfo->Id == 1766)
+        {
+            // Glyph of Kick
+            if (Aura* glyph = m_caster->GetAura(56805, EFFECT_INDEX_1))
+                ((Player*)m_caster)->SendModifyCooldown(m_spellInfo->Id, -glyph->GetModifier()->m_amount);
+        }
         // Counterspell
-        if (m_spellInfo->Id == 2139)
+        else if (m_spellInfo->Id == 2139)
         {
             // Invocation
             if (SpellEntry const * spellProto = ((Player*)m_caster)->GetKnownTalentRankById(10864))

@@ -501,6 +501,16 @@ DELETE FROM `spell_proc_event` WHERE `entry` = 79133;
 INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA1`, CustomChance) VALUES
 (79133, 8, 0x00100100, 0);
 
+-- Glyph of Hemorrhage
+DELETE FROM `spell_proc_event` WHERE `entry` = 56807;
+INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`) VALUES
+(56807, 8, 33554432);
+
+-- Glyph of Blind
+DELETE FROM `spell_proc_event` WHERE `entry` = 91299;
+INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`, `procFlags`, `CustomChance`) VALUES
+(91299, 8, 16777216, 256, 100);
+
 ### Death Knight ###
 
 -- Dark Simulacrum

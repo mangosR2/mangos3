@@ -2380,6 +2380,12 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, DamageInfo* damageI
                     triggered_spell_id = 32747;
                     break;
                 }
+                // Glyph of Hemorrhage
+                case 56807:
+                {
+                    basepoints[0] = damage * triggerAmount / 100;
+                    break;
+                }
                 // Tricks of the trade
                 case 57934:
                 {
@@ -2405,6 +2411,17 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, DamageInfo* damageI
                     // Check procSpell for Eviscerate, Envenom, Expose Armor, Kidney Shot and Rupture
                     if (!procSpell || !NeedsComboPoints(procSpell))
                         return SPELL_AURA_PROC_FAILED;
+                    break;
+                }
+                case 91299:                                 // Glyph of Blind
+                {
+                    if (!pVictim || !pVictim->isAlive())
+                        return SPELL_AURA_PROC_FAILED;
+
+                    // except shadow word: death periodic
+                    pVictim->RemoveSpellsCausingAura(SPELL_AURA_PERIODIC_DAMAGE, pVictim->GetSpellAuraHolder(32409));
+                    pVictim->RemoveSpellsCausingAura(SPELL_AURA_PERIODIC_DAMAGE_PERCENT);
+                    pVictim->RemoveSpellsCausingAura(SPELL_AURA_PERIODIC_LEECH);
                     break;
                 }
             }
