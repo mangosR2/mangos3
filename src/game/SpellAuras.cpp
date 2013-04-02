@@ -6975,13 +6975,12 @@ void Aura::HandleDamagePercentTaken(bool apply, bool Real)
         if (loading)
             return;
 
-        // Hand of Salvation (only it have this aura and mask)
-        if (GetSpellProto()->IsFitToFamily<SPELLFAMILY_PALADIN, CF_PALADIN_HAND_OF_SALVATION1>())
+        // Shadow Sight
+        if (GetId() == 34709)
         {
-            // Glyph of Salvation
-            if (target->GetObjectGuid() == GetCasterGuid())
-                if (Aura* aur = target->GetAura(63225, EFFECT_INDEX_0))
-                    m_modifier.m_amount -= aur->GetModifier()->m_amount;
+            target->RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
+            target->RemoveSpellsCausingAura(SPELL_AURA_MOD_INVISIBILITY);
+            target->RemoveSpellsCausingAura(SPELL_AURA_CAMOUFLAGE);
         }
         // Will of the Necropolis
         else if (GetId() == 81162)
