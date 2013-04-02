@@ -2042,24 +2042,17 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, DamageInfo* damageI
                     triggered_spell_id = 28810;
                     break;
                 }
-                // Glyph of Dispel Magic
-                case 55677:
-                {
-                    if (!target->IsFriendlyTo(this))
-                        return SPELL_AURA_PROC_FAILED;
-
-                    if (target->GetTypeId() == TYPEID_PLAYER)
-                        basepoints[0] = int32(target->GetMaxHealth() * triggerAmount / 100);
-                    else if (Unit* caster = triggeredByAura->GetCaster())
-                        basepoints[0] = int32(caster->GetMaxHealth() * triggerAmount / 100);
-                    // triggered_spell_id in spell data
-                    break;
-                }
                 // Glyph of Prayer of Healing
                 case 55680:
                 {
                     basepoints[0] = int32(damage * triggerAmount  / 200);   // 10% each tick
                     triggered_spell_id = 56161;             // Glyph of Prayer of Healing
+                    break;
+                }
+                // Glyph of Spirit Tap
+                case 63237:
+                {
+                    triggered_spell_id = 81301;
                     break;
                 }
                 // Priest T10 Healer 2P Bonus
@@ -4653,23 +4646,6 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(Unit *pVictim, DamageIn
                 if (Aura* old_aura = GetAura(trigger_spell_id, EFFECT_INDEX_0))
                     basepoints[0] += old_aura->GetModifier()->m_amount;
             }
-            // Glyph of Shadow Word: Pain
-            else if (auraSpellInfo->Id == 55681 )
-            {
-                basepoints[0] = GetCreateMana() * triggerAmount / 100;
-            }
-            else if (auraSpellInfo->Id == 55689)
-            {
-                if(GetShapeshiftForm() != FORM_SHADOW)
-                    return SPELL_AURA_PROC_FAILED;
-            }
-            // Improved Spirit Tap
-            else if (auraSpellInfo->Id == 15337 || auraSpellInfo->Id == 15338)
-            {
-                // proc chance for Mind Flay is 2 times lower, so we have to roll for 50% now
-                if (procSpell->GetSpellIconID() == 548 && roll_chance_i(50))
-                    return SPELL_AURA_PROC_FAILED;
-            }
             // Blessed Resilience
             else if (auraSpellInfo->SpellIconID == 2177)
             {
@@ -5671,6 +5647,11 @@ SpellAuraProcResult Unit::HandleMendingAuraProc(Unit* /*pVictim*/, DamageInfo* d
             }
 
             heal += int32(caster->SpellBaseHealingBonusDone(GetSpellSchoolMask(spellProto)) * 1.59f);
+
+            // Glyph of Prayer of Mending
+            if (jumps + 1 == spellProto->GetProcCharges())
+                if (Aura* glyph = caster->GetAura(55685, EFFECT_INDEX_0))
+                    heal = int32(heal * glyph->GetModifier()->m_amount / 100.0f);
 
         }
     }

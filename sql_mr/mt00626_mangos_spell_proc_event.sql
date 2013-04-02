@@ -91,6 +91,19 @@ DELETE FROM `spell_proc_event` WHERE `entry` IN (89523);
 INSERT INTO `spell_proc_event` (`entry`, `SchoolMask`, `procEx`) VALUES
 (89523, 126, 2048);
 
+-- Glyph of Prayer of Healing
+DELETE FROM `spell_proc_event` WHERE `entry` = 55680;
+INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`) VALUES
+(55680, 6, 512);
+
+-- Glyph of Dispel Magic
+DELETE FROM `spell_proc_event` WHERE `entry` = 55677;
+
+-- Glyph of Spirit Tap
+DELETE FROM `spell_proc_event` WHERE `entry` = 63237;
+INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskB0`, `procFlags`, `CustomChance`) VALUES
+(63237, 6, 2, 2, 100);
+
 ### Priest ###
 
 -- Vengeance

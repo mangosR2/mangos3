@@ -99,6 +99,12 @@ REPLACE INTO `spell_bonus_data` (`entry`, `direct_bonus`, `dot_bonus`, `ap_bonus
 REPLACE INTO `spell_bonus_data` (`entry`, `direct_bonus`, `dot_bonus`, `ap_bonus`, `ap_dot_bonus`, `comments`) VALUES
 (5672, 0.0955, 0, 0, 0, 'Shaman - Healing Stream Totem');
 
+-- Priest
+REPLACE INTO `spell_bonus_data` (`entry`, `direct_bonus`, `dot_bonus`, `ap_bonus`, `ap_dot_bonus`, `comments`) VALUES
+(2061, 0.725, 0, 0, 0, 'Priest - Flash Heal'),
+(32379, 0.316, 0, 0, 0, 'Priest - Shadow Word: Death');
+(101062, 0.725, 0, 0, 0, 'Priest - Flash Heal (surge of light)');
+
 -- Goblin
 REPLACE INTO `spell_bonus_data` (`entry`, `direct_bonus`, `dot_bonus`, `ap_bonus`, `ap_dot_bonus`, `comments`) VALUES
 (69041, 0.429, 0, 0.25, 0, 'Rocket Barrage (Racial)');

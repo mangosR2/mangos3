@@ -1755,11 +1755,19 @@ void Spell::DoSpellHitOnUnit(Unit *unit, uint32 effectMask)
             if (!realCaster->HasAura(54934))
                 effectMask &= ~(1 << 1);
         }
+        // Concussive Shot
         else if (m_spellInfo->Id == 5116)
         {
             // Glyph of Concussive Shot
             if (!realCaster->HasAura(56851))
                 effectMask &= ~(1 << 1);
+        }
+        // Psyhic Scream
+        else if (m_spellInfo->Id == 8122)
+        {
+            // Glyph of Psyhic Scream
+            if (!realCaster->HasAura(55676))
+                effectMask &= ~(1 << 2);
         }
         // Word of Glory
         else if (m_spellInfo->Id == 85673)
@@ -7953,7 +7961,7 @@ SpellCastResult Spell::CheckCasterAuras() const
         // Pain Suppression (have SPELL_ATTR_EX5_USABLE_WHILE_STUNNED that must be used only with glyph)
         if (m_spellInfo->GetSpellFamilyName() == SPELLFAMILY_PRIEST && m_spellInfo->GetSpellIconID() == 2178)
         {
-            if (!m_caster->HasAura(63248))                  // Glyph of Pain Suppression
+            if ((m_spellInfo->Id == 33206 || m_spellInfo->Id == 47788) && !m_caster->HasAura(63248))    // Cast Pain Suppression and Guardian Spirit without Glyph of Desperation
                 spellUsableWhileStunned = false;
         }
 

@@ -8081,6 +8081,21 @@ void Spell::EffectDispel(SpellEffectEntry const* effect)
                     if (owner->HasAura(56249))
                         m_caster->CastCustomSpell(owner, 19658, &heal_amount, NULL, NULL, true);
             }
+            // Dispel Magic
+            else if (m_spellInfo->Id == 97690)
+            {
+                // Glyph of Dispel Magic
+                if (Aura* glyph = m_caster->GetAura(55677, EFFECT_INDEX_0))
+                {
+                    int32 bp = 0;
+                    if (unitTarget->GetTypeId() == TYPEID_PLAYER)
+                        bp = int32(unitTarget->GetMaxHealth() * glyph->GetModifier()->m_amount / 100);
+                    else
+                        bp = int32(m_caster->GetMaxHealth() * glyph->GetModifier()->m_amount / 100);
+
+                    m_caster->CastCustomSpell(unitTarget, glyph->GetSpellEffect()->EffectTriggerSpell, &bp, NULL, NULL, true);
+                }
+            }
         }
         // Send fail log to client
         if (!fail_list.empty())
