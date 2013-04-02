@@ -9571,6 +9571,13 @@ void Spell::EffectInterruptCast(SpellEffectEntry const* effect)
                 if (SpellEffectEntry const * effect = spellProto->GetSpellEffect(EFFECT_INDEX_0))
                     m_caster->CastSpell(m_caster, effect->EffectTriggerSpell, true);
         }
+        // Silencing Shot
+        else if (m_spellInfo->Id == 34490)
+        {
+            // Glyph of Silencing Shot
+            if (Aura* aura = m_caster->GetAura(56836, EFFECT_INDEX_0))
+                m_caster->CastSpell(m_caster, aura->GetSpellEffect()->EffectTriggerSpell, true);
+        }
         // Wind Shear
         else if (m_spellInfo->Id == 57994)
         {
@@ -15224,6 +15231,11 @@ void Spell::EffectRedirectThreat(SpellEffectEntry const* effect)
 {
     if (!unitTarget)
         return;
+
+    // Misdirection with Glyph of Misdirection
+    if (m_spellInfo->Id == 34477 && m_caster->GetTypeId() == TYPEID_PLAYER)
+        if (unitTarget->GetObjectGuid().IsPet() && unitTarget->GetOwnerGuid() == m_caster->GetObjectGuid() && m_caster->HasAura(56829))
+            ((Player*)m_caster)->RemoveSpellCooldown(m_spellInfo->Id, true);
 
     m_caster->getHostileRefManager().SetThreatRedirection(unitTarget->GetObjectGuid(), uint32(damage));
 }

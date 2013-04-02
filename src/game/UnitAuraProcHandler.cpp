@@ -4847,6 +4847,11 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(Unit *pVictim, DamageIn
                 if (!procSpell->GetSpellFamilyFlags().test<CF_HUNTER_RAPID_FIRE>())
                     return SPELL_AURA_PROC_FAILED;
             }
+            // Glyph of Silencing Shot
+            else if (auraSpellInfo->Id == 56836)
+            {
+                return SPELL_AURA_PROC_FAILED;      // done in other way
+            }
             // Entrapment correction
             else if ((auraSpellInfo->Id == 19184 || auraSpellInfo->Id == 19387) &&
                 !procSpell->GetSpellFamilyFlags().test<CF_HUNTER_SNAKE_TRAP_EFFECT, CF_HUNTER_FROST_TRAP>())

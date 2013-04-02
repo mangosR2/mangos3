@@ -1755,6 +1755,12 @@ void Spell::DoSpellHitOnUnit(Unit *unit, uint32 effectMask)
             if (!realCaster->HasAura(54934))
                 effectMask &= ~(1 << 1);
         }
+        else if (m_spellInfo->Id == 5116)
+        {
+            // Glyph of Concussive Shot
+            if (!realCaster->HasAura(56851))
+                effectMask &= ~(1 << 1);
+        }
         // Word of Glory
         else if (m_spellInfo->Id == 85673)
         {
