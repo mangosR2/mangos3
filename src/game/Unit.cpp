@@ -13842,6 +13842,20 @@ void Unit::ProcDamageAndSpellFor(bool isVictim, DamageInfo* damageInfo)
                 procFlag, procExtra, cooldown, procResult);
         }
 
+        // Lightning Shield special case
+        if (itr->first->GetId() == 324 && procSuccess && anyAuraProc && useCharges)
+        {
+            if (Unit* caster = itr->first->GetCaster())
+            {
+                // Glyph of Lightning Shield
+                if (caster->HasAura(55448))
+                {
+                    if (itr->first->GetStackAmount() < itr->first->GetSpellProto()->GetStackAmount() + 1)
+                        useCharges = false;
+                }
+            }
+        }
+
         // Remove charge (aura can be removed by triggers)
         if (useCharges && procSuccess && anyAuraProc && !itr->first->IsDeleted())
         {
