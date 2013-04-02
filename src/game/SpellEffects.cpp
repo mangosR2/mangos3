@@ -5248,6 +5248,21 @@ void Spell::EffectDummy(SpellEffectEntry const* effect)
                                     break;
                                 }
                             }
+
+                            // Glyph of Dazzled Prey
+                            if (Aura const* glyph = m_caster->GetAura(56856, EFFECT_INDEX_0))
+                            {
+                                // check dazed affect
+                                Unit::AuraList const& decSpeedList = unitTarget->GetAurasByType(SPELL_AURA_MOD_DECREASE_SPEED);
+                                for(Unit::AuraList::const_iterator iter = decSpeedList.begin(); iter != decSpeedList.end(); ++iter)
+                                {
+                                    if ((*iter)->GetSpellProto()->GetSpellIconID() == 15 && (*iter)->GetSpellProto()->GetDispel() == 0)
+                                    {
+                                        bp += glyph->GetModifier()->m_amount;
+                                        break;
+                                    }
+                                }
+                            }
                         }
 
                         // energize
@@ -13020,6 +13035,21 @@ void Spell::EffectScriptEffect(SpellEffectEntry const* effect)
                                     if (unitTarget->GetHealthPercent() < (*itr)->GetSpellProto()->CalculateSimpleValue(EFFECT_INDEX_1))
                                         bp += (*itr)->GetModifier()->m_amount;
                                     break;
+                                }
+                            }
+
+                            // Glyph of Dazzled Prey
+                            if (Aura const* glyph = m_caster->GetAura(56856, EFFECT_INDEX_0))
+                            {
+                                // check dazed affect
+                                Unit::AuraList const& decSpeedList = unitTarget->GetAurasByType(SPELL_AURA_MOD_DECREASE_SPEED);
+                                for(Unit::AuraList::const_iterator iter = decSpeedList.begin(); iter != decSpeedList.end(); ++iter)
+                                {
+                                    if ((*iter)->GetSpellProto()->GetSpellIconID() == 15 && (*iter)->GetSpellProto()->GetDispel() == 0)
+                                    {
+                                        bp += glyph->GetModifier()->m_amount;
+                                        break;
+                                    }
                                 }
                             }
                         }

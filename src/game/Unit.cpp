@@ -1514,6 +1514,20 @@ uint32 Unit::DealDamage(DamageInfo* damageInfo)
             he->CastSpell(he, 7267, true);                  // beg
             he->DuelComplete(DUEL_WON);
         }
+
+        // Kill Shot
+        if (spellProto && spellProto->Id == 53351 && GetTypeId() == TYPEID_PLAYER)
+        {
+            // Glyph of Kill Shot
+            if (HasAura(63067))
+            {
+                if (!HasAura(90967))
+                {
+                    CastSpell(this, 90967, true);
+                    ((Player*)this)->RemoveSpellCooldown(53351, true);
+                }
+            }
+        }
     }
 
     DEBUG_FILTER_LOG(LOG_FILTER_DAMAGE,"Unit::DealDamageEnd attacker %s target %s returned %u damage", GetGuidStr().c_str(), pVictim->GetGuidStr().c_str(), damageInfo->damage);
