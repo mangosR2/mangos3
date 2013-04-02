@@ -2657,6 +2657,13 @@ void Aura::TriggerSpellWithValue()
     if (!casterGuid || !target)
         return;
 
+    // Hand of Salvation
+    if (GetId() == 1038)
+        if (Unit* caster = GetCaster())
+            // Glyph of Salvation
+            if (caster->HasAura(63225))
+                return;
+
     // generic casting code with custom spells and target/caster customs
     uint32 trigger_spell_id = m_spellEffect->EffectTriggerSpell;
     int32  basepoints0 = GetModifier()->m_amount;
@@ -5967,6 +5974,10 @@ void Aura::HandleAuraModTotalThreat(bool apply, bool Real)
 
     if (!caster || !caster->isAlive())
         return;
+
+    // Glyph of Salvation
+    if (apply && GetId() == 1038 && caster->HasAura(63225))
+        m_modifier.m_amount = -100;
 
     float threatMod = apply ? float(m_modifier.m_amount) : float(-m_modifier.m_amount);
 
