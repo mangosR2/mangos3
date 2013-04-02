@@ -3182,6 +3182,13 @@ uint32 SpellMgr::GetSpellMaxTargetsWithCustom(SpellEntry const* spellInfo, Unit 
                 unMaxTargets = 2;
             break;
         }
+        case SPELLFAMILY_HUNTER:
+        {
+            // Multi-Shot
+            if (spellInfo->Id == 2643)
+                unMaxTargets = 3;
+            break;
+        }
         case SPELLFAMILY_PALADIN:
         {
             // Light of Dawn

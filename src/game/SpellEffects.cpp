@@ -9187,6 +9187,19 @@ void Spell::EffectWeaponDmg(SpellEffectEntry const* effect)
                     spell_bonus += int32(0.0483f * m_caster->GetTotalAttackPowerValue(RANGED_ATTACK));
                     break;
                 }
+                case 2643:              // Multi-Shot
+                {
+                    if (m_caster->GetTypeId() != TYPEID_PLAYER)
+                        break;
+
+                    // Serpent Spread
+                    if (SpellEntry const* talent = ((Player*)m_caster)->GetKnownTalentRankById(11698))
+                    {
+                        uint32 spellId = talent->Id == 87934 ? 88453 : 88466;
+                        m_caster->CastSpell(unitTarget, spellId, true);
+                    }
+                    break;
+                }
                 case 19434:             // Aimed Shot
                 case 82928:
                 {

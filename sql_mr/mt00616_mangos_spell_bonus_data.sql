@@ -89,11 +89,14 @@ REPLACE INTO `spell_bonus_data` (`entry`, `direct_bonus`, `dot_bonus`, `ap_bonus
 
 -- Hunter
 REPLACE INTO `spell_bonus_data` (`entry`, `direct_bonus`, `dot_bonus`, `ap_bonus`, `ap_dot_bonus`, `comments`) VALUES
+(1978, 0, 0, 0, 0.08, 'Hunter - Serpent Sting'),
 (3044, 0, 0, 248, 0, 'Hunter - Arcane Shot'),
 (19434, 0, 0, 20, 0, 'Hunter - Aimed Shot'),
 (53351, 0, 0, 0.5, 0, 'Hunter - Kill Shot'),
 (56641, 0, 0, 221, 0, 'Hunter - Steady Shot'),
-(77767, 0, 0, 500, 0, 'Hunter - Cobra Shot');
+(77767, 0, 0, 500, 0, 'Hunter - Cobra Shot'),
+(88453, 0, 0, 0, 0.08, 'Hunter - Serpent Sting'),
+(88466, 0, 0, 0, 0.08, 'Hunter - Serpent Sting');
 
 -- Goblin
 REPLACE INTO `spell_bonus_data` (`entry`, `direct_bonus`, `dot_bonus`, `ap_bonus`, `ap_dot_bonus`, `comments`) VALUES
