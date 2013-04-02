@@ -3017,13 +3017,6 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, DamageInfo* damageI
                     beacon->CastCustomSpell(beacon, triggered_spell_id, &basepoints[0], NULL, NULL, true, castItem, triggeredByAura, pVictim->GetObjectGuid());
                     return SPELL_AURA_PROC_OK;
                 }
-                // Glyph of Holy Light
-                case 54937:
-                {
-                    triggered_spell_id = 54968;
-                    basepoints[0] = triggerAmount * damage / 100;
-                    break;
-                }
                 // Item - Paladin T8 Holy 2P Bonus
                 case 64890:
                 {
@@ -5925,27 +5918,7 @@ SpellAuraProcResult Unit::HandleAddPctModifierAuraProc(Unit* pVictim, DamageInfo
             break;
         }
         case SPELLFAMILY_PALADIN:
-        {
-            // Glyph of Divinity
-            if (spellInfo->Id == 54939)
-            {
-                // Lookup base amount mana restore
-                for (int i = 0; i < MAX_EFFECT_INDEX; ++i)
-                {
-                    SpellEffectEntry const* spellEffect = procSpell->GetSpellEffect(SpellEffectIndex(i));
-                    if(!spellEffect)
-                        continue;
-                    if (spellEffect->Effect == SPELL_EFFECT_ENERGIZE)
-                    {
-                        int32 mana = procSpell->CalculateSimpleValue(SpellEffectIndex(i));
-                        CastCustomSpell(this, 54986, NULL, &mana, NULL, true, castItem, triggeredByAura);
-                        break;
-                    }
-                }
-                return SPELL_AURA_PROC_OK;
-            }
             break;
-        }
         case SPELLFAMILY_WARRIOR:
         {
             if (spellInfo->Id == 46916)           // Slam!

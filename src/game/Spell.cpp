@@ -4236,9 +4236,10 @@ void Spell::cast(bool skipCheck)
             // Lay on Hands
             else if (m_spellInfo->GetSpellFamilyFlags().test<CF_PALADIN_LAY_ON_HANDS>())
             {
-                // only for self cast
-                if (m_caster == m_targets.getUnitTarget())
-                    AddPrecastSpell(25771);                     // Forbearance
+                AddPrecastSpell(25771);                     // Forbearance
+                // Glyph of Divinity
+                if (m_caster->HasAura(54939))
+                    AddTriggeredSpell(54986);
             }
             // Avenging Wrath
             else if (m_spellInfo->GetSpellFamilyFlags().test<CF_PALADIN_AVENGING_WRATH>())
