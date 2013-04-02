@@ -1073,10 +1073,6 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, DamageInfo* damageI
                     target = SelectRandomUnfriendlyTarget(getVictim());
                     break;
                  }
-                // Glyph of Life Tap
-                case 63320:
-                    triggered_spell_id = 63321;
-                    break;
                 // Meteor Fists
                 case 66725:
                 case 68161:
@@ -4534,27 +4530,8 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(Unit *pVictim, DamageIn
             break;
         case SPELLFAMILY_WARLOCK:
         {
-            // Drain Soul
-            if (auraSpellInfo->GetSpellFamilyFlags().test<CF_WARLOCK_DRAIN_SOUL>())
-            {
-                // search for "Improved Drain Soul" dummy aura
-                Unit::AuraList const& mDummyAura = GetAurasByType(SPELL_AURA_DUMMY);
-                for(Unit::AuraList::const_iterator i = mDummyAura.begin(); i != mDummyAura.end(); ++i)
-                {
-                    if ((*i)->GetSpellProto()->GetSpellFamilyName() == SPELLFAMILY_WARLOCK && (*i)->GetSpellProto()->GetSpellIconID() == 113)
-                    {
-                        // basepoints of trigger spell stored in dummyeffect of spellProto
-                        int32 basepoints = GetMaxPower(POWER_MANA) * (*i)->GetSpellProto()->CalculateSimpleValue(EFFECT_INDEX_2) / 100;
-                        CastCustomSpell(this, 18371, &basepoints, NULL, NULL, true, castItem, triggeredByAura);
-                        break;
-                    }
-                }
-                // Not remove charge (aura removed on death in any cases)
-                // Need for correct work Drain Soul SPELL_AURA_CHANNEL_DEATH_ITEM aura
-                return SPELL_AURA_PROC_FAILED;
-            }
             // Consume Shadows
-            else if (auraSpellInfo->GetSpellFamilyFlags().test<CF_WARLOCK_VOIDWALKER_SPELLS>())
+            if (auraSpellInfo->GetSpellFamilyFlags().test<CF_WARLOCK_VOIDWALKER_SPELLS>())
             {
                 Aura* heal = triggeredByAura->GetHolder()->GetAuraByEffectIndex(EFFECT_INDEX_0);
                 if (!heal || heal->GetAuraTicks() > 1)

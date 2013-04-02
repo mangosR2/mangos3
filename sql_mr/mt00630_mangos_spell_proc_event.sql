@@ -337,6 +337,9 @@ INSERT INTO `spell_proc_event` (`entry`, `SchoolMask`, `procFlags`, `procEx`) VA
 (85767, 127, 0x40000, 0x0010001),
 (85768, 127, 0x40000, 0x0010001);
 
+-- Glyph of Drain Soul
+DELETE FROM `spell_proc_event` WHERE `entry` = 58070;
+
 ### Mage ###
 
 -- Ring of Frost

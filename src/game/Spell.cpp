@@ -1762,6 +1762,13 @@ void Spell::DoSpellHitOnUnit(Unit *unit, uint32 effectMask)
             if (!realCaster->HasAura(56851))
                 effectMask &= ~(1 << 1);
         }
+        // Fear
+        else if (m_spellInfo->Id == 5782)
+        {
+            // Glyph of Fear
+            if (!realCaster->HasAura(56244))
+                effectMask &= ~(1 << 2);
+        }
         // Psyhic Scream
         else if (m_spellInfo->Id == 8122)
         {

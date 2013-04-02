@@ -1517,13 +1517,29 @@ uint32 Unit::DealDamage(DamageInfo* damageInfo)
 
         if (spellProto && GetTypeId() == TYPEID_PLAYER)
         {
+            // Shadowburn
+            if (spellProto->Id == 17877)
+            {
+                // Glyph of Shadowburn
+                if (Aura* glyph = GetAura(56229, EFFECT_INDEX_0))
+                {
+                    if (float(pVictim->GetHealth() + damageInfo->damage) / GetMaxHealth() < glyph->GetModifier()->m_amount)
+                    {
+                        if (!HasAura(91001))
+                        {
+                            CastSpell(this, 91001, true);
+                            ((Player*)this)->RemoveSpellCooldown(17877, true);
+                        }
+                    }
+                }
+            }
             // Shadow Word: Death
-            if (spellProto->Id == 32379)
+            else if (spellProto->Id == 32379)
             {
                 // Glyph of Shadow Word: Death
                 if (Aura* glyph = GetAura(55682, EFFECT_INDEX_0))
                 {
-                    if (float(pVictim->GetHealth() + damage) / GetMaxHealth() < glyph->GetModifier()->m_amount)
+                    if (float(pVictim->GetHealth() + damageInfo->damage) / GetMaxHealth() < glyph->GetModifier()->m_amount)
                     {
                         if (!HasAura(95652))
                         {
@@ -12172,22 +12188,8 @@ int32 Unit::CalculateAuraDuration(SpellEntry const* spellProto, uint32 effectMas
                 }
                 break;
             case SPELLFAMILY_PALADIN:
-                // Blessing of Might
-                if (spellProto->GetSpellIconID() == 298 && spellProto->GetSpellFamilyFlags().test<CF_PALADIN_BLESSING_OF_MIGHT>())
-                {
-                    // Glyph of Blessing of Might
-                    if (Aura *aur = GetAura(57958, EFFECT_INDEX_0))
-                        duration += aur->GetModifier()->m_amount * MINUTE * IN_MILLISECONDS;
-                }
-                // Blessing of Wisdom
-                else if (spellProto->GetSpellIconID() == 306 && spellProto->GetSpellFamilyFlags().test<CF_PALADIN_BLESSING_OF_WISDOM>())
-                {
-                    // Glyph of Blessing of Wisdom
-                    if (Aura *aur = GetAura(57979, EFFECT_INDEX_0))
-                        duration += aur->GetModifier()->m_amount * MINUTE * IN_MILLISECONDS;
-                }
                 // Inquisition
-                else if (spellProto->Id == 84963)
+                if (spellProto->Id == 84963)
                 {
                     if (spell && GetPowerIndex(POWER_HOLY_POWER) != INVALID_POWER_INDEX)
                         duration *= spell->GetUsedHolyPower();

@@ -5052,14 +5052,6 @@ void Aura::HandleChannelDeathItem(bool apply, bool Real)
 
         Item* newitem = ((Player*)caster)->StoreNewItem(dest, m_spellEffect->EffectItemType, true);
         ((Player*)caster)->SendNewItem(newitem, count, true, true);
-
-        // Soul Shard (glyph bonus)
-        if (m_spellEffect->EffectItemType == 6265)
-        {
-            // Glyph of Soul Shard
-            if (caster->HasAura(58070) && roll_chance_i(40))
-                caster->CastSpell(caster, 58068, true, NULL, this);
-        }
     }
 }
 
@@ -7136,13 +7128,19 @@ void Aura::HandlePeriodicDamage(bool apply, bool Real)
     // remove time effects
     else
     {
-        // Drain Soul energize
+        // Drain Soul
         if (spellProto->Id == 1120)
         {
             if (m_removeMode == AURA_REMOVE_BY_DEATH)
             {
                 if (Unit* caster = GetCaster())
+                {
+                    // energize
                     caster->CastSpell(caster, 79264, true);
+                    // Glyph of Drain Soul
+                    if (caster->GetTypeId() == TYPEID_PLAYER && ((Player*)caster)->isHonorOrXPTarget(target))
+                        caster->CastSpell(caster, 58068, true);
+                }
             }
         }
         // Rupture

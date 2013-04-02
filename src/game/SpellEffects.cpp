@@ -1187,7 +1187,7 @@ void Spell::EffectSchoolDMG(SpellEffectEntry const* effect)
 
                         // Glyph of Soul Swap
                         if (m_caster->HasAura(56226))
-                            m_caster->CastSpell(m_caster, 64229, true);
+                            m_caster->CastSpell(m_caster, 94229, true);
                         else
                         {
                             for (uint32 i = 0; i < pCaster->m_soulSwapData.spells.size(); ++i)
