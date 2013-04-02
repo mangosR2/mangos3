@@ -98,6 +98,10 @@ REPLACE INTO `spell_bonus_data` (`entry`, `direct_bonus`, `dot_bonus`, `ap_bonus
 (88453, 0, 0, 0, 0.08, 'Hunter - Serpent Sting'),
 (88466, 0, 0, 0, 0.08, 'Hunter - Serpent Sting');
 
+-- Shaman
+REPLACE INTO `spell_bonus_data` (`entry`, `direct_bonus`, `dot_bonus`, `ap_bonus`, `ap_dot_bonus`, `comments`) VALUES
+(5672, 0.0955, 0, 0, 0, 'Shaman - Healing Stream Totem');
+
 -- Goblin
 REPLACE INTO `spell_bonus_data` (`entry`, `direct_bonus`, `dot_bonus`, `ap_bonus`, `ap_dot_bonus`, `comments`) VALUES
 (69041, 0.429, 0, 0.25, 0, 'Rocket Barrage (Racial)');
