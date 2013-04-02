@@ -6026,7 +6026,16 @@ void Spell::EffectTriggerSpell(SpellEffectEntry const* effect)
     // special cases
     switch (triggered_spell_id)
     {
-        case 18461:                                         // Vanish (not exist)
+        // Intimidating Shout
+        case 5246:
+        {
+            // Glyph of Intimidating Shout
+            if (!m_caster->HasAura(63327))
+                return;
+            break;
+        }
+        // Vanish (not exist)
+        case 18461:
         {
             unitTarget->RemoveSpellsCausingAura(SPELL_AURA_MOD_ROOT);
             unitTarget->RemoveSpellsCausingAura(SPELL_AURA_MOD_DECREASE_SPEED);

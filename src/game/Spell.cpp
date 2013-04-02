@@ -4055,12 +4055,6 @@ void Spell::cast(bool skipCheck)
         }
         case SPELLFAMILY_WARRIOR:
         {
-            // Shield Slam
-            if (m_spellInfo->GetSpellFamilyFlags().test<CF_WARRIOR_SHIELD_SLAM>() && m_spellInfo->GetCategory() == 1209)
-            {
-                if (m_caster->HasAura(58375))               // Glyph of Blocking
-                    AddTriggeredSpell(58374);               // Glyph of Blocking
-            }
             // Bloodrage
             if (m_spellInfo->GetSpellFamilyFlags().test<CF_WARRIOR_BLOODRAGE>())
             {
@@ -4106,6 +4100,13 @@ void Spell::cast(bool skipCheck)
                         AddPrecastSpell(gcd_spell);
                     }
                 }
+            }
+            // Colossus Smash
+            else if (m_spellInfo->Id == 86346 || m_spellInfo->Id == 108126)
+            {
+                // Glyph of Colossus Smash
+                if (m_caster->HasAura(89003))
+                    AddTriggeredSpell(58567);
             }
             break;
         }
@@ -7732,11 +7733,20 @@ SpellCastResult Spell::CheckCast(bool strict)
         // spells that dont have direct effects listed above
         // maybe should check triggered/linked spells?
         // but not all are implemented in this way
-        case 36554: // Shadowstep
-        case 51690: // Killing Spree
+        case 7384:      // Overpower
+        {
+            if (m_caster->GetTypeId() == TYPEID_PLAYER && m_caster->GetComboPoints() == 0 &&
+                !m_caster->HasAura(60503))      // Taste For Blood talent proc
+                return SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW;
+            break;
+        }
+        case 36554:     // Shadowstep has SPELL_EFFECT_TELEPORT_UNITS in triggered spell, so do check here
+        case 51690:     // Killing Spree
+        {
             if (m_caster->hasUnitState(UNIT_STAT_ROOT))
                 return SPELL_FAILED_ROOTED;
             break;
+        }
         case 88751:     // Wild Mushroom : Detonate
         {
             if (m_caster->GetTypeId() == TYPEID_PLAYER)
