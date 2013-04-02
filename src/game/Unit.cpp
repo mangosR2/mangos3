@@ -587,6 +587,8 @@ Unit::Unit() :
         m_damage_counters[i].push_front(0);
 
     m_boneShieldCooldown = time(NULL);
+
+    m_nextCustomSpellData.Clear();
 }
 
 Unit::~Unit()
@@ -1715,6 +1717,8 @@ void Unit::CastSpell(Unit* Victim, SpellEntry const *spellInfo, bool triggered, 
     }
 
     Spell* spell = new Spell(this, spellInfo, triggered, originalCaster, triggeredBy);
+    spell->m_customSpellData = m_nextCustomSpellData;
+    m_nextCustomSpellData.Clear();
 
     SpellCastTargets targets;
     targets.setUnitTarget(Victim);
@@ -1789,6 +1793,8 @@ void Unit::CastCustomSpell(Unit* Victim, SpellEntry const *spellInfo, int32 cons
     }
 
     Spell *spell = new Spell(this, spellInfo, triggered, originalCaster, triggeredBy);
+    spell->m_customSpellData = m_nextCustomSpellData;
+    m_nextCustomSpellData.Clear();
 
     if (bp0)
         spell->m_currentBasePoints[EFFECT_INDEX_0] = *bp0;
@@ -1906,6 +1912,8 @@ void Unit::CastSpell(WorldLocation const& loc, SpellEntry const* spellInfo, bool
     }
 
     Spell* spell = new Spell(this, spellInfo, triggered, originalCaster, triggeredBy);
+    spell->m_customSpellData = m_nextCustomSpellData;
+    m_nextCustomSpellData.Clear();
 
     SpellCastTargets targets;
 
@@ -1962,6 +1970,8 @@ void Unit::CastCustomSpell(WorldLocation const& loc, SpellEntry const *spellInfo
     }
 
     Spell *spell = new Spell(this, spellInfo, triggered, originalCaster, triggeredBy);
+    spell->m_customSpellData = m_nextCustomSpellData;
+    m_nextCustomSpellData.Clear();
 
     if (bp0)
         spell->m_currentBasePoints[EFFECT_INDEX_0] = *bp0;
@@ -11953,6 +11963,9 @@ int32 Unit::CalculateSpellDamage(Unit const* target, SpellEntry const* spellProt
 
 int32 Unit::CalculateAuraDuration(SpellEntry const* spellProto, uint32 effectMask, int32 duration, Unit const* caster, Spell const* spell /*=NULL*/)
 {
+    if (spell && spell->m_customSpellData.HasFlag(CUSTOM_SPELL_FLAG_AURA_DURATION))
+        return spell->m_customSpellData.customDuration;
+
     if (duration <= 0)
         return duration;
 

@@ -496,6 +496,7 @@ Spell::Spell( Unit* caster, SpellEntry const *info, bool triggered, ObjectGuid o
     m_TriggerSpells.clear();
     m_NotTriggerSpells.clear();
     m_IsTriggeredSpell = m_spellInfo->HasAttribute(SPELL_ATTR_EX4_FORCE_TRIGGERED) ? true : triggered;
+    m_customSpellData.Clear();
     //m_AreaAura = false;
     m_CastItem = NULL;
 
@@ -8191,6 +8192,9 @@ SpellCastResult Spell::CheckRange(bool strict, WorldObject* checkTarget /*=NULL*
 
 int32 Spell::CalculatePowerCost(SpellEntry const* spellInfo, Unit* caster, Spell const* spell, Item* castItem)
 {
+    if (spell && spell->m_customSpellData.HasFlag(CUSTOM_SPELL_FLAG_NO_COST))
+        return 0;
+
     // item cast not used power
     if (castItem)
         return 0;
@@ -8479,7 +8483,7 @@ SpellCastResult Spell::CheckItems()
     // if not item target then required item must be equipped (for triggered case not report error)
     else
     {
-        if (m_caster->GetTypeId() == TYPEID_PLAYER && !((Player*)m_caster)->HasItemFitToSpellReqirements(m_spellInfo))
+        if (m_caster->GetTypeId() == TYPEID_PLAYER && !((Player*)m_caster)->HasItemFitToSpellReqirements(m_spellInfo) && m_customSpellData.HasFlag(CUSTOM_SPELL_FLAG_IGNORE_EQUIPPED_ITEM_REQ))
             return m_IsTriggeredSpell ? SPELL_FAILED_DONT_REPORT : SPELL_FAILED_EQUIPPED_ITEM_CLASS;
     }
 
