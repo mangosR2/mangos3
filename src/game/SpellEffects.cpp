@@ -60,6 +60,7 @@
 #include "SQLStorages.h"
 #include "Guild.h"
 #include "GuildMgr.h"
+#include "PhaseMgr.h"
 
 pEffect SpellEffects[TOTAL_SPELL_EFFECTS]=
 {
@@ -5990,6 +5991,11 @@ void Spell::EffectClearQuest(SpellEffectEntry const* effect)
     player->SetQuestStatus(quest_id, QUEST_STATUS_NONE);
     if (QuestStatusData* data = player->GetQuestStatusData(quest_id))
         data->m_rewarded = false;
+
+    PhaseUpdateData phaseUdateData;
+    phaseUdateData.AddQuestUpdate(quest_id);
+
+    player->GetPhaseMgr()->NotifyConditionChanged(phaseUdateData);
 }
 
 void Spell::EffectForceCast(SpellEffectEntry const* effect)

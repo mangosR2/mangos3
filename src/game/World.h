@@ -722,6 +722,8 @@ class World
 
         void InvalidatePlayer(ObjectGuid const& guid);
 
+        void UpdatePhaseDefinitions();
+
     protected:
         void _UpdateGameTime();
 

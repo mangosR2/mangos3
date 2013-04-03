@@ -1101,7 +1101,7 @@ ContentLevels GetContentLevelsForMapAndZone(uint32 mapId, uint32 zoneId)
     if(!mapEntry)
         return CONTENT_1_60;
 
-    if (mapEntry->rootPhaseMap)
+    if (mapEntry->rootPhaseMap != -1)
         mapId = mapEntry->rootPhaseMap;
 
     switch (mapId)

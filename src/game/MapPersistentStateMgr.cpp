@@ -1290,3 +1290,14 @@ void MapPersistentStateManager::AddToUnbindQueue(ObjectGuid const& guid)
 {
     m_unloadQueue.insert(guid);
 }
+
+void DungeonPersistentState::UpdatePhasing()
+{
+    //PhaseUpdateData phaseUdateData;
+    //phaseUdateData.AddConditionType(CONDITION_INSTANCE_INFO);
+
+    //Map::PlayerList const& players = this->GetPlayerCount->GetPlayers();
+    //for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
+    //    if (Player* player = itr->getSource())
+    //        player->GetPhaseMgr()->NotifyConditionChanged(phaseUdateData);
+}

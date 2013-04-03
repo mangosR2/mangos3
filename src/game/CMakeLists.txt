@@ -200,6 +200,8 @@ Pet.cpp
 Pet.h
 PetHandler.cpp
 PetitionsHandler.cpp
+PhaseMgr.cpp
+PhaseMgr.h
 Player.cpp
 PlayerDump.cpp
 PlayerDump.h

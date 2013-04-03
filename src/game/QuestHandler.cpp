@@ -29,6 +29,7 @@
 #include "ObjectAccessor.h"
 #include "ScriptMgr.h"
 #include "Group.h"
+#include "PhaseMgr.h"
 
 // Playerbot mod:
 #include "playerbot/PlayerbotAI.h"
@@ -348,6 +349,11 @@ void WorldSession::HandleQuestLogRemoveQuest(WorldPacket& recv_data)
             }
 
             _player->SetQuestStatus(quest, QUEST_STATUS_NONE);
+
+            PhaseUpdateData phaseUpdateData;
+            phaseUpdateData.AddQuestUpdate(quest);
+
+            _player->GetPhaseMgr()->NotifyConditionChanged(phaseUpdateData);
         }
 
         _player->SetQuestSlot(slot, 0);
