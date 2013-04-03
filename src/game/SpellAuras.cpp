@@ -1000,13 +1000,9 @@ void Aura::ApplyModifier(bool apply, bool Real)
 
     MANGOS_ASSERT(aura < TOTAL_AURAS);
 
-    GetHolder()->SetInUse(true);
-
     (*this.*AuraHandler [aura])(apply, Real);
 
     m_isActive = apply;
-
-    GetHolder()->SetInUse(false);
 }
 
 ClassFamilyMask const& Aura::GetAuraSpellClassMask() const { return  GetHolder() ? GetHolder()->GetSpellProto()->GetEffectSpellClassMask(m_effIndex) : ClassFamilyMask::Null; }
@@ -10561,7 +10557,7 @@ SpellAuraHolder::SpellAuraHolder(SpellEntry const* spellproto, Unit *target, Wor
 m_spellProto(spellproto), m_target(target), m_castItemGuid(castItem ? castItem->GetObjectGuid() : ObjectGuid()),
 m_auraSlot(MAX_AURAS), m_auraFlags(AFLAG_NONE), m_auraLevel(1), m_procCharges(0),
 m_stackAmount(1), m_timeCla(1000), m_removeMode(AURA_REMOVE_BY_DEFAULT), m_AuraDRGroup(DIMINISHING_NONE),
-m_permanent(false), m_isRemovedOnShapeLost(true), m_deleted(false), m_in_use(0)
+m_permanent(false), m_isRemovedOnShapeLost(true), m_deleted(false)
 {
     MANGOS_ASSERT(target);
     MANGOS_ASSERT(spellproto && spellproto == sSpellStore.LookupEntry( spellproto->Id ) && "`info` must be pointer to sSpellStore element");
@@ -11963,9 +11959,7 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
                     {
                         spellId1 = 57318;                    // Sanctified Wrath (triggered)
                         // prevent aura deletion, specially in multi-boost case
-                        SetInUse(true);
                         m_target->CastCustomSpell(m_target, spellId1, &percent, &percent, NULL, true, NULL);
-                        SetInUse(false);
                     }
                     return;
                 }
@@ -12213,14 +12207,12 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
     if (linkedSet.size() > 0)
     {
         // prevent aura deletion, specially in multi-boost case
-        SetInUse(true);
         for (SpellLinkedSet::const_iterator itr = linkedSet.begin(); itr != linkedSet.end(); ++itr)
         {
             (apply || cast_at_remove) ?
                 m_target->CastSpell(m_target, *itr, true, NULL, NULL, GetCasterGuid()) :
                 m_target->RemoveAurasByCasterSpell(*itr, GetCasterGuid());
         }
-        SetInUse(false);
     }
 }
 
@@ -12385,14 +12377,12 @@ void SpellAuraHolder::HandleSpellSpecificBoostsForward(bool apply)
     if (linkedSet.size() > 0)
     {
         // prevent aura deletion, specially in multi-boost case
-        SetInUse(true);
         for (SpellLinkedSet::const_iterator itr = linkedSet.begin(); itr != linkedSet.end(); ++itr)
         {
             apply ?
                 m_target->CastSpell(m_target, *itr, true, NULL, NULL, GetCasterGuid()) :
                 m_target->RemoveAurasByCasterSpell(*itr, GetCasterGuid());
         }
-        SetInUse(false);
     }
 }
 

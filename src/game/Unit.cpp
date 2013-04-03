@@ -5311,11 +5311,6 @@ bool Unit::RemoveNoStackAurasDueToAuraHolder(SpellAuraHolderPtr holder)
                     return false;
 
             // Its a parent aura (create this aura in ApplyModifier)
-            if (itr->second->IsInUse())
-            {
-                sLog.outError("SpellAuraHolder (Spell %u) is in process but attempt removed at SpellAuraHolder (Spell %u) adding, need add stack rule for Unit::RemoveNoStackAurasDueToAuraHolder", itr->second->GetId(), holder->GetId());
-                continue;
-            }
             if (is_spellSpecPerTargetPerCaster)
                 RemoveSpellAuraHolder(itr->second);
             else
@@ -5339,11 +5334,6 @@ bool Unit::RemoveNoStackAurasDueToAuraHolder(SpellAuraHolderPtr holder)
                 return false;
 
             // Its a parent aura (create this aura in ApplyModifier)
-            if (itr->second->IsInUse())
-            {
-                sLog.outError("SpellAuraHolder (Spell %u) is in process but attempt removed at SpellAuraHolder (Spell %u) adding, need add stack rule for Unit::RemoveNoStackAurasDueToAuraHolder", itr->second->GetId(), holder->GetId());
-                continue;
-            }
             RemoveAurasDueToSpell(i_spellId);
 
             if (holderMap.empty() )
@@ -5358,12 +5348,6 @@ bool Unit::RemoveNoStackAurasDueToAuraHolder(SpellAuraHolderPtr holder)
         if ( !is_spellSpecPerTargetPerCaster && !is_spellSpecPerTarget && sSpellMgr.IsNoStackSpellDueToSpell(spellId, i_spellId) )
         {
             // Its a parent aura (create this aura in ApplyModifier)
-            if (itr->second->IsInUse())
-            {
-                sLog.outError("SpellAuraHolder (Spell %u) is in process but attempt removed at SpellAuraHolder (Spell %u) adding, need add stack rule for Unit::RemoveNoStackAurasDueToAuraHolder", itr->second->GetId(), holder->GetId());
-                continue;
-            }
-
             // different ranks spells with different casters should also stack
             if (holder->GetCasterGuid() != itr->second->GetCasterGuid() && SpellMgr::IsStackableSpellAuraHolder(spellProto))
                 continue;
@@ -5388,11 +5372,6 @@ bool Unit::RemoveNoStackAurasDueToAuraHolder(SpellAuraHolderPtr holder)
                     return false;                       // cannot remove higher rank
 
                 // Its a parent aura (create this aura in ApplyModifier)
-                if (itr->second->IsInUse())
-                {
-                    sLog.outError("SpellAuraHolder (Spell %u) is in process but attempt removed at SpellAuraHolder (Spell %u) adding, need add stack rule for Unit::RemoveNoStackAurasDueToAuraHolder", itr->second->GetId(), holder->GetId());
-                    continue;
-                }
                 RemoveAurasDueToSpell(i_spellId);
 
                 if (holderMap.empty())
@@ -12451,9 +12430,7 @@ void Unit::ProcDamageAndSpellFor(bool isVictim, DamageInfo* damageInfo)
                     continue;
             }
 
-            itr->first->SetInUse(true);
             SpellAuraProcResult procResult = (*this.*AuraProcHandler[itr->first->GetSpellProto()->EffectApplyAuraName[i]])(pTarget, damageInfo, triggeredByAura, procSpell, procFlag, procExtra, cooldown);
-            itr->first->SetInUse(false);
 
             switch (procResult)
             {

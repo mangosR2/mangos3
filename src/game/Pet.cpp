@@ -2863,19 +2863,17 @@ bool Pet::ReapplyScalingAura(Aura* aura, int32 basePoints)
         return false;
 
     SpellAuraHolderPtr holder = aura->GetHolder();
-    if (!holder || holder->IsDeleted() || holder->IsInUse())
+    if (!holder || holder->IsDeleted())
         return false;
 
     SetCanModifyStats(false);
     DEBUG_LOG("Pet::ReapplyScalingAura pet %u, spell %u, index %u, oldValue %u, newValue %u", GetObjectGuid().GetCounter(), holder->GetId(), aura->GetEffIndex(), aura->GetModifier()->m_amount, basePoints);
-    holder->SetInUse(true);
     {
         MAPLOCK_READ(this,MAP_LOCK_TYPE_AURAS);
         aura->ApplyModifier(false,true);
         aura->GetModifier()->m_amount = basePoints;
         aura->ApplyModifier(true,true);
     }
-    holder->SetInUse(false);
     SetCanModifyStats(true);
     return true;
 }

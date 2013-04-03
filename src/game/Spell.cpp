@@ -1517,7 +1517,6 @@ void Spell::DoSpellHitOnUnit(Unit* unit, uint32 effectMask)
     {
         m_spellAuraHolder = CreateSpellAuraHolder(m_spellInfo, unit, realCaster, m_CastItem);
         m_spellAuraHolder->setDiminishGroup(m_diminishGroup);
-        m_spellAuraHolder->SetInUse(true);
     }
 
     for(int effectNumber = 0; effectNumber < MAX_EFFECT_INDEX; ++effectNumber)
@@ -1558,7 +1557,6 @@ void Spell::DoSpellHitOnUnit(Unit* unit, uint32 effectMask)
             }
 
             unit->AddSpellAuraHolder(m_spellAuraHolder);
-            m_spellAuraHolder->SetInUse(false);
         }
     }
     else if (m_spellAuraHolder)
