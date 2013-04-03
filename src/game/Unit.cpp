@@ -5434,7 +5434,8 @@ bool Unit::AddSpellAuraHolder(SpellAuraHolderPtr holder)
                 (iter->second->GetCasterGuid().IsCreatureOrPet() && holder->GetCasterGuid().IsCreatureOrPet()))))
             {
                 // Aura can stack on self -> Stack it;
-                if (aurSpellInfo->GetStackAmount())
+                // except Frostfire Bolt without Glyph of Frostfire
+                if (aurSpellInfo->GetStackAmount() && (holder->GetId() != 44614 || !holder->GetCaster() || holder->GetCaster()->HasAura(61205)))
                 {
                     holderToStackAdd = iter->second;
                     break;

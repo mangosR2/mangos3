@@ -9051,8 +9051,14 @@ void Aura::HandleSchoolAbsorb(bool apply, bool Real)
                     break;
                 case SPELLFAMILY_MAGE:
                     if (spellProto->IsFitToFamilyMask(UI64LIT(0x0000000100000000)))
+                    {
                         // +80.67% from +spell bonus
                         DoneActualBenefit = caster->SpellBaseDamageBonusDone(GetSpellSchoolMask(spellProto)) * 0.8067f;
+                        customModifier = DoneActualBenefit + m_modifier.m_amount;
+                        // Glyph of Ice Barrier
+                        if (Aura* glyph = caster->GetAura(63095, EFFECT_INDEX_0))
+                            customModifier *= (glyph->GetModifier()->m_amount + 100.0f) / 100.0f;
+                    }
                     // Mage Ward
                     else if (spellProto->Id == 543)
                         // +80.7% from +spell bonus
@@ -12693,6 +12699,23 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
 
             switch(GetId())
             {
+                case 32612:                                 // Invisibility
+                {
+                    // Glyph of Invisibility
+                    if (!apply || m_target->HasAura(56366))
+                        spellId1 = 87833;
+
+                    Pet* pet = m_target->GetPet();
+                    if (!pet)
+                        break;
+
+                    if (apply)
+                        pet->CastSpell(pet, 32612, true);
+                    else
+                        pet->RemoveAurasDueToSpell(32612);
+
+                    break;
+                }
                 case 48108:                                 // Hot Streak (triggered)
                 case 57761:                                 // Fireball! (Brain Freeze triggered)
                 {

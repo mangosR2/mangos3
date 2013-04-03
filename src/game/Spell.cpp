@@ -1781,6 +1781,15 @@ void Spell::DoSpellHitOnUnit(Unit *unit, uint32 effectMask)
             if (!realCaster->HasAura(55676))
                 effectMask &= ~(1 << 2);
         }
+        // Frostfire Bolt
+        else if (m_spellInfo->Id == 44614)
+        {
+            // Glyph of Frostfire
+            if (!realCaster->HasAura(61205))
+                effectMask &= ~(1 << 2);
+            else
+                effectMask &= ~(1 << 0);
+        }
         // Word of Glory
         else if (m_spellInfo->Id == 85673)
         {
