@@ -432,7 +432,7 @@ static AuraType const frozenAuraTypes[] = { SPELL_AURA_MOD_ROOT, SPELL_AURA_MOD_
 Aura::Aura(AuraClassType type, SpellEntry const* spellproto, SpellEffectIndex eff, int32 *currentBasePoints, SpellAuraHolderPtr holder, Unit *target, Unit *caster, Item* castItem) :
 m_periodicTimer(0), m_periodicTick(0), m_removeMode(AURA_REMOVE_BY_DEFAULT),
 m_effIndex(eff), m_deleted(false), m_positive(false), m_isPeriodic(false), m_isAreaAura(false),
-m_isPersistent(false), m_spellAuraHolder(holder), m_classType(type)
+m_isPersistent(false), m_isActive(false), m_spellAuraHolder(holder), m_classType(type)
 {
     MANGOS_ASSERT(target);
     MANGOS_ASSERT(spellproto && spellproto == sSpellStore.LookupEntry( spellproto->Id ) && "`info` must be pointer to sSpellStore element");
@@ -556,10 +556,10 @@ void Aura::AreaAura(SpellEntry const* spellproto, SpellEffectIndex eff, int32 *c
     switch (m_spellEffect->Effect)
     {
         case SPELL_EFFECT_APPLY_AREA_AURA_PARTY:
-            m_areaAuraType = AREA_AURA_PARTY;
+            m_areaAuraType = caster_ptr->IsCharmerOrOwnerPlayerOrPlayerItself() ? AREA_AURA_PARTY : AREA_AURA_FRIEND;
             break;
         case SPELL_EFFECT_APPLY_AREA_AURA_RAID:
-            m_areaAuraType = AREA_AURA_RAID;
+            m_areaAuraType = caster_ptr->IsCharmerOrOwnerPlayerOrPlayerItself() ? AREA_AURA_RAID : AREA_AURA_FRIEND;
             // Light's Beacon not applied to caster itself (TODO: more generic check for another similar spell if any?)
             if (target == caster_ptr && spellproto->Id == 53651)
                 m_modifier.m_auraname = SPELL_AURA_NONE;
@@ -581,7 +581,7 @@ void Aura::AreaAura(SpellEntry const* spellproto, SpellEffectIndex eff, int32 *c
                 m_modifier.m_auraname = SPELL_AURA_NONE;
             break;
         default:
-            sLog.outError("Wrong spell effect in AreaAura constructor");
+            sLog.outError("Aura::AreaAura Wrong spell effect %u in AreaAura constructor", m_spellEffect->Effect);
             MANGOS_ASSERT(false);
             break;
     }
@@ -1069,9 +1069,14 @@ void Aura::ApplyModifier(bool apply, bool Real)
 {
     AuraType aura = m_modifier.m_auraname;
 
+    MANGOS_ASSERT(aura < TOTAL_AURAS);
+
     GetHolder()->SetInUse(true);
-    if (aura < TOTAL_AURAS)
-        (*this.*AuraHandler [aura])(apply, Real);
+
+    (*this.*AuraHandler [aura])(apply, Real);
+
+    m_isActive = apply;
+
     GetHolder()->SetInUse(false);
 }
 
@@ -2061,13 +2066,16 @@ void Aura::TriggerSpell()
 //                    case 67546: break;
                     case 69012:                             // Explosive Barrage - Krick and Ick
                     {
-                        if (triggerTarget->GetTypeId() == TYPEID_UNIT)
-                        {
-                            if (Unit* pTarget = ((Creature*)triggerTarget)->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-                            {
-                                triggerTarget->CastSpell(pTarget, 69015, true);
-                            }
-                        }
+                       // Summon an Exploding Orb for each player in combat with the caster 
+                        ThreatList const& threatList = target->getThreatManager().getThreatList(); 
+                        for (ThreatList::const_iterator itr = threatList.begin(); itr != threatList.end(); ++itr) 
+                        { 
+                            if (Unit* expectedTarget = target->GetMap()->GetUnit((*itr)->getUnitGuid())) 
+                            { 
+                                if (expectedTarget->GetTypeId() == TYPEID_PLAYER) 
+                                    target->CastSpell(expectedTarget, 69015, true); 
+                            } 
+                        } 
                         return;
                     }
                     case 70017:                             // Gunship Cannon Fire
@@ -2425,6 +2433,7 @@ void Aura::TriggerSpell()
                 return;
             }
             case 44883:                                     // Encapsulate
+            case 56505:                                     // Surge of Power
             {
                 // Self cast spell, hence overwrite caster (only channeled spell where the triggered spell deals dmg to SELF)
                 triggerCaster = triggerTarget;
@@ -2776,6 +2785,13 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                     case 54729:                             // Winged Steed of the Ebon Blade
                         Spell::SelectMountByAreaAndSkill(target, GetSpellProto(), 0, 0, 54726, 54727, 0);
                         return;
+                    case 60444:                                // Lost!
+                        if (target && target->GetTypeId() == TYPEID_PLAYER)
+                        {
+                            uint32 spell_id = (((Player*)target)->GetTeam() == ALLIANCE ? 60323 : 60328);
+                            target->CastSpell(target, spell_id + urand(0, 7), true);
+                            return;
+                        }
                     case 62061:                             // Festive Holiday Mount
                         if (target->HasAuraType(SPELL_AURA_MOUNTED))
                             // Reindeer Transformation
@@ -3777,15 +3793,28 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                             target->PlayDirectSound(14971, (Player *)target);
                         // Play part 3
                         else
-                            target->PlayDirectSound(14972, (Player *)target);
+                            target->PlayDirectSound(14972, (Player*)target);
+                        return;
                     }
-                    return;
+                case 68987:                                 // Pursuit 
+                { 
+                    Unit* caster = GetCaster(); 
+                    if (!caster || target->GetTypeId() != TYPEID_PLAYER) 
+                        return; 
+ 
+                    if (apply) 
+                        caster->FixateTarget(target); 
+                    else if (target->GetObjectGuid() == caster->GetFixatedTargetGuid()) 
+                        caster->FixateTarget(NULL); 
+ 
+                    return; 
+                }
                 case 27978:
                 case 40131:
                     if (apply)
                         target->m_AuraFlags |= UNIT_AURAFLAG_ALIVE_INVISIBLE;
                     else
-                        target->m_AuraFlags |= ~UNIT_AURAFLAG_ALIVE_INVISIBLE;
+                        target->m_AuraFlags &= ~UNIT_AURAFLAG_ALIVE_INVISIBLE;
                     return;
             }
             break;
@@ -8633,13 +8662,13 @@ void Aura::PeriodicTick()
     if (target->IsImmuneToSpell(spellProto, GetAffectiveCaster() ? GetAffectiveCaster()->IsFriendlyTo(target) : true))
         return;
 
-    switch(m_modifier.m_auraname)
+    switch (m_modifier.m_auraname)
     {
         case SPELL_AURA_PERIODIC_DAMAGE:
         case SPELL_AURA_PERIODIC_DAMAGE_PERCENT:
         {
             // don't damage target if not alive, possible death persistent effects
-            if (!target->IsInWorld() ||  !target->isAlive())
+            if (!target->IsInWorld() || !target->isAlive())
                 return;
 
             Unit* pCaster = GetAffectiveCaster();
@@ -8650,7 +8679,7 @@ void Aura::PeriodicTick()
                 return;
 
             if (GetSpellEffect()->Effect == SPELL_EFFECT_PERSISTENT_AREA_AURA &&
-                pCaster->SpellHitResult(target, spellProto) != SPELL_MISS_NONE)
+                pCaster->SpellHitResult(target, spellProto, true) != SPELL_MISS_NONE)
                 return;
 
             // Check for immune (not use charges)
@@ -8671,7 +8700,7 @@ void Aura::PeriodicTick()
                 case 71316:
                 case 71317:
                 {
-                    if (target->GetHealth() == target->GetMaxHealth() )
+                    if (target->GetHealth() == target->GetMaxHealth())
                     {
                         target->RemoveAurasDueToSpell(GetId());
                         return;
@@ -8684,7 +8713,7 @@ void Aura::PeriodicTick()
                         GetEffIndex() < EFFECT_INDEX_2 && GetSpellEffect()->Effect == SPELL_EFFECT_DUMMY ?
                         pCaster->CalculateSpellDamage(target, spellProto, SpellEffectIndex(GetEffIndex() + 1)) :
                         100;
-                    if (target->GetHealth() * 100 >= target->GetMaxHealth() * percent )
+                    if (target->GetHealth() * 100 >= target->GetMaxHealth() * percent)
                     {
                         uint32 percent =
                             GetEffIndex() < EFFECT_INDEX_2 && spellProto->GetSpellEffectIdByIndex(GetEffIndex()) == SPELL_EFFECT_DUMMY ?
@@ -8889,10 +8918,10 @@ void Aura::PeriodicTick()
         case SPELL_AURA_PERIODIC_HEALTH_FUNNEL:
         {
             // don't damage target if not alive, possible death persistent effects
-            if (!target->IsInWorld() ||  !target->isAlive())
+            if (!target->IsInWorld() || !target->isAlive())
                 return;
 
-            Unit *pCaster = GetAffectiveCaster();
+            Unit* pCaster = GetAffectiveCaster();
             if (!pCaster)
                 return;
 
@@ -8900,7 +8929,7 @@ void Aura::PeriodicTick()
                 return;
 
             if( spellProto->GetSpellEffectIdByIndex(GetEffIndex()) == SPELL_EFFECT_PERSISTENT_AREA_AURA &&
-                pCaster->SpellHitResult(target, spellProto) != SPELL_MISS_NONE)
+                pCaster->SpellHitResult(target, spellProto, true) != SPELL_MISS_NONE)
                 return;
 
             // Check for immune
@@ -9020,7 +9049,7 @@ void Aura::PeriodicTick()
                     if (GetAuraTicks() > 1 && ticks > 1)
                         // Item - Druid T10 Restoration 2P Bonus
                         if (Aura *aura = pCaster->GetAura(70658, EFFECT_INDEX_0))
-                            addition += abs(int32((addition * aura->GetModifier()->m_amount) / ((ticks-1)* 100)));
+                            addition += int32(aura->GetModifier()->m_amount * amount * ticks * (GetAuraTicks()-1) / 5000);
 
                     damageInfo.damage = damageInfo.damage + addition;
                 }
@@ -9131,7 +9160,7 @@ void Aura::PeriodicTick()
                 return;
 
             if (GetSpellProto()->GetSpellEffectIdByIndex(GetEffIndex()) == SPELL_EFFECT_PERSISTENT_AREA_AURA &&
-                pCaster->SpellHitResult(target, spellProto) != SPELL_MISS_NONE)
+                pCaster->SpellHitResult(target, spellProto, true) != SPELL_MISS_NONE)
                 return;
 
             // Check for immune (not use charges)
@@ -9327,9 +9356,10 @@ void Aura::PeriodicTick()
                 return;
 
             // resilience reduce mana draining effect at spell crit damage reduction (added in 2.4)
-            if (powerType == POWER_MANA)
-                damageInfo.damage -= target->GetCritDamageReduction(damageInfo.damage);
-            damageInfo.cleanDamage = abs(target->ModifyPower(powerType, -damageInfo.damage));
+            //if (powerType == POWER_MANA)
+            //    damageInfo.damage -= target->GetSpellCritDamageReduction(damageInfo.damage);
+
+            damageInfo.cleanDamage = abs(target->ModifyPower(powerType, -int32(damageInfo.damage)));
 
             damageInfo.damage = uint32(damageInfo.cleanDamage * GetSpellEffect()->EffectMultipleValue);
 
@@ -9698,14 +9728,27 @@ void Aura::PeriodicDummyTick()
                     target->CastSpell(target, 52443, true);
                     return;
                 case 53035:                                 // Summon Anub'ar Champion Periodic (Azjol Nerub)
-                    target->CastSpell(target, 53014, true); // Summon Anub'ar Champion
-                    return;
                 case 53036:                                 // Summon Anub'ar Necromancer Periodic (Azjol Nerub)
-                    target->CastSpell(target, 53015, true); // Summon Anub'ar Necromancer
-                    return;
                 case 53037:                                 // Summon Anub'ar Crypt Fiend Periodic (Azjol Nerub)
-                    target->CastSpell(target, 53016, true); // Summon Anub'ar Crypt Fiend
+                {
+                    uint32 summonSpells[3][3] =
+                    {
+                        {53090, 53014, 53064},              // Summon Anub'ar Champion
+                        {53092, 53015, 53066},              // Summon Anub'ar Necromancer
+                        {53091, 53016, 53065}               // Summon Anub'ar Crypt Fiend
+                    };
+
+                    // Cast different spell depending on trigger position
+                    // This will summon a different npc entry on each location - each of those has individual movement patern
+                    if (target->GetPositionZ() < 750.0f)
+                        target->CastSpell(target, summonSpells[spell->Id - 53035][0], true, NULL, this);
+                    else if (target->GetPositionX() > 500.0f)
+                        target->CastSpell(target, summonSpells[spell->Id - 53035][1], true, NULL, this);
+                    else
+                        target->CastSpell(target, summonSpells[spell->Id - 53035][2], true, NULL, this);
+
                     return;
+                }
                 case 53520:                                 // Carrion Beetles
                     target->CastSpell(target, 53521, true, NULL, this);
                     target->CastSpell(target, 53521, true, NULL, this);
@@ -10204,6 +10247,12 @@ void Aura::PeriodicDummyTick()
         }
         default:
             break;
+    }
+
+    if (Unit* caster = GetCaster())
+    {
+        if (target && target->GetTypeId() == TYPEID_UNIT)
+            sScriptMgr.OnEffectDummy(caster, GetId(), GetEffIndex(), (Creature*)target);
     }
 }
 

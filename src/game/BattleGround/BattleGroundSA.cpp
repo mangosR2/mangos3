@@ -1054,6 +1054,7 @@ void BattleGroundSA::TeleportPlayerToCorrectLoc(Player *plr, bool resetBattle)
     {
         if (!plr->isAlive())
         {
+            plr->RemoveAurasDueToSpell(2584);
             plr->ResurrectPlayer(1.0f);
             plr->SpawnCorpseBones();
         }

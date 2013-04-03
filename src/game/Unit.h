@@ -1537,8 +1537,8 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
 
         float  MeleeSpellMissChance(Unit* pVictim, WeaponAttackType attType, int32 skillDiff, SpellEntry const *spell);
         SpellMissInfo MeleeSpellHitResult(Unit* pVictim, SpellEntry const* spell);
-        SpellMissInfo MagicSpellHitResult(Unit* pVictim, SpellEntry const* spell);
-        SpellMissInfo SpellHitResult(Unit* pVictim, SpellEntry const* spell);
+        SpellMissInfo MagicSpellHitResult(Unit* pVictim, SpellEntry const* spell, bool dotDamage = false);
+        SpellMissInfo SpellHitResult(Unit* pVictim, SpellEntry const* spell, bool dotDamage = false);
         SpellMissInfo SpellResistResult(Unit* pVictim, SpellEntry const* spell);
         uint32 CalculateBaseSpellHitChance(Unit* pVictim);
 
@@ -1637,6 +1637,8 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         void CastCustomSpell(Unit* Victim,SpellEntry const *spellInfo, int32 const* bp0, int32 const* bp1, int32 const* bp2, bool triggered, Item *castItem= NULL, Aura const* triggeredByAura = NULL, ObjectGuid originalCaster = ObjectGuid(), SpellEntry const* triggeredBy = NULL);
         void CastSpell(float x, float y, float z, uint32 spellId, bool triggered, Item *castItem = NULL, Aura const* triggeredByAura = NULL, ObjectGuid originalCaster = ObjectGuid(), SpellEntry const* triggeredBy = NULL);
         void CastSpell(float x, float y, float z, SpellEntry const *spellInfo, bool triggered, Item *castItem = NULL, Aura const* triggeredByAura = NULL, ObjectGuid originalCaster = ObjectGuid(), SpellEntry const* triggeredBy = NULL);
+        void CastSpell(WorldLocation const& loc, uint32 spellId, bool triggered, Item *castItem = NULL, Aura const* triggeredByAura = NULL, ObjectGuid originalCaster = ObjectGuid(), SpellEntry const* triggeredBy = NULL);
+        void CastSpell(WorldLocation const& loc, SpellEntry const *spellInfo, bool triggered, Item *castItem = NULL, Aura const* triggeredByAura = NULL, ObjectGuid originalCaster = ObjectGuid(), SpellEntry const* triggeredBy = NULL);
 
         void DeMorph();
 
@@ -1648,6 +1650,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         void SendSpellDamageResist(Unit* target, uint32 spellId);
         void SendSpellDamageImmune(Unit* target, uint32 spellId);
 
+        void NearTeleportTo(WorldLocation const& loc, uint32 options = 0);
         void NearTeleportTo(float x, float y, float z, float orientation, bool casting = false);
         void MonsterMoveToDestination(float x, float y, float z, float o, float speed, float height, bool isKnockBack = false, Unit* target = NULL);
         // recommend use MonsterMove/MonsterMoveWithSpeed for most case that correctly work with movegens
@@ -1799,7 +1802,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         void RemoveRankAurasDueToSpell(uint32 spellId);
         bool RemoveNoStackAurasDueToAuraHolder(SpellAuraHolderPtr holder);
         void RemoveAurasWithInterruptFlags(uint32 flags);
-        void RemoveAurasWithAttribute(uint32 flags);
+        void RemoveAurasWithAttribute(uint32 flags, uint32 exclude = 0);
         void RemoveAurasWithDispelType(DispelType type, ObjectGuid casterGuid = ObjectGuid());
         void RemoveAllAuras(AuraRemoveMode mode = AURA_REMOVE_BY_DEFAULT);
         void RemoveArenaAuras(bool onleave = false);
@@ -1807,6 +1810,9 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
 
         void HandleArenaPreparation(bool apply);
         bool RemoveSpellsCausingAuraByCaster(AuraType auraType, ObjectGuid casterGuid, AuraRemoveMode mode = AURA_REMOVE_BY_DEFAULT);
+
+        // Method for enable-disable auras (currently - passive only) affect
+        void TriggerPassiveAurasWithAttribute(bool active, uint32 flags);
 
         // removing specific aura FROM stack by diff reasons and selections
         void RemoveAuraHolderFromStack(uint32 spellId, uint32 stackAmount = 1, ObjectGuid casterGuid = ObjectGuid(), AuraRemoveMode mode = AURA_REMOVE_BY_DEFAULT);
@@ -2411,6 +2417,10 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         void CastSpell(float x, float y, float z, uint32 spell, TR triggered);
         template <typename TR>
         void CastSpell(float x, float y, float z, SpellEntry const* spell, TR triggered);
+        template <typename TR>
+        void CastSpell(WorldLocation const& loc, uint32 spell, TR triggered);
+        template <typename TR>
+        void CastSpell(WorldLocation const& loc, SpellEntry const* spell, TR triggered);
 };
 
 template<typename Func>

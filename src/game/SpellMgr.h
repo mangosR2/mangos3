@@ -248,7 +248,7 @@ inline bool IsLootCraftingSpell(SpellEntry const *spellInfo)
     return (spellEffect0 && (spellEffect0->Effect == SPELL_EFFECT_CREATE_RANDOM_ITEM ||
         // different random cards from Inscription (121==Virtuoso Inking Set category) r without explicit item
         (spellEffect0->Effect == SPELL_EFFECT_CREATE_ITEM_2 &&
-        ((totems && totems->TotemCategory[0] != 0) || spellEffect0->EffectItemType==0))));
+        ((totems && totems->TotemCategory[0] != 0) || spellEffect0->EffectItemType == 0 || spellInfo->Id == 62941))));
 }
 
 int32 CompareAuraRanks(uint32 spellId_1, uint32 spellId_2);
@@ -666,11 +666,6 @@ inline bool IsNeedCastSpellAtFormApply(SpellEntry const* spellInfo, ShapeshiftFo
     // passive spells with SPELL_ATTR_EX2_NOT_NEED_SHAPESHIFT are already active without shapeshift, do no recast!
     return (shapeShift->Stances & (1<<(form-1)) && !(spellInfo->AttributesEx2 & SPELL_ATTR_EX2_NOT_NEED_SHAPESHIFT));
 }
- 
-inline bool IsNeedCastSpellAtOutdoor(SpellEntry const* spellInfo)
-{
-    return (spellInfo->HasAttribute(SPELL_ATTR_OUTDOORS_ONLY) && spellInfo->HasAttribute(SPELL_ATTR_PASSIVE));
-}
 
 
 inline bool NeedsComboPoints(SpellEntry const* spellInfo)
@@ -736,12 +731,24 @@ inline Mechanics GetEffectMechanic(SpellEntry const* spellInfo, SpellEffectIndex
 
 inline bool IsBinaryResistedSpell(SpellEntry const* spellInfo) 
 {
-    return (GetAllSpellMechanicMask(spellInfo) != 0
+    if (!spellInfo)
+        return false;
+
+    if (IsAreaOfEffectSpell(spellInfo) ||
+            spellInfo->HasAttribute(SPELL_ATTR_EX6_EXPLICIT_NO_BINARY_RESIST) ||
+            spellInfo->HasAttribute(SPELL_ATTR_UNAFFECTED_BY_INVULNERABILITY) || //???
+            spellInfo->HasAttribute(SPELL_ATTR_EX4_IGNORE_RESISTANCES) ||
+           (spellInfo->SchoolMask & SPELL_SCHOOL_MASK_NORMAL) ||
+            spellInfo->HasAttribute(SPELL_ATTR_EX3_CANT_MISS))
+        return false;
+
+    if (GetAllSpellMechanicMask(spellInfo) != 0
             || IsDispelSpell(spellInfo)
-            || spellInfo->HasAttribute(SPELL_ATTR_EX4_IGNORE_RESISTANCES)
-            || spellInfo->HasAttribute(SPELL_ATTR_EX_BREAKABLE_BY_ANY_DAMAGE)
-            );
-};
+            || spellInfo->HasAttribute(SPELL_ATTR_EX_BREAKABLE_BY_ANY_DAMAGE))
+        return true;
+
+    return false;
+}
 
 inline uint32 GetDispellMask(DispelType dispel)
 {

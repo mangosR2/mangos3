@@ -117,7 +117,7 @@ void WorldSession::HandleMoveWorldportAckOpcode()
     }
 
     GetPlayer()->SetMap(map);
-    GetPlayer()->Relocate(loc.coord_x, loc.coord_y, loc.coord_z, loc.orientation);
+    GetPlayer()->Relocate(loc.getX(), loc.getY(), loc.getZ(), loc.orientation);
 
     GetPlayer()->SendInitialPacketsBeforeAddToMap();
     // the CanEnter checks are done in TeleporTo but conditions may change
@@ -242,7 +242,7 @@ void WorldSession::HandleMoveTeleportAckOpcode(WorldPacket& recv_data)
 
     WorldLocation const& dest = plMover->GetTeleportDest();
 
-    plMover->SetPosition(dest.coord_x, dest.coord_y, dest.coord_z, dest.orientation, true);
+    plMover->SetPosition(dest.getX(), dest.getY(), dest.getZ(), dest.orientation, true);
 
     uint32 newzone, newarea;
     plMover->GetZoneAndAreaId(newzone, newarea);
@@ -402,18 +402,21 @@ void WorldSession::HandleSetActiveMoverOpcode(WorldPacket &recv_data)
 void WorldSession::HandleMoveNotActiveMoverOpcode(WorldPacket &recv_data)
 {
     DEBUG_LOG("WORLD: Recvd CMSG_MOVE_NOT_ACTIVE_MOVER");
-    recv_data.hexlike();
+    // recv_data.hexlike();
 
-    MovementInfo mi;
-    recv_data >> mi;
+    ObjectGuid old_mover_guid;
+    MovementInfo movementInfo;
 
-    if (_player->GetMover()->GetObjectGuid() == mi.GetGuid())
+    recv_data >> old_mover_guid.ReadAsPacked();
+    recv_data >> movementInfo;
+
+    if (_player->GetMover()->GetObjectGuid() == movementInfo.GetGuid())
     {
-        DEBUG_LOG("World: CMSG_MOVE_NOT_ACTIVE_MOVER %s received, but his now is active mover!", mi.GetGuid().GetString().c_str());
+        DEBUG_LOG("World: CMSG_MOVE_NOT_ACTIVE_MOVER %s received, but his now is active mover!", movementInfo.GetGuid().GetString().c_str());
         recv_data.rpos(recv_data.wpos());                   // prevent warnings spam
     }
 
-    _player->m_movementInfo = mi;
+    _player->m_movementInfo = movementInfo;
 }
 
 void WorldSession::HandleMountSpecialAnimOpcode(WorldPacket& /*recvdata*/)

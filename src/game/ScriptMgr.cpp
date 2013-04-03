@@ -77,6 +77,7 @@ ScriptMgr::ScriptMgr() :
     m_pOnEffectDummyCreature(NULL),
     m_pOnEffectDummyGO(NULL),
     m_pOnEffectDummyItem(NULL),
+    m_pOnEffectScriptEffectCreature(NULL),
     m_pOnAuraDummy(NULL)
 {
 }
@@ -462,6 +463,11 @@ void ScriptMgr::LoadScripts(ScriptMapMapName& scripts, const char* tablename)
                         tablename, tmp.playSound.soundId, tmp.id);
                     continue;
                 }
+                // bitmask: 0/1=target-player, 0/2=with distance dependent, 0/4=map wide, 0/8=zone wide
+                if (tmp.playSound.flags & ~(1 | 2 | 4 | 8))
+                    sLog.outErrorDb("Table `%s` using unsupported sound flags (datalong2: %u) in SCRIPT_COMMAND_PLAY_SOUND for script id %u, unsupported flags will be ignored", tablename, tmp.playSound.flags, tmp.id);
+                if ((tmp.playSound.flags & (1 | 2)) > 0 && (tmp.playSound.flags & (4 | 8)) > 0)
+                    sLog.outErrorDb("Table `%s` uses sound flags (datalong2: %u) in SCRIPT_COMMAND_PLAY_SOUND for script id %u, combining (1|2) with (4|8) makes no sense", tablename, tmp.playSound.flags, tmp.id);
                 break;
             }
             case SCRIPT_COMMAND_CREATE_ITEM:                // 17
@@ -636,6 +642,8 @@ void ScriptMgr::LoadScripts(ScriptMapMapName& scripts, const char* tablename)
                 break;
             }
             case SCRIPT_COMMAND_PAUSE_WAYPOINTS:            // 32
+                break;
+            case SCRIPT_COMMAND_XP_USER:                    // 33
                 break;
             default:
             {
@@ -1391,7 +1399,7 @@ bool ScriptAction::HandleScriptStep()
                 break;
             }
 
-            // bitmask: 0/1=anyone/target, 0/2=with distance dependent
+            // bitmask: 0/1=target-player, 0/2=with distance dependent, 0/4=map wide, 0/8=zone wide
             Player* pSoundTarget = NULL;
             if (m_script->playSound.flags & 1)
             {
@@ -1400,9 +1408,10 @@ bool ScriptAction::HandleScriptStep()
                     break;
             }
 
-            // bitmask: 0/1=anyone/target, 0/2=with distance dependent
             if (m_script->playSound.flags & 2)
                 pSource->PlayDistanceSound(m_script->playSound.soundId, pSoundTarget);
+            else if (m_script->playSound.flags & (4 | 8))
+                m_map->PlayDirectSoundToMap(m_script->playSound.soundId, m_script->playSound.flags & 8 ? pSource->GetZoneId() : 0);
             else
                 pSource->PlayDirectSound(m_script->playSound.soundId, pSoundTarget);
 
@@ -1699,6 +1708,18 @@ bool ScriptAction::HandleScriptStep()
                 ((Creature*)pSource)->addUnitState(UNIT_STAT_WAYPOINT_PAUSED);
             else
                 ((Creature*)pSource)->clearUnitState(UNIT_STAT_WAYPOINT_PAUSED);
+            break;
+        }
+        case SCRIPT_COMMAND_XP_USER:                        // 33
+        {
+            Player* pPlayer = GetPlayerTargetOrSourceAndLog(pSource, pTarget);
+            if (!pPlayer)
+                break;
+
+            if (m_script->xpDisabled.flags)
+                pPlayer->SetFlag(PLAYER_FLAGS, PLAYER_FLAGS_XP_USER_DISABLED);
+            else
+                pPlayer->RemoveFlag(PLAYER_FLAGS, PLAYER_FLAGS_XP_USER_DISABLED);
             break;
         }
         default:
@@ -2006,6 +2027,11 @@ bool ScriptMgr::OnEffectDummy(Unit* pCaster, uint32 spellId, SpellEffectIndex ef
     return m_pOnEffectDummyItem != NULL && m_pOnEffectDummyItem(pCaster, spellId, effIndex, pTarget);
 }
 
+bool ScriptMgr::OnEffectScriptEffect(Unit* pCaster, uint32 spellId, SpellEffectIndex effIndex, Creature* pTarget)
+{
+    return m_pOnEffectScriptEffectCreature != NULL && m_pOnEffectScriptEffectCreature(pCaster, spellId, effIndex, pTarget);
+}
+
 bool ScriptMgr::OnAuraDummy(Aura const* pAura, bool apply)
 {
     return m_pOnAuraDummy != NULL && m_pOnAuraDummy(pAura, apply);
@@ -2068,6 +2094,7 @@ ScriptLoadResult ScriptMgr::LoadScriptLibrary(const char* libName)
     GET_SCRIPT_HOOK_PTR(m_pOnEffectDummyCreature,      "EffectDummyCreature");
     GET_SCRIPT_HOOK_PTR(m_pOnEffectDummyGO,            "EffectDummyGameObject");
     GET_SCRIPT_HOOK_PTR(m_pOnEffectDummyItem,          "EffectDummyItem");
+    GET_SCRIPT_HOOK_PTR(m_pOnEffectScriptEffectCreature, "EffectScriptEffectCreature");
     GET_SCRIPT_HOOK_PTR(m_pOnAuraDummy,                "AuraDummy");
 
 #   undef GET_SCRIPT_HOOK_PTR
@@ -2121,6 +2148,7 @@ void ScriptMgr::UnloadScriptLibrary()
     m_pOnEffectDummyCreature    = NULL;
     m_pOnEffectDummyGO          = NULL;
     m_pOnEffectDummyItem        = NULL;
+    m_pOnEffectScriptEffectCreature = NULL;
     m_pOnAuraDummy              = NULL;
 }
 

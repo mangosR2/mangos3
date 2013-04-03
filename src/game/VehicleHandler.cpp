@@ -190,8 +190,8 @@ void WorldSession::HandleChangeSeatsOnControlledVehicle(WorldPacket &recv_data)
     ObjectGuid guid, guid2;
     recv_data >> guid.ReadAsPacked();
 
-    MovementInfo mi;
-    recv_data >> mi;
+    MovementInfo movementInfo;
+    recv_data >> movementInfo;
 
     recv_data >> guid2.ReadAsPacked(); //guid of vehicle or of vehicle in target seat
 
@@ -206,7 +206,7 @@ void WorldSession::HandleChangeSeatsOnControlledVehicle(WorldPacket &recv_data)
     if (pVehicle->GetEntry()->m_flags & VEHICLE_FLAG_DISABLE_SWITCH)
         return;
 
-    pVehicle->GetBase()->m_movementInfo = mi;
+    pVehicle->GetBase()->m_movementInfo = movementInfo;
 
     if(!guid2 || guid.GetRawValue() == guid2.GetRawValue())
     {

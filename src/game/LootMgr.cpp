@@ -663,7 +663,7 @@ QuestItemList* Loot::FillNonQuestNonFFANonCurrencyConditionalLoot(Player* player
     for (uint8 i = 0; i < items.size(); ++i)
     {
         LootItem& item = items[i];
-        if (!item.is_looted && !item.freeforall && !item.currency && item.conditionId && item.AllowedForPlayer(player, m_lootTarget))
+        if (!item.is_looted && !item.freeforall && !item.currency && item.AllowedForPlayer(player, m_lootTarget))
         {
             ql->push_back(QuestItem(i));
             if (!item.is_counted)

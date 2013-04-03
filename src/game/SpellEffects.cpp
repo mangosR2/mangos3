@@ -366,7 +366,7 @@ void Spell::EffectSchoolDMG(SpellEffectEntry const* effect)
                     case 52339:                             // Hurl Boulder
                     case 51673:                             // Rocket Blast
                     {
-                        float distance = unitTarget->GetDistance2d(m_targets.m_destX, m_targets.m_destY);
+                        float distance = unitTarget->GetDistance(m_targets.getDestination());
                         damage *= exp(-distance/15.0f);
                         break;
                     }
@@ -769,7 +769,7 @@ void Spell::EffectSchoolDMG(SpellEffectEntry const* effect)
                     case 72999:
                     {
                         if (Aura const* aur = unitTarget->GetDummyAura(m_spellInfo->Id))
-                            damage += (aur->GetStackAmount() - 1) * aur->GetModifier()->m_amount;
+                            damage += aur->GetModifier()->m_amount;
 
                         break;
                     }
@@ -1435,6 +1435,26 @@ void Spell::EffectDummy(SpellEffectEntry const* effect)
                     }
 
                     m_caster->CastSpell(m_caster, spell_id, true, NULL);
+                    return;
+                }
+                case 17009:                                 // Voodoo
+                {
+                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
+                        return;
+
+                    uint32 spell_id = 0;
+                    switch (urand(0, 6))
+                    {
+                        case 0: spell_id = 16707; break;    // Hex
+                        case 1: spell_id = 16708; break;    // Hex
+                        case 2: spell_id = 16709; break;    // Hex
+                        case 3: spell_id = 16711; break;    // Grow
+                        case 4: spell_id = 16712; break;    // Special Brew
+                        case 5: spell_id = 16713; break;    // Ghostly
+                        case 6: spell_id = 16716; break;    // Launch
+                    }
+
+                    m_caster->CastSpell(unitTarget, spell_id, true, NULL, NULL, m_originalCasterGUID, m_spellInfo);
                     return;
                 }
                 case 17251:                                 // Spirit Healer Res
@@ -2414,6 +2434,31 @@ void Spell::EffectDummy(SpellEffectEntry const* effect)
                     }
                     return;
                 }
+                case 46292:                                 // Cataclysm Breath
+                {
+                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
+                        return;
+
+                    uint32 spellId = 0;
+
+                    switch (urand(0, 7))
+                    {
+                        case 0: spellId = 46293; break;     // Corrosive Poison
+                        case 1: spellId = 46294; break;     // Fevered Fatigue
+                        case 2: spellId = 46295; break;     // Hex
+                        case 3: spellId = 46296; break;     // Necrotic Poison
+                        case 4: spellId = 46297; break;     // Piercing Shadow
+                        case 5: spellId = 46298; break;     // Shrink
+                        case 6: spellId = 46299; break;     // Wavering Will
+                        case 7: spellId = 46300; break;     // Withered Touch
+                        default:
+                            return;                         // Crazy :)
+                    }
+
+                    m_caster->CastSpell(m_caster, spellId, true);
+
+                    break;
+                }
                 case 46485:                                 // Greatmother's Soulcatcher
                 {
                     if (!unitTarget || unitTarget->GetTypeId() != TYPEID_UNIT)
@@ -3286,14 +3331,12 @@ void Spell::EffectDummy(SpellEffectEntry const* effect)
                     SpellEntry const* spellInfo = sSpellStore.LookupEntry(effect->CalculateSimpleValue());
 
                     // Init dest coordinates
-                    float x,y,z;
-                    m_targets.getDestination(x, y, z);
+                    WorldLocation loc = m_targets.getDestination();
+                    MaNGOS::NormalizeMapCoord(loc.x);
+                    MaNGOS::NormalizeMapCoord(loc.y);
+                    m_caster->UpdateGroundPositionZ(loc.x, loc.y, loc.z);
 
-                    MaNGOS::NormalizeMapCoord(x);
-                    MaNGOS::NormalizeMapCoord(y);
-                    m_caster->UpdateGroundPositionZ(x,y,z);
-
-                    m_caster->CastSpell(x, y, z, spellInfo, false, NULL, NULL, m_originalCasterGUID);
+                    m_caster->CastSpell(loc, spellInfo, false, NULL, NULL, m_originalCasterGUID);
 
                     return;
                 }
@@ -3324,12 +3367,12 @@ void Spell::EffectDummy(SpellEffectEntry const* effect)
                 }
                 case 58689:                                 // Rock Shards (Vault of Archavon, Archavon)
                 {
-                    m_caster->CastSpell(m_targets.m_destX, m_targets.m_destY, m_targets.m_destZ, m_caster->GetMap()->IsRegularDifficulty() ? 58696 : 60884, true);
+                    m_caster->CastSpell(m_targets.getDestination(), m_caster->GetMap()->IsRegularDifficulty() ? 58696 : 60884, true);
                     return;
                 }
                 case 58692:                                 // Rock Shards (Vault of Archavon, Archavon)
                 {
-                    m_caster->CastSpell(m_targets.m_destX, m_targets.m_destY, m_targets.m_destZ, m_caster->GetMap()->IsRegularDifficulty() ? 58695 : 60883, true);
+                    m_caster->CastSpell(m_targets.getDestination(), m_caster->GetMap()->IsRegularDifficulty() ? 58695 : 60883, true);
                     return;
                 }
                 case 59640:                                 // Underbelly Elixir
@@ -3451,7 +3494,7 @@ void Spell::EffectDummy(SpellEffectEntry const* effect)
 
                     if (VehicleKitPtr vehicleKit = unitTarget->GetVehicleKit())
                     {
-                        vehicleKit->SetDestination(m_targets.m_destX, m_targets.m_destY, m_targets.m_destZ, unitTarget->GetOrientation(),  m_targets.GetSpeed(), m_targets.GetElevation());
+                        vehicleKit->SetDestination(m_targets.getDestination().x, m_targets.getDestination().y, m_targets.getDestination().z, unitTarget->GetOrientation(),  m_targets.GetSpeed(), m_targets.GetElevation());
                     }
                     return;
                 }
@@ -4924,15 +4967,14 @@ void Spell::EffectTriggerSpell(SpellEffectEntry const* effect)
          (m_targets.m_targetMask & TARGET_FLAG_DEST_LOCATION))
     {
         // Init dest coordinates
-        float x,y,z;
-        m_targets.getDestination(x, y, z);
+        WorldLocation loc = m_targets.getDestination();
         m_caster->RemoveSpellCooldown(triggered_spell_id);
 
-        MaNGOS::NormalizeMapCoord(x);
-        MaNGOS::NormalizeMapCoord(y);
-        m_caster->UpdateAllowedPositionZ(x,y,z);
+        MaNGOS::NormalizeMapCoord(loc.x);
+        MaNGOS::NormalizeMapCoord(loc.y);
+        m_caster->UpdateAllowedPositionZ(loc.x,loc.y,loc.z);
 
-        m_caster->CastSpell(x, y, z, spellInfo, true, NULL, NULL, m_originalCasterGUID);
+        m_caster->CastSpell(loc, spellInfo, true, NULL, NULL, m_originalCasterGUID);
         return;
     }
     else
@@ -4964,22 +5006,23 @@ void Spell::EffectTriggerMissileSpell(SpellEffectEntry const* effect)
     if ((m_targets.m_targetMask & TARGET_FLAG_DEST_LOCATION) || m_caster == unitTarget )
     {
         // Init dest coordinates
-        float x,y,z;
-        m_targets.getDestination(x, y, z);
+        WorldLocation loc = (m_targets.m_targetMask & TARGET_FLAG_DEST_LOCATION) ?
+                            m_targets.getDestination() :
+                            m_caster->GetPosition();
 
         Unit* target = unitTarget ? unitTarget : m_caster;
 
-        MaNGOS::NormalizeMapCoord(x);
-        MaNGOS::NormalizeMapCoord(y);
+        MaNGOS::NormalizeMapCoord(loc.x);
+        MaNGOS::NormalizeMapCoord(loc.y);
 
         DEBUG_FILTER_LOG(LOG_FILTER_SPELL_CAST, "Spell::EffectTriggerMissileSpell %s spell %u (eff %u): triggering spell %u with coords %f %f %f",
             m_CastItem ?  "Item" : "",
             m_spellInfo->Id,
             effect->Effect,
             triggered_spell_id,
-            x,y,z);
+            loc.x, loc.y, loc.z);
 
-        target->CastSpell(x, y, z, spellInfo, true, m_CastItem, NULL, m_originalCasterGUID, m_spellInfo);
+        target->CastSpell(loc, spellInfo, true, m_CastItem, NULL, m_originalCasterGUID, m_spellInfo);
     }
     else
     {
@@ -5003,38 +5046,35 @@ void Spell::EffectJump(SpellEffectEntry const* effect)
 
     // Init dest coordinates
     Unit* pTarget = NULL;
-    float x,y,z,o;
-    o = 0.0f;
+    WorldLocation loc = m_caster->GetPosition();
     if (m_targets.m_targetMask & TARGET_FLAG_DEST_LOCATION)
     {
-        m_targets.getDestination(x, y, z);
+        loc = m_targets.getDestination();
 
         if(effect->EffectImplicitTargetA == TARGET_BEHIND_VICTIM)
         {
             // explicit cast data from client or server-side cast
             // some spell at client send caster
-            if (m_targets.getUnitTarget() && m_targets.getUnitTarget()!=m_caster)
+            if (m_targets.getUnitTarget() && m_targets.getUnitTarget() != m_caster)
                 pTarget = m_targets.getUnitTarget();
             else if (unitTarget->getVictim())
                 pTarget = m_caster->getVictim();
             else if (m_caster->GetTypeId() == TYPEID_PLAYER)
                 pTarget = m_caster->GetMap()->GetUnit(((Player*)m_caster)->GetSelectionGuid());
 
-            o = pTarget ? pTarget->GetOrientation() : m_caster->GetOrientation();
+            loc.SetOrientation(pTarget ? pTarget->GetOrientation() : m_caster->GetOrientation());
         }
         else
-            o = m_caster->GetOrientation();
+            loc.SetOrientation(m_caster->GetOrientation());
     }
     else if (unitTarget)
     {
-        unitTarget->GetContactPoint(m_caster,x,y,z,CONTACT_DISTANCE);
-        o = m_caster->GetOrientation();
+        unitTarget->GetContactPoint(m_caster, loc.x, loc.y, loc.z, CONTACT_DISTANCE);
         pTarget = unitTarget;
     }
     else if (gameObjTarget)
     {
-        gameObjTarget->GetContactPoint(m_caster,x,y,z,CONTACT_DISTANCE);
-        o = m_caster->GetOrientation();
+        gameObjTarget->GetContactPoint(m_caster, loc.x, loc.y, loc.z, CONTACT_DISTANCE);
     }
     else
     {
@@ -5052,7 +5092,7 @@ void Spell::EffectJump(SpellEffectEntry const* effect)
     if (pTarget == m_caster)
         pTarget = NULL;
 
-    m_caster->MonsterMoveToDestination(x, y, z, o, float(speed_xy) / 2, float(speed_z) / 10, false, pTarget);
+    m_caster->MonsterMoveToDestination(loc.x, loc.y, loc.z, loc.o, float(speed_xy) / 2, float(speed_z) / 10, false, pTarget);
 }
 
 void Spell::EffectTeleportUnits(SpellEffectEntry const* effect)
@@ -5072,6 +5112,32 @@ void Spell::EffectTeleportUnits(SpellEffectEntry const* effect)
             // Only players can teleport to innkeeper
             if (unitTarget->GetTypeId() != TYPEID_PLAYER)
                 return;
+
+            switch (m_spellInfo->Id)
+            {
+                case 48129:                                 // Scroll of Recall
+                case 60320:                                 // Scroll of Recall II
+                case 60321:                                 // Scroll of Recall III
+                {
+                    uint32 charLevel = 0;
+                    switch (m_spellInfo->Id)
+                    {
+                        case 48129: charLevel = 40; break;
+                        case 60320: charLevel = 70; break;
+                        case 60321: charLevel = 80; break;
+                        default: break;
+                    }
+
+                    if (((Player*)unitTarget)->getLevel() > charLevel)
+                    {
+                        unitTarget->CastSpell(unitTarget, 60444, true);
+                        return;
+                    }
+                }
+                default:
+                    break;
+            }
+
 
             ((Player*)unitTarget)->TeleportToHomebind(unitTarget == m_caster ? TELE_TO_SPELL|TELE_TO_CHECKED : TELE_TO_CHECKED);
             return;
@@ -5119,10 +5185,9 @@ void Spell::EffectTeleportUnits(SpellEffectEntry const* effect)
                 pTarget = unitTarget->GetMap()->GetUnit(((Player*)unitTarget)->GetSelectionGuid());
 
             // Init dest coordinates
-            float x,y,z;
-            m_targets.getDestination(x, y, z);
-            float orientation = pTarget ? pTarget->GetOrientation() : unitTarget->GetOrientation();
-            unitTarget->NearTeleportTo(x,y,z,orientation,unitTarget==m_caster);
+            WorldLocation loc = m_targets.getDestination();
+            loc.SetOrientation(pTarget ? pTarget->GetOrientation() : unitTarget->GetOrientation());
+            unitTarget->NearTeleportTo(loc, unitTarget == m_caster ? TELE_TO_SPELL : 0);
             return;
         }
         default:
@@ -5134,11 +5199,10 @@ void Spell::EffectTeleportUnits(SpellEffectEntry const* effect)
                 return;
             }
             // Init dest coordinates
-            float x,y,z;
-            m_targets.getDestination(x, y, z);
-            float orientation = unitTarget->GetOrientation();
+            WorldLocation loc = m_targets.getDestination();
+            loc.SetOrientation(unitTarget->GetOrientation());
             // Teleport
-            unitTarget->NearTeleportTo(x,y,z,orientation,unitTarget==m_caster);
+            unitTarget->NearTeleportTo(loc, unitTarget == m_caster ? TELE_TO_SPELL : 0);
             return;
         }
     }
@@ -5353,7 +5417,8 @@ void Spell::EffectUnlearnSpecialization(SpellEffectEntry const* effect)
 
     _player->removeSpell(spellToUnlearn);
 
-    DEBUG_LOG( "Spell: Player %u has unlearned spell %u from NpcGUID: %u", _player->GetGUIDLow(), spellToUnlearn, m_caster->GetGUIDLow() );
+    if (WorldObject const* caster = GetCastingObject())
+        DEBUG_LOG("Spell: %s has UnLearned spell %u from %s", _player->GetGuidStr().c_str(), spellToUnlearn, caster->GetGuidStr().c_str());
 }
 
 void Spell::EffectPowerDrain(SpellEffectEntry const* effect)
@@ -5824,7 +5889,13 @@ void Spell::EffectPersistentAA(SpellEffectEntry const* effect)
         modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_RADIUS, radius);
 
     DynamicObject* dynObj = new DynamicObject;
-    if (!dynObj->Create(pCaster->GetMap()->GenerateLocalLowGuid(HIGHGUID_DYNAMICOBJECT), pCaster, m_spellInfo->Id, effect->GetIndex(), m_targets.m_destX, m_targets.m_destY, m_targets.m_destZ, m_duration, radius, DYNAMIC_OBJECT_AREA_SPELL))
+
+    WorldLocation loc = (m_targets.m_targetMask & TARGET_FLAG_DEST_LOCATION) ?
+                        m_targets.getDestination() :
+                        m_caster->GetPosition();
+
+    if (!dynObj->Create(pCaster->GetMap()->GenerateLocalLowGuid(HIGHGUID_DYNAMICOBJECT), pCaster, m_spellInfo->Id,
+        effect->GetIndex(), loc.x, loc.y, loc.z, m_duration, radius, DYNAMIC_OBJECT_AREA_SPELL))
     {
         delete dynObj;
         return;
@@ -6348,10 +6419,13 @@ void Spell::DoSummonGroupPets(SpellEffectEntry const* effect)
 
     uint32 originalSpellID = (m_IsTriggeredSpell && m_triggeredBySpellInfo) ? m_triggeredBySpellInfo->Id : m_spellInfo->Id;
 
-    CreatureCreatePos pos (m_caster->GetMap(), m_targets.m_destX, m_targets.m_destY, m_targets.m_destZ, -m_caster->GetOrientation(), m_caster->GetPhaseMask());
+    WorldLocation loc = (m_targets.m_targetMask & TARGET_FLAG_DEST_LOCATION) ?
+                        m_targets.getDestination() :
+                        m_caster->GetPosition();
 
-    if (!(m_targets.m_targetMask & TARGET_FLAG_DEST_LOCATION))
-        pos = CreatureCreatePos(m_caster, -m_caster->GetOrientation());
+    loc. SetOrientation(-m_caster->GetOrientation());
+
+    CreatureCreatePos pos(m_caster->GetMap(), loc);
 
     if (m_caster->GetTypeId() == TYPEID_PLAYER)
     {
@@ -6450,20 +6524,12 @@ void Spell::DoSummonPossessed(SpellEffectEntry const* effect)
 
     int32 duration = GetSpellDuration(m_spellInfo);
 
-        float px, py, pz;
-    // If dest location if present
-    if (m_targets.m_targetMask & TARGET_FLAG_DEST_LOCATION)
-    {
-        // Summon 1 unit in dest location
-        m_targets.getDestination(px, py, pz);
-    }
-    // Summon if dest location not present near caster
-    else
-        m_caster->GetClosePoint(px,py,pz,1.0f);
-
+    WorldLocation loc = (m_targets.m_targetMask & TARGET_FLAG_DEST_LOCATION) ?
+                        m_targets.getDestination() :
+                        m_caster->GetClosePoint(1.0f);
 
     TempSummonType summonType = (duration == 0) ? TEMPSUMMON_DEAD_DESPAWN : TEMPSUMMON_TIMED_OR_DEAD_DESPAWN;
-    Creature* spawnCreature = m_caster->SummonCreature(creature_entry,px,py,pz,m_caster->GetOrientation(),summonType,duration,true);
+    Creature* spawnCreature = m_caster->SummonCreature(creature_entry, loc.x, loc.y, loc.z, loc.o, summonType, duration, true);
 
     if (spawnCreature)
     {
@@ -6505,12 +6571,13 @@ void Spell::EffectLearnSpell(SpellEffectEntry const* effect)
         return;
     }
 
-    Player *player = (Player*)unitTarget;
+    Player* player = (Player*)unitTarget;
 
-    uint32 spellToLearn = ((m_spellInfo->Id==SPELL_ID_GENERIC_LEARN) || (m_spellInfo->Id==SPELL_ID_GENERIC_LEARN_PET)) ? damage : effect->EffectTriggerSpell;
+    uint32 spellToLearn = ((m_spellInfo->Id == SPELL_ID_GENERIC_LEARN) || (m_spellInfo->Id == SPELL_ID_GENERIC_LEARN_PET)) ? damage : effect->EffectTriggerSpell;
     player->learnSpell(spellToLearn, false);
 
-    DEBUG_LOG( "Spell: Player %u has learned spell %u from NpcGUID=%u", player->GetGUIDLow(), spellToLearn, m_caster->GetGUIDLow() );
+    if (WorldObject const* caster = GetCastingObject())
+        DEBUG_LOG("Spell: %s has learned spell %u from %s", player->GetGuidStr().c_str(), spellToLearn, caster->GetGuidStr().c_str());
 }
 
 void Spell::EffectDispel(SpellEffectEntry const* effect)
@@ -6686,7 +6753,7 @@ void Spell::EffectDistract(SpellEffectEntry const* /*effect*/)
     if (unitTarget->hasUnitState(UNIT_STAT_CAN_NOT_REACT))
         return;
 
-    unitTarget->SetFacingTo(unitTarget->GetAngle(m_targets.m_destX, m_targets.m_destY));
+    unitTarget->SetFacingTo(unitTarget->GetAngle(m_targets.getDestination().x, m_targets.getDestination().y));
     unitTarget->clearUnitState(UNIT_STAT_MOVING);
 
     if (unitTarget->GetTypeId() == TYPEID_UNIT)
@@ -6730,8 +6797,13 @@ void Spell::EffectAddFarsight(SpellEffectEntry const* effect)
     int32 duration = GetSpellDuration(m_spellInfo);
     DynamicObject* dynObj = new DynamicObject;
 
+    WorldLocation loc = (m_targets.m_targetMask & TARGET_FLAG_DEST_LOCATION) ?
+                        m_targets.getDestination() :
+                        m_caster->GetPosition();
+
     // set radius to 0: spell not expected to work as persistent aura
-    if(!dynObj->Create(m_caster->GetMap()->GenerateLocalLowGuid(HIGHGUID_DYNAMICOBJECT), m_caster, m_spellInfo->Id, effect->GetIndex(), m_targets.m_destX, m_targets.m_destY, m_targets.m_destZ, duration, 0, DYNAMIC_OBJECT_FARSIGHT_FOCUS))
+    if(!dynObj->Create(m_caster->GetMap()->GenerateLocalLowGuid(HIGHGUID_DYNAMICOBJECT), m_caster,
+        m_spellInfo->Id, effect->GetIndex(), loc.x, loc.y, loc.z, m_duration, 0, DYNAMIC_OBJECT_FARSIGHT_FOCUS))
     {
         delete dynObj;
         return;
@@ -6748,16 +6820,12 @@ void Spell::EffectTeleUnitsFaceCaster(SpellEffectEntry const* effect)
     if (!unitTarget || unitTarget->IsTaxiFlying())
         return;
 
-    float fx, fy, fz;
-    if (m_targets.m_targetMask & TARGET_FLAG_DEST_LOCATION)
-        m_targets.getDestination(fx, fy, fz);
-    else
-    {
-        float dis = GetSpellRadius(sSpellRadiusStore.LookupEntry(effect->GetRadiusIndex()));
-        m_caster->GetClosePoint(fx, fy, fz, unitTarget->GetObjectBoundingRadius(), dis);
-    }
+    WorldLocation loc = (m_targets.m_targetMask & TARGET_FLAG_DEST_LOCATION) ?
+                        m_targets.getDestination() :
+                        m_caster->GetClosePoint(unitTarget->GetObjectBoundingRadius(), GetSpellRadius(sSpellRadiusStore.LookupEntry(effect->GetRadiusIndex())));
+    loc.SetOrientation(-m_caster->GetOrientation());
 
-    unitTarget->NearTeleportTo(fx, fy, fz, -m_caster->GetOrientation(), unitTarget == m_caster);
+    unitTarget->NearTeleportTo(loc, unitTarget == m_caster ? TELE_TO_SPELL : 0);
 }
 
 void Spell::DoSummonWild(SpellEffectEntry const* effect, uint32 forceFaction)
@@ -6780,8 +6848,8 @@ void Spell::DoSummonWild(SpellEffectEntry const* effect, uint32 forceFaction)
     }
 
     // select center of summon position
-    float center_x, center_y, center_z;
-    m_targets.getDestination(center_x, center_y, center_z);
+    WorldLocation center = m_targets.getDestination();
+    center.SetOrientation(-m_caster->GetOrientation());
 
     float radius = GetSpellRadius(sSpellRadiusStore.LookupEntry(effect->EffectRadiusIndex));
 
@@ -6793,36 +6861,33 @@ void Spell::DoSummonWild(SpellEffectEntry const* effect, uint32 forceFaction)
 
     for(int32 count = 0; count < amount; ++count)
     {
-        float px, py, pz;
+        WorldLocation p = center;
         // If dest location if present
-        if (m_targets.m_targetMask & TARGET_FLAG_DEST_LOCATION)
+        if (m_targets.m_targetMask & TARGET_FLAG_DEST_LOCATION && !p.IsEmpty())
         {
-            m_caster->GetRandomPoint(center_x, center_y, center_z, radius, px, py, pz);
-            m_caster->GetMap()->GetHitPosition(center_x,center_y,center_z, px, py, pz, m_caster->GetPhaseMask(),-0.1f);
-            m_caster->UpdateAllowedPositionZ(px,py,pz);
+            m_caster->GetRandomPoint(center.x, center.y, center.z, radius, p.x, p.y, p.z);
+            m_caster->GetMap()->GetHitPosition(center.x,center.y,center.z, p.x, p.y, p.z, m_caster->GetPhaseMask(),-0.1f);
+            m_caster->UpdateAllowedPositionZ(p.x,p.y,p.z);
         }
         // Summon if dest location not present near caster
         else
         {
-            if (radius > 0.0f)
+            if (radius > M_NULL_F && radius < m_caster->GetMap()->GetVisibilityDistance())
             {
                 // not using bounding radius of caster here
-                m_caster->GetClosePoint(px, py, pz, 0.0f, radius);
-                float ox, oy, oz;
-                m_caster->GetPosition(ox, oy, oz);
-                m_caster->GetMap()->GetHitPosition(ox,oy,oz, px, py, pz, m_caster->GetPhaseMask(),-0.1f);
-                m_caster->UpdateAllowedPositionZ(px,py,pz);
+                p = m_caster->GetClosePoint(M_NULL_F, radius);
+                WorldLocation const& loc = m_caster->GetPosition();
+                m_caster->GetMap()->GetHitPosition(loc.x, loc.y, loc.z, p.x, p.y, p.z, m_caster->GetPhaseMask(),-0.1f);
+                m_caster->UpdateAllowedPositionZ(p.x, p.y, p.z);
             }
             else
             {
                 // EffectRadiusIndex 0 or 36
-                px = m_caster->GetPositionX();
-                py = m_caster->GetPositionY();
-                pz = m_caster->GetPositionZ();
+                p = m_caster->GetPosition();
             }
         }
 
-        if (Creature* summon = m_caster->SummonCreature(creature_entry, px, py, pz, m_caster->GetOrientation(), summonType, m_duration))
+        if (Creature* summon = m_caster->SummonCreature(creature_entry, p.x, p.y, p.z, p.o, summonType, m_duration))
         {
             summon->SetUInt32Value(UNIT_CREATED_BY_SPELL, m_spellInfo->Id);
 
@@ -6903,10 +6968,14 @@ void Spell::DoSummonGuardian(SpellEffectEntry const* effect, uint32 forceFaction
     }
 
     // select center of summon position
-    float center_x, center_y, center_z;
-    m_targets.getDestination(center_x, center_y, center_z);
+    WorldLocation center = (m_targets.m_targetMask & TARGET_FLAG_DEST_LOCATION) ?
+                            m_targets.getDestination() :
+                            m_caster->GetPosition();
 
-    if (!MapManager::ExistMapAndVMap(m_caster->GetMapId(),center_x,center_y))
+    if (m_targets.m_targetMask & TARGET_FLAG_DEST_LOCATION)
+        center.SetOrientation(-m_caster->GetOrientation());
+
+    if (!MapManager::ExistMapAndVMap(m_caster->GetMapId(),center.x,center.y))
     {
         sLog.outError("Spell::DoSummonGuardian: impossible place for create creature entry %u, spell %u.", pet_entry, m_spellInfo->Id);
         return;
@@ -6926,23 +6995,8 @@ void Spell::DoSummonGuardian(SpellEffectEntry const* effect, uint32 forceFaction
         GroupPetList guardians = m_caster->GetGuardians();
         spawnCreature->SetPetCounter(guardians.size());
 
-        // If dest location if present
-        // Summon 1 unit in dest location
-        CreatureCreatePos pos(m_caster->GetMap(), m_targets.m_destX, m_targets.m_destY, m_targets.m_destZ, -m_caster->GetOrientation(), m_caster->GetPhaseMask());
-
-        if (m_targets.m_targetMask & TARGET_FLAG_DEST_LOCATION)
-        {
-            // Summon in random point all other units if location present
-            if (count > 0)
-            {
-                float x, y, z;
-                m_caster->GetRandomPoint(center_x, center_y, center_z, radius, x, y, z);
-                pos = CreatureCreatePos(m_caster->GetMap(), x, y, z, m_caster->GetOrientation(), m_caster->GetPhaseMask());
-            }
-        }
-        // Summon if dest location not present near caster
-        else
-            pos = CreatureCreatePos(m_caster, m_caster->GetOrientation());
+        // If dest location present. FIXME - need correct summon pos from pet number
+        CreatureCreatePos pos = CreatureCreatePos(m_caster->GetMap(), center);
 
         if (!spawnCreature->Create(0, pos, cInfo, 0, m_caster))
         {
@@ -7001,21 +7055,15 @@ void Spell::DoSummonVehicle(SpellEffectEntry const* effect, uint32 forceFaction)
         m_mountspell = sSpellStore.LookupEntry(46598);
     // Used BasePoint mount spell, if not present - hardcoded (by Blzz).
 
-    float px, py, pz;
-    // If dest location present
-    if (m_targets.m_targetMask & TARGET_FLAG_DEST_LOCATION)
-    {
-        m_targets.getDestination(px, py, pz);
-    }
-    // Summon if dest location not present near caster
-    else
-        m_caster->GetClosePoint(px, py, pz,m_caster->GetObjectBoundingRadius());
+    WorldLocation loc = (m_targets.m_targetMask & TARGET_FLAG_DEST_LOCATION) ?
+                        m_targets.getDestination() :
+                        m_caster->GetClosePoint(m_caster->GetObjectBoundingRadius());
 
-    m_caster->UpdateAllowedPositionZ(px,py,pz);
+    m_caster->UpdateAllowedPositionZ(loc.x,loc.y,loc.z);
 
     TempSummonType summonType = (GetSpellDuration(m_spellInfo) == 0) ? TEMPSUMMON_DEAD_OR_LOST_OWNER_DESPAWN : TEMPSUMMON_TIMED_OR_DEAD_OR_LOST_OWNER_DESPAWN;
 
-    Creature* vehicle = m_caster->SummonCreature(vehicle_entry,px,py,pz,m_caster->GetOrientation(),summonType,GetSpellDuration(m_spellInfo),true);
+    Creature* vehicle = m_caster->SummonCreature(vehicle_entry, loc.x, loc.y, loc.z, loc.o, summonType, GetSpellDuration(m_spellInfo), true);
 
     if (vehicle && !vehicle->IsVehicle())
     {
@@ -7043,7 +7091,7 @@ void Spell::DoSummonVehicle(SpellEffectEntry const* effect, uint32 forceFaction)
 
 void Spell::EffectLearnSkill(SpellEffectEntry const* effect)
 {
-    if (unitTarget->GetTypeId() != TYPEID_PLAYER)
+    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
         return;
 
     if (damage < 0)
@@ -7052,6 +7100,9 @@ void Spell::EffectLearnSkill(SpellEffectEntry const* effect)
     uint32 skillid =  effect->EffectMiscValue;
     uint16 skillval = ((Player*)unitTarget)->GetPureSkillValue(skillid);
     ((Player*)unitTarget)->SetSkill(skillid, skillval ? skillval : 1, damage * 75, damage);
+
+    if (WorldObject const* caster = GetCastingObject())
+        DEBUG_LOG("Spell: %s has learned skill %u value %u from %s", unitTarget->GetGuidStr().c_str(), skillid, skillval, caster->GetGuidStr().c_str());
 }
 
 void Spell::EffectAddHonor(SpellEffectEntry const* /*effect*/)
@@ -7418,10 +7469,14 @@ void Spell::EffectSummonPet(SpellEffectEntry const* effect)
     NewSummon->SetCreateSpellID(originalSpellID);
     NewSummon->SetPetCounter(0);
 
-    CreatureCreatePos pos(m_caster, m_caster->GetOrientation());
+    WorldLocation loc = (m_targets.m_targetMask & TARGET_FLAG_DEST_LOCATION) ?
+                        m_targets.getDestination() :
+                        m_caster->GetPosition();
 
     if (m_targets.m_targetMask & TARGET_FLAG_DEST_LOCATION)
-        pos = CreatureCreatePos(m_caster->GetMap(), m_targets.m_destX, m_targets.m_destY, m_targets.m_destZ, -m_caster->GetOrientation(), m_caster->GetPhaseMask());
+        loc.SetOrientation(-m_caster->GetOrientation());
+
+    CreatureCreatePos pos = CreatureCreatePos(m_caster->GetMap(), loc);
 
     // petentry==0 for hunter "call pet" (current pet summoned if any)
     if (m_caster->GetTypeId() == TYPEID_PLAYER && NewSummon->LoadPetFromDB((Player*)m_caster, petentry, 0, false, &pos))
@@ -7492,6 +7547,9 @@ void Spell::EffectLearnPetSpell(SpellEffectEntry const* effect)
 
     pet->SavePetToDB(PET_SAVE_AS_CURRENT);
     _player->PetSpellInitialize();
+
+    if (WorldObject const* caster = GetCastingObject())
+        DEBUG_LOG("Spell: %s has learned spell %u from %s", pet->GetGuidStr().c_str(), learn_spellproto->Id, caster->GetGuidStr().c_str());
 }
 
 void Spell::EffectTaunt(SpellEffectEntry const* /*effect*/)
@@ -7942,16 +8000,14 @@ void Spell::EffectSummonObjectWild(SpellEffectEntry const* effect)
     if (!target)
         target = m_caster;
 
-    float x, y, z;
-    if (m_targets.m_targetMask & TARGET_FLAG_DEST_LOCATION)
-        m_targets.getDestination(x, y, z);
-    else
-        m_caster->GetClosePoint(x, y, z, DEFAULT_WORLD_OBJECT_SIZE);
+    WorldLocation loc = (m_targets.m_targetMask & TARGET_FLAG_DEST_LOCATION) ?
+                            m_targets.getDestination() :
+                            m_caster->GetClosePoint(DEFAULT_WORLD_OBJECT_SIZE);
 
-    Map *map = target->GetMap();
+    Map* map = target->GetMap();
 
     if(!pGameObj->Create(map->GenerateLocalLowGuid(HIGHGUID_GAMEOBJECT), gameobject_id, map,
-        m_caster->GetPhaseMask(), x, y, z, target->GetOrientation()))
+        m_caster->GetPhaseMask(), loc.x, loc.y, loc.z, target->GetOrientation()))
     {
         delete pGameObj;
         return;
@@ -9130,8 +9186,12 @@ void Spell::EffectScriptEffect(SpellEffectEntry const* effect)
                     return;
                 }
                 case 47958:                                 // Crystal Spikes
+                case 57083:                                 // Crystal Spikes (h2)
                 {
+                    if (!unitTarget)
+                        return;
                     // Summon Crystal Spike
+
                     m_caster->CastSpell(m_caster, 47954, true);
                     m_caster->CastSpell(m_caster, 47955, true);
                     m_caster->CastSpell(m_caster, 47956, true);
@@ -9676,6 +9736,14 @@ void Spell::EffectScriptEffect(SpellEffectEntry const* effect)
                     unitTarget->RemoveAurasDueToSpell(effect->CalculateSimpleValue());
                     break;
                 }
+                case 56072:                                 // Ride Red Dragon Buddy
+                {
+                    if (!unitTarget)
+                        return;
+
+                    m_caster->CastSpell(unitTarget, effect->CalculateSimpleValue(), true);
+                    break;
+                }
                 case 56659:                                 //  Build Demolisher (Force)
                 case 56662:                                 //  Build Siege Vehicle (Force) - alliance
                 case 56664:                                 //  Build Catapult (Force)
@@ -9686,6 +9754,17 @@ void Spell::EffectScriptEffect(SpellEffectEntry const* effect)
 
                     unitTarget->CastSpell(unitTarget, effect->CalculateSimpleValue(), true);
                     break;
+                }
+                case 57082:                                 // Crystal Spikes (h1)
+                {
+                    if (!unitTarget)
+                        return;
+
+                    unitTarget->CastSpell(unitTarget, 57077, true);
+                    unitTarget->CastSpell(unitTarget, 57078, true);
+                    unitTarget->CastSpell(unitTarget, 57080, true);
+                    unitTarget->CastSpell(unitTarget, 57081, true);
+                    return;
                 }
                 case 57337:                                 // Great Feast
                 {
@@ -10322,6 +10401,16 @@ void Spell::EffectScriptEffect(SpellEffectEntry const* effect)
                     return;
                 }
                 case 69171:                                 // Low Plague Blight Visual Cancel (Festergut)
+                {
+                    if (unitTarget)
+                    {
+                        // remove Visual Auras
+                        unitTarget->RemoveAurasDueToSpell(69126);
+                        unitTarget->RemoveAurasDueToSpell(69152);
+                        unitTarget->RemoveAurasDueToSpell(69154);
+                    }
+                    return;
+                }
                 case 69298:                                 // Cancel Resistant to Blight (Festergut)
                 {
                     if (unitTarget)
@@ -11153,6 +11242,14 @@ void Spell::EffectScriptEffect(SpellEffectEntry const* effect)
             m_caster->CastSpell(unitTarget, *itr, true, NULL, NULL, m_caster->GetObjectGuid(), m_spellInfo);
     }
 
+    // Script based implementation. Must be used only for not good for implementation in core spell effects
+    // So called only for not processed cases
+    if (unitTarget->GetTypeId() == TYPEID_UNIT)
+    {
+        if (sScriptMgr.OnEffectScriptEffect(m_caster, m_spellInfo->Id, effect->GetIndex(), (Creature*)unitTarget))
+            return;
+    }
+
     // Previous effect might have started script
     if (!ScriptMgr::CanSpellEffectStartDBScript(m_spellInfo, effect->GetIndex()))
         return;
@@ -11304,10 +11401,11 @@ void Spell::EffectSummonPlayer(SpellEffectEntry const* /*effect*/)
     if (unitTarget->GetDummyAura(23445))
         return;
 
-    float x, y, z;
-    m_caster->GetClosePoint(x, y, z, unitTarget->GetObjectBoundingRadius());
+    WorldLocation loc = (m_targets.m_targetMask & TARGET_FLAG_DEST_LOCATION) ?
+                        m_targets.getDestination() :
+                        m_caster->GetClosePoint(unitTarget->GetObjectBoundingRadius());
 
-    ((Player*)unitTarget)->SetSummonPoint(WorldLocation(m_caster->GetMapId(), x, y, z));
+    ((Player*)unitTarget)->SetSummonPoint(loc);
 
     WorldPacket data(SMSG_SUMMON_REQUEST, 8+4+4);
     data << m_caster->GetObjectGuid();                      // summoner guid
@@ -11595,26 +11693,16 @@ void Spell::EffectSummonObject(SpellEffectEntry const* effect)
 
     GameObject* pGameObj = new GameObject;
 
-    float x, y, z;
-    // If dest location if present
-    if (m_targets.m_targetMask & TARGET_FLAG_DEST_LOCATION)
-        m_targets.getDestination(x, y, z);
-    // Summon in random point all other units if location present
-    else
-    {
-        if (m_spellInfo->Id == 48018)
-        {
-            x = m_caster->GetPositionX();
-            y = m_caster->GetPositionY();
-            z = m_caster->GetPositionZ();
-        }
-        else
-            m_caster->GetClosePoint(x, y, z, DEFAULT_WORLD_OBJECT_SIZE);
-    }
+    WorldLocation loc = (m_targets.m_targetMask & TARGET_FLAG_DEST_LOCATION) ?
+                        m_targets.getDestination() :
+                        m_caster->GetPosition();
 
-    Map *map = m_caster->GetMap();
+    if (m_spellInfo->Id != 48018)
+        m_caster->GetClosePoint(loc.x, loc.y, loc.z, DEFAULT_WORLD_OBJECT_SIZE);
+
+    Map* map = m_caster->GetMap();
     if(!pGameObj->Create(map->GenerateLocalLowGuid(HIGHGUID_GAMEOBJECT), go_id, map,
-        m_caster->GetPhaseMask(), x, y, z, m_caster->GetOrientation()))
+        m_caster->GetPhaseMask(), loc.x, loc.y, loc.z, m_caster->GetOrientation()))
     {
         delete pGameObj;
         return;
@@ -11720,22 +11808,21 @@ void Spell::EffectLeapForward(SpellEffectEntry const* effect)
 
     if (m_targets.m_targetMask & TARGET_FLAG_DEST_LOCATION)
     {
-        float x,y,z;
-        m_targets.getDestination(x,y,z);
+        WorldLocation loc =  m_targets.getDestination();
 
         // Try to normalize Z coord
-        m_caster->UpdateGroundPositionZ(x, y, z);
-        z += 0.2f;
+        m_caster->UpdateGroundPositionZ(loc.x, loc.y, loc.z);
+        loc.z += 0.2f;
 
         if (sWorld.getConfig(CONFIG_BOOL_BLINK_ANIMATION_TYPE))
         {
             float speed = BASE_CHARGE_SPEED * 10.0f;
-            m_caster->MonsterMoveWithSpeed(x, y, z, speed, !m_caster->IsFalling(), true);
+            m_caster->MonsterMoveWithSpeed(loc.x, loc.y, loc.z, speed, !m_caster->IsFalling(), true);
         }
         else
         {
             unitTarget->SetFallInformation(0, unitTarget->GetPositionZ());
-            unitTarget->NearTeleportTo(x, y, z, m_caster->GetOrientation(), unitTarget == m_caster);
+            unitTarget->NearTeleportTo(loc.x, loc.y, loc.z, m_caster->GetOrientation(), unitTarget == m_caster);
         }
     }
     else
@@ -11866,11 +11953,11 @@ void Spell::EffectCharge(SpellEffectEntry const* /*effect*/)
     if (!unitTarget || !m_caster)
         return;
 
-    float x, y, z;
-    unitTarget->GetContactPoint(m_caster, x, y, z);
+    WorldLocation loc = m_caster->GetPosition();
+    unitTarget->GetContactPoint(m_caster, loc.x, loc.y, loc.z);
 
     // Try to normalize Z coord cuz GetContactPoint do nothing with Z axis
-    m_caster->UpdateAllowedPositionZ(x, y, z);
+    m_caster->UpdateAllowedPositionZ(loc.x, loc.y, loc.z);
 
     if (unitTarget->GetTypeId() != TYPEID_PLAYER)
         ((Creature*)unitTarget)->StopMoving();
@@ -11881,12 +11968,12 @@ void Spell::EffectCharge(SpellEffectEntry const* /*effect*/)
              m_spellInfo->Id,
              m_caster ? m_caster->GetObjectGuid().GetString().c_str() : "<none>",
              unitTarget ? unitTarget->GetObjectGuid().GetString().c_str() : "<none>",
-             speed, z, y, z);
+             speed, loc.x, loc.y, loc.z);
 
     if (m_caster->IsFalling())
-        m_caster->MonsterMoveWithSpeed(x, y, z, speed, false, false);
+        m_caster->MonsterMoveWithSpeed(loc.x, loc.y, loc.z, speed, false, false);
     else
-        m_caster->MonsterMoveToDestination(x, y, z, m_caster->GetOrientation(), speed, 0, false, unitTarget);
+        m_caster->MonsterMoveToDestination(loc.x, loc.y, loc.z, loc.o, speed, 0, false, unitTarget);
 
     // not all charge effects used in negative spells
     if (unitTarget != m_caster && !IsPositiveSpell(m_spellInfo->Id))
@@ -11899,28 +11986,29 @@ void Spell::EffectCharge(SpellEffectEntry const* /*effect*/)
 
 void Spell::EffectCharge2(SpellEffectEntry const* /*effect*/)
 {
-    float x, y, z;
+    WorldLocation loc = (m_targets.m_targetMask & TARGET_FLAG_DEST_LOCATION) ?
+                        m_targets.getDestination() :
+                        m_caster->GetPosition();
+
     if (m_targets.m_targetMask & TARGET_FLAG_DEST_LOCATION)
     {
-        m_targets.getDestination(x, y, z);
-
         if (unitTarget->GetTypeId() != TYPEID_PLAYER)
             ((Creature *)unitTarget)->StopMoving();
     }
     else if (unitTarget && unitTarget != m_caster)
-        unitTarget->GetContactPoint(m_caster, x, y, z);
+        unitTarget->GetContactPoint(m_caster, loc.x, loc.y, loc.z);
     else
         return;
 
     // Try to normalize Z coord cuz GetContactPoint do nothing with Z axis
-    m_caster->UpdateAllowedPositionZ(x, y, z);
+    m_caster->UpdateAllowedPositionZ(loc.x, loc.y, loc.z);
 
     float speed = m_spellInfo->speed ? m_spellInfo->speed : BASE_CHARGE_SPEED;
 
     if (m_caster->IsFalling())
-        m_caster->MonsterMoveWithSpeed(x, y, z, speed, false, false);
+        m_caster->MonsterMoveWithSpeed(loc.x, loc.y, loc.z, speed, false, false);
     else
-        m_caster->MonsterMoveToDestination(x, y, z, m_caster->GetOrientation(), speed, 0, false, unitTarget);
+        m_caster->MonsterMoveToDestination(loc.x, loc.y, loc.z, loc.o, speed, 0, false, unitTarget);
 
     // not all charge effects used in negative spells
     if (unitTarget && unitTarget != m_caster && !IsPositiveSpell(m_spellInfo->Id))
@@ -11956,9 +12044,9 @@ void Spell::DoSummonCritter(SpellEffectEntry const* effect, uint32 forceFaction)
     // summon new pet
     Pet* critter = new Pet(MINI_PET);
 
-    CreatureCreatePos pos(m_caster->GetMap(), m_targets.m_destX, m_targets.m_destY, m_targets.m_destZ, m_caster->GetOrientation(), m_caster->GetPhaseMask());
-    if (!(m_targets.m_targetMask & TARGET_FLAG_DEST_LOCATION))
-        pos = CreatureCreatePos(m_caster, m_caster->GetOrientation());
+    CreatureCreatePos pos = (m_targets.m_targetMask & TARGET_FLAG_DEST_LOCATION) ?
+                                CreatureCreatePos(m_caster->GetMap(), m_targets.getDestination()) :
+                                CreatureCreatePos(m_caster, m_caster->GetOrientation());
 
     uint32 originalSpellID = (m_IsTriggeredSpell && m_triggeredBySpellInfo) ? m_triggeredBySpellInfo->Id : m_spellInfo->Id;
 
@@ -12224,15 +12312,15 @@ void Spell::EffectTransmitted(SpellEffectEntry const* effect)
         return;
     }
 
-    float fx, fy, fz;
+    WorldLocation loc = m_caster->GetPosition();
 
     if (m_targets.m_targetMask & TARGET_FLAG_DEST_LOCATION)
-        m_targets.getDestination(fx, fy, fz);
+        loc = m_targets.getDestination();
     // FIXME: this can be better check for most objects but still hack
     else if (effect->GetRadiusIndex() && m_spellInfo->speed == 0)
     {
         float dis = GetSpellRadius(sSpellRadiusStore.LookupEntry(effect->GetRadiusIndex()));
-        m_caster->GetClosePoint(fx, fy, fz, DEFAULT_WORLD_OBJECT_SIZE, dis);
+        m_caster->GetClosePoint(loc.x, loc.y, loc.z, DEFAULT_WORLD_OBJECT_SIZE, dis);
     }
     else
     {
@@ -12247,16 +12335,16 @@ void Spell::EffectTransmitted(SpellEffectEntry const* effect)
             // calculate angle variation for roughly equal dimensions of target area
             float max_angle = (max_dis - min_dis)/(max_dis + m_caster->GetObjectBoundingRadius());
             float angle_offset = max_angle * (rand_norm_f() - 0.5f);
-            m_caster->GetNearPoint2D(fx, fy, dis, m_caster->GetOrientation() + angle_offset);
+            m_caster->GetNearPoint2D(loc.x, loc.y, dis, m_caster->GetOrientation() + angle_offset);
 
-            if (!m_caster->GetTerrain()->IsAboveWater(fx, fy, m_caster->GetPositionZ() + 1.5f, &fz))
+            if (!m_caster->GetTerrain()->IsAboveWater(loc.x, loc.y, m_caster->GetPositionZ() + 1.5f, &loc.z))
             {
                 SendCastResult(SPELL_FAILED_NOT_FISHABLE);
                 SendChannelUpdate(0);
                 return;
             }
 
-            if (m_caster->GetPositionZ() < (fz - 1.0f))
+            if (m_caster->GetPositionZ() < (loc.z - 1.0f))
             {
                 SendCastResult(SPELL_FAILED_ONLY_ABOVEWATER);
                 SendChannelUpdate(0);
@@ -12264,7 +12352,7 @@ void Spell::EffectTransmitted(SpellEffectEntry const* effect)
             }
 
             // finally, check LoS
-            if (!m_caster->IsWithinLOS(fx, fy, fz))
+            if (!m_caster->IsWithinLOS(loc.x, loc.y, loc.z))
             {
                 SendCastResult(SPELL_FAILED_LINE_OF_SIGHT);
                 SendChannelUpdate(0);
@@ -12272,20 +12360,18 @@ void Spell::EffectTransmitted(SpellEffectEntry const* effect)
             }
         }
         else
-            m_caster->GetClosePoint(fx, fy, fz, DEFAULT_WORLD_OBJECT_SIZE, dis);
+            m_caster->GetClosePoint(loc.x, loc.y, loc.z, DEFAULT_WORLD_OBJECT_SIZE, dis);
     }
 
     Map *cMap = m_caster->GetMap();
 
     if (goinfo->type == GAMEOBJECT_TYPE_SUMMONING_RITUAL)
-    {
-        m_caster->GetPosition(fx, fy, fz);
-    }
+        loc = m_caster->GetPosition();
 
     GameObject* pGameObj = new GameObject;
 
     if(!pGameObj->Create(cMap->GenerateLocalLowGuid(HIGHGUID_GAMEOBJECT), name_id, cMap,
-        m_caster->GetPhaseMask(), fx, fy, fz, m_caster->GetOrientation()))
+        m_caster->GetPhaseMask(), loc.x, loc.y, loc.z, loc.o))
     {
         delete pGameObj;
         return;
@@ -12953,23 +13039,19 @@ void Spell::EffectSuspendGravity(SpellEffectEntry const* effect)
     if (!unitTarget)
         return;
 
-    float x,y,z;
+    WorldLocation loc = (m_targets.m_targetMask & TARGET_FLAG_DEST_LOCATION) ?
+                        m_targets.getDestination() :
+                        m_caster->GetPosition();
 
-    if (m_targets.m_targetMask & TARGET_FLAG_DEST_LOCATION)
-    {
-        m_targets.getDestination(x, y, z);
-    }
-    else
-    {
-        m_caster->GetClosePoint(x, y, z, m_caster->GetObjectBoundingRadius(), 0.0f, m_caster->GetAngle(unitTarget));
-    }
+    if (!(m_targets.m_targetMask & TARGET_FLAG_DEST_LOCATION))
+        m_caster->GetClosePoint(loc.x, loc.y, loc.z, m_caster->GetObjectBoundingRadius(), 0.0f, m_caster->GetAngle(unitTarget));
 
-    unitTarget->UpdateAllowedPositionZ(x, y, z);
+    unitTarget->UpdateAllowedPositionZ(loc.x, loc.y, loc.z);
 
     float speed  = float(effect->EffectMiscValue/2.0f);
-    float height = float(unitTarget->GetDistance(x,y,z) / 10.0f);
+    float height = float(unitTarget->GetDistance(loc) / 10.0f);
 
-    unitTarget->MonsterMoveToDestination(x, y, z + 0.1f, unitTarget->GetOrientation(), speed, height, true, m_caster == unitTarget ? NULL : m_caster);
+    unitTarget->MonsterMoveToDestination(loc.x, loc.y, loc.z + 0.1f, unitTarget->GetOrientation(), speed, height, true, m_caster == unitTarget ? NULL : m_caster);
 }
 
 void Spell::EffectUntrainTalents(SpellEffectEntry const* effect)
@@ -12991,13 +13073,11 @@ void Spell::EffectKnockBackFromPosition(SpellEffectEntry const* effect)
     if (!unitTarget)
         return;
 
-    float x, y, z;
-    if (m_targets.m_targetMask & TARGET_FLAG_DEST_LOCATION)
-        m_targets.getDestination(x, y, z);
-    else
-        m_caster->GetPosition(x, y, z);
+    WorldLocation loc = (m_targets.m_targetMask & TARGET_FLAG_DEST_LOCATION) ?
+                        m_targets.getDestination() :
+                        m_caster->GetPosition();
 
-    float angle = unitTarget->GetAngle(x,y) + M_PI_F;
+    float angle = unitTarget->GetAngle(loc.x,loc.y) + M_PI_F;
     float horizontalSpeed = float(effect->EffectMiscValue)/10.0f;
     float verticalSpeed = float(damage)/10.0f;
     unitTarget->KnockBackWithAngle(angle, horizontalSpeed, verticalSpeed);
