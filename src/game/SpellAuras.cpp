@@ -10902,7 +10902,7 @@ void SpellAuraHolder::_AddSpellAuraHolder()
     uint8 flags = GetAuraFlags() | ((GetCasterGuid() == GetTarget()->GetObjectGuid()) ? AFLAG_NOT_CASTER : AFLAG_NONE) | ((GetSpellMaxDuration(m_spellProto) > 0 && !m_spellProto->HasAttribute(SPELL_ATTR_EX5_NO_DURATION)) ? AFLAG_DURATION : AFLAG_NONE) | (IsPositive() ? AFLAG_POSITIVE : AFLAG_NEGATIVE);
     for (int32 i = 0; i < MAX_EFFECT_INDEX; ++i)
     {
-        if (Aura* aura = GetAuraByEffectIndex(i))
+        if (Aura* aura = GetAuraByEffectIndex(SpellEffectIndex(i)))
         {
             if (aura->GetModifier()->m_amount)
             {
@@ -11361,9 +11361,9 @@ bool SpellAuraHolder::IsNeedVisibleSlot(Unit const* caster) const
         return true;
     else if (IsSpellHaveAura(m_spellProto, SPELL_AURA_ALLOW_CAST_WHILE_MOVING))
         return true;
-    else if (IsSpellHaveAura(SPELL_AURA_OVERRIDE_ACTIONBAR_SPELLS))
+    else if (IsSpellHaveAura(m_spellProto, SPELL_AURA_OVERRIDE_ACTIONBAR_SPELLS))
         return true;
-    else if (IsSpellHaveAura(SPELL_AURA_OVERRIDE_ACTIONBAR_SPELLS_2))
+    else if (IsSpellHaveAura(m_spellProto, SPELL_AURA_OVERRIDE_ACTIONBAR_SPELLS_2))
         return true;
 
     // passive auras (except totem auras) do not get placed in the slots
