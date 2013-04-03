@@ -12217,6 +12217,14 @@ int32 Unit::CalculateAuraDuration(SpellEntry const* spellProto, uint32 effectMas
             }
         }
     }
+    // Strangulate
+    else if (spellProto->Id == 47476)
+    {
+        if (IsNonMeleeSpellCasted(false))
+            // Glyph of Strangulate
+            if (Aura* aura = const_cast<Unit*>(caster)->GetAura(58618, EFFECT_INDEX_0))
+                duration += aura->GetModifier()->m_amount;
+    }
     // Kidney Shot and Expose Armor
     else if (spellProto->IsFitToFamily(SPELLFAMILY_ROGUE, UI64LIT(0x280000)))
     {

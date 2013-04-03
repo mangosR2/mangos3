@@ -12324,6 +12324,21 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
 
             switch(GetId())
             {
+                case 3714:                                  // Path of Frost
+                {
+                    if (!apply)
+                        spellId1 = 93061;
+                    else if (Unit* caster = GetCaster())
+                        // Glyph of Path of Frost
+                        if (caster == m_target && caster->HasAura(59307))
+                            spellId1 = 93061;
+                    break;
+                }
+                case 7376:                                  // Defensive Stance Passive
+                {
+                    spellId1 = 57339;
+                    break;
+                }
                 case 29865:                                 // Deathbloom (10 man)
                 {
                     if (!apply && m_removeMode == AURA_REMOVE_BY_EXPIRE)
@@ -12451,7 +12466,7 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
                     m_target->_AddAura(GetId() == 72868 ? 70346 : 72456, 2000);
                     break;
                 }
-                case 70867:                                 // Soul of Blood Qween
+                case 70867:                                 // Essence of the Blood Queen
                 case 71473:
                 case 71532:
                 case 71533:

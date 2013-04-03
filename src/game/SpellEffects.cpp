@@ -1555,6 +1555,14 @@ void Spell::EffectSchoolDMG(SpellEffectEntry const* effect)
                     damage += damage / 2;
                     damage += int32(m_caster->GetTotalAttackPowerValue(BASE_ATTACK)* 0.035f);
                 }
+                // Chains of Ice
+                else if (m_spellInfo->Id == 45524)
+                {
+                    // Glyph of Chains of Ice
+                    if (m_caster->HasAura(58620))
+                        damage += int32(m_caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.08f);
+                    break;
+                }
                 // Howling Blast
                 else if (m_spellInfo->Id == 49143)
                 {
@@ -9375,13 +9383,6 @@ void Spell::EffectWeaponDmg(SpellEffectEntry const* effect)
                             weaponDamagePercentMod *= 0.75f ;
                     }
             }
-            // Glyph of Blood Strike
-            if( classOptions && classOptions->SpellFamilyFlags & UI64LIT(0x0000000000400000) &&
-                m_caster->HasAura(59332) &&
-                unitTarget->HasAuraType(SPELL_AURA_MOD_DECREASE_SPEED))
-            {
-                totalDamagePercentMod *= 1.2f;              // 120% if snared
-            }
             // Glyph of Death Strike
             if( classOptions && classOptions->SpellFamilyFlags & UI64LIT(0x0000000000000010) &&
                 m_caster->HasAura(59336))
@@ -9392,12 +9393,6 @@ void Spell::EffectWeaponDmg(SpellEffectEntry const* effect)
                 rp /= 5;
 
                 totalDamagePercentMod *= 1.0f + 2.0f * rp / 100.0f;
-            }
-            // Glyph of Plague Strike
-            if( classOptions && classOptions->SpellFamilyFlags & UI64LIT(0x0000000000000001) &&
-                m_caster->HasAura(58657) )
-            {
-                totalDamagePercentMod *= 1.2f;
             }
             // Rune strike
             if ( m_spellInfo->GetSpellIconID() == 3007)
@@ -11579,16 +11574,7 @@ void Spell::EffectScriptEffect(SpellEffectEntry const* effect)
                     }
                     return;
                 }
-                case 55328:                                    // Stoneclaw Totem I
-                case 55329:                                    // Stoneclaw Totem II
-                case 55330:                                    // Stoneclaw Totem III
-                case 55332:                                    // Stoneclaw Totem IV
-                case 55333:                                    // Stoneclaw Totem V
-                case 55335:                                    // Stoneclaw Totem VI
-                case 55278:                                    // Stoneclaw Totem VII
-                case 58589:                                    // Stoneclaw Totem VIII
-                case 58590:                                    // Stoneclaw Totem IX
-                case 58591:                                    // Stoneclaw Totem X
+                case 55328:                                    // Stoneclaw Totem & Glyph of Stoneclaw Totem
                 {
                     if (!unitTarget)    // Stoneclaw Totem owner
                         return;
@@ -11597,6 +11583,7 @@ void Spell::EffectScriptEffect(SpellEffectEntry const* effect)
                     for(int itr = 0; itr < MAX_TOTEM_SLOT; ++itr)
                         if (Totem* totem = unitTarget->GetTotem(TotemSlot(itr)))
                             m_caster->CastCustomSpell(totem, 55277, &damage, NULL, NULL, true);
+
                     // Glyph of Stoneclaw Totem
                     if (Aura* auraGlyph = unitTarget->GetAura(63298, EFFECT_INDEX_0))
                     {
@@ -13267,6 +13254,15 @@ void Spell::EffectScriptEffect(SpellEffectEntry const* effect)
                         holder->SendAuraUpdate(false);
                     }
                 }
+                return;
+            }
+            // Glyph of Resilient Grip
+            case 90289:
+            {
+                if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
+                    return;
+
+                ((Player*)unitTarget)->RemoveSpellCooldown(49576, true);
                 return;
             }
             break;
