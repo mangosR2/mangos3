@@ -8983,6 +8983,7 @@ void Aura::HandleSchoolAbsorb(bool apply, bool Real)
         if (target->GetTypeId()!=TYPEID_PLAYER || !((Player*)target)->GetSession()->PlayerLoading())
         {
             float DoneActualBenefit = 0.0f;
+            float customModifier = 0.0f;
             switch(spellProto->GetSpellFamilyName())
             {
                 case SPELLFAMILY_GENERIC:
@@ -9082,7 +9083,16 @@ void Aura::HandleSchoolAbsorb(bool apply, bool Real)
                     break;
             }
 
-            DoneActualBenefit *= caster->CalculateLevelPenalty(GetSpellProto());
+            if (customModifier == 0.0f)
+            {
+                DoneActualBenefit *= caster->CalculateLevelPenalty(GetSpellProto());
+                ChangeAmount(m_modifier.m_amount + (int32)DoneActualBenefit);
+            }
+            else
+            {
+                customModifier *= caster->CalculateLevelPenalty(GetSpellProto());
+                ChangeAmount((int32)customModifier);
+            }
 
             m_modifier.m_amount += (int32)DoneActualBenefit;
             m_modifier.m_baseamount += (int32)DoneActualBenefit;
@@ -10689,6 +10699,10 @@ void Aura::PeriodicDummyTick()
                     // Converts up to 10 rage per second into health for $d.  Each point of rage is converted into ${$m2/10}.1% of max health.
                     // Should be manauser
                     if (target->getPowerType() != POWER_RAGE)
+                        return;
+
+                    // Glyph of Frenzied Regeneration
+                    if (target->HasAura(54810))
                         return;
 
                     int32 rage = std::min(target->GetPower(POWER_RAGE), 100);
@@ -13028,12 +13042,36 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
                     }
                 }
             }
+            // Tiger's Fury or Berserk
+            else if (GetId() == 5217 || GetId() == 50334)
+            {
+                if (apply)
+                {
+                    // search Primal Madness
+                    if (m_target->GetTypeId() == TYPEID_PLAYER)
+                        if (SpellEntry const* spellInfo = ((Player*)m_target)->GetKnownTalentRankById(8335))
+                            spellId1 = spellInfo->Id == 80316 ? 80879 : 80886;
+                }
+                else
+                {
+                    spellId1 = 80879;
+                    spellId2 = 80886;
+                }
+
+                // Berserk
+                if (GetId() == 50334)
+                    spellId3 = 58923;                       // Berserk (Mangle (Bear) modifier)
+                break;
+            }
             // Bear Form (Passive2)
             else if (GetId() == 21178)
                 spellId1 = 57339;
             // Barkskin
-            else if (GetId()==22812 && m_target->HasAura(63057)) // Glyph of Barkskin
-                spellId1 = 63058;                           // Glyph - Barkskin 01
+            else if (GetId()==22812)                        // Glyph of Barkskin
+            {
+                if (!apply || m_target->HasAura(63057))
+                    spellId1 = 63058;                       // Glyph of Amberskin Protection
+            }
             // Enrage (Druid Bear)
             else if (GetId() == 5229)
             {
@@ -13053,9 +13091,6 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
             // Eclipse (Solar)
             else if (GetId() == 48517)
                 spellId1 = 94338;
-            // Berserk
-            else if (GetId() == 50334)
-                spellId1 = 58923;                           // Berserk (Mangle (Bear) modifier)
             // Stampede
             else if (GetId() == 81021 || GetId() == 81022)
                 spellId1 = 109881;                          // Stampede Ravage Marker

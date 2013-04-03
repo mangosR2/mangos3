@@ -1335,10 +1335,25 @@ void Spell::EffectSchoolDMG(SpellEffectEntry const* effect)
                 if (m_caster->GetTypeId() == TYPEID_PLAYER && (classOptions && classOptions->GetSpellFamilyFlags().test<CF_DRUID_RIP_BITE>()) && m_spellInfo->GetSpellVisual() == 6587)
                 {
                     // converts up to 35 points to up to 100% damage
-                    int32 energy = std::min(m_caster->GetPower(POWER_ENERGY), 35);
-                    damage += int32(damage * energy / 35);
+                    if (int32 energy = std::min(m_caster->GetPower(POWER_ENERGY), 35))
+                    {
+                        // Glyph of Ferocious Bite
+                        if (Aura* glyph = m_caster->GetAura(67598, EFFECT_INDEX_0))
+                            if (int32 bp = glyph->GetModifier()->m_amount * energy / 10)
+                                m_caster->CastCustomSpell(m_caster, 101024, &bp, NULL, NULL, true);
 
-                    m_caster->ModifyPower(POWER_ENERGY, -energy);
+                        damage += int32(damage * energy / 35);
+
+                        m_caster->ModifyPower(POWER_ENERGY, -energy);
+                    }
+                }
+
+                // Maul
+                if (m_spellInfo->Id == 6807)
+                {
+                    // Maul does 1/2 damage to secondary target (Glyph of Maul)
+                    if (m_targets.getUnitTarget() != unitTarget)
+                        damage /= 2;
                 }
                 break;
             }
@@ -12858,6 +12873,21 @@ void Spell::EffectScriptEffect(SpellEffectEntry const* effect)
                     // get Unstable Affliction
                     if (SpellAuraHolderPtr holder = unitTarget->GetSpellAuraHolder(30108, m_caster->GetObjectGuid()))
                         holder->RefreshHolder();
+
+                    return;
+                }
+                case 93036:                                 // Regrowth Refresh
+                {
+                    if (!unitTarget)
+                        return;
+
+                    // get Regrowth
+                    if (SpellAuraHolderPtr holder = unitTarget->GetSpellAuraHolder(8936, m_caster->GetObjectGuid()))
+                        if (holder->GetAuraDuration() < damage * IN_MILLISECONDS)
+                        {
+                            holder->SetAuraDuration(damage * IN_MILLISECONDS);
+                            holder->SendAuraUpdate(false);
+                        }
 
                     return;
                 }

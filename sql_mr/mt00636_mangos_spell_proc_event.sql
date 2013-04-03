@@ -841,6 +841,31 @@ DELETE FROM `spell_proc_event` WHERE `entry` = 62600;
 INSERT INTO `spell_proc_event` (`entry`, `SchoolMask`, `procEx`) VALUES
 (62600, 127, 2);
 
+-- Berserk (rage cost buff)
+DELETE FROM `spell_proc_event` WHERE `entry` = 93622;
+INSERT INTO `spell_proc_event` (`entry`, `procEx`) VALUES
+(93622, 524288);
+
+-- Glyph of Healing Touch
+DELETE FROM `spell_proc_event` WHERE `entry` = 54825;
+INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`) VALUES
+(54825, 7, 32);
+
+-- Glyph of Bloodletting
+DELETE FROM `spell_proc_event` WHERE `entry` = 54743;
+INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`, `procFlags`, `procEx`, `CustomChance`) VALUES
+(54743, 7, 64, 262144, 262144, 100);
+
+-- Glyph of Blodletting
+DELETE FROM `spell_proc_event` WHERE `entry` = 54815;
+INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`, `SpellFamilyMaskB0`, `procFlags`, `CustomChance`) VALUES
+(54815, 7, 32768, 1024, 16, 100);
+
+-- Glyph of Starsurge
+DELETE FROM `spell_proc_event` WHERE `entry` = 62971;
+INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskC0`) VALUES
+(62971, 7, 33554432);
+
 ### Hunter ###
 
 -- Aspect of the Fox

@@ -77,8 +77,12 @@ REPLACE INTO `spell_bonus_data` (`entry`, `direct_bonus`, `dot_bonus`, `ap_bonus
 REPLACE INTO `spell_bonus_data` (`entry`, `direct_bonus`, `dot_bonus`, `ap_bonus`, `ap_dot_bonus`, `comments`) VALUES
 (779, 0, 0, 0.123, 0, 'Druid - Swipe'),
 (1822, 0, 0, 0.147, 0.147, 'Druid - Rake'),
+(2912, 1.231, 0, 0, 0, 'Druid - Starfire'),
 (6785, 0, 0, 0.071, 0, 'Druid - Ravage'),
+(6807, 0.18, 0, 0.19, 0, 'Druid - Maul'),
+(8936, 0.2936, 0.0296, 0, 0, 'Druid - Regrowth'),
 (22568, 0, 0, 1, 0, 'Druid - Ferocius Bite'),
+(78674, 1.228, 0, 0, 0, 'Druid - Starsurge'),
 (78777, 0.6032, 0, 0, 0, 'Druid - Wild Mushroom: Detonate'),
 (80313, 0, 0, 0.071, 0, 'Druid - Pulverize'),
 (81170, 0, 0, 0.071, 0, 'Druid - Ravage!'),

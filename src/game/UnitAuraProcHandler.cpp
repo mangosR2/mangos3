@@ -2167,35 +2167,88 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, DamageInfo* damageI
                     triggered_spell_id = 32747;
                     break;
                 }
-                // Glyph of Rejuvenation
-                case 54754:
+                // Glyph of Regrowth
+                case 54743:
                 {
-                   if (!pVictim || pVictim->GetHealthPercent() >= 50.0f)
+                    if (!pVictim || damage + pVictim->GetHealth() < triggerAmount * GetMaxHealth() / 100)
                         return SPELL_AURA_PROC_FAILED;
 
-                    target = pVictim;
-                    triggered_spell_id = 54755;
-                    basepoints[0] = int32(damage * triggerAmount  / 100);
+                    // Regrowth Refresh
+                    triggered_spell_id = 93036;
                     break;
                 }
-                // Glyph of Shred
-                case 54815:
+                // Glyph of Healing Touch
+                case 54825:
                 {
-                    basepoints[1] = triggerAmount;
-                    triggered_spell_id = 63974;
-                    break;
-                }
-                // Glyph of Rake
-                case 54821:
-                {
-                    triggered_spell_id = 54820;
-                    break;
+                    if (!pVictim || pVictim->GetTypeId() != TYPEID_PLAYER)
+                        return SPELL_AURA_PROC_FAILED;
+
+                    ((Player*)this)->SendModifyCooldown(17116, -triggerAmount * IN_MILLISECONDS);
+                    return SPELL_AURA_PROC_OK;
                 }
                 // Glyph of Starfire
                 case 54845:
                 {
-                    triggered_spell_id = 54846;
-                    break;
+                    if (Aura* moonfire = target->GetAura(SPELL_AURA_PERIODIC_DAMAGE, SPELLFAMILY_DRUID, UI64LIT(0x00000002), 0, GetObjectGuid()))
+                    {
+                        // Moonfire's max duration, note: spells which modifies Moonfire's duration also counted like Glyph of Starfire
+                        int32 CountMin = moonfire->GetAuraMaxDuration();
+
+                        // just Moonfire's max duration without other spells
+                        int32 CountMax = GetSpellMaxDuration(moonfire->GetSpellProto());
+
+                        // add possible auras' and Glyph of Starfire's max duration
+                        CountMax += 3 * triggerAmount * 1000;       // Glyph of Starfire            -> +9 seconds
+                        CountMax += HasAura(38414) ? 3 * 1000 : 0;  // Moonfire duration            -> +3 seconds
+
+                        // if min < max -> that means caster didn't cast 3 starfires yet
+                        // so set Moonfire's duration and max duration
+                        if (CountMin < CountMax)
+                        {
+                            moonfire->GetHolder()->SetAuraDuration(moonfire->GetAuraDuration() + triggerAmount * 1000);
+                            moonfire->GetHolder()->SetAuraMaxDuration(CountMin + triggerAmount * 1000);
+                            moonfire->GetHolder()->SendAuraUpdate(false);
+                            return SPELL_AURA_PROC_OK;
+                        }
+                    }
+                    return SPELL_AURA_PROC_FAILED;
+                }
+                // Glyph of Bloodletting
+                case 54815:
+                {
+                    if (Aura* rip = target->GetAura(SPELL_AURA_PERIODIC_DAMAGE, SPELLFAMILY_DRUID, UI64LIT(0x00800000), 0, GetObjectGuid()))
+                    {
+                        // Rip's max duration, note: spells which modifies Rip's duration also counted like Glyph of Rip
+                        int32 CountMin = rip->GetAuraMaxDuration();
+
+                        // just Rip's max duration without other spells
+                        int32 CountMax = GetSpellMaxDuration(rip->GetSpellProto());
+
+                        // add possible auras' and Glyph of Shred's max duration
+                        CountMax += 3 * triggerAmount * 1000;       // Glyph of Shred               -> +6 seconds
+                        CountMax += HasAura(60141) ? 4 * 1000 : 0;  // Rip Duration/Lacerate Damage -> +4 seconds
+
+                        // if min < max -> that means caster didn't cast 3 shred yet
+                        // so set Rip's duration and max duration
+                        if (CountMin < CountMax)
+                        {
+                            rip->GetHolder()->SetAuraDuration(rip->GetAuraDuration() + triggerAmount * 1000);
+                            rip->GetHolder()->SetAuraMaxDuration(CountMin + triggerAmount * 1000);
+                            rip->GetHolder()->SendAuraUpdate(false);
+                            return SPELL_AURA_PROC_OK;
+                        }
+                    }
+                    return SPELL_AURA_PROC_FAILED;
+                }
+                // Glyph of Starsurge
+                case 62971:
+                {
+                    if (GetTypeId() != TYPEID_PLAYER)
+                        return SPELL_AURA_PROC_FAILED;
+
+                    // modify Starfall cooldown
+                    ((Player*)this)->SendModifyCooldown(48505, -triggerAmount * IN_MILLISECONDS);
+                    return SPELL_AURA_PROC_OK;
                 }
                 // Item - Druid T10 Restoration 4P Bonus (Rejuvenation)
                 case 70664:
