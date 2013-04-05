@@ -4068,6 +4068,21 @@ void Spell::cast(bool skipCheck)
                 if (IsTriggeredSpell())
                     AddPrecastSpell(86262);     // Nether Vortex
             }
+
+            // Polymorph
+            if (m_caster->GetTypeId() == TYPEID_PLAYER && m_spellInfo->IsFitToFamilyMask(UI64LIT(0x1000000)) &&
+                m_spellInfo->GetEffectApplyAuraNameByIndex(EFFECT_INDEX_0) == SPELL_AURA_MOD_CONFUSE && m_spellInfo->GetSpellIconID() == 82)
+            {
+                // Glyph of the Penguid
+                if (m_caster->HasAura(52648))
+                    AddTriggeredSpell(61635);       // Sound Effect: Polymorph Penguin
+                // Glyph of the Monkey
+                else if (m_caster->HasAura(57927))
+                    AddTriggeredSpell(89729);       // Sound Effect: Polymorph Monkey
+                else
+                    AddTriggeredSpell(61634);       // Sound Effect: Polymorph Sheeps
+            }
+
             break;
         }
         case SPELLFAMILY_WARRIOR:
