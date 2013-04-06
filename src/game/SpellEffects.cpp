@@ -6062,14 +6062,6 @@ void Spell::EffectTriggerSpell(SpellEffectEntry const* effect)
     // special cases
     switch (triggered_spell_id)
     {
-        // Intimidating Shout
-        case 5246:
-        {
-            // Glyph of Intimidating Shout
-            if (!m_caster->HasAura(63327))
-                return;
-            break;
-        }
         // Vanish (not exist)
         case 18461:
         {
@@ -6078,6 +6070,14 @@ void Spell::EffectTriggerSpell(SpellEffectEntry const* effect)
             unitTarget->RemoveSpellsCausingAura(SPELL_AURA_MOD_STALKED);
 
             return;
+        }
+        // Intimidating Shout
+        case 20511:
+        {
+            // Glyph of Intimidating Shout
+            if (!m_caster->HasAura(63327))
+                return;
+            break;
         }
         // just skip
         case 23770:                                         // Sayge's Dark Fortune of *
