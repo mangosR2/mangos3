@@ -5371,7 +5371,7 @@ void Player::RepopAtGraveyard()
     AreaTableEntry const* zone = GetAreaEntryByAreaID(GetAreaId());
 
     // Such zones are considered unreachable as a ghost and the player must be automatically revived
-    if ((!isAlive() && zone && (zone->flags & AREA_FLAG_NEED_FLY)) || IsOnTransport() || GetPositionZ() < -500.0f)
+    if ((!isAlive() && zone && (zone->flags & AREA_FLAG_NEED_FLY)) || IsOnTransport() || GetPositionZ() < (zone ? zone->MaxDepth : -500.0f))
     {
         ResurrectPlayer(50);
         SpawnCorpseBones();
@@ -5405,6 +5405,13 @@ void Player::RepopAtGraveyard()
         }
         if (updateVisibility && IsInWorld())
             UpdateVisibilityAndView();
+    }
+    else if (!zone || GetPositionZ() < zone->MaxDepth)
+    {
+        DEBUG_LOG("Teleporting player %s to homebind because zone id %i does not have any graveyards and player is under map",
+            GetGuidStr().c_str(), zone ? zone->ID : -1);
+
+        RelocateToHomebind();
     }
 }
 

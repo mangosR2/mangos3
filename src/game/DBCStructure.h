@@ -574,7 +574,7 @@ struct AreaTableEntry
     DBCString area_name;                                    // 11       m_AreaName_lang
     uint32  team;                                           // 12       m_factionGroupMask
     uint32  LiquidTypeOverride[4];                          // 13-16    m_liquidTypeID[4]
-                                                            // 17       m_minElevation
+    float   MaxDepth;                                       // 17,
                                                             // 18       m_ambient_multiplier
                                                             // 19       m_lightid
     //uint32 unk20;                                         // 20 4.0.0
