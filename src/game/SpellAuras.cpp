@@ -2912,6 +2912,7 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                         target->CastSpell(target, 58585, true);
                         return;
                     case 58600:                             // Restricted Flight Area
+                    case 91604:                             // Restricted Flight Area
                     {
                         if (!target || target->GetTypeId() != TYPEID_PLAYER)
                             return;
