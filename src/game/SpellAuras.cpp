@@ -4233,7 +4233,7 @@ void Aura::HandleAuraMounted(bool apply, bool Real)
     {
         // Running Wild
         if (GetId() == 87840)
-            target->Mount(target->getGender() == GENDER_MALE ? 29422 : 29423, GetId());
+            target->Mount(target->getGender() == GENDER_MALE ? 29422 : 29423, GetId(), 0, GetMiscValue());
         else
         {
             CreatureInfo const* ci = ObjectMgr::GetCreatureTemplate(m_modifier.m_miscvalue);
