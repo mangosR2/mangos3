@@ -5374,7 +5374,7 @@ void Player::RepopAtGraveyard()
     if ((!isAlive() && zone && (zone->flags & AREA_FLAG_NEED_FLY)) || IsOnTransport() || GetPositionZ() < (zone ? zone->MaxDepth : -500.0f))
     {
         ResurrectPlayer(50);
-        SpawnCorpseBones();
+        //SpawnCorpseBones();
     }
 
     WorldSafeLocsEntry const* ClosestGrave = NULL;
