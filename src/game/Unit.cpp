@@ -13880,7 +13880,7 @@ void Unit::ProcDamageAndSpellFor(bool isVictim, DamageInfo* damageInfo)
                 // Glyph of Lightning Shield
                 if (caster->HasAura(55448))
                 {
-                    if (itr->first->GetStackAmount() < itr->first->GetSpellProto()->GetStackAmount() + 1)
+                    if (itr->first->GetAuraCharges() < itr->first->GetSpellProto()->GetProcCharges() + 1)
                         useCharges = false;
                 }
             }
