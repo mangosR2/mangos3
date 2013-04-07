@@ -13548,6 +13548,8 @@ void Unit::_ExitVehicle(bool forceDismount)
     if (!GetVehicle())
         return;
 
+    DisableSpline();
+
     if (GetVehicle()->GetBase() && GetVehicle()->GetBase()->IsInWorld())
         GetVehicle()->RemovePassenger(this, !forceDismount);
     else
