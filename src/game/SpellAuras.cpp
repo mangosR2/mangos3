@@ -9359,7 +9359,7 @@ void Aura::PeriodicTick()
             {
                 damageInfo.hitOutCome = MELEE_HIT_CRIT;
                 // Resilience - reduce crit damage
-                damageInfo.damage -= target->GetCritDamageReduction(damageInfo.damage);
+                //damageInfo.damage -= target->GetCritDamageReduction(damageInfo.damage);
             }
 
             // only from players
@@ -9456,7 +9456,7 @@ void Aura::PeriodicTick()
             {
                 damageInfo.hitOutCome = MELEE_HIT_CRIT;
                 // Resilience - reduce crit damage
-                damageInfo.damage -= target->GetCritDamageReduction(damageInfo.damage);
+                //damageInfo.damage -= target->GetCritDamageReduction(damageInfo.damage);
             }
 
             // only from players

@@ -2107,10 +2107,11 @@ void Unit::CalculateSpellDamage(DamageInfo* damageInfo, float DamageMultiplier)
                 damageInfo->damage = SpellCriticalDamageBonus(damageInfo->GetSpellProto(), damageInfo->damage, damageInfo->target);
 
                 // Resilience - reduce crit damage (full or reduced)
-                uint32 reduction_affected_damage = sWorld.getConfig(CONFIG_BOOL_RESILIENCE_ALTERNATIVE_CALCULATION) ? damageInfo->damage : CalcNotIgnoreDamageReduction(damageInfo);
-                uint32 damageCritReduction =  damageInfo->target->GetCritDamageReduction(reduction_affected_damage);
+                //  Patch 4.0.1 (12-Oct-2010): Resilience no longer reduces the chance a player will be critically hit by an opponent.
+                //uint32 reduction_affected_damage = sWorld.getConfig(CONFIG_BOOL_RESILIENCE_ALTERNATIVE_CALCULATION) ? damageInfo->damage : CalcNotIgnoreDamageReduction(damageInfo);
+                //uint32 damageCritReduction =  damageInfo->target->GetCritDamageReduction(reduction_affected_damage);
 
-                damageInfo->damage -= damageCritReduction;
+                //damageInfo->damage -= damageCritReduction;
             }
             else
             {
@@ -2135,8 +2136,9 @@ void Unit::CalculateSpellDamage(DamageInfo* damageInfo, float DamageMultiplier)
                 damageInfo->damage = SpellCriticalDamageBonus(damageInfo->GetSpellProto(), damageInfo->damage, damageInfo->target);
 
                 // Resilience - reduce crit damage (full or reduced)
-                uint32 reduction_affected_damage = sWorld.getConfig(CONFIG_BOOL_RESILIENCE_ALTERNATIVE_CALCULATION) ? damageInfo->damage : CalcNotIgnoreDamageReduction(damageInfo);
-                uint32 damageCritReduction =  damageInfo->target->GetCritDamageReduction(reduction_affected_damage);
+                // Patch 4.0.1 (12-Oct-2010): Resilience no longer reduces the chance a player will be critically hit by an opponent.
+                //uint32 reduction_affected_damage = sWorld.getConfig(CONFIG_BOOL_RESILIENCE_ALTERNATIVE_CALCULATION) ? damageInfo->damage : CalcNotIgnoreDamageReduction(damageInfo);
+                //uint32 damageCritReduction =  damageInfo->target->GetCritDamageReduction(reduction_affected_damage);
             }
             break;
         }
@@ -2144,6 +2146,12 @@ void Unit::CalculateSpellDamage(DamageInfo* damageInfo, float DamageMultiplier)
             sLog.outError("Unit::CalculateSpellDamage: Unknown damage class by caster: %s, spell %u", GetGuidStr().c_str(), damageInfo->GetSpellProto()->Id);
             return;
     }
+
+    // only from players and pets
+    //if (GetTypeId() == TYPEID_PLAYER || GetTypeId() == TYPEID_UNIT && ((Creature*)this)->IsPet())
+    //{
+    //    damage -= pVictim->GetDamageReduction(damage);
+    //}
 
     // damage mitigation
     if (int32(damageInfo->damage) > 0)
@@ -2324,8 +2332,9 @@ void Unit::CalculateMeleeDamage(DamageInfo* damageInfo)
                 damageInfo->damage = int32((damageInfo->damage) * float((100.0f + mod) / 100.0f));
 
             // Resilience - reduce crit damage
-            uint32 reduction_affected_damage = CalcNotIgnoreDamageReduction(damageInfo);
-            uint32 resilienceReduction = pVictim->GetCritDamageReduction(reduction_affected_damage);
+            //uint32 reduction_affected_damage = CalcNotIgnoreDamageReduction(damageInfo);
+            //uint32 resilienceReduction = pVictim->GetCritDamageReduction(reduction_affected_damage);
+            uint32 resilienceReduction = 0;
 
             damageInfo->damage      -= resilienceReduction;
             damageInfo->cleanDamage += resilienceReduction;
