@@ -15124,13 +15124,25 @@ void Unit::KnockBackWithAngle(float angle, float horizontalSpeed, float vertical
 float Unit::GetCombatRatingReduction(CombatRating cr) const
 {
     if (GetTypeId() == TYPEID_PLAYER)
-        return ((Player const*)this)->GetRatingBonusValue(cr);
+    {
+        // resilience formula for non 85 lvl is unknown
+        if (getLevel() == 85)
+            return (1.0f - std::pow(0.99f, GetUInt32Value(PLAYER_FIELD_COMBAT_RATING_1 + cr) / 79.12785f)) * 100.0f;
+        else
+            return ((Player const*)this)->GetRatingBonusValue(cr);
+    }
     else if (((Creature const*)this)->IsPet())
     {
         // Player's pet get 100% resilience from owner
         if (Unit* owner = GetOwner())
             if (owner->GetTypeId() == TYPEID_PLAYER)
-                return ((Player*)owner)->GetRatingBonusValue(cr);
+            {
+                // resilience formula for non 85 lvl is unknown
+                if (owner->getLevel() == 85)
+                    return (1.0f - std::pow(0.99f, GetUInt32Value(PLAYER_FIELD_COMBAT_RATING_1 + cr) / 79.12785f)) * 100.0f;
+                else
+                    return ((Player*)owner)->GetRatingBonusValue(cr);
+            }
     }
 
     return 0.0f;
