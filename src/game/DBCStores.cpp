@@ -132,6 +132,11 @@ DBCStorage <GuildPerkSpellsEntry>         sGuildPerkSpellsStore(GuildPerkSpellsf
 
 DBCStorage <HolidaysEntry>                sHolidaysStore(Holidaysfmt);
 
+DBCStorage <ImportPriceArmorEntry>        sImportPriceArmorStore(ImportPriceArmorfmt);
+DBCStorage <ImportPriceQualityEntry>      sImportPriceQualityStore(ImportPriceQualityfmt);
+DBCStorage <ImportPriceShieldEntry>       sImportPriceShieldStore(ImportPriceShieldfmt);
+DBCStorage <ImportPriceWeaponEntry>       sImportPriceWeaponStore(ImportPriceWeaponfmt);
+DBCStorage <ItemPriceBaseEntry>           sItemPriceBaseStore(ItemPriceBasefmt);
 DBCStorage <ItemArmorQualityEntry>        sItemArmorQualityStore(ItemArmorQualityfmt);
 DBCStorage <ItemArmorShieldEntry>         sItemArmorShieldStore(ItemArmorShieldfmt);
 DBCStorage <ItemArmorTotalEntry>          sItemArmorTotalStore(ItemArmorTotalfmt);
@@ -146,6 +151,7 @@ DBCStorage <ItemDamageEntry>              sItemDamageThrownStore(ItemDamagefmt);
 DBCStorage <ItemDamageEntry>              sItemDamageTwoHandStore(ItemDamagefmt);
 DBCStorage <ItemDamageEntry>              sItemDamageTwoHandCasterStore(ItemDamagefmt);
 DBCStorage <ItemDamageEntry>              sItemDamageWandStore(ItemDamagefmt);
+DBCStorage <ItemDisenchantLootEntry>      sItemDisenchantLootStore(ItemDisenchantLootfmt);
 //DBCStorage <ItemDisplayInfoEntry>         sItemDisplayInfoStore(ItemDisplayTemplateEntryfmt); -- not used currently
 DBCStorage <ItemLimitCategoryEntry>       sItemLimitCategoryStore(ItemLimitCategoryEntryfmt);
 DBCStorage <ItemRandomPropertiesEntry>    sItemRandomPropertiesStore(ItemRandomPropertiesfmt);
@@ -571,6 +577,11 @@ void LoadDBCStores(const std::string& dataPath)
     LoadDBC(availableDbcLocales,bar,bad_dbc_files,sGtOCTBaseMPByClassStore,  dbcPath,"gtOCTBaseMPByClass.dbc"); // 15595
     LoadDBC(availableDbcLocales,bar,bad_dbc_files,sGuildPerkSpellsStore,     dbcPath,"GuildPerkSpells.dbc");
     LoadDBC(availableDbcLocales,bar,bad_dbc_files,sHolidaysStore,            dbcPath,"Holidays.dbc");
+    LoadDBC(availableDbcLocales,bar,bad_dbc_files,sImportPriceArmorStore,    dbcPath,"ImportPriceArmor.dbc");
+    LoadDBC(availableDbcLocales,bar,bad_dbc_files,sImportPriceQualityStore,  dbcPath,"ImportPriceQuality.dbc");
+    LoadDBC(availableDbcLocales,bar,bad_dbc_files,sImportPriceShieldStore,   dbcPath,"ImportPriceShield.dbc");
+    LoadDBC(availableDbcLocales,bar,bad_dbc_files,sImportPriceWeaponStore,   dbcPath,"ImportPriceWeapon.dbc");
+    LoadDBC(availableDbcLocales,bar,bad_dbc_files,sItemPriceBaseStore,       dbcPath,"ItemPriceBase.dbc");
     LoadDBC(availableDbcLocales,bar,bad_dbc_files,sItemArmorQualityStore,    dbcPath,"ItemArmorQuality.dbc");
     LoadDBC(availableDbcLocales,bar,bad_dbc_files,sItemArmorShieldStore,     dbcPath,"ItemArmorShield.dbc");
     LoadDBC(availableDbcLocales,bar,bad_dbc_files,sItemArmorTotalStore,      dbcPath,"ItemArmorTotal.dbc");
@@ -585,6 +596,7 @@ void LoadDBCStores(const std::string& dataPath)
     LoadDBC(availableDbcLocales,bar,bad_dbc_files,sItemDamageTwoHandStore,   dbcPath,"ItemDamageTwoHand.dbc");
     LoadDBC(availableDbcLocales,bar,bad_dbc_files,sItemDamageTwoHandCasterStore,dbcPath,"ItemDamageTwoHandCaster.dbc");
     LoadDBC(availableDbcLocales,bar,bad_dbc_files,sItemDamageWandStore,      dbcPath,"ItemDamageWand.dbc");
+    LoadDBC(availableDbcLocales,bar,bad_dbc_files,sItemDisenchantLootStore,  dbcPath,"ItemDisenchantLoot.dbc");
     //LoadDBC(availableDbcLocales,bar,bad_dbc_files,sItemDisplayInfoStore,     dbcPath,"ItemDisplayInfo.dbc");     -- not used currently
     //LoadDBC(availableDbcLocales,bar,bad_dbc_files,sItemCondExtCostsStore,    dbcPath,"ItemCondExtCosts.dbc");
     LoadDBC(availableDbcLocales,bar,bad_dbc_files,sItemLimitCategoryStore,   dbcPath,"ItemLimitCategory.dbc");

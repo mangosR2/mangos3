@@ -1803,39 +1803,163 @@ bool Item::FitsToVoidStorage() const
     return true;
 }
 
-uint32 Item::GetSpecialPrice(ItemPrototype const* proto, uint32 minimumPrice /*= 10000*/)
+uint32 ItemPrototype::GetSpecialPrice(uint32 minimumPrice /*= 10000*/) const
 {
     uint32 cost = 0;
 
-    if (proto->Flags2 & ITEM_FLAG2_HAS_NORMAL_PRICE)
-        cost = proto->SellPrice;
+    if (Flags2 & ITEM_FLAG2_HAS_NORMAL_PRICE)
+        cost = SellPrice;
     else
     {
-        bool normalPrice = true;
-        //cost = Item::GetSellPrice(proto, normalPrice);
-        cost = proto->SellPrice;
+        bool normalPrice;
+        cost = GetSellPrice(normalPrice);
 
         if (!normalPrice)
         {
-            if (proto->BuyCount <= 1)
+            if (BuyCount <= 1)
             {
-                ItemClassEntry const* classEntry = sItemClassStore.LookupEntry(proto->Class);
+                ItemClassEntry const* classEntry = sItemClassStore.LookupEntry(Class);
                 if (classEntry)
                     cost *= classEntry->PriceFactor;
                 else
                     cost = 0;
             }
             else
-                cost /= 4 * proto->BuyCount;
+                cost /= 4 * BuyCount;
         }
         else
-            cost = proto->SellPrice;
+            cost = SellPrice;
     }
 
     if (cost < minimumPrice)
         cost = minimumPrice;
 
     return cost;
+}
+
+// used by mail items, transmog cost, stationeryinfo and others
+uint32 ItemPrototype::GetSellPrice(bool& normalSellPrice) const
+{
+    normalSellPrice = true;
+
+    if (Flags2 & ITEM_FLAG2_HAS_NORMAL_PRICE)
+    {
+        return BuyPrice;
+    }
+    else
+    {
+        ImportPriceQualityEntry const* qualityPrice = sImportPriceQualityStore.LookupEntry(Quality + 1);
+        ItemPriceBaseEntry const* basePrice = sItemPriceBaseStore.LookupEntry(ItemLevel);
+
+        if (!qualityPrice || !basePrice)
+            return 0;
+
+        float qualityFactor = qualityPrice->Factor;
+        float baseFactor = 0.0f;
+
+        uint32 inventoryType = InventoryType;
+
+        if (inventoryType == INVTYPE_WEAPON ||
+            inventoryType == INVTYPE_2HWEAPON ||
+            inventoryType == INVTYPE_WEAPONMAINHAND ||
+            inventoryType == INVTYPE_WEAPONOFFHAND ||
+            inventoryType == INVTYPE_RANGED ||
+            inventoryType == INVTYPE_THROWN ||
+            inventoryType == INVTYPE_RANGEDRIGHT)
+            baseFactor = basePrice->WeaponFactor;
+        else
+            baseFactor = basePrice->ArmorFactor;
+
+        if (inventoryType == INVTYPE_ROBE)
+            inventoryType = INVTYPE_CHEST;
+
+        float typeFactor = 0.0f;
+        uint8 wepType = -1;
+
+        switch (inventoryType)
+        {
+            case INVTYPE_HEAD:
+            case INVTYPE_SHOULDERS:
+            case INVTYPE_CHEST:
+            case INVTYPE_WAIST:
+            case INVTYPE_LEGS:
+            case INVTYPE_FEET:
+            case INVTYPE_WRISTS:
+            case INVTYPE_HANDS:
+            case INVTYPE_CLOAK:
+            {
+                ImportPriceArmorEntry const* armorPrice = sImportPriceArmorStore.LookupEntry(inventoryType);
+                if (!armorPrice)
+                    return 0;
+
+                switch (SubClass)
+                {
+                    case ITEM_SUBCLASS_ARMOR_MISC:
+                    case ITEM_SUBCLASS_ARMOR_CLOTH:
+                    {
+                        typeFactor = armorPrice->ClothFactor;
+                        break;
+                    }
+                    case ITEM_SUBCLASS_ARMOR_LEATHER:
+                    {
+                        typeFactor = armorPrice->ClothFactor;
+                        break;
+                    }
+                    case ITEM_SUBCLASS_ARMOR_MAIL:
+                    {
+                        typeFactor = armorPrice->ClothFactor;
+                        break;
+                    }
+                    case ITEM_SUBCLASS_ARMOR_PLATE:
+                    {
+                        typeFactor = armorPrice->ClothFactor;
+                        break;
+                    }
+                    default:
+                    {
+                        return 0;
+                    }
+                }
+
+                break;
+            }
+            case INVTYPE_SHIELD:
+            {
+                ImportPriceShieldEntry const* shieldPrice = sImportPriceShieldStore.LookupEntry(1); // it only has two rows, it's unclear which is the one used
+                if (!shieldPrice)
+                    return 0;
+
+                typeFactor = shieldPrice->Factor;
+                break;
+            }
+            case INVTYPE_WEAPONMAINHAND:
+                wepType = 0;             // unk enum, fall back
+            case INVTYPE_WEAPONOFFHAND:
+                wepType = 1;             // unk enum, fall back
+            case INVTYPE_WEAPON:
+                wepType = 2;             // unk enum, fall back
+            case INVTYPE_2HWEAPON:
+                wepType = 3;             // unk enum, fall back
+            case INVTYPE_RANGED:
+            case INVTYPE_RANGEDRIGHT:
+            case INVTYPE_RELIC:
+            {
+                wepType = 4;             // unk enum
+
+                ImportPriceWeaponEntry const* weaponPrice = sImportPriceWeaponStore.LookupEntry(wepType + 1);
+                if (!weaponPrice)
+                    return 0;
+
+                typeFactor = weaponPrice->Factor;
+                break;
+            }
+            default:
+                return BuyPrice;
+        }
+
+        normalSellPrice = false;
+        return (uint32)(qualityFactor * Unknown * Unknown1 * typeFactor * baseFactor);
+    }
 }
 
 int32 Item::GetReforgableStat(ItemModType statType) const

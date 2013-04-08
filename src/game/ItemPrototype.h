@@ -684,6 +684,9 @@ struct ItemPrototype
                SubClass == ITEM_SUBCLASS_WEAPON_GUN ||
                SubClass == ITEM_SUBCLASS_WEAPON_CROSSBOW;
     }
+
+    uint32 GetSpecialPrice(uint32 minimumPrice = 10000) const;
+    uint32 GetSellPrice(bool& normalSellPrice) const;
 };
 
 // GCC have alternative #pragma pack() syntax and old gcc version not support pack(pop), also any gcc version not support it at some platform

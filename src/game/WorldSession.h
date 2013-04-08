@@ -295,7 +295,7 @@ class MANGOS_DLL_SPEC WorldSession
         void SendBattlegGroundList(ObjectGuid guid, BattleGroundTypeId bgTypeId);
 
         void SendTradeStatus(TradeStatus status);
-        void SendUpdateTrade(bool trader_state = true);
+        void SendUpdateTrade(bool trader_state = true, bool spellOnly = false);
         void SendCancelTrade();
 
         void SendPetitionQueryOpcode(ObjectGuid petitionguid);

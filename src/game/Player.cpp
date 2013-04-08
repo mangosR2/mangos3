@@ -351,8 +351,8 @@ void TradeData::SetSpell(uint32 spell_id, Item* castItem /*= NULL*/)
     SetAccepted(false);
     GetTraderData()->SetAccepted(false);
 
-    Update(true);                                           // send spell info to item owner
-    Update(false);                                          // send spell info to caster self
+    Update(true, true);                                     // send spell info to item owner
+    Update(false, true);                                    // send spell info to caster self
 }
 
 void TradeData::SetMoney(uint64 money)
@@ -368,12 +368,12 @@ void TradeData::SetMoney(uint64 money)
     Update();
 }
 
-void TradeData::Update(bool for_trader /*= true*/)
+void TradeData::Update(bool for_trader /*= true*/, bool spellOnly /*=false*/)
 {
     if (for_trader)
-        m_trader->GetSession()->SendUpdateTrade(true);      // player state for trader
+        m_trader->GetSession()->SendUpdateTrade(true, spellOnly);      // player state for trader
     else
-        m_player->GetSession()->SendUpdateTrade(false);     // player state for player
+        m_player->GetSession()->SendUpdateTrade(false, spellOnly);     // player state for player
 }
 
 void TradeData::SetAccepted(bool state, bool crosssend /*= false*/)

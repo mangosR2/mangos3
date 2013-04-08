@@ -1333,20 +1333,20 @@ void LoadLootTemplates_Disenchant()
     LootTemplates_Disenchant.LoadAndCollectLootIds(ids_set);
 
     // remove real entries and check existence loot
-    for (uint32 i = 1; i < sItemStorage.GetMaxEntry(); ++i)
+    for (uint32 i = 0; i < sItemDisenchantLootStore.GetNumRows(); ++i)
     {
-        if (ItemPrototype const* proto = sItemStorage.LookupEntry<ItemPrototype>(i))
-        {
-            if (uint32 lootid = proto->DisenchantID)
-            {
-                if (ids_set.find(lootid) == ids_set.end())
-                    LootTemplates_Disenchant.ReportNotExistedId(lootid);
-                else
-                    ids_setUsed.insert(lootid);
-            }
-        }
+        ItemDisenchantLootEntry const* disenchant = sItemDisenchantLootStore.LookupEntry(i);
+        if (!disenchant)
+            continue;
+
+        uint32 lootid = disenchant->Id;
+        if (ids_set.find(lootid) == ids_set.end())
+            LootTemplates_Disenchant.ReportNotExistedId(lootid);
+        else
+            ids_setUsed.insert(lootid);
     }
-    for (LootIdSet::const_iterator itr = ids_setUsed.begin(); itr != ids_setUsed.end(); ++itr)
+
+    for(LootIdSet::const_iterator itr = ids_setUsed.begin(); itr != ids_setUsed.end(); ++itr)
         ids_set.erase(*itr);
     // output error for any still listed (not referenced from appropriate table) ids
     LootTemplates_Disenchant.ReportUnusedIds(ids_set);

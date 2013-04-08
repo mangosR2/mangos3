@@ -1792,6 +1792,48 @@ struct SQLItemLoader : public SQLStorageLoaderBase<SQLItemLoader, SQLStorage>
     }
 };
 
+void FillDisenchantFields(ItemPrototype const* proto)
+{
+    const_cast<ItemPrototype*>(proto)->DisenchantID = 0;
+    const_cast<ItemPrototype*>(proto)->RequiredDisenchantSkill = -1;
+
+    if ((proto->Flags & (ITEM_FLAG_CONJURED | ITEM_FLAG_UNK15)) ||
+        proto->Bonding == BIND_QUEST_ITEM || proto->Area || proto->Map ||
+        proto->Stackable > 1 ||
+        proto->Quality < ITEM_QUALITY_UNCOMMON || proto->Quality > ITEM_QUALITY_EPIC ||
+        !(proto->Class == ITEM_CLASS_ARMOR || proto->Class == ITEM_CLASS_WEAPON) ||
+        !(proto->GetSpecialPrice() || sItemCurrencyCostStore.LookupEntry(proto->ItemId)))
+        return;
+
+    for (uint32 i = 0; i < sItemDisenchantLootStore.GetNumRows(); ++i)
+    {
+        ItemDisenchantLootEntry const* disenchant = sItemDisenchantLootStore.LookupEntry(i);
+        if (!disenchant)
+            continue;
+
+        if (disenchant->ItemClass == proto->Class &&
+            disenchant->ItemQuality == proto->Quality &&
+            disenchant->MinItemLevel <= proto->ItemLevel &&
+            disenchant->MaxItemLevel >= proto->ItemLevel)
+        {
+            if (disenchant->Id == 60 || disenchant->Id == 61)   // epic item disenchant ilvl range 66-99 (classic)
+            {
+                if (proto->RequiredLevel > 60 || proto->RequiredSkillRank > 300)
+                    continue;                                   // skip to epic item disenchant ilvl range 90-199 (TBC)
+            }
+            else if (disenchant->Id == 66 || disenchant->Id == 67)  // epic item disenchant ilvl range 90-199 (TBC)
+            {
+                if (proto->RequiredLevel <= 60 || proto->RequiredSkill && proto->RequiredSkillRank <= 300)
+                    continue;
+            }
+
+            const_cast<ItemPrototype*>(proto)->DisenchantID = disenchant->Id;
+            const_cast<ItemPrototype*>(proto)->RequiredDisenchantSkill = disenchant->RequiredDisenchantSkill;
+            return;
+        }
+    }
+}
+
 void ObjectMgr::LoadItemPrototypes()
 {
     SQLItemLoader loader;
@@ -2295,7 +2337,10 @@ void ObjectMgr::LoadItemPrototypes()
                 const_cast<ItemPrototype*>(proto)->RequiredDisenchantSkill = -1;
             }
         }
-/*
+
+        FillDisenchantFields(proto);
+
+        /*
         if (proto->DisenchantID)
         {
             if (proto->Quality > ITEM_QUALITY_EPIC || proto->Quality < ITEM_QUALITY_UNCOMMON)
@@ -2320,7 +2365,8 @@ void ObjectMgr::LoadItemPrototypes()
             if (proto->RequiredDisenchantSkill >= 0)
                 ERROR_DB_STRICT_LOG("Item (Entry: %u) marked as disenchantable by RequiredDisenchantSkill, but not have disenchanting loot id.", i);
         }
-*/
+        */
+
         if (proto->FoodType >= MAX_PET_DIET)
         {
             sLog.outErrorDb("Item (Entry: %u) has wrong FoodType value (%u)", i, proto->FoodType);

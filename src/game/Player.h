@@ -1120,7 +1120,7 @@ class TradeData
 
     private:                                                // internal functions
 
-        void Update(bool for_trader = true);
+        void Update(bool for_trader = true, bool spellOnly =false);
 
     private:                                                // fields
 

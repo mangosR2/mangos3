@@ -172,6 +172,11 @@ extern DBCStorage <GtOCTBaseHPByClassEntry>      sGtOCTBaseHPByClassStore;
 extern DBCStorage <GtOCTBaseMPByClassEntry>      sGtOCTBaseMPByClassStore;
 extern DBCStorage <GuildPerkSpellsEntry>         sGuildPerkSpellsStore;
 extern DBCStorage <HolidaysEntry>                sHolidaysStore;
+extern DBCStorage <ImportPriceArmorEntry>        sImportPriceArmorStore;
+extern DBCStorage <ImportPriceQualityEntry>      sImportPriceQualityStore;
+extern DBCStorage <ImportPriceShieldEntry>       sImportPriceShieldStore;
+extern DBCStorage <ImportPriceWeaponEntry>       sImportPriceWeaponStore;
+extern DBCStorage <ItemPriceBaseEntry>           sItemPriceBaseStore;
 extern DBCStorage <ItemArmorQualityEntry>        sItemArmorQualityStore;
 extern DBCStorage <ItemArmorShieldEntry>         sItemArmorShieldStore;
 extern DBCStorage <ItemArmorTotalEntry>          sItemArmorTotalStore;
@@ -185,8 +190,8 @@ extern DBCStorage <ItemDamageEntry>              sItemDamageThrownStore;
 extern DBCStorage <ItemDamageEntry>              sItemDamageTwoHandStore;
 extern DBCStorage <ItemDamageEntry>              sItemDamageTwoHandCasterStore;
 extern DBCStorage <ItemDamageEntry>              sItemDamageWandStore;
-// extern DBCStorage <ItemExtendedCostEntry>        sItemExtendedCostStore;
-// extern DBCStorage <ItemDisplayInfoEntry>      sItemDisplayInfoStore; -- not used currently
+extern DBCStorage <ItemDisenchantLootEntry>      sItemDisenchantLootStore;
+//extern DBCStorage <ItemDisplayInfoEntry>      sItemDisplayInfoStore; -- not used currently
 extern DBCStorage <ItemLimitCategoryEntry>       sItemLimitCategoryStore;
 extern DBCStorage <ItemRandomPropertiesEntry>    sItemRandomPropertiesStore;
 extern DBCStorage <ItemRandomSuffixEntry>        sItemRandomSuffixStore;
