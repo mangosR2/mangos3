@@ -186,7 +186,7 @@ void TemporarySummon::Update( uint32 update_diff,  uint32 diff )
             }
             // NO break here!
         }
-        case TEMPSUMMON_TIMED_OR_DEAD_DESPAWN:
+        case TEMPSUMMON_TIMED_OR_CORPSE_DESPAWN:
         {
             // if m_deathState is DEAD, CORPSE was skipped
             if (IsDespawned())

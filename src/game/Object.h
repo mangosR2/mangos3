@@ -41,20 +41,16 @@
 
 enum TempSummonType
 {
-    TEMPSUMMON_TIMED_OR_DEAD_DESPAWN       = 1,             // despawns after a specified time OR when the creature disappears
-    TEMPSUMMON_TIMED_OR_CORPSE_DESPAWN     = 2,             // despawns after a specified time OR when the creature dies
-    TEMPSUMMON_TIMED_DESPAWN               = 3,             // despawns after a specified time
-    TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT = 4,             // despawns after a specified time after the creature is out of combat
-    TEMPSUMMON_CORPSE_DESPAWN              = 5,             // despawns instantly after death
-    TEMPSUMMON_CORPSE_TIMED_DESPAWN        = 6,             // despawns after a specified time after death
-    TEMPSUMMON_DEAD_DESPAWN                = 7,             // despawns when the creature disappears
-    TEMPSUMMON_MANUAL_DESPAWN              = 8,             // despawns when UnSummon() is called
-    TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT_OR_DEAD_DESPAWN = 9, // despawns after a specified time after the creature is out of combat OR when the creature disappears
-
-    // New types, currently same mechanics as old types
-    TEMPSUMMON_TIMED_OOC_DESPAWN           = TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT,             // despawns after a specified time after the creature is out of combat
-    TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN   = TEMPSUMMON_TIMED_OR_DEAD_DESPAWN,             // despawns after a specified time (OOC) OR when the creature disappears
-    TEMPSUMMON_TIMED_OOC_OR_CORPSE_DESPAWN = TEMPSUMMON_TIMED_OR_CORPSE_DESPAWN,             // despawns after a specified time (OOC) OR when the creature dies
+    TEMPSUMMON_MANUAL_DESPAWN              = 0,             // despawns when UnSummon() is called
+    TEMPSUMMON_DEAD_DESPAWN                = 1,             // despawns when the creature disappears
+    TEMPSUMMON_CORPSE_DESPAWN              = 2,             // despawns instantly after death
+    TEMPSUMMON_CORPSE_TIMED_DESPAWN        = 3,             // despawns after a specified time after death (or when the creature disappears)
+    TEMPSUMMON_TIMED_DESPAWN               = 4,             // despawns after a specified time
+    TEMPSUMMON_TIMED_OOC_DESPAWN           = 5,             // despawns after a specified time after the creature is out of combat
+    TEMPSUMMON_TIMED_OR_DEAD_DESPAWN       = 6,             // despawns after a specified time OR when the creature disappears
+    TEMPSUMMON_TIMED_OR_CORPSE_DESPAWN     = 7,             // despawns after a specified time OR when the creature dies
+    TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN   = 8,             // despawns after a specified time (OOC) OR when the creature disappears
+    TEMPSUMMON_TIMED_OOC_OR_CORPSE_DESPAWN = 9,             // despawns after a specified time (OOC) OR when the creature dies
 
     // Place for future despawn types
     TEMPSUMMON_LOST_OWNER_DESPAWN                           = 20,            // despawns when creature lost charmer/owner
