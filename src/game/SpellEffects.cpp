@@ -14082,7 +14082,11 @@ void Spell::EffectLeapBack(SpellEffectEntry const* effect)
     if (unitTarget->IsTaxiFlying())
         return;
 
-    m_caster->KnockBackFrom(unitTarget, float(effect->EffectMiscValue) / 10, float(damage) / 10);
+    // Rocket Jump (Racial)
+    if (m_spellInfo->Id == 69070)
+        m_caster->KnockBackWithAngle(m_caster->GetOrientation(), float(effect->EffectMiscValue) / 10, float(damage) / 10);
+    else
+        m_caster->KnockBackFrom(unitTarget, float(effect->EffectMiscValue) / 10, float(damage) / 10);
 }
 
 void Spell::EffectReputation(SpellEffectEntry const* effect)

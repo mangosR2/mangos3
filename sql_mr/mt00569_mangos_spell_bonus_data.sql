@@ -86,3 +86,7 @@ REPLACE INTO `spell_bonus_data` (`entry`, `direct_bonus`, `dot_bonus`, `ap_bonus
 (81170, 0, 0, 0.071, 0, 'Druid - Ravage!'),
 (81269, 0, 0, 0, 0, 'Druid - Efflorescence'),
 (93402, 0.18, 0.18, 0, 0, 'Druid - Sunfire');
+
+-- Goblin
+REPLACE INTO `spell_bonus_data` (`entry`, `direct_bonus`, `dot_bonus`, `ap_bonus`, `ap_dot_bonus`, `comments`) VALUES
+(69041, 0.429, 0, 0.25, 0, 'Rocket Barrage (Racial)');
