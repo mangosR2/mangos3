@@ -595,6 +595,41 @@ void Loot::FillNotNormalLootFor(Player* pl)
     qmapitr = m_playerNonQuestNonFFANonCurrencyConditionalItems.find(plguid);
     if (qmapitr == m_playerNonQuestNonFFANonCurrencyConditionalItems.end())
         FillNonQuestNonFFANonCurrencyConditionalLoot(pl);
+
+    // Process currency items
+    uint32 max_slot = GetMaxSlotInLootFor(pl);
+    LootItem* item = NULL;
+    uint32 questItemsCount = 0;
+    QuestItemMap::const_iterator itr = m_playerQuestItems.find(pl->GetGUIDLow());
+    if (itr != m_playerQuestItems.end())
+        questItemsCount = itr->second.size();
+
+    for (uint32 i = 0; i < max_slot; ++i)
+    {
+        if (i < questItemsCount)
+        {
+            QuestItem const* qItem = &itr->second.at(i);
+            item = &m_questItems[qItem->index];
+        }
+        else if (i - questItemsCount < items.size())
+            item = &items[i - questItemsCount];
+
+        if (!item->is_looted && (item->freeforall || item->currency) && item->AllowedForPlayer(pl, m_lootTarget))
+        {
+            if (item->type == LOOT_ITEM_TYPE_ITEM)
+            {
+                if (ItemPrototype const* proto = sObjectMgr.GetItemPrototype(item->itemid))
+                    if (proto->BagFamily & BAG_FAMILY_MASK_CURRENCY_TOKENS)
+                        pl->StoreLootItem(i, this);
+            }
+            else if (item->type == LOOT_ITEM_TYPE_CURRENCY)
+            {
+                CurrencyTypesEntry const* currencyEntry = sCurrencyTypesStore.LookupEntry(item->itemid);
+                if (currencyEntry && currencyEntry->Category != CURRENCY_CATEGORY_ARCHAEOLOGY)
+                    pl->StoreLootItem(i, this);
+            }
+        }
+    }
 }
 
 QuestItemList* Loot::FillCurrencyLoot(Player* player)

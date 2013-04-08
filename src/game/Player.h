@@ -2637,6 +2637,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         MapReference &GetMapRef() { return m_mapRef; }
 
         bool isAllowedToLoot(Creature* creature);
+        void StoreLootItem(uint8 lootSlot, Loot* loot, Item* pItem = NULL);
 
         DeclinedName const* GetDeclinedNames() const { return m_declinedname; }
 
