@@ -8225,6 +8225,10 @@ void Spell::DoSummonWild(SpellEffectEntry const* effect, uint32 forceFaction, bo
 
             SendEffectLogExecute(effect, summon->GetObjectGuid());
 
+            // Pack Hobgoblin (Racial)
+            if (m_spellInfo->Id == 69046)
+                summon->GetMotionMaster()->MoveFollow(m_caster, PET_FOLLOW_DIST, PET_FOLLOW_ANGLE);
+
             DEBUG_LOG("DoSummonWild: summoned npc %u from spell %u at %f %f %f map %u summonType %u duration %i",
                 creature_entry, m_spellInfo->Id, p.x, p.y, p.z, m_caster->GetMapId(), summonType, m_duration);
         }
