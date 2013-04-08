@@ -25,6 +25,7 @@
 #include "Player.h"
 #include "Vehicle.h"
 #include "SpellAuras.h"
+#include "SpellMgr.h"
 #include "MapManager.h"
 #include "Transports.h"
 #include "BattleGround/BattleGround.h"
@@ -362,6 +363,9 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
     WorldPacket data(SMSG_PLAYER_MOVE, recv_data.size());
     data << movementInfo;
     mover->SendMessageToSetExcept(&data, _player);
+
+    if (opcode ==  CMSG_MOVE_JUMP && plMover)
+        plMover->ProcDamageAndSpell(plMover, PROC_FLAG_NONE, PROC_FLAG_ON_JUMP, PROC_EX_NONE, 0);
 }
 
 void WorldSession::HandleForceSpeedChangeAckOpcodes(WorldPacket &recv_data)
