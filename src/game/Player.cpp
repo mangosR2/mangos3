@@ -21685,6 +21685,10 @@ float Player::GetReputationPriceDiscount(Creature const* pCreature) const
         return 1.0f;
 
     ReputationRank rank = GetReputationRank(vendor_faction->faction);
+    // Best Deals Anywhere (Racial Passive)
+    if (HasAura(69044))
+        rank = REP_EXALTED;
+
     if (rank <= REP_NEUTRAL)
         return 1.0f;
 
