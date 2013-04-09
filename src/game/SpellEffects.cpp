@@ -9920,7 +9920,7 @@ void Spell::EffectScriptEffect(SpellEffectEntry const* effect)
                     if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
                         return;
 
-                    unitTarget->HandleEmoteCommand(EMOTE_STATE_DANCE);
+                    unitTarget->HandleEmote(EMOTE_STATE_DANCE);
                     return;
                 }
                 case 20589:                                 // Escape artist
@@ -11220,6 +11220,14 @@ void Spell::EffectScriptEffect(SpellEffectEntry const* effect)
                         return;
 
                     unitTarget->CastSpell(m_caster, effect->CalculateSimpleValue(), true);
+                    return;
+                }
+                case 49899:                                 // Activate Robotic Arms
+                {
+                    if (!unitTarget)
+                        return;
+
+                    unitTarget->HandleEmote(EMOTE_ONESHOT_CUSTOMSPELL05);
                     return;
                 }
                 case 50217:                                 // The Cleansing: Script Effect Player Cast Mirror Image

@@ -1077,6 +1077,13 @@ uint32 Unit::DealDamage(DamageInfo* damageInfo)
     uint32 health = pVictim->GetHealth();
     DEBUG_FILTER_LOG(LOG_FILTER_DAMAGE,"Unit::DealDamage DealDamageStart, %s strike %s,  value %u, health %u",GetObjectGuid().GetString().c_str(), pVictim->GetObjectGuid().GetString().c_str(), damageInfo->damage, health);
 
+    // clear unit emote state
+    if (GetTypeId() == TYPEID_PLAYER)
+        HandleEmote(EMOTE_ONESHOT_NONE);
+
+    if (pVictim != this && pVictim->GetTypeId() == TYPEID_PLAYER)
+        pVictim->HandleEmote(EMOTE_ONESHOT_NONE);
+
     if (!damageInfo->HasFlag(DAMAGE_SHARED))
     {
         std::vector<DamageInfo> linkedDamageList;
@@ -2498,9 +2505,9 @@ void Unit::DealMeleeDamage(DamageInfo* damageInfo, bool durabilityLoss)
 
     // Hmmmm dont like this emotes client must by self do all animations
     if (damageInfo->HitInfo & HITINFO_CRITICALHIT)
-        pVictim->HandleEmoteCommand(EMOTE_ONESHOT_WOUNDCRITICAL);
+        pVictim->HandleEmote(EMOTE_ONESHOT_WOUNDCRITICAL);
     if (damageInfo->blocked && damageInfo->TargetState != VICTIMSTATE_BLOCKS)
-        pVictim->HandleEmoteCommand(EMOTE_ONESHOT_PARRYSHIELD);
+        pVictim->HandleEmote(EMOTE_ONESHOT_PARRYSHIELD);
 
     if (damageInfo->TargetState == VICTIMSTATE_PARRY)
     {
@@ -2593,7 +2600,7 @@ void Unit::HandleEmoteState(uint32 emote_id)
 void Unit::HandleEmote(uint32 emote_id)
 {
     if (!emote_id)
-        HandleEmoteState(0);
+        HandleEmoteState(EMOTE_ONESHOT_NONE);
     else if (EmotesEntry const* emoteEntry = sEmotesStore.LookupEntry(emote_id))
     {
         if (emoteEntry->EmoteType)                          // 1,2 states, 0 command
@@ -10648,6 +10655,13 @@ void Unit::SetInCombatState(bool PvP, Unit* enemy)
                 InterruptSpell(CurrentSpellTypes(i),false);
 
     RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_ENTER_COMBAT);
+
+    // clear unit emote state
+    if (GetTypeId() == TYPEID_PLAYER)
+        HandleEmote(EMOTE_ONESHOT_NONE);
+
+    if (enemy && enemy->GetTypeId() == TYPEID_PLAYER)
+        enemy->HandleEmote(EMOTE_ONESHOT_NONE);
 
     if (getRace() == RACE_WORGEN && !IsInWorgenForm(true) && HasWorgenForm())
         CastSpell(this, 97709, true);   // cast Altered Form

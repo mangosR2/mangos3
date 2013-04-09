@@ -1858,6 +1858,9 @@ bool Player::TeleportTo(WorldLocation const& loc, uint32 options)
         return false;
     }
 
+    // clear unit emote state
+    HandleEmote(EMOTE_ONESHOT_NONE);
+
     // don't let enter battlegrounds without assigned battleground id (for example through areatrigger)...
     // don't let gm level > 1 either
     if (!InBattleGround() && mEntry->IsBattleGroundOrArena())
@@ -4433,6 +4436,7 @@ void Player::InitVisibleBits()
     updateVisualBits.SetBit(UNIT_CHANNEL_SPELL);
     updateVisualBits.SetBit(UNIT_MOD_CAST_SPEED);
     updateVisualBits.SetBit(UNIT_NPC_FLAGS);
+    updateVisualBits.SetBit(UNIT_NPC_EMOTESTATE);
     updateVisualBits.SetBit(UNIT_FIELD_BASE_MANA);
     updateVisualBits.SetBit(UNIT_FIELD_BYTES_2);
     updateVisualBits.SetBit(UNIT_FIELD_HOVERHEIGHT);
@@ -7591,7 +7595,10 @@ void Player::DuelComplete(DuelCompleteType type)
     {
         UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_LOSE_DUEL, 1);
         if (duel->opponent)
+        {
             duel->opponent->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_WIN_DUEL, 1);
+            duel->opponent->HandleEmote(EMOTE_ONESHOT_CHEER);
+        }
     }
 
     //Remove Duel Flag object

@@ -717,7 +717,8 @@ void WorldSession::HandleEmoteOpcode(WorldPacket& recv_data)
     uint32 emote;
     recv_data >> emote;
     DEBUG_LOG("CMSG_EMOTE %u", emote);
-    GetPlayer()->HandleEmoteCommand(emote);
+
+    GetPlayer()->HandleEmote(emote);
 }
 
 namespace MaNGOS
@@ -774,29 +775,19 @@ void WorldSession::HandleTextEmoteOpcode(WorldPacket& recv_data)
     recv_data >> emoteNum;
     recv_data >> guid;
 
-    EmotesTextEntry const* em = sEmotesTextStore.LookupEntry(text_emote);
-    if (!em)
+    EmotesTextEntry const* textEmote = sEmotesTextStore.LookupEntry(text_emote);
+    if (!textEmote)
         return;
 
-    uint32 emote_id = em->textid;
-
-    switch (emote_id)
+    EmotesEntry const* emote = sEmotesStore.LookupEntry(textEmote->textid);
+    if (emote && !emote->UnitStandState)
     {
-        case EMOTE_STATE_SLEEP:
-        case EMOTE_STATE_SIT:
-        case EMOTE_STATE_KNEEL:
-        case EMOTE_ONESHOT_NONE:
-            break;
-        default:
-        {
-            // in feign death state allowed only text emotes.
-            if (GetPlayer()->hasUnitState(UNIT_STAT_DIED))
-                break;
-
-            GetPlayer()->HandleEmoteCommand(emote_id);
-            break;
-        }
+        // in feign death state allowed only text emotes.
+        if (!GetPlayer()->hasUnitState(UNIT_STAT_DIED))
+            GetPlayer()->HandleEmote(emote->Id);
     }
+    else
+        _player->HandleEmote(EMOTE_ONESHOT_NONE);
 
     Unit* unit = GetPlayer()->GetMap()->GetUnit(guid);
 
