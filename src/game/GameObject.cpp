@@ -97,7 +97,7 @@ void GameObject::AddToWorld()
 void GameObject::RemoveFromWorld(bool remove)
 {
     // store the slider value for non instance, non locked capture points
-    if (!GetMap()->IsBattleGroundOrArena())
+    if (GetMap() && !GetMap()->IsBattleGroundOrArena())
     {
         if (GetGOInfo()->type == GAMEOBJECT_TYPE_CAPTURE_POINT && m_lootState == GO_ACTIVATED)
             sOutdoorPvPMgr.SetCapturePointSlider(GetEntry(), m_captureSlider);
@@ -120,7 +120,7 @@ void GameObject::RemoveFromWorld(bool remove)
         EnableCollision(false);
     }
 
-    if (m_model)
+    if (m_model && GetMap())
         if (GetMap()->ContainsGameObjectModel(*m_model))
             GetMap()->RemoveGameObjectModel(*m_model);
 
