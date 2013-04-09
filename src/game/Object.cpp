@@ -208,6 +208,7 @@ void Object::BuildCreateUpdateBlockForPlayer(UpdateData *data, Player *target) c
             updatetype = UPDATETYPE_CREATE_OBJECT2;
             break;
         case HIGHGUID_UNIT:
+        case HIGHGUID_VEHICLE:
         {
             Creature* creature = (Creature*)this;
             if (creature->IsTemporarySummon() && ((TemporarySummon*)this)->GetSummonerGuid().IsPlayer())
