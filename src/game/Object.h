@@ -58,6 +58,10 @@ enum TempSummonType
     TEMPSUMMON_TIMED_OR_DEAD_OR_LOST_OWNER_DESPAWN          = 22,            // despawns when creature lost charmer/owner, or by time
     TEMPSUMMON_TIMED_OR_DEAD_OR_LOST_UNIQUENESS_DESPAWN     = 23,            // despawns when owner spawn creature this type in visible range, or by rules of TEMPSUMMON_TIMED_OR_DEAD_DESPAWN
     TEMPSUMMON_DEAD_OR_LOST_UNIQUENESS_DESPAWN              = 24,            // despawns when owner spawn creature this type in visible range, or by rules of TEMPSUMMON_DEAD_DESPAWN
+
+    // Wrappers for old scripts
+    TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT = TEMPSUMMON_TIMED_OOC_DESPAWN,
+    TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT_OR_DEAD_DESPAWN = TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN,
 };
 
 class WorldPacket;

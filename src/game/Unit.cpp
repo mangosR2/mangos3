@@ -13359,7 +13359,7 @@ void Unit::EnterVehicle(Unit* vehicleBase, int8 seatId)
         {
             for (SpellClickInfoMap::const_iterator itr = clickPair.first; itr != clickPair.second; ++itr)
             {
-                if (itr->second.IsFitToRequirements((Player*)this))
+                if (itr->second.IsFitToRequirements((Player*)this, (Creature*)vehicleBase))
                 {
 
                     spellInfo = sSpellStore.LookupEntry(itr->second.spellId);
