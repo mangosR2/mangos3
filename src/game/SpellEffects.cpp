@@ -8513,7 +8513,7 @@ void Spell::DoSummonVehicle(SpellEffectEntry const* effect, uint32 forceFaction)
         effect->CalculateSimpleValue() :
         SPELL_RIDE_VEHICLE_HARDCODED);
 
-    if (!m_mountspell)
+    if (!m_mountspell || !IsSpellHaveAura(m_mountspell, SPELL_AURA_CONTROL_VEHICLE))
         m_mountspell = sSpellStore.LookupEntry(46598);
     // Used BasePoint mount spell, if not present - hardcoded (by Blzz).
 
