@@ -3048,6 +3048,14 @@ void Player::GiveLevel(uint32 level)
         WorldPacket packet = WorldPacket();
         GetSession()->HandleQuestgiverStatusMultipleQuery(packet);
     }
+
+    // learn Running Wild
+    if (level >= 20 && getRace() == RACE_WORGEN && !HasSpell(94098))
+        learnSpell(94098, false);
+
+    // learn Sinister Strike Enabler
+    if (level >= 3 && getClass() == CLASS_ROGUE && !HasSpell(79327))
+        learnSpell(79327, false);
 }
 
 void Player::UpdateFreeTalentPoints(bool resetIfNeed)
