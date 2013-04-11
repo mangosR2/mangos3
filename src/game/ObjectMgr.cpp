@@ -11202,9 +11202,9 @@ void ObjectMgr::LoadSpellPhaseInfo()
             continue;
         }
 
-        if (!IsSpellHaveAura(spell, SPELL_AURA_PHASE))
+        if (!IsSpellHaveAura(spell, SPELL_AURA_PHASE) && !IsSpellHaveAura(spell, SPELL_AURA_PHASE_2))
         {
-            sLog.outError("Spell %u defined in `spell_phase` does not have aura effect type SPELL_AURA_PHASE, useless value.", spellPhaseInfo->spellId);
+            sLog.outError("Spell %u defined in `spell_phase` does not have aura effect type SPELL_AURA_PHASE or SPELL_AURA_PHASE_2, useless value.", spellPhaseInfo->spellId);
             delete spellPhaseInfo;
             continue;
         }

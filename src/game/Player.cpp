@@ -2736,15 +2736,7 @@ void Player::SetGameMaster(bool on)
         RemoveFlag(PLAYER_FLAGS, PLAYER_FLAGS_GM);
 
         // restore phase
-        AuraList const& phases = GetAurasByType(SPELL_AURA_PHASE);
-        AuraList const& phases2 = GetAurasByType(SPELL_AURA_PHASE_2);
-
-        if (!phases.empty())
-            SetPhaseMask(phases.front()->GetMiscValue(), false);
-        else if (!phases2.empty())
-            SetPhaseMask(phases2.front()->GetMiscValue(), false);
-        else
-            SetPhaseMask(PHASEMASK_NORMAL, false);
+        SetPhaseMask(phaseMgr->GetCurrentPhasemask(), false);
 
         CallForAllControlledUnits(SetGameMasterOffHelper(getFaction()), CONTROLLED_PET | CONTROLLED_TOTEMS | CONTROLLED_GUARDIANS | CONTROLLED_CHARM);
 

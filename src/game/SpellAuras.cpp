@@ -382,7 +382,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleUnused,                                    //323 0 spells in 4.3.4
     &Aura::HandleNULL,                                      //324 2 spells in 4.3.4 test spells
     &Aura::HandleUnused,                                    //325 0 spells in 4.3.4
-    &Aura::HandlePhase,                                     //326 SPELL_AURA_PHASE_2 24 spells in 4.3.4
+    &Aura::HandlePhase,                                     //326 SPELL_AURA_PHASE_2 24 spells in 4.3.4 new phase auras
     &Aura::HandleUnused,                                    //327 0 spells in 4.3.4
     &Aura::HandleNoImmediateEffect,                         //328 SPELL_AURA_PROC_ON_TARGET_AMOUNT 2 spells in 4.3.4 Eclipse Mastery Driver Passive
     &Aura::HandleNULL,                                      //329 SPELL_AURA_MOD_RUNIC_POWER_GAIN 3 spells in 4.3.4
@@ -11394,7 +11394,7 @@ void Aura::HandlePhase(bool apply, bool Real)
         if (apply)
         {
             phaseMask = target->GetPhaseMask();
-            if (target->GetAurasByType(SPELL_AURA_PHASE).size() == 1)
+            if (target->GetAurasByType(SPELL_AURA_PHASE).size() == 1 && target->GetAurasByType(SPELL_AURA_PHASE_2).size() == 1)
                 phaseMask &= ~PHASEMASK_NORMAL;
 
             phaseMask |= GetMiscValue();
@@ -11403,6 +11403,10 @@ void Aura::HandlePhase(bool apply, bool Real)
         {
             Unit::AuraList const& phases = target->GetAurasByType(SPELL_AURA_PHASE);
             for (Unit::AuraList::const_iterator itr = phases.begin(); itr != phases.end(); ++itr)
+                phaseMask |= (*itr)->GetMiscValue();
+
+            Unit::AuraList const& phases2 = target->GetAurasByType(SPELL_AURA_PHASE_2);
+            for (Unit::AuraList::const_iterator itr = phases2.begin(); itr != phases2.end(); ++itr)
                 phaseMask |= (*itr)->GetMiscValue();
         }
 
