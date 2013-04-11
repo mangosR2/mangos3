@@ -2579,6 +2579,7 @@ uint32 SpellMgr::GetSpellMaxTargetsWithCustom(SpellEntry const* spellInfo, Unit 
                 case 33711:                                 // Murmur's Touch
                 case 38794:                                 // Murmur's Touch (h)
                 case 44869:                                 // Spectral Blast
+                case 45785:                                 // Sinister Reflection Clone (SWP, Kil'jaeden)
                 case 45892:                                 // Sinister Reflection (SWP, Kil'jaeden)
                 case 45976:                                 // Open Portal
                 case 46293:                                 // Corrosive Poison
