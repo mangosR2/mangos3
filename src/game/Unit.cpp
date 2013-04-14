@@ -11753,6 +11753,7 @@ int32 Unit::CalculateSpellDamage(Unit const* target, SpellEntry const* spellProt
 
     if (!gtScalingEntry && spellProto->GetAttributes() & SPELL_ATTR_LEVEL_DAMAGE_CALCULATION && spellLevel &&
             spellEffect->Effect != SPELL_EFFECT_WEAPON_PERCENT_DAMAGE &&
+            spellEffect->Effect != SPELL_EFFECT_WMO_DAMAGE &&
             spellEffect->Effect != SPELL_EFFECT_KNOCK_BACK &&
             (spellEffect->Effect != SPELL_EFFECT_APPLY_AURA || spellEffect->EffectApplyAuraName != SPELL_AURA_MOD_DECREASE_SPEED))
         value = int32(value * 0.25f * exp(level * (70 - spellLevel) / 1000.0f));
