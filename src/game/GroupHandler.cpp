@@ -1121,3 +1121,23 @@ void WorldSession::HandleClearRaidMarkerOpcode(WorldPacket& recv_data)
     if (group->IsAssistant(_player->GetObjectGuid()) || group->IsLeader(_player->GetObjectGuid()))
         group->SetRaidMarker(id, _player, ObjectGuid());
 }
+
+void WorldSession::HandeSetEveryoneIsAssistant(WorldPacket& recv_data)
+{
+    bool apply = recv_data.ReadBit();
+
+    DEBUG_LOG("WORLD: Received CMSG_SET_EVERYONE_IS_ASSISTANT from %s (%u) apply: %u",
+        GetPlayerName(), GetAccountId(), apply ? 1 : 0);
+
+    Group* group = _player->GetGroup();
+    if (!group || !group->isRaidGroup())                    // Only raid groups may have assistant
+        return;
+
+    if (!group->IsLeader(_player->GetObjectGuid()))
+        return;
+
+    for (Group::member_citerator itr = group->GetMemberSlots().begin(); itr != group->GetMemberSlots().end(); ++itr)
+        group->SetGroupUniqueFlag(itr->guid, GROUP_ASSIGN_ASSISTANT, apply);
+
+    group->SendUpdate();
+}
