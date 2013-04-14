@@ -20,6 +20,7 @@
 #include "Opcodes.h"
 #include "WorldPacket.h"
 #include "WorldSession.h"
+#include "DynamicObject.h"
 #include "Player.h"
 #include "World.h"
 #include "AccountMgr.h"
@@ -481,6 +482,7 @@ bool Group::AddMember(ObjectGuid guid, const char* name)
         }
 
         player->RemoveFieldNotifyFlag(UF_FLAG_PARTY_MEMBER);
+        player->UpdateForRaidMarkers(this);
     }
 
     return true;
@@ -515,6 +517,10 @@ uint32 Group::RemoveMember(ObjectGuid guid, uint8 method, bool logout /*=false*/
             // quest related GO state dependent from raid membership
             if (isRaidGroup())
                 player->UpdateForQuestWorldObjects();
+
+            player->UpdateForRaidMarkers(this);
+
+            WorldPacket data;
 
             if (method == 1)
             {
@@ -688,6 +694,9 @@ void Group::Disband(bool hideDestroy)
         player = sObjectMgr.GetPlayer(citr->guid);
         if (!player)
             continue;
+
+        // remove all raid markers
+        SetRaidMarker(RAID_MARKER_COUNT, player, ObjectGuid(), false);
 
         // we cannot call _removeMember because it would invalidate member iterator
         // if we are removing player from battleground raid
@@ -1265,6 +1274,58 @@ void Group::SetTargetIcon(uint8 id, ObjectGuid whoGuid, ObjectGuid targetGuid)
     BroadcastPacket(&data, true);
 }
 
+void Group::SetRaidMarker(uint8 id, Player* who, ObjectGuid targetGuid, bool update /*=true*/)
+{
+    if (!who)
+        return;
+
+    if (id >= RAID_MARKER_COUNT)
+    {
+        // remove all markers
+        for (uint8 i = 0; i < RAID_MARKER_COUNT; ++i)
+            m_raidMarkers[i].Clear();
+    }
+    else
+        m_raidMarkers[id] = targetGuid;
+
+    if (update)
+        SendRaidMarkerUpdate();
+}
+
+void Group::SendRaidMarkerUpdate()
+{
+    WorldPacket data(SMSG_RAID_MARKERS_CHANGED, 4);
+    uint32 mask = 0;
+    for (uint8 i = 0; i < RAID_MARKER_COUNT; ++i)
+        if (m_raidMarkers[i])
+            mask |= 1 << i;
+    data << uint32(mask);
+
+    BroadcastPacket(&data, false);
+}
+
+void Group::ClearRaidMarker(ObjectGuid guid)
+{
+    for (uint8 i = 0; i < RAID_MARKER_COUNT; ++i)
+    {
+        if (m_raidMarkers[i] == guid)
+        {
+            m_raidMarkers[i].Clear();
+            SendRaidMarkerUpdate();
+            break;
+        }
+    }
+}
+
+bool Group::HasRaidMarker(ObjectGuid guid) const
+{
+    for (uint8 i = 0; i < RAID_MARKER_COUNT; ++i)
+        if (m_raidMarkers[i] == guid)
+            return true;
+
+    return false;
+}
+
 static void GetDataForXPAtKill_helper(Player* player, Unit const* victim, uint32& sum_level, Player* & member_with_max_level, Player* & not_gray_member_with_max_level)
 {
     sum_level += player->getLevel();
@@ -1373,7 +1434,6 @@ void Group::SendUpdate()
             data << uint8(m_lootThreshold);                 // loot threshold
             data << uint8(GetDungeonDifficulty());          // Dungeon Difficulty
             data << uint8(GetRaidDifficulty());             // Raid Difficulty
-            data << uint8(0);                               // 3.3, dynamic difficulty?
         }
         player->GetSession()->SendPacket(&data);
 

@@ -418,32 +418,35 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
         cast_count = 0;
     }
 
-    if (mover->GetTypeId()==TYPEID_PLAYER)
+    if (!spellInfo->HasAttribute(SPELL_ATTR_EX8_RAID_MARKER))
     {
-        // not have spell in spellbook or spell passive and not casted by client
-        if (((((Player*)mover)->GetUInt16Value(PLAYER_FIELD_BYTES2, 0) == 0 &&
-            (!((Player*)mover)->HasActiveSpell(spellId) && !triggered))
-            || IsPassiveSpell(spellInfo)) && spellId != 1843)
-        {
-            sLog.outError("WorldSession::HandleCastSpellOpcode: %s casts spell %u which he shouldn't have", mover->GetObjectGuid().GetString().c_str(), spellId);
-            //cheater? kick? ban?
-            recvPacket.rpos(recvPacket.wpos());                 // prevent spam at ignore packet
-            return;
-        }
-    }
-    else
-    {
-        // not have spell in spellbook or spell passive and not casted by client
-        if ((!((Creature*)mover)->HasSpell(spellId) && !triggered)
-        || IsPassiveSpell(spellInfo))
+        if (mover->GetTypeId()==TYPEID_PLAYER)
         {
             // not have spell in spellbook or spell passive and not casted by client
-            if ((!((Player*)mover)->HasActiveSpell(spellId) && !triggered || IsPassiveSpell(spellInfo)) && !sSpellMgr.IsAbilityOfSkillType(spellInfo, SKILL_ARCHAEOLOGY))
+            if (((((Player*)mover)->GetUInt16Value(PLAYER_FIELD_BYTES2, 0) == 0 &&
+                (!((Player*)mover)->HasActiveSpell(spellId) && !triggered))
+                || IsPassiveSpell(spellInfo)) && spellId != 1843)
             {
-                sLog.outError("World: Player %u casts spell %u which he shouldn't have", mover->GetGUIDLow(), spellId);
+                sLog.outError("WorldSession::HandleCastSpellOpcode: %s casts spell %u which he shouldn't have", mover->GetObjectGuid().GetString().c_str(), spellId);
                 //cheater? kick? ban?
                 recvPacket.rpos(recvPacket.wpos());                 // prevent spam at ignore packet
                 return;
+            }
+        }
+        else
+        {
+            // not have spell in spellbook or spell passive and not casted by client
+            if ((!((Creature*)mover)->HasSpell(spellId) && !triggered)
+            || IsPassiveSpell(spellInfo))
+            {
+                // not have spell in spellbook or spell passive and not casted by client
+                if ((!((Player*)mover)->HasActiveSpell(spellId) && !triggered || IsPassiveSpell(spellInfo)) && !sSpellMgr.IsAbilityOfSkillType(spellInfo, SKILL_ARCHAEOLOGY))
+                {
+                    sLog.outError("World: Player %u casts spell %u which he shouldn't have", mover->GetGUIDLow(), spellId);
+                    //cheater? kick? ban?
+                    recvPacket.rpos(recvPacket.wpos());                 // prevent spam at ignore packet
+                    return;
+                }
             }
         }
     }

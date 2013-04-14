@@ -30,7 +30,7 @@
 
 class WorldSession;
 class WorldPacket;
-class DynamicObj;
+class DynamicObject;
 class Item;
 class GameObject;
 class Group;

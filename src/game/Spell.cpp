@@ -5873,6 +5873,13 @@ SpellCastResult Spell::CheckCast(bool strict)
 
     SpellAuraRestrictionsEntry const* auraRestrictions = m_spellInfo->GetSpellAuraRestrictions();
 
+    //if (auraRestrictions && auraRestrictions->excludeCasterAuraSpell)
+    //{
+    //    if (auraRestrictions->excludeCasterAuraSpell == 79636 ||    // No Feather Fall
+    //        auraRestrictions->excludeCasterAuraSpell == 96223)      // Run Speed Marker
+    //        AddTriggeredSpell(auraRestrictions->excludeCasterAuraSpell);
+    //}
+
     // caster state requirements
     if(auraRestrictions && auraRestrictions->CasterAuraState && !m_caster->HasAuraState(AuraState(auraRestrictions->CasterAuraState)))
         return SPELL_FAILED_CASTER_AURASTATE;
@@ -6906,6 +6913,8 @@ SpellCastResult Spell::CheckCast(bool strict)
             }
             // FIXME hack due to npc-on-transport not ready
             case SPELL_EFFECT_SUMMON_OBJECT_SLOT:
+            case SPELL_EFFECT_SURVEY:
+            case SPELL_EFFECT_SUMMON_RAID_MARKER:
             {
                 if (m_caster->GetTypeId() == TYPEID_PLAYER)
                     if (m_caster->IsOnTransport())
@@ -7345,7 +7354,7 @@ SpellCastResult Spell::CheckCast(bool strict)
     }
 
     // check LOS for ground targeted spells
-    if (!m_spellInfo->HasAttribute(SPELL_ATTR_EX2_IGNORE_LOS) && !m_targets.getUnitTarget() && !m_targets.getGOTarget() && !m_targets.getItemTarget())
+    if (!m_spellInfo->HasAttribute(SPELL_ATTR_EX2_IGNORE_LOS) && !m_spellInfo->HasAttribute(SPELL_ATTR_EX8_RAID_MARKER) && !m_targets.getUnitTarget() && !m_targets.getGOTarget() && !m_targets.getItemTarget())
     {
         if (!m_targets.getDestination().IsEmpty() && !m_caster->IsWithinLOS(m_targets.getDestination().x, m_targets.getDestination().y, m_targets.getDestination().z))
             return SPELL_FAILED_LINE_OF_SIGHT;

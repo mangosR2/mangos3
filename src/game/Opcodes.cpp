@@ -2070,6 +2070,8 @@ void InitializeOpcodes()
     OPCODE(CMSG_REFORGE_ITEM,                            STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleReforgeItemOpcode         );
     OPCODE(SMSG_REFORGE_RESULT,                          STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
     OPCODE(CMSG_TRANSMOGRIFY_ITEMS,                      STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleTransmogrifyItems         );
+    OPCODE(CMSG_CLEAR_RAID_MARKER,                       STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleClearRaidMarkerOpcode     );
+    OPCODE(SMSG_RAID_MARKERS_CHANGED,                    STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
 
     OPCODE(NUM_MSG_TYPES,                                STATUS_UNHANDLED,PROCESS_INPLACE,      &WorldSession::Handle_NULL             );
 };

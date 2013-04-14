@@ -27,6 +27,7 @@
 #include "GridNotifiersImpl.h"
 #include "SpellMgr.h"
 #include "DBCStores.h"
+#include "ObjectMgr.h"
 
 DynamicObject::DynamicObject() : WorldObject()
 {
@@ -71,7 +72,14 @@ bool DynamicObject::Create(uint32 guidlow, Unit* caster, uint32 spellId, SpellEf
     SetEntry(spellId);
     SetObjectScale(DEFAULT_OBJECT_SCALE);
 
-    SetGuidValue(DYNAMICOBJECT_CASTER, caster->GetObjectGuid());
+    if (type == DYNAMIC_OBJECT_RAID_MARKER)
+    {
+        MANGOS_ASSERT(caster->GetTypeId() == TYPEID_PLAYER && ((Player*)caster)->GetGroup()
+            && "DYNAMIC_OBJECT_RAID_MARKER must only be casted by players and that are in group.");
+        SetGuidValue(DYNAMICOBJECT_CASTER, ((Player*)caster)->GetGroup()->GetObjectGuid());
+    }
+    else
+        SetGuidValue(DYNAMICOBJECT_CASTER, caster->GetObjectGuid());
 
     SetUInt32Value(DYNAMICOBJECT_BYTES, spellProto->GetSpellVisual() | (type << 28));
 
@@ -96,12 +104,25 @@ Unit* DynamicObject::GetCaster() const
 
 void DynamicObject::Update(uint32 /*update_diff*/, uint32 p_time)
 {
-    // caster can be not in world at time dynamic object update, but dynamic object not yet deleted in Unit destructor
-    Unit* caster = GetCaster();
-    if (!caster)
+    Unit* caster = NULL;
+    if (GetType() == DYNAMIC_OBJECT_RAID_MARKER)
     {
-        Delete();
-        return;
+        Group* group = sObjectMgr.GetGroup(GetCasterGuid());
+        if (!group || !group->HasRaidMarker(GetObjectGuid()))
+        {
+            Delete();
+            return;
+        }
+    }
+    else
+    {
+        caster = GetCaster();
+        // caster can be not in world at time dynamic object update, but dynamic object not yet deleted in Unit destructor
+        if (!caster)
+        {
+            Delete();
+            return;
+        }
     }
 
     bool deleteThis = false;
@@ -112,7 +133,7 @@ void DynamicObject::Update(uint32 /*update_diff*/, uint32 p_time)
         deleteThis = true;
 
     // have radius and work as persistent effect
-    if (m_radius)
+    if (m_radius && caster)
     {
         // TODO: make a timer and update this in larger intervals
         MaNGOS::DynamicObjectUpdater notifier(*this, caster, m_positive);
@@ -121,7 +142,16 @@ void DynamicObject::Update(uint32 /*update_diff*/, uint32 p_time)
 
     if (deleteThis)
     {
-        caster->RemoveDynObjectWithGuid(GetObjectGuid());
+        DEBUG_LOG("DynObject %s type %u removed from caster %s", GetGuidStr().c_str(), GetType(), caster->GetGuidStr().c_str());
+
+        if (GetType() == DYNAMIC_OBJECT_RAID_MARKER)
+        {
+            if (Group* group = sObjectMgr.GetGroup(GetCasterGuid()))
+                group->ClearRaidMarker(GetObjectGuid());
+        }
+        else
+            caster->RemoveDynObjectWithGuid(GetObjectGuid());
+
         Delete();
     }
 }
@@ -183,6 +213,16 @@ bool DynamicObject::isVisibleForInState(Player const* u, WorldObject const* view
     // always seen by owner
     if (GetCasterGuid() == u->GetObjectGuid())
         return true;
+
+    if (GetType() == DYNAMIC_OBJECT_RAID_MARKER)
+    {
+        Group const* group = u->GetGroup();
+        if (!group)
+            return false;
+
+        if (GetCasterGuid() != group->GetObjectGuid())
+            return false;
+    }
 
     // normal case
     return IsWithinDistInMap(viewPoint, GetMap()->GetVisibilityDistance() + (inVisibleList ? World::GetVisibleObjectGreyDistance() : 0.0f), false);

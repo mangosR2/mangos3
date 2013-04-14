@@ -1347,6 +1347,8 @@ typedef std::map<uint32, SpellCooldown> SpellCooldowns;
 #define EVADE_TIME_DELAY     500
 #define EVADE_TIME_DELAY_MIN 50
 
+#define MAX_OBJECT_SLOT 5
+
 struct SpellProcEventEntry;                                 // used only privately
 class  VehicleKit;
 

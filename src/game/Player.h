@@ -1631,6 +1631,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         bool HasQuestForItem(uint32 itemid) const;
         bool HasQuestForGO(int32 GOId) const;
         void UpdateForQuestWorldObjects();
+        void UpdateForRaidMarkers(Group* group);
         bool CanShareQuest(uint32 quest_id) const;
 
         void SendQuestCompleteEvent(uint32 quest_id);

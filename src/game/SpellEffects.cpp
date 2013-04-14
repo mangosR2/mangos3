@@ -12887,6 +12887,9 @@ void Spell::EffectSummonObject(SpellEffectEntry const* effect)
         return;
 
     uint8 slot = effect->EffectMiscValueB;
+    if (effect->Effect == SPELL_EFFECT_SURVEY)
+        slot = 4;
+
     if (slot >= MAX_OBJECT_SLOT)
         return;
 
@@ -12894,6 +12897,7 @@ void Spell::EffectSummonObject(SpellEffectEntry const* effect)
     {
         if (GameObject* obj = m_caster ? m_caster->GetMap()->GetGameObject(guid) : NULL)
             obj->SetLootState(GO_JUST_DEACTIVATED);
+
         m_caster->m_ObjectSlotGuid[slot].Clear();
     }
 
@@ -12935,7 +12939,49 @@ void Spell::EffectSummonObject(SpellEffectEntry const* effect)
 
 void Spell::EffectSummonRaidMarker(SpellEffectEntry const* effect)
 {
+    Unit* caster = GetAffectiveCaster();
+    // FIXME: in case wild GO will used wrong affective caster (target in fact) as dynobject owner
+    if (!caster)
+        caster = m_caster;
 
+    if (caster->GetTypeId() != TYPEID_PLAYER)
+        return;
+
+    Player* pCaster = (Player*)caster;
+
+    Group* group = pCaster->GetGroup();
+    if (!group)
+        return;
+
+    if (!group->IsAssistant(pCaster->GetObjectGuid()) && !group->IsLeader(pCaster->GetObjectGuid()))
+        return;
+
+    uint32 go_id = effect->EffectMiscValue;
+
+    uint8 slot = damage;
+
+    float radius = GetSpellRadius(sSpellRadiusStore.LookupEntry(effect->GetRadiusIndex()));
+
+    if (Player* modOwner = pCaster->GetSpellModOwner())
+        modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_RADIUS, radius);
+
+    WorldLocation loc;
+    if (m_targets.m_targetMask & TARGET_FLAG_DEST_LOCATION)
+        loc = m_targets.getDestination();
+    else if (Unit* target = m_targets.getUnitTarget())
+        target->GetPosition(loc.x, loc.y, loc.z);
+    else
+        pCaster->GetPosition(loc.x, loc.y, loc.z);
+
+    DynamicObject* dynObj = new DynamicObject;
+    if (!dynObj->Create(pCaster->GetMap()->GenerateLocalLowGuid(HIGHGUID_DYNAMICOBJECT), pCaster, m_spellInfo->Id, SpellEffectIndex(effect->EffectIndex), loc.x, loc.y, loc.z, m_duration, radius, DYNAMIC_OBJECT_RAID_MARKER))
+    {
+        delete dynObj;
+        return;
+    }
+
+    group->SetRaidMarker(slot, pCaster, dynObj->GetObjectGuid());
+    pCaster->GetMap()->Add(dynObj);
 }
 
 void Spell::EffectResurrect(SpellEffectEntry const* effect)

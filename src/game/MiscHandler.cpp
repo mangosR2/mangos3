@@ -1780,3 +1780,4 @@ void WorldSession::SendLoadCUFProfiles()
     data.append(byteBuffer);
     SendPacket(&data);
 }
+
