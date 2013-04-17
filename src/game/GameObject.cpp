@@ -2274,13 +2274,37 @@ void GameObject::SetLootState(LootState state)
 
 void GameObject::SetGoState(GOState state)
 {
+    GOState oldState = GetGoState();
     SetByteValue(GAMEOBJECT_BYTES_1, 0, state);
+    if (oldState != state && (m_updateFlag & UPDATEFLAG_TRANSPORT_ARR))
+        SetUInt32Value(GAMEOBJECT_LEVEL, WorldTimer::getMSTime() + CalculateAnimDuration(oldState, state));
+
     if (m_model)
     {
         if (!IsInWorld())
             return;
+
         EnableCollision(CalculateCurrentCollisionState());
     }
+}
+
+uint32 GameObject::CalculateAnimDuration(GOState oldState, GOState newState) const
+{
+    if (oldState == newState || oldState >= MAX_GO_STATE || newState >= MAX_GO_STATE)
+        return 0;
+
+    TransportAnimationsByEntry::const_iterator itr = sTransportAnimationsByEntry.find(GetEntry());
+    if (itr == sTransportAnimationsByEntry.end())
+        return 0;
+
+    uint32 frameByState[MAX_GO_STATE] = { 0, m_goInfo->transport.startFrame, m_goInfo->transport.nextFrame1 };
+    if (oldState == GO_STATE_ACTIVE)
+        return frameByState[newState];
+
+    if (newState == GO_STATE_ACTIVE)
+        return frameByState[oldState];
+
+    return uint32(std::abs(int32(frameByState[oldState]) - int32(frameByState[newState])));
 }
 
 void GameObject::SetDisplayId(uint32 modelId)
