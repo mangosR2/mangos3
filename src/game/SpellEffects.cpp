@@ -6401,11 +6401,10 @@ void Spell::DoSummonGroupPets(SpellEffectIndex eff_idx)
         return;
 
     uint32 pet_entry = m_spellInfo->EffectMiscValue[eff_idx];
-
     if (!pet_entry)
         return;
 
-    CreatureInfo const* cInfo = ObjectMgr::GetCreatureTemplate(pet_entry);;
+    CreatureInfo const* cInfo = ObjectMgr::GetCreatureTemplate(pet_entry);
     if (!cInfo)
     {
         sLog.outErrorDb("Spell::DoSummon: creature entry %u not found for spell %u.", pet_entry, m_spellInfo->Id);
@@ -6451,7 +6450,8 @@ void Spell::DoSummonGroupPets(SpellEffectIndex eff_idx)
             {
                Field* fields = result->Fetch();
                uint32 petnum = fields[0].GetUInt32();
-               if (petnum) petnumber.push_back(petnum);
+               if (petnum)
+                   petnumber.push_back(petnum);
             }
             while (result->NextRow());
 
@@ -6460,7 +6460,7 @@ void Spell::DoSummonGroupPets(SpellEffectIndex eff_idx)
 
         if (!petnumber.empty())
         {
-            for(uint8 i = 0; i < petnumber.size() && amount > 0; ++i)
+            for (uint8 i = 0; i < petnumber.size() && amount > 0; ++i)
             {
                 if (petnumber[i])
                 {
@@ -6471,19 +6471,22 @@ void Spell::DoSummonGroupPets(SpellEffectIndex eff_idx)
                     pet->SetPetCounter(amount-1);
                     //bool _summoned = false;
 
-                    if (pet->LoadPetFromDB((Player*)m_caster,pet_entry, petnumber[i], false, &pos))
+                    if (pet->LoadPetFromDB((Player*)m_caster, pet_entry, petnumber[i], false, &pos))
                     {
                          --amount;
-                        DEBUG_LOG("Pet %s summoned (from database). Counter is %d ",
-                                     pet->GetObjectGuid().GetString().c_str(), pet->GetPetCounter());
+                        DEBUG_LOG("%s summoned (from database). Counter is %d ",
+                            pet->GetGuidStr().c_str(), pet->GetPetCounter());
                         SendEffectLogExecute(eff_idx, pet->GetObjectGuid());
                     }
                     else
                     {
-                        DEBUG_LOG("Pet (guidlow %d, entry %d) found in database, but not loaded. Counter is %d ",
-                                     pet->GetGUIDLow(), pet->GetEntry(), pet->GetPetCounter());
+                        DEBUG_LOG("%s found in database, but not loaded. Counter is %d ",
+                             pet->GetGuidStr().c_str(), pet->GetPetCounter());
                         delete pet;
                     }
+
+                    if (m_duration)
+                        pet->SetDuration(duration);
                 }
             }
         }
