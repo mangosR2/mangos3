@@ -6838,7 +6838,7 @@ void Spell::DoSummonWild(SpellEffectIndex eff_idx, uint32 forceFaction)
     if (m_duration > 0)
     {
         if (propEntry->HasFlag(SUMMON_PROP_FLAG_NOT_DESPAWN_IN_COMBAT))
-            summonType = TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT_OR_DEAD_DESPAWN;
+            summonType = TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN;
         else
             summonType = TEMPSUMMON_TIMED_OR_DEAD_DESPAWN;
     }
