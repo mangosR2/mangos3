@@ -58,7 +58,7 @@ UpdateFieldData::UpdateFieldData(Object const* object, Player* target)
     m_hasSpecialInfo = false;
     m_isPartyMember = false;
 
-    switch(object->GetTypeId())
+    switch (object->GetTypeId())
     {
         case TYPEID_ITEM:
         case TYPEID_CONTAINER:
@@ -72,7 +72,7 @@ UpdateFieldData::UpdateFieldData(Object const* object, Player* target)
             m_isOwner = ((Unit*)object)->GetOwnerGuid() == target->GetObjectGuid();
             m_hasSpecialInfo = ((Unit*)object)->HasAuraTypeWithCaster(SPELL_AURA_EMPATHY, target->GetObjectGuid());
             if (Player* pPlayer = ((Unit*)object)->GetCharmerOrOwnerPlayerOrPlayerItself())
-                m_isPartyMember = pPlayer->IsInSameGroupWith(target);
+                m_isPartyMember = pPlayer->IsInSameRaidWith(target);
             break;
         }
         case TYPEID_GAMEOBJECT:
@@ -110,7 +110,7 @@ Object::Object()
     m_objectTypeId        = TYPEID_OBJECT;
     m_objectType          = TYPEMASK_OBJECT;
 
-    m_uint32Values        = 0;
+    m_uint32Values        = NULL;
     m_valuesCount         = 0;
     m_fieldNotifyFlags    = UF_FLAG_DYNAMIC;
 
@@ -138,8 +138,8 @@ Object::~Object()
 
 void Object::_InitValues()
 {
-    m_uint32Values = new uint32[ m_valuesCount ];
-    memset(m_uint32Values, 0, m_valuesCount*sizeof(uint32));
+    m_uint32Values = new uint32[m_valuesCount];
+    memset(m_uint32Values, 0, m_valuesCount * sizeof(uint32));
 
     m_changedValues.resize(m_valuesCount, false);
 
