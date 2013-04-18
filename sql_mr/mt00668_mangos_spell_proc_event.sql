@@ -86,6 +86,11 @@ DELETE FROM `spell_proc_event` WHERE `entry` = 16180;
 INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`, `SpellFamilyMaskC0`, `procEx`) VALUES
 (16180, 11, 448, 73683, 2);
 
+-- Mind Spike
+DELETE FROM `spell_proc_event` WHERE `entry` = 87178;
+INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`, `procFlags`) VALUES
+(87178, 6, 8192, 131072);
+
 -- Glyph of Grounding Totem
 DELETE FROM `spell_proc_event` WHERE `entry` IN (89523);
 INSERT INTO `spell_proc_event` (`entry`, `SchoolMask`, `procEx`) VALUES

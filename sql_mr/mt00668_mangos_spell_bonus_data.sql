@@ -107,7 +107,8 @@ REPLACE INTO `spell_bonus_data` (`entry`, `direct_bonus`, `dot_bonus`, `ap_bonus
 -- Priest
 REPLACE INTO `spell_bonus_data` (`entry`, `direct_bonus`, `dot_bonus`, `ap_bonus`, `ap_dot_bonus`, `comments`) VALUES
 (2061, 0.725, 0, 0, 0, 'Priest - Flash Heal'),
-(32379, 0.316, 0, 0, 0, 'Priest - Shadow Word: Death');
+(32379, 0.316, 0, 0, 0, 'Priest - Shadow Word: Death'),
+(73510, 0.836, 0, 0, 0, 'Priest - Mind Spike'),
 (101062, 0.725, 0, 0, 0, 'Priest - Flash Heal (surge of light)');
 
 -- Goblin

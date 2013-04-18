@@ -1295,9 +1295,9 @@ void Spell::EffectSchoolDMG(SpellEffectEntry const* effect)
                             continue;
 
                         // Except Shadow Word: Death periodic
-                        if (IsSpellAppliesAura(spellProto, SPELL_AURA_PERIODIC_DAMAGE) && spellProto->Id != 32409 ||
-                            IsSpellAppliesAura(spellProto, SPELL_AURA_PERIODIC_DAMAGE_PERCENT) ||
-                            IsSpellAppliesAura(spellProto, SPELL_AURA_PERIODIC_LEECH))
+                        if (IsSpellHaveAura(spellProto, SPELL_AURA_PERIODIC_DAMAGE) && spellProto->Id != 32409 ||
+                            IsSpellHaveAura(spellProto, SPELL_AURA_PERIODIC_DAMAGE_PERCENT) ||
+                            IsSpellHaveAura(spellProto, SPELL_AURA_PERIODIC_LEECH))
                             toRemoveSpellList.insert(spellProto->Id);
                     }
 
@@ -1323,9 +1323,13 @@ void Spell::EffectSchoolDMG(SpellEffectEntry const* effect)
                         m_caster->RemoveSpellAuraHolder(orb);
                     }
 
-                    // remove Mind Spike buff (Mind Blast crit chance)
-                    if (SpellAuraHolderPtr holder = unitTarget->GetSpellAuraHolder(87178, m_caster->GetObjectGuid()))
-                        unitTarget->RemoveSpellAuraHolder(holder);
+                    // Mind Blast
+                    if (m_spellInfo->Id == 8092)
+                    {
+                        // remove Mind Spike buff (Mind Blast crit chance)
+                        if (SpellAuraHolder* holder = unitTarget->GetSpellAuraHolder(87178, m_caster->GetObjectGuid()))
+                            unitTarget->RemoveSpellAuraHolder(holder);
+                    }
                 }
                 break;
             }
