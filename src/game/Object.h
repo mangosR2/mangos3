@@ -39,6 +39,8 @@
 
 #define MAX_STEALTH_DETECT_RANGE    45.0f
 
+#define DEFAULT_HIDDEN_MODEL_ID     11686                   // common "hidden" (invisible) model ID
+
 enum TempSummonType
 {
     TEMPSUMMON_MANUAL_DESPAWN              = 0,             // despawns when UnSummon() is called

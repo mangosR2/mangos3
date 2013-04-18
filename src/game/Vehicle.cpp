@@ -503,8 +503,7 @@ void VehicleKit::InstallAccessory(VehicleAccessory const* accessory)
             hideAccessory = true;
 
         if (hideAccessory)
-            summoned->SetDisplayId(summoned->GetCreatureInfo()->ModelId[0]);
-                                                                     // ^ very importantly! in YTDB this is "hidden" model
+            summoned->SetDisplayId(DEFAULT_HIDDEN_MODEL_ID); // set to empty model
 
         SetDestination(accessory->m_offsetX, accessory->m_offsetY, accessory->m_offsetZ, accessory->m_offsetO, 0.0f, 0.0f);
         int32 seatId = accessory->seatId + 1;
