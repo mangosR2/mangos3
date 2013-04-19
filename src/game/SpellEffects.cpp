@@ -3314,11 +3314,6 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     unitTarget->CastSpell(unitTarget, 56432, true, NULL, NULL, m_caster->GetObjectGuid());
                     return;
                 }
-                case 57496:                                 // Volazj - Insanity
-                {
-                    m_caster->CastSpell(m_caster, 57561, true);
-                    return;
-                }
                 case 57385:                                 // Argent Cannon
                 case 57412:                                 // Reckoning Bomb
                 {
@@ -3335,6 +3330,19 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
 
                     m_caster->CastSpell(loc, spellInfo, false, NULL, NULL, m_originalCasterGUID);
 
+                    return;
+                }
+                case 57496:                                 // Volazj - Insanity
+                {
+                    m_caster->CastSpell(m_caster, 57561, true);
+                    return;
+                }
+                case 57578:                                 // Lava Strike
+                {
+                    if (!unitTarget)
+                        return;
+
+                    m_caster->CastSpell(unitTarget, m_spellInfo->CalculateSimpleValue(eff_idx), true);
                     return;
                 }
                 case 57908:                                 // Stain Cloth
