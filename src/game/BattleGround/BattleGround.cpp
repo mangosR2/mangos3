@@ -737,6 +737,10 @@ void BattleGround::RewardXpToTeam(uint32 Xp, float percentOfLevel, Team team)
             continue;
         }
 
+        // no xp rewards for lvl 85+
+        if (plr->getLevel() >= sWorld.getConfig(CONFIG_UINT32_MAX_PLAYER_LEVEL))
+            continue;
+
         uint32 bgTeam = itr->second.PlayerTeam;
         if(!team) bgTeam = plr->GetTeam();
 
@@ -903,9 +907,22 @@ void BattleGround::EndBattleGround(Team winner)
             }
         }
 
-        uint32 win_kills = plr->IsRandomBGWinner() ? BG_REWARD_WINNER_HONOR_LAST : BG_REWARD_WINNER_HONOR_FIRST;
-        uint32 loos_kills = plr->IsRandomBGWinner() ? BG_REWARD_LOOSER_HONOR_LAST : BG_REWARD_LOOSER_HONOR_FIRST;
-        uint32 win_arena = plr->IsRandomBGWinner() ? BG_REWARD_WINNER_CONQUEST_LAST : BG_REWARD_WINNER_CONQUEST_FIRST;
+        uint32 win_kills, win_arena, loose_kills;
+        if (plr->getLevel() == sWorld.getConfig(CONFIG_UINT32_MAX_PLAYER_LEVEL))
+        {
+            win_kills = plr->IsRandomBGWinner() ? BG_REWARD_WINNER_HONOR_LAST : BG_REWARD_WINNER_HONOR_FIRST;
+            loose_kills = plr->IsRandomBGWinner() ? BG_REWARD_LOOSER_HONOR_LAST : BG_REWARD_LOOSER_HONOR_FIRST;
+            win_arena = plr->IsRandomBGWinner() ? BG_REWARD_WINNER_CONQUEST_LAST : BG_REWARD_WINNER_CONQUEST_FIRST;
+        }
+        else
+        {
+            win_kills = plr->IsRandomBGWinner() ? BG_REWARD_WINNER_HONOR_LAST_LOW : BG_REWARD_WINNER_HONOR_FIRST_LOW;
+            loose_kills = plr->IsRandomBGWinner() ? BG_REWARD_LOOSER_HONOR_LAST_LOW : BG_REWARD_LOOSER_HONOR_FIRST_LOW;
+            win_arena = 0;
+        }
+
+        win_kills = uint32(win_kills * sWorld.getConfig(CONFIG_FLOAT_RATE_HONOR_RANDOMBG));
+        loose_kills = uint32(loose_kills * sWorld.getConfig(CONFIG_FLOAT_RATE_HONOR_RANDOMBG));
 
         if (team == winner)
         {
@@ -949,7 +966,7 @@ void BattleGround::EndBattleGround(Team winner)
         {
             RewardMark(plr, ITEM_LOSER_COUNT);
             if (IsRandom() || BattleGroundMgr::IsBGWeekend(GetTypeID()))
-                UpdatePlayerScore(plr, SCORE_BONUS_HONOR, GetBonusHonorFromKill(loos_kills));
+                UpdatePlayerScore(plr, SCORE_BONUS_HONOR, GetBonusHonorFromKill(loose_kills));
         }
 
         plr->CombatStopWithPets(true);

@@ -556,6 +556,7 @@ void World::LoadConfigSettings(bool reload)
     setConfig(CONFIG_FLOAT_RATE_AUCTION_CUT,     "Rate.Auction.Cut", 1.0f);
     setConfig(CONFIG_UINT32_AUCTION_DEPOSIT_MIN, "Auction.Deposit.Min", SILVER);
     setConfig(CONFIG_FLOAT_RATE_HONOR, "Rate.Honor",1.0f);
+    setConfig(CONFIG_FLOAT_RATE_HONOR_RANDOMBG, "Rate.Honor.RandomBG", 1.0f);
     setConfigPos(CONFIG_FLOAT_RATE_MINING_AMOUNT, "Rate.Mining.Amount", 1.0f);
     setConfigPos(CONFIG_FLOAT_RATE_MINING_NEXT,   "Rate.Mining.Next", 1.0f);
     setConfigPos(CONFIG_FLOAT_RATE_INSTANCE_RESET_TIME, "Rate.InstanceResetTime", 1.0f);
@@ -737,7 +738,6 @@ void World::LoadConfigSettings(bool reload)
     setConfigMin(CONFIG_UINT32_CURRENCY_RESET_INTERVAL, "Currency.ResetInterval", 7, 1);
     setConfig(CONFIG_UINT32_CURRENCY_START_CONQUEST_POINTS, "Currency.StartConquestPoints", 0);
     setConfig(CONFIG_UINT32_CURRENCY_START_HONOR_POINTS, "Currency.StartHonorPoints", 0);
-    setConfig(CONFIG_UINT32_CURRENCY_CONQUEST_POINTS_DEFAULT_WEEK_CAP, "Currency.ConquestPointsDefaultWeekCap", 1350 * 100);  // with precision
     setConfig(CONFIG_UINT32_CURRENCY_ARENA_CONQUEST_POINTS_REWARD, "Currency.ConquestPointsArenaReward", 120 * 100);          // with precision
 
 

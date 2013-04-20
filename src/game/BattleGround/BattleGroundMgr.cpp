@@ -1370,7 +1370,6 @@ void BattleGroundMgr::BuildPvpLogDataPacket(WorldPacket* data, BattleGround* bg)
     {
         ObjectGuid memberGuid = itr->first;
         Player* player = sObjectMgr.GetPlayer(itr->first);
-
         data->WriteBit(0);                  // unk1
         data->WriteBit(0);                  // unk2
         data->WriteGuidMask<2>(memberGuid);
@@ -1381,8 +1380,8 @@ void BattleGroundMgr::BuildPvpLogDataPacket(WorldPacket* data, BattleGround* bg)
         data->WriteGuidMask<3, 0, 5, 1, 6>(memberGuid);
         Team team = bg->GetPlayerTeam(itr->first);
         if (!team && player)
-            team = player->GetTeam();
-        data->WriteBit(team == ALLIANCE);   // unk7
+            team = Team(player->GetTeam());
+        data->WriteBit(team == ALLIANCE);   // Team
         data->WriteGuidMask<7>(memberGuid);
 
         buffer << uint32(itr->second->HealingDone);         // healing done
@@ -1944,18 +1943,28 @@ void BattleGroundMgr::BuildBattleGroundListPacket(WorldPacket* data, ObjectGuid 
     if (!plr)
         return;
 
-    uint32 win_kills = plr->IsRandomBGWinner() ? BG_REWARD_WINNER_HONOR_LAST : BG_REWARD_WINNER_HONOR_FIRST;
-    uint32 win_arena = plr->IsRandomBGWinner() ? BG_REWARD_WINNER_CONQUEST_LAST : BG_REWARD_WINNER_CONQUEST_FIRST;
-    uint32 loos_kills = plr->IsRandomBGWinner() ? BG_REWARD_LOOSER_HONOR_LAST : BG_REWARD_LOOSER_HONOR_FIRST;
+    uint32 win_kills, win_arena, loose_kills;
+    if (plr->getLevel() == sWorld.getConfig(CONFIG_UINT32_MAX_PLAYER_LEVEL))
+    {
+        win_kills = plr->IsRandomBGWinner() ? BG_REWARD_WINNER_HONOR_LAST : BG_REWARD_WINNER_HONOR_FIRST;
+        win_arena = plr->IsRandomBGWinner() ? BG_REWARD_WINNER_CONQUEST_LAST : BG_REWARD_WINNER_CONQUEST_FIRST;
+        loose_kills = plr->IsRandomBGWinner() ? BG_REWARD_LOOSER_HONOR_LAST : BG_REWARD_LOOSER_HONOR_FIRST;
+    }
+    else
+    {
+        win_kills = plr->IsRandomBGWinner() ? BG_REWARD_WINNER_HONOR_LAST_LOW : BG_REWARD_WINNER_HONOR_FIRST_LOW;
+        win_arena = 0;
+        loose_kills = plr->IsRandomBGWinner() ? BG_REWARD_LOOSER_HONOR_LAST_LOW : BG_REWARD_LOOSER_HONOR_FIRST_LOW;
+    }
 
     BattleGround* bgTemplate = sBattleGroundMgr.GetBattleGroundTemplate(bgTypeId);
 
     data->Initialize(SMSG_BATTLEFIELD_LIST);
     *data << uint32(win_arena);                           // 4.3.4 winConquest weekend
     *data << uint32(win_arena);                           // 4.3.4 winConquest random
-    *data << uint32(loos_kills);                          // 4.3.4 lossHonor weekend
+    *data << uint32(loose_kills);                         // 4.3.4 lossHonor weekend
     *data << uint32(bgTypeId);                            // battleground id
-    *data << uint32(loos_kills);                          // 4.3.4 lossHonor random
+    *data << uint32(loose_kills);                         // 4.3.4 lossHonor random
     *data << uint32(win_kills);                           // 4.3.4 winHonor random
     *data << uint32(win_kills);                           // 4.3.4 winHonor weekend
     *data << uint8(0);                                    // max level
