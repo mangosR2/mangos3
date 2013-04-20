@@ -9528,7 +9528,6 @@ bool Unit::IsSpellCrit(Unit *pVictim, SpellEntry const *spellProto, SpellSchoolM
 
     if (pVictim)
     {
-        // hunter trap auras
         Unit::AuraList const& m308auras = pVictim->GetAurasByType(SPELL_AURA_MOD_CRIT_FROM_CASTER);
         for (Unit::AuraList::const_iterator itr = m308auras.begin(); itr != m308auras.end(); ++itr)
         {
