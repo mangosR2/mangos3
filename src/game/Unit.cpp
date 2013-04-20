@@ -5868,7 +5868,7 @@ void Unit::TriggerPassiveAurasWithAttribute(bool active, uint32 flags)
         SpellAuraHolderMap const& holdersMap = GetSpellAuraHolderMap();
         for (SpellAuraHolderMap::const_iterator iter = holdersMap.begin(); iter != holdersMap.end(); ++iter)
         {
-            if (!iter->second || 
+            if (!iter->second ||
                 iter->second->IsDeleted() ||
                 !IsPassiveSpell(iter->second->GetSpellProto()) ||
                 !iter->second->GetSpellProto()->HasAttribute((SpellAttributes)flags)
@@ -6268,7 +6268,7 @@ Aura* Unit::GetAuraByEffectMask(AuraType type, SpellFamily family, ClassFamilyMa
             continue;
 
         if ((*i)->GetAuraSpellClassMask() == classMask &&
-            (family <= SPELLFAMILY_PET &&  (*i)->GetSpellProto()->SpellFamilyName == family) &&
+            (family <= SPELLFAMILY_PET && SpellFamily((*i)->GetSpellProto()->SpellFamilyName) == family) &&
             (!casterGuid || (*i)->GetCasterGuid() == casterGuid))
             return (*i)();
     }
@@ -10400,7 +10400,7 @@ struct SetSpeedRateHelper
 
 void Unit::SetSpeedRate(UnitMoveType mtype, float rate, bool forced)
 {
-    if (rate < 0)
+    if (rate < 0.0f)
         rate = 0.0f;
 
     // Update speed only on change
@@ -10411,15 +10411,15 @@ void Unit::SetSpeedRate(UnitMoveType mtype, float rate, bool forced)
 
         const Opcodes SetSpeed2Opc_table[MAX_MOVE_TYPE][2]=
         {
-            {MSG_MOVE_SET_WALK_SPEED,       SMSG_FORCE_WALK_SPEED_CHANGE},
-            {MSG_MOVE_SET_RUN_SPEED,        SMSG_FORCE_RUN_SPEED_CHANGE},
-            {MSG_MOVE_SET_RUN_BACK_SPEED,   SMSG_FORCE_RUN_BACK_SPEED_CHANGE},
-            {MSG_MOVE_SET_SWIM_SPEED,       SMSG_FORCE_SWIM_SPEED_CHANGE},
-            {MSG_MOVE_SET_SWIM_BACK_SPEED,  SMSG_FORCE_SWIM_BACK_SPEED_CHANGE},
-            {MSG_MOVE_SET_TURN_RATE,        SMSG_FORCE_TURN_RATE_CHANGE},
-            {MSG_MOVE_SET_FLIGHT_SPEED,     SMSG_FORCE_FLIGHT_SPEED_CHANGE},
-            {MSG_MOVE_SET_FLIGHT_BACK_SPEED,SMSG_FORCE_FLIGHT_BACK_SPEED_CHANGE},
-            {MSG_MOVE_SET_PITCH_RATE,       SMSG_FORCE_PITCH_RATE_CHANGE},
+            {MSG_MOVE_SET_WALK_SPEED,        SMSG_FORCE_WALK_SPEED_CHANGE},
+            {MSG_MOVE_SET_RUN_SPEED,         SMSG_FORCE_RUN_SPEED_CHANGE},
+            {MSG_MOVE_SET_RUN_BACK_SPEED,    SMSG_FORCE_RUN_BACK_SPEED_CHANGE},
+            {MSG_MOVE_SET_SWIM_SPEED,        SMSG_FORCE_SWIM_SPEED_CHANGE},
+            {MSG_MOVE_SET_SWIM_BACK_SPEED,   SMSG_FORCE_SWIM_BACK_SPEED_CHANGE},
+            {MSG_MOVE_SET_TURN_RATE,         SMSG_FORCE_TURN_RATE_CHANGE},
+            {MSG_MOVE_SET_FLIGHT_SPEED,      SMSG_FORCE_FLIGHT_SPEED_CHANGE},
+            {MSG_MOVE_SET_FLIGHT_BACK_SPEED, SMSG_FORCE_FLIGHT_BACK_SPEED_CHANGE},
+            {MSG_MOVE_SET_PITCH_RATE,        SMSG_FORCE_PITCH_RATE_CHANGE},
         };
 
         if (forced && GetTypeId() == TYPEID_PLAYER)
@@ -10441,7 +10441,7 @@ void Unit::SetSpeedRate(UnitMoveType mtype, float rate, bool forced)
         m_movementInfo.UpdateTime(WorldTimer::getMSTime());
 
         // TODO: Actually such opcodes should (always?) be packed with SMSG_COMPRESSED_MOVES
-        WorldPacket data(Opcodes(SetSpeed2Opc_table[mtype][0]), 64);
+        WorldPacket data(SetSpeed2Opc_table[mtype][0], 64);
         data << GetPackGUID();
         data << m_movementInfo;
         data << float(GetSpeed(mtype));
