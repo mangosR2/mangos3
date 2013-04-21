@@ -13000,6 +13000,10 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
                     spellId1 = 60069;                       // Dispersion
                     spellId2 = 63230;                       // Dispersion
                     break;
+                // Chakra: Sanctuary (Chakra: Sanctuary)
+                case 81206:
+                    spellId1 = 81207;
+                    break;
                 default:
                     return;
             }
