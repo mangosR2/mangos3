@@ -25984,7 +25984,6 @@ void Player::_LoadCurrencies(QueryResult* result)
                 continue;
             }
 
-            uint32 weekCap = customWeekCap ? customWeekCap : GetCurrencyWeekCap(entry);
             uint32 totalCap = GetCurrencyTotalCap(entry);
 
             PlayerCurrency cur;
@@ -25996,10 +25995,7 @@ void Player::_LoadCurrencies(QueryResult* result)
             else
                 cur.totalCount = totalCount;
 
-            if (weekCap && weekCount > weekCap)
-                cur.weekCount = weekCap;
-            else
-                cur.weekCount = weekCount;
+            cur.weekCount = weekCount;
 
             cur.seasonCount = seasonCount;
 
