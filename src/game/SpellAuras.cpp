@@ -1386,7 +1386,6 @@ void Aura::HandleAddModifier(bool apply, bool Real)
             case 74434:                                     // Soulburn
             case 81093:                                     // Fury of Stormrage
             case 83359:                                     // Sic 'Em!
-            case 88688:                                     // Surge of Light
             case 88819:                                     // Daybreak
             case 89485:                                     // Inner Focus
             case 90174:                                     // Divine Purpose
@@ -14269,9 +14268,13 @@ void Aura::HandleAuraOverrideActionbarSpells(bool apply, bool Real)
 
     if (apply)
     {
-        // Hot Streak!
-        if (GetId() == 48108)
-            GetHolder()->SetAuraCharges(1);
+        switch (GetId())
+        {
+            case 48108:         // Hot Streak!
+            case 88688:         // Surge of Light
+                GetHolder()->SetAuraCharges(1);
+                break;
+        }
     }
     else
     {
