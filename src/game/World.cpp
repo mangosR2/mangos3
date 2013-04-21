@@ -2756,6 +2756,8 @@ void World::ResetMonthlyQuests()
 void World::ResetCurrencyWeekCounts()
 {
     CharacterDatabase.Execute("UPDATE `character_currencies` SET `weekCount` = 0");
+    CharacterDatabase.PExecute("UPDATE `character_currencies` SET `customWeekCap` = 0 WHERE `id` IN (%u, %u, %u)",
+        CURRENCY_CONQUEST_ARENA_META, CURRENCY_CONQUEST_BG_META, CURRENCY_CONQUEST_POINTS);
 
     for (SessionMap::const_iterator itr = m_sessions.begin(); itr != m_sessions.end(); ++itr)
         if (itr->second->GetPlayer())
