@@ -4861,7 +4861,7 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(Unit *pVictim, DamageIn
                 if (procFlags & PROC_FLAG_ON_DO_PERIODIC)
                 {
                     // only Black Arrow, Immolation Trap and Explosive Traps
-                    if (!procSpell->IsFitToFamily(SPELLFAMILY_HUNTER, UI64LIT(0x800000000000000), 0x4000))
+                    if (!procSpell->IsFitToFamily(SPELLFAMILY_HUNTER, UI64LIT(0x800000000000000), 0x24000))
                         return SPELL_AURA_PROC_FAILED;
 
                     // search T.N.T.
