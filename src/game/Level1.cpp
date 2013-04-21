@@ -1149,7 +1149,7 @@ bool ChatHandler::HandleModifyASpeedCommand(char* args)
     chr->UpdateSpeed(MOVE_WALK,   true, modSpeed, true);
     chr->UpdateSpeed(MOVE_RUN,    true, modSpeed, true);
     chr->UpdateSpeed(MOVE_SWIM,   true, modSpeed, true);
-    // chr->UpdateSpeed(MOVE_TURN,   true, modSpeed);
+    // chr->UpdateSpeed(MOVE_TURN,   true, modSpeed, true);
     chr->UpdateSpeed(MOVE_FLIGHT, true, modSpeed, true);
     return true;
 }
