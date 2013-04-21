@@ -4281,7 +4281,7 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(Unit *pVictim, DamageIn
                 case 45234:                                 // Focused Will
                 case 45243:
                 {
-                    if (damage * 100 >= pVictim->GetMaxHealth() * 10 ||
+                    if (damage * 100 >= GetMaxHealth() * auraSpellInfo->CalculateSimpleValue(EFFECT_INDEX_1) ||
                         (procEx & PROC_EX_CRITICAL_HIT) != 0 && (procFlags & PROC_FLAG_ON_TAKE_PERIODIC) == 0)
                         break;
 
