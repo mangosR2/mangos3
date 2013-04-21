@@ -581,6 +581,11 @@ void AchievementMgr<T>::ResetAchievementCriteria(AchievementCriteriaTypes type, 
                     case 3848:
                     case 3849:
                     case 3853:
+                    case 5210:      // Two-Timer
+                    case 5220:      // I'm in the Black Lodge
+                    case 5226:      // Cloud Nine
+                    case 5227:      // Cloud Nine
+                    case 5228:      // Wild Hammering
                         SetCriteriaProgress(achievementCriteria, achievement, 0, referencePlayer, PROGRESS_SET);
                     default: continue; // Do not reset progress for other achievements.
                 }
@@ -2315,6 +2320,29 @@ void AchievementMgr<T>::UpdateAchievementCriteria(AchievementCriteriaTypes type,
 
                         break;
                     }*/
+                    case 5220:                      // I'm in the Black Lodge
+                    {
+                        if (!bg || !unit)
+                            continue;
+
+                        if (bg->GetTypeID(true) != BATTLEGROUND_TP)
+                            continue;
+
+                        switch(referencePlayer->GetTeam())
+                        {
+                            case ALLIANCE:
+                                if (!(((BattleGroundWS*)bg)->GetFlagState(HORDE) == BG_WS_FLAG_STATE_ON_BASE) || !unit->HasAura(23335) || referencePlayer->GetAreaId() != 4572)
+                                    continue;
+                                break;
+                            case HORDE:
+                                if (!(((BattleGroundWS*)bg)->GetFlagState(ALLIANCE) == BG_WS_FLAG_STATE_ON_BASE) || !unit->HasAura(23333) || referencePlayer->GetAreaId() != 4571)
+                                    continue;
+                                break;
+                            default:
+                                break;
+                        }
+                        break;
+                    }
                     default:
                     {
                         // those requirements couldn't be found in the dbc

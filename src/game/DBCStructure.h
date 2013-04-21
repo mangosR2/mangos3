@@ -388,8 +388,9 @@ struct AchievementCriteriaEntry
         {
             uint32  unused;                                 // 3
             uint32  count;                                  // 4
-            uint32  flag;                                   // 5 =3 for battleground healing
-            uint32  mapid;                                  // 6
+            uint32  unk5;                                   // 5
+            uint32  flag;                                   // 6 =3 for battleground healing
+            uint32  mapid;                                  // 7
         } healing_done;
 
         // ACHIEVEMENT_CRITERIA_TYPE_EQUIP_ITEM             = 57

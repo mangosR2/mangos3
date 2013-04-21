@@ -68,6 +68,12 @@ enum BG_TP_FlagState
     BG_TP_FLAG_STATE_ON_GROUND    = 3
 };
 
+enum BG_TP_Objectives
+{
+    TP_OBJECTIVE_CAPTURE_FLAG     = 290,
+    TP_OBJECTIVE_RETURN_FLAG      = 291
+};
+
 enum BG_TP_Graveyards
 {
     TP_GRAVEYARD_FLAGROOM_ALLIANCE = 1726,
