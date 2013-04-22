@@ -816,7 +816,7 @@ void BattleGround::EndBattleGround(Team winner)
         }
     }
 
-    bool guildAwarded = false;
+    std::set<ObjectGuid> guildAwarded;
     for(BattleGroundPlayerMap::iterator itr = m_Players.begin(); itr != m_Players.end(); ++itr)
     {
         Team team = itr->second.PlayerTeam;
@@ -877,6 +877,17 @@ void BattleGround::EndBattleGround(Team winner)
 
                 winner_arena_team->MemberWon(plr, loser_rating);
 
+                // reward guild rep and xp if in guild group
+                if (GetBgMap()->HasGuildGroup(plr->GetGuildGuid(), plr))
+                {
+                    uint32 guildXP = uint32(27900 * sWorld.getConfig(CONFIG_FLOAT_RATE_GUILD_XP_MODIFIER));
+                    uint32 guildRep = uint32(27900 * sWorld.getConfig(CONFIG_FLOAT_RATE_GUILD_REPUTATION_GAIN) / 450);
+
+                    if (Guild* guild = sGuildMgr.GetGuildByGuid(plr->GetGuildGuid()))
+                        guild->GiveXP(guildXP, plr);
+                    plr->RewardGuildReputation(guildRep);
+                }
+
                 if (member)
                 {
                     plr->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_HIGHEST_PERSONAL_RATING, GetArenaType(), member->personal_rating);
@@ -915,17 +926,23 @@ void BattleGround::EndBattleGround(Team winner)
             else // 50cp awarded for each non-rated battleground won
                 plr->ModifyCurrencyCount(CURRENCY_CONQUEST_BG_META, win_arena * GetCurrencyPrecision(CURRENCY_CONQUEST_BG_META));
 
-            plr->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_WIN_BG, 1);
-            if (!guildAwarded)
+            if (ObjectGuid guildGuid = plr->GetGuildGuid())
             {
-                guildAwarded = true;
-                if (uint32 guildId = GetBgMap()->GetOwnerGuildId(plr->GetTeam()))
-                    if (Guild* guild = sGuildMgr.GetGuildById(guildId))
+                if (guildAwarded.find(guildGuid) == guildAwarded.end())
+                {
+                    if (Guild* guild = sGuildMgr.GetGuildByGuid(plr->GetGuildGuid()))
                     {
-                        guild->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_WIN_BG, 1, 0, NULL, 0, plr);
-                        if (isArena() && isRated() && winner_arena_team && loser_arena_team && winner_arena_team != loser_arena_team)
-                            guild->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_WIN_RATED_ARENA, std::max<uint32>(winner_arena_team->GetRating(), 1), 0, NULL, 0, plr);
+                        if (GetBgMap()->HasGuildGroup(guildGuid, plr))
+                        {
+                            // Rated Battlegrounds only
+                            //if (isRated())
+                            //    guild->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_WIN_BG, 1, 0, NULL, 0, plr);
+                            if (isArena() && isRated() && winner_arena_team && loser_arena_team && winner_arena_team != loser_arena_team)
+                                guild->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_WIN_RATED_ARENA, std::max<uint32>(winner_arena_team->GetRating(), 1), 0, NULL, 0, plr);
+                            guildAwarded.insert(guildGuid);
+                        }
                     }
+                }
             }
         }
         else

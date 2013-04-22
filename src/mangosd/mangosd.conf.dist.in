@@ -1622,6 +1622,7 @@ Visibility.AIRelocationNotifyDelay = 1000
 #        Default: 1
 #
 #    Rate.Reputation.Gain
+#    Rate.Guild.Reputation.Gain
 #         Reputation Gain rate
 #         Default: 1
 #
@@ -1748,6 +1749,7 @@ Rate.Mining.Amount = 1
 Rate.Mining.Next   = 1
 Rate.Talent = 1
 Rate.Reputation.Gain = 1
+Rate.Guild.Reputation.Gain = 1
 Rate.Reputation.LowLevel.Kill    = 1
 Rate.Reputation.LowLevel.Quest   = 1
 Rate.InstanceResetTime = 1

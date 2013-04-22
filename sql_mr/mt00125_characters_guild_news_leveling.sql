@@ -1,6 +1,7 @@
 ALTER TABLE guild ADD `level` INT(10) unsigned DEFAULT '1' AFTER `BankMoney`;
 ALTER TABLE guild ADD `experience` BIGINT(20) unsigned DEFAULT '0' AFTER `level`;
 ALTER TABLE guild ADD `todayExperience` BIGINT(20) unsigned DEFAULT '0' AFTER `experience`;
+ALTER TABLE guild_member ADD COLUMN thisWeekReputation int(11) unsigned NOT NULL DEFAULT '0' AFTER offnote;
 
 CREATE TABLE `guild_news_eventlog` (
   `guildid` int(10) unsigned NOT NULL,

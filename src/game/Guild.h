@@ -324,6 +324,7 @@ struct MemberSlot
     uint8 Class;
     uint32 ZoneId;
     uint64 LogoutTime;
+    uint32 thisWeekReputation;
     std::string Pnote;
     std::string OFFnote;
     uint32 BankResetTimeMoney;
@@ -521,6 +522,7 @@ class Guild
         bool MemberMoneyWithdraw(uint64 amount, uint32 LowGuid);
         uint64 GetGuildBankMoney() { return m_GuildBankMoney; }
         void SetBankMoney(int64 money);
+        void SetThisWeekReputation(ObjectGuid playerGuid, uint32 amt);
         void HandleCashFlow(uint64 money, Player* player);
         // per days
         bool MemberItemWithdraw(uint8 TabId, uint32 LowGuid);
@@ -546,6 +548,7 @@ class Guild
         uint64 GetTodayExperience() const { return m_TodayExperience; }
         void SendGuildXP(Player* player);
         void ResetDailyExperience();
+        void ResetReputationCaps();
 
         void HandleGuildPartyRequest(WorldSession* session);
         void SendReputationWeeklyCap(Player* player);

@@ -313,7 +313,7 @@ pAuraProcHandler AuraProcHandler[TOTAL_AURAS]=
     &Unit::HandleNULLProc,                                  //278 SPELL_AURA_MOD_DISARM_RANGED disarm ranged weapon
     &Unit::HandleNULLProc,                                  //279 SPELL_AURA_INITIALIZE_IMAGES 9 spells in 4.3.4 visual effects?
     &Unit::HandleNULLProc,                                  //280 SPELL_AURA_MOD_TARGET_ARMOR_PCT
-    &Unit::HandleNULLProc,                                  //281 SPELL_AURA_MOD_HONOR_GAIN
+    &Unit::HandleNULLProc,                                  //281 SPELL_AURA_MOD_GUILD_REPUTATION_GAIN
     &Unit::HandleNULLProc,                                  //282 SPELL_AURA_INCREASE_BASE_HEALTH_PERCENT
     &Unit::HandleNULLProc,                                  //283 SPELL_AURA_MOD_HEALING_RECEIVED
     &Unit::HandleNULLProc,                                  //284 146 spells in 4.3.4

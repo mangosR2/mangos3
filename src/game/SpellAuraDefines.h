@@ -316,7 +316,7 @@ enum AuraType
     SPELL_AURA_MOD_DISARM_RANGED = 278,
     SPELL_AURA_INITIALIZE_IMAGES = 279,
     SPELL_AURA_280 = 280,                                   // old SPELL_AURA_MOD_TARGET_ARMOR_PCT
-    SPELL_AURA_MOD_HONOR_GAIN = 281,
+    SPELL_AURA_MOD_GUILD_REPUTATION_GAIN = 281,
     SPELL_AURA_MOD_BASE_HEALTH_PCT = 282,
     SPELL_AURA_MOD_HEALING_RECEIVED = 283,                  // Possibly only for some spell family class spells
     SPELL_AURA_LINKED = 284,

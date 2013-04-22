@@ -234,6 +234,8 @@ bool Guild::AddMember(ObjectGuid plGuid, uint32 plRank)
     newmember.Pnote   = (std::string)"";
     newmember.LogoutTime = time(NULL);
     newmember.BankResetTimeMoney = 0;                       // this will force update at first query
+    newmember.thisWeekReputation = 0;
+
     for (int i = 0; i < GUILD_BANK_MAX_TABS; ++i)
         newmember.BankResetTimeTab[i] = 0;
     members[lowguid] = newmember;
@@ -466,6 +468,8 @@ bool Guild::LoadMembersFromDB(QueryResult* guildMembersResult)
         newmember.ZoneId                = fields[22].GetUInt32();
         newmember.LogoutTime            = fields[23].GetUInt64();
         newmember.accountId             = fields[24].GetInt32();
+
+        newmember.thisWeekReputation     = fields[25].GetUInt32();
 
         // this code will remove not existing character guids from guild
         if (newmember.Level < 1 || newmember.Level > STRONG_MAX_LEVEL) // can be at broken `data` field
@@ -869,8 +873,9 @@ void Guild::Roster(WorldSession* session /*= NULL*/)
                 flags |= GUILDMEMBER_STATUS_DND;
         }
 
+        uint32 rep = player ? player->GetReputationMgr().GetReputation(sFactionStore.LookupEntry(GUILD_REP_FACTION)) : 0;
         buffer << uint8(member.Class);
-        buffer << int32(0);                             // unk
+        buffer << int32(rep);                           // member guild rep
         buffer.WriteGuidBytes<0>(guid);
         buffer << uint64(0);                            // weekly activity
         buffer << uint32(member.RankId);
@@ -885,7 +890,8 @@ void Guild::Roster(WorldSession* session /*= NULL*/)
         buffer << uint32(player ? player->GetZoneId() : member.ZoneId);
         buffer << uint64(0);                            // Total activity
         buffer.WriteGuidBytes<7>(guid);
-        buffer << uint32(0);                            // Remaining guild week Rep
+        buffer << uint32(sWorld.getConfig(CONFIG_UINT32_GUILD_WEEKLY_REP_CAP) > member.thisWeekReputation ?
+            sWorld.getConfig(CONFIG_UINT32_GUILD_WEEKLY_REP_CAP) - member.thisWeekReputation : 0);// Remaining guild week Rep
 
         buffer.WriteStringData(member.Pnote);
 
@@ -1554,6 +1560,16 @@ void Guild::SetBankMoney(int64 money)
     m_GuildBankMoney = money;
 
     CharacterDatabase.PExecute("UPDATE guild SET BankMoney='" UI64FMTD "' WHERE guildid='%u'", money, m_Id);
+}
+
+void Guild::SetThisWeekReputation(ObjectGuid playerGuid, uint32 amt)
+{
+    MemberList::iterator itr = members.find(playerGuid);
+    if (itr == members.end())
+        return;
+
+    itr->second.thisWeekReputation = amt;
+    CharacterDatabase.PExecute("UPDATE guild_member SET thisWeekReputation = '%u' WHERE guildid='%u' AND guid = '%u'", amt, m_Id, playerGuid.GetCounter());
 }
 
 // *************************************************
@@ -2901,7 +2917,7 @@ void Guild::HandleGuildPartyRequest(WorldSession* session)
         return;
 
     WorldPacket data(SMSG_GUILD_PARTY_STATE_RESPONSE, 13);
-    data.WriteBit(player->GetMap()->GetOwnerGuildId(player->GetTeam()) == GetId()); // Is guild group
+    data.WriteBit(player->GetMap()->HasGuildGroup(GetObjectGuid())); // Is guild group
     data << float(0.0f);                            // Guild XP multiplier
     data << uint32(0);                              // Current guild members
     data << uint32(0);                              // Needed guild members
@@ -3078,10 +3094,18 @@ void Guild::SendGuildXP(Player* player)
 void Guild::ResetDailyExperience()
 {
     m_TodayExperience = 0;
-    CharacterDatabase.Execute("UPDATE `guild` SET `todayExperience` = 0");
-
     for (MemberList::iterator itr = members.begin(); itr != members.end(); ++itr)
         if (Player* player = sObjectMgr.GetPlayer(itr->second.guid))
             SendGuildXP(player);
+}
+
+void Guild::ResetReputationCaps()
+{
+    for (MemberList::iterator itr = members.begin(); itr != members.end(); ++itr)
+    {
+        itr->second.thisWeekReputation = 0;
+        //if (Player* player = sObjectMgr.GetPlayer(itr->second.guid))
+        //    SendRep(player);
+    }
 }
 

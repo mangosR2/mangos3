@@ -1848,6 +1848,51 @@ DungeonPersistentState* DungeonMap::GetPersistanceState() const
     return (DungeonPersistentState*)Map::GetPersistentState();
 }
 
+bool DungeonMap::HasGuildGroup(ObjectGuid guildGuid, Player* player /*=NULL*/)
+{
+    if (guildGuid.IsEmpty())
+        return false;
+
+    if (!i_mapEntry)
+        return false;
+
+    uint32 plrCount = 0;
+    if (i_mapEntry->IsNonRaidDungeon())
+        plrCount = 3;
+    else if (i_mapEntry->IsRaid())
+    {
+        if (i_mapEntry->maxPlayers == 40)
+            plrCount = 10;
+        else
+            switch (GetDifficulty())
+            {
+                case RAID_DIFFICULTY_10MAN_NORMAL:
+                case RAID_DIFFICULTY_10MAN_HEROIC:
+                    plrCount = 8;
+                    break;
+                case RAID_DIFFICULTY_25MAN_NORMAL:
+                case RAID_DIFFICULTY_25MAN_HEROIC:
+                    // pre-wotlk raids
+                    if (i_mapEntry->Expansion() < 2)
+                        plrCount = 8;
+                    else
+                        plrCount = 20;
+                    break;
+            }
+    }
+
+    if (!plrCount)
+        return false;
+
+    uint32 count = 0;
+    PlayerList const& players = GetPlayers();
+    for (PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
+        if (Player* plr = itr->getSource())
+            if (plr->GetGuildGuid() == guildGuid)
+                ++count;
+
+    return count >= plrCount;
+}
 
 /* ******* Battleground Instance Maps ******* */
 
@@ -1942,6 +1987,38 @@ bool Map::CanEnter(Player* player)
     }
 
     return true;
+}
+
+bool BattleGroundMap::HasGuildGroup(ObjectGuid guildGuid, Player* player /*=NULL*/)
+{
+    if (guildGuid.IsEmpty())
+        return false;
+
+    if (!player)
+        return false;
+
+    if (!i_mapEntry)
+        return false;
+
+    BattleGround* bg = GetBG();
+    if (!bg)
+        return false;
+
+    uint32 plrCount = 0;
+
+    if (bg->isArena())
+        plrCount = uint32(bg->GetArenaType());
+    //else // rated battlegrounds
+    //    plrCount = uint32(bg->GetMaxPlayersPerTeam() * 0.8f);
+
+    uint32 count = 0;
+    PlayerList const& players = GetPlayers();
+    for (PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
+        if (Player* plr = itr->getSource())
+            if (plr->GetGuildGuid() == guildGuid && bg->GetPlayerTeam(player->GetObjectGuid()) == bg->GetPlayerTeam(plr->GetObjectGuid()))
+                ++count;
+
+    return count >= plrCount;
 }
 
 /// Put scripts in the execution queue

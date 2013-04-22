@@ -431,6 +431,7 @@ class MANGOS_DLL_SPEC Map : public GridRefManager<NGridType>
 
 
         virtual uint32 GetOwnerGuildId(Team /*team*/ = TEAM_NONE) const { return 0; }
+        virtual bool HasGuildGroup(ObjectGuid guildGuid, Player* player = NULL) { return false; }
 
     private:
         void LoadMapAndVMap(int gx, int gy);
@@ -575,6 +576,8 @@ class MANGOS_DLL_SPEC DungeonMap : public Map
         DungeonPersistentState* GetPersistanceState() const;
 
         virtual void InitVisibilityDistance() override;
+
+        bool HasGuildGroup(ObjectGuid guildGuid, Player* player = NULL) override;
     private:
         bool m_resetAfterUnload;
         bool m_unloadWhenEmpty;
@@ -601,6 +604,8 @@ class MANGOS_DLL_SPEC BattleGroundMap : public Map
 
         // can't be NULL for loaded map
         BattleGroundPersistentState* GetPersistanceState() const;
+
+        bool HasGuildGroup(ObjectGuid guildGuid, Player* player = NULL) override;
 
     private:
         BattleGround* m_bg;

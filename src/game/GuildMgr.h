@@ -22,6 +22,8 @@
 #include "Common.h"
 #include "Policies/Singleton.h"
 
+#define GUILD_REP_FACTION 1168
+
 class Guild;
 class ObjectGuid;
 

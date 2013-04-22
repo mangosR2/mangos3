@@ -21,6 +21,9 @@
 #include "Player.h"
 #include "WorldPacket.h"
 #include "ObjectMgr.h"
+#include "Guild.h"
+#include "GuildMgr.h"
+#include "World.h"
 
 const int32 ReputationMgr::PointsInRank[MAX_REPUTATION_RANK] = {36000, 3000, 3000, 3000, 6000, 12000, 21000, 1000};
 
@@ -122,6 +125,9 @@ void ReputationMgr::SendForceReactions()
 
 void ReputationMgr::SendState(FactionState const* faction, bool anyRankIncreased)
 {
+    if (!m_player->IsInWorld() || !m_player->GetSession() || m_player->GetSession()->PlayerLoading())
+        return;
+
     uint32 count = 1;
 
     WorldPacket data(SMSG_SET_FACTION_STANDING, 17);
@@ -313,8 +319,23 @@ bool ReputationMgr::SetOneFactionReputation(FactionEntry const* factionEntry, in
     {
         int32 BaseRep = GetBaseReputation(factionEntry);
 
-        if(incremental)
+        if (incremental)
+        {
+            if (factionEntry->ID == GUILD_REP_FACTION)
+            {
+                if (Guild* guild = sGuildMgr.GetGuildByGuid(m_player->GetGuildGuid()))
+                    if (MemberSlot* member = guild->GetMemberSlot(m_player->GetObjectGuid()))
+                    {
+                        if (standing + member->thisWeekReputation > sWorld.getConfig(CONFIG_UINT32_GUILD_WEEKLY_REP_CAP))
+                            standing = sWorld.getConfig(CONFIG_UINT32_GUILD_WEEKLY_REP_CAP) > member->thisWeekReputation ?
+                                sWorld.getConfig(CONFIG_UINT32_GUILD_WEEKLY_REP_CAP) - member->thisWeekReputation : 0;
+
+                        guild->SetThisWeekReputation(m_player->GetObjectGuid(), member->thisWeekReputation + standing);
+                    }
+            }
+
             standing += itr->second.Standing + BaseRep;
+        }
 
         if (standing > Reputation_Cap)
             standing = Reputation_Cap;

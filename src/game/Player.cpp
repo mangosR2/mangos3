@@ -2809,6 +2809,30 @@ void Player::GiveXP(uint32 xp, Unit* victim)
             xp = uint32(xp*(1.0f + (*i)->GetModifier()->m_amount / 100.0f));
     }
 
+    if (victim && victim->GetTypeId() == TYPEID_UNIT)
+    {
+        if (ObjectGuid guildGuid = GetGuildGuid())
+        {
+            Guild* guild = sGuildMgr.GetGuildByGuid(guildGuid);
+            if (((Creature*)victim)->IsWorldBoss())
+            {
+                if (!GetGroup() || GetMap()->HasGuildGroup(guildGuid, this))
+                {
+                    uint32 guildXP = uint32(xp * sWorld.getConfig(CONFIG_FLOAT_RATE_GUILD_XP_MODIFIER));
+                    uint32 guildRep = uint32(xp * sWorld.getConfig(CONFIG_FLOAT_RATE_GUILD_REPUTATION_GAIN) / 450);
+                    if (guild)
+                        guild->GiveXP(guildXP, this);
+                    RewardGuildReputation(guildRep);
+                }
+            }
+        }
+    }
+
+    // XP to money conversion processed in Player::RewardQuest
+    if (level >= sWorld.getConfig(CONFIG_UINT32_MAX_PLAYER_LEVEL))
+        return;
+
+    // XP resting bonus for kill
     uint32 bonus_xp = 0;
     bool ReferAFriend = false;
     if (CheckRAFConditions())
@@ -6665,7 +6689,27 @@ ReputationRank Player::GetReputationRank(uint32 faction) const
     return GetReputationMgr().GetRank(factionEntry);
 }
 
-// Calculate total reputation percent player gain with quest/creature level
+void Player::RewardGuildReputation(int32 rep)
+{
+    if (!GetGuildId())
+        return;
+
+    float percent = 100.0f;
+    float repMod = GetTotalAuraModifier(SPELL_AURA_MOD_GUILD_REPUTATION_GAIN);
+
+    repMod += GetTotalAuraModifierByMiscValue(SPELL_AURA_MOD_FACTION_REPUTATION_GAIN, 0);
+
+    percent += rep > 0 ? repMod : -repMod;
+
+    if (percent <= 0.0f)
+        return;
+
+    rep = int32(sWorld.getConfig(CONFIG_FLOAT_RATE_GUILD_REPUTATION_GAIN) * rep * percent / 100.0f);
+
+    GetReputationMgr().ModifyReputation(sFactionStore.LookupEntry(GUILD_REP_FACTION), rep);
+}
+
+//Calculate total reputation percent player gain with quest/creature level
 int32 Player::CalculateReputationGain(ReputationSource source, int32 rep, int32 faction, uint32 creatureOrQuestLevel, bool noAuraBonus)
 {
     float percent = 100.0f;
@@ -7079,6 +7123,8 @@ void Player::SetInGuild(uint32 GuildId)
 
     ApplyModFlag(PLAYER_FLAGS, PLAYER_FLAGS_GUILD_LEVELING_ENABLED, GuildId != 0 && sWorld.getConfig(CONFIG_BOOL_GUILD_LEVELING_ENABLED));
     SetUInt16Value(OBJECT_FIELD_TYPE, 1, GuildId != 0);
+    if (GuildId == 0)
+        GetReputationMgr().SetReputation(sFactionStore.LookupEntry(GUILD_REP_FACTION), 0);
 }
 
 std::string Player::GetGuildName() const
@@ -13970,12 +14016,16 @@ void Player::RewardQuest(Quest const* pQuest, uint32 reward, Object* questGiver,
     // Used for client inform but rewarded only in case not max level
     uint32 xp = uint32(pQuest->XPValue(this) * sWorld.getConfig(CONFIG_FLOAT_RATE_XP_QUEST));
 
+
+    if (Guild* guild = sGuildMgr.GetGuildById(GetGuildId()))
+    {
+        guild->GiveXP(uint32(xp * sWorld.getConfig(CONFIG_FLOAT_RATE_GUILD_XP_MODIFIER)), this);
+        RewardGuildReputation(xp * sWorld.getConfig(CONFIG_FLOAT_RATE_GUILD_REPUTATION_GAIN) / 450);
+    }
+
     if (getLevel() < sWorld.getConfig(CONFIG_UINT32_MAX_PLAYER_LEVEL))
     {
         GiveXP(xp , NULL);
-
-        if (Guild* guild = sGuildMgr.GetGuildById(GetGuildId()))
-            guild->GiveXP(uint32(xp * sWorld.getConfig(CONFIG_FLOAT_RATE_GUILD_XP_MODIFIER)), this);
 
         // Give player extra money (for max level already included in pQuest->GetRewMoneyMaxLevel())
         if (pQuest->GetRewOrReqMoney() > 0)

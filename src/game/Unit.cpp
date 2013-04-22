@@ -1612,9 +1612,9 @@ void Unit::JustKilledCreature(Creature* victim, Player* responsiblePlayer)
         }
     }
 
-    if (GetTypeId() == TYPEID_PLAYER)
-        if (uint32 guildId = victim->GetMap()->GetOwnerGuildId())
-            if (Guild* guild = sGuildMgr.GetGuildById(guildId))
+    if (Player* plr = GetCharmerOrOwnerPlayerOrPlayerItself())
+        if (Guild* guild = sGuildMgr.GetGuildByGuid(plr->GetGuildGuid()))
+            if (GetMap()->HasGuildGroup(guild->GetObjectGuid()))
                 guild->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_KILL_CREATURE, victim->GetEntry(), 1, victim, 0, (Player*)this);
 }
 

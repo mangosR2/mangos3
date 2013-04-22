@@ -645,7 +645,8 @@ void WorldSession::SendListInventory(ObjectGuid vendorguid)
                         if ((itr->second.Racemask & _player->getRaceMask()) == 0)
                             continue;
 
-                        //if (itr->second.Standing ...
+                        if (itr->second.Standing && _player->GetReputationRank(GUILD_REP_FACTION) < itr->second.Standing)
+                            continue;
                     }
                 }
 
