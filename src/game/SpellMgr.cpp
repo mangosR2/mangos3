@@ -2895,7 +2895,7 @@ bool SpellMgr::IsTargetMatchedWithCreatureType(SpellEntry const* pSpellInfo, Uni
 
 bool SpellMgr::IsReflectableSpell(SpellEntry const* spellInfo)
 {
-    // AoE spells, spells with non-magic DmgClass or SchoolMask or with SPELL_ATTR_EX2_CANT_REFLECTED cannot be reflected
+    // AoE spells, spells with non-magic DmgClass or SchoolMask or with SPELL_ATTR_EX_CANT_REFLECTED cannot be reflected
     if (spellInfo->GetDmgClass() == SPELL_DAMAGE_CLASS_MAGIC &&
         spellInfo->GetSchoolMask() != SPELL_SCHOOL_MASK_NORMAL &&
         !spellInfo->HasAttribute(SPELL_ATTR_EX2_IGNORE_LOS) &&
