@@ -666,8 +666,8 @@ enum MovementFlags
     MOVEFLAG_WALK_MODE          = 0x00000100,               // Walking
     MOVEFLAG_LEVITATING         = 0x00000200,
     MOVEFLAG_ROOT               = 0x00000400,
-    MOVEFLAG_FALLING            = 0x00000800,
-    MOVEFLAG_FALLINGFAR         = 0x00001000,
+    MOVEFLAG_FALLING            = 0x00000800,               // jumping
+    MOVEFLAG_FALLINGFAR         = 0x00001000,               // falling through air
     MOVEFLAG_PENDINGSTOP        = 0x00002000,
     MOVEFLAG_PENDINGSTRAFESTOP  = 0x00004000,
     MOVEFLAG_PENDINGFORWARD     = 0x00008000,
@@ -857,8 +857,8 @@ class MovementInfo
         // used only for SMSG_PLAYER_MOVE currently
         struct StatusInfo
         {
-            StatusInfo() : hasFallData(false), hasFallDirection(false), hasOrientation(false), 
-                hasPitch(false), hasSpline(false), hasSplineElevation(false), 
+            StatusInfo() : hasFallData(false), hasFallDirection(false), hasOrientation(false),
+                hasPitch(false), hasSpline(false), hasSplineElevation(false),
                 hasTimeStamp(false), hasTransportTime2(false), hasTransportTime3(false) { }
             bool hasFallData        : 1;
             bool hasFallDirection   : 1;
