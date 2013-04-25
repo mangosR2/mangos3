@@ -2422,6 +2422,8 @@ void Player::Regenerate(Powers power, uint32 diff)
         {
             if (!m_focusRegenTimer)
                 addvalue += 6.0f * sWorld.getConfig(CONFIG_FLOAT_RATE_POWER_FOCUS);
+            else
+                return;
             break;
         }
         case POWER_HOLY_POWER:

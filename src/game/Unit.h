@@ -1363,7 +1363,7 @@ typedef std::map<uint32, SpellCooldown> SpellCooldowns;
 // Regeneration defines
 #define REGEN_TIME_FULL         2000                        // This determines how often regen value is computed
 #define REGEN_TIME_HOLY_POWER   10000                       // This determines how often holy power regen is processed
-#define REGEN_TIME_PET_FOCUS    2000
+#define REGEN_TIME_PET_FOCUS    1000
 #define REGEN_TIME_PLAYER_FOCUS 1000
 
 // delay time for evading

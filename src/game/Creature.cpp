@@ -663,7 +663,10 @@ void Creature::Regenerate(Powers power)
             break;
         }
         case POWER_FOCUS:
-            addvalue = 24.0f * sWorld.getConfig(CONFIG_FLOAT_RATE_POWER_FOCUS);
+            if (!m_focusRegenTimer)
+                addvalue = 5 * sWorld.getConfig(CONFIG_FLOAT_RATE_POWER_FOCUS);
+            else
+                return;
             break;
         default:
             return;

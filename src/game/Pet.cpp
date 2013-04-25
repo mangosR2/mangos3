@@ -659,6 +659,9 @@ void Pet::Update(uint32 update_diff, uint32 diff)
                 }
             }
 
+            if (getPetType() != HUNTER_PET)
+                break;
+
             RegenerateAll(update_diff);
             break;
         }
