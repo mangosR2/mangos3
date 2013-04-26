@@ -4464,53 +4464,76 @@ TrainerSpellState Player::GetTrainerSpellState(TrainerSpell const* trainer_spell
     if (!trainer_spell)
         return TRAINER_SPELL_RED;
 
-    if (!trainer_spell->learnedSpell)
-        return TRAINER_SPELL_RED;
+    bool hasSpell = true;
+    bool prof = false;
+    for (uint8 i = 0; i < MAX_EFFECT_INDEX ; ++i)
+    {
+        if (!trainer_spell->learnedSpell[i])
+            continue;
 
+        if (SpellMgr::IsProfessionSpell(trainer_spell->learnedSpell[i]))
+            prof = true;
+
+        if (!HasSpell(trainer_spell->learnedSpell[i]))
+        {
+            hasSpell = false;
+            break;
+        }
+    }
     // known spell
-    if (HasSpell(trainer_spell->learnedSpell))
+    if (hasSpell)
         return TRAINER_SPELL_GRAY;
-
-    // check race/class requirement
-    if (!IsSpellFitByClassAndRace(trainer_spell->learnedSpell))
-        return TRAINER_SPELL_RED;
-
-    bool prof = SpellMgr::IsProfessionSpell(trainer_spell->learnedSpell);
 
     // check level requirement
     if (!prof || GetSession()->GetSecurity() < AccountTypes(sWorld.getConfig(CONFIG_UINT32_TRADE_SKILL_GMIGNORE_LEVEL)))
         if (getLevel() < reqLevel)
             return TRAINER_SPELL_RED;
 
-    if (SpellChainNode const* spell_chain = sSpellMgr.GetSpellChainNode(trainer_spell->learnedSpell))
-    {
-        // check prev.rank requirement
-        if (spell_chain->prev && !HasSpell(spell_chain->prev))
-            return TRAINER_SPELL_RED;
-
-        // check additional spell requirement
-        if (spell_chain->req && !HasSpell(spell_chain->req))
-            return TRAINER_SPELL_RED;
-    }
-
     // check skill requirement
     if (!prof || GetSession()->GetSecurity() < AccountTypes(sWorld.getConfig(CONFIG_UINT32_TRADE_SKILL_GMIGNORE_SKILL)))
         if (trainer_spell->reqSkill && GetBaseSkillValue(trainer_spell->reqSkill) < trainer_spell->reqSkillValue)
             return TRAINER_SPELL_RED;
 
-    // exist, already checked at loading
-    SpellEntry const* spell = sSpellStore.LookupEntry(trainer_spell->learnedSpell);
+    for (uint8 i = 0; i < MAX_EFFECT_INDEX; ++i)
+    {
+        if (!trainer_spell->learnedSpell[i])
+            continue;
 
-    // secondary prof. or not prof. spell
-    SpellEffectEntry const* spellEffect = spell->GetSpellEffect(EFFECT_INDEX_1);
-    uint32 skill = spellEffect ? spellEffect->EffectMiscValue : 0;
+        // check race/class requirement
+        if (!IsSpellFitByClassAndRace(trainer_spell->learnedSpell[i]))
+            return TRAINER_SPELL_RED;
 
-    if(spellEffect && (spellEffect->Effect != SPELL_EFFECT_SKILL || !IsPrimaryProfessionSkill(skill)))
-        return TRAINER_SPELL_GREEN;
+        if (SpellChainNode const* spell_chain = sSpellMgr.GetSpellChainNode(trainer_spell->learnedSpell[i]))
+        {
+            // check prev.rank requirement
+            if (spell_chain->prev && !HasSpell(spell_chain->prev))
+                return TRAINER_SPELL_RED;
 
-    // check primary prof. limit
-    if (sSpellMgr.IsPrimaryProfessionFirstRankSpell(spell->Id) && GetFreePrimaryProfessionPoints() == 0)
-        return TRAINER_SPELL_GREEN_DISABLED;
+            // check additional spell requirement
+            if (spell_chain->req && !HasSpell(spell_chain->req))
+                return TRAINER_SPELL_RED;
+        }
+    }
+
+    for (uint8 i = 0; i < MAX_EFFECT_INDEX; ++i)
+    {
+        if (!trainer_spell->learnedSpell[i])
+            continue;
+
+        // exist, already checked at loading
+        SpellEntry const* spell = sSpellStore.LookupEntry(trainer_spell->learnedSpell[i]);
+
+        // secondary prof. or not prof. spell
+        SpellEffectEntry const* spellEffect = spell->GetSpellEffect(EFFECT_INDEX_1);
+        uint32 skill = spellEffect ? spellEffect->EffectMiscValue : 0;
+
+        if (spellEffect && (spellEffect->Effect != SPELL_EFFECT_SKILL || !IsPrimaryProfessionSkill(skill)))
+            return TRAINER_SPELL_GREEN;
+
+        // check primary prof. limit
+        if (sSpellMgr.IsPrimaryProfessionFirstRankSpell(spell->Id) && GetFreePrimaryProfessionPoints() == 0)
+            return TRAINER_SPELL_GREEN_DISABLED;
+    }
 
     return TRAINER_SPELL_GREEN;
 }

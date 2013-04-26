@@ -6456,11 +6456,14 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
                     if (!tSpell)
                         break;
 
-                    if (!tSpell->learnedSpell && !m_bot->IsSpellFitByClassAndRace(tSpell->learnedSpell))
-                        continue;
+                    for (uint8 i = 0; i < MAX_EFFECT_INDEX ; ++i)
+                    {
+                        if (!tSpell->learnedSpell && !m_bot->IsSpellFitByClassAndRace(tSpell->learnedSpell[i]))
+                            continue;
 
-                    if  (sSpellMgr.IsPrimaryProfessionFirstRankSpell(tSpell->learnedSpell) && m_bot->HasSpell(tSpell->learnedSpell))
-                        continue;
+                        if  (sSpellMgr.IsPrimaryProfessionFirstRankSpell(tSpell->learnedSpell[i]) && m_bot->HasSpell(tSpell->learnedSpell[i]))
+                            continue;
+                    }
 
                     TrainerSpellState state =  m_bot->GetTrainerSpellState(tSpell, m_bot->getLevel());
                     if (state != TRAINER_SPELL_GREEN)
