@@ -275,6 +275,10 @@ inline bool IsPassiveSpellStackableWithRanks(SpellEntry const* spellProto)
 
 inline bool IsSpellRemoveAllMovementAndControlLossEffects(SpellEntry const* spellProto)
 {
+    // Bullheaded
+    if (spellProto->Id == 53490)
+        return true;
+
     SpellEffectEntry const* spellEffect0 = spellProto->GetSpellEffect(EFFECT_INDEX_0);
     if (!spellEffect0)
         return false;
