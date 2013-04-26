@@ -224,7 +224,7 @@ void PetAI::MoveInLineOfSight(Unit *u)
         return;
 
     CharmInfo* charmInfo = m_creature->GetCharmInfo();
-    if (charmInfo)
+    if (!charmInfo)
         return;
 
     if (m_creature->IsPet() && charmInfo->HasState(CHARM_STATE_ACTION, ACTIONS_DISABLE))
