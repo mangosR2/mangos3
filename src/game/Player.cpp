@@ -5904,13 +5904,15 @@ bool Player::UpdateCraftSkill(uint32 spellid)
                     learnSpell(discoveredSpell, false);
             }
 
+            int32 chance = SkillGainChance(SkillValue, _spell_idx->second->max_value, (_spell_idx->second->max_value + _spell_idx->second->min_value)/2,
+                _spell_idx->second->min_value);
             uint32 craft_skill_gain = sWorld.getConfig(CONFIG_UINT32_SKILL_GAIN_CRAFTING);
+            if (!_spell_idx->second->characterPoints)
+                sLog.outError("Player::UpdateCraftSkill spell %u has characterPoints == 0!");
+            else if (chance >= sWorld.getConfig(CONFIG_UINT32_SKILL_CHANCE_ORANGE))
+                 craft_skill_gain += _spell_idx->second->characterPoints - 1;
 
-            return UpdateSkillPro(_spell_idx->second->skillId, SkillGainChance(SkillValue,
-                _spell_idx->second->max_value,
-                (_spell_idx->second->max_value + _spell_idx->second->min_value)/2,
-                _spell_idx->second->min_value),
-                craft_skill_gain);
+            return UpdateSkillPro(_spell_idx->second->skillId, chance, craft_skill_gain);
         }
     }
     return false;
@@ -5967,7 +5969,7 @@ bool Player::UpdateSkillPro(uint16 SkillId, int32 Chance, uint32 step)
     if (!SkillId)
         return false;
 
-    Chance = int32(Chance * GetTotalAuraModifier(SPELL_AURA_MOD_SKILLCHANCE) / 100.0f);
+    Chance += int32(Chance * GetTotalAuraModifier(SPELL_AURA_MOD_SKILLCHANCE) / 100.0f);
 
     if(Chance <= 0)                                         // speedup in 0 chance case
     {
