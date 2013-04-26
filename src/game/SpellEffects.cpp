@@ -7289,6 +7289,11 @@ void Spell::EffectEnergize(SpellEffectEntry const* effect)
             }
             break;
         }
+        case 99131:                                         // Divine Fire
+        {
+            damage = m_caster->GetCreateMana() * damage / 100;
+            break;
+        }
         case 101033:                                        // Resurgence
         {
             // spell by wich Resurgence was procced is stored in unexistent effect
