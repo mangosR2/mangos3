@@ -763,6 +763,9 @@ void PetAI::UpdateAI(const uint32 diff)
                             pTarget ? pTarget->GetGuidStr().c_str() : "<none>");
                 switch (result)
                 {
+                    case SPELL_FAILED_TOO_CLOSE:
+                    case SPELL_FAILED_OUT_OF_RANGE:
+                        break; // ignore
                     case SPELL_FAILED_UNIT_NOT_INFRONT:
                     {
                         if (DoCastSpellIfCan(pTarget, spellID) == CAST_OK)
