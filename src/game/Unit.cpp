@@ -12230,7 +12230,13 @@ int32 Unit::CalculateAuraDuration(SpellEntry const* spellProto, uint32 effectMas
                 if (spellProto->Id == 84963)
                 {
                     if (spell && GetPowerIndex(POWER_HOLY_POWER) != INVALID_POWER_INDEX)
-                        duration *= spell->GetUsedHolyPower();
+                    {
+                        int32 power = spell->GetUsedHolyPower();
+                        // Item - Paladin T11 Retribution 4P Bonus
+                        if (caster->HasAura(90299))
+                            power += 1;
+                        duration *= power;
+                    }
                 }
                 break;
             default:
