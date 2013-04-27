@@ -634,6 +634,11 @@ DELETE FROM `spell_proc_event` WHERE `entry` = 51099;
 INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`, `SpellFamilyMaskC0`) VALUE
 (51099, 15, 1+2+4, 4096);
 
+-- Item - Death Knight T12 Blood 2P Bonus
+DELETE FROM `spell_proc_event` WHERE `entry` = 98956;
+INSERT INTO `spell_proc_event` (`entry`, `SchoolMask`) VALUE
+(98956, 127);
+
 ### Mage ###
 
 -- Offensive State (DND)
