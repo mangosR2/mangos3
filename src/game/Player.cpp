@@ -18303,6 +18303,9 @@ void Player::_SaveAuras()
             case 48518: // Eclipse (Lunar)
             case 67483: // Eclipse Marker
             case 67484: // Eclipse Marker
+            case 83582: // Pyromaniac
+            case 96206: // Nature's Bounty
+            case 99158: // Dark Flames
                 continue;
             default:
                 break;

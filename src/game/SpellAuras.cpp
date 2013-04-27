@@ -12646,28 +12646,26 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
                 if (caster->GetTypeId() == TYPEID_PLAYER)
                 {
                     Player* player = (Player*)caster;
-                    if (SpellEntry const * tal = player->GetKnownTalentRankById(10559))
+                    SpellEntry const* tal = player->GetKnownTalentRankById(10559);
+                    if (IsSpellHaveAura(GetSpellProto(), SPELL_AURA_PERIODIC_DAMAGE) ||
+                        IsSpellHaveAura(GetSpellProto(), SPELL_AURA_PERIODIC_DAMAGE_PERCENT) ||
+                        IsSpellHaveAura(GetSpellProto(), SPELL_AURA_PERIODIC_LEECH))
                     {
-                        if (IsSpellHaveAura(GetSpellProto(), SPELL_AURA_PERIODIC_DAMAGE) ||
-                            IsSpellHaveAura(GetSpellProto(), SPELL_AURA_PERIODIC_DAMAGE_PERCENT) ||
-                            IsSpellHaveAura(GetSpellProto(), SPELL_AURA_PERIODIC_LEECH))
+                        if (!apply)
                         {
-                            if (!apply)
-                            {
-                                if (player->m_pyromaniacCounter > 0)
-                                    --player->m_pyromaniacCounter;
+                            if (player->m_pyromaniacCounter > 0)
+                                --player->m_pyromaniacCounter;
 
-                                if (player->m_pyromaniacCounter < 3)
-                                    caster->RemoveAurasDueToSpell(83582);
-                            }
-                            else
+                            if (player->m_pyromaniacCounter < 3 || !tal)
+                                caster->RemoveAurasDueToSpell(83582);
+                        }
+                        else
+                        {
+                            ++player->m_pyromaniacCounter;
+                            if (player->m_pyromaniacCounter >= 3 && tal && !caster->HasAura(83582))
                             {
-                                ++player->m_pyromaniacCounter;
-                                if (player->m_pyromaniacCounter >= 3 && !caster->HasAura(83582))
-                                {
-                                    int32 bp = tal->CalculateSimpleValue(EFFECT_INDEX_0);
-                                    caster->CastCustomSpell(caster, 83582, &bp, NULL, NULL, true);
-                                }
+                                int32 bp = tal->CalculateSimpleValue(EFFECT_INDEX_0);
+                                caster->CastCustomSpell(caster, 83582, &bp, NULL, NULL, true);
                             }
                         }
                     }
@@ -12992,6 +12990,45 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
                 return;
             }
 
+            // Shadow Word: Pain, Devouring Plague, Vampiric Touch
+            if (GetId() == 589 || GetId() == 2944 || GetId() == 34914)
+            {
+                if (Unit* caster = GetCaster())
+                {
+                    // Vampiric Touch
+                    if (GetId() == 34914)
+                        ((Player*)caster)->vampiricTouchTargetGuid = m_target->GetObjectGuid();
+
+                    // Item - Priest T12 Shadow 4P Bonus
+                    if (caster->HasAura(99157))
+                    {
+                        Unit* target;
+                        if (m_target->GetObjectGuid() == ((Player*)caster)->vampiricTouchTargetGuid)
+                            target = m_target;
+                        else
+                            target = caster->GetMap()->GetAnyTypeCreature(((Player*)caster)->vampiricTouchTargetGuid);
+
+                        uint32 count = 0;
+                        if (target)
+                        {
+                            Unit::SpellAuraHolderMap const& holders = target->GetSpellAuraHolderMap();
+                            for (Unit::SpellAuraHolderMap::const_iterator itr = holders.begin(); itr != holders.end(); ++itr)
+                                if ((itr->first == 589 || itr->first == 2944 || itr->first == 34914) && itr->second->GetCasterGuid() == caster->GetObjectGuid())
+                                    ++count;
+                        }
+
+                        // Dark Flames
+                        // Item - Priest T12 Shadow 4P Bonus
+                        if (count < 3)
+                            caster->RemoveAurasDueToSpell(99158);
+                        else
+                            caster->CastSpell(caster, 99158, true);
+                    }
+                    else
+                        caster->RemoveAurasDueToSpell(99158);
+                }
+            }
+
             switch (GetId())
             {
                 // Abolish Disease (remove 1 more poison effect with Body and Soul)
@@ -13040,6 +13077,11 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
                 // Chakra: Sanctuary (Chakra: Sanctuary)
                 case 81206:
                     spellId1 = 81207;
+                    break;
+                // Item - Priest T12 Shadow 4P Bonus
+                case 99157:
+                    if (!apply)
+                        spellId1 = 99158;                   // Dark Flames
                     break;
                 default:
                 {
@@ -13092,24 +13134,22 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
                     if (caster->GetTypeId() == TYPEID_PLAYER)
                     {
                         Player* player = (Player*)caster;
-                        if (SpellEntry const * tal = player->GetKnownTalentRankById(8255))
+                        SpellEntry const * tal = player->GetKnownTalentRankById(8255);
+                        if (!apply)
                         {
-                            if (!apply)
-                            {
-                                if (player->m_naturesBountyCounter > 0)
-                                    --player->m_naturesBountyCounter;
+                            if (player->m_naturesBountyCounter > 0)
+                                --player->m_naturesBountyCounter;
 
-                                if (player->m_naturesBountyCounter < 3)
-                                    caster->RemoveAurasDueToSpell(96206);
-                            }
-                            else
+                            if (player->m_naturesBountyCounter < 3 || !tal)
+                                caster->RemoveAurasDueToSpell(96206);
+                        }
+                        else
+                        {
+                            ++player->m_naturesBountyCounter;
+                            if (player->m_naturesBountyCounter >= 3 && tal && !caster->HasAura(96206))
                             {
-                                ++player->m_naturesBountyCounter;
-                                if (player->m_naturesBountyCounter >= 3 && !caster->HasAura(96206))
-                                {
-                                    int32 bp = -tal->CalculateSimpleValue(EFFECT_INDEX_1);
-                                    caster->CastCustomSpell(caster, 96206, &bp, NULL, NULL, true);
-                                }
+                                int32 bp = -tal->CalculateSimpleValue(EFFECT_INDEX_1);
+                                caster->CastCustomSpell(caster, 96206, &bp, NULL, NULL, true);
                             }
                         }
                     }
