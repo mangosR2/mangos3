@@ -809,8 +809,13 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, DamageInfo* damageI
                 {
                     // Cast on owner
                     target = GetOwner();
-                    if(!target)
+                    if (!target)
                         return SPELL_AURA_PROC_FAILED;
+
+                    // Item - Priest T13 Shadow 4P Bonus (Shadowfiend and Shadowy Apparition)
+                    if (target->HasAura(105844))
+                        for (int i = 0; i < 3; ++i)
+                            target->CastSpell(target, 77487, true);
 
                     triggered_spell_id = 34650;
                     break;
