@@ -13207,6 +13207,13 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
             // Stampede
             else if (GetId() == 81021 || GetId() == 81022)
                 spellId1 = 109881;                          // Stampede Ravage Marker
+            // Harmony
+            else if (GetId() == 100977)
+            {
+                // Item - Druid T11 Restoration 4P Bonus
+                if (!apply || m_target->HasAura(90158))
+                    spellId1 = 90159;
+            }
             else
                 return;
             break;

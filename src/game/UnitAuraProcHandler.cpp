@@ -4811,6 +4811,12 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(Unit *pVictim, DamageIn
                 }
                 return SPELL_AURA_PROC_FAILED;
             }
+            // Item - Druid T11 Restoration 4P Bonus
+            else if (auraSpellInfo->Id == 90158)
+            {
+                // done in other way
+                return SPELL_AURA_PROC_FAILED;
+            }
             break;
         }
         case SPELLFAMILY_ROGUE:
