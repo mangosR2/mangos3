@@ -4632,6 +4632,12 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(Unit *pVictim, DamageIn
             }
             else if (auraSpellInfo->Id == 50421)            // Scent of Blood
                 trigger_spell_id = 50422;
+            else if (auraSpellInfo->Id == 90295)            // Item - Warrior T11 DPS 4P Bonus
+            {
+                if (!procSpell || procSpell->Id == 85288)   // except Raging Blow main spell
+                    return SPELL_AURA_PROC_FAILED;
+                break;
+            }
             break;
         case SPELLFAMILY_WARLOCK:
         {
