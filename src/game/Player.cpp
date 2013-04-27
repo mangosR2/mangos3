@@ -22995,6 +22995,10 @@ void Player::SetRuneConvertAura(uint8 index, Aura const* aura)
 
 void Player::AddRuneByAuraEffect(uint8 index, RuneType newType, Aura const* aura)
 {
+    // Item - Death Knight T11 DPS 4P Bonus
+    if (newType == RUNE_DEATH && HasAura(90459))
+        CastSpell(this, 90507, true);   // Death Eater
+
     SetRuneConvertAura(index, aura); ConvertRune(index, newType);
 }
 

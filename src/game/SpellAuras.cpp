@@ -13603,6 +13603,12 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
                         m_target->RemoveAurasDueToSpell(63621);
                     break;
                 }
+                case 51124:                                 // Killing Machine
+                {
+                    if (apply && m_target->HasAura(90459))  // Item - Death Knight T11 DPS 4P Bonus
+                        spellId1 = 90507;                   // Death Eater
+                    break;
+                }
                 // Pillar of Frost
                 case 51271:
                 {
