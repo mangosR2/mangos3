@@ -13635,6 +13635,16 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
                         spellId1 = 90259;
                     break;
                 }
+                case 81256:                                 // Dancing Rune Weapon
+                {
+                    // Item - Death Knight T12 Blood 4P Bonus
+                    if (!apply && m_target->HasAura(98966))
+                    {
+                        cast_at_remove = true;
+                        spellId1 = 101162;                  // Flaming Rune Weapon
+                    }
+                    break;
+                }
             }
 
             // Improved Blood Presence
