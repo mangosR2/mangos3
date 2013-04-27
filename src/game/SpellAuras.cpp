@@ -9032,6 +9032,10 @@ void Aura::HandleSchoolAbsorb(bool apply, bool Real)
                         }
 
                         customModifier = (baseAmt + spdBonus * spd) * (100.0f + IMP) / 100.0f * (100.0f + SD) / 100.0f;
+                        // Item - Priest T13 Healer 4P Bonus (Holy Word and Power Word: Shield)
+                        if (Aura* aura = caster->GetAura(105832, EFFECT_INDEX_1))
+                            if (roll_chance_i(aura->GetSpellProto()->CalculateSimpleValue(EFFECT_INDEX_0)))
+                                customModifier *= (100.0f + aura->GetModifier()->m_amount) / 100.0f;
                     }
                     break;
 
@@ -9125,6 +9129,9 @@ void Aura::HandleSchoolAbsorb(bool apply, bool Real)
             if (vSpell->GetSpellFamilyName() == SPELLFAMILY_PRIEST && vSpell->GetSpellIconID() == 2894 && (*itr)->GetEffIndex() == EFFECT_INDEX_0)
             {
                 int32 bp = caster->GetMaxPower(POWER_MANA) * (*itr)->GetModifier()->m_amount / 100;
+                // Item - Priest T13 Healer 4P Bonus (Holy Word and Power Word: Shield)
+                if (Aura* aura = caster->GetAura(105832, EFFECT_INDEX_1))
+                    bp += bp * aura->GetModifier()->m_amount / 100.0f;
                 caster->CastCustomSpell(caster, 47755, &bp, NULL, NULL, true);
                 break;
             }
