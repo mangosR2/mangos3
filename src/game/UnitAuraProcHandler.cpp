@@ -617,6 +617,21 @@ SpellAuraProcResult Unit::HandleSpellCritChanceAuraProc(Unit *pVictim, DamageInf
 
     switch(triggeredByAuraSpell->GetSpellFamilyName())
     {
+        case SPELLFAMILY_GENERIC:
+        {
+            // Astral Alignment
+            if (triggeredByAura->GetId() == 90164)
+            {
+                Modifier const* mod = triggeredByAura->GetModifier();
+                mod -= triggeredByAura->GetSpellEffect()->CalculateSimpleValue();
+                if (mod > 0)
+                {
+                    triggeredByAura->GetHolder()->SendAuraUpdate(false);
+                    return SPELL_AURA_PROC_FAILED;
+                }
+            }
+            break;
+        }
         case SPELLFAMILY_MAGE:
         {
             switch(triggeredByAuraSpell->Id)
@@ -6673,6 +6688,16 @@ SpellAuraProcResult Unit::HandleAuraProcOnPowerAmount(Unit* /*pVictim*/, DamageI
 
                 // cast Eclipse
                 CastSpell(this, triggeredByAura->GetSpellEffect()->EffectTriggerSpell, true);
+                // Item - Druid T11 Balance 4P Bonus
+                if (Aura* aura = GetAura(90163, EFFECT_INDEX_0))
+                {
+                    // Astral Alignment
+                    if (SpellEntry const* bonus = sSpellStore.LookupEntry(90164))
+                    {
+                        int32 bp = bonus->CalculateSimpleValue(EFFECT_INDEX_0) * 3;
+                        CastCustomSpell(this, bonus, &bp, NULL, NULL, true, NULL, aura);
+                    }
+                }
 
                 // solar marker or lunar marker
                 markerSpellAdd = triggeredByAura->GetEffIndex() == EFFECT_INDEX_0 ? 67484 : 67483;
