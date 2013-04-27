@@ -4822,7 +4822,7 @@ void Spell::finish(bool ok)
                 {
                     // check caster->GetObjectGuid() let load auras at login and speedup most often case
                     Unit* unit = caster->GetObjectGuid() == ihit->targetGUID ? caster : ObjectAccessor::GetUnit(*m_caster, ihit->targetGUID);
-                    if (unit)
+                    if (unit && unit->isAlive())
                     {
                         SpellEntry const* auraSpellInfo = (*i)->GetSpellProto();
                         SpellEffectIndex auraSpellIdx = (*i)->GetEffIndex();
@@ -4831,7 +4831,23 @@ void Spell::finish(bool ok)
                         int32 chance = caster->CalculateSpellDamage(unit, auraSpellInfo, auraSpellIdx, &auraBasePoints);
                         if (roll_chance_i(chance))
                             if(SpellEffectEntry const* spellEffect = auraSpellInfo->GetSpellEffect(auraSpellIdx))
-                                m_caster->CastSpell(unit, spellEffect->EffectTriggerSpell, true, NULL, (*i)());
+                            {
+                                switch (spellEffect->EffectTriggerSpell)
+                                {
+                                    case 50434:     // Chillblains
+                                    case 50435:
+                                    case 81325:     // Brittle Bones
+                                    case 81326:
+                                    {
+                                        if (unit == caster)
+                                            break;
+                                        // no break
+                                    }
+                                    default:
+                                        m_caster->CastSpell(unit, spellEffect->EffectTriggerSpell, true, NULL, (*i)());
+                                        break;
+                                }
+                            }
                     }
                 }
             }
