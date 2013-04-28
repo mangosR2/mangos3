@@ -581,6 +581,11 @@ DELETE FROM `spell_proc_event` WHERE `entry` = 99175;
 INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskB0`) VALUES
 (99175, 8, 131072);
 
+-- Item - Rogue T13 2P Bonus (Tricks of the Trade)
+DELETE FROM `spell_proc_event` WHERE `entry` = 105849;
+INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskB0`, `procFlags`, `CustomChance`) VALUES
+(105849, 8, 131072, 17424, 100);
+
 ### Death Knight ###
 
 -- Dark Simulacrum
