@@ -2704,13 +2704,13 @@ bool Pet::Summon()
             SetNeedSave(true);
             owner->SetPet(this);
             setFaction(owner->getFaction());
-            // generate new name for first summon pet (not for tempsummoned)
-            if (!isTemporarySummoned())
-            {
-                std::string new_name = sObjectMgr.GeneratePetName(GetEntry());
-                if (!new_name.empty())
-                    SetName(new_name);
-            }
+
+            std::string newName;
+            if (!isTemporarySummoned()) // generate new name for first summon pet (not for tempsummoned)
+                newName = sObjectMgr.GeneratePetName(GetEntry());
+            if (newName.empty())
+                newName = Creature::GetNameForLocaleIdx(sObjectMgr.GetDBCLocaleIndex());
+            SetName(newName);
             break;
         }
         case HUNTER_PET:  // Called only if new tamed pet created
