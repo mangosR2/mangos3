@@ -11704,7 +11704,7 @@ void SpellAuraHolder::_AddSpellAuraHolder()
     {
         if (Aura* aura = GetAuraByEffectIndex(SpellEffectIndex(i)))
         {
-            if (aura->GetModifier()->m_amount)
+            if (aura->GetModifier()->m_amount && IsAuraApplyEffect(m_spellProto, SpellEffectIndex(i)))
             {
                 switch (aura->GetModifier()->m_auraname)
                 {
