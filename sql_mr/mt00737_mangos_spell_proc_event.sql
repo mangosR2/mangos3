@@ -114,6 +114,11 @@ DELETE FROM `spell_proc_event` WHERE `entry` = 99190;
 INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskC0`, `procEx`) VALUES
 (99190, 11, 16, 262144);
 
+-- Item - Shaman T12 Elemental 2P Bonus
+DELETE FROM `spell_proc_event` WHERE `entry` = 99204;
+INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`) VALUES
+(99204, 11, 1);
+
 ### Priest ###
 
 -- Vengeance

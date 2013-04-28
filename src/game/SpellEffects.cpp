@@ -13380,7 +13380,13 @@ void Spell::EffectScriptEffect(SpellEffectEntry const* effect)
                     // Cast Stun
                     if (unitTarget && roll_chance_i(damage))
                         m_caster->CastSpell(unitTarget, 77505, true);
-                    break;
+                    return;
+                }
+                case 99202:                                     // Taming the Flames
+                {
+                    if (unitTarget && unitTarget->GetTypeId() == TYPEID_PLAYER)
+                        ((Player*)unitTarget)->SendModifyCooldown(2894, -4 * IN_MILLISECONDS);
+                    return;
                 }
             }
             break;
