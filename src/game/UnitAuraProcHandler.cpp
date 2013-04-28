@@ -2895,6 +2895,18 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, DamageInfo* damageI
             // Vengeance (paladin)
             else if (dummySpell->Id == 84839)
                 return HandleVengeanceProc(pVictim, damage, triggerAmount);
+            // Item - Paladin T12 Holy 4P Bonus
+            else if(dummySpell->Id == 99070)
+            {
+                if (!procSpell)
+                    return SPELL_AURA_PROC_FAILED;
+                triggered_spell_id = procSpell->Id;
+                basepoints[0] = triggerAmount * damage / 100;
+                target = SelectRandomFriendlyTarget(pVictim, 15.0f);
+                if (!target)
+                    return SPELL_AURA_PROC_FAILED;
+                break;
+            }
 
             // Divine Purpose
             if (dummySpell->SpellIconID == 2170)

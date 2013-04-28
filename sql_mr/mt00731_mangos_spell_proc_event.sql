@@ -245,6 +245,11 @@ DELETE FROM `spell_proc_event` WHERE `entry` = 20165;
 INSERT INTO `spell_proc_event` (`entry`, `SchoolMask`, `ppmRate`) VALUE
 (20165, 127, 20);
 
+-- Item - Paladin T12 Holy 2P Bonus
+DELETE FROM `spell_proc_event` WHERE `entry` = 99067;
+INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskB0`) VALUE
+(99067, 10, 65536);
+
 ### WARLOCK ###
 
 -- Vigilance
