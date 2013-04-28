@@ -551,6 +551,11 @@ DELETE FROM `spell_proc_event` WHERE `entry` = 99174;
 INSERT INTO `spell_proc_event` (`entry`, `SchoolMask`, `procEx`) VALUES
 (99174, 127, 2);
 
+-- Item - Rogue T12 4P Bonus
+DELETE FROM `spell_proc_event` WHERE `entry` = 99175;
+INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskB0`) VALUES
+(99175, 8, 131072);
+
 ### Death Knight ###
 
 -- Dark Simulacrum

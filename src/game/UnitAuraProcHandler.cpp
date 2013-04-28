@@ -2532,6 +2532,15 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, DamageInfo* damageI
                     pVictim->RemoveSpellsCausingAura(SPELL_AURA_PERIODIC_LEECH);
                     break;
                 }
+                case 99175:                                 // Item - Rogue T12 4P Bonus
+                {
+                    uint32 spells[] = { 99186, 99187, 99188 };
+                    for (int i = 0; i < 3; ++i)
+                        RemoveAurasDueToSpell(spells[i]);
+
+                    triggered_spell_id = spells[urand(0, 2)];
+                    break;
+                }
             }
             // Murderous Intent
             if (dummySpell->GetSpellIconID() == 134)
