@@ -5210,6 +5210,16 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(Unit *pVictim, DamageIn
                 if (GetHealthPercent() > 20.0f)
                     return SPELL_AURA_PROC_FAILED;
             }
+            // Item - Paladin T13 Protection 2P Bonus (Judgement)
+            else if (auraSpellInfo->Id == 105800)
+            {
+                if (!damage)
+                    return SPELL_AURA_PROC_FAILED;
+
+                trigger_spell_id = 105801;
+                basepoints[0] = damage * triggerAmount / 100;
+                break;
+            }
             break;
         }
         case SPELLFAMILY_SHAMAN:
