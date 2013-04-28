@@ -215,7 +215,7 @@ void PetAI::Reset()
         );
 }
 
-void PetAI::MoveInLineOfSight(Unit *u)
+void PetAI::MoveInLineOfSight(Unit* u)
 {
     if (m_creature->getVictim())
         return;
@@ -258,9 +258,6 @@ void PetAI::AttackStart(Unit* pTarget)
     Unit* owner = m_creature->GetCharmerOrOwner();
     if (owner && !pTarget->isVisibleForOrDetect(owner, owner, true))
         return;
-
-    m_creature->RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
-    pTarget->RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
 
     if (m_creature->Attack(pTarget, m_AIType != PET_AI_RANGED))
     {
