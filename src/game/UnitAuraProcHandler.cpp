@@ -6656,7 +6656,7 @@ SpellAuraProcResult Unit::HandleAuraProcOnPowerAmount(Unit* /*pVictim*/, DamageI
             else if (powerMod < 0 && triggeredByAura->GetEffIndex() != EFFECT_INDEX_1)
                 return SPELL_AURA_PROC_FAILED;
 
-            // check Eclipse State
+            // while not in Eclipse State
             if (!HasAura(48517) && !HasAura(48518))
             {
                 // only Starfire and Wrath
@@ -6672,9 +6672,12 @@ SpellAuraProcResult Unit::HandleAuraProcOnPowerAmount(Unit* /*pVictim*/, DamageI
                             // energize eclipse
                             if (roll_chance_i((*itr)->GetModifier()->m_amount))
                                 CastCustomSpell(this, 81069, &powerMod, NULL, NULL, true);
-                            break;
                         }
                     }
+
+                    // Item - Druid T12 Balance 4P Bonus
+                    if (HasAura(99049))
+                        powerMod += direction * (procSpell->Id == 2912 ? 5 : 3);
                 }
             }
 
