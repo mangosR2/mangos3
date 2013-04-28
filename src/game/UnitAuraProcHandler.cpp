@@ -2344,6 +2344,15 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, DamageInfo* damageI
                     triggered_spell_id = 99173;
                     basepoints[0] = int32(triggerAmount * (damage + damageInfo->absorb) / 100) / GetSpellAuraMaxTicks(triggered_spell_id);
                 }
+                // Item - Druid T13 Feral 4P Bonus (Frenzied Regeneration and Stampede)
+                case 105735:
+                {
+                    if (triggeredByAura->GetEffIndex() != EFFECT_INDEX_1)
+                        return SPELL_AURA_PROC_FAILED;
+
+                    triggered_spell_id = 105737;
+                    break;
+                }
             }
             // Nature's Ward
             if (dummySpell->GetSpellIconID() == 2250)
@@ -2440,6 +2449,10 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, DamageInfo* damageI
                     }
                     case EFFECT_INDEX_1:    // Feral Charge (Cat)
                     {
+                        // Item - Druid T13 Feral 4P Bonus (Frenzied Regeneration and Stampede)
+                        if (!procSpell || procSpell->Id == 5217 && !HasAura(105735))
+                            return SPELL_AURA_PROC_FAILED;
+
                         triggered_spell_id = dummySpell->Id == 78892 ? 81021 : 81022;
                         break;
                     }

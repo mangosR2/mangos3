@@ -971,6 +971,11 @@ DELETE FROM `spell_proc_event` WHERE `entry` = 99015;
 INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskB0`) VALUES
 (99015, 7, 2);
 
+-- Item - Druid T13 Feral 4P Bonus (Frenzied Regeneration and Stampede)
+DELETE FROM `spell_proc_event` WHERE `entry` = 105735;
+INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskB1`) VALUES
+(105735, 7, 1073741824);
+
 ### Hunter ###
 
 -- Aspect of the Fox

@@ -7770,6 +7770,7 @@ void Aura::HandleAuraModIncreaseHealth(bool apply, bool Real)
             return;
         }
         case 22842:                                         // Frenzied Regeneration (Bear Form)
+        case 105737:                                        // Mass Regeneration (Bear Form)
         {
             if (apply)
                 if (target->GetHealthPercent() < m_modifier.m_amount)
@@ -8733,6 +8734,14 @@ void Aura::HandleShapeshiftBoosts(bool apply)
                         break;
                     }
                 }
+            }
+
+            if (form == FORM_BEAR)
+            {
+                // Item - Druid T13 Feral 4P Bonus (Frenzied Regeneration and Stampede)
+                if (target->HasAura(105735))
+                    // Mass Regeneration (Bear Form)
+                    ((Player*)target)->AddSpellCooldown(105737, 0, time(NULL) + 15);
             }
         }
     }
@@ -10748,6 +10757,10 @@ void Aura::PeriodicDummyTick()
                     float healthPerRage = target->CalculateSpellDamage(target, spell, EFFECT_INDEX_1) / 100.0f;
                     int32 regen = int32(target->GetMaxHealth() * rage * healthPerRage / 100 / 10);
                     target->CastCustomSpell(target, 22845, &regen, NULL, NULL, true, NULL, this);
+                    // Item - Druid T13 Feral 4P Bonus (Frenzied Regeneration and Stampede)
+                    if (target->HasAura(105735))
+                        // Mass Regeneration
+                        target->CastCustomSpell(target, 105739, &regen, NULL, NULL, true, NULL, this);
                     target->ModifyPower(POWER_RAGE, -rage);
                     return;
                 }
