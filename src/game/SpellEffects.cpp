@@ -9364,7 +9364,10 @@ void Spell::EffectWeaponDmg(SpellEffectEntry const* effect)
                         // Searing Flames
                         if (SpellAuraHolderPtr flames = unitTarget->GetSpellAuraHolder(77661, m_caster->GetObjectGuid()))
                         {
-                            totalDamagePercentMod *= (flames->GetStackAmount() * spellInfo->CalculateSimpleValue(EFFECT_INDEX_1) + 100.0f) / 100.0f;
+                            // Item - Shaman T12 Enhancement 2P Bonus
+                            Aura* aura = m_caster->GetAura(99209, EFFECT_INDEX_0);
+
+                            totalDamagePercentMod *= (flames->GetStackAmount() * (spellInfo->CalculateSimpleValue(EFFECT_INDEX_1) + (aura ? aura->GetModifier()->m_amount : 0)) + 100.0f) / 100.0f;
                             unitTarget->RemoveSpellAuraHolder(flames);
                         }
 
