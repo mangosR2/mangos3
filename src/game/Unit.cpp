@@ -12269,6 +12269,16 @@ int32 Unit::CalculateAuraDuration(SpellEntry const* spellProto, uint32 effectMas
             if (Aura* aura = const_cast<Unit*>(caster)->GetAura(58618, EFFECT_INDEX_0))
                 duration += aura->GetModifier()->m_amount;
     }
+    // Burning Rage - Warrior T12 DPS 2P Bonus
+    else if (spellProto->Id == 99233)
+    {
+        // Booming Voice (Rank 1)
+        if (caster->HasAura(12321))
+            duration += 3 * IN_MILLISECONDS;
+        // Booming Voice (Rank 2)
+        else if(!caster->HasAura(12835))
+            duration += 6 * IN_MILLISECONDS;
+    }
     // Kidney Shot and Expose Armor
     else if (spellProto->IsFitToFamily(SPELLFAMILY_ROGUE, UI64LIT(0x280000)))
     {

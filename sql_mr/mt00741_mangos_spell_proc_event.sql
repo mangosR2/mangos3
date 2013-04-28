@@ -462,6 +462,11 @@ DELETE FROM `spell_proc_event` WHERE `entry` = 90295;
 INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`, `SpellFamilyMaskB0`) VALUE
 (90295, 4, 4, 8192);
 
+-- Item - Warrior T12 DPS 2P Bonus
+DELETE FROM `spell_proc_event` WHERE `entry` = 99234;
+INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`, `SpellFamilyMaskB0`) VALUE
+(99234, 4, 65536, 128);
+
 ### Rogue ###
 
 -- Waylay
