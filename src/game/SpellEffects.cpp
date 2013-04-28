@@ -5282,6 +5282,9 @@ void Spell::EffectDummy(SpellEffectEntry const* effect)
                     if (SpellEntry const* spellEntry = sSpellStore.LookupEntry(77443))
                     {
                         int32 bp = spellEntry->CalculateSimpleValue(EFFECT_INDEX_0);
+                        // Item - Hunter T13 2P Bonus (Steady Shot and Cobra Shot)
+                        if (m_caster->HasAura(105732))
+                            bp *= 2;
 
                         if (unitTarget)
                         {
@@ -13135,6 +13138,9 @@ void Spell::EffectScriptEffect(SpellEffectEntry const* effect)
                     if (SpellEntry const* spellEntry = sSpellStore.LookupEntry(77443))
                     {
                         int32 bp = spellEntry->CalculateSimpleValue(EFFECT_INDEX_0);
+                        // Item - Hunter T13 2P Bonus (Steady Shot and Cobra Shot)
+                        if (m_caster->HasAura(105732))
+                            bp *= 2;
 
                         if (unitTarget)
                         {
