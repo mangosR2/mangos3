@@ -2325,6 +2325,13 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, DamageInfo* damageI
                     basepoints[0] = int32(triggerAmount * (damage + damageInfo->absorb) / 100) / GetSpellAuraMaxTicks(triggered_spell_id);
                     break;
                 }
+                // Item - Druid T12 Restoration 4P Bonus
+                case 99015:
+                {
+                    basepoints[0] = damage;
+                    triggered_spell_id = 99017;
+                    break;
+                }
             }
             // Nature's Ward
             if (dummySpell->GetSpellIconID() == 2250)

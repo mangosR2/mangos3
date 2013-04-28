@@ -3042,6 +3042,19 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
             {
                 FillRaidOrPartyHealthPriorityTargets(targetUnitMap, m_caster, m_targets.getUnitTarget(), radius, 1, true, false, true);
             }
+            // Firebloom
+            // Item - Druid T12 Restoration 4P Bonus
+            else if (m_spellInfo->Id == 99017)
+            {
+                PrioritizeHealthUnitQueue healthQueue;
+                for(UnitList::const_iterator itr = targetUnitMap.begin(); itr != targetUnitMap.end(); ++itr)
+                    if (!(*itr)->isDead() && (*itr) != m_targets.getUnitTarget())
+                        healthQueue.push(PrioritizeHealthUnitWraper(*itr));
+
+                targetUnitMap.clear();
+                if (!healthQueue.empty())
+                    targetUnitMap.push_back(healthQueue.top().getUnit());
+            }
             // Cauterizing Flame
             // Item - Priest T12 Healer 4P Bonus
             else if (m_spellInfo->Id == 99152)
