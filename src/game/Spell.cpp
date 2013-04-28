@@ -4830,24 +4830,33 @@ void Spell::finish(bool ok)
                         int32 auraBasePoints = (*i)->GetBasePoints();
                         int32 chance = caster->CalculateSpellDamage(unit, auraSpellInfo, auraSpellIdx, &auraBasePoints);
                         if (roll_chance_i(chance))
-                            if(SpellEffectEntry const* spellEffect = auraSpellInfo->GetSpellEffect(auraSpellIdx))
+                        {
+                            switch (auraSpellInfo->Id)
                             {
-                                switch (spellEffect->EffectTriggerSpell)
+                                case 99009:     // Item - Druid T12 Feral 4P Bonus
                                 {
-                                    case 50434:     // Chillblains
-                                    case 50435:
-                                    case 81325:     // Brittle Bones
-                                    case 81326:
-                                    {
-                                        if (unit == caster)
-                                            break;
-                                        // no break
-                                    }
-                                    default:
-                                        m_caster->CastSpell(unit, spellEffect->EffectTriggerSpell, true, NULL, (*i)());
+                                    if (m_caster->GetTypeId() == TYPEID_PLAYER)
+                                        ((Player*)m_caster)->SendModifyCooldown(50334, -(*i)->GetModifier()->m_amount * IN_MILLISECONDS);
+                                    break;
+                                }
+                                case 50040:     // Chillblains
+                                case 50041:
+                                case 81327:     // Brittle Bones
+                                case 81328:
+                                {
+                                    // don't proc on self
+                                    if (unit == caster)
                                         break;
+                                    // no break
+                                }
+                                default:
+                                {
+                                    if (SpellEffectEntry const* spellEffect = (*i)->GetSpellEffect())
+                                        m_caster->CastSpell(unit, spellEffect->EffectTriggerSpell, true, NULL, (*i)());
+                                    break;
                                 }
                             }
+                        }
                     }
                 }
             }
