@@ -12741,6 +12741,12 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
                     }
                 }
             }
+            // Arcane Power or Icy Veins
+            else if (m_spellProto->Id == 12042 || m_spellProto->Id == 12472)
+            {
+                if (!apply)
+                    spellId1 = 105785;      // Stolen Time
+            }
             // Arcane Missiles!
             else if (m_spellProto->Id == 79683)
             {
@@ -12760,6 +12766,13 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
                     caster->CastSpell(m_target, 80354, true);
                     return;
                 }
+            }
+            // Combustion
+            else if (m_spellProto->Id == 83853)
+            {
+                if (Unit* caster = GetCaster())
+                    caster->RemoveAurasDueToSpell(105785);
+                return;
             }
             // Ice Barrier (non stacking from one caster)
             else if (m_spellProto->GetSpellIconID() == 32)

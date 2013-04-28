@@ -387,6 +387,11 @@ DELETE FROM `creature_template_addon` WHERE `entry` = 44199;
 INSERT INTO `creature_template_addon` (`entry`, `b2_0_sheath`, `auras`) VALUE
 (44199, 1, '91264');
 
+-- Item - Mage T13 2P Bonus (Haste Rating)
+DELETE FROM `spell_proc_event` WHERE `entry` = 105788;
+INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`, `SpellFamilyMaskB0`, `SpellFamilyMaskC0`) VALUES
+(105788, 3, 536870912+1+32, 4096, 4096);
+
 ### Warrior ###
 
 -- Sudden Death

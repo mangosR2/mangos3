@@ -4641,6 +4641,16 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(Unit *pVictim, DamageIn
                     return SPELL_AURA_PROC_FAILED;
                 break;
             }
+            else if (auraSpellInfo->Id == 105788)           // Item - Mage T13 2P Bonus (Haste Rating)
+            {
+                if (!procSpell)
+                    return SPELL_AURA_PROC_FAILED;
+
+                // only Arcane Blast has 100% proc chance
+                if (procSpell->Id == 30451 && !roll_chance_i(triggerAmount))
+                    return SPELL_AURA_PROC_FAILED;
+                break;
+            }
             break;
         case SPELLFAMILY_WARRIOR:
             // Deep Wounds (replace triggered spells to directly apply DoT), dot spell have familyflags
