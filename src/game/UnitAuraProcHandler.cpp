@@ -3839,6 +3839,10 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, DamageInfo* damageI
                 if (cooldown)
                     AddSpellCooldown(dummySpell->Id, 0, time(NULL) + cooldown);
 
+                // Item - Shaman T13 Elemental 4P Bonus (Elemental Overload)
+                if (HasAura(105816))
+                    CastSpell(this, 105821, true);  // Time Rupture
+
                 return SPELL_AURA_PROC_OK;
             }
             // Static Shock
