@@ -4649,6 +4649,10 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(Unit *pVictim, DamageIn
                 // only Arcane Blast has 100% proc chance
                 if (procSpell->Id == 30451 && !roll_chance_i(triggerAmount))
                     return SPELL_AURA_PROC_FAILED;
+
+                // Item - Mage T13 4P Bonus (Arcane Power, Combustion, and Icy Veins)
+                if (HasAura(105790))
+                    CastSpell(this, 105791, true);
                 break;
             }
             break;

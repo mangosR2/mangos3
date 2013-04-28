@@ -12680,6 +12680,12 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
                     }
                     return;
                 }
+                case 105785:                                // Stolen Time
+                {
+                    if (!apply)
+                        spellId1 = 105791;
+                    break;
+                }
                 default:
                     return;
             }
