@@ -649,6 +649,11 @@ DELETE FROM `spell_proc_event` WHERE `entry` = 105552;
 INSERT INTO `spell_proc_event` (`entry`, `SchoolMask`, `Cooldown`) VALUE
 (105552, 127, 45);
 
+-- Item - Death Knight T12 DPS 4P Bonus
+DELETE FROM `spell_proc_event` WHERE `entry` = 98996;
+INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskB0`) VALUE
+(98996, 15, 131072+134217728);
+
 ### Mage ###
 
 -- Offensive State (DND)

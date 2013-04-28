@@ -4008,6 +4008,13 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, DamageInfo* damageI
                 }
                 return SPELL_AURA_PROC_OK;
             }
+            // Item - Death Knight T12 DPS 4P Bonus
+            else if (dummySpell->Id == 98996)
+            {
+                triggered_spell_id = 99000;
+                basepoints[0] = triggerAmount * (damage + damageInfo->absorb) / 100 / GetSpellAuraMaxTicks(triggered_spell_id);
+                break;
+            }
             // Wandering Plague
             if (dummySpell->GetSpellIconID() == 1614)
             {
