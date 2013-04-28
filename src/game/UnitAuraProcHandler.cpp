@@ -4879,6 +4879,16 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(Unit *pVictim, DamageIn
                 if (!pVictim || pVictim->GetHealthPercent() > triggerAmount)
                     return SPELL_AURA_PROC_FAILED;
 
+                // Item - Druid T13 Feral 2P Bonus (Savage Defense and Blood In The Water)
+                if (Aura* aura = GetAura(105725, EFFECT_INDEX_0))
+                {
+                    if (pVictim->GetHealthPercent() > aura->GetSpellProto()->CalculateSimpleValue(EFFECT_INDEX_1))
+                        return SPELL_AURA_PROC_FAILED;
+                }
+                // common case
+                else if (pVictim->GetHealthPercent() > triggerAmount)
+                    return SPELL_AURA_PROC_FAILED;
+
                 // Rip and Ferocius Bite have intersecting class masks
                 if (!procSpell || procSpell->Id != 22568)
                     return SPELL_AURA_PROC_FAILED;
@@ -5563,7 +5573,14 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(Unit *pVictim, DamageIn
         // Druid - Savage Defense
         case 62606:
         {
-            if (!roll_chance_i(triggeredByAura->GetSpellProto()->CalculateSimpleValue(EFFECT_INDEX_1)))
+            int32 chance = triggeredByAura->GetSpellProto()->CalculateSimpleValue(EFFECT_INDEX_1);
+            // Item - Druid T13 Feral 2P Bonus (Savage Defense and Blood In The Water)
+            if (Aura* aura = GetAura(105725, EFFECT_INDEX_0))
+                // if procced by Mangle (Bear) with Pulverize active
+                if (procSpell && procSpell->Id == 33878 && HasAura(80951))
+                    chance = aura->GetModifier()->m_amount;
+
+            if (!roll_chance_i(chance))
                 return SPELL_AURA_PROC_FAILED;
 
             basepoints[0] = int32(GetTotalAttackPowerValue(BASE_ATTACK) * triggerAmount / 100);
