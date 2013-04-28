@@ -12212,36 +12212,60 @@ int32 Unit::CalculateAuraDuration(SpellEntry const* spellProto, uint32 effectMas
             duration = 0;
     }
 
-    if (caster == this)
+    switch (spellProto->Id)
     {
-        switch(spellProto->GetSpellFamilyName())
+        case 774:  // Rejuvenation
+        case 8936: // Regrowth
         {
-            case SPELLFAMILY_DRUID:
-                // Thorns
-                if (spellProto->GetSpellIconID() == 53 && spellProto->GetSpellFamilyFlags().test<CF_DRUID_THORNS>())
-                {
-                    // Glyph of Thorns
-                    if (Aura *aur = GetAura(57862, EFFECT_INDEX_0))
-                        duration += aur->GetModifier()->m_amount * MINUTE * IN_MILLISECONDS;
-                }
-                break;
-            case SPELLFAMILY_PALADIN:
-                // Inquisition
-                if (spellProto->Id == 84963)
-                {
-                    if (spell && GetPowerIndex(POWER_HOLY_POWER) != INVALID_POWER_INDEX)
-                    {
-                        int32 power = spell->GetUsedHolyPower();
-                        // Item - Paladin T11 Retribution 4P Bonus
-                        if (caster->HasAura(90299))
-                            power += 1;
-                        duration *= power;
-                    }
-                }
-                break;
-            default:
-                break;
+            // Item - Druid T13 Restoration 4P Bonus (Rejuvenation)
+            if (Aura* aura = const_cast<Unit*>(caster)->GetAura(105770, EFFECT_INDEX_0))
+                if (roll_chance_i(aura->GetModifier()->m_amount))
+                    duration *= 2;
+            break;
         }
+        case 1122:  // Summon Infernal
+        case 18540: // Summon Doomguard
+        {
+            // Item - Warlock T13 2P Bonus (Doomguard and Infernal)
+            if (Aura* aura = const_cast<Unit*>(caster)->GetAura(105888, EFFECT_INDEX_0))
+                if (HasSpell(30146)) // demonology spec
+                    duration += aura->GetModifier()->m_amount * IN_MILLISECONDS;
+                else
+                    duration += aura->GetSpellProto()->CalculateSimpleValue(EFFECT_INDEX_1) * IN_MILLISECONDS;
+            break;
+        }
+        case 47476: // Strangulate
+        {
+            if (IsNonMeleeSpellCasted(false))
+                // Glyph of Strangulate
+                if (Aura* aura = const_cast<Unit*>(caster)->GetAura(58618, EFFECT_INDEX_0))
+                    duration += aura->GetModifier()->m_amount;
+            break;
+        }
+        case 84963: // Inquisition
+        {
+            if (spell && GetPowerIndex(POWER_HOLY_POWER) != INVALID_POWER_INDEX)
+            {
+                int32 power = spell->GetUsedHolyPower();
+                // Item - Paladin T11 Retribution 4P Bonus
+                if (caster->HasAura(90299))
+                    power += 1;
+                duration *= power;
+            }
+            break;
+        }
+        case 99233: // Burning Rage
+        {
+            // Booming Voice (Rank 1)
+            if (caster->HasAura(12321))
+                duration += 3 * IN_MILLISECONDS;
+            // Booming Voice (Rank 2)
+            else if(!caster->HasAura(12835))
+                duration += 6 * IN_MILLISECONDS;
+            break;
+        }
+        default:
+            break;
     }
 
     // Wyvern Sting
@@ -12288,9 +12312,9 @@ int32 Unit::CalculateAuraDuration(SpellEntry const* spellProto, uint32 effectMas
             duration += 6 * IN_MILLISECONDS;
     }
     // Kidney Shot and Expose Armor
-    else if (spellProto->IsFitToFamily(SPELLFAMILY_ROGUE, UI64LIT(0x280000)))
+    if (spellProto->IsFitToFamily(SPELLFAMILY_ROGUE, UI64LIT(0x280000)))
     {
-        // Revealig Strike
+        // Revealing Strike
         if (SpellAuraHolderPtr holder = GetSpellAuraHolder(84617, caster->GetObjectGuid()))
             if (Aura const* aura = holder->GetAuraByEffectIndex(EFFECT_INDEX_2))
                 duration = int32(duration * (aura->GetModifier()->m_amount + 100.0f) / 100.0f);
