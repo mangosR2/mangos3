@@ -24,7 +24,8 @@
 #include "GridNotifiers.h"
 
 TemporarySummon::TemporarySummon(ObjectGuid summoner) :
-    Creature(CREATURE_SUBTYPE_TEMPORARY_SUMMON), m_type(TEMPSUMMON_TIMED_OR_CORPSE_DESPAWN), m_timer(0), m_lifetime(0), m_summoner(summoner), m_isActive(true)
+    Creature(CREATURE_SUBTYPE_TEMPORARY_SUMMON), m_type(TEMPSUMMON_TIMED_OR_CORPSE_DESPAWN),
+    m_timer(0), m_lifetime(0), m_summoner(summoner), m_isActive(true)
 {
 }
 
@@ -51,7 +52,9 @@ void TemporarySummon::Update(uint32 update_diff, uint32 diff)
         }
         case TEMPSUMMON_CORPSE_TIMED_DESPAWN:
         {
-            if (IsCorpse())
+            if (IsDespawned())
+                ua = TSUA_UNSUMMON;
+            else if (IsCorpse())
                 ua = TSUA_CHECK_TIMER;
             break;
         }
@@ -93,18 +96,9 @@ void TemporarySummon::Update(uint32 update_diff, uint32 diff)
             break;
         }
         case TEMPSUMMON_LOST_OWNER_DESPAWN:
-        {
-            if (!GetSummoner())
-            {
-                m_type = TEMPSUMMON_TIMED_DESPAWN;
-                m_lifetime = DEFAULT_DESPAWN_DELAY;
-                ua = TSUA_RESET_TIMER;
-            }
-            break;
-        }
         case TEMPSUMMON_DEAD_OR_LOST_OWNER_DESPAWN:
         {
-            if (IsDespawned())
+            if (m_type == TEMPSUMMON_DEAD_OR_LOST_OWNER_DESPAWN && IsDespawned())
                 ua = TSUA_UNSUMMON;
             else if (!GetSummoner())
             {
