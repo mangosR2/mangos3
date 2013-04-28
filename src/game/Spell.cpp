@@ -2893,6 +2893,8 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
             }
             else if (m_spellInfo->Id == 70940)              // Divine Guardian
                 FillRaidOrPartyTargets(targetUnitMap, m_caster, m_caster, radius, true, true, false);
+            else if (m_spellInfo->Id == 105588)             // Vampiric Blood
+                FillRaidOrPartyTargets(targetUnitMap, m_caster, m_caster, radius, true, true, false);
             else
                 FillRaidOrPartyTargets(targetUnitMap, m_caster, m_caster, radius, true, true, IsPositiveSpell(m_spellInfo->Id));
             break;
@@ -4371,6 +4373,13 @@ void Spell::cast(bool skipCheck)
             // Pestilence
             else if (m_spellInfo->Id == 50842)
                 AddPrecastSpell(76243);                     // dot damage reducer
+            // Vampiric Blood
+            else if (m_spellInfo->Id == 55233)
+            {
+                // Item - Death Knight T13 Blood 4P Bonus
+                if (m_caster->HasAura(105587))
+                    AddTriggeredSpell(105588);
+            }
             break;
         }
         default:
