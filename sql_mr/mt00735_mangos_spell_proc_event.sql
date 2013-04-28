@@ -109,15 +109,10 @@ DELETE FROM `spell_proc_event` WHERE `entry` = 63237;
 INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskB0`, `procFlags`, `CustomChance`) VALUES
 (63237, 6, 2, 2, 100);
 
--- Item - Priest T11 Healer 4P Bonus
-DELETE FROM `spell_proc_event` WHERE `entry` = 89911;
-INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskB0`, `procFlags`, `CustomChance`) VALUES
-(89911, 6, 65536, 16384, 100);
-
--- Item - Priest T12 Healer 2P Bonus
-DELETE FROM `spell_proc_event` WHERE `entry` = 99134;
-INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`, `SpellFamilyMaskB0`) VALUES
-(99134, 6, 2048+4096+1024, 32);
+-- Item - Shaman T12 Restoration 2P Bonus
+DELETE FROM `spell_proc_event` WHERE `entry` = 99190;
+INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskC0`, `procEx`) VALUES
+(99190, 11, 16, 262144);
 
 ### Priest ###
 
@@ -232,6 +227,16 @@ INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`)
 DELETE FROM `spell_proc_event` WHERE `entry` = 76672;
 INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskB0`, `SpellFamilyMaskC0`, `procFlags`) VALUE
 (76672, 10, 131072+32768, 8192, 16+4096);
+
+-- Item - Priest T11 Healer 4P Bonus
+DELETE FROM `spell_proc_event` WHERE `entry` = 89911;
+INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskB0`, `procFlags`, `CustomChance`) VALUES
+(89911, 6, 65536, 16384, 100);
+
+-- Item - Priest T12 Healer 2P Bonus
+DELETE FROM `spell_proc_event` WHERE `entry` = 99134;
+INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`, `SpellFamilyMaskB0`) VALUES
+(99134, 6, 2048+4096+1024, 32);
 
 ### Paladin ###
 

@@ -7302,6 +7302,7 @@ void Spell::EffectEnergize(SpellEffectEntry const* effect)
         case 99007:                                         // Heartfire
         case 99069:                                         // Fires of Heaven
         case 99131:                                         // Divine Fire
+        case 99189:                                         // Flametide
         {
             damage = m_caster->GetCreateMana() * damage / 100;
             break;
