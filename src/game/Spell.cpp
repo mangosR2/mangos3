@@ -4337,6 +4337,13 @@ void Spell::cast(bool skipCheck)
             // Heroism
             else if (m_spellInfo->Id == 32182)
                 AddPrecastSpell(57723);                     // Exhaustion
+            // Stormstrike
+            else if (m_spellInfo->Id == 17364)
+            {
+                // Item - Shaman T12 Enhancement 4P Bonus
+                if (m_caster->HasAura(99213))
+                    AddTriggeredSpell(99212);
+            }
             // Spirit Walk
             else if (m_spellInfo->Id == 58875)
                 AddPrecastSpell(58876);
