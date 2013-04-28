@@ -1406,6 +1406,28 @@ void Aura::HandleAddModifier(bool apply, bool Real)
 
     switch (GetId())
     {
+        case 59052:     // Freezing Fog
+        {
+            if (apply)
+            {
+                // Item - Death Knight T13 DPS 2P Bonus
+                if (Aura* aura = target->GetAura(105609, EFFECT_INDEX_0))
+                    if (roll_chance_i(aura->GetSpellProto()->CalculateSimpleValue(EFFECT_INDEX_1)))
+                        GetHolder()->SetAuraCharges(2);
+            }
+            break;
+        }
+        case 81340:     // Sudden Doom
+        {
+            if (apply)
+            {
+                // Item - Death Knight T13 DPS 2P Bonus
+                if (Aura* aura = target->GetAura(105609, EFFECT_INDEX_0))
+                    if (roll_chance_i(aura->GetModifier()->m_amount))
+                        GetHolder()->SetAuraCharges(2);
+            }
+            break;
+        }
         case 81661:     // Evangelism
         case 87118:     // Dark Evangelism
         {
