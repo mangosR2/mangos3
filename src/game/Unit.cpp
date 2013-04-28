@@ -12261,6 +12261,14 @@ int32 Unit::CalculateAuraDuration(SpellEntry const* spellProto, uint32 effectMas
             }
         }
     }
+    // Rejuvenation or Regrowth
+    if (spellProto->Id == 774 || spellProto->Id == 8936)
+    {
+        // Item - Druid T13 Restoration 4P Bonus (Rejuvenation)
+        if (Aura* aura = const_cast<Unit*>(caster)->GetAura(105770, EFFECT_INDEX_0))
+            if (roll_chance_i(aura->GetModifier()->m_amount))
+                duration *= 2;
+    }
     // Strangulate
     else if (spellProto->Id == 47476)
     {
