@@ -4025,6 +4025,9 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, DamageInfo* damageI
 
                 Player* player = (Player*)this;
 
+                // Item - Death Knight T13 DPS 4P Bonus
+                Aura* bonus = GetAura(105646, EFFECT_INDEX_0);
+
                 int32 runicCorruptionBp = 0;
                 // Search Runic Corruption
                 Unit::AuraList const& dummyAuras = GetAurasByType(SPELL_AURA_DUMMY);
@@ -4037,8 +4040,15 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, DamageInfo* damageI
                     }
                 }
 
+                // Runic Corruption
                 if (runicCorruptionBp)
+                {
                     CastCustomSpell(this, 51460, &runicCorruptionBp, &runicCorruptionBp, NULL, true);
+                    // Runic Mastery
+                    if (bonus && roll_chance_i(bonus->GetSpellProto()->CalculateSimpleValue(EFFECT_INDEX_1)))
+                        CastSpell(this, 105647, true);
+                }
+                // Runic Empowerment
                 else
                 {
                     std::vector<uint8> cdRunes;
@@ -4069,6 +4079,9 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, DamageInfo* damageI
                             spellId = 81168;
 
                         CastSpell(this, spellId, true);
+                        // Runic Mastery
+                        if (bonus && roll_chance_i(bonus->GetModifier()->m_amount))
+                            CastSpell(this, 105647, true);
                     }
                 }
                 return SPELL_AURA_PROC_OK;
