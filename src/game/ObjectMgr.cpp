@@ -6668,11 +6668,9 @@ std::string ObjectMgr::GeneratePetName(uint32 entry)
 
     if (list0.empty() || list1.empty())
     {
-        CreatureInfo const *cinfo = GetCreatureTemplate(entry);
+        CreatureInfo const* cinfo = GetCreatureTemplate(entry);
         char const* petname = GetPetName(cinfo->family, sWorld.GetDefaultDbcLocale());
-        if (!petname)
-            petname = cinfo->Name;
-        return std::string(petname);
+        return std::string(petname ? petname : "");
     }
 
     return *(list0.begin()+urand(0, list0.size()-1)) + *(list1.begin()+urand(0, list1.size()-1));
