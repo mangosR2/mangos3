@@ -13576,6 +13576,27 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
             spellId3 = 63514;                               // placeholder for talent spell mods
             break;
         }
+        case SPELLFAMILY_SHAMAN:
+        {
+            // Maelstrom Weapon
+            if (GetId() == 53817)
+            {
+                //  Item - Shaman T13 Enhancement 2P Bonus (Maelstrom Weapon)
+                if (!apply || m_target->HasAura(105866))
+                    spellId1 = 105869;
+            }
+            // Temporal Maelstrom
+            else if (GetId() == 105869)
+            {
+                // Maelstrom Weapon
+                if (apply && !m_target->HasAura(53817))
+                {
+                    m_target->RemoveAurasDueToSpell(GetId());
+                    return;
+                }
+            }
+            break;
+        }
         case SPELLFAMILY_DEATHKNIGHT:
         {
             // second part of spell apply
