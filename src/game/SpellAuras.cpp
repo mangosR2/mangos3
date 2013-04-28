@@ -13584,6 +13584,15 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
                 //  Item - Shaman T13 Enhancement 2P Bonus (Maelstrom Weapon)
                 if (!apply || m_target->HasAura(105866))
                     spellId1 = 105869;
+                break;
+            }
+            // Spiritwalker's Grace
+            else if (GetId() == 79206)
+            {
+                // Item - Shaman T13 Restoration 4P Bonus (Spiritwalker's Grace)
+                if (!apply || m_target->HasAura(105876))
+                    spellId1 = 105877;
+                break;
             }
             // Temporal Maelstrom
             else if (GetId() == 105869)
@@ -13594,6 +13603,7 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
                     m_target->RemoveAurasDueToSpell(GetId());
                     return;
                 }
+                break;
             }
 
             if (apply)
