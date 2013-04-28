@@ -119,6 +119,11 @@ DELETE FROM `spell_proc_event` WHERE `entry` = 99204;
 INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`) VALUES
 (99204, 11, 1);
 
+-- Item - Shaman T13 Enhancement 4P Bonus (Feral Spirits)
+DELETE FROM `spell_pet_auras` WHERE `spell` = 105872; 
+INSERT INTO `spell_pet_auras` (`spell`, `effectId`, `pet`, `aura`) VALUE
+(105872, 0, 29264, 105873);
+
 ### Priest ###
 
 -- Vengeance

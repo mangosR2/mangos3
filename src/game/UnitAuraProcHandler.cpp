@@ -3593,6 +3593,13 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, DamageInfo* damageI
                     ls->SetAuraCharges(minCharges);
                     return SPELL_AURA_PROC_OK;
                 }
+                // Item - Shaman T13 Enhancement 4P Effect (Feral Spirits)
+                case 105873:
+                {
+                    if (Unit* owner = GetOwner())
+                        owner->CastSpell(owner, 53817, true);       // Maelstrom Weapon
+                    return SPELL_AURA_PROC_OK;
+                }
             }
             // Earth's Grasp
             if (dummySpell->SpellIconID == 20)
