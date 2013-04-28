@@ -3607,6 +3607,12 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, DamageInfo* damageI
                 target = this;
                 break;
             }
+            // Lava Surge
+            if (dummySpell->GetSpellIconID() == 4777)
+            {
+                triggered_spell_id = 77762;
+                break;
+            }
             // Telluric Currents
             if (dummySpell->SpellIconID == 320)
             {

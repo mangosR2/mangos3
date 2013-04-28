@@ -4600,6 +4600,19 @@ void Spell::EffectDummy(SpellEffectEntry const* effect)
                     m_caster->CastSpell(unitTarget, 74454, true, NULL, NULL, m_caster->GetObjectGuid(), m_spellInfo);
                     return;
                 }
+                case 77762:                                 // Lava Surge!
+                {
+                    if (!unitTarget)
+                        return;
+
+                    if (unitTarget->GetTypeId() == TYPEID_PLAYER)
+                        ((Player*)unitTarget)->RemoveSpellCooldown(51505, true);
+
+                    // Item - Shaman T12 Elemental 4P Bonus
+                    if (unitTarget->HasAura(99206))
+                        unitTarget->CastSpell(unitTarget, 99207, true);
+                    return;
+                }
                 default:
                     break;
             }
