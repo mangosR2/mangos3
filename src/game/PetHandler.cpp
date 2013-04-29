@@ -54,6 +54,20 @@ void WorldSession::HandlePetAction(WorldPacket& recv_data)
         return;
     }
 
+    // copyguids system (for treants or spirit wolves)
+    ObjectGuid copyguid = ObjectGuid(pet->GetObjectGuid().GetHigh(), pet->GetObjectGuid().GetEntry()-1, pet->GetGUIDLow()-1);
+    Unit* pet2= ObjectAccessor::GetUnit(*_player, copyguid);
+    if (pet2 && pet2->GetEntry() == pet->GetEntry() && pet2->GetOwnerGuid() == pet->GetOwnerGuid())
+    {
+        WorldPacket *virtualpacket = new WorldPacket(recv_data.GetOpcode());
+        *virtualpacket << copyguid;
+        *virtualpacket << data;
+        *virtualpacket << targetGuid;
+        *virtualpacket << x << y << z;
+        HandlePetAction(*virtualpacket);
+        delete virtualpacket;
+    }
+
     if (GetPlayer()->GetObjectGuid() != pet->GetCharmerOrOwnerGuid())
     {
         sLog.outError("HandlePetAction: %s isn't controlled by %s.", petGuid.GetString().c_str(), GetPlayer()->GetGuidStr().c_str());
