@@ -2911,6 +2911,11 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
                 FillRaidOrPartyTargets(targetUnitMap, m_caster, m_caster, radius, true, true, IsPositiveSpell(m_spellInfo->Id));
             break;
         }
+        case TARGET_119:
+        {
+            FillRaidOrPartyTargets(targetUnitMap, m_caster, m_caster, radius, true, false, false);
+            break;
+        }
         case TARGET_SINGLE_FRIEND:
         case TARGET_SINGLE_FRIEND_2:
             if (m_targets.getUnitTarget())

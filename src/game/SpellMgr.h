@@ -369,6 +369,7 @@ inline bool IsCasterSourceTarget(uint32 target)
         case TARGET_RANDOM_CIRCUMFERENCE_POINT:
         case TARGET_DEST_RADIUS:
         case TARGET_RANDOM_NEARBY_DEST:
+        case TARGET_119:
             return true;
         default:
             break;
@@ -514,6 +515,7 @@ inline bool IsAreaEffectPossitiveTarget( Targets target )
         case TARGET_AREAEFFECT_PARTY:
         case TARGET_ALL_RAID_AROUND_CASTER:
         case TARGET_AREAEFFECT_PARTY_AND_CLASS:
+        case TARGET_119:
             return true;
         default:
             break;
@@ -541,6 +543,7 @@ inline bool IsAreaEffectTarget( Targets target )
         case TARGET_ALL_RAID_AROUND_CASTER:
         case TARGET_AREAEFFECT_PARTY_AND_CLASS:
         case TARGET_IN_FRONT_OF_CASTER_30:
+        case TARGET_119:
             return true;
         default:
             break;
