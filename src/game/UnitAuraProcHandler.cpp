@@ -1266,6 +1266,18 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, DamageInfo* damageI
                         return SPELL_AURA_PROC_FAILED;
                     break;
                 }
+                case 109786:                                // Indomitable
+                {
+                    if (triggeredByAura->GetEffIndex() != EFFECT_INDEX_1)
+                        return SPELL_AURA_PROC_FAILED;
+
+                    if (GetHealthPercent() > triggeredByAura->GetSpellProto()->CalculateSimpleValue(EFFECT_INDEX_0))
+                        return SPELL_AURA_PROC_FAILED;
+
+                    basepoints[0] = triggerAmount * damage / 100;
+                    triggered_spell_id = 108008;
+                    break;
+                }
             }
             break;
         }
