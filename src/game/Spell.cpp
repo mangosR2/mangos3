@@ -2904,6 +2904,8 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
                 FillRaidOrPartyTargets(targetUnitMap, m_caster, m_caster, radius, true, true, false);
             else if (m_spellInfo->Id == 105739)             // Mass Regeneration
                 FillRaidOrPartyTargets(targetUnitMap, m_caster, m_caster, radius, true, true, false);
+            else if (m_spellInfo->Id == 105914)             // Shield Fortress
+                FillRaidOrPartyTargets(targetUnitMap, m_caster, m_caster, radius, true, true, false);
             else
                 FillRaidOrPartyTargets(targetUnitMap, m_caster, m_caster, radius, true, true, IsPositiveSpell(m_spellInfo->Id));
             break;

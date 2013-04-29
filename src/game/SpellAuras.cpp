@@ -12878,8 +12878,17 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
         }
         case SPELLFAMILY_WARRIOR:
         {
+            // Shield Wall
+            if (GetId() == 871)
+            {
+                // Item - Warrior T13 Protection 4P Bonus (Shield Wall)
+                // Shield Fortress
+                if (apply && m_target->HasAura(105911))
+                    spellId1 = 105914;
+                break;
+            }
             // Inner Rage
-            if (GetId() == 1134)
+            else if (GetId() == 1134)
             {
                 // Item - Warrior T13 Arms and Fury 2P Bonus (Inner Rage)
                 // Volatile Outrage
