@@ -497,6 +497,11 @@ DELETE FROM `spell_proc_event` WHERE `entry` = 105907;
 INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`, `SpellFamilyMaskB0`) VALUE
 (105907, 4, 33554432, 1024);
 
+-- Item - Warrior T13 Protection 2P Bonus (Revenge)
+DELETE FROM `spell_proc_event` WHERE `entry` = 105908;
+INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`) VALUE
+(105908, 4, 1024);
+
 ### Rogue ###
 
 -- Waylay
