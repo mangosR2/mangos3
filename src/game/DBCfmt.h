@@ -144,6 +144,7 @@ const char TaxiNodesEntryfmt[]="nifffsiixxx";
 const char TaxiPathEntryfmt[]="niii";
 const char TaxiPathNodeEntryfmt[]="diiifffiiii";
 const char TotemCategoryEntryfmt[]="nxii";
+const char TransportAnimationEntryfmt[]="diixxxx";
 const char VehicleEntryfmt[]="niffffiiiiiiiifffffffffffffffssssfifiixx";
 const char VehicleSeatEntryfmt[]="niiffffffffffiiiiiifffffffiiifffiiiiiiiffiiiiixxxxxxxxxxxxxxxxxxxx";
 const char WMOAreaTableEntryfmt[]="niiixxxxxiixxxx";
