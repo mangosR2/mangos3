@@ -390,6 +390,11 @@ INSERT INTO `spell_proc_event` (`entry`, `SchoolMask`, `procFlags`, `procEx`) VA
 -- Glyph of Drain Soul
 DELETE FROM `spell_proc_event` WHERE `entry` = 58070;
 
+-- Item - Warlock T13 4P Bonus (Soulburn)
+DELETE FROM `spell_proc_event` WHERE `entry` = 105787;
+INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskC0`) VALUE
+(105787, 5, 33554432);
+
 ### Mage ###
 
 -- Ring of Frost
@@ -481,6 +486,11 @@ INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`,
 DELETE FROM `spell_proc_event` WHERE `entry` = 99234;
 INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`, `SpellFamilyMaskB0`) VALUE
 (99234, 4, 65536, 128);
+
+-- Item - Warrior T13 Arms and Fury 2P Bonus (Inner Rage)
+DELETE FROM `spell_proc_event` WHERE `entry` = 105797;
+INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskC0`) VALUE
+(105797, 4, 536870912);
 
 ### Rogue ###
 

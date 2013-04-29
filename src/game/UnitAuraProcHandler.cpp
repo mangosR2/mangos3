@@ -6158,10 +6158,14 @@ SpellAuraProcResult Unit::HandleAddPctModifierAuraProc(Unit* pVictim, DamageInfo
                     case 48020:     // Demonic Circle: Teleport
                         CastSpell(this, 79438, true);
                         break;
+                    case 6353:      // Soul Fire
+                        // Item - Warlock T13 4P Bonus (Soulburn)
+                        if (HasAura(105787))
+                            CastSpell(this, 87388, true);   // Soul Shard
+                        break;
                     case 688:       // Summon Imp
                     case 691:       // Summon Felhunter
                     case 697:       // Summon Voidwalker
-                    case 6353:      // Soul Fire
                     case 11519:     // Summon Succubus
                     case 30146:     // Summon Felguard
                     case 89420:     // Drain Life

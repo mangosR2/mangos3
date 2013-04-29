@@ -12878,8 +12878,17 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
         }
         case SPELLFAMILY_WARRIOR:
         {
+            // Inner Rage
+            if (GetId() == 1134)
+            {
+                // Item - Warrior T13 Arms and Fury 2P Bonus (Inner Rage)
+                // Volatile Outrage
+                if (!apply)
+                    spellId1 = 105860;
+                break;
+            }
             // Shield Block (Defensive Stance)
-            if (GetId() == 2565)
+            else if (GetId() == 2565)
             {
                 // Item - Warrior T12 Protection 4P Bonus
                 if (!apply && m_target->HasAura(99242))
@@ -12887,7 +12896,9 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
                     spellId1 = 99243;
                     cast_at_remove = true;
                 }
+                break;
             }
+
             if(!apply)
             {
                 // Remove Blood Frenzy only if target no longer has any Deep Wound or Rend (applying is handled by procs)
