@@ -3058,9 +3058,10 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
             }
             // Atonement
             else if (m_spellInfo->Id == 94472)
-            {
                 FillRaidOrPartyHealthPriorityTargets(targetUnitMap, m_caster, m_targets.getUnitTarget(), radius, 1, true, false, true);
-            }
+            // Nick of Time
+            else if (m_spellInfo->Id == 109825)
+                FillRaidOrPartyHealthPriorityTargets(targetUnitMap, m_caster, m_targets.getUnitTarget(), radius, 1, true, false, true);
             // Firebloom
             // Item - Druid T12 Restoration 4P Bonus
             else if (m_spellInfo->Id == 99017)
