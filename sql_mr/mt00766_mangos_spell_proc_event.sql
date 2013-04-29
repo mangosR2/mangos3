@@ -492,6 +492,11 @@ DELETE FROM `spell_proc_event` WHERE `entry` = 105797;
 INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskC0`) VALUE
 (105797, 4, 536870912);
 
+-- Item - Warrior T13 Arms and Fury 4P Bonus (Colossus Smash)
+DELETE FROM `spell_proc_event` WHERE `entry` = 105907;
+INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`, `SpellFamilyMaskB0`) VALUE
+(105907, 4, 33554432, 1024);
+
 ### Rogue ###
 
 -- Waylay

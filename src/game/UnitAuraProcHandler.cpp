@@ -4774,6 +4774,17 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(Unit *pVictim, DamageIn
                     return SPELL_AURA_PROC_FAILED;
                 break;
             }
+            else if (auraSpellInfo->Id == 105907)           // Item - Warrior T13 Arms and Fury 4P Bonus (Colossus Smash)
+            {
+                if (!procSpell)
+                    return SPELL_AURA_PROC_FAILED;
+
+                // Bloodthirst has 2 times lower chance to proc
+                if (procSpell->Id == 23881)
+                    if (!roll_chance_i(50))
+                        return SPELL_AURA_PROC_FAILED;
+                break;
+            }
             break;
         case SPELLFAMILY_WARLOCK:
         {
