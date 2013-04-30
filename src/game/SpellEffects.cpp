@@ -4717,6 +4717,38 @@ void Spell::EffectDummy(SpellEffectEntry const* effect)
                         m_caster->CastSpell(unitTarget, 92827, true);   // Ritual of Refreshment (Rank 3)
                     return;
                 }
+                case 96934:                                 // Blessing of Khaz'goroth
+                case 97127:                                 // Blessing of Khaz'goroth
+                {
+                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
+                        return;
+
+                    Player* player = (Player*)unitTarget;
+
+                    // Titanic Power
+                    SpellAuraHolderPtr holder = unitTarget->GetSpellAuraHolder(96923);
+                    if (!holder)
+                        return;
+
+                    int32 bp = damage * holder->GetStackAmount();
+
+                    uint32 spells[] = { 96927, 96928, 96929 };
+                    for (int i = 0; i < 3; ++i)
+                        unitTarget->RemoveAurasDueToSpell(spells[i]);
+
+                    uint32 triggered_spell_id = 96927;
+                    CombatRating cr = CR_HASTE_MELEE;
+                    if (player->GetRatingBonusValue(CR_CRIT_MELEE) > player->GetRatingBonusValue(cr))
+                    {
+                        cr = CR_CRIT_MELEE;
+                        triggered_spell_id = 96928;
+                    }
+                    if (player->GetRatingBonusValue(CR_MASTERY) > player->GetRatingBonusValue(cr))
+                        triggered_spell_id = 96929;
+
+                    unitTarget->CastCustomSpell(unitTarget, triggered_spell_id, &bp, NULL, NULL, true, m_CastItem);
+                    return;
+                }
             }
 
             // Conjure Mana Gem
@@ -6945,6 +6977,16 @@ void Spell::EffectHeal(SpellEffectEntry const* effect)
 
             m_healing += addhealth;
             return;
+        }
+        // Tipping of the Scales
+        else if (m_spellInfo->Id == 96880)
+        {
+            // Weight of a Feather
+            if (Aura* aura = unitTarget->GetAura(96881, EFFECT_INDEX_0))
+            {
+                addhealth += aura->GetModifier()->m_amount;
+                unitTarget->RemoveSpellAuraHolder(aura->GetHolder());
+            }
         }
 
         // Chain Healing

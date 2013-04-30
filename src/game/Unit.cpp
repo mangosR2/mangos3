@@ -8325,7 +8325,7 @@ int32 Unit::DealHeal(Unit* pVictim, uint32 addhealth, SpellEntry const* spellPro
     return DealHeal(&healInfo, critical);
 }
 
-int32  Unit::DealHeal(DamageInfo* healInfo, bool critical/* = false*/)
+int32 Unit::DealHeal(DamageInfo* healInfo, bool critical/* = false*/)
 {
     if (!healInfo || !healInfo->target)
         return 0;
@@ -8349,9 +8349,9 @@ int32  Unit::DealHeal(DamageInfo* healInfo, bool critical/* = false*/)
 
     if (overheal > 0)
     {
-        // Guarded by the Light (Rank 2), paladin talent
-        if (pVictim == this && HasAura(85646))
+        if (pVictim == this)
         {
+            // Guarded by the Light (Rank 2), paladin talent
             if (Aura* aura = GetAura(85646, EFFECT_INDEX_0))
             {
                 if (aura->GetModifier()->m_amount > overheal)
@@ -8359,6 +8359,44 @@ int32  Unit::DealHeal(DamageInfo* healInfo, bool critical/* = false*/)
                 else
                     // cast absorb
                     CastCustomSpell(this, 88063, &overheal, NULL, NULL, true);
+            }
+
+            // Weight of a Feather
+            if (Aura* aura = pVictim->GetAura(96881, EFFECT_INDEX_0))
+            {
+                int32 maxHp = 0;
+                // Weight of a Feather
+                if (Aura* aura2 = pVictim->GetAura(97117, EFFECT_INDEX_0))
+                    maxHp = aura2->GetModifier()->m_amount;
+                // Weight of a Feather
+                else if (Aura* aura2 = pVictim->GetAura(96879, EFFECT_INDEX_0))
+                    maxHp = aura2->GetModifier()->m_amount;
+
+                if (maxHp)
+                {
+                    if (aura->GetModifier()->m_amount + overheal > maxHp)
+                        aura->GetModifier()->m_amount = maxHp;
+                    else
+                        aura->GetModifier()->m_amount += overheal;
+                    aura->GetHolder()->RefreshHolder();
+                }
+            }
+            else
+            {
+                int32 maxHp = 0;
+                // Weight of a Feather
+                Aura* aura2 = NULL;
+                if (aura2 = pVictim->GetAura(97117, EFFECT_INDEX_0))
+                    maxHp = aura2->GetModifier()->m_amount;
+                // Weight of a aura
+                else if (aura2 = pVictim->GetAura(96879, EFFECT_INDEX_0))
+                    maxHp = aura2->GetModifier()->m_amount;
+
+                if (maxHp)
+                {
+                    int32 bp = std::min(overheal, maxHp);
+                    pVictim->CastCustomSpell(pVictim, 96881, &bp, NULL, NULL, true, NULL, aura2);
+                }
             }
         }
     }

@@ -1266,6 +1266,82 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, DamageInfo* damageI
                         return SPELL_AURA_PROC_FAILED;
                     break;
                 }
+                case 96976:                                 // Matrix Restabilizer
+                {
+                    if (GetTypeId() != TYPEID_PLAYER)
+                        return SPELL_AURA_PROC_FAILED;
+
+                    Player* player = (Player*)this;
+
+                    uint32 spells[] = { 96977, 96978, 96979 };
+                    for (int i = 0; i < 3; ++i)
+                        if (player->HasSpellCooldown(spells[i]))
+                            return SPELL_AURA_PROC_FAILED;
+
+                    for (int i = 0; i < 3; ++i)
+                        RemoveAurasDueToSpell(spells[i]);
+
+                    uint32 triggered_spell_id = 96977;
+                    CombatRating cr = CR_HASTE_MELEE;
+                    if (player->GetRatingBonusValue(CR_CRIT_MELEE) > player->GetRatingBonusValue(cr))
+                    {
+                        cr = CR_CRIT_MELEE;
+                        triggered_spell_id = 96978;
+                    }
+                    if (player->GetRatingBonusValue(CR_MASTERY) > player->GetRatingBonusValue(cr))
+                        triggered_spell_id = 96979;
+                    break;
+                }
+                case 96887:                                 // Electrical Charge
+                case 97119:                                 // Electrical Charge
+                {
+                    if (GetTypeId() != TYPEID_PLAYER)
+                        return SPELL_AURA_PROC_FAILED;
+
+                    triggered_spell_id = 96890;
+
+                    int32 bp;
+                    Player* player = (Player*)this;
+                    if (Aura* aura = GetAura(triggered_spell_id, EFFECT_INDEX_0))
+                        if (aura->GetHolder()->GetStackAmount() >= aura->GetSpellProto()->GetStackAmount())
+                        {
+                            bp = aura->GetModifier()->m_amount;
+                            CastCustomSpell(pVictim, 96891, &bp, NULL, NULL, true, NULL, triggeredByAura);
+                            RemoveSpellAuraHolder(aura->GetHolder());
+                            return SPELL_AURA_PROC_OK;
+                        }
+
+                    bp = CalculateSpellDamage(pVictim, triggeredByAura->GetSpellProto(), EFFECT_INDEX_0);
+                    CastCustomSpell(this, triggered_spell_id, &bp, NULL, NULL, true, NULL, triggeredByAura);
+                    return SPELL_AURA_PROC_OK;
+                }
+                case 97138:                                 // Matrix Restabilizer
+                {
+                    if (GetTypeId() != TYPEID_PLAYER)
+                        return SPELL_AURA_PROC_FAILED;
+
+                    Player* player = (Player*)this;
+
+                    uint32 spells[] = { 97139, 97140, 97141 };
+                    for (int i = 0; i < 3; ++i)
+                        if (player->HasSpellCooldown(spells[i]))
+                            return SPELL_AURA_PROC_FAILED;
+
+                    for (int i = 0; i < 3; ++i)
+                        RemoveAurasDueToSpell(spells[i]);
+
+                    uint32 triggered_spell_id = 97139;
+                    CombatRating cr = CR_HASTE_MELEE;
+                    if (player->GetRatingBonusValue(CR_CRIT_MELEE) > player->GetRatingBonusValue(cr))
+                    {
+                        cr = CR_CRIT_MELEE;
+                        triggered_spell_id = 97140;
+                    }
+                    if (player->GetRatingBonusValue(CR_MASTERY) > player->GetRatingBonusValue(cr))
+                        triggered_spell_id = 97141;
+                    break;
+                }
+                case 108007:                                // Indomitable
                 case 109786:                                // Indomitable
                 {
                     if (triggeredByAura->GetEffIndex() != EFFECT_INDEX_1)
