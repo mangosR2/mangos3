@@ -8894,12 +8894,38 @@ void Aura::HandleModRating(bool apply, bool Real)
     if (!Real)
         return;
 
-    if (GetTarget()->GetTypeId() != TYPEID_PLAYER)
+    Unit* target = GetTarget();
+
+    if (target->GetTypeId() != TYPEID_PLAYER)
         return;
+
+    if (apply)
+    {
+        // Heart's Judgement
+        if (GetId() == 91041)
+        {
+            // Heart's Revelation
+            if (Aura* aura = target->GetAura(91027, EFFECT_INDEX_0))
+            {
+                ChangeAmount(m_modifier.m_amount * aura->GetStackAmount());
+                target->RemoveSpellAuraHolder(aura->GetHolder());
+            }
+        }
+        // Heart's Judgement
+        else if (GetId() == 92328)
+        {
+            // Heart's Revelation
+            if (Aura* aura = target->GetAura(92325, EFFECT_INDEX_0))
+            {
+                ChangeAmount(m_modifier.m_amount * aura->GetStackAmount());
+                target->RemoveSpellAuraHolder(aura->GetHolder());
+            }
+        }
+    }
 
     for (uint32 rating = 0; rating < MAX_COMBAT_RATING; ++rating)
         if (m_modifier.m_miscvalue & (1 << rating))
-            ((Player*)GetTarget())->ApplyRatingMod(CombatRating(rating), m_modifier.m_amount, apply);
+            ((Player*)target)->ApplyRatingMod(CombatRating(rating), m_modifier.m_amount, apply);
 }
 
 void Aura::HandleModRatingFromStat(bool apply, bool Real)

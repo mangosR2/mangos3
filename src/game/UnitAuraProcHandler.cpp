@@ -1311,8 +1311,12 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, DamageInfo* damageI
                             return SPELL_AURA_PROC_OK;
                         }
 
+                    if (player->HasSpellCooldown(triggered_spell_id))
+                        return SPELL_AURA_PROC_FAILED;
+
                     bp = CalculateSpellDamage(pVictim, triggeredByAura->GetSpellProto(), EFFECT_INDEX_0);
                     CastCustomSpell(this, triggered_spell_id, &bp, NULL, NULL, true, NULL, triggeredByAura);
+                    player->AddSpellCooldown(triggered_spell_id, 0, time(NULL) + 3);
                     return SPELL_AURA_PROC_OK;
                 }
                 case 97138:                                 // Matrix Restabilizer
@@ -1342,6 +1346,7 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, DamageInfo* damageI
                     break;
                 }
                 case 108007:                                // Indomitable
+                case 109785:                                // Indomitable
                 case 109786:                                // Indomitable
                 {
                     if (triggeredByAura->GetEffIndex() != EFFECT_INDEX_1)
