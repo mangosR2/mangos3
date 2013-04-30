@@ -12569,6 +12569,9 @@ void Unit::StopMoving()
     if (!IsInWorld())
         return;
 
+    if (movespline->Finalized())
+        return;
+
     Movement::MoveSplineInit<Unit*> init(*this);
     init.SetFacing(GetOrientation());
     init.Launch();
