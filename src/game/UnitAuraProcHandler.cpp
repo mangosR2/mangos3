@@ -4678,6 +4678,13 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(Unit *pVictim, DamageIn
                     CastSpell(this, 86347, true);
                     break;
                 }
+                case 96947:                                 // Loom of Fate
+                case 97130:                                 // Loom of Fate
+                {
+                    if (GetHealth() > triggerAmount * GetMaxHealth() / 100)
+                        return SPELL_AURA_PROC_FAILED;
+                    break;
+                }
             }
             break;
         case SPELLFAMILY_MAGE:
