@@ -5392,6 +5392,13 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(Unit *pVictim, DamageIn
                     return SPELL_AURA_PROC_FAILED;
                 break;
             }
+            // Song of Sorrow
+            else if (auraSpellInfo->Id == 90998 || auraSpellInfo->Id == 91003)
+            {
+                if (!pVictim || pVictim->GetHealthPercent() > triggerAmount * pVictim->GetMaxHealth() / 100)
+                    return SPELL_AURA_PROC_FAILED;
+                break;
+            }
             // Item - Proc Stacking Activator (5)
             else if (auraSpellInfo->Id == 91833)
             {
