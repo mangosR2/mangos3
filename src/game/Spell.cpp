@@ -7960,6 +7960,18 @@ SpellCastResult Spell::CheckCast(bool strict)
                 return SPELL_FAILED_CASTER_AURASTATE;
             break;
         }
+        case 92601:     // Detonate Mana
+        {
+            Unit* target = m_targets.getUnitTarget();
+            if (!target)
+                return SPELL_FAILED_CASTER_AURASTATE;
+
+            // Recaptured Mana
+            if (!target->HasAura(92596))
+                return SPELL_FAILED_CASTER_AURASTATE;
+
+            break;
+        }
         case 96880:     // Tipping of the Scales
         {
             // Weight of a Feather

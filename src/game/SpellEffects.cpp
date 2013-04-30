@@ -914,6 +914,13 @@ void Spell::EffectSchoolDMG(SpellEffectEntry const* effect)
                         }
                         break;
                     }
+                    case 92601:                             // Detonate Mana
+                    {
+                        // Recaptured Mana
+                        if (Aura* aura = m_caster->GetAura(92596, EFFECT_INDEX_0))
+                            damage += aura->GetModifier()->m_amount;
+                        break;
+                    }
                 }
                 break;
             }
@@ -7376,6 +7383,16 @@ void Spell::EffectEnergize(SpellEffectEntry const* effect)
         {
             // remove Inner Eye
             unitTarget->RemoveAurasDueToSpell(92329);
+            break;
+        }
+        case 92601:                                         // Detonate Mana
+        {
+            // Recaptured Mana
+            if (Aura* aura = m_caster->GetAura(92596, EFFECT_INDEX_0))
+            {
+                damage += aura->GetModifier()->m_amount;
+                m_caster->RemoveSpellAuraHolder(aura->GetHolder());
+            }
             break;
         }
         case 99007:                                         // Heartfire

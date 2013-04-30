@@ -3421,6 +3421,33 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, DamageInfo* damageI
                     target = this;
                     triggered_spell_id = 89906;
                     break;
+                // Item - Collecting Mana
+                case 92272:
+                {
+                    if (!procSpell || triggeredByAura->GetEffIndex() != EFFECT_INDEX_1)
+                        return SPELL_AURA_PROC_FAILED;
+
+                    uint32 triggeredSpellId = 92596;
+
+                    // _base_ mana cost save
+                    int32 mana = procSpell->GetManaCost() + procSpell->GetManaCostPercentage() * GetCreateMana() / 100;
+                    mana = mana * triggeredByAura->GetSpellProto()->CalculateSimpleValue(EFFECT_INDEX_0) / 100;
+                    if (Aura* aura = GetAura(triggeredSpellId, EFFECT_INDEX_0))
+                    {
+                        mana += aura->GetModifier()->m_amount;
+                        if (mana > triggerAmount)
+                            aura->ChangeAmount(triggerAmount);
+                        else
+                            aura->ChangeAmount(mana);
+                        return SPELL_AURA_PROC_OK;
+                    }
+
+                    if (mana > triggerAmount)
+                        mana = triggerAmount;
+
+                    CastCustomSpell(this, triggeredSpellId, &mana, NULL, NULL, true, NULL, triggeredByAura);
+                    return SPELL_AURA_PROC_OK;
+                }
             }
             break;
         }
