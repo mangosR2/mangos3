@@ -2623,6 +2623,10 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
                 if (classOptions_1->IsFitToFamily<SPELLFAMILY_PRIEST, CF_PRIEST_SHADOW_PROTECTION>() &&
                     classOptions_2->IsFitToFamily<SPELLFAMILY_PRIEST, CF_PRIEST_SHADOW_PROTECTION>())
                     return true;
+
+                // Dancing Rune Weapon
+                if (spellInfo_1->SpellIconID == 2657 && spellInfo_2->SpellIconID == 2657)
+                    return false;
             }
             break;
         default:
