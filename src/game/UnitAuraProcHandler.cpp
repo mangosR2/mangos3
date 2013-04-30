@@ -5399,6 +5399,13 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(Unit *pVictim, DamageIn
                     return SPELL_AURA_PROC_FAILED;
                 break;
             }
+            // Item - Proc Armor
+            else if (auraSpellInfo->Id == 92180 || auraSpellInfo->Id == 92185)
+            {
+                if (GetHealthPercent() > triggerAmount * GetMaxHealth() / 100)
+                    return SPELL_AURA_PROC_FAILED;
+                break;
+            }
             // Item - Proc Dodge Below 35%
             else if (auraSpellInfo->Id == 92234)
             {
