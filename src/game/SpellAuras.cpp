@@ -9157,6 +9157,17 @@ void Aura::HandleSchoolAbsorb(bool apply, bool Real)
             uint32 trigger_spell_Id = GetId() == 62274 ? 62277 : 63967;
             target->CastSpell(target, trigger_spell_Id, true);
         }
+        // Stay of Execution
+        else if (GetId() == 96988 || GetId() == 97145)
+        {
+            int32 absorbed = target->CalculateSpellDamage(target, GetSpellProto(), EFFECT_INDEX_0) - m_modifier.m_amount;
+            if (absorbed > 0)
+            {
+                int32 triggered_spell = 96993;
+                int32 bp = absorbed * 40 / 100 / GetSpellAuraMaxTicks(triggered_spell);
+                target->CastCustomSpell(target, triggered_spell, &bp, NULL, NULL, true);
+            }
+        }
         Unit::AuraList const& vDummyAuras = caster->GetAurasByType(SPELL_AURA_DUMMY);
         for (Unit::AuraList::const_iterator itr = vDummyAuras.begin(); itr != vDummyAuras.end(); ++itr)
         {
