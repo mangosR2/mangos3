@@ -956,33 +956,24 @@ struct DamageInfo
         SpellSchoolMask   SchoolMask()    const;
 
         // Damage types
-        union {
-            uint32 damage;
-            uint32 heal;
-        };
-
-        union {
-            int32  cleanDamage;          // Used for rage and healing calculation
-            int32  cleanHeal;
-        };
+        uint32 damage;
+        int32  cleanDamage;          // Used for rage and healing calculation
 
         // Damage calculation
-        union {
-            uint32 baseDamage;
-            uint32 baseHeal;
-        };
+        uint32 baseDamage;
         uint32 bonusCrit;
         int32  bonusDone;
         int32  bonusTaken;
         uint32 reduction;
+        uint32 absorb;
         uint32 resist;
         uint32 blocked;
-        //uint32 Damage() const
-        //{
-        //    return IsHeal() ?
-        //        (baseDamage + bonusCrit + bonusDone + bonusTaken + reduction + absorb /*+ resist + blocked*/) :
-        //        (baseDamage + bonusCrit + bonusDone + bonusTaken - reduction - absorb - resist - blocked);
-        //};*/
+        uint32 Damage() const
+        {
+            return IsHeal() ?
+                (baseDamage + bonusCrit + bonusDone + bonusTaken + reduction + absorb /*+ resist + blocked*/) :
+                (baseDamage + bonusCrit + bonusDone + bonusTaken - reduction - absorb - resist - blocked);
+        };
 
         // Various types
         WeaponAttackType attackType;
@@ -1010,18 +1001,11 @@ struct DamageInfo
         void           RemoveFlag(DamageFlags flag)    { m_flags &= ~(1 << flag); };
         bool           HasFlag(DamageFlags flag) const { return (m_flags & (1 << flag)); };
 
-        uint32         GetAbsorb() const { return absorb;} ;
-        uint32         AddAbsorb(uint32 absorb);
-        void           SetAbsorb(uint32 absorb);
-        void           AbsorbPct(float absorbPct);
     private:
         DamageInfo();     // Don't allow plain initialization!
         uint32            m_flags;
         SpellEntry const* m_spellInfo;
         uint32            SpellID;
-
-        uint32 absorb;
-
 };
 
 
@@ -1470,7 +1454,6 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         uint32 DealDamage(Unit *pVictim, uint32 damage, DamageInfo* cleanDamage, DamageEffectType damagetype, SpellSchoolMask damageSchoolMask, SpellEntry const *spellProto, bool durabilityLoss);
         uint32 DealDamage(Unit* pVictim, DamageInfo* damageInfo, bool durabilityLoss);
         uint32 DealDamage(DamageInfo* damageInfo);
-        int32  DealHeal(DamageInfo const* damageInfo, bool critical);
         int32  DealHeal(Unit* pVictim, uint32 addhealth, SpellEntry const* spellProto, bool critical = false, uint32 absorb = 0);
 
         void PetOwnerKilledUnit(Unit* pVictim);
@@ -2052,8 +2035,8 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
 
         int32 SpellBaseHealingBonusDone(SpellSchoolMask schoolMask);
         int32 SpellBaseHealingBonusTaken(SpellSchoolMask schoolMask);
-        void SpellHealingBonusDone(DamageInfo* damageInfo, uint32 stack = 1);
-        void SpellHealingBonusTaken(DamageInfo* damageInfo, uint32 stack = 1);
+        uint32 SpellHealingBonusDone(Unit *pVictim, SpellEntry const *spellProto, int32 healamount, DamageEffectType damagetype, uint32 stack = 1);
+        uint32 SpellHealingBonusTaken(Unit *pCaster, SpellEntry const *spellProto, int32 healamount, DamageEffectType damagetype, uint32 stack = 1);
 
         void MeleeDamageBonusDone(DamageInfo* damageInfo, uint32 stack = 1);
         void MeleeDamageBonusTaken(DamageInfo* damageInfo, uint32 stack = 1);
@@ -2124,7 +2107,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         void CalculateResistance(Unit* pCaster, DamageInfo* damageInfo);
         void CalculateDamageAbsorbAndResist(Unit* pCaster, DamageInfo* damageInfo, bool canReflect = false);
         void CalculateAbsorbResistBlock(Unit* pCaster, DamageInfo* damageInfo, SpellEntry const* spellProto, WeaponAttackType attType = BASE_ATTACK);
-        void CalculateHealAbsorb(DamageInfo* damageInfo);
+        void CalculateHealAbsorb(uint32 heal, uint32* absorb);
 
         void  UpdateSpeed(UnitMoveType mtype, bool forced, float ratio = 1.0f);
         float GetSpeed( UnitMoveType mtype ) const;
