@@ -14283,12 +14283,27 @@ void DamageInfo::Reset(uint32 _damage)
     attackType    = GetWeaponAttackType(GetSpellProto());
 }
 
-SpellSchoolMask  DamageInfo::SchoolMask() const
+SpellSchoolMask DamageInfo::SchoolMask() const
 {
     return GetSpellProto() ?
         SpellSchoolMask(GetSpellProto()->SchoolMask) :
         attacker && attacker->GetMeleeDamageSchoolMask() ? attacker->GetMeleeDamageSchoolMask() : SPELL_SCHOOL_MASK_NORMAL;
-};
+}
+
+uint32 DamageInfo::AddAbsorb(uint32 addvalue)
+{
+    uint32 realabsorb = addvalue;
+    if (damage < realabsorb)
+        realabsorb = damage;
+    absorb += realabsorb;
+    damage -= realabsorb;
+    return realabsorb - addvalue;
+}
+void DamageInfo::AddPctAbsorb(float aborbPct)
+{
+    uint32 realabsorb = damage * aborbPct/100.0f;
+    AddAbsorb(realabsorb);
+}
 
 void Unit::SetLastManaUse()
 {
