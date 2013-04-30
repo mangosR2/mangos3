@@ -7739,9 +7739,25 @@ void Unit::UnsummonAllTotems()
             totem->UnSummon();
 }
 
+/*
+ * deprecated
+ */
 int32 Unit::DealHeal(Unit* pVictim, uint32 addhealth, SpellEntry const* spellProto, bool critical, uint32 absorb)
 {
-    int32 gain = pVictim->ModifyHealth(int32(addhealth));
+    DamageInfo healInfo = DamageInfo(this, pVictim, spellProto, addhealth);
+    healInfo.absorb = absorb;
+    return DealHeal(&healInfo, critical);
+}
+
+int32  Unit::DealHeal(DamageInfo* healInfo, bool critical/* = false*/)
+{
+    if (!healInfo || !healInfo->target)
+        return 0;
+
+    Unit* pVictim = healInfo->target;
+    SpellEntry const* spellProto = healInfo->GetSpellProto();
+
+    int32 gain = pVictim->ModifyHealth(healInfo->heal);
 
     Unit* unit = this;
 
@@ -7749,7 +7765,7 @@ int32 Unit::DealHeal(Unit* pVictim, uint32 addhealth, SpellEntry const* spellPro
         unit = GetOwner();
 
     // overheal = addhealth - gain
-    unit->SendHealSpellLog(pVictim, spellProto->Id, addhealth, addhealth - gain, critical, absorb);
+    unit->SendHealSpellLog(pVictim, spellProto->Id, healInfo->heal, healInfo->heal - gain, critical, healInfo->absorb);
 
     if (unit->GetTypeId() == TYPEID_PLAYER)
     {
@@ -7760,18 +7776,18 @@ int32 Unit::DealHeal(Unit* pVictim, uint32 addhealth, SpellEntry const* spellPro
         if (gain)
             ((Player*)unit)->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_HEALING_DONE, gain, 0, pVictim);
 
-        ((Player*)unit)->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_HIGHEST_HEAL_CASTED, addhealth);
+        ((Player*)unit)->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_HIGHEST_HEAL_CASTED, healInfo->heal);
     }
 
     if (pVictim->GetTypeId() == TYPEID_PLAYER)
     {
         ((Player*)pVictim)->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_TOTAL_HEALING_RECEIVED, gain);
-        ((Player*)pVictim)->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_HIGHEST_HEALING_RECEIVED, addhealth);
+        ((Player*)pVictim)->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_HIGHEST_HEALING_RECEIVED, healInfo->heal);
     }
 
     // Script Event HealedBy
     if (pVictim->GetTypeId() == TYPEID_UNIT && ((Creature*)pVictim)->AI())
-        ((Creature*)pVictim)->AI()->HealedBy(this, addhealth);
+        ((Creature*)pVictim)->AI()->HealedBy(this, healInfo->heal);
 
     return gain;
 }

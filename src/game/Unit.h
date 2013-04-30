@@ -956,7 +956,11 @@ struct DamageInfo
         SpellSchoolMask   SchoolMask()    const;
 
         // Damage types
-        uint32 damage;
+        union {
+            uint32 damage;
+            uint32 heal;
+        };
+
         int32  cleanDamage;          // Used for rage and healing calculation
 
         // Damage calculation
@@ -1455,6 +1459,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         uint32 DealDamage(Unit* pVictim, DamageInfo* damageInfo, bool durabilityLoss);
         uint32 DealDamage(DamageInfo* damageInfo);
         int32  DealHeal(Unit* pVictim, uint32 addhealth, SpellEntry const* spellProto, bool critical = false, uint32 absorb = 0);
+        int32  DealHeal(DamageInfo* healInfo, bool critical = false);
 
         void PetOwnerKilledUnit(Unit* pVictim);
 
