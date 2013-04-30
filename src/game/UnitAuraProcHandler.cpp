@@ -4690,17 +4690,19 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(Unit *pVictim, DamageIn
                         return SPELL_AURA_PROC_FAILED;
                     break;
                 }
+                case 92236:                                 // Symbiotic Worms
+                case 92356:                                 // Symbiotic Worms
+                case 96947:                                 // Loom of Fate
+                case 97130:                                 // Loom of Fate
+                {
+                    if (GetHealthPercent() > triggerAmount * GetMaxHealth() / 100)
+                        return SPELL_AURA_PROC_FAILED;
+                    break;
+                }
                 case 92330:                                 // Item - Proc Stacking Spirit
                 {
                     // Blind Spot
                     if (HasAura(92331))
-                        return SPELL_AURA_PROC_FAILED;
-                    break;
-                }
-                case 96947:                                 // Loom of Fate
-                case 97130:                                 // Loom of Fate
-                {
-                    if (GetHealth() > triggerAmount * GetMaxHealth() / 100)
                         return SPELL_AURA_PROC_FAILED;
                     break;
                 }
@@ -5360,6 +5362,13 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(Unit *pVictim, DamageIn
             else if (auraSpellInfo->Id == 85285)
             {
                 if (GetHealthPercent() > 20.0f)
+                    return SPELL_AURA_PROC_FAILED;
+                break;
+            }
+            // Item - Proc Dodge Below 35%
+            else if (auraSpellInfo->Id == 92234)
+            {
+                if (GetHealthPercent() > GetMaxHealth() * triggerAmount / 100)
                     return SPELL_AURA_PROC_FAILED;
                 break;
             }
