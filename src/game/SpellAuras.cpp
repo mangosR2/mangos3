@@ -9190,6 +9190,12 @@ void Aura::HandleSchoolAbsorb(bool apply, bool Real)
             uint32 trigger_spell_Id = GetId() == 62274 ? 62277 : 63967;
             target->CastSpell(target, trigger_spell_Id, true);
         }
+        // Egg Shell
+        else if (GetId() == 91296 || GetId() == 91308)
+        {
+            if (Unit* caster = GetCaster())
+                caster->CastSpell(caster, GetId() == 91296 ? 91305 : 91310, true);
+        }
         // Stay of Execution
         else if (GetId() == 96988 || GetId() == 97145)
         {
@@ -10719,6 +10725,13 @@ void Aura::PeriodicDummyTick()
                         holder->SendAuraUpdate(false);
                     }
                     break;
+                }
+                case 91296:                                 // Egg Shell
+                case 91308:                                 // Egg Shell
+                {
+                    if (Unit* caster = GetCaster())
+                        caster->CastSpell(caster, GetId() == 91296 ? 91306 : 91311, true);
+                    return;
                 }
                 // Exist more after, need add later
                 default:
