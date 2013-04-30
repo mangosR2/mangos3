@@ -7447,6 +7447,13 @@ void Aura::HandleAuraModStat(bool apply, bool /*Real*/)
                 }
                 break;
             }
+            // Forged Fury
+            case 91836:
+            {
+                // Raw Fury
+                target->RemoveAurasDueToSpell(91832);
+                break;
+            }
             default:
                 break;
         }

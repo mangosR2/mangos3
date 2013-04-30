@@ -7937,6 +7937,22 @@ SpellCastResult Spell::CheckCast(bool strict)
                 return SPELL_FAILED_CASTER_AURASTATE;
             break;
         }
+        case 91836:     // Forged Fury
+        {
+            Unit* target = m_targets.getUnitTarget();
+            if (!target)
+                return SPELL_FAILED_CASTER_AURASTATE;
+
+            // Raw Fury
+            SpellAuraHolderPtr fury = target->GetSpellAuraHolder(91832);
+            if (!fury)
+                return SPELL_FAILED_CASTER_AURASTATE;
+
+            if (fury->GetStackAmount() != fury->GetSpellProto()->GetStackAmount())
+                return SPELL_FAILED_CASTER_AURASTATE;
+
+            break;
+        }
         case 92328:     // Heart's Judgement
         {
             // Heart's Revelation
