@@ -4683,6 +4683,20 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(Unit *pVictim, DamageIn
                     CastSpell(this, 86347, true);
                     break;
                 }
+                case 91321:                                 // Item - Proc Stacking Spirit
+                {
+                    // Blind Spot
+                    if (HasAura(91322))
+                        return SPELL_AURA_PROC_FAILED;
+                    break;
+                }
+                case 92330:                                 // Item - Proc Stacking Spirit
+                {
+                    // Blind Spot
+                    if (HasAura(92331))
+                        return SPELL_AURA_PROC_FAILED;
+                    break;
+                }
                 case 96947:                                 // Loom of Fate
                 case 97130:                                 // Loom of Fate
                 {

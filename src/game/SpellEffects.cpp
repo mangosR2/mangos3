@@ -7366,6 +7366,18 @@ void Spell::EffectEnergize(SpellEffectEntry const* effect)
             }
             break;
         }
+        case 91322:                                         // Blind Spot
+        {
+            // remove Inner Eye
+            unitTarget->RemoveAurasDueToSpell(91320);
+            break;
+        }
+        case 92331:                                         // Blind Spot
+        {
+            // remove Inner Eye
+            unitTarget->RemoveAurasDueToSpell(92329);
+            break;
+        }
         case 99007:                                         // Heartfire
         case 99069:                                         // Fires of Heaven
         case 99131:                                         // Divine Fire
