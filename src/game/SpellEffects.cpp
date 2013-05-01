@@ -3371,7 +3371,7 @@ void Spell::EffectDummy(SpellEffectEntry const* effect)
                     if (!unitTarget)
                         return;
 
-                    m_caster->CastSpell(unitTarget, m_spellInfo->CalculateSimpleValue(eff_idx), true);
+                    m_caster->CastSpell(unitTarget, effect->CalculateSimpleValue(), true);
                     return;
                 }
                 case 57908:                                 // Stain Cloth
@@ -9122,7 +9122,7 @@ void Spell::EffectScriptEffect(SpellEffectEntry const* effect)
                     if (!unitTarget)
                         return;
 
-                    unitTarget->CastSpell(unitTarget, m_spellInfo->CalculateSimpleValue(eff_idx), true);
+                    unitTarget->CastSpell(unitTarget, effect->CalculateSimpleValue(), true);
                     return;
                 }
                 case 45833:                                 // Power of the Blue Flight

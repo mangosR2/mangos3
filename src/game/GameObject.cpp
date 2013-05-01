@@ -211,15 +211,9 @@ bool GameObject::Create(uint32 guidlow, uint32 name_id, Map* map, uint32 phaseMa
         }
         case GAMEOBJECT_TYPE_TRANSPORT:
         {
+            // SetFlag(GAMEOBJECT_FLAGS, (GO_FLAG_TRANSPORT | GO_FLAG_NODESPAWN));
             SetUInt32Value(GAMEOBJECT_LEVEL, WorldTimer::getMSTime());
-            if (goinfo->transport.startOpen)
-                SetGoState(GO_STATE_ACTIVE);
-            break;
-        }
-        case GAMEOBJECT_TYPE_TRANSPORT:
-        {
-            SetFlag(GAMEOBJECT_FLAGS, (GO_FLAG_TRANSPORT | GO_FLAG_NODESPAWN));
-            SetUInt32Value(GAMEOBJECT_LEVEL, goinfo->transport.pause);
+            // SetUInt32Value(GAMEOBJECT_LEVEL, goinfo->transport.startFrame);
             if (goinfo->transport.startOpen)
                 SetGoState(GO_STATE_ACTIVE);
             break;
@@ -812,8 +806,10 @@ bool GameObject::IsDynTransport() const
 {
     // If something is marked as a transport, don't transmit an out of range packet for it.
     GameObjectInfo const * gInfo = GetGOInfo();
-    if(!gInfo) return false;
-    return gInfo->type == GAMEOBJECT_TYPE_MO_TRANSPORT || (gInfo->type == GAMEOBJECT_TYPE_TRANSPORT && !gInfo->transport.pause);
+    if(!gInfo)
+        return false;
+
+    return gInfo->type == GAMEOBJECT_TYPE_MO_TRANSPORT || (gInfo->type == GAMEOBJECT_TYPE_TRANSPORT && !gInfo->transport.startFrame);
 }
 
 Unit* GameObject::GetOwner() const
