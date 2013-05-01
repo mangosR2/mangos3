@@ -1228,15 +1228,6 @@ uint32 Unit::DealDamage(DamageInfo* damageInfo)
             player_tap->SendDirectMessage(&data);
         }
 
-        // Reward player, his pets, and group/raid members
-        if (player_tap != pVictim)
-        {
-            if (group_tap)
-                group_tap->RewardGroupAtKill(pVictim, player_tap);
-            else if (player_tap)
-                player_tap->RewardSinglePlayerAtKill(pVictim);
-        }
-
         // stop combat
         DEBUG_FILTER_LOG(LOG_FILTER_DAMAGE, "Unit::DealDamage DealDamageAttackStop, %s stopped attack",GetGuidStr().c_str());
         pVictim->CombatStop();
@@ -1346,6 +1337,15 @@ uint32 Unit::DealDamage(DamageInfo* damageInfo)
             if (player_tap)                                 // killedby Player
                 if (BattleGround* bg = player_tap->GetBattleGround())
                     bg->HandleKillUnit((Creature*)pVictim, player_tap);
+        }
+
+        // Reward player, his pets, and group/raid members
+        if (player_tap != pVictim)
+        {
+            if (group_tap)
+                group_tap->RewardGroupAtKill(pVictim, player_tap);
+            else if (player_tap)
+                player_tap->RewardSinglePlayerAtKill(pVictim);
         }
     }
     else                                                    // if (health <= damage)
@@ -5502,11 +5502,6 @@ bool Unit::RemoveNoStackAurasDueToAuraHolder(SpellAuraHolderPtr holder)
                     return false;
 
             // Its a parent aura (create this aura in ApplyModifier)
-            if (itr->second->IsInUse())
-            {
-                sLog.outError("SpellAuraHolder (Spell %u) is in process but attempt removed at SpellAuraHolder (Spell %u) adding, need add stack rule for Unit::RemoveNoStackAurasDueToAuraHolder", itr->second->GetId(), holder->GetId());
-                continue;
-            }
             if (is_spellSpecPerTargetPerCaster)
                 RemoveSpellAuraHolder(itr->second);
             else
@@ -5530,11 +5525,6 @@ bool Unit::RemoveNoStackAurasDueToAuraHolder(SpellAuraHolderPtr holder)
                 return false;
 
             // Its a parent aura (create this aura in ApplyModifier)
-            if (itr->second->IsInUse())
-            {
-                sLog.outError("SpellAuraHolder (Spell %u) is in process but attempt removed at SpellAuraHolder (Spell %u) adding, need add stack rule for Unit::RemoveNoStackAurasDueToAuraHolder", itr->second->GetId(), holder->GetId());
-                continue;
-            }
             RemoveAurasDueToSpell(i_spellId);
 
             if (holderMap.empty() )
@@ -5549,12 +5539,6 @@ bool Unit::RemoveNoStackAurasDueToAuraHolder(SpellAuraHolderPtr holder)
         if ( !is_spellSpecPerTargetPerCaster && !is_spellSpecPerTarget && sSpellMgr.IsNoStackSpellDueToSpell(spellId, i_spellId) )
         {
             // Its a parent aura (create this aura in ApplyModifier)
-            if (itr->second->IsInUse())
-            {
-                sLog.outError("SpellAuraHolder (Spell %u) is in process but attempt removed at SpellAuraHolder (Spell %u) adding, need add stack rule for Unit::RemoveNoStackAurasDueToAuraHolder", itr->second->GetId(), holder->GetId());
-                continue;
-            }
-
             // different ranks spells with different casters should also stack
             if (holder->GetCasterGuid() != itr->second->GetCasterGuid() && SpellMgr::IsStackableSpellAuraHolder(spellProto))
                 continue;
@@ -5579,11 +5563,6 @@ bool Unit::RemoveNoStackAurasDueToAuraHolder(SpellAuraHolderPtr holder)
                     return false;                       // cannot remove higher rank
 
                 // Its a parent aura (create this aura in ApplyModifier)
-                if (itr->second->IsInUse())
-                {
-                    sLog.outError("SpellAuraHolder (Spell %u) is in process but attempt removed at SpellAuraHolder (Spell %u) adding, need add stack rule for Unit::RemoveNoStackAurasDueToAuraHolder", itr->second->GetId(), holder->GetId());
-                    continue;
-                }
                 RemoveAurasDueToSpell(i_spellId);
 
                 if (holderMap.empty())
@@ -6076,7 +6055,7 @@ void Unit::TriggerPassiveAurasWithAttribute(bool active, uint32 flags)
         SpellAuraHolderMap const& holdersMap = GetSpellAuraHolderMap();
         for (SpellAuraHolderMap::const_iterator iter = holdersMap.begin(); iter != holdersMap.end(); ++iter)
         {
-            if (!iter->second || 
+            if (!iter->second ||
                 iter->second->IsDeleted() ||
                 !IsPassiveSpell(iter->second->GetSpellProto()) ||
                 !iter->second->GetSpellProto()->HasAttribute((SpellAttributes)flags)
@@ -7948,9 +7927,25 @@ void Unit::UnsummonAllTotems()
             totem->UnSummon();
 }
 
+/*
+ * deprecated
+ */
 int32 Unit::DealHeal(Unit* pVictim, uint32 addhealth, SpellEntry const* spellProto, bool critical, uint32 absorb)
 {
-    int32 gain = pVictim->ModifyHealth(int32(addhealth));
+    DamageInfo healInfo = DamageInfo(this, pVictim, spellProto, addhealth);
+    healInfo.absorb = absorb;
+    return DealHeal(&healInfo, critical);
+}
+
+int32  Unit::DealHeal(DamageInfo* healInfo, bool critical/* = false*/)
+{
+    if (!healInfo || !healInfo->target)
+        return 0;
+
+    Unit* pVictim = healInfo->target;
+    SpellEntry const* spellProto = healInfo->GetSpellProto();
+
+    int32 gain = pVictim->ModifyHealth(healInfo->heal);
 
     Unit* unit = this;
 
@@ -7958,7 +7953,7 @@ int32 Unit::DealHeal(Unit* pVictim, uint32 addhealth, SpellEntry const* spellPro
         unit = GetOwner();
 
     // overheal = addhealth - gain
-    unit->SendHealSpellLog(pVictim, spellProto->Id, addhealth, addhealth - gain, critical, absorb);
+    unit->SendHealSpellLog(pVictim, spellProto->Id, healInfo->heal, healInfo->heal - gain, critical, healInfo->absorb);
 
     if (unit->GetTypeId() == TYPEID_PLAYER)
     {
@@ -7969,14 +7964,18 @@ int32 Unit::DealHeal(Unit* pVictim, uint32 addhealth, SpellEntry const* spellPro
         if (gain)
             ((Player*)unit)->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_HEALING_DONE, gain, 0, pVictim);
 
-        ((Player*)unit)->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_HIGHEST_HEAL_CASTED, addhealth);
+        ((Player*)unit)->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_HIGHEST_HEAL_CASTED, healInfo->heal);
     }
 
     if (pVictim->GetTypeId() == TYPEID_PLAYER)
     {
         ((Player*)pVictim)->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_TOTAL_HEALING_RECEIVED, gain);
-        ((Player*)pVictim)->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_HIGHEST_HEALING_RECEIVED, addhealth);
+        ((Player*)pVictim)->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_HIGHEST_HEALING_RECEIVED, healInfo->heal);
     }
+
+    // Script Event HealedBy
+    if (pVictim->GetTypeId() == TYPEID_UNIT && ((Creature*)pVictim)->AI())
+        ((Creature*)pVictim)->AI()->HealedBy(this, healInfo->heal);
 
     return gain;
 }
@@ -10712,7 +10711,7 @@ struct SetSpeedRateHelper
 
 void Unit::SetSpeedRate(UnitMoveType mtype, float rate, bool forced)
 {
-    if (rate < 0)
+    if (rate < 0.0f)
         rate = 0.0f;
 
     // Update speed only on change
@@ -10724,14 +10723,11 @@ void Unit::SetSpeedRate(UnitMoveType mtype, float rate, bool forced)
         WorldPacket data;
         ObjectGuid guid = GetObjectGuid();
 
-        if (forced)
+        if (forced && GetTypeId() == TYPEID_PLAYER)
         {
-            if (GetTypeId() == TYPEID_PLAYER)
-            {
-                // register forced speed changes for WorldSession::HandleForceSpeedChangeAck
-                // and do it only for real sent packets and use run for run/mounted as client expected
-                ++((Player*)this)->m_forced_speed_changes[mtype];
-            }
+            // register forced speed changes for WorldSession::HandleForceSpeedChangeAck
+            // and do it only for real sent packets and use run for run/mounted as client expected
+            ++((Player*)this)->m_forced_speed_changes[mtype];
 
             switch (mtype)
             {
@@ -10930,6 +10926,15 @@ void Unit::SetSpeedRate(UnitMoveType mtype, float rate, bool forced)
 
             SendMessageToSet(&data, true);
         }
+
+        m_movementInfo.UpdateTime(WorldTimer::getMSTime());
+
+        // TODO: Actually such opcodes should (always?) be packed with SMSG_COMPRESSED_MOVES
+        WorldPacket data(SetSpeed2Opc_table[mtype][0], 64);
+        data << GetPackGUID();
+        data << m_movementInfo;
+        data << float(GetSpeed(mtype));
+        SendMessageToSet(&data, false);
     }
 
     CallForAllControlledUnits(SetSpeedRateHelper(mtype,forced), CONTROLLED_PET|CONTROLLED_GUARDIANS|CONTROLLED_CHARM|CONTROLLED_MINIPET);
@@ -13083,9 +13088,7 @@ void Unit::ProcDamageAndSpellFor(bool isVictim, DamageInfo* damageInfo)
                     continue;
             }
 
-            itr->first->SetInUse(true);
             SpellAuraProcResult procResult = (*this.*AuraProcHandler[spellEffect->EffectApplyAuraName])(pTarget, damageInfo, triggeredByAura, procSpell, procFlag, procExtra, cooldown);
-            itr->first->SetInUse(false);
 
             switch (procResult)
             {
@@ -13222,6 +13225,9 @@ void Unit::StopMoving()
 
     // not need send any packets if not in world
     if (!IsInWorld())
+        return;
+
+    if (movespline->Finalized())
         return;
 
     Movement::MoveSplineInit<Unit*> init(*this);
@@ -13995,7 +14001,7 @@ void Unit::EnterVehicle(Unit* vehicleBase, int8 seatId)
         {
             for (SpellClickInfoMap::const_iterator itr = clickPair.first; itr != clickPair.second; ++itr)
             {
-                if (itr->second.IsFitToRequirements((Player*)this))
+                if (itr->second.IsFitToRequirements((Player*)this, (Creature*)vehicleBase))
                 {
 
                     spellInfo = sSpellStore.LookupEntry(itr->second.spellId);
@@ -14186,6 +14192,8 @@ void Unit::_ExitVehicle(bool forceDismount)
 {
     if (!GetVehicle())
         return;
+
+    DisableSpline();
 
     if (GetVehicle()->GetBase() && GetVehicle()->GetBase()->IsInWorld())
         GetVehicle()->RemovePassenger(this, !forceDismount);
@@ -14909,12 +14917,27 @@ void DamageInfo::Reset(uint32 _damage)
     attackType    = GetWeaponAttackType(GetSpellProto());
 }
 
-SpellSchoolMask  DamageInfo::SchoolMask() const
+SpellSchoolMask DamageInfo::SchoolMask() const
 {
     return GetSpellProto() ?
         SpellSchoolMask(GetSpellProto()->SchoolMask) :
         attacker && attacker->GetMeleeDamageSchoolMask() ? attacker->GetMeleeDamageSchoolMask() : SPELL_SCHOOL_MASK_NORMAL;
-};
+}
+
+uint32 DamageInfo::AddAbsorb(uint32 addvalue)
+{
+    uint32 realabsorb = addvalue;
+    if (damage < realabsorb)
+        realabsorb = damage;
+    absorb += realabsorb;
+    damage -= realabsorb;
+    return realabsorb - addvalue;
+}
+void DamageInfo::AddPctAbsorb(float aborbPct)
+{
+    uint32 realabsorb = damage * aborbPct/100.0f;
+    AddAbsorb(realabsorb);
+}
 
 void Unit::SetLastManaUse()
 {

@@ -64,13 +64,14 @@ struct SpellClickInfo
     uint32 questEnd;                                        // quest end (quest don't must be rewarded for spell apply)
     bool   questStartCanActive;                             // if true then quest start can be active (not only rewarded)
     uint8 castFlags;
+    uint16 conditionId;                                     // intends to replace questStart, questEnd, questStartCanActive
 
     // helpers
-    bool IsFitToRequirements(Player const* player) const;
+    bool IsFitToRequirements(Player const* player, Creature const* clickedCreature) const;
 };
 
-typedef UNORDERED_MULTIMAP<uint32, SpellClickInfo> SpellClickInfoMap;
-typedef std::pair<SpellClickInfoMap::const_iterator,SpellClickInfoMap::const_iterator> SpellClickInfoMapBounds;
+typedef UNORDERED_MULTIMAP<uint32 /*npcEntry*/, SpellClickInfo> SpellClickInfoMap;
+typedef std::pair<SpellClickInfoMap::const_iterator, SpellClickInfoMap::const_iterator> SpellClickInfoMapBounds;
 
 struct AreaTrigger
 {
@@ -508,6 +509,8 @@ enum ConditionType
     CONDITION_LAST_WAYPOINT         = 33,                   // waypointId   0 = exact, 1: wp <= waypointId, 2: wp > waypointId  Use to check what waypoint was last reached
     CONDITION_XP_USER               = 34,                   // 0, 1 (0: XP off, 1: XP on) for player    0
     CONDITION_GENDER                = 35,                   // 0=male, 1=female, 2=none (see enum Gender)
+    CONDITION_DEAD_OR_AWAY          = 36,                   // value1: 0=player dead, 1=player is dead (with group dead), 2=player in instance are dead, 3=creature is dead
+                                                            // value2: if != 0 only consider players in range of this value
 };
 
 class PlayerCondition

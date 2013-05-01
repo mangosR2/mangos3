@@ -1984,6 +1984,22 @@ void Spell::EffectDummy(SpellEffectEntry const* effect)
                     DoCreateItem(effect, newitemid);
                     return;
                 }
+                case 40834:                                 // Agonizing Flames
+                {
+                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
+                        return;
+
+                    m_caster->CastSpell(unitTarget, 40932, true);
+                    return;
+                }
+                case 40869:                                 // Fatal Attraction
+                {
+                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
+                        return;
+
+                    m_caster->CastSpell(unitTarget, 41001, true);
+                    return;
+                }
                 case 40962:                                 // Blade's Edge Terrace Demon Boss Summon Branch
                 {
                     if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
@@ -1998,6 +2014,16 @@ void Spell::EffectDummy(SpellEffectEntry const* effect)
                         case 4: spell_id = 40961; break;    // Blade's Edge Terrace Demon Boss Summon 4
                     }
                     unitTarget->CastSpell(unitTarget, spell_id, true);
+                    return;
+                }
+                case 41333:                                 // Empyreal Equivalency
+                {
+                    if (!unitTarget)
+                        return;
+
+                    // Equilize the health of all targets based on the corresponding health percent
+                    float health_diff = (float)unitTarget->GetMaxHealth() / (float)m_caster->GetMaxHealth();
+                    unitTarget->SetHealth(m_caster->GetHealth() * health_diff);
                     return;
                 }
                 case 42287:                                 // Salvage Wreckage
@@ -3317,11 +3343,6 @@ void Spell::EffectDummy(SpellEffectEntry const* effect)
                     unitTarget->CastSpell(unitTarget, 56432, true, NULL, NULL, m_caster->GetObjectGuid());
                     return;
                 }
-                case 57496:                                 // Volazj - Insanity
-                {
-                    m_caster->CastSpell(m_caster, 57561, true);
-                    return;
-                }
                 case 57385:                                 // Argent Cannon
                 case 57412:                                 // Reckoning Bomb
                 {
@@ -3338,6 +3359,19 @@ void Spell::EffectDummy(SpellEffectEntry const* effect)
 
                     m_caster->CastSpell(loc, spellInfo, false, NULL, NULL, m_originalCasterGUID);
 
+                    return;
+                }
+                case 57496:                                 // Volazj - Insanity
+                {
+                    m_caster->CastSpell(m_caster, 57561, true);
+                    return;
+                }
+                case 57578:                                 // Lava Strike
+                {
+                    if (!unitTarget)
+                        return;
+
+                    m_caster->CastSpell(unitTarget, m_spellInfo->CalculateSimpleValue(eff_idx), true);
                     return;
                 }
                 case 57908:                                 // Stain Cloth
@@ -6397,7 +6431,7 @@ void Spell::DoSummonGroupPets(SpellEffectEntry const* effect)
     if (!pet_entry)
         return;
 
-    CreatureInfo const* cInfo = ObjectMgr::GetCreatureTemplate(pet_entry);;
+    CreatureInfo const* cInfo = ObjectMgr::GetCreatureTemplate(pet_entry);
     if (!cInfo)
     {
         sLog.outErrorDb("Spell::DoSummon: creature entry %u not found for spell %u.", pet_entry, m_spellInfo->Id);
@@ -6443,16 +6477,16 @@ void Spell::DoSummonGroupPets(SpellEffectEntry const* effect)
             {
                Field* fields = result->Fetch();
                uint32 petnum = fields[0].GetUInt32();
-               if (petnum) petnumber.push_back(petnum);
+               if (petnum)
+                   petnumber.push_back(petnum);
             }
             while (result->NextRow());
-
             delete result;
         }
 
         if (!petnumber.empty())
         {
-            for(uint8 i = 0; i < petnumber.size() && amount > 0; ++i)
+            for (uint8 i = 0; i < petnumber.size() && amount > 0; ++i)
             {
                 if (petnumber[i])
                 {
@@ -6463,19 +6497,23 @@ void Spell::DoSummonGroupPets(SpellEffectEntry const* effect)
                     pet->SetPetCounter(amount-1);
                     //bool _summoned = false;
 
-                    if (pet->LoadPetFromDB((Player*)m_caster,pet_entry, petnumber[i], false, &pos))
+                    if (pet->LoadPetFromDB((Player*)m_caster, pet_entry, petnumber[i], false, &pos))
                     {
                          --amount;
-                        DEBUG_LOG("Pet %s summoned (from database). Counter is %d ",
-                                     pet->GetObjectGuid().GetString().c_str(), pet->GetPetCounter());
+                        DEBUG_LOG("%s summoned (from database). Counter is %d ",
+                             pet->GetObjectGuid().GetString().c_str(), pet->GetPetCounter());
                         SendEffectLogExecute(effect, pet->GetObjectGuid());
                     }
                     else
                     {
-                        DEBUG_LOG("Pet (guidlow %d, entry %d) found in database, but not loaded. Counter is %d ",
-                                     pet->GetGUIDLow(), pet->GetEntry(), pet->GetPetCounter());
+                        DEBUG_LOG("%s found in database, but not loaded. Counter is %d ",
+                             pet->GetGuidStr().c_str(), pet->GetPetCounter());
                         delete pet;
                     }
+
+                    if (m_duration)
+                        pet->SetDuration(m_duration);
+
                 }
             }
         }
@@ -6500,12 +6538,12 @@ void Spell::DoSummonGroupPets(SpellEffectEntry const* effect)
 
         if (!pet->Summon())
         {
-            sLog.outError("Pet (guidlow %d, entry %d) not summoned by undefined reason. ",
-                pet->GetGUIDLow(), pet->GetEntry());
+            sLog.outError("Spell::EffectSummonGroupPets: %s not summoned by undefined reason.", pet->GetGuidStr().c_str());
+                
             delete pet;
             return;
         }
-        DEBUG_LOG("New Pet (%s) summoned (default). Counter is %d ", pet->GetObjectGuid().GetString().c_str(), pet->GetPetCounter());
+        DEBUG_LOG("New %s summoned (default). Counter is %d ", pet->GetGuidStr().c_str(), pet->GetPetCounter());
 
         if (m_caster->GetTypeId() == TYPEID_UNIT && ((Creature*)m_caster)->AI())
             ((Creature*)m_caster)->AI()->JustSummoned((Creature*)pet);
@@ -6845,7 +6883,7 @@ void Spell::DoSummonWild(SpellEffectEntry const* effect, uint32 forceFaction)
     if (m_duration > 0)
     {
         if (propEntry->HasFlag(SUMMON_PROP_FLAG_NOT_DESPAWN_IN_COMBAT))
-            summonType = TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT_OR_DEAD_DESPAWN;
+            summonType = TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN;
         else
             summonType = TEMPSUMMON_TIMED_OR_DEAD_DESPAWN;
     }
@@ -8274,6 +8312,14 @@ void Spell::EffectScriptEffect(SpellEffectEntry const* effect)
                     unitTarget->CastSpell(unitTarget, 24321, true, NULL, NULL, m_caster->GetObjectGuid());
                     return;
                 }
+                case 24324:                                 // Blood Siphon
+                {
+                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
+                        return;
+
+                    unitTarget->CastSpell(m_caster, unitTarget->HasAura(24321) ? 24323 : 24322, true);
+                    return;
+                }
                 case 24590:                                 // Brittle Armor - need remove one 24575 Brittle Armor aura
                     unitTarget->RemoveAuraHolderFromStack(24575);
                     return;
@@ -8660,6 +8706,14 @@ void Spell::EffectScriptEffect(SpellEffectEntry const* effect)
                     unitTarget->CastSpell(m_caster, 32300, true);
                     return;
                 }
+                case 33676:                                 // Incite Chaos
+                {
+                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
+                        return;
+
+                    m_caster->CastSpell(unitTarget, 33684, true);
+                    return;
+                }
                 case 35865:                                 // Summon Nether Vapor
                 {
                     if (!unitTarget)
@@ -8951,6 +9005,14 @@ void Spell::EffectScriptEffect(SpellEffectEntry const* effect)
 
                     return;
                 }
+                case 45235:                                 // Blaze
+                {
+                    if (!unitTarget)
+                        return;
+
+                    unitTarget->CastSpell(unitTarget, 45236, true, NULL, NULL, m_caster->GetObjectGuid());
+                    return;
+                }
                 case 45668:                                 // Ultra-Advanced Proto-Typical Shortening Blaster
                 {
                     if (!unitTarget || unitTarget->GetTypeId() != TYPEID_UNIT)
@@ -9053,6 +9115,32 @@ void Spell::EffectScriptEffect(SpellEffectEntry const* effect)
                     }
 
                     m_caster->SetDisplayId(display_id);
+                    return;
+                }
+                case 45785:                                 // Sinister Reflection Clone
+                {
+                    if (!unitTarget)
+                        return;
+
+                    unitTarget->CastSpell(unitTarget, m_spellInfo->CalculateSimpleValue(eff_idx), true);
+                    return;
+                }
+                case 45833:                                 // Power of the Blue Flight
+                {
+                    if (!unitTarget)
+                        return;
+
+                    unitTarget->CastSpell(unitTarget, 45836, true);
+                    return;
+                }
+                case 45892:                                 // Sinister Reflection
+                {
+                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
+                        return;
+
+                    // Summon 4 clones of the same player
+                    for (uint8 i = 0; i < 4; ++i)
+                        unitTarget->CastSpell(unitTarget, 45891, true, NULL, NULL, m_caster->GetObjectGuid());
                     return;
                 }
                 case 45958:                                 // Signal Alliance

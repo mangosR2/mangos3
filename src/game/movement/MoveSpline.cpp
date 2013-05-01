@@ -67,6 +67,8 @@ namespace Movement
             if (splineflags.orientationInversed)
                 c.orientation = -c.orientation;
         }
+
+        c.orientation = G3D::wrap(c.orientation, 0.0f, float(G3D::twoPi()));
         return c;
     }
 

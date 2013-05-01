@@ -645,6 +645,20 @@ void ScriptMgr::LoadScripts(ScriptMapMapName& scripts, const char* tablename)
                 break;
             case SCRIPT_COMMAND_XP_USER:                    // 33
                 break;
+            case SCRIPT_COMMAND_TERMINATE_COND:             // 34
+            {
+                if (!sConditionStorage.LookupEntry<PlayerCondition>(tmp.terminateCond.conditionId))
+                {
+                    sLog.outErrorDb("Table `%s` has datalong = %u in SCRIPT_COMMAND_TERMINATE_COND for script id %u, but this condition_id does not exist.", tablename, tmp.terminateCond.conditionId, tmp.id);
+                    continue;
+                }
+                if (tmp.terminateCond.failQuest && !sObjectMgr.GetQuestTemplate(tmp.terminateCond.failQuest))
+                {
+                    sLog.outErrorDb("Table `%s` has datalong2 = %u in SCRIPT_COMMAND_TERMINATE_COND for script id %u, but this questId does not exist.", tablename, tmp.terminateCond.failQuest, tmp.id);
+                    continue;
+                }
+                break;
+            }
             default:
             {
                 sLog.outErrorDb("Table `%s` unknown command %u, skipping.", tablename, tmp.command);
@@ -1381,12 +1395,18 @@ bool ScriptAction::HandleScriptStep()
         }
         case SCRIPT_COMMAND_CAST_SPELL:                     // 15
         {
-            if (LogIfNotUnit(pSource))
-                break;
-            if (LogIfNotUnit(pTarget))
+            if (LogIfNotUnit(pTarget))                      // TODO - Change when support for casting without victim will be supported
                 break;
 
-            //TODO: when GO cast implemented, code below must be updated accordingly to also allow GO spell cast
+            // TODO: when GO cast implemented, code below must be updated accordingly to also allow GO spell cast
+            if (pSource && pSource->GetTypeId() == TYPEID_GAMEOBJECT)
+            {
+                ((Unit*)pTarget)->CastSpell(((Unit*)pTarget), m_script->castSpell.spellId, true, NULL, NULL, pSource->GetObjectGuid());
+                break;
+            }
+
+            if (LogIfNotUnit(pSource))
+                break;
             ((Unit*)pSource)->CastSpell(((Unit*)pTarget), m_script->castSpell.spellId, (m_script->data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL) != 0);
 
             break;
@@ -1721,6 +1741,45 @@ bool ScriptAction::HandleScriptStep()
             else
                 pPlayer->RemoveFlag(PLAYER_FLAGS, PLAYER_FLAGS_XP_USER_DISABLED);
             break;
+        }
+        case SCRIPT_COMMAND_TERMINATE_COND:
+        {
+            Player* player = NULL;
+            WorldObject* second = pSource;
+            // First case: target is player
+            if (pTarget && pTarget->GetTypeId() == TYPEID_PLAYER)
+                player = static_cast<Player*>(pTarget);
+            // Second case: source is player
+            else if (pSource && pSource->GetTypeId() == TYPEID_PLAYER)
+            {
+                player = static_cast<Player*>(pSource);
+                second = pTarget;
+            }
+
+            bool terminateResult;
+            if (m_script->data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL)
+                terminateResult = !sObjectMgr.IsPlayerMeetToCondition(m_script->terminateCond.conditionId, player, m_map, second, CONDITION_FROM_DBSCRIPTS);
+            else
+                terminateResult = sObjectMgr.IsPlayerMeetToCondition(m_script->terminateCond.conditionId, player, m_map, second, CONDITION_FROM_DBSCRIPTS);
+
+            if (terminateResult && m_script->terminateCond.failQuest && player)
+            {
+                if (Group* group = player->GetGroup())
+                {
+                    for (GroupReference* groupRef = group->GetFirstMember(); groupRef != NULL; groupRef = groupRef->next())
+                    {
+                        Player* member = groupRef->getSource();
+                        if (member->GetQuestStatus(m_script->terminateCond.failQuest) == QUEST_STATUS_INCOMPLETE)
+                            member->FailQuest(m_script->terminateCond.failQuest);
+                    }
+                }
+                else
+                {
+                    if (player->GetQuestStatus(m_script->terminateCond.failQuest) == QUEST_STATUS_INCOMPLETE)
+                        player->FailQuest(m_script->terminateCond.failQuest);
+                }
+            }
+            return terminateResult;
         }
         default:
             sLog.outError(" DB-SCRIPTS: Process table `%s` id %u, command %u unknown command used.", m_table, m_script->id, m_script->command);

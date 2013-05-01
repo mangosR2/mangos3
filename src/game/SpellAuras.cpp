@@ -1071,13 +1071,9 @@ void Aura::ApplyModifier(bool apply, bool Real)
 
     MANGOS_ASSERT(aura < TOTAL_AURAS);
 
-    GetHolder()->SetInUse(true);
-
     (*this.*AuraHandler [aura])(apply, Real);
 
     m_isActive = apply;
-
-    GetHolder()->SetInUse(false);
 }
 
 ClassFamilyMask const& Aura::GetAuraSpellClassMask() const { return  GetHolder() ? GetHolder()->GetSpellProto()->GetEffectSpellClassMask(m_effIndex) : ClassFamilyMask::Null; }
@@ -2432,6 +2428,12 @@ void Aura::TriggerSpell()
                     caster->CastSpell(triggerTarget, trigger_spell_id, true, NULL, this);
                 return;
             }
+            case 43149:                                     // Claw Rage
+            {
+                // Need to provide explicit target for trigger spell target combination
+                target->CastSpell(target->getVictim(), trigger_spell_id, true, NULL, this);
+                return;
+            }
             case 44883:                                     // Encapsulate
             case 56505:                                     // Surge of Power
             {
@@ -3739,6 +3741,20 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                         target->CastSpell(target, 42517, true);
                     return;
                 }
+                case 42583:                                 // Claw Rage
+                case 68987:                                 // Pursuit
+                {
+                    Unit* caster = GetCaster();
+                    if (!caster || target->GetTypeId() != TYPEID_PLAYER)
+                        return;
+
+                    if (apply)
+                        caster->FixateTarget(target);
+                    else if (target->GetObjectGuid() == caster->GetFixatedTargetGuid())
+                        caster->FixateTarget(NULL);
+
+                    return;
+                }
                 case 43874:                                 // Scourge Mur'gul Camp: Force Shield Arcane Purple x3
                     target->ApplyModFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE, apply);
 
@@ -3794,21 +3810,8 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                         // Play part 3
                         else
                             target->PlayDirectSound(14972, (Player*)target);
-                        return;
                     }
-                case 68987:                                 // Pursuit 
-                { 
-                    Unit* caster = GetCaster(); 
-                    if (!caster || target->GetTypeId() != TYPEID_PLAYER) 
-                        return; 
- 
-                    if (apply) 
-                        caster->FixateTarget(target); 
-                    else if (target->GetObjectGuid() == caster->GetFixatedTargetGuid()) 
-                        caster->FixateTarget(NULL); 
- 
-                    return; 
-                }
+                    return;
                 case 27978:
                 case 40131:
                     if (apply)
@@ -4016,7 +4019,17 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
         }
     }
 
-    if (GetEffIndex() == EFFECT_INDEX_0 && target->GetTypeId() == TYPEID_PLAYER)
+    // pet auras
+    if (PetAura const* petSpell = sSpellMgr.GetPetAura(GetId(), m_effIndex))
+    {
+        if (apply)
+            target->AddPetAura(petSpell);
+        else
+            target->RemovePetAura(petSpell);
+        return;
+    }
+
+    if (target->GetTypeId() == TYPEID_PLAYER)
     {
         SpellAreaForAreaMapBounds saBounds = sSpellMgr.GetSpellAreaForAuraMapBounds(GetId());
         if (saBounds.first != saBounds.second)
@@ -4024,18 +4037,8 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
             uint32 zone, area;
             target->GetZoneAndAreaId(zone, area);
 
-            for(SpellAreaForAreaMap::const_iterator itr = saBounds.first; itr != saBounds.second; ++itr)
-            {
-                // some auras remove at aura remove
-                if (!itr->second->IsFitToRequirements((Player*)target, zone, area))
-                    target->RemoveAurasDueToSpell(itr->second->spellId);
-                // some auras applied at aura apply
-                else if (itr->second->autocast)
-                {
-                    if (!target->HasAura(itr->second->spellId, EFFECT_INDEX_0))
-                        target->CastSpell(target, itr->second->spellId, true);
-                }
-            }
+            for (SpellAreaForAreaMap::const_iterator itr = saBounds.first; itr != saBounds.second; ++itr)
+                itr->second->ApplyOrRemoveSpellIfCan((Player*)target, zone, area, false);
         }
     }
 
@@ -10606,7 +10609,7 @@ void Aura::HandlePhase(bool apply, bool Real)
 
     target->SetPhaseMask(apply ? GetMiscValue() : uint32(PHASEMASK_NORMAL), true);
     // no-phase is also phase state so same code for apply and remove
-    if (GetEffIndex() == EFFECT_INDEX_0 && target->GetTypeId() == TYPEID_PLAYER)
+    if (target->GetTypeId() == TYPEID_PLAYER)
     {
         SpellAreaForAreaMapBounds saBounds = sSpellMgr.GetSpellAreaForAuraMapBounds(GetId());
         if (saBounds.first != saBounds.second)
@@ -10614,18 +10617,8 @@ void Aura::HandlePhase(bool apply, bool Real)
             uint32 zone, area;
             target->GetZoneAndAreaId(zone, area);
 
-            for(SpellAreaForAreaMap::const_iterator itr = saBounds.first; itr != saBounds.second; ++itr)
-            {
-                // some auras remove at aura remove
-                if (!itr->second->IsFitToRequirements((Player*)target, zone, area))
-                    target->RemoveAurasDueToSpell(itr->second->spellId);
-                // some auras applied at aura apply
-                else if (itr->second->autocast)
-                {
-                    if (!target->HasAura(itr->second->spellId, EFFECT_INDEX_0))
-                        target->CastSpell(target, itr->second->spellId, true);
-                }
-            }
+            for (SpellAreaForAreaMap::const_iterator itr = saBounds.first; itr != saBounds.second; ++itr)
+                itr->second->ApplyOrRemoveSpellIfCan((Player*)target, zone, area, false);
         }
 
     }
@@ -10714,7 +10707,7 @@ SpellAuraHolder::SpellAuraHolder(SpellEntry const* spellproto, Unit *target, Wor
 m_spellProto(spellproto), m_target(target), m_castItemGuid(castItem ? castItem->GetObjectGuid() : ObjectGuid()),
 m_auraSlot(MAX_AURAS), m_auraFlags(AFLAG_NONE), m_auraLevel(1), m_procCharges(0),
 m_stackAmount(1), m_timeCla(1000), m_removeMode(AURA_REMOVE_BY_DEFAULT), m_AuraDRGroup(DIMINISHING_NONE),
-m_permanent(false), m_isRemovedOnShapeLost(true), m_deleted(false), m_in_use(0)
+m_permanent(false), m_isRemovedOnShapeLost(true), m_deleted(false)
 {
     MANGOS_ASSERT(target);
     MANGOS_ASSERT(spellproto && spellproto == sSpellStore.LookupEntry( spellproto->Id ) && "`info` must be pointer to sSpellStore element");
@@ -12168,9 +12161,7 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
                     {
                         spellId1 = 57318;                    // Sanctified Wrath (triggered)
                         // prevent aura deletion, specially in multi-boost case
-                        SetInUse(true);
                         m_target->CastCustomSpell(m_target, spellId1, &percent, &percent, NULL, true, NULL);
-                        SetInUse(false);
                     }
                     return;
                 }
@@ -12418,14 +12409,12 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
     if (linkedSet.size() > 0)
     {
         // prevent aura deletion, specially in multi-boost case
-        SetInUse(true);
         for (SpellLinkedSet::const_iterator itr = linkedSet.begin(); itr != linkedSet.end(); ++itr)
         {
             (apply || cast_at_remove) ?
                 m_target->CastSpell(m_target, *itr, true, NULL, NULL, GetCasterGuid()) :
                 m_target->RemoveAurasByCasterSpell(*itr, GetCasterGuid());
         }
-        SetInUse(false);
     }
 }
 
@@ -12590,14 +12579,12 @@ void SpellAuraHolder::HandleSpellSpecificBoostsForward(bool apply)
     if (linkedSet.size() > 0)
     {
         // prevent aura deletion, specially in multi-boost case
-        SetInUse(true);
         for (SpellLinkedSet::const_iterator itr = linkedSet.begin(); itr != linkedSet.end(); ++itr)
         {
             apply ?
                 m_target->CastSpell(m_target, *itr, true, NULL, NULL, GetCasterGuid()) :
                 m_target->RemoveAurasByCasterSpell(*itr, GetCasterGuid());
         }
-        SetInUse(false);
     }
 }
 

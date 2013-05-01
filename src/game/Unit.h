@@ -997,7 +997,11 @@ struct DamageInfo
         SpellSchoolMask   SchoolMask()    const;
 
         // Damage types
-        uint32 damage;
+        union {
+            uint32 damage;
+            uint32 heal;
+        };
+
         int32  cleanDamage;          // Used for rage and healing calculation
 
         // Damage calculation
@@ -1037,10 +1041,22 @@ struct DamageInfo
         bool   IsMeleeDamage() const { return !m_spellInfo; };
         bool   IsHeal()        const { return cleanDamage < 0; };
 
-        uint32 const&  GetFlags();
         void           AddFlag(DamageFlags flag)       { m_flags |= (1 << flag); };
         void           RemoveFlag(DamageFlags flag)    { m_flags &= ~(1 << flag); };
         bool           HasFlag(DamageFlags flag) const { return (m_flags & (1 << flag)); };
+
+        // Attention: We now that this to function return the same (Remember the union from heal and damage)
+        // Exits Only for better reading!
+        uint32 GetRemainingHeal() { return heal; };
+        uint32 GetRemainingDamage() { return damage; };
+
+        // absorb
+        uint32 AddAbsorb(uint32 addvalue);
+        void AddPctAbsorb(float aborbPct);
+        // should not be used, possible for some kinds of hacks
+        void SetAbsorb(uint32 value) { absorb = value; };
+        uint32 GetAbsorb() { return absorb; };
+
 
     private:
         DamageInfo();     // Don't allow plain initialization!
@@ -1507,6 +1523,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         uint32 DealDamage(Unit* pVictim, DamageInfo* damageInfo, bool durabilityLoss);
         uint32 DealDamage(DamageInfo* damageInfo);
         int32  DealHeal(Unit* pVictim, uint32 addhealth, SpellEntry const* spellProto, bool critical = false, uint32 absorb = 0);
+        int32  DealHeal(DamageInfo* healInfo, bool critical = false);
 
         void PetOwnerKilledUnit(Unit* pVictim);
 
