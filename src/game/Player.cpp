@@ -26885,7 +26885,7 @@ uint32 Player::GetChampioningFaction()
 
 PetSaveMode Player::GetFreeStableSlot() const
 {
-    QueryResult* result = CharacterDatabase.PQuery("SELECT actual_slot from character_pet WHERE owner = %u'", GetObjectGuid().GetCounter());
+    QueryResult* result = CharacterDatabase.PQuery("SELECT actual_slot from character_pet WHERE owner = '%u'", GetObjectGuid().GetCounter());
     if (!result)
         return PET_SAVE_AS_CURRENT;
 
