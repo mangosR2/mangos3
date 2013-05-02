@@ -2694,6 +2694,9 @@ class MANGOS_DLL_SPEC Player : public Unit
         VoidStorageItem* GetVoidStorageItem(uint64 id, uint8& slot) const;
         void _LoadVoidStorage(QueryResult* result);
         void _SaveVoidStorage();
+
+        uint32 GetChampioningFaction();
+
     protected:
 
         uint32 m_contestedPvPTimer;

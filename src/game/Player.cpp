@@ -6837,27 +6837,21 @@ void Player::RewardReputation(Unit* pVictim, float rate)
     if (!Rep)
         return;
 
-    uint32 Repfaction1 = Rep->repfaction1;
-    uint32 Repfaction2 = Rep->repfaction2;
+    uint32 repFaction1 = Rep->repfaction1;
+    uint32 repFaction2 = Rep->repfaction2;
 
     // Championning tabard reputation system
-    if (HasAura(Rep->championingAura))
+    if (uint32 championingFaction = GetChampioningFaction())
     {
-        if (Item* pItem = GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_TABARD))
-        {
-            if (uint32 tabardFactionID = pItem->GetProto()->RequiredReputationFaction)
-            {
-                Repfaction1 = tabardFactionID;
-                Repfaction2 = tabardFactionID;
-            }
-        }
+        repFaction1 = championingFaction;
+        repFaction2 = championingFaction;
     }
 
-    if (Repfaction1 && (!Rep->team_dependent || GetTeam()==ALLIANCE))
+    if (repFaction1 && (!Rep->team_dependent || GetTeam() == ALLIANCE))
     {
-        int32 donerep1 = CalculateReputationGain(REPUTATION_SOURCE_KILL, Rep->repvalue1, Repfaction1, pVictim->getLevel());
+        int32 donerep1 = CalculateReputationGain(REPUTATION_SOURCE_KILL, Rep->repvalue1, repFaction1, pVictim->getLevel());
         donerep1 = int32(donerep1 * rate);
-        FactionEntry const* factionEntry1 = sFactionStore.LookupEntry(Repfaction1);
+        FactionEntry const* factionEntry1 = sFactionStore.LookupEntry(repFaction1);
         uint32 current_reputation_rank1 = GetReputationMgr().GetRank(factionEntry1);
         if (factionEntry1 && current_reputation_rank1 <= Rep->reputation_max_cap1)
             GetReputationMgr().ModifyReputation(factionEntry1, donerep1);
@@ -6871,11 +6865,11 @@ void Player::RewardReputation(Unit* pVictim, float rate)
         }
     }
 
-    if (Repfaction2 && (!Rep->team_dependent || GetTeam()==HORDE))
+    if (repFaction2 && (!Rep->team_dependent || GetTeam() == HORDE))
     {
-        int32 donerep2 = CalculateReputationGain(REPUTATION_SOURCE_KILL, Rep->repvalue2, Repfaction2, pVictim->getLevel());
+        int32 donerep2 = CalculateReputationGain(REPUTATION_SOURCE_KILL, Rep->repvalue2, repFaction2, pVictim->getLevel());
         donerep2 = int32(donerep2 * rate);
-        FactionEntry const* factionEntry2 = sFactionStore.LookupEntry(Repfaction2);
+        FactionEntry const* factionEntry2 = sFactionStore.LookupEntry(repFaction2);
         uint32 current_reputation_rank2 = GetReputationMgr().GetRank(factionEntry2);
         if (factionEntry2 && current_reputation_rank2 <= Rep->reputation_max_cap2)
             GetReputationMgr().ModifyReputation(factionEntry2, donerep2);
@@ -26533,4 +26527,154 @@ void Player::RemoveSpecDependentAuras()
 
     for (size_t i = 0; i < auras2remove.size(); ++i)
         RemoveAurasDueToSpell(auras2remove[i]);
+}
+
+uint32 Player::GetChampioningFaction()
+{
+    MapEntry const* storedMap = sMapStore.LookupEntry(GetMapId());
+    InstanceTemplate const* instance = ObjectMgr::GetInstanceTemplate(GetMapId());
+    if (!storedMap || !instance)
+        return false;
+
+    uint32 faction, level;
+    uint32 expansion = 0;
+
+    Unit::AuraList const& mDummyAuras = GetAurasByType(SPELL_AURA_DUMMY);
+    for (Unit::AuraList::const_iterator itr = mDummyAuras.begin(); itr != mDummyAuras.end(); ++itr)
+    {
+        switch ((*itr)->GetId())
+        {
+            // Wrath of the Lich King factions
+            case 57819:
+                faction = 1106;
+                level = 80;
+                expansion = EXPANSION_WOTLK;
+                break;          // Argent Crusade
+            case 57820:
+                faction = 1098;
+                level = 80;
+                expansion = EXPANSION_WOTLK;
+                break;          // Knights of the Ebon Blade
+            case 57821:
+                faction = 1090;
+                level = 80;
+                expansion = EXPANSION_WOTLK;
+                break;          // Kirin Tor
+            case 57822:
+                faction = 1091;
+                level = 80;
+                expansion = EXPANSION_WOTLK;
+                break;          // The Wyrmrest Accord
+                // Cataclysm factions
+            case 93337:
+                faction = 1173;
+                level = 85;
+                expansion = EXPANSION_CATA;
+                break;          // Ramkahen
+            case 93339:
+                faction = 1135;
+                level = 85;
+                expansion = EXPANSION_CATA;
+                break;          // The Earthen Ring
+            case 93341:
+                faction = 1158;
+                level = 85;
+                expansion = EXPANSION_CATA;
+                break;          // Guardians of Hyjal
+            case 93347:
+                faction = 1171;
+                level = 85;
+                expansion = EXPANSION_CATA;
+                break;          // Therazane
+            case 93368:
+                faction = 1174;
+                level = 85;
+                expansion = EXPANSION_CATA;
+                break;          // Wildhammer Clan
+            case 94158:
+                faction = 1172;
+                level = 85;
+                expansion = EXPANSION_CATA;
+                break;          // Dragonmaw Clan
+                // Alliance factions
+            case 93795:
+                faction = 72;
+                level = 0;
+                expansion = EXPANSION_NONE;
+                break;          // Stormwind
+            case 93805:
+                faction = 47;
+                level = 0;
+                expansion = EXPANSION_NONE;
+                break;          // Ironforge
+            case 93806:
+                faction = 69;
+                level = 0;
+                expansion = EXPANSION_NONE;
+                break;          // Darnassus
+            case 93811:
+                faction = 930;
+                level = 0;
+                expansion = EXPANSION_NONE;
+                break;          // Exodar
+            case 93816:
+                faction = 1134;
+                level = 0;
+                expansion = EXPANSION_NONE;
+                break;          // Gilneas
+            case 93821:
+                faction = 54;
+                level = 0;
+                expansion = EXPANSION_NONE;
+                break;          // Gnomeregan
+                // Horde factions
+            case 93825:
+                faction = 76;
+                level = 0;
+                expansion = EXPANSION_NONE;
+                break;          // Orgrimmar
+            case 93827:
+                faction = 530;
+                level = 0;
+                expansion = EXPANSION_NONE;
+                break;          // Darkspear Trolls
+            case 93828:
+                faction = 911;
+                level = 0;
+                expansion = EXPANSION_NONE;
+                break;          // Silvermoon
+            case 93830:
+                faction = 1133;
+                level = 0;
+                expansion = EXPANSION_NONE;
+                break;          // Bilgewater Cartel
+            case 94462:
+                faction = 68;
+                level = 0;
+                expansion = EXPANSION_NONE;
+                break;          // Undercity
+            case 94463:
+                faction = 81;
+                level = 0;
+                expansion = EXPANSION_NONE;
+                break;          // Thunder Bluff
+        }
+
+        if (faction)
+            break;
+    }
+
+    if (!faction)
+        return 0;
+
+    if (level == 0)
+        return faction;
+
+    if (storedMap->Expansion() < expansion)
+        return 0;
+
+    if (instance->levelMin < level && GetMap()->IsRegularDifficulty())
+        return 0;
+
+    return faction;
 }
