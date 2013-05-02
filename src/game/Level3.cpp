@@ -3996,8 +3996,6 @@ bool ChatHandler::HandleDamageCommand(char* args)
     if (!*args)
     {
         DamageInfo damageInfo  = DamageInfo(m_session->GetPlayer(), target, spellid, damage);
-        damageInfo.absorb      = 0;
-        damageInfo.resist      = 0;
         damageInfo.HitInfo     = HITINFO_AFFECTS_VICTIM;
         damageInfo.TargetState = VICTIMSTATE_NORMAL;
 

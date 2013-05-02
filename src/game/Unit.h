@@ -1012,9 +1012,10 @@ struct DamageInfo
         // absorb
         uint32 AddAbsorb(uint32 addvalue);
         void AddPctAbsorb(float aborbPct);
+        uint32 GetAbsorb() const { return absorb; };
         // should not be used, possible for some kinds of hacks
         void SetAbsorb(uint32 value) { absorb = value; };
-        uint32 GetAbsorb() { return absorb; };
+
 
 
     private:

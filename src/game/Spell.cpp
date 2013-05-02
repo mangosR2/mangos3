@@ -1244,9 +1244,9 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
         else
             damageInfo.procEx |= PROC_EX_NORMAL_HIT;
 
-        damageInfo.absorb = 0;
+        damageInfo.SetAbsorb(0);
         damageInfo.target->CalculateHealAbsorb(damageInfo.damage, &damageInfo.absorb);
-        damageInfo.damage -= damageInfo.absorb;
+        damageInfo.damage -= damageInfo.GetAbsorb();
 
         // Do triggers for unit (reflect triggers passed on hit phase for correct drop charge)
         if (m_canTrigger && missInfo != SPELL_MISS_REFLECT)
@@ -1293,7 +1293,7 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
         damageInfo.procEx = createProcExtendMask(&damageInfo, missInfo);
         damageInfo.procVictim |= PROC_FLAG_TAKEN_ANY_DAMAGE;
 
-        if (damageInfo.absorb && damageInfo.damage == 0)
+        if (damageInfo.GetAbsorb() && damageInfo.damage == 0)
             damageInfo.procEx &= ~PROC_EX_DIRECT_DAMAGE;
         else if (damageInfo.damage > 0)
             damageInfo.procEx |= PROC_EX_DIRECT_DAMAGE;
@@ -1317,7 +1317,7 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
         if (m_spellInfo->SpellFamilyName == SPELLFAMILY_WARLOCK && m_spellInfo->SpellIconID == 3172 &&
             m_spellInfo->GetSpellFamilyFlags().test<CF_WARLOCK_HAUNT>())
             if (Aura const* dummy = unitTarget->GetDummyAura(m_spellInfo->Id))
-                dummy->GetModifier()->m_amount = damageInfo.damage + damageInfo.absorb;
+                dummy->GetModifier()->m_amount = damageInfo.damage + damageInfo.GetAbsorb();
 
         /* process anticheat check */
         if (caster->GetObjectGuid().IsPlayer())

@@ -1009,7 +1009,7 @@ uint32 Player::EnvironmentalDamage(EnviromentalDamage type, uint32 damage)
     data << GetObjectGuid();
     data << uint8(type != DAMAGE_FALL_TO_VOID ? type : DAMAGE_FALL);
     data << uint32(damageInfo.damage);
-    data << uint32(damageInfo.absorb);
+    data << uint32(damageInfo.GetAbsorb());
     data << uint32(damageInfo.resist);
     SendMessageToSet(&data, true);
 

@@ -8758,12 +8758,12 @@ void Aura::PeriodicTick()
             target->CalculateDamageAbsorbAndResist(pCaster, &damageInfo, !GetSpellProto()->HasAttribute(SPELL_ATTR_EX_CANT_REFLECTED));
 
             DETAIL_FILTER_LOG(LOG_FILTER_PERIODIC_AFFECTS, "PeriodicTick: %s attacked %s for %u dmg inflicted by %u abs is %u",
-                GetAffectiveCasterGuid().GetString().c_str(), target->GetGuidStr().c_str(), damageInfo.damage, GetId(), damageInfo.absorb);
+                GetAffectiveCasterGuid().GetString().c_str(), target->GetGuidStr().c_str(), damageInfo.damage, GetId(), damageInfo.GetAbsorb());
 
             pCaster->DealDamageMods(&damageInfo);
 
             uint32 overkill = damageInfo.damage > target->GetHealth() ? damageInfo.damage - target->GetHealth() : 0;
-            SpellPeriodicAuraLogInfo pInfo(this, damageInfo.damage, overkill, damageInfo.absorb, damageInfo.resist, 0.0f, isCrit);
+            SpellPeriodicAuraLogInfo pInfo(this, damageInfo.damage, overkill, damageInfo.GetAbsorb(), damageInfo.resist, 0.0f, isCrit);
             target->SendPeriodicAuraLog(&pInfo);
 
             // Set trigger flag
@@ -8853,11 +8853,11 @@ void Aura::PeriodicTick()
             target->CalculateDamageAbsorbAndResist(pCaster, &damageInfo, !spellProto->HasAttribute(SPELL_ATTR_EX_CANT_REFLECTED));
 
             DETAIL_FILTER_LOG(LOG_FILTER_PERIODIC_AFFECTS, "PeriodicTick: %s health leech of %s for %u dmg inflicted by %u abs is %u",
-                GetAffectiveCasterGuid().GetString().c_str(), target->GetGuidStr().c_str(), damageInfo.damage, GetId(),damageInfo.absorb);
+                GetAffectiveCasterGuid().GetString().c_str(), target->GetGuidStr().c_str(), damageInfo.damage, GetId(),damageInfo.GetAbsorb());
 
             pCaster->DealDamageMods(&damageInfo);
 
-            pCaster->SendSpellNonMeleeDamageLog(target, GetId(), damageInfo.damage, damageInfo.SchoolMask(), damageInfo.absorb, damageInfo.resist, false, 0, isCrit);
+            pCaster->SendSpellNonMeleeDamageLog(target, GetId(), damageInfo.damage, damageInfo.SchoolMask(), damageInfo.GetAbsorb(), damageInfo.resist, false, 0, isCrit);
 
             // Set trigger flag
             damageInfo.procAttacker = PROC_FLAG_ON_DO_PERIODIC; //  | PROC_FLAG_SUCCESSFUL_HARMFUL_SPELL_HIT;
@@ -8945,16 +8945,16 @@ void Aura::PeriodicTick()
             bool isCrit = IsCritFromAbilityAura(pCaster, &damageInfo);
 
             pCaster->CalculateHealAbsorb(damageInfo.damage, &damageInfo.absorb);
-            damageInfo.damage -= damageInfo.absorb;
+            damageInfo.damage -= damageInfo.GetAbsorb();
 
             DETAIL_FILTER_LOG(LOG_FILTER_PERIODIC_AFFECTS, "PeriodicTick: %s heal of %s for %u health  (absorbed %u) inflicted by %u",
-                GetAffectiveCasterGuid().GetString().c_str(), target->GetGuidStr().c_str(), damageInfo.damage, damageInfo.absorb, GetId());
+                GetAffectiveCasterGuid().GetString().c_str(), target->GetGuidStr().c_str(), damageInfo.damage, damageInfo.GetAbsorb(), GetId());
 
             int32 gain = target->ModifyHealth(damageInfo.damage);
             damageInfo.cleanDamage = damageInfo.damage;
             damageInfo.damage = uint32(gain);
             uint32 overDamage = damageInfo.cleanDamage - damageInfo.damage;
-            SpellPeriodicAuraLogInfo pInfo(this, damageInfo.cleanDamage, overDamage, damageInfo.absorb, 0, 0.0f, isCrit);
+            SpellPeriodicAuraLogInfo pInfo(this, damageInfo.cleanDamage, overDamage, damageInfo.GetAbsorb(), 0, 0.0f, isCrit);
             target->SendPeriodicAuraLog(&pInfo);
 
             // Set trigger flag
@@ -8987,10 +8987,9 @@ void Aura::PeriodicTick()
                 {
                     DamageInfo funneldamageInfo = DamageInfo(pCaster, pCaster, spellProto);
                     funneldamageInfo.damage = gain;
-                    funneldamageInfo.absorb = 0;
                     funneldamageInfo.damageType = DOT;
                     pCaster->DealDamageMods(&funneldamageInfo);
-                    pCaster->SendSpellNonMeleeDamageLog(pCaster, GetId(), funneldamageInfo.damage, GetSpellSchoolMask(spellProto), funneldamageInfo.absorb, 0, false, 0, false);
+                    pCaster->SendSpellNonMeleeDamageLog(pCaster, GetId(), funneldamageInfo.damage, GetSpellSchoolMask(spellProto), funneldamageInfo.GetAbsorb(), 0, false, 0, false);
                     pCaster->DealDamage(pCaster, &funneldamageInfo, true);
                 }
             }
