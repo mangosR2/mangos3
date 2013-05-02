@@ -305,12 +305,12 @@ void FlightPathMovementGenerator::_Initialize(Player &player)
 
 void FlightPathMovementGenerator::_Finalize(Player & player)
 {
-    if(player.m_taxi.empty())
+    if (player.m_taxi.empty())
     {
         // update z position to ground and orientation for landing point
         // this prevent cheating with landing  point at lags
         // when client side flight end early in comparison server side
-        player.StopMoving();
+        player.StopMoving(true);
     }
 }
 

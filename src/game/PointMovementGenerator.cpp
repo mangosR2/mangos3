@@ -166,7 +166,7 @@ void EjectMovementGenerator::Finalize(Unit &unit)
     }
 
     unit.m_movementInfo.SetMovementFlags(MOVEFLAG_NONE);
-    unit.StopMoving();
+    unit.StopMoving(true);
 }
 
 void FlyOrLandMovementGenerator::Initialize(Unit& unit)

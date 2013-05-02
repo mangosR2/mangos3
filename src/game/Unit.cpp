@@ -12577,15 +12577,15 @@ void Unit::SendCharmState()
 
 ///----------End of Pet responses methods----------
 
-void Unit::StopMoving()
+void Unit::StopMoving(bool ignoreMoveState/*=false*/)
 {
+    if (IsStopped() && !ignoreMoveState)
+        return;
+
     clearUnitState(UNIT_STAT_MOVING);
 
     // not need send any packets if not in world
     if (!IsInWorld())
-        return;
-
-    if (movespline->Finalized())
         return;
 
     Movement::MoveSplineInit<Unit*> init(*this);
