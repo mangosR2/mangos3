@@ -6233,7 +6233,7 @@ void Aura::HandleModMechanicImmunity(bool apply, bool /*Real*/)
 
     Unit *target = GetTarget();
 
-    if (apply && GetSpellProto()->HasAttribute(SPELL_ATTR_EX_DISPEL_AURAS_ON_IMMUNITY))
+    if (GetSpellProto()->HasAttribute(SPELL_ATTR_EX_DISPEL_AURAS_ON_IMMUNITY))
     {
         uint32 mechanic = 1 << (misc-1);
 
@@ -10733,6 +10733,12 @@ void Aura::PeriodicDummyTick()
                         caster->CastSpell(caster, GetId() == 91296 ? 91306 : 91311, true);
                     return;
                 }
+                // Smoldering Rune - Death Knight T12 DPS 2P Bonus
+                case 98971:
+                {
+                    target->CastSpell(target, 99055, true);
+                    return;
+                }
                 // Exist more after, need add later
                 default:
                     break;
@@ -11033,12 +11039,6 @@ void Aura::PeriodicDummyTick()
                     target->RemoveAurasDueToSpell(GetId());
                 else
                     GetHolder()->RefreshHolder();
-                return;
-            }
-            // Smoldering Rune - Death Knight T12 DPS 2P Bonus
-            else if (GetId() == 98971)
-            {
-                target->CastSpell(target, 99055, true);
                 return;
             }
             // Raise Dead
