@@ -5951,7 +5951,15 @@ bool Player::UpdateFishingSkill()
 
     uint32 SkillValue = GetPureSkillValue(SKILL_FISHING);
 
-    int32 chance = SkillValue < 90 ? 100 : 3000 / (SkillValue - 60);
+    int32 chance = 100;
+    if (SkillValue >= 450)
+        chance = 18.18f;
+    else if (SkillValue >= 300)
+        chance = 27.78f;
+    else if (SkillValue >= 200)
+        chance = 52.63f;
+    else if (SkillValue >= 100)
+        chance = 62.5f;
 
     uint32 gathering_skill_gain = sWorld.getConfig(CONFIG_UINT32_SKILL_GAIN_GATHERING);
 
