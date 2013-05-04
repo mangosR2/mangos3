@@ -8941,7 +8941,7 @@ void Unit::SpellDamageBonusDone(DamageInfo* damageInfo, uint32 stack)
                 }
             }
             // Drain Life
-            if (damageInfo->GetSpellProto()->Id == 689 && GetHealthPercent() < 25.0f)
+            if ((damageInfo->GetSpellProto()->Id == 689 || damageInfo->GetSpellProto()->Id == 89420) && GetHealthPercent() < 25.0f)
             {
                 // Search Death's Embrace
                 Unit::AuraList const& dummyAuras = GetAurasByType(SPELL_AURA_DUMMY);

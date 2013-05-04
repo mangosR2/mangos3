@@ -7732,6 +7732,7 @@ void Aura::HandleAuraModIncreaseHealth(bool apply, bool Real)
         case 50322:                                         // Survival Instincts (Cast with percentage-value by CastCustomSpell)
         case 53479:                                         // Hunter pet - Last Stand (Cast with percentage-value by CastCustomSpell)
         case 59465:                                         // Brood Rage (Ahn'Kahet)
+        case 79437:                                         // Soulburn: Healthstone
         case 105284:                                        // Ancestral Vigor
         case 105588:                                        // Vampiric Blood
         {
@@ -7739,9 +7740,9 @@ void Aura::HandleAuraModIncreaseHealth(bool apply, bool Real)
             {
                 if (apply)
                 {
-                    // Demonic Empowerment (Voidwalker) & Vampiric Blood - special cases, store percent in data
+                    // Demonic Empowerment (Voidwalker), Soulburn: Healthstone & Vampiric Blood - special cases, store percent in data
                     // recalculate to full amount at apply for proper remove
-                    if (GetId() == 54443 || GetId() == 55233 || GetId() == 105588)
+                    if (GetId() == 54443 || GetId() == 55233 || GetId() == 79437 || GetId() == 105588)
                         m_modifier.m_amount = target->GetMaxHealth() * m_modifier.m_amount / 100;
 
                     // Ancestral Vigor, increase max health not more than 5/10%
@@ -9267,6 +9268,13 @@ void Aura::PeriodicTick()
             // some auras remove at specific health level or more
             switch (GetId())
             {
+                case 689:       // Drain Life
+                case 89420:     // Drain Life (Soulburn)
+                {
+                    // Drain Life (Health Energize)
+                    pCaster->CastSpell(pCaster, 89653, true);
+                    break;
+                }
                 case 31956:
                 case 35321:
                 case 38363:
