@@ -2832,7 +2832,10 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, DamageInfo* damageI
                     return SPELL_AURA_PROC_FAILED;
 
                 triggered_spell_id = 83077;
-                basepoints[0] = int32(triggerAmount * damage / 100);
+                basepoints[0] = int32(triggerAmount * CalculateSpellDamage(pVictim, procSpell, EFFECT_INDEX_0) / 100);
+                // ToDo: Make it over DamageInfo struct
+                //basepoints[0] = SpellDamageBonusDone(pVictim, procSpell, basepoints[0], DOT);
+                //basepoints[0] = pVictim->SpellDamageBonusTaken(this, procSpell, basepoints[0], DOT);
                 basepoints[0] *= GetSpellAuraMaxTicks(procSpell);
                 break;
             }
