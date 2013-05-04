@@ -29,9 +29,7 @@
 template<class T>
 void PointMovementGenerator<T>::Initialize(T &unit)
 {
-    if (!unit.IsStopped())
-        unit.StopMoving();
-
+    unit.StopMoving();
     unit.addUnitState(UNIT_STAT_ROAMING|UNIT_STAT_ROAMING_MOVE);
     Movement::MoveSplineInit<Unit*> init(unit);
     init.MoveTo(i_x, i_y, i_z, m_generatePath);
@@ -48,23 +46,16 @@ void PointMovementGenerator<T>::Finalize(T &unit)
 }
 
 template<class T>
-void PointMovementGenerator<T>::Interrupt(T &unit)
+void PointMovementGenerator<T>::Interrupt(T& unit)
 {
-    if (!unit.movespline->Finalized())
-    {
-        Location loc = unit.movespline->ComputePosition();
-        unit.SetPosition(loc.x,loc.y,loc.z,loc.orientation);
-        unit.movespline->_Interrupt();
-    }
+    unit.InterruptMoving();
     unit.clearUnitState(UNIT_STAT_ROAMING|UNIT_STAT_ROAMING_MOVE);
 }
 
 template<class T>
 void PointMovementGenerator<T>::Reset(T &unit)
 {
-    if (!unit.IsStopped())
-        unit.StopMoving();
-
+    unit.StopMoving();
     unit.addUnitState(UNIT_STAT_ROAMING|UNIT_STAT_ROAMING_MOVE);
 }
 
@@ -174,8 +165,7 @@ void FlyOrLandMovementGenerator::Initialize(Unit& unit)
     if (unit.hasUnitState(UNIT_STAT_CAN_NOT_REACT | UNIT_STAT_NOT_MOVE))
         return;
 
-    if (!unit.IsStopped())
-        unit.StopMoving();
+    unit.StopMoving();
 
     float x, y, z;
     GetDestination(x, y, z);

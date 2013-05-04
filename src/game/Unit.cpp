@@ -12589,6 +12589,24 @@ void Unit::StopMoving(bool ignoreMoveState/*=false*/)
     init.Launch();
 }
 
+void Unit::InterruptMoving(bool ignoreMoveState /*=false*/)
+{
+    if (!movespline)
+        return;
+
+    bool isMoving = false;
+
+    if (!movespline->Finalized())
+    {
+        Location loc = movespline->ComputePosition();
+        movespline->_Interrupt();
+        SetPosition(loc.x,loc.y,loc.z,loc.orientation);
+        isMoving = true;
+    }
+
+    StopMoving(ignoreMoveState || isMoving);
+}
+
 void Unit::SetFeared(bool apply, ObjectGuid casterGuid, uint32 spellID, uint32 time)
 {
     if (apply)
