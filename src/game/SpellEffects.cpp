@@ -4621,6 +4621,24 @@ void Spell::EffectDummy(SpellEffectEntry const* effect)
                         unitTarget->CastSpell(unitTarget, 99207, true);
                     return;
                 }
+                case 79637:                                 // Flask of Enhancement
+                {
+                    uint32 spell =79638;                    // Enhanced Strength
+                    Stats stat = STAT_STRENGTH;
+                    if (m_caster->GetTotalStatValue(STAT_AGILITY) > m_caster->GetTotalStatValue(stat))
+                    {
+                        stat = STAT_AGILITY;
+                        spell = 79639;                      // Enhanced Agility
+                    }
+                    if (m_caster->GetTotalStatValue(STAT_INTELLECT) > m_caster->GetTotalStatValue(stat))
+                    {
+                        stat = STAT_INTELLECT;
+                        spell = 79640;                      // Enhanced Intellect
+                    }
+
+                    m_caster->CastSpell(m_caster, spell, true);
+                    return;
+                }
                 default:
                     break;
             }
