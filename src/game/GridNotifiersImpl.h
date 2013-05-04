@@ -101,6 +101,15 @@ inline void MaNGOS::ObjectUpdater::Visit(CreatureMapType& m)
     }
 }
 
+inline void MaNGOS::ObjectUpdater::Visit(GameObjectMapType& m)
+{
+    for (GameObjectMapType::iterator iter = m.begin(); iter != m.end(); ++iter)
+    {
+        WorldObject::UpdateHelper helper(iter->getSource());
+        helper.Update(i_timeDiff);
+    }
+}
+
 inline void PlayerCreatureRelocationWorker(Player* pl, Creature* c)
 {
     // Creature AI reaction

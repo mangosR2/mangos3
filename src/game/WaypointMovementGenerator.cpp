@@ -23,6 +23,7 @@
 #include "Player.h"
 #include "Creature.h"
 #include "CreatureAI.h"
+#include "GameObject.h"
 #include "WaypointManager.h"
 #include "WorldPacket.h"
 #include "ScriptMgr.h"

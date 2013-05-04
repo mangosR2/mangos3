@@ -288,8 +288,6 @@ Unit::Unit() :
     m_isCreatureLinkingTrigger = false;
     m_isSpawningLinked = false;
 
-    m_transport = NULL;
-
     m_pVehicleKit = VehicleKitPtr(NULL);
     m_pVehicle    = VehicleKitPtr(NULL);
 
@@ -498,17 +496,17 @@ bool Unit::haveOffhandWeapon() const
     }
 }
 
-bool Unit::SetPosition(float x, float y, float z, float orientation, bool teleport)
+bool Unit::SetPosition(Position const& pos, bool teleport)
 {
     // prevent crash when a bad coord is sent by the client
-    if (!MaNGOS::IsValidMapCoord(x, y, z, orientation))
+    if (!MaNGOS::IsValidMapCoord(pos.x, pos.y, pos.z, pos.orientation))
     {
-        DEBUG_LOG("Unit::SetPosition(%f, %f, %f, %f, %d) .. bad coordinates for unit %d!", x, y, z, orientation, teleport, GetGUIDLow());
+        DEBUG_LOG("Unit::SetPosition(%f, %f, %f, %f, %d) .. bad coordinates for unit %s!", pos.x, pos.y, pos.z, pos.orientation, teleport, GetObjectGuid().GetString().c_str());
         return false;
     }
 
-    bool turn = GetOrientation() != orientation;
-    bool relocate = (teleport || GetPositionX() != x || GetPositionY() != y || GetPositionZ() != z);
+    bool turn = fabs(GetOrientation() - pos.orientation) > M_NULL_F;
+    bool relocate = !((Position)GetPosition() == pos);
 
     if (turn)
         RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_TURNING);
@@ -518,12 +516,12 @@ bool Unit::SetPosition(float x, float y, float z, float orientation, bool telepo
         RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_MOVE);
 
         if (GetTypeId() == TYPEID_PLAYER)
-            GetMap()->Relocation((Player*)this, x, y, z, orientation);
+            GetMap()->Relocation((Player*)this, pos);
         else
-            GetMap()->Relocation((Creature*)this, x, y, z, orientation);
+            GetMap()->Relocation((Creature*)this, pos);
     }
     else if (turn)
-        SetOrientation(orientation);
+        SetOrientation(pos.orientation);
 
     return relocate || turn;
 }
@@ -7455,7 +7453,7 @@ void Unit::SetOwnerGuid(ObjectGuid ownerGuid)
 
     // Update owner dependent fields
     Player* pPlayer = ObjectMgr::GetPlayer(ownerGuid, true);
-    if (!pPlayer || !pPlayer->HaveAtClient(this)) // if player cannot see this unit yet, he will receive needed data with create object
+    if (!pPlayer || !pPlayer->HaveAtClient(GetObjectGuid())) // if player cannot see this unit yet, he will receive needed data with create object
         return;
 
     SetFieldNotifyFlag(UF_FLAG_OWNER);
@@ -9937,23 +9935,17 @@ int32 Unit::ModifyPower(Powers power, int32 dVal)
 
 bool Unit::isVisibleForOrDetect(Unit const* u, WorldObject const* viewPoint, bool detect, bool inVisibleList, bool is3dDistance, bool skipLOScheck) const
 {
-    if(!u || !IsInMap(u))
+    if (!u)
         return false;
 
     // Always can see self
-    if (u==this)
+    if (u == this)
         return true;
 
-    // player visible for other player if not logout and at same transport
-    // including case when player is out of world
-    bool at_same_transport =
-        GetTypeId() == TYPEID_PLAYER &&  u->GetTypeId()==TYPEID_PLAYER &&
-        !((Player*)this)->GetSession()->PlayerLogout() && !((Player*)u)->GetSession()->PlayerLogout() &&
-        !((Player*)this)->GetSession()->PlayerLoading() && !((Player*)u)->GetSession()->PlayerLoading() &&
-        ((Player*)this)->GetTransport() && ((Player*)this)->GetTransport() == ((Player*)u)->GetTransport();
+    bool at_same_transport = (IsBoarded() && (GetTransportInfo() == u->GetTransportInfo()));
 
     // not in world
-    if(!at_same_transport && (!IsInWorld() || !u->IsInWorld()))
+    if (!at_same_transport && (!IsInMap(u) || !IsInWorld() || !u->IsInWorld()))
         return false;
 
     // forbidden to seen (while Removing corpse)
@@ -9961,11 +9953,12 @@ bool Unit::isVisibleForOrDetect(Unit const* u, WorldObject const* viewPoint, boo
         return false;
 
     Map& _map = *u->GetMap();
+
     // Grid dead/alive checks
-    if (u->GetTypeId()==TYPEID_PLAYER)
+    if (u->GetTypeId() == TYPEID_PLAYER)
     {
         // non visible at grid for any stealth state
-        if(!IsVisibleInGridForPlayer((Player *)u))
+        if (!IsVisibleInGridForPlayer((Player *)u))
             return false;
 
         // if player is dead then he can't detect anyone in any cases
@@ -9986,10 +9979,11 @@ bool Unit::isVisibleForOrDetect(Unit const* u, WorldObject const* viewPoint, boo
         if (!IsWithinDistInMap(viewPoint,World::GetMaxVisibleDistanceInFlight()+(inVisibleList ? World::GetVisibleObjectGreyDistance() : 0.0f), is3dDistance))
             return false;
     }
-    else if(!at_same_transport)                             // distance for show player/pet/creature (no transport case)
+    else if (!at_same_transport)                             // distance for show player/pet/creature (no transport case)
     {
         // Any units far than max visible distance for viewer or not in our map are not visible too
-        if (!IsWithinDistInMap(viewPoint, _map.GetVisibilityDistance() + (inVisibleList ? World::GetVisibleUnitGreyDistance() : 0.0f), is3dDistance))
+        // FIXME Visibility distance doubled for on-transport measurement
+        if (!IsWithinDistInMap(viewPoint, _map.GetVisibilityDistance() + (inVisibleList ? World::GetVisibleUnitGreyDistance() : 0.0f) + (IsBoarded() ? _map.GetVisibilityDistance() : 0.0f), is3dDistance))
             return false;
     }
 
@@ -10089,13 +10083,17 @@ bool Unit::isVisibleForOrDetect(Unit const* u, WorldObject const* viewPoint, boo
     if (m_Visibility != VISIBILITY_GROUP_STEALTH)
         return true;
 
+    // Check same transport/vehicle before stealth check
+    if (IsBoarded() && GetTransportInfo() == u->GetTransportInfo())
+        return true;
+
     // NOW ONLY STEALTH CASE
 
     //if in non-detect mode then invisible for unit
     //mobs always detect players (detect == true)... return 'false' for those mobs which have (detect == false)
     //players detect players only in Player::HandleStealthedUnitsDetection()
     if (!detect)
-        return (u->GetTypeId() == TYPEID_PLAYER) ? ((Player*)u)->HaveAtClient(this) : false;
+        return (u->GetTypeId() == TYPEID_PLAYER) ? ((Player*)u)->HaveAtClient(GetObjectGuid()) : false;
 
     // Special cases
 
@@ -12598,9 +12596,9 @@ void Unit::InterruptMoving(bool ignoreMoveState /*=false*/)
 
     if (!movespline->Finalized())
     {
-        Location loc = movespline->ComputePosition();
+        Position loc = movespline->ComputePosition();
         movespline->_Interrupt();
-        SetPosition(loc.x,loc.y,loc.z,loc.orientation);
+        SetPosition(loc);
         isMoving = true;
     }
 
@@ -13281,7 +13279,7 @@ void Unit::NearTeleportTo(WorldLocation const& loc, uint32 options)
     else
     {
         ExitVehicle(true);
-        GetMap()->Relocation((Creature*)this, loc.x, loc.y, loc.z, loc.orientation);
+        GetMap()->Relocation((Creature*)this, loc);
         SendHeartBeat();
     }
 }
@@ -13549,8 +13547,6 @@ void Unit::_EnterVehicle(VehicleKitPtr vehicle, int8 seatId)
     {
         if (GetTypeId() == TYPEID_PLAYER)
             pTransport->RemovePassenger((Player*)this);
-
-        SetTransport(NULL);
     }
 }
 
@@ -13565,6 +13561,7 @@ void Unit::_ExitVehicle(bool forceDismount)
         GetVehicle()->RemovePassenger(this, !forceDismount);
     else
     {
+        ClearTransportData();
         m_movementInfo.ClearTransportData();
         m_movementInfo.RemoveMovementFlag(MOVEFLAG_ONTRANSPORT);
     }
@@ -14197,15 +14194,15 @@ void Unit::UpdateSplineMovement(uint32 t_diff)
     if (m_movesplineTimer.Passed() || arrived)
     {
         m_movesplineTimer.Reset(sWorld.getConfig(CONFIG_UINT32_POSITION_UPDATE_DELAY));
-        Location loc = movespline->ComputePosition();
+        Position loc = movespline->ComputePosition();
 
         if (IsBoarded())
         {
-            m_movementInfo.ChangeTransportPosition(loc.x, loc.y, loc.z, loc.orientation);
-            GetTransportInfo()->SetLocalPosition(loc.x, loc.y, loc.z, loc.orientation);
+            m_movementInfo.ChangeTransportPosition(loc);
+            GetTransportInfo()->SetLocalPosition(loc);
         }
         else
-            SetPosition(loc.x,loc.y,loc.z,loc.orientation);
+            SetPosition(loc);
     }
 }
 

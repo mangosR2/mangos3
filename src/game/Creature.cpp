@@ -197,9 +197,8 @@ void Creature::RemoveCorpse()
     if (respawnDelay)
         m_respawnTime = time(NULL) + respawnDelay;
 
-    float x, y, z, o;
-    GetRespawnCoord(x, y, z, &o);
-    GetMap()->Relocation(this, x, y, z, o);
+    WorldLocation loc = GetRespawnCoord();
+    GetMap()->Relocation(this, loc);
     DisableSpline();
 
     // forced recreate creature object at clients
@@ -1308,9 +1307,13 @@ bool Creature::LoadFromDB(uint32 guidlow, Map* map)
         m_deathState = DEAD;
         if (CanFly())
         {
-            float tz = GetMap()->GetHeight(GetPhaseMask(), data->posX, data->posY, data->posZ);
-            if (data->posZ - tz > 0.1)
-                Relocate(data->posX, data->posY, tz);
+            Position loc = pos.m_pos;
+            float tz = GetMap()->GetHeight(GetPhaseMask(), loc.x, loc.y, loc.z);
+            if (loc.z - tz > 0.1)
+            {
+                loc.z = tz;
+                Relocate(loc);
+            }
         }
     }
     else if (m_respawnTime)                                 // respawn time set but expired
@@ -1338,9 +1341,13 @@ bool Creature::LoadFromDB(uint32 guidlow, Map* map)
             // Just set to dead, so need to relocate like above
             if (CanFly())
             {
-                float tz = GetMap()->GetHeight(data->phaseMask, data->posX, data->posY, data->posZ);
-                if (data->posZ - tz > 0.1)
-                    Relocate(data->posX, data->posY, tz);
+                Position loc = pos.m_pos;
+                float tz = GetMap()->GetHeight(GetPhaseMask(), loc.x, loc.y, loc.z);
+                if (loc.z - tz > 0.1)
+                {
+                    loc.z = tz;
+                    Relocate(loc);
+                }
             }
         }
     }

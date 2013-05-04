@@ -846,6 +846,12 @@ class ObjectMgr
         void LoadVehicleAccessory();
 
         void LoadTransports(Map* map);
+        void LoadTransports();
+        typedef UNORDERED_SET<Transport*> TransportSet;
+        TransportSet const& GetTransports() { return m_Transports; };
+
+        Transport* GetTransportByGuid(ObjectGuid const& guid);
+        Transport const* GetTransportByGOMapId(uint32 mapid) const;
 
         std::string GeneratePetName(uint32 entry);
         uint32 GetBaseXP(uint32 level) const;
@@ -1373,6 +1379,8 @@ class ObjectMgr
         DungeonEncounterMap m_DungeonEncounters;
 
         CreatureModelRaceMap    m_mCreatureModelRaceMap;
+
+        TransportSet m_Transports;
 
         CacheNpcTextIdMap m_mCacheNpcTextIdMap;
         CacheVendorItemMap m_mCacheVendorTemplateItemMap;

@@ -620,8 +620,8 @@ Player::~Player ()
 
     delete PlayerTalkClass;
 
-    if (m_transport)
-        m_transport->RemovePassenger(this);
+    if (Transport* transport = GetTransport())
+        transport->RemovePassenger(this);
 
     for (size_t x = 0; x < ItemSetEff.size(); x++)
         if (ItemSetEff[x])
@@ -699,8 +699,7 @@ bool Player::Create(uint32 guidlow, const std::string& name, uint8 race, uint8 c
     for (int i = 0; i < PLAYER_SLOTS_COUNT; ++i)
         m_items[i] = NULL;
 
-    SetLocationMapId(info->mapId);
-    Relocate(info->positionX,info->positionY,info->positionZ, info->orientation);
+    Relocate(WorldLocation(info->mapId, info->positionX, info->positionY, info->positionZ, info->orientation));
 
     SetMap(sMapMgr.CreateMap(info->mapId, this));
 
@@ -1751,7 +1750,7 @@ bool Player::TeleportTo(WorldLocation const& loc, uint32 options)
         {
             if (!CheckTransferPossibility(loc.GetMapId()))
             {
-                if (GetTransport())
+                if (IsOnTransport())
                     TeleportToHomebind();
 
                 DEBUG_LOG("Player::TeleportTo %s is NOT teleported to map %u (requirements check failed)", GetName(), loc.GetMapId());
@@ -1796,12 +1795,8 @@ bool Player::TeleportTo(WorldLocation const& loc, uint32 options)
         grp->SetPlayerMap(GetObjectGuid(), loc.GetMapId());
 
     // if we were on a transport, leave
-    if (!(options & TELE_TO_NOT_LEAVE_TRANSPORT) && m_transport)
-    {
-        m_transport->RemovePassenger(this);
-        SetTransport(NULL);
-        m_movementInfo.ClearTransportData();
-    }
+    if (!(options & TELE_TO_NOT_LEAVE_TRANSPORT) && IsOnTransport())
+        GetTransport()->RemovePassenger(this);
 
     if (GetVehicleKit())
         GetVehicleKit()->RemoveAllPassengers();
@@ -1819,7 +1814,7 @@ bool Player::TeleportTo(WorldLocation const& loc, uint32 options)
     m_movementInfo.SetMovementFlags(MOVEFLAG_NONE);
     DisableSpline();
 
-    if (GetMap() && GetMapId() == loc.GetMapId() && !m_transport)
+    if (GetMap() && GetMapId() == loc.GetMapId() && !IsOnTransport())
     {
         //lets reset far teleport flag if it wasn't reset during chained teleports
         SetSemaphoreTeleportFar(false);
@@ -1978,9 +1973,9 @@ bool Player::TeleportTo(WorldLocation const& loc, uint32 options)
                 // send transfer packet to display load screen
                 WorldPacket data(SMSG_TRANSFER_PENDING, (4+4+4));
                 data << uint32(loc.GetMapId());
-                if (m_transport)
+                if (IsOnTransport())
                 {
-                    data << uint32(m_transport->GetEntry());
+                    data << uint32(GetTransport()->GetEntry());
                     data << uint32(GetMapId());
                 }
                 GetSession()->SendPacket(&data);
@@ -1991,21 +1986,18 @@ bool Player::TeleportTo(WorldLocation const& loc, uint32 options)
                 oldmap->Remove(this, false);
 
             // new final coordinates
-            float final_x = loc.x;
-            float final_y = loc.y;
-            float final_z = loc.z;
-            float final_o = loc.orientation;
+            WorldLocation final = loc;
 
-            if (m_movementInfo.HasMovementFlag(MOVEFLAG_ONTRANSPORT))
+            if (IsOnTransport())
             {
-                final_x += m_movementInfo.GetTransportPos()->x;
-                final_y += m_movementInfo.GetTransportPos()->y;
-                final_z += m_movementInfo.GetTransportPos()->z;
-                final_o += m_movementInfo.GetTransportPos()->o;
+                final = GetTransport()->GetPosition();
+                final += (*m_movementInfo.GetTransportPos());
             }
+            else
+                final = loc;
 
-            m_teleport_dest = WorldLocation(loc.GetMapId(), final_x, final_y, final_z, final_o);
-            SetFallInformation(0, final_z);
+            m_teleport_dest = final;
+            SetFallInformation(0, final.z);
             // if the player is saved before worldport ack (at logout for example)
             // this will be used instead of the current location in SaveToDB
 
@@ -2018,7 +2010,7 @@ bool Player::TeleportTo(WorldLocation const& loc, uint32 options)
                 // transfer finished, inform client to start load
                 WorldPacket data(SMSG_NEW_WORLD, (20));
                 data << uint32(loc.GetMapId());
-                if (m_transport)
+                if (IsOnTransport())
                 {
                     data << float(m_movementInfo.GetTransportPos()->x);
                     data << float(m_movementInfo.GetTransportPos()->y);
@@ -2027,10 +2019,10 @@ bool Player::TeleportTo(WorldLocation const& loc, uint32 options)
                 }
                 else
                 {
-                    data << float(final_x);
-                    data << float(final_y);
-                    data << float(final_z);
-                    data << float(final_o);
+                    data << float(final.x);
+                    data << float(final.y);
+                    data << float(final.z);
+                    data << float(final.o);
                 }
 
                 GetSession()->SendPacket(&data);
@@ -4963,7 +4955,7 @@ void Player::RepopAtGraveyard()
     AreaTableEntry const *zone = GetAreaEntryByAreaID(GetAreaId());
 
     // Such zones are considered unreachable as a ghost and the player must be automatically revived
-    if ((!isAlive() && zone && (zone->flags & AREA_FLAG_NEED_FLY)) || GetTransport() || GetPositionZ() < -500.0f)
+    if ((!isAlive() && zone && (zone->flags & AREA_FLAG_NEED_FLY)) || IsOnTransport() || GetPositionZ() < -500.0f)
     {
         ResurrectPlayer(0.5f);
         SpawnCorpseBones();
@@ -6276,11 +6268,11 @@ ActionButton const* Player::GetActionButton(uint8 button)
     return &buttonItr->second;
 }
 
-bool Player::SetPosition(float x, float y, float z, float orientation, bool teleport)
+bool Player::SetPosition(Position const& pos, bool teleport)
 {
-    bool groupUpdate = (GetGroup() && (teleport || abs(GetPositionX() - x) > 1.0f || abs(GetPositionY() - y) > 1.0f));
+    bool groupUpdate = (GetGroup() && (teleport || abs(GetPositionX() - pos.x) > 1.0f || abs(GetPositionY() - pos.y) > 1.0f));
 
-    if (!Unit::SetPosition(x, y, z, orientation, teleport))
+    if (!Unit::SetPosition(pos, teleport))
         return false;
 
     if (GetTrader() && !IsWithinDistInMap(GetTrader(), INTERACTION_DISTANCE))
@@ -6295,7 +6287,7 @@ bool Player::SetPosition(float x, float y, float z, float orientation, bool tele
         SetGroupUpdateFlag(GROUP_UPDATE_FLAG_POSITION);
 
     // code block for underwater state update
-    UpdateUnderwaterState(GetMap(), x, y, z);
+    UpdateUnderwaterState(GetMap(), pos.x, pos.y, pos.z);
 
     // code block for outdoor state and area-explore check
     CheckAreaExploreAndOutdoor();
@@ -15834,6 +15826,7 @@ bool Player::LoadFromDB(ObjectGuid guid, SqlQueryHolder *holder)
 
         transGUID = 0;
         m_movementInfo.ClearTransportData();
+        ClearTransportData();
     }
 
     _LoadBGData(holder->GetResult(PLAYER_LOGIN_QUERY_LOADBGDATA));
@@ -15947,59 +15940,49 @@ bool Player::LoadFromDB(ObjectGuid guid, SqlQueryHolder *holder)
 
     if (transGUID != 0)
     {
-        m_movementInfo.SetTransportData(ObjectGuid(HIGHGUID_MO_TRANSPORT,transGUID), fields[26].GetFloat(), fields[27].GetFloat(), fields[28].GetFloat(), fields[29].GetFloat(), 0, -1);
+        ObjectGuid transportGuid = ObjectGuid(HIGHGUID_MO_TRANSPORT,transGUID);
+        Transport* transport = sObjectMgr.GetTransportByGuid(transportGuid);
 
-        if (!MaNGOS::IsValidMapCoord(
-            GetPositionX() + m_movementInfo.GetTransportPos()->x, GetPositionY() + m_movementInfo.GetTransportPos()->y,
-            GetPositionZ() + m_movementInfo.GetTransportPos()->z, GetOrientation() + m_movementInfo.GetTransportPos()->o) ||
-            // transport size limited
-            m_movementInfo.GetTransportPos()->x > 50 || m_movementInfo.GetTransportPos()->y > 50 || m_movementInfo.GetTransportPos()->z > 50)
+        if (transport)
         {
-            sLog.outError("%s have invalid transport coordinates (X: %f Y: %f Z: %f O: %f). Teleport to default race/class locations.",
-                guid.GetString().c_str(), GetPositionX() + m_movementInfo.GetTransportPos()->x, GetPositionY() + m_movementInfo.GetTransportPos()->y,
-                GetPositionZ() + m_movementInfo.GetTransportPos()->z, GetOrientation() + m_movementInfo.GetTransportPos()->o);
-
-            RelocateToHomebind();
-
-            m_movementInfo.ClearTransportData();
-
-            transGUID = 0;
-        }
-    }
-
-    if (transGUID != 0)
-    {
-        for (MapManager::TransportSet::const_iterator iter = sMapMgr.m_Transports.begin(); iter != sMapMgr.m_Transports.end(); ++iter)
-        {
-            Transport* transport = *iter;
-
-            if (transport->GetGUIDLow() == transGUID)
+            MapEntry const* transMapEntry = sMapStore.LookupEntry(transport->GetMapId());
+            // client without expansion support
+            if (GetSession()->Expansion() < transMapEntry->Expansion())
             {
-                MapEntry const* transMapEntry = sMapStore.LookupEntry(transport->GetMapId());
-                // client without expansion support
-                if (GetSession()->Expansion() < transMapEntry->Expansion())
-                {
-                    DEBUG_LOG("Player %s using client without required expansion tried login at transport at non accessible map %u", GetName(), transport->GetMapId());
-                    break;
-                }
-
-                SetTransport(transport);
-                transport->AddPassenger(this);
+                DEBUG_LOG("Player %s using client without required expansion tried login at transport at non accessible map %u", GetName(), transport->GetMapId());
+            }
+            else
+            {
+                Relocate(transport->GetPosition());
                 SetLocationMapId(transport->GetMapId());
-                break;
+                // AddPassenger not used, becoze need add passenger in correct position on transport
+                Position t_pos = Position(fields[26].GetFloat(), fields[27].GetFloat(), fields[28].GetFloat(), fields[29].GetFloat());
+                transport->AddPassenger(this, t_pos);
+            }
+
+            if (!MaNGOS::IsValidMapCoord(
+                GetPositionX() + m_movementInfo.GetTransportPos()->x, GetPositionY() + m_movementInfo.GetTransportPos()->y,
+                GetPositionZ() + m_movementInfo.GetTransportPos()->z, GetOrientation() + m_movementInfo.GetTransportPos()->o) ||
+                // transport size limited
+                m_movementInfo.GetTransportPos()->x > 50 || m_movementInfo.GetTransportPos()->y > 50 || m_movementInfo.GetTransportPos()->z > 50)
+            {
+                sLog.outError("%s have invalid transport coordinates (X: %f Y: %f Z: %f O: %f). Teleport to default race/class locations.",
+                    guid.GetString().c_str(), GetPositionX() + m_movementInfo.GetTransportPos()->x, GetPositionY() + m_movementInfo.GetTransportPos()->y,
+                    GetPositionZ() + m_movementInfo.GetTransportPos()->z, GetOrientation() + m_movementInfo.GetTransportPos()->o);
+
+                transport->RemovePassenger(this);
             }
         }
 
-        if (!m_transport)
+        if (!IsOnTransport())
         {
             sLog.outError("%s have problems with transport guid (%u). Teleport to default race/class locations.",
                 guid.GetString().c_str(), transGUID);
 
-            RelocateToHomebind();
-
+            ClearTransportData();
             m_movementInfo.ClearTransportData();
-
             transGUID = 0;
+            RelocateToHomebind();
         }
     }
 
@@ -16212,8 +16195,7 @@ bool Player::LoadFromDB(ObjectGuid guid, SqlQueryHolder *holder)
         else                                                // have start node, to it
         {
             sLog.outError("Character %u have too short taxi destination list, teleport to original node.",GetGUIDLow());
-            SetLocationMapId(nodeEntry->map_id);
-            Relocate(nodeEntry->x, nodeEntry->y, nodeEntry->z,0.0f);
+            Relocate(WorldLocation(nodeEntry->map_id, nodeEntry->x, nodeEntry->y, nodeEntry->z, 0.0f, GetPhaseMask()));
         }
 
         //we can be relocated from taxi and still have an outdated Map pointer!
@@ -17747,8 +17729,8 @@ void Player::SaveToDB()
     uberInsert.addFloat(finiteAlways(m_movementInfo.GetTransportPos()->y));
     uberInsert.addFloat(finiteAlways(m_movementInfo.GetTransportPos()->z));
     uberInsert.addFloat(finiteAlways(m_movementInfo.GetTransportPos()->o));
-    if (m_transport)
-        uberInsert.addUInt32(m_transport->GetGUIDLow());
+    if (IsOnTransport())
+        uberInsert.addUInt32(GetTransport()->GetGUIDLow());
     else
         uberInsert.addUInt32(0);
 
@@ -19366,7 +19348,7 @@ void Player::HandleStealthedUnitsDetection()
         if ((*i)==this)
             continue;
 
-        bool hasAtClient = HaveAtClient((*i));
+        bool hasAtClient = HaveAtClient((*i)->GetObjectGuid());
         bool hasDetected = (*i)->isVisibleForOrDetect(this, viewPoint, true);
 
         if (hasDetected)
@@ -19375,13 +19357,13 @@ void Player::HandleStealthedUnitsDetection()
             {
                 ObjectGuid i_guid = (*i)->GetObjectGuid();
                 (*i)->SendCreateUpdateToPlayer(this);
-                m_clientGUIDs.insert(i_guid);
+                AddClientGuid(i_guid);
 
                 DEBUG_FILTER_LOG(LOG_FILTER_VISIBILITY_CHANGES, "%s is detected in stealth by player %u. Distance = %f",i_guid.GetString().c_str(),GetGUIDLow(),GetDistance(*i));
 
                 // target aura duration for caster show only if target exist at caster client
                 // send data at target visibility change (adding to client)
-                if ((*i)!=this && (*i)->isType(TYPEMASK_UNIT))
+                if ((*i) != this && (*i)->isType(TYPEMASK_UNIT))
                     SendAurasForTarget(*i);
             }
         }
@@ -19390,7 +19372,7 @@ void Player::HandleStealthedUnitsDetection()
             if (hasAtClient)
             {
                 (*i)->DestroyForPlayer(this);
-                m_clientGUIDs.erase((*i)->GetObjectGuid());
+                RemoveClientGuid((*i)->GetObjectGuid());
             }
         }
     }
@@ -20448,29 +20430,53 @@ bool Player::IsVisibleGloballyFor(Player* u) const
     return true;
 }
 
-template<class T>
-inline void BeforeVisibilityDestroy(T* /*t*/, Player* /*p*/)
+bool Player::HaveAtClient(ObjectGuid const& guid) const
 {
+    return  guid == GetObjectGuid() || 
+            (IsBoarded() && GetTransportInfo()->GetTransportGuid() == guid) ||
+            HasClientGuid(guid);
 }
 
-template<>
-inline void BeforeVisibilityDestroy<Creature>(Creature* t, Player* p)
+void Player::AddClientGuid(ObjectGuid const& guid)
 {
-    if (p->GetPetGuid() == t->GetObjectGuid() && ((Creature*)t)->IsPet())
+    MAPLOCK_WRITE(this,MAP_LOCK_TYPE_MAPOBJECTS);
+    m_clientGUIDs.insert(guid);
+}
+
+void Player::RemoveClientGuid(ObjectGuid const& guid)
+{
+    MAPLOCK_WRITE(this,MAP_LOCK_TYPE_MAPOBJECTS);
+    m_clientGUIDs.erase(guid);
+}
+
+bool Player::HasClientGuid(ObjectGuid const& guid) const
+{
+    MAPLOCK_READ(const_cast<Player*>(this),MAP_LOCK_TYPE_MAPOBJECTS);
+    return (m_clientGUIDs.find(guid) != m_clientGUIDs.end());
+}
+
+void Player::BeforeVisibilityDestroy(WorldObject* t)
+{
+    if (GetPetGuid() == t->GetObjectGuid() && ((Creature*)t)->IsPet())
         ((Pet*)t)->Unsummon(PET_SAVE_REAGENTS);
 }
 
 void Player::UpdateVisibilityOf(WorldObject const* viewPoint, WorldObject* target)
 {
-    if (HaveAtClient(target))
+    if (HaveAtClient(target->GetObjectGuid()))
     {
         if (!target->isVisibleForInState(this, viewPoint, true))
         {
             ObjectGuid t_guid = target->GetObjectGuid();
 
-            if (target->GetTypeId()==TYPEID_UNIT)
+            if (GetMap()->IsVisibleGlobally(t_guid))
             {
-                BeforeVisibilityDestroy<Creature>((Creature*)target,this);
+            // FIXME - this code block temporary, only on test phase (seems as not need, but...)
+                target->AddNotifiedClient(GetObjectGuid());
+            }
+            else if (target->GetTypeId() == TYPEID_UNIT)
+            {
+                BeforeVisibilityDestroy(target);
 
                 // at remove from map (destroy) show kill animation (in different out of range/stealth case)
                 target->DestroyForPlayer(this, !target->IsInWorld() && ((Creature*)target)->isDead());
@@ -20478,57 +20484,45 @@ void Player::UpdateVisibilityOf(WorldObject const* viewPoint, WorldObject* targe
             else
                 target->DestroyForPlayer(this);
 
-            m_clientGUIDs.erase(t_guid);
+            RemoveClientGuid(t_guid);
 
-            DEBUG_FILTER_LOG(LOG_FILTER_VISIBILITY_CHANGES, "%s out of range for player %u. Distance = %f",t_guid.GetString().c_str(),GetGUIDLow(),GetDistance(target));
+            DEBUG_FILTER_LOG(LOG_FILTER_VISIBILITY_CHANGES, "Player::UpdateVisibilityOf (by viewPoint) %s out of range for %s, distance = %f",t_guid.GetString().c_str(),GetObjectGuid().GetString().c_str(), GetDistance(target));
         }
     }
     else
     {
         if (target->isVisibleForInState(this, viewPoint, false))
         {
-            target->SendCreateUpdateToPlayer(this);
-            if (target->GetTypeId()!=TYPEID_GAMEOBJECT||!((GameObject*)target)->IsTransport())
-                m_clientGUIDs.insert(target->GetObjectGuid());
+            if (!GetMap()->IsVisibleGlobally(target->GetObjectGuid()))
+            {
+                target->SendCreateUpdateToPlayer(this);
+                AddClientGuid(target->GetObjectGuid());
 
-            DEBUG_FILTER_LOG(LOG_FILTER_VISIBILITY_CHANGES, "Object %u (Type: %u) is visible now for player %u. Distance = %f",target->GetGUIDLow(),target->GetTypeId(),GetGUIDLow(),GetDistance(target));
+                DEBUG_FILTER_LOG(LOG_FILTER_VISIBILITY_CHANGES, "Player::UpdateVisibilityOf (by viewPoint) %s is visible now for %s, distance = %f", target->GetObjectGuid().GetString().c_str(), GetObjectGuid().GetString().c_str(), GetDistance(target));
 
-            // target aura duration for caster show only if target exist at caster client
-            // send data at target visibility change (adding to client)
-            if (target!=this && target->isType(TYPEMASK_UNIT))
-                SendAurasForTarget((Unit*)target);
+                // target aura duration for caster show only if target exist at caster client
+                // send data at target visibility change (adding to client)
+                if (target != this && target->isType(TYPEMASK_UNIT))
+                    SendAurasForTarget((Unit*)target);
+            }
         }
     }
 }
 
-template<class T>
-inline void UpdateVisibilityOf_helper(GuidSet& s64, T* target)
+void Player::UpdateVisibilityOf(WorldObject const* viewPoint, WorldObject* target, UpdateData& data, WorldObjectSet& visibleNow)
 {
-    s64.insert(target->GetObjectGuid());
-}
-
-template<>
-inline void UpdateVisibilityOf_helper(GuidSet& s64, GameObject* target)
-{
-    if (!target->IsTransport())
-        s64.insert(target->GetObjectGuid());
-}
-
-template<class T>
-void Player::UpdateVisibilityOf(WorldObject const* viewPoint, T* target, UpdateData& data, WorldObjectSet& visibleNow)
-{
-    if (HaveAtClient(target))
+    if (HaveAtClient(target->GetObjectGuid()))
     {
         if (!target->isVisibleForInState(this,viewPoint,true))
         {
-            BeforeVisibilityDestroy<T>(target,this);
+            BeforeVisibilityDestroy(target);
 
             ObjectGuid t_guid = target->GetObjectGuid();
 
             target->BuildOutOfRangeUpdateBlock(&data);
-            m_clientGUIDs.erase(t_guid);
+            RemoveClientGuid(t_guid);
 
-            DEBUG_FILTER_LOG(LOG_FILTER_VISIBILITY_CHANGES, "%s is out of range for %s. Distance = %f", t_guid.GetString().c_str(), GetGuidStr().c_str(), GetDistance(target));
+            DEBUG_FILTER_LOG(LOG_FILTER_VISIBILITY_CHANGES, "Player::UpdateVisibilityOf %s is out of range for %s, distance = %f", t_guid.GetString().c_str(), GetGuidStr().c_str(), GetDistance(target));
         }
     }
     else
@@ -20537,18 +20531,12 @@ void Player::UpdateVisibilityOf(WorldObject const* viewPoint, T* target, UpdateD
         {
             visibleNow.insert(target);
             target->BuildCreateUpdateBlockForPlayer(&data, this);
-            UpdateVisibilityOf_helper(m_clientGUIDs,target);
+            AddClientGuid(target->GetObjectGuid());
 
-            DEBUG_FILTER_LOG(LOG_FILTER_VISIBILITY_CHANGES, "%s is visible now for %s. Distance = %f", target->GetGuidStr().c_str(), GetGuidStr().c_str(), GetDistance(target));
+            DEBUG_FILTER_LOG(LOG_FILTER_VISIBILITY_CHANGES, "Player::UpdateVisibilityOf %s is visible now for %s, distance = %f", target->GetGuidStr().c_str(), GetGuidStr().c_str(), GetDistance(target));
         }
     }
 }
-
-template void Player::UpdateVisibilityOf(WorldObject const* viewPoint, Player*        target, UpdateData& data, WorldObjectSet& visibleNow);
-template void Player::UpdateVisibilityOf(WorldObject const* viewPoint, Creature*      target, UpdateData& data, WorldObjectSet& visibleNow);
-template void Player::UpdateVisibilityOf(WorldObject const* viewPoint, Corpse*        target, UpdateData& data, WorldObjectSet& visibleNow);
-template void Player::UpdateVisibilityOf(WorldObject const* viewPoint, GameObject*    target, UpdateData& data, WorldObjectSet& visibleNow);
-template void Player::UpdateVisibilityOf(WorldObject const* viewPoint, DynamicObject* target, UpdateData& data, WorldObjectSet& visibleNow);
 
 void Player::SetPhaseMask(uint32 newPhaseMask, bool update)
 {
@@ -20715,8 +20703,8 @@ void Player::SendInitialPacketsAfterAddToMap()
     SendEnchantmentDurations();                             // must be after add to map
     SendItemDurations();                                    // must be after add to map
 
-    // "Fake movement" in current point - maked only for grid activating (seems not need make special method for this)
-    GetMap()->Relocation(this, GetPositionX(), GetPositionY(), GetPositionZ(), GetOrientation());
+    // only grid activating
+    GetMap()->ActivateGrid(GetPosition());
 }
 
 void Player::SendUpdateToOutOfRangeGroupMembers()
@@ -21173,12 +21161,12 @@ bool Player::HasQuestForGO(int32 GOId) const
 
 void Player::UpdateForQuestWorldObjects()
 {
-    if (m_clientGUIDs.empty() || !GetMap())
+    if (GetClientGuids().empty() || !GetMap())
         return;
 
     UpdateData udata;
     WorldPacket packet;
-    for (GuidSet::const_iterator itr=m_clientGUIDs.begin(); itr!=m_clientGUIDs.end(); ++itr)
+    for (GuidSet::const_iterator itr = GetClientGuids().begin(); itr != GetClientGuids().end(); ++itr)
     {
         if (itr->IsGameObject())
         {
@@ -22022,7 +22010,7 @@ void Player::UpdateUnderwaterState(Map* m, float x, float y, float z)
     }
 
     // Allow travel in dark water on taxi or transport
-    if ((liquid_status.type_flags & MAP_LIQUID_TYPE_DARK_WATER) && !IsTaxiFlying() && !GetTransport())
+    if ((liquid_status.type_flags & MAP_LIQUID_TYPE_DARK_WATER) && !IsTaxiFlying() && !IsOnTransport())
         m_MirrorTimerFlags |= UNDERWATER_INDARKWATER;
     else
         m_MirrorTimerFlags &= ~UNDERWATER_INDARKWATER;

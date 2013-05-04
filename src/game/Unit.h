@@ -756,14 +756,11 @@ class MovementInfo
         void AddMovementFlag2(MovementFlags2 f) { moveFlags2 |= f; }
 
         // Position manipulations
-        Position const *GetPos() const { return &pos; }
-        void SetTransportData(ObjectGuid guid, float x, float y, float z, float o, uint32 time, int8 seat, VehicleSeatEntry const* seatInfo = NULL)
+        Position const* GetPos() const { return &pos; }
+        void SetTransportData(ObjectGuid guid, Position const& pos, uint32 time, int8 seat, VehicleSeatEntry const* seatInfo = NULL)
         {
             t_guid = guid;
-            t_pos.x = x;
-            t_pos.y = y;
-            t_pos.z = z;
-            t_pos.o = o;
+            t_pos = pos;
             t_time = time;
             t_seat = seat;
             t_seatInfo = seatInfo;
@@ -781,7 +778,7 @@ class MovementInfo
             moveFlags2 = MOVEFLAG2_NONE;
         }
         ObjectGuid const& GetTransportGuid() const { return t_guid; }
-        Position const *GetTransportPos() const { return &t_pos; }
+        Position const* GetTransportPos() const { return &t_pos; }
         int8 GetTransportSeat() const { return t_seat; }
         uint32 GetTransportDBCSeat() const { return t_seatInfo ? t_seatInfo->m_ID : 0; }
         uint32 GetVehicleSeatFlags() const { return t_seatInfo ? t_seatInfo->m_flags : 0; }
@@ -790,6 +787,12 @@ class MovementInfo
         void ChangeOrientation(float o) { pos.o = o; }
         void ChangePosition(float x, float y, float z, float o) { pos.x = x; pos.y = y; pos.z = z; pos.o = o; }
         void ChangeTransportPosition(float x, float y, float z, float o) { t_pos.x = x; t_pos.y = y; t_pos.z = z; t_pos.o = o; }
+
+        void ChangePosition(Position const& _pos) { pos = _pos; }
+        void ChangeTransportPosition(Position const& _pos) { t_pos = _pos; }
+        Position const& GetPosition() const { return pos; }
+        Position const& GetTransportPosition() const { return t_pos; }
+
         void UpdateTime(uint32 _time) { time = _time; }
 
         struct JumpInfo
@@ -814,7 +817,7 @@ class MovementInfo
             fallTime   = targetInfo.fallTime;
             jump       = targetInfo.jump;
 
-            if (!t_guid)
+            if (!t_guid || (t_guid && t_guid == targetInfo.t_guid))
             {
                 moveFlags2 = targetInfo.moveFlags2;
                 t_guid     = targetInfo.t_guid;
@@ -1634,7 +1637,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         void MonsterMoveToDestination(float x, float y, float z, float o, float speed, float height, bool isKnockBack = false, Unit* target = NULL);
         // recommend use MonsterMove/MonsterMoveWithSpeed for most case that correctly work with movegens
         // if used additional args in ... part then floats must explicitly casted to double
-        virtual bool SetPosition(float x, float y, float z, float orientation, bool teleport = false);
+        virtual bool SetPosition(Position const& pos, bool teleport = false);
         virtual void SetFallInformation(uint32 time, float z) {};
 
         void MonsterMoveWithSpeed(float x, float y, float z, float speed, bool generatePath = true, bool forceDestination = false);
@@ -2205,15 +2208,9 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
 
         // Movement info
         MovementInfo m_movementInfo;
+        MovementInfo const& GetMovementInfo() const { return m_movementInfo; };
 
         // Transports
-        Transport* GetTransport() const { return m_transport; }
-        void SetTransport(Transport* pTransport) { m_transport = pTransport; }
-
-        float GetTransOffsetX() const { return m_movementInfo.GetTransportPos()->x; }
-        float GetTransOffsetY() const { return m_movementInfo.GetTransportPos()->y; }
-        float GetTransOffsetZ() const { return m_movementInfo.GetTransportPos()->z; }
-        float GetTransOffsetO() const { return m_movementInfo.GetTransportPos()->o; }
         uint32 GetTransTime() const { return m_movementInfo.GetTransportTime(); }
         int8 GetTransSeat() const { return m_movementInfo.GetTransportSeat(); }
 
@@ -2229,6 +2226,9 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         VehicleKitPtr GetVehicle() const { return m_pVehicle; }
         VehicleKitPtr GetVehicleKit() const { return m_pVehicleKit; }
         void RemoveVehicleKit();
+
+        virtual bool IsTransport() const override { return bool(GetVehicleKit()); };
+        TransportBase* GetTransportBase() { return (TransportBase*)(&*GetVehicleKit()); };
 
         VehicleEntry const* GetVehicleInfo() const;
         virtual bool IsVehicle() const override { return GetVehicleInfo() != NULL; }
@@ -2307,9 +2307,6 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         // Frozen Mod
         bool m_spoofSamePlayerFaction : 1;
         // Frozen Mod
-
-        // Transports
-        Transport* m_transport;
 
         VehicleKitPtr m_pVehicleKit;
         VehicleKitPtr m_pVehicle;

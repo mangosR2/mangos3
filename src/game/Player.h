@@ -1874,7 +1874,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void SendResetInstanceFailed(uint32 reason, uint32 MapId);
         void SendResetFailedNotify(uint32 mapid);
 
-        bool SetPosition(float x, float y, float z, float orientation, bool teleport = false);
+        bool SetPosition(Position const& pos, bool teleport = false);
         void UpdateUnderwaterState(Map * m, float x, float y, float z);
 
         void SendMessageToSet(WorldPacket *data, bool self);// overwrite Object::SendMessageToSet
@@ -2266,18 +2266,18 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         Object* GetObjectByTypeMask(ObjectGuid guid, TypeMask typemask);
 
-        // currently visible objects at player client
-        GuidSet m_clientGUIDs;
-
-        bool HaveAtClient(WorldObject const* u) { return u==this || m_clientGUIDs.find(u->GetObjectGuid())!=m_clientGUIDs.end(); }
+        // list of currently visible objects, stored at player client
+        GuidSet const& GetClientGuids() { return m_clientGUIDs; };
+        bool HaveAtClient(ObjectGuid const& guid) const;
+        void AddClientGuid(ObjectGuid const& guid);
+        void RemoveClientGuid(ObjectGuid const& guid);
+        bool HasClientGuid(ObjectGuid const& guid) const;
 
         bool IsVisibleInGridForPlayer(Player* pl) const;
         bool IsVisibleGloballyFor(Player* pl) const;
-
+        void BeforeVisibilityDestroy(WorldObject* obj);
         void UpdateVisibilityOf(WorldObject const* viewPoint, WorldObject* target);
-
-        template<class T>
-            void UpdateVisibilityOf(WorldObject const* viewPoint,T* target, UpdateData& data, WorldObjectSet& visibleNow);
+        void UpdateVisibilityOf(WorldObject const* viewPoint, WorldObject* target, UpdateData& data, WorldObjectSet& visibleNow);
 
         // Stealth detection system
         void HandleStealthedUnitsDetection();
@@ -2638,9 +2638,6 @@ class MANGOS_DLL_SPEC Player : public Unit
         RestType rest_type;
         ////////////////////Rest System/////////////////////
 
-        // Transports
-//        Transport * m_transport;
-
         AntiCheat* m_anticheat;
 
         uint32 m_resetTalentsCost;
@@ -2751,6 +2748,9 @@ class MANGOS_DLL_SPEC Player : public Unit
         bool m_bHasBeenAliveAtDelayedTeleport;
 
         uint32 m_DetectInvTimer;
+
+        // Visible object storage
+        GuidSet m_clientGUIDs;
 
         // Temporary removed pet cache
         PetNumberList m_temporaryUnsummonedPetNumber;

@@ -130,9 +130,9 @@ void GameObject::RemoveFromWorld(bool remove)
 bool GameObject::Create(uint32 guidlow, uint32 name_id, Map* map, uint32 phaseMask, float x, float y, float z, float ang, QuaternionData rotation, uint8 animprogress, GOState go_state)
 {
     MANGOS_ASSERT(map);
-    Relocate(x, y, z, ang);
+
+    Relocate(WorldLocation(map->GetId(), x, y, z, ang, phaseMask, map->GetInstanceId()));
     SetMap(map);
-    SetPhaseMask(phaseMask, false);
 
     if (!IsPositionValid())
     {
@@ -239,15 +239,6 @@ bool GameObject::Create(uint32 guidlow, uint32 name_id, Map* map, uint32 phaseMa
 
 void GameObject::Update(uint32 update_diff, uint32 p_time)
 {
-    if (GetObjectGuid().IsMOTransport())
-    {
-        //GetTransportKit()->Update(update_diff, diff);
-        //DEBUG_LOG("Transport::Update %s", GetObjectGuid().GetString().c_str());
-        // TODO - move spline update to more correct place
-        UpdateSplineMovement(p_time);
-        return;
-    }
-
     switch (m_lootState)
     {
         case GO_NOT_READY:
@@ -531,11 +522,11 @@ void GameObject::Update(uint32 update_diff, uint32 p_time)
             break;
         }
     }
+    UpdateSplineMovement(p_time);
 }
 
 void GameObject::UpdateSplineMovement(uint32 t_diff)
 {
-
     if (movespline->Finalized())
         return;
 
@@ -551,12 +542,13 @@ void GameObject::UpdateSplineMovement(uint32 t_diff)
     if (m_movesplineTimer.Passed() || arrived)
     {
         m_movesplineTimer.Reset(sWorld.getConfig(CONFIG_UINT32_POSITION_UPDATE_DELAY));
-        Location loc = movespline->ComputePosition();
+
+        Position loc = movespline->ComputePosition();
 
         if (IsBoarded())
-            GetTransportInfo()->SetLocalPosition(loc.x, loc.y, loc.z, loc.orientation);
+            GetTransportInfo()->SetLocalPosition(loc);
         else
-            Relocate(loc.x,loc.y,loc.z,loc.orientation);
+            Relocate(loc);
     }
 }
 
@@ -819,7 +811,7 @@ bool GameObject::isVisibleForInState(Player const* u, WorldObject const* viewPoi
         return false;
 
     // Transport always visible at this step implementation
-    if (IsTransport() && IsInMap(u))
+    if (IsTransport() && IsInMap(u) && isActiveObject())
         return true;
 
     // quick check visibility false cases for non-GM-mode

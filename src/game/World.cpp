@@ -1639,7 +1639,7 @@ void World::SetInitialWorldSettings()
 
     // Not sure if this can be moved up in the sequence (with static data loading) as it uses MapManager
     sLog.outString("Loading Transports...");
-    sMapMgr.LoadTransports();
+    sObjectMgr.LoadTransports();
 
     sLog.outString("Deleting expired bans..." );
     LoginDatabase.Execute("DELETE FROM ip_banned WHERE unbandate<=UNIX_TIMESTAMP() AND unbandate<>bandate");
