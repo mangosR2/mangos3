@@ -1866,6 +1866,16 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, DamageInfo* damageI
                     triggered_spell_id = 85383;
                     break;
                 }
+                // Fel Armor
+                case 28176:
+                {
+                    if (!procSpell || IsAreaOfEffectSpell(procSpell))
+                        return SPELL_AURA_PROC_FAILED;
+
+                    triggered_spell_id = 96379;
+                    basepoints[0] = int32(damage * triggerAmount / 100);
+                    break;
+                }
                 // Shadowflame (Voidheart Raiment set bonus)
                 case 37377:
                 {
