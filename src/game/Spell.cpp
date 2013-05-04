@@ -8582,11 +8582,31 @@ int32 Spell::CalculatePowerCost(SpellEntry const* spellInfo, Unit* caster, Spell
             pctCostMultiplier += (*itr)->GetModifier()->m_amount / 100.0f;
     }
 
+    caster->wildHuntMarker = false;
+    int32 powerCostMod = 0;
+    if (spellInfo->powerType == POWER_FOCUS && caster->GetObjectGuid().IsPet() &&
+        caster->GetPowerIndex(POWER_FOCUS) != INVALID_POWER_INDEX &&
+        caster->GetPower(POWER_FOCUS) >= 50)
+    {
+        // search for "Wild Hunt"
+        for (PetSpellMap::const_iterator itr = ((Pet*)caster)->m_spells.begin(); itr != ((Pet*)caster)->m_spells.end(); ++itr)
+            if (itr->second.state != PETSPELL_REMOVED)
+            {
+                SpellEntry const* spellInfo = sSpellStore.LookupEntry(itr->first);
+                if (!spellInfo || spellInfo->GetSpellIconID() == 3748)
+                    continue;
+                caster->wildHuntMarker = true;
+                pctCostMultiplier += spellInfo->CalculateSimpleValue(EFFECT_INDEX_1) / 100;
+                break;
+            }
+    }
+
     // PCT mod from user auras by school
     powerCost = ceil((float)powerCost * pctCostMultiplier);
 
     if (powerCost < 0)
         powerCost = 0;
+
     return powerCost;
 }
 
