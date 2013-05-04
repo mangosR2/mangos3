@@ -12833,8 +12833,9 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
             // Combustion
             else if (m_spellProto->Id == 83853)
             {
-                if (Unit* caster = GetCaster())
-                    caster->RemoveAurasDueToSpell(105785);
+                if (!apply)
+                    if (Unit* caster = GetCaster())
+                        caster->RemoveAurasDueToSpell(105785);
                 return;
             }
             // Ice Barrier (non stacking from one caster)
