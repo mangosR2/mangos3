@@ -5991,7 +5991,7 @@ bool Player::UpdateCraftSkill(uint32 spellid)
                 _spell_idx->second->min_value);
             uint32 craft_skill_gain = sWorld.getConfig(CONFIG_UINT32_SKILL_GAIN_CRAFTING);
             if (!_spell_idx->second->characterPoints)
-                sLog.outError("Player::UpdateCraftSkill spell %u has characterPoints == 0!");
+                sLog.outError("Player::UpdateCraftSkill spell %u has characterPoints == 0!", spellid);
             else if (chance >= sWorld.getConfig(CONFIG_UINT32_SKILL_CHANCE_ORANGE))
                  craft_skill_gain += _spell_idx->second->characterPoints - 1;
 
