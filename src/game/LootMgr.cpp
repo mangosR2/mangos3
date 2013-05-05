@@ -982,19 +982,21 @@ ByteBuffer& operator<<(ByteBuffer& b, LootView const& lv)
     // in next cases used same slot type for all items
     LootSlotType slot_type = lv.permission == OWNER_PERMISSION ? LOOT_SLOT_OWNER : LOOT_SLOT_NORMAL;
 
+    uint32 questItemsCount = 0;
     QuestItemMap const& lootPlayerQuestItems = l.GetPlayerQuestItems();
     QuestItemMap::const_iterator q_itr = lootPlayerQuestItems.find(lv.viewer->GetGUIDLow());
     if (q_itr != lootPlayerQuestItems.end())
     {
         QuestItemList const& q_list = q_itr->second;
+        questItemsCount = q_list.size();
         for (QuestItemList::const_iterator qi = q_list.begin() ; qi != q_list.end(); ++qi)
         {
             LootItem& item = l.m_questItems[qi->index];
             if (!qi->is_looted && !item.is_looted)
             {
                 b << uint8(qi->index);
-                b << item;
-                b << uint8(slot_type);                      // allow loot
+                b << uint8(questItemsCount + qi->index) << item;
+                b << uint8(slot_type);                      // 0 - get 1 - look only 2 - master selection
                 ++itemsShown;
             }
         }
