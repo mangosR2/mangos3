@@ -4226,12 +4226,7 @@ void Spell::cast(bool skipCheck)
         }
         case SPELLFAMILY_WARLOCK:
         {
-            if (m_spellInfo->Id == 74434)                   // Soulburn
-            {
-                if (m_caster->HasSpell(86664))              // Soulburn: Seed of Corruption, rank 1
-                    AddTriggeredSpell(93313);               // marker
-            }
-            else if (m_spellInfo->Id == 80398)              // Dark Intent
+            if (m_spellInfo->Id == 80398)                   // Dark Intent
                 AddTriggeredSpell(85768);                   // caster haste part
             else if (m_spellInfo->Id == 86213)              // Soul Swap Exhale
                 AddPrecastSpell(92794);

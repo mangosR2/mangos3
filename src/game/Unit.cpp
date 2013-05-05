@@ -591,6 +591,7 @@ Unit::Unit() :
     m_nextCustomSpellData.Clear();
 
     wildHuntMarker = false;
+    soulburnMarker = false;
 }
 
 Unit::~Unit()

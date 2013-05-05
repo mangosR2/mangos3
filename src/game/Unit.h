@@ -2402,6 +2402,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         CustomSpellData m_nextCustomSpellData;
 
         bool wildHuntMarker;
+        bool soulburnMarker;
 
     protected:
         explicit Unit ();

@@ -1157,6 +1157,22 @@ void Spell::EffectSchoolDMG(SpellEffectEntry const* effect)
                         }
                     }
                 }
+                // Seed of Corruption detonate
+                else if (m_spellInfo->Id == 27285)
+                {
+                    if (Unit* caster = GetAffectiveCaster())
+                        if (caster->soulburnMarker)           // marked as affected by Soulburn
+                        {
+                            caster->m_nextCustomSpellData.SetFlag(CUSTOM_SPELL_FLAG_NO_COST);
+                            caster->CastSpell(unitTarget, 172, true);   // cast Corruption
+                        }
+                }
+                // Shadow Cleave
+                else if (m_spellInfo->Id == 50581)
+                {
+                    int32 mod = int32(m_caster->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS + SPELL_SCHOOL_SHADOW) - m_caster->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_NEG + SPELL_SCHOOL_SHADOW));
+                    damage += mod > 0 ? int32(mod * 0.2143f) : 0;
+                }
                 // Soul Swap
                 else if (m_spellInfo->Id == 86121)
                 {

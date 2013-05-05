@@ -13076,6 +13076,21 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
                 else
                     return;
             }
+            // Seed of Corruption
+            else if (m_spellProto->Id == 27243)
+            {
+                if (m_removeMode != AURA_REMOVE_BY_DEFAULT)
+                    if (Unit* caster = GetCaster())
+                        caster->soulburnMarker = false;
+            }
+            // Soulburn
+            else if (m_spellProto->Id == 74434)
+            {
+                // Soulburn: Seed of Corruption, rank 1
+                if (!apply || m_target->HasSpell(86664))
+                    spellId1 = 93313;   // Soulburn Dummy
+                break;
+            }
             // Bane of Havoc
             else if (m_spellProto->Id == 80240)
             {

@@ -1729,14 +1729,14 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, DamageInfo* damageI
                     RemoveAurasDueToSpell(triggeredByAura->GetId());
 
                     // Cast finish spell (triggeredByAura already not exist!)
-                    int32 bp = 0;
-                    if (mod->m_miscvalue)               // marked as affected by soulburn
-                    {
-                        bp = 1;
-                        CastSpell(this, 87388, true);   // Soul Shard energize
-                    }
+                    CastSpell(this, 27285, true, castItem, NULL, casterGuid);
 
-                    CastCustomSpell(this, 27285, NULL, &bp, NULL, true, castItem, NULL, casterGuid);
+                    if (Unit* caster = GetMap()->GetUnit(casterGuid))
+                    {
+                        if (caster->soulburnMarker)                     // marked as affected by soulburn
+                            caster->CastSpell(caster, 87388, true);     // Soul Shard energize
+                        caster->soulburnMarker = false;
+                    }
 
                     return SPELL_AURA_PROC_OK;                            // no hidden cooldown
                 }
@@ -6344,18 +6344,12 @@ SpellAuraProcResult Unit::HandleAddPctModifierAuraProc(Unit* pVictim, DamageInfo
                         break;
                     case 27243:     // Seed of Corruption
                     {
+                        soulburnMarker = false;
                         // Soulburn: Seed of Corruption, rank 1
                         if (!HasSpell(86664))
                             return SPELL_AURA_PROC_FAILED;
 
-                        if (pVictim)
-                        {
-                            if (SpellAuraHolderPtr holder = pVictim->GetSpellAuraHolder(procSpell->Id, GetObjectGuid()))
-                            {
-                                if (Aura* aura = holder->GetAuraByEffectIndex(EFFECT_INDEX_1))
-                                    aura->GetModifier()->m_miscvalue = 1;   // mark as affected by Soulburn
-                            }
-                        }
+                        soulburnMarker = true;
                         break;
                     }
                     case 48020:     // Demonic Circle: Teleport
