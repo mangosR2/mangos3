@@ -13966,10 +13966,14 @@ void Unit::ProcDamageAndSpellFor(bool isVictim, DamageInfo* damageInfo)
 
                         // don't allow proc from cast end for non modifier spells
                         // unless they have proc ex defined for that
-                        if (IsCastEndProcModifierAura(itr->first->GetSpellProto(), SpellEffectIndex(i), procSpell))
+                        // Backdraft hack
+                        if (triggeredByAura->GetId() != 54274 && triggeredByAura->GetId() != 54276 && triggeredByAura->GetId() != 54277)
                         {
-                            if (useCharges && procExtra != PROC_EX_CAST_END && spellProcEvent->procEx == PROC_EX_NONE)
-                                continue;
+                            if (IsCastEndProcModifierAura(triggeredByAura->GetSpellProto(), SpellEffectIndex(i), procSpell))
+                            {
+                                if (useCharges && procExtra != PROC_EX_CAST_END && spellProcEvent->procEx == PROC_EX_NONE)
+                                    continue;
+                            }
                         }
                         else if (spellProcEvent->procEx == PROC_EX_NONE && procExtra == PROC_EX_CAST_END)
                             continue;
