@@ -6255,8 +6255,8 @@ void Spell::EffectTriggerSpell(SpellEffectEntry const* effect)
             m_caster->CastSpell(m_caster, triggered_spell_id, false);
             return;
         }
-        // Stampeding Roar (Cat Form)
-        case 77764:
+        // Feral Swiftness Clear
+        case 97985:
         {
             if (m_caster->GetTypeId() == TYPEID_PLAYER)
                 // search Feral Swiftness
