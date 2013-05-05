@@ -1138,7 +1138,10 @@ void Spell::EffectSchoolDMG(SpellEffectEntry const* effect)
                     // find req. aura for damage calculation
                     if (Aura* aura = im->GetAuraByEffectIndex(EFFECT_INDEX_2))
                     {
-                        damage += int32(aura->GetModifier()->m_amount * aura->GetAuraMaxTicks() * aura->GetSpellProto()->CalculateSimpleValue(EFFECT_INDEX_1) / 100.0f);
+                        damage += int32(aura->GetModifier()->m_amount * aura->GetAuraMaxTicks() * m_spellInfo->CalculateSimpleValue(EFFECT_INDEX_1) / 100.0f);
+                        DamageInfo damageInfo = DamageInfo(m_caster, unitTarget, m_spellInfo, damage);
+                        damageInfo.damageType = SPELL_DIRECT_DAMAGE;
+                        m_caster->SpellDamageBonusDone(&damageInfo);
                         break;
                     }
                 }

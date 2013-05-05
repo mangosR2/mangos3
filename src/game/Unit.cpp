@@ -8892,6 +8892,9 @@ void Unit::SpellDamageBonusDone(DamageInfo* damageInfo, uint32 stack)
         }
         case SPELLFAMILY_WARLOCK:
         {
+            if (damageInfo->GetSpellProto()->GetTargetAuraState() == AURA_STATE_CONFLAGRATE)
+                return;
+
             // Drain Soul
             if (damageInfo->GetSpellProto()->GetSpellFamilyFlags().test<CF_WARLOCK_DRAIN_SOUL>())
             {
@@ -8914,7 +8917,7 @@ void Unit::SpellDamageBonusDone(DamageInfo* damageInfo, uint32 stack)
             // Conflagate Aura-related
             if (pVictim->HasAuraState(AURA_STATE_CONFLAGRATE))
             {
-                // Incinerate Rank 1, 2, 3, 4
+                // Incinerate
                 if ((classOptions && classOptions->SpellFamilyFlags & UI64LIT(0x00004000000000)) && damageInfo->GetSpellProto()->GetSpellIconID() == 2128)
                 {
                     // Incinerate does more dmg (dmg/6) if the target have Immolate debuff.
