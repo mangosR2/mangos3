@@ -9271,8 +9271,27 @@ void Aura::PeriodicTick()
                 case 689:       // Drain Life
                 case 89420:     // Drain Life (Soulburn)
                 {
+                    int32 bp = 0;
+                    if (pCaster->GetHealthPercent() < 25.0f)
+                    {
+                        // Drain Life (Health Energize)
+                        Unit::AuraList const& mDummyAuras= pCaster->GetAurasByType(SPELL_AURA_DUMMY);
+                        for(Unit::AuraList::const_iterator i = mDummyAuras.begin(); i != mDummyAuras.end(); ++i)
+                        {
+                            if ((*i)->GetSpellProto()->GetSpellIconID() == 3223 && (*i)->GetSpellProto()->GetSpellFamilyName() == SPELLFAMILY_WARLOCK &&
+                                (*i)->GetEffIndex() == EFFECT_INDEX_0)
+                            {
+                                bp = 2 + (*i)->GetModifier()->m_amount;
+                                break;
+                            }
+                        }
+                    }
+
                     // Drain Life (Health Energize)
-                    pCaster->CastSpell(pCaster, 89653, true);
+                    if (bp)
+                        pCaster->CastCustomSpell(pCaster, 89653, &bp, NULL, NULL, true);
+                    else
+                        pCaster->CastSpell(pCaster, 89653, true);
                     break;
                 }
                 case 31956:
