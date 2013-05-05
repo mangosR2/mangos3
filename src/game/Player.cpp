@@ -53,6 +53,7 @@
 #include "BattleGround/BattleGroundMgr.h"
 #include "BattleGround/BattleGroundAV.h"
 #include "OutdoorPvP/OutdoorPvP.h"
+#include "BattleField/BattleField.h"
 #include "ArenaTeam.h"
 #include "Chat.h"
 #include "Database/DatabaseImpl.h"
@@ -23242,6 +23243,7 @@ bool Player::CanStartFlyInArea(uint32 mapid, uint32 zone, uint32 area) const
 
     // continent checked in SpellMgr::GetSpellAllowedInLocationError at cast and area update
     uint32 v_map = GetVirtualMapForMapAndZone(mapid, zone);
+    OutdoorPvP* opvp = sOutdoorPvPMgr.GetScript(zone);
 
     // switch all known flying maps
     switch (v_map)
@@ -23255,7 +23257,9 @@ bool Player::CanStartFlyInArea(uint32 mapid, uint32 zone, uint32 area) const
         case 571:       // Northrend
             // Check Cold Weather Flying
             // Disallow mounting in wintergrasp when battle is in progress
-            return HasSpell(54197); /* && (!inWintergrasp || wg->GetState() != BF_IN_PROGRESS);*/
+            return HasSpell(54197) && (!opvp || !opvp->IsBattleField() || ((BattleField*)opvp)->GetState() != BF_STATE_IN_PROGRESS);
+        case 732:       // Tol Barad
+            return false;
     }
 
     return false;

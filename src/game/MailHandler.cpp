@@ -107,7 +107,7 @@ bool WorldSession::CheckMailBox(ObjectGuid guid)
  */
 void WorldSession::HandleSendMail(WorldPacket& recv_data)
 {
-    sLog.outError("WORLD: CMSG_SEND_MAIL");
+    DEBUG_LOG("WORLD: CMSG_SEND_MAIL");
     ObjectGuid mailboxGuid;
     uint64 money, COD;
     std::string receiver, subject, body;
