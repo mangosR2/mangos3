@@ -1150,7 +1150,7 @@ bool Aura::CanProcFrom(SpellEntry const* spell, uint32 procFlag, uint32 EventPro
         // note: SpellFamilyName is not checked if no spell_proc_event is defined
         SpellClassOptionsEntry const* classOpt = spell->GetSpellClassOptions();
         if(!classOpt)
-            return true;
+            return false;
 
         return mask.IsFitToFamilyMask(classOpt->SpellFamilyFlags);
     }
