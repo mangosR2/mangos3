@@ -3700,6 +3700,15 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     }
                     break;
                 }
+                case 71281:                                 // Slave Trigger Closest (Q:24498)
+                {
+                    if (!m_caster || m_caster->GetTypeId() != TYPEID_PLAYER)
+                        return;
+
+                    Player* pPlayer = (Player*)m_caster;
+                    pPlayer->KilledMonsterCredit(pPlayer->GetTeam() == ALLIANCE ? 36764 : 36770);
+                    break;
+                }
                 case 71307:                                 // Vile Gas (Festergut, Rotface)
                 case 71908:
                 case 72270:
@@ -6520,7 +6529,7 @@ void Spell::DoSummonGroupPets(SpellEffectIndex eff_idx)
         if (!pet->Summon())
         {
             sLog.outError("Spell::EffectSummonGroupPets: %s not summoned by undefined reason.", pet->GetGuidStr().c_str());
-                
+
             delete pet;
             return;
         }
