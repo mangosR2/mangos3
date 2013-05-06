@@ -439,10 +439,7 @@ void Transport::Update(uint32 update_diff, uint32 p_time)
 
         m_nextNodeTime = m_curr->first;
 
-        if (m_curr == m_WayPoints.begin())
-            DETAIL_FILTER_LOG(LOG_FILTER_TRANSPORT_MOVES, " ************ BEGIN ************** %s", GetName());
-
-        DETAIL_FILTER_LOG(LOG_FILTER_TRANSPORT_MOVES, "%s moved to %f %f %f %d", GetName(), m_curr->second.loc.x, m_curr->second.loc.y, m_curr->second.loc.z, m_curr->second.loc.GetMapId());
+        DEBUG_FILTER_LOG(LOG_FILTER_TRANSPORT_MOVES, "Transport::Update %s moved to %f %f %f %d %s", GetObjectGuid().GetString().c_str(), m_curr->second.loc.x, m_curr->second.loc.y, m_curr->second.loc.z, m_curr->second.loc.GetMapId(), m_curr == m_WayPoints.begin() ? "begin move" : "");
     }
 }
 
@@ -450,7 +447,7 @@ void Transport::DoEventIfAny(WayPointMap::value_type const& node, bool departure
 {
     if (uint32 eventid = departure ? node.second.departureEventID : node.second.arrivalEventID)
     {
-        DEBUG_FILTER_LOG(LOG_FILTER_TRANSPORT_MOVES, "Taxi %s event %u of node %u of %s \"%s\") path", departure ? "departure" : "arrival", eventid, node.first, GetGuidStr().c_str(), GetName());
+        DEBUG_FILTER_LOG(LOG_FILTER_TRANSPORT_MOVES, "Transport::DoEventIfAny %s activate taxi %s event %u (node %u)", GetGuidStr().c_str(), departure ? "departure" : "arrival", eventid, node.first);
 
         if (!sScriptMgr.OnProcessEvent(eventid, this, this, departure))
             GetMap()->ScriptsStart(sEventScripts, eventid, this, this);
