@@ -2696,12 +2696,25 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, DamageInfo* damageI
             // Honor Among Thieves
             else if (dummySpell->GetSpellIconID() == 2903)
             {
-                if (Unit* caster = triggeredByAura->GetCaster())
-                {
-                    caster->CastSpell(caster, 51699, true);
-                    return SPELL_AURA_PROC_OK;
-                }
-                return SPELL_AURA_PROC_FAILED;
+                if (GetTypeId() != TYPEID_PLAYER)
+                    return SPELL_AURA_PROC_FAILED;
+
+                Unit* caster = triggeredByAura->GetCaster();
+                if (!caster || caster->GetTypeId() != TYPEID_PLAYER || caster == this)
+                    return SPELL_AURA_PROC_FAILED;
+
+                triggered_spell_id = 51699;
+                if (((Player*)caster)->HasSpellCooldown(triggered_spell_id))
+                    return SPELL_AURA_PROC_FAILED;
+
+                int32 cd = 4000;
+                ((Player*)caster)->ApplySpellMod(triggered_spell_id, SPELLMOD_COOLDOWN, cd);
+
+                if (Unit* target = caster->GetMap()->GetUnit(((Player*)caster)->GetSelectionGuid()))
+                    caster->CastSpell(target, 51699, true);
+
+                ((Player*)caster)->AddSpellCooldown(triggered_spell_id, 0, time(NULL) + cd / IN_MILLISECONDS);
+                return SPELL_AURA_PROC_OK;
             }
             // Cut to the Chase
             else if (dummySpell->GetSpellIconID() == 2909)
