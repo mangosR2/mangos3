@@ -84,7 +84,7 @@ public PathMovementBase<Creature, WaypointPath const*>
         // now path movement implmementation
         void LoadPath(Creature &c);
 
-        bool GetResetPosition(Creature&, float& x, float& y, float& z);
+        bool GetResetPosition(Creature&, float& x, float& y, float& z) const;
 
         void AddToWaypointPauseTime(int32 waitTimeDiff);
 
@@ -131,7 +131,7 @@ public PathMovementBase<Player,TaxiPathNodeList const*>
         void SetCurrentNodeAfterTeleport();
         void SkipCurrentNode() { ++i_currentNode; }
         void DoEventIfAny(Player& player, TaxiPathNodeEntry const& node, bool departure);
-        bool GetResetPosition(Player&, float& x, float& y, float& z);
+        bool GetResetPosition(Player&, float& x, float& y, float& z) const;
 
     protected:
         void _Initialize(Player &);
@@ -167,7 +167,7 @@ class MANGOS_DLL_SPEC TransportPathMovementGenerator
         void SetCurrentNodeAfterTeleport();
         void SkipCurrentNode() { ++i_currentNode; }
         void DoEventIfAny(GameObject& go, TaxiPathNodeEntry const& node, bool departure);
-        bool GetResetPosition(GameObject& go, float& x, float& y, float& z);
+        bool GetResetPosition(GameObject& go, float& x, float& y, float& z) const;
 };
 
 #endif
