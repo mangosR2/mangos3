@@ -7874,7 +7874,36 @@ SpellCastResult Spell::CheckCast(bool strict)
         }
     }
 
+    // check trade slot case (last, for allow catch any other cast problems)
+    if (m_targets.m_targetMask & TARGET_FLAG_TRADE_ITEM)
+    {
+        if (m_caster->GetTypeId() != TYPEID_PLAYER)
+            return SPELL_FAILED_NOT_TRADING;
+
+        Player *pCaster = ((Player*)m_caster);
+        TradeData* my_trade = pCaster->GetTradeData();
+
+        if (!my_trade)
+            return SPELL_FAILED_NOT_TRADING;
+
+        TradeSlots slot = TradeSlots(m_targets.getItemTargetGuid().GetRawValue());
+        if (slot != TRADE_SLOT_NONTRADED)
+            return SPELL_FAILED_ITEM_NOT_READY;
+
+        // if trade not complete then remember it in trade data
+        if (!my_trade->IsInAcceptProcess())
+        {
+            // Spell will be casted at completing the trade. Silently ignore at this place
+            my_trade->SetSpell(m_spellInfo->Id, m_CastItem);
+            return SPELL_FAILED_DONT_REPORT;
+        }
+    }
+
+    if (m_caster->GetTypeId() == TYPEID_PLAYER && m_spellInfo->Id != 39870)
+        return SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW;
+
     // and some hacks, as always
+
     switch(m_spellInfo->Id)
     {
         // spells that dont have direct effects listed above
