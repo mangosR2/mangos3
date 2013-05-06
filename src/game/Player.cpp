@@ -1987,14 +1987,8 @@ bool Player::TeleportTo(WorldLocation const& loc, uint32 options)
 
             // new final coordinates
             WorldLocation final = loc;
-
             if (IsOnTransport())
-            {
-                final = GetTransport()->GetPosition();
                 final += (*m_movementInfo.GetTransportPos());
-            }
-            else
-                final = loc;
 
             m_teleport_dest = final;
             SetFallInformation(0, final.z);
