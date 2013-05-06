@@ -682,21 +682,20 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
     LoadAccountData(holder->GetResult(PLAYER_LOGIN_QUERY_LOADACCOUNTDATA), PER_CHARACTER_CACHE_MASK);
     SendAccountDataTimes(PER_CHARACTER_CACHE_MASK);
 
-    bool featureBit4 = true;
-    data.Initialize(SMSG_FEATURE_SYSTEM_STATUS, 7);         // checked in 4.2.2
-    data << uint8(2);                                       // unknown value
-    data << uint32(1);
+    bool sessionTimeAlert = false;
+    data.Initialize(SMSG_FEATURE_SYSTEM_STATUS, 34);        // added in 2.2.0
+    data << uint8(2);                                       // Complain System Status
+    data << uint32(1);                                      // Scrolls of Ressurection remaining
     data << uint32(1);
     data << uint32(2);
     data << uint32(0);
-    data.WriteBit(1);
-    data.WriteBit(1);
-    data.WriteBit(0);
-    data.WriteBit(featureBit4);
-    data.WriteBit(0);
-    data.WriteBit(0);
-    data.FlushBits();
-    if (featureBit4)
+    data.WriteBit(true);
+    data.WriteBit(true);
+    data.WriteBit(false);
+    data.WriteBit(sessionTimeAlert);                        // Session Time Alert
+    data.WriteBit(false);                                   // GMQuickTicketSystemEnabled
+    data.WriteBit(false);                                   // IsVoiceChatAllowedByServer
+    if (sessionTimeAlert)
     {
         data << uint32(1);
         data << uint32(0);
