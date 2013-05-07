@@ -6228,6 +6228,14 @@ SpellAuraProcResult Unit::HandleAddFlatModifierAuraProc(Unit* pVictim, DamageInf
         {
             switch (spellInfo->Id)
             {
+                case 57529:                         // Arcane Potency
+                case 57531:
+                {
+                    // exclude Arcane Blast debuff
+                    if (!procSpell || procSpell->Id == 36032)
+                        return SPELL_AURA_PROC_FAILED;
+                    break;
+                }
                 case 83049:                         // Early Frost
                 case 83050:
                 {
