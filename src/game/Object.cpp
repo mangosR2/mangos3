@@ -535,7 +535,7 @@ void Object::BuildMovementUpdate(ByteBuffer * data, uint16 updateFlags) const
         *data << float(unit->GetSpeed(MOVE_RUN));
 
         if (hasPitch)
-            *data << float(unit->m_movementInfo.GetPitch());
+            *data << float(NormalizePitch(unit->m_movementInfo.GetPitch()));
 
         *data << float(unit->GetSpeed(MOVE_FLIGHT));
     }

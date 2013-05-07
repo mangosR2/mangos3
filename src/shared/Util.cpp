@@ -157,6 +157,16 @@ float NormalizeOrientation(float o)
     return fmod(o, 2.0f * M_PI_F);
 }
 
+float NormalizePitch(float o)
+{
+    if (o > -M_PI_F && o < M_PI_F)
+        return o;
+
+    o = NormalizeOrientation(o + M_PI) - M_PI;
+
+    return o;
+}
+
 void stripLineInvisibleChars(std::string &str)
 {
     static std::string invChars = " \t\7\n";

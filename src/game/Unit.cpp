@@ -374,7 +374,7 @@ void MovementInfo::Write(ByteBuffer& data, uint16 opcode) const
                 break;
             case MSEPitch:
                 if (si.hasPitch)
-                    data << float(s_pitch);
+                    data << float(NormalizePitch(s_pitch));
                 break;
             case MSEHasOrientation:
                 data.WriteBit(!si.hasOrientation);

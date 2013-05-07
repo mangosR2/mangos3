@@ -35,6 +35,7 @@ struct Tokens: public std::vector<char*>
 uint32 GetUInt32ValueFromArray(Tokens const& data, uint16 index);
 float GetFloatValueFromArray(Tokens const& data, uint16 index);
 float NormalizeOrientation(float o);
+float NormalizePitch(float o);
 
 void stripLineInvisibleChars(std::string &src);
 
