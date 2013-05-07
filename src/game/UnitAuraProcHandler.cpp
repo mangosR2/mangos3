@@ -3697,18 +3697,6 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, DamageInfo* damageI
                     }
                     return SPELL_AURA_PROC_FAILED;
                 }
-                // Cleansing Waters (Rank 1)
-                case 86959:
-                {
-                    triggered_spell_id = 86961;
-                    break;
-                }
-                // Cleansing Waters (Rank 2)
-                case 86962:
-                {
-                    triggered_spell_id = 86958;
-                    break;
-                }
                 // Fulmination marker
                 case 95774:
                 {
