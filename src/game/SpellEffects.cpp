@@ -232,7 +232,7 @@ pEffect SpellEffects[TOTAL_SPELL_EFFECTS]=
     &Spell::EffectRewardCurrency,                           //166 SPELL_EFFECT_REWARD_CURRENCY          56 spells in 4.3.4
     &Spell::EffectNULL,                                     //167 SPELL_EFFECT_167                      42 spells in 4.3.4
     &Spell::EffectNULL,                                     //168 SPELL_EFFECT_168                      2 spells in 4.3.4 Allows give commands to controlled pet
-    &Spell::EffectNULL,                                     //169 SPELL_EFFECT_DESTROY_ITEM             9 spells in 4.3.4
+    &Spell::EffectDestroyItem,                              //169 SPELL_EFFECT_DESTROY_ITEM             9 spells in 4.3.4 removes something
     &Spell::EffectNULL,                                     //170 SPELL_EFFECT_170                      70 spells in 4.3.4
     &Spell::EffectNULL,                                     //171 SPELL_EFFECT_171                      19 spells in 4.3.4 related to GO summon
     &Spell::EffectResurrectWithAura,                        //172 SPELL_EFFECT_RESURRECT_WITH_AURA      Mass Ressurection (Guild Perk)
@@ -14713,4 +14713,15 @@ void Spell::EffectResurrectWithAura(SpellEffectEntry const* effect)
 
     pTarget->setResurrectRequestData(m_caster->GetObjectGuid(), m_caster->GetMapId(), m_caster->GetPositionX(), m_caster->GetPositionY(), m_caster->GetPositionZ(), health, mana, spellInfo ? resurrectAuraSpell : 0);
     SendResurrectRequest(pTarget);
+}
+
+void Spell::EffectDestroyItem(SpellEffectEntry const* effect)
+{
+    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
+        return;
+
+    uint32 itemId = effect->EffectItemType;
+    uint32 count = uint32(damage);
+
+    ((Player*)unitTarget)->DestroyItemCount(itemId, count, true);
 }
