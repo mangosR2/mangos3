@@ -10787,8 +10787,8 @@ bool Unit::SelectHostileTarget(bool withEvade)
                     // next iteration we will select next possible target
                     m_HostileRefManager->deleteReference(target);
                     m_ThreatManager.modifyThreatPercent(target, -101);
-
-                    GetMap()->RemoveAttackerFor(GetObjectGuid(),target->GetObjectGuid());
+                    // remove target from current attacker, do not exit combat settings
+                    AttackStop(true);
                 }
                 return false;
             }
