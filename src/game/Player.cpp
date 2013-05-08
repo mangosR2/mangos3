@@ -15905,6 +15905,8 @@ bool Player::LoadFromDB(ObjectGuid guid, SqlQueryHolder* holder)
 
     _LoadGroup(holder->GetResult(PLAYER_LOGIN_QUERY_LOADGROUP));
 
+    _LoadCurrencies(holder->GetResult(PLAYER_LOGIN_QUERY_LOADCURRENCIES));
+
     _LoadArenaTeamInfo(holder->GetResult(PLAYER_LOGIN_QUERY_LOADARENAINFO));
 
     // check arena teams integrity
@@ -16252,7 +16254,6 @@ bool Player::LoadFromDB(ObjectGuid guid, SqlQueryHolder* holder)
     if (HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_GHOST))
         m_deathState = DEAD;
 
-    _LoadCurrencies(holder->GetResult(PLAYER_LOGIN_QUERY_LOADCURRENCIES));
     _LoadSpells(holder->GetResult(PLAYER_LOGIN_QUERY_LOADSPELLS));
 
     // after spell load, learn rewarded spell if need also
@@ -19597,7 +19598,8 @@ void Player::SetArenaTeamInfoField(uint8 slot, ArenaTeamInfoType type, uint32 va
             if (newCap <= itr->second.customWeekCap)
                 continue;
 
-            itr->second.state = PLAYERCURRENCY_CHANGED;
+            if (itr->second.state != PLAYERCURRENCY_NEW)
+                itr->second.state = PLAYERCURRENCY_CHANGED;
             itr->second.customWeekCap = newCap;
             SendCurrencyWeekCap(itr->second.currencyEntry, newCap);
         }
@@ -25708,12 +25710,12 @@ void Player::ModifyCurrencyCount(uint32 id, int32 count, bool modifyWeek, bool m
     if (newTotalCount < 0)
         newTotalCount = 0;
 
-    int32 newWeekCount = oldWeekCount + (modifyWeek && count > 0 ? count : 0);
+    int32 newWeekCount = oldWeekCount + ((modifyWeek && count > 0) ? count : 0);
     if (newWeekCount < 0)
         newWeekCount = 0;
 
     int32 totalCap = GetCurrencyTotalCap(currency);
-    if (totalCap && totalCap < newTotalCount)
+    if (totalCap && totalCap < newTotalCount && count > 0)
     {
         int32 delta = newTotalCount - totalCap;
         newTotalCount = totalCap;
