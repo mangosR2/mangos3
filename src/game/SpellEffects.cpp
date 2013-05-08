@@ -12988,6 +12988,14 @@ void Spell::EffectScriptEffect(SpellEffectEntry const* effect)
                         holder->RefreshHolder();
                     return;
                 }
+                case 86507:                                 // Fortitude
+                {
+                    if (!unitTarget)
+                        return;
+
+                    m_caster->CastCustomSpell(unitTarget, 72590, &damage, NULL, NULL, true);
+                    return;
+                }
                 case 97985:                                 // Feral Swiftness Clear
                 {
                     if (!unitTarget)
