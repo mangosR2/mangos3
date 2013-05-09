@@ -719,6 +719,16 @@ DELETE FROM `spell_proc_event` WHERE `entry` = 51099;
 INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`, `SpellFamilyMaskC0`) VALUE
 (51099, 15, 1+2+4, 4096);
 
+-- Rune Strike passive
+DELETE FROM `spell_proc_event` WHERE `entry` = 56816;
+INSERT INTO `spell_proc_event` (`entry`, `SchoolMask`, `ppmRate`) VALUE
+(56816, 127, 48);
+
+-- Rune Strike enabler
+DELETE FROM `spell_proc_event` WHERE `entry` = 56817;
+INSERT INTO `spell_proc_event` (`entry`, `SchoolMask`, `SpellFamilyMaskB0`) VALUE
+(56817, 15, 536870912);
+
 -- Item - Death Knight T12 Blood 2P Bonus
 DELETE FROM `spell_proc_event` WHERE `entry` = 98956;
 INSERT INTO `spell_proc_event` (`entry`, `SchoolMask`) VALUE

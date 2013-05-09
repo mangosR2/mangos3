@@ -11922,6 +11922,10 @@ void SpellAuraHolder::_AddSpellAuraHolder()
         if (GetAllSpellMechanicMask(m_spellProto) & (1 << (MECHANIC_BLEED-1)))
             m_target->ModifyAuraState(AURA_STATE_BLEEDING, true);
 
+        // Blood Presence and Rune Strike enabler
+        if (GetId() == 48263 || GetId() == 56817)
+            m_target->ModifyAuraState(AURA_STATE_DEFENSE, true);
+
         switch(m_spellProto->GetSpellFamilyName())
         {
             case SPELLFAMILY_GENERIC:
@@ -12070,6 +12074,20 @@ void SpellAuraHolder::_RemoveSpellAuraHolder()
             case SPELLFAMILY_HUNTER:
                 if (m_spellProto->GetSpellFamilyFlags().test<CF_HUNTER_PET_SPELLS>())
                     removeState = AURA_STATE_FAERIE_FIRE;   // Sting (hunter versions)
+                break;
+            case SPELLFAMILY_DEATHKNIGHT:
+                if (m_spellProto->Id == 48263)              // Blood Presence
+                {
+                    if (!m_target->GetSpellAuraHolder(56817, m_target->GetObjectGuid()))    // Rune Strike enabler
+                        removeState = AURA_STATE_DEFENSE;
+                    break;
+                }
+                else if (m_spellProto->Id == 56817)         // Rune Strike enabler
+                {
+                    if (!m_target->GetSpellAuraHolder(48263, m_target->GetObjectGuid()))    // Blood Presence
+                        removeState = AURA_STATE_DEFENSE;
+                    break;
+                }
                 break;
             default:
                 break;

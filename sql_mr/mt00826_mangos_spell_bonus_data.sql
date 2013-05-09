@@ -63,6 +63,7 @@ REPLACE INTO `spell_bonus_data` (`entry`, `direct_bonus`, `dot_bonus`, `ap_bonus
 (49998, 0, 0, 0.236, 0, 'Death Knight - Death Strike'),
 (52212, 0, 0, 0.064, 0, 'Death Knight - Death and Decay Triggered'),
 (55050, 0, 0, 0.236, 0, 'Death Knight - Heart Strike'),
+(56815, 0, 0, 0.236, 0, 'Death Knight - Rune Strike'),
 (85948, 0, 0, 0.236, 0, 'Death Knight - Festering Strike');
 
 -- Mage
