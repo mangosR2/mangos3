@@ -75,7 +75,7 @@ int32 GetSpellMaxDuration(SpellEntry const *spellInfo)
     return (du->Duration[2] == -1) ? -1 : abs(du->Duration[2]);
 }
 
-int32 CalculateSpellDuration(SpellEntry const *spellInfo, Unit const* caster)
+int32 CalculateSpellDuration(SpellEntry const *spellInfo, Unit const* caster, bool withHaste /*= true*/)
 {
     int32 duration = GetSpellDuration(spellInfo);
 
@@ -90,13 +90,29 @@ int32 CalculateSpellDuration(SpellEntry const *spellInfo, Unit const* caster)
         {
             modOwner->ApplySpellMod(spellInfo->Id, SPELLMOD_DURATION, duration);
 
-            duration = modOwner->CalculateSpellDurationWithHaste(spellInfo, duration);
+            if (withHaste)
+                duration = ApplyHasteToDuration(spellInfo, modOwner, duration);
 
             if (duration < 0)
                 duration = 0;
 
         }
     }
+
+    return duration;
+}
+
+int32 ApplyHasteToDuration(SpellEntry const* spellProto, Unit const* caster, int32 duration)
+{
+    if (!spellProto || duration <= 0)
+        return duration;
+
+    if (!spellProto->HasAttribute(SPELL_ATTR_EX5_AFFECTED_BY_HASTE))
+        return duration;
+
+    // Apply haste to duration
+    if (Player* modOwner = caster->GetSpellModOwner())
+        duration = ceil(float(duration) * modOwner->GetFloatValue(UNIT_MOD_CAST_SPEED));
 
     return duration;
 }

@@ -486,15 +486,26 @@ m_isPersistent(false), m_isActive(false), m_spellAuraHolder(holder), m_classType
 
     SetModifier(AuraType(m_spellEffect->EffectApplyAuraName), damage, m_spellEffect->EffectAmplitude, m_spellEffect->EffectMiscValue);
 
-    Player* modOwner = caster ? caster->GetSpellModOwner() : NULL;
-
-    // Apply periodic time mod
-    if (modOwner && m_modifier.periodictime)
+    if (m_modifier.periodictime)
     {
-        modOwner->ApplySpellMod(spellproto->Id, SPELLMOD_ACTIVATION_TIME, m_modifier.periodictime);
-        uint32 newperiodictime  = modOwner->CalculateAuraPeriodicTimeWithHaste(spellproto, m_modifier.periodictime);
-        if (newperiodictime != m_modifier.periodictime)
-            m_modifier.periodictime = newperiodictime;
+        if (Player* modOwner = caster ? caster->GetSpellModOwner() : NULL)
+        {
+            int32 newperiodictime = m_modifier.periodictime;
+            modOwner->ApplySpellMod(spellproto->Id, SPELLMOD_ACTIVATION_TIME, newperiodictime);
+            m_modifier.periodictime = uint32(ApplyHasteToDuration(spellproto, modOwner, newperiodictime));
+        }
+
+        if (spellproto->HasAttribute(SPELL_ATTR_EX8_HASTE_ADD_TICKS))
+        {
+            int32 diff = holder->GetAuraMaxDurationWithoutHaste() - holder->GetAuraMaxDuration();
+            int32 addTicks = diff > 0 ? diff / m_modifier.periodictime : 0;
+            if (addTicks)
+            {
+                int32 newDuration = holder->GetAuraMaxDuration() + addTicks * m_modifier.periodictime;
+                holder->SetAuraMaxDuration(newDuration);
+                holder->SetAuraDuration(newDuration);
+            }
+        }
     }
 
     // Start periodic on next tick or at aura apply
@@ -11166,7 +11177,8 @@ m_permanent(false), m_isRemovedOnShapeLost(true), m_deleted(false)
 
     Unit* unitCaster = caster && caster->isType(TYPEMASK_UNIT) ? (Unit*)caster : NULL;
 
-    m_duration = m_maxDuration = CalculateSpellDuration(spellproto, unitCaster);
+    m_maxDurationWithoutHaste =  CalculateSpellDuration(spellproto, unitCaster, false);
+    m_duration = m_maxDuration = ApplyHasteToDuration(spellproto, unitCaster, m_maxDurationWithoutHaste);
 
     if (m_maxDuration == -1 || (m_isPassive && spellproto->GetDurationIndex() == 0))
         SetPermanent(true);

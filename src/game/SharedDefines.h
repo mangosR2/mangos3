@@ -555,7 +555,7 @@ enum SpellAttributesEx8
     SPELL_ATTR_EX8_UNK6                        = 0x00000040,// 6 Rune Strike, [DND] Falling, Altered Form
     SPELL_ATTR_EX8_UNK7                        = 0x00000080,// 7
     SPELL_ATTR_EX8_UNK8                        = 0x00000100,// 8 some raid-wide buffs
-    SPELL_ATTR_EX8_UNK9                        = 0x00000200,// 9 some dot/hot spells
+    SPELL_ATTR_EX8_HASTE_ADD_TICKS             = 0x00000200,// 9 haste add additional aura ticks
     SPELL_ATTR_EX8_UNK10                       = 0x00000400,// 10 some transformation spells
     SPELL_ATTR_EX8_UNK11                       = 0x00000800,// 11 Phase 2 Intro Aura (80224)
     SPELL_ATTR_EX8_AURA_SENDS_AMOUNT           = 0x00001000,// 12

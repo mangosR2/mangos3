@@ -108,7 +108,8 @@ inline uint32 GetSpellRecoveryTime(SpellEntry const *spellInfo)
 }
 int32 GetSpellDuration(SpellEntry const *spellInfo);
 int32 GetSpellMaxDuration(SpellEntry const *spellInfo);
-int32 CalculateSpellDuration(SpellEntry const *spellInfo, Unit const* caster = NULL);
+int32 ApplyHasteToDuration(SpellEntry const* spellProto, Unit const* caster, int32 duration);
+int32 CalculateSpellDuration(SpellEntry const *spellInfo, Unit const* caster = NULL, bool withHaste = true);
 uint16 GetSpellAuraMaxTicks(SpellEntry const* spellInfo);
 uint16 GetSpellAuraMaxTicks(uint32 spellId);
 WeaponAttackType GetWeaponAttackType(SpellEntry const *spellInfo);

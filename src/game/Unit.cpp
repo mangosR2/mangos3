@@ -15101,38 +15101,6 @@ VehicleEntry const* Unit::GetVehicleInfo() const
     return GetVehicleKit() ? GetVehicleKit()->GetEntry() : NULL;
 }
 
-uint32 Unit::CalculateAuraPeriodicTimeWithHaste(SpellEntry const* spellProto, uint32 oldPeriodicTime)
-{
-    if (!spellProto || oldPeriodicTime == 0)
-        return 0;
-
-    bool applyHaste = spellProto->HasAttribute(SPELL_ATTR_EX5_AFFECTED_BY_HASTE);
-
-    if (!applyHaste)
-        return oldPeriodicTime;
-
-    uint32 _periodicTime = ceil(float(oldPeriodicTime) * GetFloatValue(UNIT_MOD_CAST_SPEED));
-
-    return _periodicTime;
-}
-
-uint32 Unit::CalculateSpellDurationWithHaste(SpellEntry const* spellProto, uint32 oldduration)
-{
-    if (!spellProto || oldduration == 0)
-        return 0;
-
-    bool applyHaste = spellProto->HasAttribute(SPELL_ATTR_EX5_AFFECTED_BY_HASTE);
-
-    if (!applyHaste)
-        return oldduration;
-
-    // Apply haste to duration
-
-    uint32 duration = ceil(float(oldduration) * GetFloatValue(UNIT_MOD_CAST_SPEED));
-
-    return duration;
-}
-
 bool Unit::IsVisibleTargetForSpell(WorldObject const* caster, SpellEntry const* spellInfo, WorldLocation const* location) const
 {
     bool no_stealth = false;
