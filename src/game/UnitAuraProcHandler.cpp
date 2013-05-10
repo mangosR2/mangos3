@@ -6442,6 +6442,16 @@ SpellAuraProcResult Unit::HandleAddPctModifierAuraProc(Unit* pVictim, DamageInfo
             }
             break;
         }
+        case SPELLFAMILY_SHAMAN:
+        {
+            // Maelstrom Weapon proc remove
+            if (spellInfo->Id == 53817)
+            {
+                if (!procSpell || !procSpell->IsFitToFamilyMask(UI64LIT(0x8000000001C3), 0x10000))
+                    return SPELL_AURA_PROC_FAILED;
+            }
+            break;
+        }
         default:
             break;
     }
