@@ -104,7 +104,7 @@ int32 CalculateSpellDuration(SpellEntry const *spellInfo, Unit const* caster, bo
 
 int32 ApplyHasteToDuration(SpellEntry const* spellProto, Unit const* caster, int32 duration)
 {
-    if (!spellProto || duration <= 0)
+    if (!spellProto || !caster || duration <= 0)
         return duration;
 
     if (!spellProto->HasAttribute(SPELL_ATTR_EX5_AFFECTED_BY_HASTE))
