@@ -6285,6 +6285,25 @@ void Spell::EffectSummonType(SpellEffectIndex eff_idx)
         return;
     }
 
+    // Get casting object
+    WorldObject* realCaster = GetCastingObject();
+    if (!realCaster)
+    {
+        sLog.outError("EffectSummonType: No Casting Object found for spell %u, (caster = %s)", m_spellInfo->Id, m_caster->GetGuidStr().c_str());
+        return;
+    }
+
+    Unit* responsibleCaster = m_originalCaster;
+    if (realCaster->GetTypeId() == TYPEID_GAMEOBJECT)
+        responsibleCaster = ((GameObject*)realCaster)->GetOwner();
+
+    uint32 factionId = summon_prop->FactionId ? summon_prop->FactionId :
+                        // Else set faction to summoner's faction for pet-like summoned
+                        ((summon_prop->Flags & SUMMON_PROP_FLAG_INHERIT_FACTION) ? 
+                        (responsibleCaster ? responsibleCaster->getFaction() : m_caster->getFaction()) :
+                        // else auto faction detect
+                        0);
+
     switch(summon_prop->Group)
     {
         // faction handled later on, or loaded from template
@@ -6304,15 +6323,15 @@ void Spell::EffectSummonType(SpellEffectIndex eff_idx)
                     else if (m_spellInfo->EffectMiscValueB[eff_idx] == 2301)
                         DoSummonSnakes(eff_idx);
                     else if (prop_id == 1021)
-                        DoSummonGuardian(eff_idx, summon_prop->FactionId);
+                        DoSummonGuardian(eff_idx, factionId);
                     else
-                        DoSummonWild(eff_idx, summon_prop->FactionId);
+                        DoSummonWild(eff_idx, factionId);
                     break;
                 }
                 case UNITNAME_SUMMON_TITLE_PET:
                 case UNITNAME_SUMMON_TITLE_MINION:
                 case UNITNAME_SUMMON_TITLE_RUNEBLADE:
-                    DoSummonGuardian(eff_idx, summon_prop->FactionId);
+                    DoSummonGuardian(eff_idx, factionId);
                     break;
                 case UNITNAME_SUMMON_TITLE_GUARDIAN:
                 {
@@ -6333,7 +6352,7 @@ void Spell::EffectSummonType(SpellEffectIndex eff_idx)
                             if (cInfo->type == CREATURE_TYPE_TOTEM)
                                 DoSummonTotem(eff_idx);
                             else
-                                DoSummonGuardian(eff_idx, summon_prop->FactionId);
+                                DoSummonGuardian(eff_idx, factionId);
                         }
                     }
                     else
@@ -6343,9 +6362,9 @@ void Spell::EffectSummonType(SpellEffectIndex eff_idx)
                 case UNITNAME_SUMMON_TITLE_CONSTRUCT:
                 {
                     if (prop_id == 2913)                    // Scrapbot
-                        DoSummonWild(eff_idx, summon_prop->FactionId);
+                        DoSummonWild(eff_idx, factionId);
                     else
-                        DoSummonGuardian(eff_idx, summon_prop->FactionId);
+                        DoSummonGuardian(eff_idx, factionId);
                     break;
                 }
                 case UNITNAME_SUMMON_TITLE_TOTEM:
@@ -6354,18 +6373,18 @@ void Spell::EffectSummonType(SpellEffectIndex eff_idx)
                 case UNITNAME_SUMMON_TITLE_COMPANION:
                     // slot 6 set for critters that can help to player in fighting
                     if (summon_prop->Slot == 6)
-                        DoSummonGuardian(eff_idx, summon_prop->FactionId);
+                        DoSummonGuardian(eff_idx, factionId);
                     else
-                        DoSummonCritter(eff_idx, summon_prop->FactionId);
+                        DoSummonCritter(eff_idx, factionId);
                     break;
                 case UNITNAME_SUMMON_TITLE_OPPONENT:
                 case UNITNAME_SUMMON_TITLE_LIGHTWELL:
                 case UNITNAME_SUMMON_TITLE_BUTLER:
                 case UNITNAME_SUMMON_TITLE_MOUNT:
-                    DoSummonWild(eff_idx, summon_prop->FactionId);
+                    DoSummonWild(eff_idx, factionId);
                     break;
                 case UNITNAME_SUMMON_TITLE_VEHICLE:
-                    DoSummonWild(eff_idx, summon_prop->FactionId);
+                    DoSummonWild(eff_idx, factionId);
                     break;
                 default:
                     sLog.outError("EffectSummonType: Unhandled summon title %u", summon_prop->Title);
@@ -6390,7 +6409,7 @@ void Spell::EffectSummonType(SpellEffectIndex eff_idx)
                     EffectSummonPossessed(eff_idx);
                     break;
                 default:
-                    DoSummonGuardian(eff_idx, summon_prop->FactionId);
+                    DoSummonGuardian(eff_idx, factionId);
                 break;
             }
             break;
@@ -6398,9 +6417,7 @@ void Spell::EffectSummonType(SpellEffectIndex eff_idx)
         case SUMMON_PROP_GROUP_VEHICLE:
         case SUMMON_PROP_GROUP_UNCONTROLLABLE_VEHICLE:
         {
-            DoSummonVehicle(eff_idx, summon_prop->FactionId);
-//            sLog.outDebug("EffectSummonType: Unhandled summon group type SUMMON_PROP_GROUP_VEHICLE(%u)", summon_prop->Group);
-//            Mangos developers thinking - this summon is not supported. But in this his worked fine :)
+            DoSummonVehicle(eff_idx, factionId);
             break;
         }
         default:
