@@ -499,7 +499,7 @@ m_isPersistent(false), m_isActive(false), m_spellAuraHolder(holder), m_classType
         if (spellproto->HasAttribute(SPELL_ATTR_EX8_HASTE_ADD_TICKS))
         {
             int32 diff = holder->GetAuraMaxDurationWithoutHaste() - holder->GetAuraMaxDuration();
-            int32 addTicks = diff > 0 ? diff / m_modifier.periodictime : 0;
+            int32 addTicks = diff > 0 ? int32(float(diff) / m_modifier.periodictime + 0.5f) : 0;
             if (addTicks)
             {
                 int32 newDuration = holder->GetAuraMaxDuration() + addTicks * m_modifier.periodictime;
