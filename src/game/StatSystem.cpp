@@ -426,7 +426,9 @@ void Player::CalculateMinMaxDamage(WeaponAttackType attType, bool normalized, fl
 
     if (IsInFeralForm())                                    // check if player is druid and in cat or bear forms, non main hand attacks not allowed for this mode so not check attack type
     {
-        float weaponSpeed = GetAttackTime(attType) / 1000.0f;
+        float weaponSpeed = BASE_ATTACK_TIME / 1000.0f;
+        if (Item* weapon = GetWeaponForAttack(BASE_ATTACK, true, true))
+            weaponSpeed =  weapon->GetProto()->Delay / 1000;
 
         switch (GetShapeshiftForm())
         {
