@@ -4926,13 +4926,27 @@ void Spell::finish(bool ok)
 
     if (IsMeleeAttackResetSpell())
     {
-        m_caster->resetAttackTimer(BASE_ATTACK);
-        if (m_caster->haveOffhandWeapon())
-            m_caster->resetAttackTimer(OFF_ATTACK);
-    }
+        bool found = false;
+        Unit::AuraList const& vIgnoreReset = m_caster->GetAurasByType(SPELL_AURA_IGNORE_MELEE_RESET);
+        for (Unit::AuraList::const_iterator i = vIgnoreReset.begin(); i != vIgnoreReset.end(); ++i)
+        {
+            if ((*i)->isAffectedOnSpell(m_spellInfo))
+            {
+                found = true;
+                break;
+            }
+        }
 
-    /*if (IsRangedAttackResetSpell())
-        m_caster->resetAttackTimer(RANGED_ATTACK);*/
+        if (!found)
+        {
+            m_caster->resetAttackTimer(BASE_ATTACK);
+            if (m_caster->haveOffhandWeapon())
+                m_caster->resetAttackTimer(OFF_ATTACK);
+
+            if (IsRangedSpell())
+                m_caster->resetAttackTimer(RANGED_ATTACK);
+        }
+    }
 
     // Clear combo at finish state
     if (NeedsComboPoints(m_spellInfo))
