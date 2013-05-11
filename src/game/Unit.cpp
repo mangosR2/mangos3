@@ -12883,6 +12883,9 @@ int32 Unit::GetMaxPowerByIndex(uint32 index) const
 {
     MANGOS_ASSERT(index < MAX_STORED_POWERS);
 
+    if (GetInt32Value(UNIT_FIELD_POWER1 + index) == POWER_ALTERNATIVE)
+        return std::numeric_limits<int32>::max();
+
     return GetInt32Value(UNIT_FIELD_MAXPOWER1 + index);
 }
 
@@ -13061,6 +13064,7 @@ int32 Unit::GetCreatePowers(Powers power) const
         case POWER_SOUL_SHARDS: return 0;
         case POWER_ECLIPSE:     return 0;
         case POWER_HOLY_POWER:  return 0;
+        case POWER_ALTERNATIVE: return 0;
     }
 
     return 0;
@@ -13074,6 +13078,8 @@ int32 Unit::GetCreateMaxPowers(Powers power) const
             return GetTypeId() == TYPEID_PLAYER && ((Player const*)this)->getClass() == CLASS_PALADIN ? 3 : 0;
         case POWER_SOUL_SHARDS:
             return GetTypeId() == TYPEID_PLAYER && ((Player const*)this)->getClass() == CLASS_WARLOCK ? 3 : 0;
+        case POWER_ALTERNATIVE:
+            return 100;
         case POWER_ECLIPSE:
             return 100;
         default:
