@@ -25100,6 +25100,12 @@ AreaLockStatus Player::GetAreaTriggerLockStatus(AreaTrigger const* at, Difficult
         if (pBind && pBind->perm && pBind->state != map->GetPersistentState())
             return AREA_LOCKSTATUS_HAS_BIND;
     }
+    // End of Time, Well of Eternity, Hour of Twilight
+    if (at->loc.GetMapId() == 938 || at->loc.GetMapId() == 939 || at->loc.GetMapId() == 940)
+    {
+        if (isRegularTargetMap)
+            return AREA_LOCKSTATUS_MISSING_DIFFICULTY;
+    }
 
     return AREA_LOCKSTATUS_OK;
 };
