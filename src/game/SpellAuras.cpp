@@ -12828,7 +12828,7 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
             }
 
             // Cone of Cold
-            if (m_spellProto->Id == 120)
+            if (m_spellProto->Id == 120 && apply)
             {
                 if (Unit* caster = GetCaster())
                 {

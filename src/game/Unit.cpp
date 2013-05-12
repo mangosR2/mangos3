@@ -12058,8 +12058,9 @@ int32 Unit::CalculateSpellDamage(Unit const* target, SpellEntry const* spellProt
             if (!spellProto->GetProcFlags() || !target)
                 break;
 
-            if ((spellProto->GetAuraInterruptFlags() & (AURA_INTERRUPT_FLAG_DAMAGE | AURA_INTERRUPT_FLAG_DAMAGE2)) == 0)
-                break;
+            if (uint32 interruptFlags = spellProto->GetAuraInterruptFlags())
+                if ((interruptFlags & (AURA_INTERRUPT_FLAG_DAMAGE | AURA_INTERRUPT_FLAG_DAMAGE2)) == 0)
+                    break;
 
             if (spellProto->GetProcCharges())
                 return 1;
