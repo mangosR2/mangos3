@@ -4580,9 +4580,6 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
     }
     else
     {
-        if (modelid > 0)
-            target->SetDisplayId(target->GetNativeDisplayId());
-
         if (target->getClass() == CLASS_DRUID)
             target->setPowerType(POWER_MANA);
 
@@ -4608,6 +4605,8 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
             }
             handledAura->ApplyModifier(true);
         }
+        else if (modelid > 0)
+            target->SetDisplayId(target->GetNativeDisplayId());
 
         switch(form)
         {
