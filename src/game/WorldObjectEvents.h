@@ -161,7 +161,7 @@ class EvadeDelayEvent : public BasicEvent
 class AiDelayEventAround : public BasicEvent
 {
     public:
-        AiDelayEventAround(AIEventType eventType, ObjectGuid invokerGuid, Creature& owner, std::list<Creature*> const& receivers);
+        AiDelayEventAround(AIEventType eventType, ObjectGuid invokerGuid, Creature& owner, std::list<Creature*> const& receivers, uint32 miscValue);
         bool Execute(uint64 /*e_time*/, uint32 /*p_time*/);
 
     private:
@@ -172,6 +172,7 @@ class AiDelayEventAround : public BasicEvent
         Creature&  m_owner;
 
         AIEventType m_eventType;
+        uint32 m_miscValue;
 };
 
 

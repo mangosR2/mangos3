@@ -419,11 +419,12 @@ bool EvadeDelayEvent::Execute(uint64 /*e_time*/, uint32 /*p_time*/)
     return true;
 }
 
-AiDelayEventAround::AiDelayEventAround(AIEventType eventType, ObjectGuid invokerGuid, Creature& owner, std::list<Creature*> const& receivers) :
+AiDelayEventAround::AiDelayEventAround(AIEventType eventType, ObjectGuid invokerGuid, Creature& owner, std::list<Creature*> const& receivers, uint32 miscValue) :
     BasicEvent(WORLDOBJECT_EVENT_TYPE_COMMON),
     m_eventType(eventType),
     m_invokerGuid(invokerGuid),
-    m_owner(owner)
+    m_owner(owner),
+    m_miscValue(miscValue)
 {
     // Pushing guids because in delay can happen some creature gets despawned => invalid pointer
     m_receiverGuids.reserve(receivers.size());
@@ -439,7 +440,7 @@ bool AiDelayEventAround::Execute(uint64 /*e_time*/, uint32 /*p_time*/)
     {
         if (Creature* pReceiver = m_owner.GetMap()->GetAnyTypeCreature(*itr))
         {
-            pReceiver->AI()->ReceiveAIEvent(m_eventType, &m_owner, pInvoker);
+            pReceiver->AI()->ReceiveAIEvent(m_eventType, &m_owner, pInvoker, m_miscValue);
             // Special case for type 0 (call-assistance)
             if (m_eventType == AI_EVENT_CALL_ASSISTANCE && pInvoker && pReceiver->CanAssistTo(&m_owner, pInvoker))
             {

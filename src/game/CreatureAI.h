@@ -295,7 +295,7 @@ class MANGOS_DLL_SPEC CreatureAI
          * @param uiDelay  delay time until the Event will be triggered
          * @param fRadius  range in which for receiver is searched
          */
-        void SendAIEvent(AIEventType eventType, Unit* pInvoker, uint32 uiDelay, float fRadius) const;
+        void SendAIEvent(AIEventType eventType, Unit* pInvoker, uint32 uiDelay, float fRadius, uint32 miscValue = 0) const;
 
         /**
          * Send an AI Event to a Creature
@@ -303,7 +303,7 @@ class MANGOS_DLL_SPEC CreatureAI
          * @param pInvoker Unit that triggered this event (like an attacker)
          * @param pReceiver Creature to receive this event
          */
-        void SendAIEvent(AIEventType eventType, Unit* pInvoker, Creature* pReceiver) const;
+        void SendAIEvent(AIEventType eventType, Unit* pInvoker, Creature* pReceiver, uint32 miscValue = 0) const;
 
         /**
          * Called when an AI Event is received
@@ -311,7 +311,7 @@ class MANGOS_DLL_SPEC CreatureAI
          * @param pSender Creature that sent this event
          * @param pInvoker Unit that triggered this event (like an attacker)
          */
-        virtual void ReceiveAIEvent(AIEventType /*eventType*/, Creature* /*pSender*/, Unit* /*pInvoker*/) {}
+        virtual void ReceiveAIEvent(AIEventType /*eventType*/, Creature* /*pSender*/, Unit* /*pInvoker*/, uint32 /*miscValue*/) {}
 
     protected:
         void HandleMovementOnAttackStart(Unit* victim);

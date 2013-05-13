@@ -184,7 +184,7 @@ void CreatureAI::HandleMovementOnAttackStart(Unit* victim)
 //                                      Event system
 // ////////////////////////////////////////////////////////////////////////////////////////////////
 
-void CreatureAI::SendAIEvent(AIEventType eventType, Unit* pInvoker, uint32 uiDelay, float fRadius) const
+void CreatureAI::SendAIEvent(AIEventType eventType, Unit* pInvoker, uint32 uiDelay, float fRadius, uint32 miscValue /*=0*/) const
 {
     if (fRadius > 0)
     {
@@ -197,14 +197,14 @@ void CreatureAI::SendAIEvent(AIEventType eventType, Unit* pInvoker, uint32 uiDel
 
         if (!receiverList.empty())
         {
-            AiDelayEventAround* e = new AiDelayEventAround(eventType, pInvoker ? pInvoker->GetObjectGuid() : ObjectGuid(), *m_creature, receiverList);
+            AiDelayEventAround* e = new AiDelayEventAround(eventType, pInvoker ? pInvoker->GetObjectGuid() : ObjectGuid(), *m_creature, receiverList, miscValue);
             m_creature->AddEvent(e, uiDelay);
         }
     }
 }
 
-void CreatureAI::SendAIEvent(AIEventType eventType, Unit* pInvoker, Creature* pReceiver) const
+void CreatureAI::SendAIEvent(AIEventType eventType, Unit* pInvoker, Creature* pReceiver, uint32 miscValue /*=0*/) const
 {
     MANGOS_ASSERT(pReceiver);
-    pReceiver->AI()->ReceiveAIEvent(eventType, m_creature, pInvoker);
+    pReceiver->AI()->ReceiveAIEvent(eventType, m_creature, pInvoker, miscValue);
 }
