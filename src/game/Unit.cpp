@@ -10199,11 +10199,18 @@ void Unit::MeleeDamageBonusDone(DamageInfo* damageInfo, uint32 stack)
 
         if (damageInfo->attackType == OFF_ATTACK)
             DonePercent *= GetModifierValue(UNIT_MOD_DAMAGE_OFFHAND, TOTAL_PCT);                    // no school check required
+
+        // creature and pet bonus mods
+        if (GetTypeId() == TYPEID_UNIT)
+        {
+            if (!((Creature*)this)->IsPet())
+                DonePercent *= ((Creature*)this)->GetSpellDamageMod(((Creature*)this)->GetCreatureInfo()->rank);
+        }
     }
 
     if (damageInfo->IsMeleeDamage())
     {
-        // apply SPELL_AURA_MOD_AUTOATTACK_DAMAGE for white damage
+        // SPELL_AURA_MOD_AUTOATTACK_DAMAGE for autoattacks
         AuraList const& mModAutoAttackDamageAuras = GetAurasByType(SPELL_AURA_MOD_AUTOATTACK_DAMAGE);
         for (AuraList::const_iterator i = mModAutoAttackDamageAuras.begin(); i != mModAutoAttackDamageAuras.end(); ++i)
         {
