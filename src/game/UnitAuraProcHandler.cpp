@@ -6107,7 +6107,7 @@ SpellAuraProcResult Unit::HandleMendingAuraProc(Unit* /*pVictim*/, DamageInfo* d
                 target->AddSpellAuraHolder(new_holder);
             }
 
-            heal += int32(caster->SpellBaseHealingBonusDone(GetSpellSchoolMask(spellProto)) * 1.59f);
+            heal += int32(caster->SpellBaseHealingBonusDone(GetSpellSchoolMask(spellProto)) * 0.318f);
 
             // Glyph of Prayer of Mending
             if (jumps + 1 == spellProto->GetProcCharges())
