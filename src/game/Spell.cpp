@@ -1559,7 +1559,7 @@ void Spell::DoAllEffectOnTarget(TargetInfo *target)
         }
 
         // Glyph of Resilient Grip
-        if (m_spellInfo->Id == 49575 && missInfo == SPELL_MISS_IMMUNE)
+        if (m_spellInfo->Id == 49576 && missInfo == SPELL_MISS_IMMUNE)
             if (real_caster->HasAura(59309))
                 real_caster->CastSpell(real_caster, 90289, true);
     }
