@@ -19410,11 +19410,14 @@ void Player::PossessSpellInitialize()
 
 void Player::VehicleSpellInitialize()
 {
-    Creature* charm = (Creature*)GetCharm();
-    if (!charm)
+    Unit* _charm = GetCharm();
+    if (!_charm || _charm->GetTypeId() != TYPEID_UNIT)
         return;
 
-    CharmInfo* charmInfo = charm->GetCharmInfo();
+    Creature* charm = (Creature*)_charm;
+
+    CharmInfo *charmInfo = charm->GetCharmInfo();
+
     if (!charmInfo)
     {
         sLog.outError("Player::VehicleSpellInitialize(): vehicle (GUID: %u) has no charminfo!", charm->GetGUIDLow());
