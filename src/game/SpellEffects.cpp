@@ -5001,7 +5001,15 @@ void Spell::EffectDummy(SpellEffectEntry const* effect)
                 if (!unitTarget)
                     return;
 
-                uint32 spellId = unitTarget->IsFriendlyTo(m_caster) ? 97690 : 97691;
+                uint32 spellId = 97691;
+                if (!unitTarget->IsHostileTo(m_caster))
+                {
+                    spellId = 97690;
+                    // check Absolution Talent
+                    if (unitTarget != m_caster && !m_caster->HasAura(33167))
+                        unitTarget = m_caster;
+                }
+
                 // cast actual dispel spell
                 m_caster->CastSpell(unitTarget, spellId, true);
             }
