@@ -2577,6 +2577,11 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
                 // Camouflage
                 if (spellInfo_1->GetSpellIconID() == 2227 && spellInfo_2->GetSpellIconID() == 2227)
                     return false;
+
+                // Explosive Shot & Black Arrow
+                if (spellInfo_1->GetSpellIconID() == 3407 && spellInfo_2->GetSpellIconID() == 1939 ||
+                    spellInfo_1->GetSpellIconID() == 1939 && spellInfo_2->GetSpellIconID() == 3407)
+                    return false;
             }
 
             break;
