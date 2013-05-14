@@ -304,11 +304,14 @@ class AchievementMgr
         void SendPacket(WorldPacket* data) const;
         void SendCriteriaProgressRemove(uint32 criteriaId);
 
+        uint32 GetAchievementPoints() const { return m_achievementPoints; }
+
     private:
         T* m_owner;
         CriteriaProgressMap m_criteriaProgress;
         CompletedAchievementMap m_completedAchievements;
         AchievementCriteriaFailTimeMap m_criteriaFailTimes;
+        uint32 m_achievementPoints;
 };
 
 class AchievementGlobalMgr

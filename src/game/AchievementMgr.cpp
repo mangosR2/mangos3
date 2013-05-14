@@ -406,6 +406,7 @@ template <class T>
 AchievementMgr<T>::AchievementMgr(T* owner)
 {
     m_owner = owner;
+    m_achievementPoints = 0;
 }
 
 template <class T>
@@ -475,6 +476,8 @@ void AchievementMgr<Player>::Reset()
     m_criteriaProgress.clear();
     DeleteFromDB(m_owner->GetObjectGuid());
 
+    m_achievementPoints = 0;
+
     // re-fill data
     CheckAllAchievementCriteria(GetOwner());
 }
@@ -497,6 +500,8 @@ void AchievementMgr<Guild>::Reset()
 
     for (CriteriaProgressMap::const_iterator iter = m_criteriaProgress.begin(); iter!=m_criteriaProgress.end(); ++iter)
         SendCriteriaProgressRemove(iter->first);
+
+    m_achievementPoints = 0;
 
     m_completedAchievements.clear();
     m_criteriaProgress.clear();
@@ -746,12 +751,18 @@ void AchievementMgr<Player>::LoadFromDB(QueryResult *achievementResult, QueryRes
             uint32 achievement_id = fields[0].GetUInt32();
 
             // don't must happen: cleanup at server startup in sAchievementMgr.LoadCompletedAchievements()
-            if (!sAchievementStore.LookupEntry(achievement_id))
+            AchievementEntry const * achievement = sAchievementStore.LookupEntry(achievement_id);
+            if (!achievement)
+                continue;
+
+            if (achievement->flags & ACHIEVEMENT_FLAG_GUILD)
                 continue;
 
             CompletedAchievementData& ca = m_completedAchievements[achievement_id];
             ca.date = time_t(fields[1].GetUInt64());
             ca.changed = false;
+
+            m_achievementPoints += achievement->points;
         }
         while(achievementResult->NextRow());
 
@@ -840,6 +851,9 @@ void AchievementMgr<Guild>::LoadFromDB(QueryResult *achievementResult, QueryResu
             if (!achievement)
                 continue;
 
+            if (!(achievement->flags & ACHIEVEMENT_FLAG_GUILD))
+                continue;
+
             CompletedAchievementData& ca = m_completedAchievements[achievementid];
             ca.date = time_t(fields[1].GetUInt32());
             Tokens tokens(fields[2].GetCppString(), ' ');
@@ -847,6 +861,8 @@ void AchievementMgr<Guild>::LoadFromDB(QueryResult *achievementResult, QueryResu
                 ca.guids.insert(ObjectGuid(HIGHGUID_PLAYER, 0, uint32(atol(tokens[i]))));
 
             ca.changed = false;
+
+            m_achievementPoints += achievement->points;
 
         } while (achievementResult->NextRow());
 
@@ -3294,6 +3310,8 @@ void AchievementMgr<Player>::CompletedAchievement(AchievementEntry const* achiev
     if (!(achievement->flags & ACHIEVEMENT_FLAG_REALM_FIRST_KILL))
         sAchievementMgr.SetRealmCompleted(achievement);
 
+    m_achievementPoints += achievement->points;
+
     UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_COMPLETE_ACHIEVEMENT, 0, 0, NULL, 0, referencePlayer);
 
     // reward items and titles if any
@@ -3424,6 +3442,8 @@ void AchievementMgr<Guild>::CompletedAchievement(AchievementEntry const* achieve
     }
 
     sAchievementMgr.SetRealmCompleted(achievement);
+
+    m_achievementPoints += achievement->points;
 
     UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_COMPLETE_ACHIEVEMENT, 0, 0, NULL, 0, referencePlayer);
     UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_EARN_ACHIEVEMENT_POINTS, achievement->points, 0, 0, 0, referencePlayer);

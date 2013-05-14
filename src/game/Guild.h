@@ -307,9 +307,21 @@ struct GuildItemPosCount
 };
 typedef std::vector<GuildItemPosCount> GuildItemPosCountVec;
 
+#define MAX_GUILD_PROFESSIONS 2
+
 struct MemberSlot
 {
-    void SetMemberStats(Player* player);
+    struct ProfessionInfo
+    {
+        ProfessionInfo() : skillId(0), value(0), rank(0) { }
+        ProfessionInfo(uint32 _skillId, uint16 _value, uint8 _rank) : skillId(_skillId), value(_value), rank(_rank) { }
+
+        uint32 skillId;
+        uint16 value;
+        uint8 rank;
+    };
+
+    void SetMemberStats(Player* player, bool save = true);
     void UpdateLogoutTime();
     void SetPNOTE(std::string pnote);
     void SetOFFNOTE(std::string offnote);
@@ -325,12 +337,15 @@ struct MemberSlot
     uint32 ZoneId;
     uint64 LogoutTime;
     uint32 thisWeekReputation;
+    uint32 AchievementPoints;
     std::string Pnote;
     std::string OFFnote;
     uint32 BankResetTimeMoney;
     uint32 BankRemMoney;
     uint32 BankResetTimeTab[GUILD_BANK_MAX_TABS];
     uint32 BankRemSlotsTab[GUILD_BANK_MAX_TABS];
+
+    ProfessionInfo m_professions[MAX_GUILD_PROFESSIONS];
 };
 
 struct RankInfo

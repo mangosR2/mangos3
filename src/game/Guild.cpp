@@ -27,18 +27,65 @@
 #include "GuildFinderMgr.h"
 #include "Chat.h"
 #include "SocialMgr.h"
+#include "SpellMgr.h"
 #include "Util.h"
 #include "Language.h"
 #include "World.h"
 #include "Calendar.h"
 
 //// MemberSlot ////////////////////////////////////////////
-void MemberSlot::SetMemberStats(Player* player)
+void MemberSlot::SetMemberStats(Player* player, bool save /*=true*/)
 {
     Name   = player->GetName();
     Level  = player->getLevel();
     Class  = player->getClass();
     ZoneId = player->IsInWorld() ? player->GetZoneId() : player->GetCachedZoneId();
+    AchievementPoints = player->GetAchievementMgr().GetAchievementPoints();
+
+    for (int i = 0; i < MAX_GUILD_PROFESSIONS; ++i)
+    {
+        m_professions[i].skillId = 0;
+        m_professions[i].rank = 0;
+        m_professions[i].value = 0;
+    }
+
+    uint32 prev_skill = 0;
+    uint32 counter = 0;
+    for (PlayerSpellMap::const_iterator spellIter = player->GetSpellMap().begin(); spellIter != player->GetSpellMap().end() && counter < MAX_GUILD_PROFESSIONS; ++spellIter)
+    {
+        uint32 spellId = spellIter->first;
+        SpellEntry const* spellInfo = sSpellStore.LookupEntry(spellId);
+        if (!spellInfo)
+            continue;
+
+        uint32 skill = 0;
+        for (int i = 0; i < MAX_EFFECT_INDEX; ++i)
+        {
+            if (SpellEffectEntry const* effect = spellInfo->GetSpellEffect(SpellEffectIndex(i)))
+                if (effect->Effect == SPELL_EFFECT_SKILL && IsPrimaryProfessionSkill(effect->EffectMiscValue))
+                {
+                    skill = effect->EffectMiscValue;
+                    break;
+                }
+        }
+
+        if (!skill || prev_skill == skill)
+            continue;
+
+        m_professions[counter].skillId = skill;
+        m_professions[counter].rank = sSpellMgr.GetSpellRank(spellId);
+        m_professions[counter].value = player->GetSkillValue(skill);
+    }
+
+    if (save)
+    {
+        CharacterDatabase.PExecute("UPDATE guild_member SET achievementPoints = %u, firstProfessionId = %u, firstProfessionRank = %u, firstProfessionValue = %u, "
+            "secondProfessionId = %u, secondProfessionRank = %u, secondProfessionValue = %u "
+            "WHERE guid='%u'",
+            AchievementPoints, m_professions[0].skillId, m_professions[0].rank, m_professions[0].value,
+            m_professions[1].skillId, m_professions[1].rank, m_professions[1].value,
+            player->GetGUIDLow());
+    }
 }
 
 void MemberSlot::UpdateLogoutTime()
@@ -201,10 +248,7 @@ bool Guild::AddMember(ObjectGuid plGuid, uint32 plRank)
     if (pl)
     {
         newmember.accountId = pl->GetSession()->GetAccountId();
-        newmember.Name   = pl->GetName();
-        newmember.Level  = pl->getLevel();
-        newmember.Class  = pl->getClass();
-        newmember.ZoneId = pl->GetZoneId();
+        newmember.SetMemberStats(pl, false);
     }
     else
     {
@@ -219,6 +263,14 @@ bool Guild::AddMember(ObjectGuid plGuid, uint32 plRank)
         newmember.Class  = fields[2].GetUInt8();
         newmember.ZoneId = fields[3].GetUInt32();
         newmember.accountId = fields[4].GetInt32();
+        newmember.AchievementPoints = 0;
+        for (int i = 0; i < MAX_GUILD_PROFESSIONS; ++i)
+        {
+            newmember.m_professions[i].skillId = 0;
+            newmember.m_professions[i].rank = 0;
+            newmember.m_professions[i].value = 0;
+        }
+
         delete result;
 
         if (newmember.Level < 1 || newmember.Level > STRONG_MAX_LEVEL ||
@@ -245,8 +297,12 @@ bool Guild::AddMember(ObjectGuid plGuid, uint32 plRank)
     CharacterDatabase.escape_string(dbPnote);
     CharacterDatabase.escape_string(dbOFFnote);
 
-    CharacterDatabase.PExecute("INSERT INTO guild_member (guildid,guid,rank,pnote,offnote) VALUES ('%u', '%u', '%u','%s','%s')",
-                               m_Id, lowguid, newmember.RankId, dbPnote.c_str(), dbOFFnote.c_str());
+    CharacterDatabase.PExecute("INSERT INTO guild_member (guildid,guid,rank,pnote,offnote,achievementPoints,firstProfessionId,firstProfessionRank,firstProfessionValue,secondProfessionId,secondProfessionRank,secondProfessionValue) VALUES "
+        "('%u', '%u', '%u','%s','%s', '%u', '%u', '%u', '%u', '%u', '%u', '%u')",
+        m_Id, lowguid, newmember.RankId, dbPnote.c_str(), dbOFFnote.c_str(),
+        newmember.AchievementPoints,
+        newmember.m_professions[0].skillId,newmember.m_professions[0].rank,newmember.m_professions[0].value,
+        newmember.m_professions[1].skillId,newmember.m_professions[1].rank,newmember.m_professions[1].value);
 
     // If player not in game data in data field will be loaded from guild tables, no need to update it!!
     if (pl)
@@ -469,7 +525,16 @@ bool Guild::LoadMembersFromDB(QueryResult* guildMembersResult)
         newmember.LogoutTime            = fields[23].GetUInt64();
         newmember.accountId             = fields[24].GetInt32();
 
-        newmember.thisWeekReputation     = fields[25].GetUInt32();
+        newmember.thisWeekReputation    = fields[25].GetUInt32();
+
+        newmember.AchievementPoints     = fields[26].GetUInt32();
+
+        for (int i = 0; i < 2; ++i)
+        {
+            newmember.m_professions[i].skillId = fields[27 + i * 3].GetUInt32();
+            newmember.m_professions[i].rank = fields[28 + i * 3].GetUInt32();
+            newmember.m_professions[i].value = fields[29 + i * 3].GetUInt32();
+        }
 
         // this code will remove not existing character guids from guild
         if (newmember.Level < 1 || newmember.Level > STRONG_MAX_LEVEL) // can be at broken `data` field
@@ -879,11 +944,11 @@ void Guild::Roster(WorldSession* session /*= NULL*/)
         buffer.WriteGuidBytes<0>(guid);
         buffer << uint64(0);                            // weekly activity
         buffer << uint32(member.RankId);
-        buffer << uint32(0);                            // achievement points
+        buffer << uint32(member.AchievementPoints);
 
-        // professions: id, value, rank
-        buffer << uint32(0) << uint32(0) << uint32(0);
-        buffer << uint32(0) << uint32(0) << uint32(0);
+        // professions: value, rank, id
+        for (int i = 0; i < MAX_GUILD_PROFESSIONS; ++i)
+            buffer << uint32(member.m_professions[i].rank) << uint32(member.m_professions[i].value) << uint32(member.m_professions[i].skillId);
 
         buffer.WriteGuidBytes<2>(guid);
         buffer << uint8(flags);
@@ -899,7 +964,7 @@ void Guild::Roster(WorldSession* session /*= NULL*/)
         buffer << uint8(player ? player->getLevel() : member.Level);
         buffer << int32(0);                             // unk
         buffer.WriteGuidBytes<5, 4>(guid);
-        buffer << uint8(0);                             // unk
+        buffer << uint8(player ? player->getGender() : 0);
         buffer.WriteGuidBytes<1>(guid);
         buffer << float(player ? 0.0f : float(time(NULL) - itr->second.LogoutTime) / DAY);
 
