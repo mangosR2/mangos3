@@ -1261,17 +1261,6 @@ void SpellMgr::LoadSpellTargetPositions()
                 spellInfo->EffectImplicitTargetB[i] == TARGET_SCRIPT_COORDINATES ||
                 spellInfo->EffectImplicitTargetB[i] == TARGET_SELF2)
             {
-                // additional requirements
-                if (spellInfo->Effect[i] == SPELL_EFFECT_BIND && spellInfo->EffectMiscValue[i])
-                {
-                    uint32 zone_id = st.GetZoneId();
-                    if (int32(zone_id) != spellInfo->EffectMiscValue[i])
-                    {
-                        sLog.outErrorDb("Spell (Id: %u) listed in `spell_target_position` expected point to zone %u bit point to zone %u.",Spell_ID, spellInfo->EffectMiscValue[i], zone_id);
-                        break;
-                    }
-                }
-
                 found = true;
                 break;
             }
