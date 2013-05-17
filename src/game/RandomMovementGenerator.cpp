@@ -64,7 +64,10 @@ void RandomMovementGenerator<Creature>::_setRandomLocation(Creature &creature)
 
     Movement::MoveSplineInit<Unit*> init(creature);
     init.MoveTo(destX, destY, destZ, true);
-    init.SetWalk(true);
+
+    if (!creature.IsLevitating() && !creature.IsSwimming())
+        init.SetWalk(true);
+
     init.Launch();
 
     if (creature.CanFly())

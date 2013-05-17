@@ -143,7 +143,7 @@ m_subtype(subtype), m_defaultMovementType(IDLE_MOTION_TYPE), m_equipmentId(0),
 m_AlreadyCallAssistance(false), m_AlreadySearchedAssistance(false),
 m_regenHealth(true), m_AI_locked(false), m_isDeadByDefault(false),
 m_temporaryFactionFlags(TEMPFACTION_NONE), m_meleeDamageSchoolMask(SPELL_SCHOOL_MASK_NORMAL), m_originalEntry(0),
-m_creatureInfo(NULL)
+m_creatureInfo(NULL), m_modelInhabitType(-1)
 {
     m_regenTimer = 200;
     m_valuesCount = UNIT_END;
@@ -303,6 +303,9 @@ bool Creature::InitEntry(uint32 Entry, CreatureData const* data /*=NULL*/, GameE
 
     SetLevitate(cinfo->InhabitType & INHABIT_AIR, GetObjectGuid().IsPet() ? 2.0f : 4.0f);
 
+    if (CanSwim())
+        SetSwim(IsInWater());
+
     // checked at loading
     m_defaultMovementType = MovementGeneratorType(cinfo->MovementType);
 
@@ -432,6 +435,9 @@ uint32 Creature::ChooseDisplayId(const CreatureInfo* cinfo, const CreatureData* 
 
 void Creature::Update(uint32 update_diff, uint32 diff)
 {
+    if (CanSwim())
+        SetSwim(IsInWater());
+
     switch (m_deathState)
     {
         case JUST_ALIVED:
@@ -1568,6 +1574,10 @@ void Creature::SetDeathState(DeathState s)
         RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE);
 
         SetWalk(true, true);
+
+        if (CanSwim())
+            SetSwim(IsInWater());
+
         GetMotionMaster()->Initialize();
     }
 }
@@ -2580,6 +2590,18 @@ void Creature::SetLevitate(bool enable, float altitude)
     SendMessageToSet(&data, true);
 }
 
+void Creature::SetSwim(bool enable)
+{
+    if (enable)
+        m_movementInfo.AddMovementFlag(MOVEFLAG_SWIMMING);
+    else
+        m_movementInfo.RemoveMovementFlag(MOVEFLAG_SWIMMING);
+
+//    WorldPacket data(enable ? SMSG_SPLINE_MOVE_START_SWIM : SMSG_SPLINE_MOVE_STOP_SWIM, 8);
+//    data << GetPackGUID();
+//    SendMessageToSet(&data, true);
+}
+
 Unit* Creature::SelectPreferredTargetForSpell(SpellEntry const* spellInfo)
 {
     Unit* target = NULL;
@@ -2674,7 +2696,7 @@ void Creature::SetRoot(bool enable)
     else
         m_movementInfo.RemoveMovementFlag(MOVEFLAG_ROOT);
 
-    WorldPacket data(enable ? SMSG_SPLINE_MOVE_ROOT : SMSG_SPLINE_MOVE_UNROOT, 9);
+    WorldPacket data(enable ? SMSG_SPLINE_MOVE_ROOT : SMSG_SPLINE_MOVE_UNROOT, 8);
     data << GetPackGUID();
     SendMessageToSet(&data, true);
 }
@@ -2686,7 +2708,81 @@ void Creature::SetWaterWalk(bool enable)
     else
         m_movementInfo.RemoveMovementFlag(MOVEFLAG_WATERWALKING);
 
-    WorldPacket data(enable ? SMSG_SPLINE_MOVE_WATER_WALK : SMSG_SPLINE_MOVE_LAND_WALK, 9);
+    WorldPacket data(enable ? SMSG_SPLINE_MOVE_WATER_WALK : SMSG_SPLINE_MOVE_LAND_WALK, 8);
     data << GetPackGUID();
     SendMessageToSet(&data, true);
+}
+
+// TODO
+//void Creature::SetCanFly(bool enable)
+//{
+//    if (enable)
+//        m_movementInfo.AddMovementFlag(MOVEFLAG_CAN_FLY);
+//    else
+//        m_movementInfo.RemoveMovementFlag(MOVEFLAG_CAN_FLY);
+//
+//    Unit::SetCanFly(enable);
+//}
+
+void Creature::SetDisplayId(uint32 modelId)
+{
+    m_modelInhabitType = -1;
+    Unit::SetDisplayId(modelId);
+}
+
+uint32 Creature::GetModelInhabitType()
+{
+    if (m_modelInhabitType < 0)
+    {
+        uint32 miType = MODEL_INHABIT_ONLY_GROUND;
+        if (CreatureDisplayInfoEntry const* displayInfo = sCreatureDisplayInfoStore.LookupEntry(GetDisplayId()))
+        {
+            if (CreatureModelDataEntry const* modelData = sCreatureModelDataStore.LookupEntry(displayInfo->ModelId))
+                miType = modelData->modInhabitType;
+        }
+        m_modelInhabitType = miType;
+    }
+
+    return m_modelInhabitType;
+}
+
+bool Creature::CanWalk()
+{
+    if (!(m_creatureInfo->InhabitType & INHABIT_GROUND))
+        return false;
+
+    int32 modelInhabitType = GetModelInhabitType();
+    if ((modelInhabitType == MODEL_INHABIT_ONLY_SWIM) /*||
+        (modelInhabitType == MODEL_INHABIT_ONLY_FLY)*/)
+        return false;
+
+    return true;
+}
+
+bool Creature::CanSwim()
+{
+    if (!(m_creatureInfo->InhabitType & INHABIT_WATER))
+        return false;
+
+    int32 modelInhabitType = GetModelInhabitType();
+    if ((modelInhabitType == MODEL_INHABIT_ONLY_GROUND) ||
+        (modelInhabitType == MODEL_INHABIT_ONLY_FLY) ||
+        (modelInhabitType == MODEL_INHABIT_ONLY_UNDERWATER))
+        return false;
+
+    return true;
+}
+
+bool Creature::CanFly()
+{
+    if (!(m_creatureInfo->InhabitType & INHABIT_AIR) && !(GetByteValue(UNIT_FIELD_BYTES_1, 3) & UNIT_BYTE1_FLAG_HOVER))
+        return false;
+
+    int32 modelInhabitType = GetModelInhabitType();
+    if ((modelInhabitType == MODEL_INHABIT_ONLY_GROUND) ||
+        (modelInhabitType == MODEL_INHABIT_ONLY_SWIM) ||
+        (modelInhabitType == MODEL_INHABIT_ONLY_UNDERWATER))
+        return false;
+
+    return true;
 }
