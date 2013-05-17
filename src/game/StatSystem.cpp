@@ -345,7 +345,7 @@ void Player::UpdateAttackPowerAndDamage(bool ranged)
                 {
             if (SpellShapeshiftFormEntry const * entry = sSpellShapeshiftFormStore.LookupEntry(uint32(GetShapeshiftForm())))
                 if (entry->flags1 & 0x20)
-                    val2 += std::max(GetStat(STAT_AGILITY) - 10.0f, 0.0f) * chrEntry->apPerStr;
+                    val2 += std::max(GetStat(STAT_AGILITY) - 10.0f, 0.0f) * chrEntry->apPerStr * 2;
         }
     }
 
