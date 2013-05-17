@@ -2591,6 +2591,7 @@ uint32 SpellMgr::GetSpellMaxTargetsWithCustom(SpellEntry const* spellInfo, Unit 
                 case 46298:                                 // Shrink
                 case 46299:                                 // Wavering Will
                 case 46300:                                 // Withered Touch
+                case 46372:                                 // Ice Spear Target Picker (Slave Pens, Ahune)
                 case 47669:                                 // Wakeup Subboss (Utgarde Pinnacle)
                 case 48278:                                 // Paralyze (Utgarde Pinnacle)
                 case 50988:                                 // Glare of the Tribunal (Halls of Stone)
