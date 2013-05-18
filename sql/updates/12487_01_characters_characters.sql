@@ -1,4 +1,4 @@
-ALTER TABLE character_db_version CHANGE COLUMN required_12339_02_characters_calendar_invites required_12487_01_characters_characters bit;
+ALTER TABLE character_db_version CHANGE COLUMN required_11785_02_characters_instance required_12487_01_characters_characters bit;
 
 UPDATE characters SET drunk = (drunk / 256) & 0xFF;
 
