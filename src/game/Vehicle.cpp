@@ -159,7 +159,7 @@ Unit* VehicleKit::GetPassenger(int8 seatId) const
 }
 
 // Helper function to undo the turning of the vehicle to calculate a relative position of the passenger when boarding
-Position VehicleKit::CalculateBoardingPositionOf(Position const& pos) const override
+Position VehicleKit::CalculateBoardingPositionOf(Position const& pos) const
 {
     Position posl = pos;
     NormalizeRotatedPosition(pos.x - GetBase()->GetPositionX(), pos.y - GetBase()->GetPositionY(), posl.x, posl.y);

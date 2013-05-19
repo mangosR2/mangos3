@@ -614,7 +614,7 @@ class MANGOS_DLL_SPEC Creature : public Unit
         CreatureDataAddon const* GetCreatureAddon() const;
 
         static uint32 ChooseDisplayId(const CreatureInfo* cinfo, const CreatureData* data = NULL, GameEventCreatureData const* eventData = NULL);
-        void SetDisplayId(uint32 modelId) override;
+        void SetDisplayId(uint32 modelId);
 
         std::string GetAIName() const;
         std::string GetScriptName() const;
