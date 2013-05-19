@@ -6981,6 +6981,16 @@ void Aura::HandlePeriodicHeal(bool apply, bool /*Real*/)
             int32 healthBonus = int32 (0.0032f * caster->GetMaxHealth());
             m_modifier.m_amount += healthBonus;
         }
+        // Spirit Mend (Exotic Ability)
+        else if (GetId() == 90361)
+        {
+            if (Unit* owner = caster->GetOwner())
+            {
+                float rap = owner->GetTotalAttackPowerValue(RANGED_ATTACK);
+                int32 healthBonus = int32((rap * 0.35f) * 0.335f);
+                m_modifier.m_amount += healthBonus;
+            }
+        }
         else
         {
             m_modifier.m_amount = caster->SpellHealingBonusDone(target, GetSpellProto(), m_modifier.m_amount, DOT, GetStackAmount());

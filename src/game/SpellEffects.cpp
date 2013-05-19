@@ -7057,6 +7057,15 @@ void Spell::EffectHeal(SpellEffectEntry const* effect)
                 unitTarget->RemoveSpellAuraHolder(aura->GetHolder());
             }
         }
+        // Spirit Mend (Exotic Ability)
+        else if (m_spellInfo->Id == 90361)
+        {
+            if (Unit* owner = m_caster->GetOwner())
+            {
+                float rap = owner->GetTotalAttackPowerValue(RANGED_ATTACK);
+                addhealth += int32((rap * 0.35f) * 0.5f);
+            }
+        }
 
         // Chain Healing
         SpellClassOptionsEntry const* chClassOptions = m_spellInfo->GetSpellClassOptions();
