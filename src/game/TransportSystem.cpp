@@ -204,31 +204,12 @@ void TransportBase::UnBoardPassenger(WorldObject* passenger)
 
 /* **************************************** TransportInfo ****************************************/
 
-TransportInfo::TransportInfo(WorldObject& owner, TransportBase& transport, Position const& pos, int8 seat) :
-    m_owner(owner),
-    m_transport(transport),
-    m_seat(seat)
-{
-}
-
-TransportInfo::TransportInfo(TransportInfo const& info) :
-    m_owner(info.m_owner),
-    m_transport(info.m_transport),
-    m_seat(info.m_seat)
-{
-}
-
 void TransportInfo::SetLocalPosition(Position const& pos)
 {
     m_owner.SetTransportPosition(pos);
 
     // Update global position
     m_transport.UpdateGlobalPositionOf(m_owner.GetObjectGuid(), pos);
-}
-
-TransportInfo::~TransportInfo()
-{
-    m_owner.SetTransportInfo(NULL);
 }
 
 WorldObject* TransportInfo::GetTransport() const 

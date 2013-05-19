@@ -403,7 +403,7 @@ void Transport::Update(uint32 update_diff, uint32 p_time)
     {
 
         // delay detect
-        uint32 delta = abs(m_next->first - m_curr->first);
+        uint32 delta = abs(int(m_next->first - m_curr->first));
         if (delta > 5000)
         {
             m_anchorageTimer.SetInterval(delta);
@@ -616,11 +616,15 @@ void TransportKit::Reset()
 
 bool TransportKit::AddPassenger(WorldObject* passenger, Position const& transportPos)
 {
+    // possible requires check for board possibility here and return false
+
     // Calculate passengers local position, if not provided
     BoardPassenger(passenger, transportPos.IsEmpty() ? CalculateBoardingPositionOf(passenger->GetPosition()) : transportPos, -1);
 
     DETAIL_FILTER_LOG(LOG_FILTER_TRANSPORT_MOVES,"TransportKit::AddPassenger %s boarded on %s offset %f %f %f", 
         passenger->GetObjectGuid().GetString().c_str(), GetBase()->GetObjectGuid().GetString().c_str(), transportPos.getX(), transportPos.getY(), transportPos.getZ());
+
+    return true;
 }
 
 void TransportKit::RemovePassenger(WorldObject* passenger)

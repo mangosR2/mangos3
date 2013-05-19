@@ -52,9 +52,15 @@ class TransportBase;
 class MANGOS_DLL_DECL TransportInfo
 {
     public:
-        explicit TransportInfo(WorldObject& owner, TransportBase& transport, Position const& pos, int8 seat);
-        TransportInfo(TransportInfo const& info);
-        ~TransportInfo();
+        TransportInfo(WorldObject& owner, TransportBase& transport, Position const& pos, int8 seat) :
+            m_owner(owner), m_transport(transport), m_seat(seat)
+        {/*SetTransportPosition(pos)*/};
+
+        TransportInfo(TransportInfo const& info) :
+            m_owner(info.m_owner), m_transport(info.m_transport), m_seat(info.m_seat)
+        {};
+
+        ~TransportInfo() { m_owner.SetTransportInfo(NULL); };
 
         // Set local positions
         void SetLocalPosition(Position const& pos);
@@ -101,7 +107,7 @@ class MANGOS_DLL_DECL TransportBase
         void RotateLocalPosition(float lx, float ly, float& rx, float& ry) const;
         void NormalizeRotatedPosition(float rx, float ry, float& lx, float& ly) const;
 
-        virtual Position CalculateGlobalPositionOf(Position const& pos) const;
+        Position CalculateGlobalPositionOf(Position const& pos) const;
 
         bool const HasPassengers() const { return (m_passengers.size() > 0); }
 
