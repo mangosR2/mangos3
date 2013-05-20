@@ -5399,7 +5399,7 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(Unit *pVictim, DamageIn
             // Sacred Shield
             else if (auraSpellInfo->Id == 85285)
             {
-                if (GetHealthPercent() > 20.0f)
+                if (GetHealthPercent() > 30.0f)
                     return SPELL_AURA_PROC_FAILED;
                 break;
             }
