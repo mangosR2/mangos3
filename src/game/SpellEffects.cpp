@@ -8720,6 +8720,10 @@ void Spell::DoSummonGuardian(SpellEffectEntry const* effect, uint32 forceFaction
         DEBUG_LOG("Guardian pet %s summoned (default). Counter is %d ", spawnCreature->GetObjectGuid().GetString().c_str(), spawnCreature->GetPetCounter());
 
         SendEffectLogExecute(effect, spawnCreature->GetObjectGuid());
+
+        // reload creature addon for Moonwel because of creator-dependent auras
+        if (spawnCreature->GetEntry() == 53883)
+            spawnCreature->LoadCreatureAddon(true);
     }
 }
 
