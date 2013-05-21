@@ -4185,13 +4185,36 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(Unit *pVictim, DamageIn
                 target = pVictim;
             }
             // Item - Icecrown 25 Normal/Heroic Healer Weapon Proc
-            if (auraSpellInfo->Id == 71865 || auraSpellInfo->Id == 71868)
+            else if (auraSpellInfo->Id == 71865 || auraSpellInfo->Id == 71868)
             {
                 // don't proc on self
                 if (procSpell->Id == 71864 || procSpell->Id == 71866)
                     return SPELL_AURA_PROC_FAILED;
 
                 target = pVictim;
+            }
+            // Item - Coliseum 25 Normal and Heroic Caster Trinket
+            else if (auraSpellInfo->Id == 67712 || auraSpellInfo->Id == 67758)
+            {
+                if (!pVictim || !pVictim->isAlive())
+                    return SPELL_AURA_PROC_FAILED;
+
+                uint32 castSpell = auraSpellInfo->Id == 67758 ? 67759 : 67713;
+
+                // stacking
+                CastSpell(this, castSpell, true, NULL, triggeredByAura);
+
+                // counting
+                Aura const* dummy = GetDummyAura(castSpell);
+
+                // release at 3 aura in stack (count contained in basepoint of trigger aura)
+                if (!dummy || dummy->GetStackAmount() < uint32(triggerAmount))
+                    return SPELL_AURA_PROC_FAILED;
+
+                RemoveAurasDueToSpell(castSpell);
+                trigger_spell_id = castSpell + 1;
+                target = pVictim;
+                break;
             }
             break;
         }
