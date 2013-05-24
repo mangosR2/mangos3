@@ -12598,9 +12598,10 @@ void Unit::InterruptMoving(bool ignoreMoveState /*=false*/)
 
     if (!movespline->Finalized())
     {
-        Position loc = movespline->ComputePosition();
+        Position pos = movespline->ComputePosition();
+        pos.SetPhaseMask(GetPhaseMask());
         movespline->_Interrupt();
-        SetPosition(loc);
+        SetPosition(pos);
         isMoving = true;
     }
 
@@ -14196,15 +14197,16 @@ void Unit::UpdateSplineMovement(uint32 t_diff)
     if (m_movesplineTimer.Passed() || arrived)
     {
         m_movesplineTimer.Reset(sWorld.getConfig(CONFIG_UINT32_POSITION_UPDATE_DELAY));
-        Position loc = movespline->ComputePosition();
+        Position pos = movespline->ComputePosition();
+        pos.SetPhaseMask(GetPhaseMask());
 
         if (IsBoarded())
         {
-            m_movementInfo.ChangeTransportPosition(loc);
-            GetTransportInfo()->SetLocalPosition(loc);
+            m_movementInfo.ChangeTransportPosition(pos);
+            GetTransportInfo()->SetLocalPosition(pos);
         }
         else
-            SetPosition(loc);
+            SetPosition(pos);
     }
 }
 
