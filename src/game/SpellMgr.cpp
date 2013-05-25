@@ -2567,6 +2567,11 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
                 // Hemorrhage vs. Glyph of Hemorrhage
                 if (spellInfo_1->SpellIconID == 153 && spellInfo_2->SpellIconID == 153)
                     return false;
+
+                // Glyph of Hemorrhage vs. Rupture
+                if (spellInfo_1->GetSpellIconID() == 153 && spellInfo_2->GetSpellIconID() == 500 ||
+                    spellInfo_2->GetSpellIconID() == 153 && spellInfo_1->GetSpellIconID() == 500)
+                    return false;
             }
             // Blessing of Forgotten Kings and (Greater) Blessing of Kings
             if (spellInfo_1->GetSpellFamilyFlags().test<CF_PALADIN_BLESSING_OF_KINGS>())
