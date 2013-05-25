@@ -2526,6 +2526,11 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
                     if (spellInfo_1->GetSpellVisual() != 0 && spellInfo_2->GetSpellVisual() != 0)
                         return true;                        // can't be stacked
                 }
+
+                // Shadow Trance vs. Demonic Rebirth
+                if (spellInfo_1->GetSpellIconID() == 164 && spellInfo_2->GetSpellIconID() == 195 ||
+                    spellInfo_2->GetSpellIconID() == 164 && spellInfo_1->GetSpellIconID() == 195)
+                    return false;
             }
             break;
         case SPELLFAMILY_WARRIOR:
