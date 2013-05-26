@@ -8269,6 +8269,7 @@ void Aura::HandleAuraModRangedHaste(bool apply, bool /*Real*/)
                 ChangeAmount(bp);
 
                 // energize pet
+                bp = GetSpellProto()->CalculateSimpleValue(EFFECT_INDEX_1) * aura->GetStackAmount();
                 target->CastCustomSpell(target, 83468, &bp, NULL, NULL, true);
 
                 pet->RemoveSpellAuraHolder(aura->GetHolder());
