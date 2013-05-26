@@ -236,7 +236,7 @@ pEffect SpellEffects[TOTAL_SPELL_EFFECTS]=
     &Spell::EffectNULL,                                     //170 SPELL_EFFECT_170                      70 spells in 4.3.4
     &Spell::EffectNULL,                                     //171 SPELL_EFFECT_171                      19 spells in 4.3.4 related to GO summon
     &Spell::EffectNULL,                                     //172 SPELL_EFFECT_MASS_RESSURECTION        Mass Ressurection (Guild Perk)
-    &Spell::EffectNULL,                                     //173 SPELL_EFFECT_BUY_GUILD_BANKSLOT       4 spells in 4.3.4 basepoints - slot
+    &Spell::EffectBuyGuildBankSlot,                         //173 SPELL_EFFECT_BUY_GUILD_BANKSLOT       4 spells in 4.3.4 basepoints - slot
     &Spell::EffectNULL,                                     //174 SPELL_EFFECT_174                      13 spells some sort of area aura apply effect
     &Spell::EffectUnused,                                   //175 SPELL_EFFECT_175                      unused in 4.3.4
     &Spell::EffectNULL,                                     //176 SPELL_EFFECT_SANCTUARY_2              4 spells in 4.3.4
@@ -14123,4 +14123,38 @@ void Spell::DoSummonSnakes(SpellEffectEntry const* effect)
         pSummon->SetMaxHealth(m_caster->getLevel()+ urand(20,30));
         SendEffectLogExecute(effect, pSummon->GetObjectGuid());
     }
+}
+
+void Spell::EffectBuyGuildBankSlot(SpellEffectEntry const* effect)
+{
+    if (m_caster->GetTypeId() != TYPEID_PLAYER)
+        return;
+
+    if (!damage)
+        return;
+
+    uint8 TabId = damage - 1;
+    Player* player = (Player*)m_caster;
+
+    uint32 GuildId = player->GetGuildId();
+    if (!GuildId)
+        return;
+
+    Guild* pGuild = sGuildMgr.GetGuildById(GuildId);
+    if (!pGuild)
+        return;
+
+    if (pGuild->GetLeaderGuid() != player->GetObjectGuid())
+        return;
+
+    // m_PurchasedTabs = 0 when buying Tab 0, that is why this check can be made
+    // also don't allow buy tabs that are obtained through guild perks
+    if (TabId != pGuild->GetPurchasedTabs() || TabId >= GUILD_BANK_MAX_TABS)
+        return;
+
+    // Go on with creating tab
+    pGuild->CreateNewBankTab();
+    pGuild->SetBankRightsAndSlots(player->GetRank(), TabId, GUILD_BANK_RIGHT_FULL, WITHDRAW_SLOT_UNLIMITED, true);
+    pGuild->Roster();                                       // broadcast for tab rights update
+    pGuild->DisplayGuildBankTabsInfo(player->GetSession());
 }

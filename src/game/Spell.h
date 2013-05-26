@@ -380,6 +380,7 @@ class Spell
         void EffectWMORepair(SpellEffectEntry const* effect);
         void EffectWMOChange(SpellEffectEntry const* effect);
         void EffectSuspendGravity(SpellEffectEntry const* effect);
+        void EffectBuyGuildBankSlot(SpellEffectEntry const* effect);
 
         Spell(Unit* caster, SpellEntry const *info, bool triggered, ObjectGuid originalCasterGUID = ObjectGuid(), SpellEntry const* triggeredBy = NULL);
         ~Spell();
