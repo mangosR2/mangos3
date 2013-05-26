@@ -1074,6 +1074,14 @@ void AchievementMgr<T>::CheckAllAchievementCriteria(Player* referencePlayer)
         referencePlayer->UpdateAchievementCriteria(AchievementCriteriaTypes(i), 0, 0, NULL, 0);
 }
 
+template<>
+void AchievementMgr<Guild>::CheckAllAchievementCriteria(Player* referencePlayer)
+{
+    // suppress sending packets
+    for (uint32 i = 0; i < ACHIEVEMENT_CRITERIA_TYPE_TOTAL; ++i)
+        UpdateAchievementCriteria(AchievementCriteriaTypes(i), 0, 0, NULL, 0, referencePlayer);
+}
+
 static const uint32 achievIdByArenaSlot[MAX_ARENA_SLOT] = { 1057, 1107, 1108 };
 static const uint32 achievIdForDungeon[][4] =
 {

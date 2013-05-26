@@ -3021,6 +3021,7 @@ void Guild::OnLogin(Player* player)
 
     SendReputationWeeklyCap(player);
 
+    GetAchievementMgr().CheckAllAchievementCriteria(player);
     GetAchievementMgr().SendAllAchievementData(player);
 }
 
