@@ -1236,6 +1236,9 @@ void AchievementMgr<T>::UpdateAchievementCriteria(AchievementCriteriaTypes type,
         if (IsCompletedCriteria(achievementCriteria, achievement))
             continue;
 
+        if (!AdditionalRequirementsSatisfied(achievementCriteria, miscvalue1, miscvalue2, unit, referencePlayer))
+            continue;
+
         // init values, real set in switch
         uint32 change = 0;
         ProgressType progressType = PROGRESS_HIGHEST;       // when need it will replaced by PROGRESS_ACCUMULATE
@@ -2852,6 +2855,481 @@ void AchievementMgr<T>::UpdateAchievementCriteria(AchievementCriteriaTypes type,
 
         SetCriteriaProgress(achievementCriteria, achievement, change, referencePlayer, progressType);
     }
+}
+
+template<class T>
+bool AchievementMgr<T>::AdditionalRequirementsSatisfied(AchievementCriteriaEntry const *criteria, uint64 miscValue1, uint64 /*miscValue2*/, Unit const* unit, Player* referencePlayer) const
+{
+    for (uint8 i = 0; i < MAX_ADDITIONAL_CRITERIA_CONDITIONS; ++i)
+    {
+        uint32 reqType = criteria->additionalConditionType[i];
+        uint32 reqValue;
+
+        // There is missing additionalConditionValue[2] field in DBC.
+        // So we need to set values for those criterias manually.
+        // I use values from 4.0.6 DBC.
+        if (i < 2)
+            reqValue = criteria->additionalConditionValue[i];
+        else
+        {
+            switch (criteria->ID)
+            {
+                case 3929: reqValue = 8403; break;
+                case 3931: reqValue = 9099; break;
+                case 4112: reqValue = 4395; break;
+                case 6237: reqValue = 6; break;
+                case 6239: reqValue = 7; break;
+                case 6240: reqValue = 11; break;
+                case 6241: reqValue = 4; break;
+                case 6242: reqValue = 3; break;
+                case 6243: reqValue = 8; break;
+                case 6244: reqValue = 2; break;
+                case 6245: reqValue = 9; break;
+                case 6246: reqValue = 5; break;
+                case 6261: reqValue = 4395; break;
+                case 6302: reqValue = 6; break;
+                case 6312: reqValue = 9; break;
+                case 6313: reqValue = 6; break;
+                case 6314: reqValue = 5; break;
+                case 6315: reqValue = 7; break;
+                case 6316: reqValue = 11; break;
+                case 6317: reqValue = 4; break;
+                case 6319: reqValue = 8; break;
+                case 6320: reqValue = 2; break;
+                case 6321: reqValue = 3; break;
+                case 2379:
+                case 7573:
+                case 10223:
+                case 10240:
+                case 10241:
+                    reqValue = 0;
+                    break;
+                case 4227:
+                case 12859:
+                    reqValue = 68478;
+                    break;
+                case 6238:
+                case 6318:
+                case 7574:
+                case 10229:
+                case 10238:
+                case 10239:
+                case 14638:
+                    reqValue = 1;
+                    break;
+                case 14808:
+                    reqValue = 85;
+                    break;
+                case 14887:
+                case 14888:
+                    reqValue = 23505;
+                    break;
+                case 13905:
+                case 14537:
+                case 14538:
+                case 14539:
+                case 14540:
+                case 14541:
+                case 14542:
+                case 14543:
+                case 14544:
+                case 14545:
+                case 14546:
+                case 14547:
+                case 14548:
+                case 14549:
+                case 14550:
+                case 14551:
+                case 14552:
+                case 14553:
+                case 14554:
+                case 14555:
+                case 14556:
+                case 14557:
+                case 14558:
+                case 14559:
+                case 14560:
+                case 14561:
+                case 14562:
+                case 14563:
+                case 14564:
+                case 14565:
+                case 14566:
+                case 14567:
+                case 14568:
+                case 14569:
+                case 14570:
+                case 14571:
+                case 14572:
+                case 14573:
+                case 14574:
+                case 14575:
+                case 14602:
+                case 14603:
+                case 14604:
+                case 14605:
+                case 14606:
+                case 14607:
+                case 14608:
+                case 14609:
+                case 14610:
+                case 14611:
+                case 14612:
+                case 14613:
+                case 14614:
+                case 14615:
+                case 14616:
+                case 14617:
+                case 14618:
+                case 14619:
+                case 14620:
+                case 14621:
+                case 14622:
+                case 14623:
+                case 14624:
+                case 14625:
+                case 14626:
+                case 14627:
+                case 14628:
+                case 14629:
+                case 14630:
+                case 14631:
+                case 14632:
+                case 14633:
+                case 14634:
+                case 14635:
+                case 14636:
+                case 14637:
+                case 14639:
+                case 14640:
+                case 14641:
+                case 14642:
+                case 14643:
+                case 14644:
+                case 14645:
+                case 14646:
+                case 14647:
+                case 14648:
+                case 14649:
+                case 14650:
+                case 14651:
+                case 14652:
+                case 14653:
+                case 15485:
+                case 15486:
+                case 15487:
+                case 15488:
+                case 15489:
+                case 15490:
+                case 15491:
+                case 15492:
+                case 15493:
+                case 15494:
+                case 15495:
+                case 15496:
+                case 15497:
+                case 15498:
+                case 15499:
+                case 15500:
+                case 15501:
+                case 15502:
+                case 15503:
+                case 15504:
+                case 15505:
+                case 15506:
+                case 15507:
+                case 15508:
+                case 15509:
+                case 15510:
+                case 15511:
+                case 15512:
+                case 15513:
+                case 15514:
+                case 15515:
+                case 15516:
+                case 15517:
+                case 15518:
+                case 15519:
+                case 15520:
+                case 15521:
+                case 15522:
+                case 15523:
+                    reqValue = 9000;
+                    break;
+                case 9124:
+                case 9143:
+                case 9144:
+                case 9145:
+                case 9146:
+                case 9147:
+                case 9148:
+                case 9149:
+                case 9150:
+                case 9151:
+                case 17845:
+                case 17846:
+                    reqValue = 8128; 
+                    break;
+            }
+        }
+
+        switch (AchievementCriteriaMoreReqType(reqType))
+        {
+            case ACHIEVEMENT_CRITERIA_MORE_REQ_TYPE_SOURCE_DRUNK_VALUE: // 1
+            {
+                if (referencePlayer->GetDrunkValue() < reqValue)
+                    return false;
+                break;
+            }
+            case ACHIEVEMENT_CRITERIA_MORE_REQ_TYPE_ITEM_LEVEL: // 2
+            {
+                ItemPrototype const* pItem = sObjectMgr.GetItemPrototype(miscValue1);
+                if (!pItem)
+                    return false;
+
+                if (pItem->ItemLevel < reqValue)
+                    return false;
+                break;
+            }
+            case ACHIEVEMENT_CRITERIA_MORE_REQ_TYPE_TARGET_CREATURE_ENTRY: // 4
+                if (!unit || !unit->IsInWorld())
+                    return false;
+
+                // Hack for Bros. Before Ho Ho Ho's
+                if (criteria->referredAchievement == 1685 || criteria->referredAchievement == 1686)
+                    break;
+
+                if (unit->GetEntry() != reqValue)
+                    return false;
+                break;
+            case ACHIEVEMENT_CRITERIA_MORE_REQ_TYPE_TARGET_MUST_BE_PLAYER: // 5
+                if (!unit || !unit->IsInWorld() || unit->GetTypeId() != TYPEID_PLAYER)
+                    return false;
+                break;
+            case ACHIEVEMENT_CRITERIA_MORE_REQ_TYPE_TARGET_MUST_BE_DEAD: // 6
+                if (!unit || !unit->IsInWorld() || unit->isAlive())
+                    return false;
+                break;
+            case ACHIEVEMENT_CRITERIA_MORE_REQ_TYPE_TARGET_MUST_BE_ENEMY: // 7
+                if (!unit || !unit->IsInWorld() || !referencePlayer->IsHostileTo(unit))
+                    return false;
+                break;
+            case ACHIEVEMENT_CRITERIA_MORE_REQ_TYPE_SOURCE_HAS_AURA: // 8
+                // Hack for Fa-la-la-la-Ogri'la, there are wrong auras in dbc
+                if (criteria->referredAchievement == 1282)
+                {
+                    if (referencePlayer->HasAura(62061))
+                        break;
+                }
+
+                if (!referencePlayer->HasAura(reqValue))
+                    return false;
+                break;
+            case ACHIEVEMENT_CRITERIA_MORE_REQ_TYPE_TARGET_HAS_AURA: // 10
+                if (!unit || !unit->IsInWorld() || !unit->HasAura(reqValue))
+                    return false;
+                break;
+            case ACHIEVEMENT_CRITERIA_MORE_REQ_TYPE_TARGET_MUST_BE_MOUNTED: // 11
+                if (!unit || !unit->IsMounted())
+                    return false;
+                break;
+            case ACHIEVEMENT_CRITERIA_MORE_REQ_TYPE_ITEM_QUALITY_MIN: // 14
+            {
+                // miscValue1 is itemid
+                ItemPrototype const * const item = sObjectMgr.GetItemPrototype(uint32(miscValue1));
+                if (!item || item->Quality < reqValue)
+                    return false;
+                break;
+            }
+            case ACHIEVEMENT_CRITERIA_MORE_REQ_TYPE_ITEM_QUALITY_EQUALS: // 15
+            {
+                // miscValue1 is itemid
+                ItemPrototype const * const item = sObjectMgr.GetItemPrototype(uint32(miscValue1));
+                if (!item || item->Quality < reqValue)
+                    return false;
+                break;
+            }
+            case ACHIEVEMENT_CRITERIA_MORE_REQ_TYPE_SOURCE_AREA_OR_ZONE: // 17
+            {
+                uint32 zoneId, areaId;
+                referencePlayer->GetZoneAndAreaId(zoneId, areaId);
+                if (zoneId != reqValue && areaId != reqValue)
+                    return false;
+                break;
+            }
+            case ACHIEVEMENT_CRITERIA_MORE_REQ_TYPE_TARGET_AREA_OR_ZONE: // 18
+            {
+                if (!unit)
+                    return false;
+
+                uint32 zoneId, areaId;
+                unit->GetZoneAndAreaId(zoneId, areaId);
+                if (zoneId != reqValue && areaId != reqValue)
+                    return false;
+                break;
+            }
+            case ACHIEVEMENT_CRITERIA_MORE_REQ_TYPE_MAP_DIFFICULTY: // 20
+            {
+                if (Map* pMap = referencePlayer->GetMap())
+                {
+                    if (pMap->IsNonRaidDungeon() || pMap->IsRaid())
+                    {
+                        if (pMap->GetDifficulty() < Difficulty(reqValue))
+                            return false;
+                    }
+                    else
+                        return false;
+                }
+                else
+                    return false;
+                break;
+            }
+            case ACHIEVEMENT_CRITERIA_MORE_REQ_TYPE_SOURCE_RACE: // 25
+                if (referencePlayer->getRace() != reqValue)
+                    return false;
+                break;
+            case ACHIEVEMENT_CRITERIA_MORE_REQ_TYPE_SOURCE_CLASS: // 26
+                if (referencePlayer->getClass() != reqValue)
+                    return false;
+                break;
+            case ACHIEVEMENT_CRITERIA_MORE_REQ_TYPE_TARGET_RACE: // 27
+                if (!unit || !unit->IsInWorld() || unit->GetTypeId() != TYPEID_PLAYER || unit->getRace() != reqValue)
+                    return false;
+                break;
+            case ACHIEVEMENT_CRITERIA_MORE_REQ_TYPE_TARGET_CLASS: // 28
+                if (!unit || !unit->IsInWorld() || unit->GetTypeId() != TYPEID_PLAYER || unit->getClass() != reqValue)
+                    return false;
+                break;
+            case ACHIEVEMENT_CRITERIA_MORE_REQ_TYPE_MAX_GROUP_MEMBERS: // 29
+                if (referencePlayer->GetGroup() && referencePlayer->GetGroup()->GetMembersCount() >= reqValue)
+                    return false;
+                break;
+            case ACHIEVEMENT_CRITERIA_MORE_REQ_TYPE_TARGET_CREATURE_TYPE: // 30
+            {
+                if (!unit || unit->GetTypeId() != TYPEID_UNIT)
+                    return false;
+
+                if (((Creature const*)unit)->GetCreatureType() != reqValue)
+                    return false;
+                break;
+            }
+            case ACHIEVEMENT_CRITERIA_MORE_REQ_TYPE_SOURCE_MAP: // 32
+                if (referencePlayer->GetMapId() != reqValue)
+                    return false;
+                break;
+            case ACHIEVEMENT_CRITERIA_MORE_REQ_TYPE_ITEM_CLASS: // 33
+            {
+                ItemPrototype const* pItem = sObjectMgr.GetItemPrototype(miscValue1);
+                if (!pItem)
+                    return false;
+
+                if (pItem->Class != reqValue)
+                    return false;
+                break;
+            }
+            case ACHIEVEMENT_CRITERIA_MORE_REQ_TYPE_ITEM_SUBCLASS: // 34
+            {
+                ItemPrototype const* pItem = sObjectMgr.GetItemPrototype(miscValue1);
+                if (!pItem)
+                    return false;
+
+                if (pItem->SubClass != reqValue)
+                    return false;
+                break;
+            }
+            case ACHIEVEMENT_CRITERIA_MORE_REQ_TYPE_MIN_PERSONAL_RATING: // 37
+            {
+                if (miscValue1 < reqValue)
+                    return false;
+                break;
+            }
+            case ACHIEVEMENT_CRITERIA_MORE_REQ_TYPE_TITLE_BIT_INDEX: // 38
+                // miscValue1 is title's bit index
+                if (miscValue1 != reqValue)
+                    return false;
+                break;
+            case ACHIEVEMENT_CRITERIA_MORE_REQ_TYPE_SOURCE_LEVEL: // 39
+                if (referencePlayer->getLevel() != reqValue)
+                    return false;
+                break;
+            case ACHIEVEMENT_CRITERIA_MORE_REQ_TYPE_TARGET_LEVEL: // 40
+                if (!unit || !unit->IsInWorld() || unit->getLevel() != reqValue)
+                    return false;
+                break;
+            case ACHIEVEMENT_CRITERIA_MORE_REQ_TYPE_TARGET_ZONE: // 41
+                if (!unit || !unit->IsInWorld() || unit->GetZoneId() != reqValue)
+                    return false;
+                break;
+            case ACHIEVEMENT_CRITERIA_MORE_REQ_TYPE_TARGET_HEALTH_PERCENT_BELOW: // 46
+                if (!unit || !unit->IsInWorld() || unit->GetHealthPercent() >= reqValue)
+                    return false;
+                break;
+            case ACHIEVEMENT_CRITERIA_MORE_REQ_TYPE_MIN_ACHIEVEMENT_POINTS: // 56
+                if (referencePlayer->GetAchievementMgr().GetAchievementPoints() < reqValue)
+                    return false;
+                break;
+            case ACHIEVEMENT_CRITERIA_MORE_REQ_TYPE_REQUIRES_GUILD_GROUP: // 61
+            {
+                Group* pGroup = referencePlayer->GetGroup();
+                if (!pGroup)
+                    return false;
+
+                Map* map = referencePlayer->GetMap();
+                if (!map)
+                    return false;
+
+                if (!map->HasGuildGroup(referencePlayer->GetGuildGuid(), referencePlayer))
+                    return false;
+                break;
+            }
+            case ACHIEVEMENT_CRITERIA_MORE_REQ_TYPE_GUILD_REPUTATION: // 62
+            {
+                if (uint32(referencePlayer->GetReputationMgr().GetReputation(GUILD_REP_FACTION)) < reqValue) // 1168 = Guild faction
+                    return false;
+                break;
+            }
+            case ACHIEVEMENT_CRITERIA_MORE_REQ_TYPE_PROJECT_RARITY: // 65
+            {
+                //if (!miscValue1)
+                //    return false;
+
+                //bool ok = false;
+                //for (std::set<ResearchProjectEntry const*>::const_iterator itr = sResearchProjectSet.begin(); itr != sResearchProjectSet.end(); ++itr)
+                //{
+                //    if ((*itr)->ID == miscValue1)
+                //    {
+                //        ok = ((*itr)->rare == reqValue);
+                //        break;
+                //    }
+                //}
+                //if (!ok)
+                    return false;
+                break;
+            }
+            case ACHIEVEMENT_CRITERIA_MORE_REQ_TYPE_PROJECT_RACE: // 66
+            {
+                //if (!miscValue1)
+                //    return false;
+
+                //bool ok = false;
+                //for (std::set<ResearchProjectEntry const*>::const_iterator itr = sResearchProjectSet.begin(); itr != sResearchProjectSet.end(); ++itr)
+                //{
+                //    if ((*itr)->ID == miscValue1)
+                //    {
+                //        ok = ((*itr)->branchId == reqValue);
+                //        break;
+                //    }
+                //}
+                //if (!ok)
+                    return false;
+                break;
+            }
+            default:
+                break;
+        }
+    }
+
+    return true;
 }
 
 template <class T>

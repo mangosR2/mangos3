@@ -304,6 +304,8 @@ class AchievementMgr
         void SendPacket(WorldPacket* data) const;
         void SendCriteriaProgressRemove(uint32 criteriaId);
 
+        bool AdditionalRequirementsSatisfied(AchievementCriteriaEntry const* criteria, uint64 miscValue1, uint64 miscValue2, Unit const* unit, Player* referencePlayer) const;
+
         uint32 GetAchievementPoints() const { return m_achievementPoints; }
 
     private:

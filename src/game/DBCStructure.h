@@ -518,13 +518,13 @@ struct AchievementCriteriaEntry
                                                             //              1: ByEventId(?) (serverside IDs),    2: ByQuestId,   5: ByCastSpellId(?)
                                                             //              6: BySpellIdTarget(some of these are unknown spells, some not, some maybe spells)
                                                             //              7: ByKillNpcId,  9: ByUseItemId
-    uint32  timedCriteriaMiscId;                            // 12       m_timer_asset_id Alway appears with timed events, used internally to start the achievement, store
-    uint32  timeLimit;                                      // 13       m_timer_time time limit in seconds
-    uint32  showOrder;                                      // 14       m_ui_order  also used in achievement shift-links as index in state bitmask
-    //uint32 unk1;                                          // 15 only one value, still unknown
-    //uint32 unk2;                                          // 16 all zeros
-    //uint32 moreRequirement[3];                            // 17-19
-    //uint32 moreRequirementValue[3];                       // 20-22
+    uint32  timedCriteriaMiscId;                            // 13       m_timer_asset_id Alway appears with timed events, used internally to start the achievement, store
+    uint32  timeLimit;                                      // 14       m_timer_time time limit in seconds
+    uint32  showOrder;                                      // 15       m_ui_order  also used in achievement shift-links as index in state bitmask
+    //uint32 unk1;                                          // 16
+    //uint32 unk1;                                          // 17
+    uint32 additionalConditionType[MAX_ADDITIONAL_CRITERIA_CONDITIONS];     // 18-20
+    uint32 additionalConditionValue[MAX_ADDITIONAL_CRITERIA_CONDITIONS-1];  // 21-22
 
     // helpers
     bool IsExplicitlyStartedTimedCriteria() const
