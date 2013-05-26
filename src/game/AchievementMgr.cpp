@@ -2881,6 +2881,12 @@ void AchievementMgr<T>::UpdateAchievementCriteria(AchievementCriteriaTypes type,
                 progressType = PROGRESS_SET;
                 break;
             }
+            case ACHIEVEMENT_CRITERIA_TYPE_EARN_ACHIEVEMENT_POINTS:
+            {
+                change = m_achievementPoints;
+                progressType = PROGRESS_HIGHEST;
+                break;
+            }
             // std case: not exist in DBC, not triggered in code as result
             case ACHIEVEMENT_CRITERIA_TYPE_HIGHEST_HEALTH:
             case ACHIEVEMENT_CRITERIA_TYPE_HIGHEST_SPELLPOWER:
@@ -2892,7 +2898,6 @@ void AchievementMgr<T>::UpdateAchievementCriteria(AchievementCriteriaTypes type,
                 // FIXME: not triggered in code as result, need to implement
             case ACHIEVEMENT_CRITERIA_TYPE_COMPLETE_RAID:
             case ACHIEVEMENT_CRITERIA_TYPE_OWN_RANK:
-            case ACHIEVEMENT_CRITERIA_TYPE_EARN_ACHIEVEMENT_POINTS:
                 break;                                   // Not implemented yet :(
         }
 
@@ -3540,6 +3545,9 @@ uint32 AchievementMgr<T>::GetCriteriaProgressMaxCounter(AchievementCriteriaEntry
         case ACHIEVEMENT_CRITERIA_TYPE_USE_LFD_TO_GROUP_WITH_PLAYERS:
             resultValue = achievementCriteria->use_lfg.dungeonsComplete;
             break;
+        case ACHIEVEMENT_CRITERIA_TYPE_EARN_ACHIEVEMENT_POINTS:
+            resultValue = 9000;
+            break;
 
             // handle all statistic-only criteria here
         case ACHIEVEMENT_CRITERIA_TYPE_COMPLETE_BATTLEGROUND:
@@ -3834,6 +3842,7 @@ void AchievementMgr<Player>::CompletedAchievement(AchievementEntry const* achiev
     m_achievementPoints += achievement->points;
 
     UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_COMPLETE_ACHIEVEMENT, 0, 0, NULL, 0, referencePlayer);
+    UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_EARN_ACHIEVEMENT_POINTS, 0, 0, NULL, 0, referencePlayer);
 
     // reward items and titles if any
     AchievementReward const* reward = sAchievementMgr.GetAchievementReward(achievement, GetOwner()->getGender());
@@ -3967,7 +3976,7 @@ void AchievementMgr<Guild>::CompletedAchievement(AchievementEntry const* achieve
     m_achievementPoints += achievement->points;
 
     UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_COMPLETE_ACHIEVEMENT, 0, 0, NULL, 0, referencePlayer);
-    UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_EARN_ACHIEVEMENT_POINTS, achievement->points, 0, 0, 0, referencePlayer);
+    UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_EARN_ACHIEVEMENT_POINTS, 0, 0, NULL, 0, referencePlayer);
 }
 
 struct VisibleAchievementPred
