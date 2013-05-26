@@ -3247,14 +3247,8 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
             }
             case SPELLFAMILY_HUNTER:
             {
-                // Focus Fire
-                if (GetId() == 82692)
-                {
-                    int32 bp = m_modifier.m_amount;
-                    target->CastCustomSpell(target, 83468, &bp, NULL, NULL, true);
-                }
                 // Ready, Set, Aim...
-                else if (GetId() == 82925)
+                if (GetId() == 82925)
                 {
                     if (GetStackAmount() >= GetSpellProto()->GetStackAmount())
                     {
@@ -8269,7 +8263,16 @@ void Aura::HandleAuraModRangedHaste(bool apply, bool /*Real*/)
     {
         if (Pet* pet = target->GetPet())
             if (Aura* aura = pet->GetAura(19615, EFFECT_INDEX_0))
-                ChangeAmount(m_modifier.m_amount * aura->GetStackAmount());
+            {
+                int32 bp = m_modifier.m_amount * aura->GetStackAmount();
+
+                ChangeAmount(bp);
+
+                // energize pet
+                target->CastCustomSpell(target, 83468, &bp, NULL, NULL, true);
+
+                pet->RemoveSpellAuraHolder(aura->GetHolder());
+            }
     }
 
     target->ApplyAttackTimePercentMod(RANGED_ATTACK, float(m_modifier.m_amount), apply);

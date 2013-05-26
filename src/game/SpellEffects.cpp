@@ -7433,17 +7433,6 @@ void Spell::EffectEnergize(SpellEffectEntry const* effect)
             }
             break;
         }
-        case 83468:                                         // Focus Fire
-        {
-            // Frenzy Effect
-            if (Aura* aura = unitTarget->GetAura(19615, EFFECT_INDEX_0))
-            {
-                damage *= aura->GetStackAmount();
-
-                unitTarget->RemoveSpellAuraHolder(aura->GetHolder());
-            }
-            break;
-        }
         case 91322:                                         // Blind Spot
         {
             // remove Inner Eye
