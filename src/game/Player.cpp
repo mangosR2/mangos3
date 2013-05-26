@@ -25217,7 +25217,7 @@ void Player::ModifyCurrencyCount(uint32 id, int32 count, bool modifyWeek, bool m
         if (IsInWorld() && !GetSession()->PlayerLoading())
         {
             if (diff > 0)
-                UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_CURRENCY_EARNED, id, newTotalCount);
+                UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_CURRENCY_EARNED, id, diff);
 
             WorldPacket packet(SMSG_SET_CURRENCY, 13);
             bool bit0 = modifyWeek && weekCap && diff > 0;

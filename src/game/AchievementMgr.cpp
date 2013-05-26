@@ -1624,7 +1624,7 @@ void AchievementMgr<T>::UpdateAchievementCriteria(AchievementCriteriaTypes type,
             case ACHIEVEMENT_CRITERIA_TYPE_CURRENCY_EARNED:
             {
                 if (!miscvalue1 || !miscvalue2 || miscvalue1 != achievementCriteria->currencyEarned.currencyId)
-                    return;
+                    continue;
 
                 change = miscvalue2;
                 progressType = PROGRESS_ACCUMULATE;
