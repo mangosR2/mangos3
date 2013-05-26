@@ -1810,7 +1810,7 @@ void AchievementMgr<T>::UpdateAchievementCriteria(AchievementCriteriaTypes type,
                     continue;
 
                 change = 1;
-                progressType = PROGRESS_HIGHEST;
+                progressType = PROGRESS_ACCUMULATE;
                 break;
             }
             case ACHIEVEMENT_CRITERIA_TYPE_BE_SPELL_TARGET:
@@ -2911,7 +2911,10 @@ bool AchievementMgr<T>::AdditionalRequirementsSatisfied(AchievementCriteriaEntry
     for (uint8 i = 0; i < MAX_ADDITIONAL_CRITERIA_CONDITIONS; ++i)
     {
         uint32 reqType = criteria->additionalConditionType[i];
-        uint32 reqValue;
+        if (!reqType)
+            continue;
+
+        uint32 reqValue = 0;
 
         // There is missing additionalConditionValue[2] field in DBC.
         // So we need to set values for those criterias manually.
@@ -3116,7 +3119,7 @@ bool AchievementMgr<T>::AdditionalRequirementsSatisfied(AchievementCriteriaEntry
                 case 9151:
                 case 17845:
                 case 17846:
-                    reqValue = 8128; 
+                    reqValue = 8128;
                     break;
             }
         }
@@ -3434,7 +3437,7 @@ uint32 AchievementMgr<T>::GetCriteriaProgressMaxCounter(AchievementCriteriaEntry
             resultValue = achievementCriteria->fall_without_dying.fallHeight;
             break;
         case ACHIEVEMENT_CRITERIA_TYPE_COMPLETE_QUEST:
-            resultValue = 1;
+            resultValue = achievementCriteria->complete_quest.questCount ? achievementCriteria->complete_quest.questCount : 1;
             break;
         case ACHIEVEMENT_CRITERIA_TYPE_BE_SPELL_TARGET:
         case ACHIEVEMENT_CRITERIA_TYPE_BE_SPELL_TARGET2:
