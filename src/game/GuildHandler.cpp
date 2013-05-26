@@ -1309,7 +1309,7 @@ void WorldSession::HandleGuildBankBuyTab(WorldPacket& recv_data)
     recv_data >> goGuid;
     recv_data >> TabId;
 
-    if (!GetPlayer()->GetGameObjectIfCanInteractWith(goGuid, GAMEOBJECT_TYPE_GUILD_BANK))
+    if (!goGuid.IsEmpty() && !GetPlayer()->GetGameObjectIfCanInteractWith(goGuid, GAMEOBJECT_TYPE_GUILD_BANK))
         return;
 
     uint32 GuildId = GetPlayer()->GetGuildId();
