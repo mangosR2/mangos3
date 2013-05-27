@@ -418,6 +418,17 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
         cast_count = 0;
     }
 
+    Unit::AuraList const& m363auras = mover->GetAurasByType(SPELL_AURA_363);
+    for (Unit::AuraList::const_iterator itr = m363auras.begin(); itr != m363auras.end(); ++itr)
+    {
+        if ((*itr)->GetSpellEffect()->EffectTriggerSpell == spellId)
+        {
+            triggered = true;
+            mover->RemoveSpellAuraHolder((*itr)->GetHolder());
+            break;
+        }
+    }
+
     if (!spellInfo->HasAttribute(SPELL_ATTR_EX8_RAID_MARKER))
     {
         if (mover->GetTypeId()==TYPEID_PLAYER)
