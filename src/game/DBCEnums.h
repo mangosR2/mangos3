@@ -297,6 +297,20 @@ enum AchievementCriteriaMoreReqType
     ACHIEVEMENT_CRITERIA_MORE_REQ_TYPE_PROJECT_RACE                 = 66,
 };
 
+enum ArchaeologyBranches
+{
+    ARCHAEOLOGY_BRANCH_DWARF        = 1,
+    ARCHAEOLOGY_BRANCH_DRAENEI      = 2,
+    ARCHAEOLOGY_BRANCH_FOSSIL       = 3,
+    ARCHAEOLOGY_BRANCH_NIGHT_ELF    = 4,
+    ARCHAEOLOGY_BRANCH_NERUBIAN     = 5,
+    ARCHAEOLOGY_BRANCH_ORC          = 6,
+    ARCHAEOLOGY_BRANCH_TOLVIR       = 7,
+    ARCHAEOLOGY_BRANCH_TROLL        = 8,
+    ARCHAEOLOGY_BRANCH_VRYKUL       = 27,
+    ARCHAEOLOGY_BRANCH_OTHER        = 29,
+};
+
 enum AreaFlags
 {
     AREA_FLAG_SNOW                  = 0x00000001,           // wrong - snow (only Dun Morogh, Naxxramas, Razorfen Downs and Winterspring)
@@ -434,13 +448,22 @@ enum CurrencyFlags
 
 enum Currencies
 {
-    CURRENCY_NONE                   = 0,
-    CURRENCY_CONQUEST_POINTS        = 390,
-    CURRENCY_HONOR_POINTS           = 392,
-    CURRENCY_JUSTICE_POINTS         = 395,
-    CURRENCY_VALOR_POINTS           = 396,
-    CURRENCY_CONQUEST_ARENA_META    = 483,
-    CURRENCY_CONQUEST_BG_META       = 484,
+    CURRENCY_NONE                           = 0,
+    CURRENCY_DWARF_ARCHAEOLOGY_FRAGMENT     = 384,
+    CURRENCY_TROLL_ARCHAEOLOGY_FRAGMENT     = 385,
+    CURRENCY_CONQUEST_POINTS                = 390,
+    CURRENCY_HONOR_POINTS                   = 392,
+    CURRENCY_FOSSIL_ARCHAEOLOGY_FRAGMENT    = 393,
+    CURRENCY_NIGHT_ELF_ARCHAEOLOGY_FRAGMENT = 394,
+    CURRENCY_JUSTICE_POINTS                 = 395,
+    CURRENCY_VALOR_POINTS                   = 396,
+    CURRENCY_ORC_ARCHAEOLOGY_FRAGMENT       = 397,
+    CURRENCY_DRAENEI_ARCHAEOLOGY_FRAGMENT   = 398,
+    CURRENCY_VRYKUL_ARCHAEOLOGY_FRAGMENT    = 399,
+    CURRENCY_NERUBIAN_ARCHAEOLOGY_FRAGMENT  = 400,
+    CURRENCY_TOLVIR_ARCHAEOLOGY_FRAGMENT    = 401,
+    CURRENCY_CONQUEST_ARENA_META            = 483,
+    CURRENCY_CONQUEST_BG_META               = 484,
 };
 
 enum ItemEnchantmentType

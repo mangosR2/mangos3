@@ -1207,6 +1207,10 @@ void World::LoadConfigSettings(bool reload)
     mail_timer_expires = uint32( (DAY * IN_MILLISECONDS) / (m_timers[WUPDATE_AUCTIONS].GetInterval()));
     sLog.outString("BOOT: Mail timer set to: %u, mail return is called every %u minutes", mail_timer, mail_timer_expires);
 
+
+    setConfig(CONFIG_BOOL_ARCHAEOLOGY_ENABLED, "Archaeology.Enabled", false);
+    setConfig(CONFIG_FLOAT_ARCHAEOLOGY_RARE_BASE_CHANCE, "Archaeology.RareBaseChance", 10.0f);
+    setConfig(CONFIG_FLOAT_ARCHAEOLOGY_RARE_MAXLEVEL_CHANCE, "Archaeology.RareMaxLevelChance", 10.0f);
 }
 
 extern void LoadGameObjectModelList();
@@ -1646,6 +1650,12 @@ void World::SetInitialWorldSettings()
 
     sLog.outString( "Loading WorldState templates and data..." );
     sWorldStateMgr.Initialize();
+
+    sLog.outString("Loading research site to zone mapping data...");
+    sObjectMgr.LoadResearchSiteToZoneData();
+
+    sLog.outString("Loading archaeology digsite positions...");
+    sObjectMgr.LoadDigSitePositions();
 
     ///- Handle outdated emails (delete/return)
     sLog.outString( "Returning old mails..." );

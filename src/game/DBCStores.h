@@ -116,6 +116,7 @@ PvPDifficultyEntry const* GetBattlegroundBracketById(uint32 mapid, BattleGroundB
 MANGOS_DLL_SPEC uint32 GetCreatureModelRace(uint32 model_id);
 
 float GetCurrencyPrecision(uint32 currencyId);
+ResearchSiteEntry const* GetResearchSiteEntryById(uint32 id);
 
 extern DBCStorage <AchievementEntry>             sAchievementStore;
 extern DBCStorage <AchievementCriteriaEntry>     sAchievementCriteriaStore;
@@ -204,11 +205,17 @@ extern DBCStorage <MountTypeEntry>               sMountTypeStore;
 extern DBCStorage <NumTalentsAtLevelEntry>       sNumTalentsAtLevelStore;
 extern DBCStorage <OverrideSpellDataEntry>       sOverrideSpellDataStore;
 extern DBCStorage <QuestFactionRewardEntry>      sQuestFactionRewardStore;
+extern DBCStorage <QuestPOIPointEntry>           sQuestPOIPointStore;
 extern DBCStorage <QuestSortEntry>               sQuestSortStore;
 extern DBCStorage <QuestXPLevel>                 sQuestXPLevelStore;
 extern DBCStorage <PhaseEntry>                   sPhaseStore;
 // extern DBCStorage <PvPDifficultyEntry>           sPvPDifficultyStore; -- use GetBattlegroundSlotByLevel for access
 extern DBCStorage <RandomPropertiesPointsEntry>  sRandomPropertiesPointsStore;
+extern DBCStorage <ResearchBranchEntry>          sResearchBranchStore;
+extern DBCStorage <ResearchSiteEntry>            sResearchSiteStore;
+extern DBCStorage <ResearchProjectEntry>         sResearchProjectStore;
+extern std::set<ResearchProjectEntry const*>     sResearchProjectSet;
+extern ResearchSiteDataMap                       sResearchSiteDataMap;
 extern DBCStorage <ScalingStatDistributionEntry> sScalingStatDistributionStore;
 extern DBCStorage <ScalingStatValuesEntry>       sScalingStatValuesStore;
 extern DBCStorage <SkillLineEntry>               sSkillLineStore;

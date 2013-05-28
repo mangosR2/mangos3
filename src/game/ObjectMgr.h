@@ -618,6 +618,8 @@ struct CharacterNameData
     uint8 m_level;
 };
 
+typedef std::map<uint32, uint32> SiteToZoneMap;
+
 class ObjectMgr
 {
     friend class PlayerDumpReader;
@@ -1307,6 +1309,9 @@ class ObjectMgr
         void DeleteCharacterNameData(uint32 guid) { _characterNameDataMap.erase(guid); }
         bool HasCharacterNameData(uint32 guid) { return _characterNameDataMap.find(guid) != _characterNameDataMap.end(); }
 
+        void LoadResearchSiteToZoneData();
+        void LoadDigSitePositions();
+
     protected:
 
         // first free id for selected id type
@@ -1461,6 +1466,9 @@ class ObjectMgr
         HotfixData m_hotfixData;
 
         std::map<uint32, CharacterNameData> _characterNameDataMap;
+
+        DigSitePositionVector m_digSitePositions;
+        SiteToZoneMap _zoneByResearchSite;
 };
 
 #define sObjectMgr MaNGOS::Singleton<ObjectMgr>::Instance()

@@ -1047,6 +1047,11 @@ LexicsCutterNoActionOnGM = 1
 #        Default: 1 (parse commands)
 #                 0 (ignore commands)
 #
+#    Archaeology.Enabled
+#        Enable Archaeology Profession and its features.
+#        Default: 0 - disabled
+#                 1 - enabled
+#
 ###################################################################################################################
 
 GameType = 1
@@ -1131,6 +1136,7 @@ Realm.AlwaysMaxExpansion = 0
 Resistance.CalculationMethod = 1
 Resistance.AddByOverLevel = 0
 PlayerCommands = 1
+Archaeology.Enabled = 0
 
 ###################################################################################################################
 # PLAYER INTERACTION
@@ -1710,6 +1716,12 @@ Visibility.AIRelocationNotifyDelay = 1000
 #         Modifies the speed of player's ghosts, removed upon reviving, not permanent/saved, in non-BG and BG maps
 #         Default: 1.0 (normal speed)
 #
+#    Archaeology.RareBaseChance
+#         Default: 10
+#
+#    Archaeology.RareMaxLevelChance
+#         Default: 10
+#
 ###################################################################################################################
 
 Rate.Health = 1
@@ -1775,6 +1787,8 @@ Death.Bones.World = 1
 Death.Bones.BattlegroundOrArena = 1
 Death.Ghost.RunSpeed.World = 1.0
 Death.Ghost.RunSpeed.Battleground = 1.0
+Archaeology.RareBaseChance = 10
+Archaeology.RareMaxLevelChance = 10
 
 ###################################################################################################################
 # BATTLEGROUND CONFIG

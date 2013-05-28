@@ -1498,6 +1498,15 @@ void AchievementMgr<T>::UpdateAchievementCriteria(AchievementCriteriaTypes type,
                 progressType = PROGRESS_ACCUMULATE;
                 break;
             }
+            case ACHIEVEMENT_CRITERIA_TYPE_COMPLETE_ARCHAEOLOGY_PROJECTS:
+            {
+                if (!miscvalue1 || !miscvalue2)
+                    continue;
+
+                change = miscvalue2;
+                progressType = PROGRESS_ACCUMULATE;
+                break;
+            }
             case ACHIEVEMENT_CRITERIA_TYPE_REACH_LEVEL:
             {
                 bool ok = true;
@@ -3221,18 +3230,16 @@ bool AchievementMgr<T>::AdditionalRequirementsSatisfied(AchievementCriteriaEntry
             }
             case ACHIEVEMENT_CRITERIA_MORE_REQ_TYPE_MAP_DIFFICULTY: // 20
             {
-                if (Map* pMap = referencePlayer->GetMap())
-                {
-                    if (pMap->IsNonRaidDungeon() || pMap->IsRaid())
-                    {
-                        if (pMap->GetDifficulty() < Difficulty(reqValue))
-                            return false;
-                    }
-                    else
-                        return false;
-                }
-                else
+                Map* pMap = referencePlayer->GetMap();
+                if (!pMap)
                     return false;
+
+                if (!pMap->IsNonRaidDungeon() && !pMap->IsRaid())
+                    return false;
+
+                if (pMap->GetDifficulty() < Difficulty(reqValue))
+                    return false;
+
                 break;
             }
             case ACHIEVEMENT_CRITERIA_MORE_REQ_TYPE_SOURCE_RACE: // 25
@@ -3341,38 +3348,33 @@ bool AchievementMgr<T>::AdditionalRequirementsSatisfied(AchievementCriteriaEntry
             }
             case ACHIEVEMENT_CRITERIA_MORE_REQ_TYPE_PROJECT_RARITY: // 65
             {
-                //if (!miscValue1)
-                //    return false;
-
-                //bool ok = false;
-                //for (std::set<ResearchProjectEntry const*>::const_iterator itr = sResearchProjectSet.begin(); itr != sResearchProjectSet.end(); ++itr)
-                //{
-                //    if ((*itr)->ID == miscValue1)
-                //    {
-                //        ok = ((*itr)->rare == reqValue);
-                //        break;
-                //    }
-                //}
-                //if (!ok)
+                if (!miscValue1)
                     return false;
+
+                ResearchProjectEntry const* rp = sResearchProjectStore.LookupEntry(miscValue1);
+                if (!rp)
+                    return false;
+
+                if (rp->rare != reqValue)
+                    return false;
+
+                if (referencePlayer->IsCompletedProject(rp->ID, false))
+                    return false;
+
                 break;
             }
             case ACHIEVEMENT_CRITERIA_MORE_REQ_TYPE_PROJECT_RACE: // 66
             {
-                //if (!miscValue1)
-                //    return false;
-
-                //bool ok = false;
-                //for (std::set<ResearchProjectEntry const*>::const_iterator itr = sResearchProjectSet.begin(); itr != sResearchProjectSet.end(); ++itr)
-                //{
-                //    if ((*itr)->ID == miscValue1)
-                //    {
-                //        ok = ((*itr)->branchId == reqValue);
-                //        break;
-                //    }
-                //}
-                //if (!ok)
+                if (!miscValue1)
                     return false;
+
+                ResearchProjectEntry const* rp = sResearchProjectStore.LookupEntry(miscValue1);
+                if (!rp)
+                    return false;
+
+                if (rp->branchId != reqValue)
+                    return false;
+
                 break;
             }
             default:
@@ -3401,6 +3403,9 @@ uint32 AchievementMgr<T>::GetCriteriaProgressMaxCounter(AchievementCriteriaEntry
             break;
         case ACHIEVEMENT_CRITERIA_TYPE_KILL_CREATURE:
             resultValue = achievementCriteria->kill_creature.creatureCount;
+            break;
+        case ACHIEVEMENT_CRITERIA_TYPE_COMPLETE_ARCHAEOLOGY_PROJECTS:
+            resultValue = achievementCriteria->archaeology.count;
             break;
         case ACHIEVEMENT_CRITERIA_TYPE_REACH_LEVEL:
         case ACHIEVEMENT_CRITERIA_TYPE_REACH_GUILD_LEVEL:

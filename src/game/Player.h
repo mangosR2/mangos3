@@ -955,6 +955,8 @@ enum PlayerLoginQueryIndex
     PLAYER_LOGIN_QUERY_LOADCURRENCIES,
     PLAYER_LOGIN_QUERY_LOAD_CUF_PROFILES,
     PLAYER_LOGIN_QUERY_LOAD_VOID_STORAGE,
+    PLAYER_LOGIN_QUERY_LOAD_ARCHAEOLOGY,
+    PLAYER_LOGIN_QUERY_LOAD_ARCHAEOLOGY_FINDS,
 
     MAX_PLAYER_LOGIN_QUERY
 };
@@ -1160,6 +1162,40 @@ struct VoidStorageItem
     uint32 ItemRandomPropertyId;
     uint32 ItemSuffixFactor;
 };
+
+struct DigSite
+{
+    uint8 count;
+    uint16 site_id;
+    uint32 find_id;
+    float loot_x;
+    float loot_y;
+
+    void clear()
+    {
+        site_id = find_id = 0;
+        loot_x = loot_y = 0.0f;
+        count = 0;
+    }
+
+    bool empty() { return site_id == 0; }
+};
+
+struct CompletedProject
+{
+    CompletedProject() : entry(NULL), count(1), date(time(NULL)) { }
+    CompletedProject(ResearchProjectEntry const* _entry) : entry(_entry), count(1), date(time(NULL)) { }
+
+    ResearchProjectEntry const* entry;
+    uint32 count;
+    uint32 date;
+};
+
+typedef std::set<uint32> ResearchSiteSet;
+typedef std::list<CompletedProject> CompletedProjectList;
+typedef std::set<uint32> ResearchProjectSet;
+
+#define MAX_RESEARCH_SITES 16
 
 class MANGOS_DLL_SPEC Player : public Unit
 {
@@ -2464,6 +2500,47 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         // select modelid depending on hair color or skin tone
         uint32 GetModelForForm(SpellShapeshiftFormEntry const* ssEntry) const;
+
+        /*********************************************************/
+        /***                 ARCHAEOLOGY SYSTEM                ***/
+        /*********************************************************/
+
+        void _SaveArchaeology();
+        void _LoadArchaeology(QueryResult* result);
+        void _LoadArchaeologyFinds(QueryResult* result);
+        bool HasResearchSite(uint32 id) const
+        {
+            return _researchSites.find(id) != _researchSites.end();
+        }
+
+        bool HasResearchProjectOfBranch(uint32 id) const;
+        bool HasResearchProject(uint32 id) const;
+        void ReplaceResearchProject(uint32 oldId, uint32 newId);
+
+        static float GetRareArtifactChance(uint32 skill_value);
+
+        void ShowResearchSites();
+        void GenerateResearchSites();
+        void GenerateResearchSiteInMap(uint32 mapId);
+        void GenerateResearchProjects();
+        bool SolveResearchProject(uint32 spellId, SpellCastTargets& targets);
+        void UseResearchSite(uint32 id);
+        static bool IsPointInZone(ResearchPOIPoint &test, ResearchPOIPointVector &polygon);
+        uint16 GetResearchSiteID();
+        bool OnSurvey(uint32& entry, float& x, float& y, float& z, float &orientation);
+        bool CanResearchWithLevel(uint32 site_id);
+        uint8 CanResearchWithSkillLevel(uint32 site_id);
+        bool GenerateDigSiteLoot(uint16 zoneid, DigSite &site);
+        void AddCompletedProject(ResearchProjectEntry const* entry);
+        bool IsCompletedProject(uint32 id, bool onlyRare);
+        void SendCompletedProjects();
+
+        DigSite _digSites[MAX_RESEARCH_SITES];
+        ResearchSiteSet _researchSites;
+        CompletedProjectList _completedProjects;
+        bool _archaeologyChanged;
+
+        // END
 
         /*********************************************************/
         /***                 INSTANCE SYSTEM                   ***/

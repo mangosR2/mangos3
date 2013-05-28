@@ -174,6 +174,7 @@ DBCStorage <NumTalentsAtLevelEntry> sNumTalentsAtLevelStore(NumTalentsAtLevelfmt
 
 DBCStorage <OverrideSpellDataEntry> sOverrideSpellDataStore(OverrideSpellDatafmt);
 DBCStorage <QuestFactionRewardEntry> sQuestFactionRewardStore(QuestFactionRewardfmt);
+DBCStorage <QuestPOIPointEntry> sQuestPOIPointStore(QuestPOIPointfmt);
 DBCStorage <QuestSortEntry> sQuestSortStore(QuestSortEntryfmt);
 DBCStorage <QuestXPLevel> sQuestXPLevelStore(QuestXPLevelfmt);
 
@@ -181,6 +182,13 @@ DBCStorage <PhaseEntry> sPhaseStore(Phasefmt);
 DBCStorage <PvPDifficultyEntry> sPvPDifficultyStore(PvPDifficultyfmt);
 
 DBCStorage <RandomPropertiesPointsEntry> sRandomPropertiesPointsStore(RandomPropertiesPointsfmt);
+
+DBCStorage <ResearchBranchEntry> sResearchBranchStore(ResearchBranchfmt);
+DBCStorage <ResearchSiteEntry> sResearchSiteStore(ResearchSitefmt);
+DBCStorage <ResearchProjectEntry> sResearchProjectStore(ResearchProjectfmt);
+std::set<ResearchProjectEntry const*> sResearchProjectSet;
+ResearchSiteDataMap sResearchSiteDataMap;
+
 DBCStorage <ScalingStatDistributionEntry> sScalingStatDistributionStore(ScalingStatDistributionfmt);
 DBCStorage <ScalingStatValuesEntry> sScalingStatValuesStore(ScalingStatValuesfmt);
 
@@ -606,6 +614,7 @@ void LoadDBCStores(const std::string& dataPath)
     LoadDBC(availableDbcLocales,bar,bad_dbc_files,sNumTalentsAtLevelStore,   dbcPath,"NumTalentsAtLevel.dbc");
     LoadDBC(availableDbcLocales,bar,bad_dbc_files,sOverrideSpellDataStore,   dbcPath,"OverrideSpellData.dbc");
     LoadDBC(availableDbcLocales,bar,bad_dbc_files,sQuestFactionRewardStore,  dbcPath,"QuestFactionReward.dbc");
+    LoadDBC(availableDbcLocales,bar,bad_dbc_files,sQuestPOIPointStore,       dbcPath,"QuestPOIPoint.dbc");
     LoadDBC(availableDbcLocales,bar,bad_dbc_files,sQuestSortStore,           dbcPath,"QuestSort.dbc");
     LoadDBC(availableDbcLocales,bar,bad_dbc_files,sQuestXPLevelStore,        dbcPath,"QuestXP.dbc");
     LoadDBC(availableDbcLocales,bar,bad_dbc_files,sPhaseStore,               dbcPath,"Phase.dbc");
@@ -616,6 +625,38 @@ void LoadDBCStores(const std::string& dataPath)
                 MANGOS_ASSERT(false && "Need update MAX_BATTLEGROUND_BRACKETS by DBC data");
 
     LoadDBC(availableDbcLocales,bar,bad_dbc_files,sRandomPropertiesPointsStore, dbcPath,"RandPropPoints.dbc");
+
+    LoadDBC(availableDbcLocales,bar,bad_dbc_files,sResearchBranchStore,      dbcPath,"ResearchBranch.dbc");
+    LoadDBC(availableDbcLocales,bar,bad_dbc_files,sResearchProjectStore,     dbcPath,"ResearchProject.dbc");
+    for (uint32 i = 0; i < sResearchProjectStore.GetNumRows(); ++i)
+    {
+        ResearchProjectEntry const* rp = sResearchProjectStore.LookupEntry(i);
+        if (!rp || !rp->IsVaid())
+            continue;
+
+        sResearchProjectSet.insert(rp);
+    }
+
+    LoadDBC(availableDbcLocales,bar,bad_dbc_files,sResearchSiteStore,        dbcPath,"ResearchSite.dbc");
+    for (uint32 i = 0; i < sResearchSiteStore.GetNumRows(); ++i)
+    {
+        ResearchSiteEntry const* rs = sResearchSiteStore.LookupEntry(i);
+        if (!rs || !rs->IsValid())
+            continue;
+
+        ResearchSiteData& data = sResearchSiteDataMap[rs->ID];
+
+        data.entry = rs;
+
+        for (uint32 i = 0; i < sQuestPOIPointStore.GetNumRows(); ++i)
+            if (QuestPOIPointEntry const* poi = sQuestPOIPointStore.LookupEntry(i))
+                if (poi->POIId == rs->POIid)
+                    data.points.push_back(ResearchPOIPoint(poi->x, poi->y));
+
+        if (data.points.size() == 0)
+            sLog.outDebug("Research site %u POI %u map %u has 0 POI points in DBC!", rs->ID, rs->POIid, rs->mapId);
+    }
+
     LoadDBC(availableDbcLocales,bar,bad_dbc_files,sScalingStatDistributionStore, dbcPath,"ScalingStatDistribution.dbc");
     LoadDBC(availableDbcLocales,bar,bad_dbc_files,sScalingStatValuesStore,   dbcPath,"ScalingStatValues.dbc");
     LoadDBC(availableDbcLocales,bar,bad_dbc_files,sSkillLineStore,           dbcPath,"SkillLine.dbc");
@@ -1320,6 +1361,15 @@ float GetCurrencyPrecision(uint32 currencyId)
     CurrencyTypesEntry const * entry = sCurrencyTypesStore.LookupEntry(currencyId);
 
     return entry ? entry->GetPrecision() : 1.0f;
+}
+
+ResearchSiteEntry const* GetResearchSiteEntryById(uint32 id)
+{
+    ResearchSiteDataMap::const_iterator itr = sResearchSiteDataMap.find(id);
+    if (itr == sResearchSiteDataMap.end())
+        return NULL;
+
+    return itr->second.entry;
 }
 
 // script support functions

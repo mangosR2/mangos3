@@ -27,6 +27,7 @@ AggressorAI.cpp
 AggressorAI.h
 AntiCheat.cpp
 AntiCheat.h
+Archaeology.cpp
 ArenaTeam.cpp
 ArenaTeam.h
 ArenaTeamHandler.cpp

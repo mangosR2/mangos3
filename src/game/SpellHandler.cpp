@@ -28,6 +28,7 @@
 #include "ScriptMgr.h"
 #include "Totem.h"
 #include "SpellAuras.h"
+#include "SharedDefines.h"
 
 #include <G3D/Vector3.h>
 
@@ -436,10 +437,14 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
         if ((!((Creature*)mover)->HasSpell(spellId) && !triggered)
         || IsPassiveSpell(spellInfo))
         {
-            sLog.outError("WorldSession::HandleCastSpellOpcode: %s try casts spell %u which he shouldn't have", mover->GetObjectGuid().GetString().c_str(), spellId);
-            //cheater? kick? ban?
-            recvPacket.rpos(recvPacket.wpos());                 // prevent spam at ignore packet
-            return;
+            // not have spell in spellbook or spell passive and not casted by client
+            if ((!((Player*)mover)->HasActiveSpell(spellId) && !triggered || IsPassiveSpell(spellInfo)) && !sSpellMgr.IsAbilityOfSkillType(spellInfo, SKILL_ARCHAEOLOGY))
+            {
+                sLog.outError("World: Player %u casts spell %u which he shouldn't have", mover->GetGUIDLow(), spellId);
+                //cheater? kick? ban?
+                recvPacket.rpos(recvPacket.wpos());                 // prevent spam at ignore packet
+                return;
+            }
         }
     }
 

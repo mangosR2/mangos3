@@ -168,8 +168,8 @@ pEffect SpellEffects[TOTAL_SPELL_EFFECTS]=
     &Spell::EffectDismissPet,                               //102 SPELL_EFFECT_DISMISS_PET
     &Spell::EffectReputation,                               //103 SPELL_EFFECT_REPUTATION
     &Spell::EffectSummonObject,                             //104 SPELL_EFFECT_SUMMON_OBJECT_SLOT
-    &Spell::EffectNULL,                                     //105 SPELL_EFFECT_SURVEY
-    &Spell::EffectNULL,                                     //106 SPELL_EFFECT_SUMMON_RAID_MARKER
+    &Spell::EffectSurvey,                                   //105 SPELL_EFFECT_SURVEY
+    &Spell::EffectSummonRaidMarker,                         //106 SPELL_EFFECT_SUMMON_RAID_MARKER
     &Spell::EffectNULL,                                     //107 SPELL_EFFECT_LOOT_CORPSE
     &Spell::EffectDispelMechanic,                           //108 SPELL_EFFECT_DISPEL_MECHANIC
     &Spell::EffectSummonDeadPet,                            //109 SPELL_EFFECT_SUMMON_DEAD_PET
@@ -6388,6 +6388,10 @@ void Spell::DoCreateItem(SpellEffectEntry const* effect, uint32 itemtype)
 
 void Spell::EffectCreateItem(SpellEffectEntry const* effect)
 {
+    if (m_caster->GetTypeId() == TYPEID_PLAYER && sSpellMgr.IsAbilityOfSkillType(m_spellInfo, SKILL_ARCHAEOLOGY))
+        if (!((Player*)m_caster)->SolveResearchProject(m_spellInfo->Id, m_targets))
+            return;
+
     DoCreateItem(effect, effect->EffectItemType);
 }
 
@@ -7702,6 +7706,13 @@ void Spell::EffectLearnSkill(SpellEffectEntry const* effect)
     uint32 skillid =  effect->EffectMiscValue;
     uint16 skillval = ((Player*)unitTarget)->GetPureSkillValue(skillid);
     ((Player*)unitTarget)->SetSkill(skillid, skillval ? skillval : 1, damage * 75, damage);
+
+    // Archaeology
+    if (skillid == SKILL_ARCHAEOLOGY && sWorld.getConfig(CONFIG_BOOL_ARCHAEOLOGY_ENABLED))
+    {
+        ((Player*)unitTarget)->GenerateResearchSites();
+        ((Player*)unitTarget)->GenerateResearchProjects();
+    }
 
     if (WorldObject const* caster = GetCastingObject())
         DEBUG_LOG("Spell: %s has learned skill %u value %u from %s", unitTarget->GetGuidStr().c_str(), skillid, skillval, caster->GetGuidStr().c_str());
@@ -12668,6 +12679,9 @@ void Spell::EffectDismissPet(SpellEffectEntry const* effect)
 void Spell::EffectSummonObject(SpellEffectEntry const* effect)
 {
     uint32 go_id = effect->EffectMiscValue;
+    if (!go_id)
+        return;
+
     uint8 slot = effect->EffectMiscValueB;
     if (slot >= MAX_OBJECT_SLOT)
         return;
@@ -12689,7 +12703,7 @@ void Spell::EffectSummonObject(SpellEffectEntry const* effect)
         m_caster->GetClosePoint(loc.x, loc.y, loc.z, DEFAULT_WORLD_OBJECT_SIZE);
 
     Map* map = m_caster->GetMap();
-    if(!pGameObj->Create(map->GenerateLocalLowGuid(HIGHGUID_GAMEOBJECT), go_id, map,
+    if (!pGameObj->Create(map->GenerateLocalLowGuid(HIGHGUID_GAMEOBJECT), go_id, map,
         m_caster->GetPhaseMask(), loc.x, loc.y, loc.z, m_caster->GetOrientation()))
     {
         delete pGameObj;
@@ -12697,7 +12711,7 @@ void Spell::EffectSummonObject(SpellEffectEntry const* effect)
     }
 
     pGameObj->SetUInt32Value(GAMEOBJECT_LEVEL, m_caster->getLevel());
-    pGameObj->SetRespawnTime(m_duration > 0 ? m_duration/IN_MILLISECONDS : 0);
+    pGameObj->SetRespawnTime(m_duration > 0 ? m_duration / IN_MILLISECONDS : 0);
     pGameObj->SetSpellId(m_spellInfo->Id);
     m_caster->AddGameObject(pGameObj);
 
@@ -12713,6 +12727,11 @@ void Spell::EffectSummonObject(SpellEffectEntry const* effect)
         ((Creature*)m_originalCaster)->AI()->JustSummoned(pGameObj);
 
     SendEffectLogExecute(effect, pGameObj->GetObjectGuid());
+}
+
+void Spell::EffectSummonRaidMarker(SpellEffectEntry const* effect)
+{
+
 }
 
 void Spell::EffectResurrect(SpellEffectEntry const* effect)
@@ -14157,4 +14176,64 @@ void Spell::EffectBuyGuildBankSlot(SpellEffectEntry const* effect)
     pGuild->SetBankRightsAndSlots(player->GetRank(), TabId, GUILD_BANK_RIGHT_FULL, WITHDRAW_SLOT_UNLIMITED, true);
     pGuild->Roster();                                       // broadcast for tab rights update
     pGuild->DisplayGuildBankTabsInfo(player->GetSession());
+}
+
+void Spell::EffectSurvey(SpellEffectEntry const* effect)
+{
+    if (m_caster->GetTypeId() != TYPEID_PLAYER)
+        return;
+
+    if (!sWorld.getConfig(CONFIG_BOOL_ARCHAEOLOGY_ENABLED))
+        return;
+
+    uint32 go_id = 0;
+    uint8 slot = 4;
+
+    float x, y, z, o;
+    x = m_caster->GetPositionX();
+    y = m_caster->GetPositionY();
+    z = m_caster->GetPositionZ();
+    o = m_caster->GetOrientation();
+
+    int32 duration;
+    if (!((Player*)m_caster)->OnSurvey(go_id, x, y, z, o))
+        duration = 10000;
+    else
+        duration = 60000;
+
+    if (!go_id)
+        return;
+
+    if (ObjectGuid guid = m_caster->m_ObjectSlotGuid[slot])
+    {
+        if (GameObject* obj = m_caster ? m_caster->GetMap()->GetGameObject(guid) : NULL)
+            obj->SetLootState(GO_JUST_DEACTIVATED);
+
+        m_caster->m_ObjectSlotGuid[slot].Clear();
+    }
+
+    GameObject* pGameObj = new GameObject;
+
+    Map* map = m_caster->GetMap();
+    if (!pGameObj->Create(map->GenerateLocalLowGuid(HIGHGUID_GAMEOBJECT), go_id, map,
+        m_caster->GetPhaseMask(), x, y, z, o))
+    {
+        delete pGameObj;
+        return;
+    }
+
+    pGameObj->SetRespawnTime(duration > 0 ? duration / IN_MILLISECONDS : 0);
+    pGameObj->SetSpellId(m_spellInfo->Id);
+    m_caster->AddGameObject(pGameObj);
+
+    map->Add(pGameObj);
+
+    m_caster->m_ObjectSlotGuid[slot] = pGameObj->GetObjectGuid();
+
+    pGameObj->SummonLinkedTrapIfAny();
+
+    if (m_caster->GetTypeId() == TYPEID_UNIT && ((Creature*)m_caster)->AI())
+        ((Creature*)m_caster)->AI()->JustSummoned(pGameObj);
+    if (m_originalCaster && m_originalCaster != m_caster && m_originalCaster->GetTypeId() == TYPEID_UNIT && ((Creature*)m_originalCaster)->AI())
+        ((Creature*)m_originalCaster)->AI()->JustSummoned(pGameObj);
 }

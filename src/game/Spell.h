@@ -107,6 +107,37 @@ struct SpellCastTargetsReader
     Unit* caster;
 };
 
+enum WeightType
+{
+    WEIGHT_FRAGMENT = 1,
+    WEIGHT_KEYSTONE = 2,
+};
+
+struct ArchaeologyWeight
+{
+    uint8 type;
+    union
+    {
+        struct
+        {
+            uint32 currencyId;
+            uint32 currencyCount;
+        } fragment;
+        struct
+        {
+            uint32 itemId;
+            uint32 itemCount;
+        } keystone;
+        struct
+        {
+            uint32 id;
+            uint32 count;
+        } raw;
+    };
+};
+
+typedef std::list<ArchaeologyWeight> ArchaeologyWeights;
+
 class SpellCastTargets
 {
     public:
@@ -141,6 +172,8 @@ class SpellCastTargets
 
             m_elevation = target.m_elevation;
             m_speed     = target.m_speed;
+
+            m_weights = target.m_weights;
 
             return *this;
         }
@@ -194,6 +227,8 @@ class SpellCastTargets
         void  SetElevation(float elevation) { m_elevation = elevation; }
         void  SetSpeed(float speed)         { m_speed = speed; }
 
+        ArchaeologyWeights const& GetWeights() { return m_weights; }
+
         uint32 m_targetMask;
 
     private:
@@ -212,6 +247,8 @@ class SpellCastTargets
         WorldLocation m_src, m_dest;
 
         float m_elevation, m_speed;
+
+        ArchaeologyWeights m_weights;
 };
 
 inline ByteBuffer& operator<< (ByteBuffer& buf, SpellCastTargets const& targets)
@@ -316,6 +353,7 @@ class Spell
         void EffectApplyGlyph(SpellEffectEntry const* effect);
         void EffectEnchantHeldItem(SpellEffectEntry const* effect);
         void EffectSummonObject(SpellEffectEntry const* effect);
+        void EffectSummonRaidMarker(SpellEffectEntry const* effect);
         void EffectResurrect(SpellEffectEntry const* effect);
         void EffectParry(SpellEffectEntry const* effect);
         void EffectBlock(SpellEffectEntry const* effect);
@@ -381,6 +419,7 @@ class Spell
         void EffectWMOChange(SpellEffectEntry const* effect);
         void EffectSuspendGravity(SpellEffectEntry const* effect);
         void EffectBuyGuildBankSlot(SpellEffectEntry const* effect);
+        void EffectSurvey(SpellEffectEntry const* effect);
 
         Spell(Unit* caster, SpellEntry const *info, bool triggered, ObjectGuid originalCasterGUID = ObjectGuid(), SpellEntry const* triggeredBy = NULL);
         ~Spell();

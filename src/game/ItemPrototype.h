@@ -20,6 +20,7 @@
 #define _ITEMPROTOTYPE_H
 
 #include "Common.h"
+#include "DBCEnums.h"
 
 enum ItemModType
 {
@@ -653,6 +654,23 @@ struct ItemPrototype
     bool IsVellum() const
     {
         return Class == ITEM_CLASS_TRADE_GOODS && (1 << SubClass) & (1 << ITEM_SUBCLASS_VELLUM);
+    }
+
+    uint32 GetCurrencySubstitutionId() const
+    {
+        switch (CurrencySubstitutionId)
+        {
+            case 4: return CURRENCY_TROLL_ARCHAEOLOGY_FRAGMENT;
+            case 5: return CURRENCY_DWARF_ARCHAEOLOGY_FRAGMENT;
+            case 9: return CURRENCY_NIGHT_ELF_ARCHAEOLOGY_FRAGMENT;
+            case 10: return CURRENCY_ORC_ARCHAEOLOGY_FRAGMENT;
+            case 11: return CURRENCY_DRAENEI_ARCHAEOLOGY_FRAGMENT;
+            case 12: return CURRENCY_VRYKUL_ARCHAEOLOGY_FRAGMENT;
+            case 13: return CURRENCY_NERUBIAN_ARCHAEOLOGY_FRAGMENT;
+            case 14: return CURRENCY_TOLVIR_ARCHAEOLOGY_FRAGMENT;
+        }
+
+        return 0;
     }
 };
 
