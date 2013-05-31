@@ -3055,6 +3055,12 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                     case 75973:                             // X-53 Touring Rocket
                         Spell::SelectMountByAreaAndSkill(target, GetSpellProto(), 0, 0, 75957, 75972, 76154);
                         return;
+                    case 87649:                             // Satisfied
+                    {
+                        if (GetStackAmount() == 91 && target->GetTypeId() == TYPEID_PLAYER)
+                            ((Player*)target)->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_BE_SPELL_TARGET, 99041, 1);
+                        return;
+                    }
                 }
                 break;
             }
