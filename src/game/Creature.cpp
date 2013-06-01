@@ -2775,7 +2775,7 @@ bool Creature::CanSwim()
 
 bool Creature::CanFly()
 {
-    if (!(m_creatureInfo->InhabitType & INHABIT_AIR) && !(GetByteValue(UNIT_FIELD_BYTES_1, 3) & UNIT_BYTE1_FLAG_HOVER))
+    if (!(m_creatureInfo->InhabitType & INHABIT_AIR) && !(GetByteValue(UNIT_FIELD_BYTES_1, 3) & UNIT_BYTE1_FLAG_HOVER) && !HasAuraType(SPELL_AURA_FLY))
         return false;
 
     int32 modelInhabitType = GetModelInhabitType();
