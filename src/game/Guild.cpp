@@ -518,22 +518,22 @@ bool Guild::LoadMembersFromDB(QueryResult* guildMembersResult)
             newmember.BankRemSlotsTab[i]  = fields[8 + (2 * i)].GetUInt32();
         }
 
-        newmember.Name                  = fields[19].GetCppString();
-        newmember.Level                 = fields[20].GetUInt8();
-        newmember.Class                 = fields[21].GetUInt8();
-        newmember.ZoneId                = fields[22].GetUInt32();
-        newmember.LogoutTime            = fields[23].GetUInt64();
-        newmember.accountId             = fields[24].GetInt32();
+        newmember.Name                  = fields[23].GetCppString();
+        newmember.Level                 = fields[24].GetUInt8();
+        newmember.Class                 = fields[25].GetUInt8();
+        newmember.ZoneId                = fields[26].GetUInt32();
+        newmember.LogoutTime            = fields[27].GetUInt64();
+        newmember.accountId             = fields[28].GetInt32();
 
-        newmember.thisWeekReputation    = fields[25].GetUInt32();
+        newmember.thisWeekReputation    = fields[29].GetUInt32();
 
-        newmember.AchievementPoints     = fields[26].GetUInt32();
+        newmember.AchievementPoints     = fields[30].GetUInt32();
 
         for (int i = 0; i < 2; ++i)
         {
-            newmember.m_professions[i].skillId = fields[27 + i * 3].GetUInt32();
-            newmember.m_professions[i].rank = fields[28 + i * 3].GetUInt32();
-            newmember.m_professions[i].value = fields[29 + i * 3].GetUInt32();
+            newmember.m_professions[i].skillId = fields[31 + i * 3].GetUInt32();
+            newmember.m_professions[i].rank = fields[32 + i * 3].GetUInt32();
+            newmember.m_professions[i].value = fields[33 + i * 3].GetUInt32();
         }
 
         // this code will remove not existing character guids from guild

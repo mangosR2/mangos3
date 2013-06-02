@@ -134,15 +134,15 @@ void GuildMgr::LoadGuilds()
     QueryResult* guildRanksResult   = CharacterDatabase.Query("SELECT guildid,rid,rname,rights,BankMoneyPerDay FROM guild_rank ORDER BY guildid ASC, rid ASC");
 
     // load guild members
-    //                                                                0       1                 2    3     4       5                  6
+    //                                                                 0       1                 2    3     4       5                  6
     QueryResult* guildMembersResult = CharacterDatabase.PQuery("SELECT guildid,guild_member.guid,rank,pnote,offnote,BankResetTimeMoney,BankRemMoney,"
     //   7                 8                9                 10               11                12
         "BankResetTimeTab0,BankRemSlotsTab0,BankResetTimeTab1,BankRemSlotsTab1,BankResetTimeTab2,BankRemSlotsTab2,"
-    //   13                14               15                16               17                18
-        "BankResetTimeTab3,BankRemSlotsTab3,BankResetTimeTab4,BankRemSlotsTab4,BankResetTimeTab5,BankRemSlotsTab5,"
-    //   19               20                21                22               23                      24                  25
+    //   13                14               15                16               17                18               19                20               21                22
+        "BankResetTimeTab3,BankRemSlotsTab3,BankResetTimeTab4,BankRemSlotsTab4,BankResetTimeTab5,BankRemSlotsTab5,BankResetTimeTab6,BankRemSlotsTab6,BankResetTimeTab7,BankRemSlotsTab7,"
+    //   23               24                25                26               27                      28                  29
         "characters.name, characters.level, characters.class, characters.zone, characters.logout_time, characters.account, thisWeekReputation, "
-    //   26                 27                 28                   29                    30                  31                    32
+    //   30                 30                 32                   33                    34                  35                    36
         "achievementPoints, firstProfessionId, firstProfessionRank, firstProfessionValue, secondProfessionId, secondProfessionRank, secondProfessionValue "
         "FROM guild_member LEFT JOIN characters ON characters.guid = guild_member.guid ORDER BY guildid ASC");
 
