@@ -2243,6 +2243,12 @@ void Aura::TriggerSpell()
                                 caster->CastSpell(caster, 82897, true);
                         return;
                     }
+                    case 87604:                             // Food
+                    {
+                        uint32 spells[11] = { 87545, 87546, 87547, 87548, 87549, 87550, 87551, 87552, 87554, 87555, 87635 };
+                        target->CastSpell(target, spells[urand(0, 10)], true);
+                        return;
+                    }
                     default:
                         break;
                 }
