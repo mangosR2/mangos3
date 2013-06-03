@@ -151,7 +151,8 @@ ObjectMgr::ObjectMgr() :
     m_EquipmentSetIds("Equipment set ids"),
     m_GuildIds("Guild ids"),
     m_MailIds("Mail ids"),
-    m_PetNumbers("Pet numbers")
+    m_PetNumbers("Pet numbers"),
+    DBCLocaleIndex(LOCALE_enUS)
 {
 }
 
