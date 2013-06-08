@@ -16130,8 +16130,8 @@ void Unit::RemoveSpellCategoryCooldown(uint32 cat, bool update /* = false */)
     if (m_spellCooldowns.empty())
         return;
 
-    SpellCategoryStore::const_iterator ct = sSpellCategoryStore.find(cat);
-    if (ct == sSpellCategoryStore.end())
+    SpellCategoryMap::const_iterator ct = sSpellCategoryMap.find(cat);
+    if (ct == sSpellCategoryMap.end())
         return;
 
     const SpellCategorySet& ct_set = ct->second;
@@ -16256,8 +16256,8 @@ void Unit::AddSpellAndCategoryCooldowns(SpellEntry const* spellInfo, uint32 item
     // category spells
     if (category && categorycooldown > 0)
     {
-        SpellCategoryStore::const_iterator i_scstore = sSpellCategoryStore.find(category);
-        if (i_scstore != sSpellCategoryStore.end())
+        SpellCategoryMap::const_iterator i_scstore = sSpellCategoryMap.find(category);
+        if (i_scstore != sSpellCategoryMap.end())
         {
             for (SpellCategorySet::const_iterator i_scset = i_scstore->second.begin(); i_scset != i_scstore->second.end(); ++i_scset)
             {

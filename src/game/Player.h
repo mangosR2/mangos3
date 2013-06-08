@@ -1870,10 +1870,27 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         void AddSpellMod(Aura* aura, bool apply);
         template <class T> T ApplySpellMod(uint32 spellId, SpellModOp op, T &basevalue, Spell const* spell = NULL);
-
-        void SendCooldownEvent(SpellEntry const *spellInfo, uint32 itemId = 0);
-        void ProhibitSpellSchool(SpellSchoolMask idSchoolMask, uint32 unTimeMs);
-        void SendClearCooldown(uint32 spell_id, Unit* target);
+        static uint32 const infinityCooldownDelay = MONTH;  // used for set "infinity cooldowns" for spells and check
+        static uint32 const infinityCooldownDelayCheck = MONTH/2;
+        bool HasSpellCooldown(uint32 spell_id) const
+        {
+            SpellCooldowns::const_iterator itr = m_spellCooldowns.find(spell_id);
+            return itr != m_spellCooldowns.end() && itr->second.end > time(NULL);
+        }
+        time_t GetSpellCooldownDelay(uint32 spell_id) const
+        {
+            SpellCooldowns::const_iterator itr = m_spellCooldowns.find(spell_id);
+            time_t t = time(NULL);
+            return itr != m_spellCooldowns.end() && itr->second.end > t ? itr->second.end - t : 0;
+        }
+        void AddSpellAndCategoryCooldowns(SpellEntry const* spellInfo, uint32 itemId, Spell* spell = NULL, bool infinityCooldown = false);
+        void AddSpellCooldown(uint32 spell_id, uint32 itemid, time_t end_time);
+        void SendCooldownEvent(SpellEntry const *spellInfo, uint32 itemId = 0, Spell* spell = NULL);
+        void SendCategoryCooldownMods();
+        void ProhibitSpellSchool(SpellSchoolMask idSchoolMask, uint32 unTimeMs ) override;
+        void RemoveSpellCooldown(uint32 spell_id, bool update = false);
+        void RemoveSpellCategoryCooldown(uint32 cat, bool update = false);
+        void SendClearCooldown(uint32 spell_id, Unit* target );
         void SendModifyCooldown(uint32 spell_id, int32 delta);
 
         GlobalCooldownMgr& GetGlobalCooldownMgr() { return m_GlobalCooldownMgr; }

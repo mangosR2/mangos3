@@ -393,11 +393,11 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleNULL,                                      //334 SPELL_AURA_BLIND_SIGHT 2 spells in 4.3.4
     &Aura::HandleAuraSeeWhileInvisible,                     //335 SPELL_AURA_SEE_WHILE_INVISIBLE implemented in Unit::isVisibleForOrDetect 5 spells in 4.3.4
     &Aura::HandleNULL,                                      //336 SPELL_AURA_FLIGHT_RESTRICTIONS 8 spells in 4.3.4
-    &Aura::HandleNULL,                                      //337 SPELL_AURA_MOD_VENDOR_PRICE 1 spells in 4.3.4
-    &Aura::HandleNULL,                                      //338 SPELL_AURA_MOD_DURABILITY_LOSS 3 spells in 4.3.4
-    &Aura::HandleNULL,                                      //339 SPELL_AURA_MOD_SKILLCHANCE 1 spells in 4.3.4
-    &Aura::HandleNULL,                                      //340 SPELL_AURA_MOD_RESSURECTED_HEALTH_PCT 1 spells in 4.3.4
-    &Aura::HandleNULL,                                      //341 SPELL_AURA_MOD_SPELL_CATEGORY_COOLDOWN 2 spells in 4.3.4 modifies cooldown of hearthstone and cast time of archaeology mining
+    &Aura::HandleNoImmediateEffect,                         //337 SPELL_AURA_MOD_VENDOR_PRICE 1 spells in 4.3.4
+    &Aura::HandleNoImmediateEffect,                         //338 SPELL_AURA_MOD_DURABILITY_LOSS 3 spells in 4.3.4,  implemented in Player::DurabilityLossAll
+    &Aura::HandleNoImmediateEffect,                         //339 SPELL_AURA_MOD_SKILLCHANCE 1 spells in 4.3.4, implemented in Player::UpdateSkillPro
+    &Aura::HandleNULL,                                      //340 SPELL_AURA_MOD_RESURRECTED_HEALTH_BY_GUILD_MEMBER 1 spells in 4.3.4
+    &Aura::HandleAuraModCategoryCooldown,                   //341 SPELL_AURA_MOD_SPELL_CATEGORY_COOLDOWN spells in 4.3.4 implemented in Player::AddSpellAndCategoryCooldowns
     &Aura::HandleModMeleeRangedSpeedPct,                    //342 SPELL_AURA_MOD_ATTACKSPEED_2 17 spells in 4.3.4
     &Aura::HandleNULL,                                      //343 SPELL_AURA_MOD_ALL_DAMAGE_FROM_CASTER 2 spells in 4.3.4
     &Aura::HandleNoImmediateEffect,                         //344 SPELL_AURA_MOD_AUTOATTACK_DAMAGE 6 spells in 4.3.4
@@ -14739,4 +14739,13 @@ void Aura::HandleAltPowerIndicator(bool apply, bool Real)
 
     if (!apply)
         target->SetPower(POWER_ALTERNATIVE, 0);
+}
+
+void Aura::HandleAuraModCategoryCooldown(bool apply, bool Real)
+{
+    Unit* target = GetTarget();
+    if (target->GetTypeId() != TYPEID_PLAYER || ((Player*)target)->GetSession()->PlayerLoading())
+        return;
+
+    ((Player*)target)->SendCategoryCooldownMods();
 }
