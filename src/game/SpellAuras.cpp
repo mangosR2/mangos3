@@ -396,7 +396,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleNoImmediateEffect,                         //337 SPELL_AURA_MOD_VENDOR_PRICE 1 spells in 4.3.4
     &Aura::HandleNoImmediateEffect,                         //338 SPELL_AURA_MOD_DURABILITY_LOSS 3 spells in 4.3.4,  implemented in Player::DurabilityLossAll
     &Aura::HandleNoImmediateEffect,                         //339 SPELL_AURA_MOD_SKILLCHANCE 1 spells in 4.3.4, implemented in Player::UpdateSkillPro
-    &Aura::HandleNULL,                                      //340 SPELL_AURA_MOD_RESURRECTED_HEALTH_BY_GUILD_MEMBER 1 spells in 4.3.4
+    &Aura::HandleNoImmediateEffect,                         //340 SPELL_AURA_MOD_RESURRECTED_HEALTH_BY_GUILD_MEMBER 1 spells in 4.3.4
     &Aura::HandleAuraModCategoryCooldown,                   //341 SPELL_AURA_MOD_SPELL_CATEGORY_COOLDOWN spells in 4.3.4 implemented in Player::AddSpellAndCategoryCooldowns
     &Aura::HandleModMeleeRangedSpeedPct,                    //342 SPELL_AURA_MOD_ATTACKSPEED_2 17 spells in 4.3.4
     &Aura::HandleNULL,                                      //343 SPELL_AURA_MOD_ALL_DAMAGE_FROM_CASTER 2 spells in 4.3.4
@@ -405,11 +405,11 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleAltPowerIndicator,                         //346 SPELL_AURA_ALT_POWER_INDICATOR 32 spells in 4.3.4 shows progressbar-like ui?
     &Aura::HandleNoImmediateEffect,                         //347 SPELL_AURA_MOD_CD_FROM_HASTE 2 spells in 4.3.4, implemented in Player::AddSpellAndCategoryCooldowns
     &Aura::HandleNoImmediateEffect,                         //348 SPELL_AURA_MOD_MONEY_TO_GUILD_BANK 2 spells in 4.3.4, implemented in WorldSession::HandleLootMoneyOpcode
-    &Aura::HandleNoImmediateEffect,                         //349 SPELL_AURA_MOD_CURRENCY_GAIN 16 spells in 4.3.4
+    &Aura::HandleNoImmediateEffect,                         //349 SPELL_AURA_MOD_CURRENCY_GAIN 16 spells in 4.3.4, implemented in Player::ModifyCurrencyCount
     &Aura::HandleNoImmediateEffect,                         //350 SPELL_AURA_MOD_ITEM_LOOT 1 spells in 4.3.4
     &Aura::HandleNoImmediateEffect,                         //351 SPELL_AURA_MOD_CURRENCY_LOOT 8 spells in 4.3.4
-    &Aura::HandleNULL,                                      //352 SPELL_AURA_ALLOW_WORGEN_TRANSFORM 1 spells in 4.3.4 enables worgen<>human form switches
-    &Aura::HandleNULL,                                      //353 SPELL_AURA_CAMOUFLAGE 3 spells in 4.3.4
+    &Aura::HandleNoImmediateEffect,                         //352 SPELL_AURA_ALLOW_WORGEN_TRANSFORM 1 spells in 4.3.4 enables worgen<>human form switches
+    &Aura::HandleNoImmediateEffect,                         //353 SPELL_AURA_CAMOUFLAGE 3 spells in 4.3.4
     &Aura::HandleNoImmediateEffect,                         //354 SPELL_AURA_MOD_HEALING_DONE_FROM_PCT_HEALTH 2 spells in 4.3.4
     &Aura::HandleUnused,                                    //355 0 spells in 4.3.4
     &Aura::HandleNoImmediateEffect,                         //356 SPELL_AURA_MOD_DAMAGE_DONE_FROM_PCT_POWER 2 spells in 4.3.4, imlemented in Unit::SpellDamageBonusDone
