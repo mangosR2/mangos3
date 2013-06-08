@@ -2751,10 +2751,10 @@ bool Creature::CanWalk()
     if (!(m_creatureInfo->InhabitType & INHABIT_GROUND))
         return false;
 
-    int32 modelInhabitType = GetModelInhabitType();
-    if ((modelInhabitType == MODEL_INHABIT_ONLY_SWIM) /*||
-        (modelInhabitType == MODEL_INHABIT_ONLY_FLY)*/)
-        return false;
+    /*int32 modelInhabitType = GetModelInhabitType();
+    if ((modelInhabitType == MODEL_INHABIT_ONLY_SWIM) ||
+        (modelInhabitType == MODEL_INHABIT_ONLY_FLY))
+        return false;*/
 
     return true;
 }
