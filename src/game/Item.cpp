@@ -671,12 +671,16 @@ void Item::LoadLootFromDB(Field* fields)
     // normal item case
     if (type == LOOT_ITEM_TYPE_ITEM)
     {
-        ItemPrototype const* proto = ObjectMgr::GetItemPrototype(item_id);
-        if (!proto)
+        // gold case
+        if (item_id != 0)
         {
-            DeleteLootFromDB(GetGUIDLow(), item_id);
-            sLog.outError("Item::LoadLootFromDB: %s has an unknown item (id: %u) in item_loot, deleted.", GetGuidStr().c_str(), item_id);
-            return;
+            ItemPrototype const* proto = ObjectMgr::GetItemPrototype(item_id);
+            if (!proto)
+            {
+                CharacterDatabase.PExecute("DELETE FROM item_loot WHERE guid = '%u' AND itemid = '%u'", GetGUIDLow(), item_id);
+                sLog.outError("Item::LoadLootFromDB: %s has an unknown item (id: #%u) in item_loot, deleted.", GetOwnerGuid().GetString().c_str(), item_id);
+                return;
+            }
         }
         loot.items.push_back(LootItem(item_id, type, item_amount, item_suffix, item_propid));
     }
