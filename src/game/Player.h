@@ -1392,7 +1392,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         Item* GetItemFromBuyBackSlot(uint32 slot);
         void RemoveItemFromBuyBackSlot(uint32 slot, bool del);
 
-        void TakeExtendedCost(uint32 extendedCostId, uint32 count);
+        void TakeExtendedCost(uint32 extendedCostId);
 
         void SendEquipError(InventoryResult msg, Item* pItem, Item *pItem2 = NULL, uint32 itemid = 0) const;
         void SendBuyError(BuyResult msg, Creature* pCreature, uint32 item, uint32 param);
@@ -1418,8 +1418,8 @@ class MANGOS_DLL_SPEC Player : public Unit
         }
         void SendNewItem(Item* item, uint32 count, bool received, bool created, bool broadcast = false);
         bool _StoreOrEquipNewItem(uint32 vendorSlot, uint32 item, uint8 count, uint8 bag, uint8 slot, int32 price, ItemPrototype const* pProto, Creature* pVendor, VendorItem const* crItem, bool store);
-        bool BuyItemFromVendorSlot(ObjectGuid vendorGuid, uint32 vendorslot, uint32 item, uint8 count, uint8 bag, uint8 slot);
-        bool BuyCurrencyFromVendorSlot(ObjectGuid vendorGuid, uint32 vendorslot, uint32 currencyId, uint8 count);
+        bool BuyItemFromVendorSlot(ObjectGuid vendorGuid, uint32 vendorslot, uint32 item, uint32 count, uint8 bag, uint8 slot);
+        bool BuyCurrencyFromVendorSlot(ObjectGuid vendorGuid, uint32 vendorslot, uint32 currencyId, uint32 count);
 
         float GetReputationPriceDiscount(Creature const* pCreature) const;
 

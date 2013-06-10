@@ -505,40 +505,42 @@ void WorldSession::HandleBuyItemOpcode(WorldPacket& recv_data)
     else
         return;                                             // cheating
 
-    switch(type)
+    switch (type)
     {
         case VENDOR_ITEM_TYPE_NONE:
             break;
         case VENDOR_ITEM_TYPE_ITEM:
         {
-    uint8 bag = NULL_BAG;                                   // init for case invalid bagGUID
+            uint8 bag = NULL_BAG;                                   // init for case invalid bagGUID
 
-    // find bag slot by bag guid
-    if (bagGuid == _player->GetObjectGuid())
-        bag = INVENTORY_SLOT_BAG_0;
-    else
-    {
-        for (int i = INVENTORY_SLOT_BAG_START; i < INVENTORY_SLOT_BAG_END; ++i)
-        {
-            if (Bag* pBag = (Bag*)_player->GetItemByPos(INVENTORY_SLOT_BAG_0, i))
+            // find bag slot by bag guid
+            if (bagGuid == _player->GetObjectGuid())
+                bag = INVENTORY_SLOT_BAG_0;
+            else
             {
-                if (bagGuid == pBag->GetObjectGuid())
+                for (int i = INVENTORY_SLOT_BAG_START; i < INVENTORY_SLOT_BAG_END; ++i)
                 {
-                    bag = i;
-                    break;
+                    if (Bag* pBag = (Bag*)_player->GetItemByPos(INVENTORY_SLOT_BAG_0, i))
+                    {
+                        if (bagGuid == pBag->GetObjectGuid())
+                        {
+                            bag = i;
+                            break;
+                        }
+                    }
                 }
             }
-        }
-    }
 
             GetPlayer()->BuyItemFromVendorSlot(vendorGuid, slot, item, count, bag, bagSlot);
             break;
-}
+        }
         case VENDOR_ITEM_TYPE_CURRENCY:
-{
-            GetPlayer()->BuyCurrencyFromVendorSlot(vendorGuid, slot, item, 1);
+        {
+            GetPlayer()->BuyCurrencyFromVendorSlot(vendorGuid, slot, item, count);
             break;
         }
+        default:
+            break;
     }
 }
 

@@ -19650,14 +19650,14 @@ void Player::InitDisplayIds()
     }
 }
 
-void Player::TakeExtendedCost(uint32 extendedCostId, uint32 count)
+void Player::TakeExtendedCost(uint32 extendedCostId)
 {
     ItemExtendedCostEntry const* extendedCost = sItemExtendedCostStore.LookupEntry(extendedCostId);
 
     for (uint8 i = 0; i < MAX_EXTENDED_COST_ITEMS; ++i)
     {
         if (extendedCost->reqitem[i])
-            DestroyItemCount(extendedCost->reqitem[i], extendedCost->reqitemcount[i] * count, true);
+            DestroyItemCount(extendedCost->reqitem[i], extendedCost->reqitemcount[i], true);
     }
 
     for (int i = 0; i < MAX_EXTENDED_COST_CURRENCIES; ++i)
@@ -19672,13 +19672,13 @@ void Player::TakeExtendedCost(uint32 extendedCostId, uint32 count)
         if (!entry)
             continue;
 
-        int32 cost = int32(extendedCost->reqcurrcount[i] * count);
+        int32 cost = int32(extendedCost->reqcurrcount[i]);
         ModifyCurrencyCount(entry->ID, -cost);
     }
 }
 
 // Return true is the bought item has a max count to force refresh of window by caller
-bool Player::BuyItemFromVendorSlot(ObjectGuid vendorGuid, uint32 vendorslot, uint32 item, uint8 count, uint8 bag, uint8 slot)
+bool Player::BuyItemFromVendorSlot(ObjectGuid vendorGuid, uint32 vendorslot, uint32 item, uint32 count, uint8 bag, uint8 slot)
 {
     // cheating attempt
     if (count < 1) count = 1;
@@ -19762,6 +19762,12 @@ bool Player::BuyItemFromVendorSlot(ObjectGuid vendorGuid, uint32 vendorslot, uin
 
     if (uint32 extendedCostId = crItem->ExtendedCost)
     {
+        if (pProto->BuyCount != count)
+        {
+            SendEquipError(EQUIP_ERR_CANT_BUY_QUANTITY, NULL, NULL);
+            return false;
+        }
+
         ItemExtendedCostEntry const* iece = sItemExtendedCostStore.LookupEntry(extendedCostId);
         if (!iece)
         {
@@ -19772,7 +19778,7 @@ bool Player::BuyItemFromVendorSlot(ObjectGuid vendorGuid, uint32 vendorslot, uin
         // item base price
         for (uint8 i = 0; i < MAX_EXTENDED_COST_ITEMS; ++i)
         {
-            if (iece->reqitem[i] && !HasItemCount(iece->reqitem[i], iece->reqitemcount[i] * count))
+            if (iece->reqitem[i] && !HasItemCount(iece->reqitem[i], iece->reqitemcount[i]))
             {
                 SendEquipError(EQUIP_ERR_VENDOR_MISSING_TURNINS, NULL, NULL);
                 return false;
@@ -19792,7 +19798,7 @@ bool Player::BuyItemFromVendorSlot(ObjectGuid vendorGuid, uint32 vendorslot, uin
                 continue;
             }
 
-            int32 cost = int32(iece->reqcurrcount[i] * count);
+            int32 cost = int32(iece->reqcurrcount[i]);
 
             bool hasCount = iece->IsSeasonCurrencyRequirement(i) ? HasCurrencySeasonCount(iece->reqcur[i], cost) : HasCurrencyCount(iece->reqcur[i], cost);
             if (!hasCount)
@@ -19817,7 +19823,9 @@ bool Player::BuyItemFromVendorSlot(ObjectGuid vendorGuid, uint32 vendorslot, uin
         return false;
     }
 
-    uint32 price = (crItem->ExtendedCost == 0 || pProto->Flags2 & ITEM_FLAG2_EXT_COST_REQUIRES_GOLD) ? pProto->BuyPrice * count : 0;
+    uint64 price = (crItem->ExtendedCost == 0 || pProto->Flags2 & ITEM_FLAG2_EXT_COST_REQUIRES_GOLD) ? pProto->BuyPrice * count : 0;
+    if (pProto->BuyCount > 1)
+        price = uint64(price / float(pProto->BuyCount) + 0.5f);
 
     // reputation discount
     if (price)
@@ -19844,7 +19852,7 @@ bool Player::BuyItemFromVendorSlot(ObjectGuid vendorGuid, uint32 vendorslot, uin
         ModifyMoney(-int64(price));
 
         if (crItem->ExtendedCost)
-            TakeExtendedCost(crItem->ExtendedCost, count);
+            TakeExtendedCost(crItem->ExtendedCost);
 
         pItem = StoreNewItem(dest, item, true);
     }
@@ -19867,7 +19875,7 @@ bool Player::BuyItemFromVendorSlot(ObjectGuid vendorGuid, uint32 vendorslot, uin
         ModifyMoney(-int64(price));
 
         if (crItem->ExtendedCost)
-            TakeExtendedCost(crItem->ExtendedCost, count);
+            TakeExtendedCost(crItem->ExtendedCost);
 
         pItem = EquipNewItem(dest, item, true);
 
@@ -19897,7 +19905,7 @@ bool Player::BuyItemFromVendorSlot(ObjectGuid vendorGuid, uint32 vendorslot, uin
     return crItem->maxcount != 0;
 }
 
-bool Player::BuyCurrencyFromVendorSlot(ObjectGuid vendorGuid, uint32 vendorslot, uint32 currencyId, uint8 count)
+bool Player::BuyCurrencyFromVendorSlot(ObjectGuid vendorGuid, uint32 vendorslot, uint32 currencyId, uint32 count)
 {
     // cheating attempt
     if (count < 1) count = 1;
@@ -19946,6 +19954,12 @@ bool Player::BuyCurrencyFromVendorSlot(ObjectGuid vendorGuid, uint32 vendorslot,
 
     if (uint32 extendedCostId = crItem->ExtendedCost)
     {
+        if (crItem->maxcount != count)
+        {
+            SendEquipError(EQUIP_ERR_CANT_BUY_QUANTITY, NULL, NULL);
+            return false;
+        }
+
         ItemExtendedCostEntry const* iece = sItemExtendedCostStore.LookupEntry(extendedCostId);
         if (!iece)
         {
@@ -19956,7 +19970,7 @@ bool Player::BuyCurrencyFromVendorSlot(ObjectGuid vendorGuid, uint32 vendorslot,
         // item base price
         for (uint8 i = 0; i < MAX_EXTENDED_COST_ITEMS; ++i)
         {
-            if (iece->reqitem[i] && !HasItemCount(iece->reqitem[i], iece->reqitemcount[i] * count))
+            if (iece->reqitem[i] && !HasItemCount(iece->reqitem[i], iece->reqitemcount[i]))
             {
                 SendEquipError(EQUIP_ERR_VENDOR_MISSING_TURNINS, NULL, NULL);
                 return false;
@@ -19976,7 +19990,7 @@ bool Player::BuyCurrencyFromVendorSlot(ObjectGuid vendorGuid, uint32 vendorslot,
                 continue;
             }
 
-            int32 cost = int32(iece->reqcurrcount[i] * count);
+            int32 cost = int32(iece->reqcurrcount[i]);
             bool hasCount = iece->IsSeasonCurrencyRequirement(i) ? HasCurrencySeasonCount(iece->reqcur[i], cost) : HasCurrencyCount(iece->reqcur[i], cost);
             if (!hasCount)
             {
@@ -20019,7 +20033,7 @@ bool Player::BuyCurrencyFromVendorSlot(ObjectGuid vendorGuid, uint32 vendorslot,
     }
 
     if (crItem->ExtendedCost)
-        TakeExtendedCost(crItem->ExtendedCost, count);
+        TakeExtendedCost(crItem->ExtendedCost);
 
     ModifyCurrencyCount(currencyId, crItem->maxcount, true, false, true);
 
