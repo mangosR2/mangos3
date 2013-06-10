@@ -10532,7 +10532,7 @@ bool Unit::canDetectInvisibilityOf(Unit const* u) const
     return false;
 }
 
-void Unit::UpdateSpeed(UnitMoveType mtype, bool forced, float ratio)
+void Unit::UpdateSpeed(UnitMoveType mtype, bool forced, float ratio, bool ignoreChange)
 {
     bool isPlayerPet = false;
     if (GetTypeId() == TYPEID_UNIT)
@@ -10551,7 +10551,7 @@ void Unit::UpdateSpeed(UnitMoveType mtype, bool forced, float ratio)
             {
                 if (Unit* owner = GetOwner())
                 {
-                    SetSpeedRate(mtype, owner->GetSpeedRate(mtype), forced);
+                    SetSpeedRate(mtype, owner->GetSpeedRate(mtype), forced, ignoreChange);
                     return;
                 }
             }
@@ -10697,7 +10697,7 @@ void Unit::UpdateSpeed(UnitMoveType mtype, bool forced, float ratio)
         }
     }
 
-    SetSpeedRate(mtype, speed * ratio, forced);
+    SetSpeedRate(mtype, speed * ratio, forced, ignoreChange);
 }
 
 float Unit::GetSpeed( UnitMoveType mtype ) const
@@ -10707,19 +10707,19 @@ float Unit::GetSpeed( UnitMoveType mtype ) const
 
 struct SetSpeedRateHelper
 {
-    explicit SetSpeedRateHelper(UnitMoveType _mtype, bool _forced) : mtype(_mtype), forced(_forced) {}
-    void operator()(Unit* unit) const { unit->UpdateSpeed(mtype,forced); }
+    explicit SetSpeedRateHelper(UnitMoveType _mtype, bool _forced, bool _ignoreChange) : mtype(_mtype), forced(_forced), ignoreChange(_ignoreChange) {}
+    void operator()(Unit* unit) const { unit->UpdateSpeed(mtype, forced, 1.0f, ignoreChange); }
     UnitMoveType mtype;
-    bool forced;
+    bool forced, ignoreChange;
 };
 
-void Unit::SetSpeedRate(UnitMoveType mtype, float rate, bool forced)
+void Unit::SetSpeedRate(UnitMoveType mtype, float rate, bool forced, bool ignoreChange)
 {
     if (rate < 0.0f)
         rate = 0.0f;
 
     // Update speed only on change
-    if (m_speed_rate[mtype] != rate)
+    if (m_speed_rate[mtype] != rate || ignoreChange)
     {
         m_speed_rate[mtype] = rate;
         propagateSpeedChange();
@@ -10934,7 +10934,7 @@ void Unit::SetSpeedRate(UnitMoveType mtype, float rate, bool forced)
         m_movementInfo.UpdateTime(WorldTimer::getMSTime());
     }
 
-    CallForAllControlledUnits(SetSpeedRateHelper(mtype,forced), CONTROLLED_PET|CONTROLLED_GUARDIANS|CONTROLLED_CHARM|CONTROLLED_MINIPET);
+    CallForAllControlledUnits(SetSpeedRateHelper(mtype, forced, ignoreChange), CONTROLLED_PET | CONTROLLED_GUARDIANS | CONTROLLED_CHARM | CONTROLLED_MINIPET);
 }
 
 void Unit::SetDeathState(DeathState s)
