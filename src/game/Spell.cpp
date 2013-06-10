@@ -2174,8 +2174,8 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
                     {
                         m_targets.setUnitTarget(pUnitTarget);
                         m_spellFlags |= SPELL_FLAG_REDIRECTED;
+                        targetUnitMap.push_back(pUnitTarget);
                     }
-                    targetUnitMap.push_back(pUnitTarget);
                 }
             }
             else
