@@ -528,7 +528,6 @@ void Item::SaveToDB()
             {
                 static SqlStatementID saveLoot;
                 SqlStatement stmt1 = CharacterDatabase.CreateStatement(saveLoot, "INSERT INTO item_loot (guid, owner_guid, itemid, amount, suffix, property) VALUES (?, ?, ?, ?, ?, ?)");
-
                 for (uint32 i = 0; i < lootItemCount; ++i)
                 {
                     QuestItem* qitem = NULL;
@@ -543,7 +542,7 @@ void Item::SaveToDB()
 
                     stmt1.addUInt32(GetGUIDLow());
                     stmt1.addUInt32(owner->GetGUIDLow());
-                    stmt1.addUInt32(item->itemid);
+                    stmt1.addInt32(item->currency ? -int32(item->itemid) : item->itemid);
                     stmt1.addUInt8(item->count);
                     stmt1.addUInt32(item->randomSuffix);
                     stmt1.addInt32(item->randomPropertyId);
@@ -655,7 +654,7 @@ bool Item::LoadFromDB(uint32 guidLow, Field* fields, ObjectGuid ownerGuid)
 void Item::LoadLootFromDB(Field* fields)
 {
     uint32 item_id     = abs(fields[1].GetInt32());
-    uint8  type        = fields[1].GetInt32() > 0 ? LOOT_ITEM_TYPE_ITEM : LOOT_ITEM_TYPE_CURRENCY;
+    uint8  type        = fields[1].GetInt32() >= 0 ? LOOT_ITEM_TYPE_ITEM : LOOT_ITEM_TYPE_CURRENCY;
     uint32 item_amount = fields[2].GetUInt32();
     uint32 item_suffix = fields[3].GetUInt32();
     int32  item_propid = fields[4].GetInt32();
