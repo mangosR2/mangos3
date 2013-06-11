@@ -443,7 +443,7 @@ void Spell::EffectSchoolDMG(SpellEffectIndex effect_idx)
                         if (unitTarget->GetEntry() == 26125 && (unitTarget->GetObjectGuid() == m_caster->GetObjectGuid()))
                         {
                             // After explode the ghoul must be killed
-                            unitTarget->DealDamage(unitTarget, unitTarget->GetMaxHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
+                            unitTarget->KillSelf();
                         }
                         break;
                     }
@@ -3192,7 +3192,7 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     if (!unitTarget)
                         return;
 
-                    m_caster->DealDamage(unitTarget, unitTarget->GetMaxHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
+                    unitTarget->KillSelf();
                     return;
                 }
                 case 54250:                                 // Skull Missile - Drakuru Overlord
@@ -3478,7 +3478,7 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                         return;
 
                     if (unitTarget->HasAura(64162))
-                        unitTarget->DealDamage(unitTarget, unitTarget->GetMaxHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
+                        unitTarget->KillSelf();
                     return;
                 }
                 case 64385:                                 // Spinning (from Unusual Compass)
@@ -6300,7 +6300,7 @@ void Spell::EffectSummonType(SpellEffectIndex eff_idx)
 
     uint32 factionId = summon_prop->FactionId ? summon_prop->FactionId :
                         // Else set faction to summoner's faction for pet-like summoned
-                        ((summon_prop->Flags & SUMMON_PROP_FLAG_INHERIT_FACTION) ? 
+                        ((summon_prop->Flags & SUMMON_PROP_FLAG_INHERIT_FACTION) ?
                         (responsibleCaster ? responsibleCaster->getFaction() : m_caster->getFaction()) :
                         // else auto faction detect
                         0);

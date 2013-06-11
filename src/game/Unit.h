@@ -2259,6 +2259,9 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         void RemoveSpellCooldown(uint32 spell_id, bool update = false);
         void RemoveAllSpellCooldown();
         void RemoveSpellCategoryCooldown(uint32 cat, bool update = false);
+
+        void KillSelf(uint32 keepHealthPoints = 0); // used instead ForcedDespawn() when not need despawn unit
+
     protected:
         explicit Unit ();
 

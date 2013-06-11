@@ -2518,9 +2518,9 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, DamageInfo* damageI
                     triggered_spell_id = 53652;             // Beacon of Light
                     uint32 radius = GetSpellMaxRange(sSpellRangeStore.LookupEntry(sSpellStore.LookupEntry(triggered_spell_id)->rangeIndex));
 
-                    if (!beacon->IsWithinDistInMap(this, radius) || 
+                    if (!beacon->IsWithinDistInMap(this, radius) ||
                         !beacon->IsWithinLOSInMap(this) ||
-                        !beacon->IsWithinDistInMap(pVictim, radius) || 
+                        !beacon->IsWithinDistInMap(pVictim, radius) ||
                         !beacon->IsWithinLOSInMap(pVictim))
                         return SPELL_AURA_PROC_FAILED;
 
@@ -5168,7 +5168,7 @@ SpellAuraProcResult Unit::HandleSpellMagnetAuraProc(Unit *pVictim, DamageInfo* d
         // for spells that doesn't do damage but need to destroy totem anyway
         if ((!damageInfo->damage || damageInfo->damage < GetHealth()) && GetTypeId() == TYPEID_UNIT && ((Creature*)this)->IsTotem())
         {
-            DealDamage(this, GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
+            KillSelf();
             return SPELL_AURA_PROC_OK;
         }
     }
@@ -5250,7 +5250,7 @@ SpellAuraProcResult Unit::HandleModResistanceAuraProc(Unit* /*pVictim*/, DamageI
 /**
  * Function to operations with custom hardcoded proc-like effects, maked over proc system
  *
- * @param - as 
+ * @param - as
  * @retcode - enum SpellAuraProcResult
         SPELL_AURA_PROC_OK           - aura must proc anyway
         SPELL_AURA_PROC_CANT_TRIGGER - aura not may proc anyway

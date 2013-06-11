@@ -14543,3 +14543,9 @@ void Unit::RemoveOutdatedSpellCooldowns()
         }
     }
 }
+
+void Unit::KillSelf(uint32 keepHealthPoints/*=0*/)
+{
+    DealDamage(this, keepHealthPoints ? GetHealth() - keepHealthPoints : GetHealth(),
+        NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
+}
