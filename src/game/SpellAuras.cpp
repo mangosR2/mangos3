@@ -8409,7 +8409,7 @@ void Aura::HandleSpiritOfRedemption( bool apply, bool Real )
     }
     // die at aura end
     else
-        target->KillSelf();
+        target->DealDamage(target, target->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, GetSpellProto(), false);
 }
 
 void Aura::HandleSchoolAbsorb(bool apply, bool Real)
