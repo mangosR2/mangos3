@@ -201,8 +201,8 @@ void SpellCastTargets::Update(Unit* caster)
 {
     m_GOTarget   = m_GOTargetGUID ? caster->GetMap()->GetGameObject(m_GOTargetGUID) : NULL;
     m_unitTarget = (m_unitTargetGUID && caster->GetMap()) ?
-        (m_unitTargetGUID == caster->GetObjectGuid() ? 
-            caster : 
+        (m_unitTargetGUID == caster->GetObjectGuid() ?
+            caster :
             caster->GetMap()->GetUnit(m_unitTargetGUID)) :
         NULL;
 
@@ -1141,8 +1141,8 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
     // Get mask of effects for target
     uint32 mask = target->effectMask;
 
-    Unit* unit = (m_caster->GetObjectGuid() == target->targetGUID) ? 
-                    m_caster : 
+    Unit* unit = (m_caster->GetObjectGuid() == target->targetGUID) ?
+                    m_caster :
                     ObjectAccessor::GetUnit(*m_caster, target->targetGUID);
 
     if (!unit)
@@ -1219,8 +1219,8 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
         if (unit && real_caster && real_caster != unit)
         {
             // can cause back attack (if detected)
-            if (!m_spellInfo->HasAttribute(SPELL_ATTR_EX3_NO_INITIAL_AGGRO) 
-                && !m_spellInfo->HasAttribute(SPELL_ATTR_EX_NO_THREAT) 
+            if (!m_spellInfo->HasAttribute(SPELL_ATTR_EX3_NO_INITIAL_AGGRO)
+                && !m_spellInfo->HasAttribute(SPELL_ATTR_EX_NO_THREAT)
                 && (!IsPositiveSpell(m_spellInfo->Id) || (IsNonPositiveSpell(m_spellInfo) && !real_caster->IsFriendlyTo(unit)))
                 && real_caster->isVisibleForOrDetect(unit, unit, false))
             {
@@ -1465,8 +1465,8 @@ void Spell::DoSpellHitOnUnit(Unit* unit, uint32 effectMask)
                 return;
             }
 
-            if (!m_spellInfo->HasAttribute(SPELL_ATTR_EX3_NO_INITIAL_AGGRO) 
-                && !m_spellInfo->HasAttribute(SPELL_ATTR_EX_NO_THREAT) 
+            if (!m_spellInfo->HasAttribute(SPELL_ATTR_EX3_NO_INITIAL_AGGRO)
+                && !m_spellInfo->HasAttribute(SPELL_ATTR_EX_NO_THREAT)
                 && (!IsPositiveSpell(m_spellInfo->Id) || IsNonPositiveSpell(m_spellInfo))
                 && realCaster->isVisibleForOrDetect(unit, unit, false))
             {
@@ -3258,8 +3258,8 @@ void Spell::prepare(SpellCastTargets const* targets, Aura const* triggeredByAura
     if (triggeredByAura)
         m_triggeredByAuraSpell  = triggeredByAura->GetSpellProto();
 
-    DEBUG_FILTER_LOG(LOG_FILTER_SPELL_CAST, "Spell::prepare spell %u caster %s %s formal target %s %s preparing.", 
-        m_spellInfo->Id, 
+    DEBUG_FILTER_LOG(LOG_FILTER_SPELL_CAST, "Spell::prepare spell %u caster %s %s formal target %s %s preparing.",
+        m_spellInfo->Id,
         m_caster ? m_caster->GetObjectGuid().GetString().c_str() : "<none>",
         (m_caster && !m_caster->IsInWorld()) ? "(not in World)" : "",
         m_targets.getUnitTargetGuid() ? m_targets.getUnitTargetGuid().GetString().c_str() : "<none>",
@@ -3355,7 +3355,7 @@ void Spell::cancel(bool force)
     if (m_spellState == SPELL_STATE_FINISHED)
         return;
 
-    DEBUG_FILTER_LOG(LOG_FILTER_SPELL_CAST, "Spell::cancel spell %u caster %s target %s cancelled.", 
+    DEBUG_FILTER_LOG(LOG_FILTER_SPELL_CAST, "Spell::cancel spell %u caster %s target %s cancelled.",
         m_spellInfo->Id, (m_caster && m_caster->IsInWorld()) ? m_caster->GetObjectGuid().GetString().c_str() : "<none>",
         (m_targets.getUnitTarget() && m_targets.getUnitTarget()->IsInWorld()) ? m_targets.getUnitTarget()->GetObjectGuid().GetString().c_str() : "<none>");
 
@@ -4037,8 +4037,8 @@ void Spell::update(uint32 difftime)
                     if (checkFailed)
                     {
                         DEBUG_FILTER_LOG(LOG_FILTER_SPELL_CAST, "Spell::update  spell %u caster %s  target %s cancelled by CheckRange wile cast process continued (code %u)",
-                            m_spellInfo->Id, m_caster ? m_caster->GetObjectGuid().GetString().c_str() : "<none>", 
-                            m_targets.getUnitTarget() ? m_targets.getUnitTarget()->GetObjectGuid().GetString().c_str() : "<none>", 
+                            m_spellInfo->Id, m_caster ? m_caster->GetObjectGuid().GetString().c_str() : "<none>",
+                            m_targets.getUnitTarget() ? m_targets.getUnitTarget()->GetObjectGuid().GetString().c_str() : "<none>",
                             result);
                         SendCastResult(result);
                         cancel(true);
@@ -5407,9 +5407,9 @@ SpellCastResult Spell::CheckCast(bool strict)
         if (m_spellInfo->HasAttribute(SPELL_ATTR_STOP_ATTACK_TARGET) && m_spellInfo->HasAttribute(SPELL_ATTR_EX2_UNK26) && !m_caster->isInCombat())
             return SPELL_FAILED_CASTER_AURASTATE;
 
-        if (!m_IsTriggeredSpell 
-            && NeedsComboPoints(m_spellInfo) 
-            && !m_caster->IsIgnoreUnitState(m_spellInfo, IGNORE_UNIT_TARGET_STATE) 
+        if (!m_IsTriggeredSpell
+            && NeedsComboPoints(m_spellInfo)
+            && !m_caster->IsIgnoreUnitState(m_spellInfo, IGNORE_UNIT_TARGET_STATE)
             && (!m_targets.getUnitTarget() || m_targets.getUnitTarget()->GetObjectGuid() != m_caster->GetComboTargetGuid()))
             // warrior not have real combo-points at client side but use this way for mark allow Overpower use (need really recheck this, for pets alsO)
             return (m_caster->GetObjectGuid().IsPet() || m_caster->getClass() == CLASS_WARRIOR) ? SPELL_FAILED_CASTER_AURASTATE : SPELL_FAILED_NO_COMBO_POINTS;
@@ -5894,10 +5894,12 @@ SpellCastResult Spell::CheckCast(bool strict)
                         if (m_spellInfo->EffectImplicitTargetA[j] == TARGET_SCRIPT_COORDINATES && m_spellInfo->Effect[j] != SPELL_EFFECT_PERSISTENT_AREA_AURA)
                             AddGOTarget(goScriptTarget, SpellEffectIndex(j));
                     }
-                    // store explicit target for TARGET_FOCUS_OR_SCRIPTED_GAMEOBJECT
+                    // store explicit target for TARGET_SCRIPT and TARGET_FOCUS_OR_SCRIPTED_GAMEOBJECT
                     else
                     {
-                        if (m_spellInfo->EffectImplicitTargetA[j] == TARGET_FOCUS_OR_SCRIPTED_GAMEOBJECT ||
+                        if (m_spellInfo->EffectImplicitTargetA[j] == TARGET_SCRIPT ||
+                            m_spellInfo->EffectImplicitTargetB[j] == TARGET_SCRIPT ||
+                            m_spellInfo->EffectImplicitTargetA[j] == TARGET_FOCUS_OR_SCRIPTED_GAMEOBJECT ||
                             m_spellInfo->EffectImplicitTargetB[j] == TARGET_FOCUS_OR_SCRIPTED_GAMEOBJECT)
                             AddGOTarget(goScriptTarget, SpellEffectIndex(j));
                     }
@@ -8374,7 +8376,7 @@ float Spell::GetBaseSpellSpeed()
                             m_triggeredBySpellInfo->speed : m_spellInfo->speed;
 
     // spell speed calculation for charge-like spells
-    if (m_spellInfo->HasAttribute(SPELL_ATTR_EX7_HAS_CHARGE_EFFECT) 
+    if (m_spellInfo->HasAttribute(SPELL_ATTR_EX7_HAS_CHARGE_EFFECT)
         && (fabs(speed_proto) < M_NULL_F))
         speed_proto = BASE_CHARGE_SPEED;
 

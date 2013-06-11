@@ -2263,6 +2263,24 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     unitTarget->CastSpell(m_caster, 45456, true);
                     break;
                 }
+                case 45536:                                // Complete Ancestor Ritual, KillCredit for (Q:11610)
+                {
+                    if (!gameObjTarget || m_caster->GetTypeId() != TYPEID_PLAYER)
+                        return;
+
+                    uint32 killCredit;
+                    switch (gameObjTarget->GetEntry())
+                    {
+                        case 191088: killCredit = 25397; break;
+                        case 191089: killCredit = 25398; break;
+                        case 191090: killCredit = 25399; break;
+                        default:
+                            return;
+                    }
+
+                    ((Player*)m_caster)->KilledMonsterCredit(killCredit);
+                    return;
+                }
                 case 45583:                                 // Throw Gnomish Grenade
                 {
                     if (!unitTarget || m_caster->GetTypeId() != TYPEID_PLAYER)
