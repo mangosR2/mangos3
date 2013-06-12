@@ -57,7 +57,7 @@ namespace Movement
         MoveSpline& move_spline = *unit.movespline;
         TransportInfo* transportInfo = unit.GetTransportInfo();
 
-        Position real_position = transportInfo ? 
+        Position real_position = transportInfo ?
                                     transportInfo->GetLocalPosition() :
                                     unit.GetPosition();
 
@@ -76,7 +76,7 @@ namespace Movement
         else
         {
             // check path equivalence
-            if (!args.flags.isFacing() && args.path[0] == args.path[args.path.size() - 1])
+            if (!args.flags.isFacing() && args.path.size() == 2 && args.path[0] == args.path[1])
                 return 0;
         }
 
@@ -92,11 +92,13 @@ namespace Movement
 
         if (fabs(args.velocity) < M_NULL_F)
         {
-            // If spline is initialized with SetWalk method it only means we need to select
-            // walk move speed for it but not add walk flag to unit
+            // Add or remove walk mode flag for select speed depending from call SetWalk()
+            // in spline initialization. Not need change the real unit move flags.
             uint32 moveFlagsForSpeed = moveFlags;
             if (args.flags.walkmode)
                 moveFlagsForSpeed |= MOVEFLAG_WALK_MODE;
+            else
+                moveFlagsForSpeed &= ~MOVEFLAG_WALK_MODE;
 
             args.velocity = unit.GetSpeed(SelectSpeedType(moveFlagsForSpeed));
         }
@@ -151,7 +153,7 @@ namespace Movement
         MoveSpline& move_spline = *gameobject.movespline;
         TransportInfo* transportInfo = gameobject.GetTransportInfo();
 
-        Position real_position = transportInfo ? 
+        Position real_position = transportInfo ?
                                     transportInfo->GetLocalPosition() :
                                     gameobject.GetPosition();
 
@@ -170,7 +172,7 @@ namespace Movement
         else
         {
             // check path equivalence
-            if (!args.flags.isFacing() && args.path[0] == args.path[args.path.size() - 1])
+            if (!args.flags.isFacing() && args.path.size() == 2 && args.path[0] == args.path[1])
                 return 0;
         }
 
