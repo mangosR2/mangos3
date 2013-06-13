@@ -574,6 +574,15 @@ enum SummonPropFlags
     SUMMON_PROP_FLAG_UNK14                    = 0x2000,           // 2 spells in 3.0.3, escort?
 };
 
+enum SpellCooldownFlags
+{
+    SPELL_COOLDOWN_FLAG_NONE    = 0x0,
+    SPELL_COOLDOWN_FLAG_UNK1    = 0x1,                      // finishing move and repair bot
+    SPELL_COOLDOWN_FLAG_UNK2    = 0x2,                      // ranged weapon
+    SPELL_COOLDOWN_FLAG_POTION  = 0x4,                      // potions
+    SPELL_COOLDOWN_FLAG_DAY     = 0x8,                      // weekly spells - profession researches
+};
+
 // SpellEntry::Targets
 enum SpellCastTargetFlags
 {

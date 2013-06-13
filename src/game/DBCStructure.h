@@ -2189,6 +2189,15 @@ struct SpellCastingRequirementsEntry
     uint32    RequiresSpellFocus;                           // 19       m_requiresSpellFocus
 };
 
+// SpellCategory.dbc
+struct SpellCategoryEntry
+{
+    //uint32    Id;                                         // 0        m_Id
+    uint32    flags;                                        // 1        m_flags
+    //uint32    unk;                                        // 2
+    //DBCString* name;                                      // 3        m_categoryName
+};
+
 // SpellCategories.dbc
 struct SpellCategoriesEntry
 {
@@ -3138,7 +3147,7 @@ struct WorldStateEntry
 #endif
 
 typedef std::set<uint32> SpellCategorySet;
-typedef std::map<uint32,SpellCategorySet > SpellCategoryStore;
+typedef std::map<uint32,SpellCategorySet > SpellCategoryMap;
 typedef std::set<uint32> PetFamilySpellsSet;
 typedef std::map<uint32,PetFamilySpellsSet > PetFamilySpellsStore;
 

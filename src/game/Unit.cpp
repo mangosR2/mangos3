@@ -16130,8 +16130,8 @@ void Unit::RemoveSpellCategoryCooldown(uint32 cat, bool update /* = false */)
     if (m_spellCooldowns.empty())
         return;
 
-    SpellCategoryStore::const_iterator ct = sSpellCategoryStore.find(cat);
-    if (ct == sSpellCategoryStore.end())
+    SpellCategoryMap::const_iterator ct = sSpellCategoryMap.find(cat);
+    if (ct == sSpellCategoryMap.end())
         return;
 
     const SpellCategorySet& ct_set = ct->second;
@@ -16191,6 +16191,11 @@ void Unit::AddSpellAndCategoryCooldowns(SpellEntry const* spellInfo, uint32 item
 
     time_t catrecTime;
     time_t recTime;
+
+    bool isDayCd = false;
+    if (SpellCategoryEntry const* categoryEntry = sSpellCategoryStore.LookupEntry(category))
+        if (categoryEntry->flags & SPELL_COOLDOWN_FLAG_DAY)
+            isDayCd = true;
 
     // overwrite time for selected category
     if (infinityCooldown)
@@ -16256,11 +16261,19 @@ void Unit::AddSpellAndCategoryCooldowns(SpellEntry const* spellInfo, uint32 item
         if (categorycooldown < 0) categorycooldown = 0;
 
         // no cooldown after applying spell mods
-        if (cooldown == 0 && categorycooldown == 0)
+        if (!isDayCd && cooldown == 0 && categorycooldown == 0)
             return;
 
-        catrecTime = categorycooldown ? curTime+categorycooldown/IN_MILLISECONDS : 0;
-        recTime    = cooldown ? curTime+cooldown/IN_MILLISECONDS : catrecTime;
+        if (!isDayCd)
+        {
+            catrecTime = categorycooldown ? curTime + categorycooldown/IN_MILLISECONDS : 0;
+            recTime    = cooldown ? curTime + cooldown / IN_MILLISECONDS : catrecTime;
+        }
+        else
+        {
+            catrecTime = uint32(sWorld.GetNextDailyQuestsResetTime());
+            recTime = cooldown ? curTime + cooldown/IN_MILLISECONDS : catrecTime;
+        }
     }
 
     // self spell cooldown
@@ -16270,8 +16283,8 @@ void Unit::AddSpellAndCategoryCooldowns(SpellEntry const* spellInfo, uint32 item
     // category spells
     if (category && categorycooldown > 0)
     {
-        SpellCategoryStore::const_iterator i_scstore = sSpellCategoryStore.find(category);
-        if (i_scstore != sSpellCategoryStore.end())
+        SpellCategoryMap::const_iterator i_scstore = sSpellCategoryMap.find(category);
+        if (i_scstore != sSpellCategoryMap.end())
         {
             for (SpellCategorySet::const_iterator i_scset = i_scstore->second.begin(); i_scset != i_scstore->second.end(); ++i_scset)
             {

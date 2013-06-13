@@ -5373,7 +5373,7 @@ void SpellMgr::CheckUsedSpells(char const* table)
         }
 
         // TODO: for spellCategory better check need dbc loading
-        if (category < -1 || (category >=0 && sSpellCategoryStore.find(category) == sSpellCategoryStore.end()))
+        if (category < -1 || (category >=0 && sSpellCategoryMap.find(category) == sSpellCategoryMap.end()))
         {
             sLog.outError("Table '%s' for spell %u have wrong SpellCategory value(%u), skipped.",table,spell,category);
             continue;
