@@ -4812,7 +4812,7 @@ SpellCastResult SpellMgr::CheckBgAndArenaCast(SpellEntry const *spellInfo, uint3
     bool isRatedBg = false;     // TODO: implement
 
     if ((isArena || isRatedBg) && spellInfo->HasAttribute(SPELL_ATTR_EX4_NOT_USABLE_IN_ARENA_OR_RATED_BG))
-        return isArena ? SPELL_FAILED_NOT_IN_ARENA : SPELL_FAILED_NOT_IN_RATED_BG;
+        return isArena ? SPELL_FAILED_NOT_IN_ARENA : SPELL_FAILED_NOT_IN_RATED_BATTLEGROUND;
 
     if (isArena)
     {
@@ -4831,7 +4831,7 @@ SpellCastResult SpellMgr::CheckBgAndArenaCast(SpellEntry const *spellInfo, uint3
         // - with greater than 10 min CD
         if (GetSpellRecoveryTime(spellInfo) > 15 * MINUTE * IN_MILLISECONDS &&
             !spellInfo->HasAttribute(SPELL_ATTR_EX9_USABLE_IN_RATED_BATTLEGROUNDS))
-            return SPELL_FAILED_NOT_IN_RATED_BG;
+            return SPELL_FAILED_NOT_IN_RATED_BATTLEGROUND;
     }
 
     // Spell casted only on battleground
