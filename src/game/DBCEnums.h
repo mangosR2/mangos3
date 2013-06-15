@@ -497,6 +497,14 @@ enum MountFlags
     MOUNT_FLAG_CAN_SWIM             = 0x8,                  // client checks MOVEMENTFLAG_SWIMMING
 };
 
+enum PetTalenType
+{
+    PET_TALENT_TYPE_NONE            = -1,
+    PET_TALENT_TYPE_FEROCITY        = 0,
+    PET_TALENT_TYPE_TENACITY        = 1,
+    PET_TALENT_TYPE_CUNNING         = 2,
+};
+
 enum TalentTreeRole
 {
     TALENT_ROLE_TANK    = 0x2,
