@@ -532,12 +532,15 @@ class Spell
 
         void UpdatePointers();                              // must be used at call Spell code after time delay (non triggered spell cast/update spell call/etc)
 
-        void AddTriggeredSpell(SpellEntry const* spellInfo) { m_TriggerSpells.push_back(spellInfo); }
         void AddPrecastSpell(SpellEntry const* spellInfo) { m_preCastSpells.push_back(spellInfo); }
-        void AddTriggeredSpell(uint32 spellId);
+        void AddTriggeredSpell(SpellEntry const* spellInfo) { m_TriggerSpells.push_back(spellInfo); }
+        void AddNotTriggeredSpell(SpellEntry const* spellInfo) { m_NotTriggerSpells.push_back(spellInfo); }
         void AddPrecastSpell(uint32 spellId);
+        void AddTriggeredSpell(uint32 spellId);
+        void AddNotTriggeredSpell(uint32 spellId);
         void CastPreCastSpells(Unit* target);
         void CastTriggerSpells();
+        void CastNotTriggerSpells();
 
         void CleanupTargetList();
         void ClearCastItem();
