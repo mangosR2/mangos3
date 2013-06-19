@@ -12963,7 +12963,11 @@ void Spell::EffectStuck(SpellEffectEntry const* effect /*effect*/)
         return;
 
     pTarget->RepopAtGraveyard();
-
+    if (pTarget->isDead())
+    {
+        pTarget->ResurrectPlayer(0.5f);
+        pTarget->SpawnCorpseBones();
+    }
     // Stuck spell trigger Hearthstone cooldown
     SpellEntry const *spellInfo = sSpellStore.LookupEntry(8690);
     if (!spellInfo)
