@@ -1885,6 +1885,13 @@ bool Player::TeleportTo(WorldLocation const& loc, uint32 options)
     // reset movement flags at teleport, because player will continue move with these flags after teleport
     DisableSpline();
     m_movementInfo.SetMovementFlags(MOVEFLAG_NONE);
+    m_movementInfo.GetJumpInfo().Clear();
+    m_movementInfo.GetStatusInfo().hasPitch = false;
+    m_movementInfo.GetStatusInfo().hasSplineElevation = false;
+
+    WorldPacket data;
+    BuildForceMoveRootPacket(&data, false, 0);
+    SendMessageToSet(&data, true);
 
     if (GetMap() && GetMapId() == loc.GetMapId() && !IsOnTransport())
     {
@@ -21021,6 +21028,8 @@ void Player::SendInitialPacketsAfterAddToMap()
     if (getClass() == CLASS_HUNTER)
         GetSession()->SendStablePet(ObjectGuid());
 
+    // fix client movement freeze after teleport
+    Relocate(WorldLocation(GetMap()->GetId(), GetPositionX(), GetPositionY(), GetPositionZ(), GetOrientation()));
     UpdateSpeed(MOVE_RUN, true, 1.0f, true);
     UpdateSpeed(MOVE_SWIM, true, 1.0f, true);
     UpdateSpeed(MOVE_FLIGHT, true, 1.0f, true);

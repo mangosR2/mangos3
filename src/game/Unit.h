@@ -824,6 +824,7 @@ class MovementInfo
         {
             JumpInfo() : velocity(0.f), sinAngle(0.f), cosAngle(0.f), xyspeed(0.f) {}
             float velocity, sinAngle, cosAngle, xyspeed;
+            void Clear() { velocity = sinAngle = cosAngle = xyspeed = 0.0f; }
         };
 
         // used only for SMSG_PLAYER_MOVE currently
@@ -844,6 +845,7 @@ class MovementInfo
         };
 
         JumpInfo const& GetJumpInfo() const { return jump; }
+        JumpInfo& GetJumpInfo() { return jump; }
 
         MovementInfo& operator = (const MovementInfo& targetInfo)
         {
@@ -871,6 +873,7 @@ class MovementInfo
         }
 
         StatusInfo const& GetStatusInfo() const { return si; }
+        StatusInfo& GetStatusInfo() { return si; }
         float GetSplineElevation() const { return splineElevation; }
         float GetPitch() const { return s_pitch; }
 
