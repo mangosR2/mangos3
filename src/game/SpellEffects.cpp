@@ -8816,7 +8816,7 @@ void Spell::EffectEnchantItemPerm(SpellEffectEntry const* effect)
     // remove old enchanting before applying new if equipped
     item_owner->ApplyEnchantment(itemTarget,PERM_ENCHANTMENT_SLOT,false);
 
-    itemTarget->SetEnchantment(PERM_ENCHANTMENT_SLOT, enchant_id, 0, 0);
+    itemTarget->SetEnchantment(PERM_ENCHANTMENT_SLOT, enchant_id, 0, 0, m_caster->GetObjectGuid());
 
     // add new enchanting if equipped
     item_owner->ApplyEnchantment(itemTarget,PERM_ENCHANTMENT_SLOT,true);
@@ -8876,7 +8876,7 @@ void Spell::EffectEnchantItemPrismatic(SpellEffectEntry const* effect)
     // remove old enchanting before applying new if equipped
     item_owner->ApplyEnchantment(itemTarget, PRISMATIC_ENCHANTMENT_SLOT, false);
 
-    itemTarget->SetEnchantment(PRISMATIC_ENCHANTMENT_SLOT, enchant_id, 0, 0);
+    itemTarget->SetEnchantment(PRISMATIC_ENCHANTMENT_SLOT, enchant_id, 0, 0, m_caster->GetObjectGuid());
 
     // add new enchanting if equipped
     item_owner->ApplyEnchantment(itemTarget,PRISMATIC_ENCHANTMENT_SLOT,true);
@@ -8996,7 +8996,7 @@ void Spell::EffectEnchantItemTmp(SpellEffectEntry const* effect)
     // remove old enchanting before applying new if equipped
     item_owner->ApplyEnchantment(itemTarget,TEMP_ENCHANTMENT_SLOT, false);
 
-    itemTarget->SetEnchantment(TEMP_ENCHANTMENT_SLOT, enchant_id, duration * 1000, 0);
+    itemTarget->SetEnchantment(TEMP_ENCHANTMENT_SLOT, enchant_id, duration * 1000, 0, m_caster->GetObjectGuid());
 
     // add new enchanting if equipped
     item_owner->ApplyEnchantment(itemTarget, TEMP_ENCHANTMENT_SLOT, true);
@@ -14059,13 +14059,13 @@ void Spell::EffectEnchantHeldItem(SpellEffectEntry const* effect)
     {
         uint32 enchant_id = effect->EffectMiscValue;
         int32 duration = m_duration;                        // Try duration index first...
-        if(!duration)
-            duration = m_currentBasePoints[effect->GetIndex()];        // Base points after...
+        if (!duration)
+            duration = m_currentBasePoints[SpellEffectIndex(effect->EffectIndex)];        // Base points after...
+
         if (!duration)
             duration = 10;                                  // 10 seconds for enchants which don't have listed duration
 
         SpellItemEnchantmentEntry const *pEnchant = sSpellItemEnchantmentStore.LookupEntry(enchant_id);
-
         if (!pEnchant)
             return;
 
@@ -14076,9 +14076,15 @@ void Spell::EffectEnchantHeldItem(SpellEffectEntry const* effect)
         if (item->GetEnchantmentId(slot) && item->GetEnchantmentId(slot) != enchant_id)
             return;
 
+        bool dontApply = 
+            item->IsEquipped() 
+            && (item->GetSlot() == EQUIPMENT_SLOT_MAINHAND || item->GetSlot() == EQUIPMENT_SLOT_OFFHAND || item->GetSlot() == EQUIPMENT_SLOT_RANGED)
+            && !item_owner->CanUseEquippedWeapon((WeaponAttackType)Player::GetAttackBySlot(item->GetSlot()));
+
         // Apply the temporary enchantment
-        item->SetEnchantment(slot, enchant_id, duration*IN_MILLISECONDS, 0);
-        item_owner->ApplyEnchantment(item, slot, true);
+        item->SetEnchantment(slot, enchant_id, duration*IN_MILLISECONDS, 0, m_caster->GetObjectGuid());
+        if (!dontApply)
+            item_owner->ApplyEnchantment(item, slot, true);
     }
 }
 

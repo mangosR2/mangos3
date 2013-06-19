@@ -938,13 +938,13 @@ void WorldSession::HandleSetAmmoOpcode(WorldPacket& recv_data)
     recv_data >> item;
 }
 
-void WorldSession::SendEnchantmentLog(ObjectGuid targetGuid, ObjectGuid casterGuid, uint32 itemId, uint32 spellId)
+void WorldSession::SendEnchantmentLog(ObjectGuid targetGuid, ObjectGuid casterGuid, uint32 itemId, uint32 enchantId)
 {
     WorldPacket data(SMSG_ENCHANTMENTLOG, (8 + 8 + 4 + 4 + 1)); // last check 2.0.10
     data << targetGuid.WriteAsPacked();
     data << casterGuid.WriteAsPacked();
     data << uint32(itemId);
-    data << uint32(spellId);
+    data << uint32(enchantId);
     SendPacket(&data);
 }
 
@@ -1314,7 +1314,7 @@ void WorldSession::HandleSocketOpcode(WorldPacket& recv_data)
         if (GemEnchants[i])
         {
             uint32 count = 1;
-            itemTarget->SetEnchantment(EnchantmentSlot(SOCK_ENCHANTMENT_SLOT + i), GemEnchants[i], 0, 0);
+            itemTarget->SetEnchantment(EnchantmentSlot(SOCK_ENCHANTMENT_SLOT + i), GemEnchants[i], 0, 0, _player->GetObjectGuid());
             if (Item* guidItem = gemGuids[i] ? _player->GetItemByGuid(gemGuids[i]) : NULL)
                 _player->DestroyItemCount(guidItem, count, true);
         }
@@ -1327,7 +1327,7 @@ void WorldSession::HandleSocketOpcode(WorldPacket& recv_data)
     if (SocketBonusActivated != SocketBonusToBeActivated)   // if there was a change...
     {
         _player->ApplyEnchantment(itemTarget, BONUS_ENCHANTMENT_SLOT, false);
-        itemTarget->SetEnchantment(BONUS_ENCHANTMENT_SLOT, (SocketBonusToBeActivated ? itemTarget->GetProto()->socketBonus : 0), 0, 0);
+        itemTarget->SetEnchantment(BONUS_ENCHANTMENT_SLOT, (SocketBonusToBeActivated ? itemTarget->GetProto()->socketBonus : 0), 0, 0, _player->GetObjectGuid());
         _player->ApplyEnchantment(itemTarget, BONUS_ENCHANTMENT_SLOT, true);
         // it is not displayed, client has an inbuilt system to determine if the bonus is activated
     }
@@ -1335,6 +1335,8 @@ void WorldSession::HandleSocketOpcode(WorldPacket& recv_data)
     _player->ToggleMetaGemsActive(slot, true);              // turn on all metagems (except for target item)
 
     itemTarget->SetNotSoulboundTradeable(_player);          // clear tradeable flag
+
+    itemTarget->SendUpdateSockets();
 }
 
 void WorldSession::HandleCancelTempEnchantmentOpcode(WorldPacket& recv_data)
