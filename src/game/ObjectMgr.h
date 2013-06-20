@@ -609,6 +609,15 @@ struct HotfixInfo
 
 typedef std::vector<HotfixInfo> HotfixData;
 
+struct CharacterNameData
+{
+    std::string m_name;
+    uint8 m_class;
+    uint8 m_race;
+    uint8 m_gender;
+    uint8 m_level;
+};
+
 class ObjectMgr
 {
     friend class PlayerDumpReader;
@@ -1283,11 +1292,19 @@ class ObjectMgr
         HotfixData const& GetHotfixData() const { return m_hotfixData; }
         time_t GetHotfixTime(uint32 entry, uint32 type) const;
 
-    protected:
-
         // initial free low guid for selected guid type for map local guids
         uint32 m_FirstTemporaryCreatureGuid;
         uint32 m_FirstTemporaryGameObjectGuid;
+
+        void LoadCharacterNameData();
+        CharacterNameData const* GetCharacterNameData(uint32 guid) const;
+        void AddCharacterNameData(uint32 guid, std::string const& name, uint8 gender, uint8 race, uint8 playerClass, uint8 level);
+        void UpdateCharacterNameData(uint32 guid, std::string const& name, uint8 gender = GENDER_NONE, uint8 race = 0);
+        void UpdateCharacterNameDataLevel(uint32 guid, uint8 level);
+        void DeleteCharacterNameData(uint32 guid) { _characterNameDataMap.erase(guid); }
+        bool HasCharacterNameData(uint32 guid) { return _characterNameDataMap.find(guid) != _characterNameDataMap.end(); }
+
+    protected:
 
         // first free id for selected id type
         IdGenerator<uint32> m_ArenaTeamIds;
@@ -1438,6 +1455,8 @@ class ObjectMgr
         CacheTrainerSpellMap m_mCacheTrainerSpellMap;
 
         HotfixData m_hotfixData;
+
+        std::map<uint32, CharacterNameData> _characterNameDataMap;
 };
 
 #define sObjectMgr MaNGOS::Singleton<ObjectMgr>::Instance()

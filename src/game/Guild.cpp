@@ -250,6 +250,8 @@ bool Guild::AddMember(ObjectGuid plGuid, uint32 plRank)
     UpdateAccountsNumber();
     //sGuildFinderMgr.RemoveMembershipRequest(pl->GetGUIDLow(), ObjectGuid(this->GetId()));
 
+    sGuildFinderMgr.RemoveMembershipRequest(lowguid, m_Id);
+
     return true;
 }
 
@@ -806,8 +808,9 @@ void Guild::Disband()
     CharacterDatabase.PExecute("DELETE FROM guild_bank_right WHERE guildid = '%u'", m_Id);
     CharacterDatabase.PExecute("DELETE FROM guild_bank_eventlog WHERE guildid = '%u'", m_Id);
     CharacterDatabase.PExecute("DELETE FROM guild_eventlog WHERE guildid = '%u'", m_Id);
-    CharacterDatabase.CommitTransaction();
     sGuildFinderMgr.DeleteGuild(m_Id);
+    CharacterDatabase.CommitTransaction();
+
     sGuildMgr.RemoveGuild(m_Id);
 }
 

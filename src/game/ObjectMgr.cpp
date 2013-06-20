@@ -10849,3 +10849,77 @@ time_t ObjectMgr::GetHotfixTime(uint32 entry, uint32 type) const
 
     return ret ? ret : time(NULL);
 }
+
+void ObjectMgr::LoadCharacterNameData()
+{
+    //                                                    0     1     2     3       4      5
+    QueryResult* result = CharacterDatabase.Query("SELECT guid, name, race, gender, class, level FROM characters WHERE deleteDate IS NULL");
+    if (!result)
+    {
+        sLog.outString(">> No character name data loaded, empty query");
+        return;
+    }
+
+    uint32 count = 0;
+
+    do
+    {
+        Field* fields = result->Fetch();
+
+        CharacterNameData& data = _characterNameDataMap[fields[0].GetUInt32()];
+        data.m_name = fields[1].GetCppString();
+        data.m_race = fields[2].GetUInt8();
+        data.m_gender = fields[3].GetUInt8();
+        data.m_class = fields[4].GetUInt8();
+        data.m_level = fields[5].GetUInt8();
+        ++count;
+    }
+    while (result->NextRow());
+
+    delete result;
+
+    sLog.outString(">> Loaded name data for %u characters", count);
+}
+
+void ObjectMgr::AddCharacterNameData(uint32 guid, std::string const& name, uint8 gender, uint8 race, uint8 playerClass, uint8 level)
+{
+    CharacterNameData& data = _characterNameDataMap[guid];
+    data.m_name = name;
+    data.m_race = race;
+    data.m_gender = gender;
+    data.m_class = playerClass;
+    data.m_level = level;
+}
+
+void ObjectMgr::UpdateCharacterNameData(uint32 guid, std::string const& name, uint8 gender /*= GENDER_NONE*/, uint8 race /*= RACE_NONE*/)
+{
+    std::map<uint32, CharacterNameData>::iterator itr = _characterNameDataMap.find(guid);
+    if (itr == _characterNameDataMap.end())
+        return;
+
+    itr->second.m_name = name;
+
+    if (gender != GENDER_NONE)
+        itr->second.m_gender = gender;
+
+    if (race != 0)
+        itr->second.m_race = race;
+}
+
+void ObjectMgr::UpdateCharacterNameDataLevel(uint32 guid, uint8 level)
+{
+    std::map<uint32, CharacterNameData>::iterator itr = _characterNameDataMap.find(guid);
+    if (itr == _characterNameDataMap.end())
+        return;
+
+    itr->second.m_level = level;
+}
+
+CharacterNameData const* ObjectMgr::GetCharacterNameData(uint32 guid) const
+{
+    std::map<uint32, CharacterNameData>::const_iterator itr = _characterNameDataMap.find(guid);
+    if (itr != _characterNameDataMap.end())
+        return &itr->second;
+    else
+        return NULL;
+}

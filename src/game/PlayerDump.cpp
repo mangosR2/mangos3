@@ -469,6 +469,11 @@ DumpReturn PlayerDumpReader::LoadDump(const std::string& file, uint32 account, s
     typedef PetIds::value_type PetIdsPair;
     PetIds petids;
 
+    uint8 gender = GENDER_NONE;
+    uint8 race = 0;
+    uint8 playerClass = 0;
+    uint8 level = 1;
+
     CharacterDatabase.BeginTransaction();
     while(!feof(fin))
     {
@@ -551,6 +556,11 @@ DumpReturn PlayerDumpReader::LoadDump(const std::string& file, uint32 account, s
 
                 if (!changenth(line, 2, chraccount))        // characters.account update
                     ROLLBACK(DUMP_FILE_BROKEN);
+
+                race = uint8(atol(getnth(line, 4).c_str()));
+                playerClass = uint8(atol(getnth(line, 5).c_str()));
+                gender = uint8(atol(getnth(line, 6).c_str()));
+                level = uint8(atol(getnth(line, 7).c_str()));
 
                 if (name == "")
                 {
@@ -724,6 +734,9 @@ DumpReturn PlayerDumpReader::LoadDump(const std::string& file, uint32 account, s
     }
 
     CharacterDatabase.CommitTransaction();
+
+    // in case of name conflict player has to rename at login anyway
+    sObjectMgr.AddCharacterNameData(guid, name, gender, race, playerClass, level);
 
     //FIXME: current code with post-updating guids not safe for future per-map threads
     sObjectMgr.m_ItemGuids.Set(sObjectMgr.m_ItemGuids.GetNextAfterMaxUsed() + items.size());

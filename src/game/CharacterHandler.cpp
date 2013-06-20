@@ -29,6 +29,7 @@
 #include "Player.h"
 #include "Guild.h"
 #include "GuildMgr.h"
+#include "GuildFinderMgr.h"
 #include "UpdateMask.h"
 #include "Auth/md5.h"
 #include "ObjectAccessor.h"
@@ -193,6 +194,10 @@ void WorldSession::HandleCharEnum(QueryResult* result)
                 sLog.outError("Building enum data for SMSG_CHAR_ENUM has failed, aborting");
                 return;
             }
+
+            // This can happen if characters are inserted into the database manually. Core hasn't loaded name data yet.
+            if (!sObjectMgr.HasCharacterNameData((*result)[0].GetUInt32()))
+                sObjectMgr.AddCharacterNameData((*result)[0].GetUInt32(), (*result)[1].GetString(), (*result)[4].GetUInt8(), (*result)[2].GetUInt8(), (*result)[3].GetUInt8(), (*result)[7].GetUInt8());
         }
         while (result->NextRow());
 
@@ -508,6 +513,8 @@ void WorldSession::HandleCharCreateOpcode(WorldPacket& recv_data)
     std::string IP_str = GetRemoteAddress();
     BASIC_LOG("Account: %d (IP: %s) Create Character:[%s] (guid: %u)", GetAccountId(), IP_str.c_str(), name.c_str(), pNewChar.GetGUIDLow());
     sLog.outChar("Account: %d (IP: %s) Create Character:[%s] (guid: %u)", GetAccountId(), IP_str.c_str(), name.c_str(), pNewChar.GetGUIDLow());
+
+    sObjectMgr.AddCharacterNameData(pNewChar.GetGUIDLow(), std::string(pNewChar.GetName()), pNewChar.getGender(), pNewChar.getRace(), pNewChar.getClass(), pNewChar.getLevel());
 }
 
 void WorldSession::HandleCharDeleteOpcode(WorldPacket& recv_data)
@@ -559,7 +566,9 @@ void WorldSession::HandleCharDeleteOpcode(WorldPacket& recv_data)
     BASIC_LOG("Account: %d (IP: %s) Delete Character:[%s] (guid: %u)", GetAccountId(), IP_str.c_str(), name.c_str(), lowguid);
     sLog.outChar("Account: %d (IP: %s) Delete Character:[%s] (guid: %u)", GetAccountId(), IP_str.c_str(), name.c_str(), lowguid);
 
-    if (sLog.IsOutCharDump())                               // optimize GetPlayerDump call
+    sObjectMgr.DeleteCharacterNameData(lowguid);
+
+    if(sLog.IsOutCharDump())                                // optimize GetPlayerDump call
     {
         std::string dump = PlayerDumpWriter().GetDump(lowguid);
         sLog.outCharDump(dump.c_str(), GetAccountId(), lowguid, name.c_str());
@@ -567,6 +576,7 @@ void WorldSession::HandleCharDeleteOpcode(WorldPacket& recv_data)
 
     sCalendarMgr.RemovePlayerCalendar(guid);
 
+    sGuildFinderMgr.RemoveAllMembershipRequestsFromPlayer(lowguid);
     Player::DeleteFromDB(guid, GetAccountId());
 
     WorldPacket data(SMSG_CHAR_DELETE, 1);
@@ -1108,6 +1118,8 @@ void WorldSession::HandleChangePlayerNameOpcodeCallBack(QueryResult* result, uin
 
     sWorld.InvalidatePlayer(guid);
 	sAccountMgr.ClearPlayerDataCache(guid);
+
+    sObjectMgr.UpdateCharacterNameData(guidLow, newname);
 }
 
 void WorldSession::HandleSetPlayerDeclinedNamesOpcode(WorldPacket& recv_data)
@@ -1284,6 +1296,16 @@ void WorldSession::HandleCharFactionOrRaceChangeOpcode(WorldPacket& recv_data)
     recv_data >> guid;
     recv_data >> newname;
     recv_data >> gender >> skin >> hairColor >> hairStyle >> facialHair >> face >> newRace;
+
+    // get the players old (at this moment current) race
+    CharacterNameData const* nameData = sObjectMgr.GetCharacterNameData(guid.GetCounter());
+    if (!nameData)
+    {
+        WorldPacket data(SMSG_CHAR_FACTION_CHANGE, 1);
+        data << uint8(CHAR_CREATE_ERROR);
+        SendPacket(&data);
+        return;
+    }
 
     QueryResult* result = CharacterDatabase.PQuery("SELECT at_login, name, race FROM characters WHERE guid ='%u'", guid.GetCounter());
     if (!result)
@@ -1570,6 +1592,8 @@ void WorldSession::HandleCharFactionOrRaceChangeOpcode(WorldPacket& recv_data)
 
     sWorld.InvalidatePlayer(guid);
 
+    sObjectMgr.UpdateCharacterNameData(guid.GetCounter(), newname, gender, newRace);
+
     WorldPacket data(SMSG_CHAR_FACTION_CHANGE, 1 + 8 + (newname.size() + 1) + 7);
     data << uint8(RESPONSE_SUCCESS);
     data << ObjectGuid(guid);
@@ -1664,6 +1688,7 @@ void WorldSession::HandleCharCustomizeOpcode(WorldPacket& recv_data)
     sLog.outChar("Account: %d (IP: %s), Character %s customized to: %s", GetAccountId(), IP_str.c_str(), guid.GetString().c_str(), newname.c_str());
 
     sWorld.InvalidatePlayer(guid);
+    sObjectMgr.UpdateCharacterNameData(guid.GetCounter(), newname, gender);
 
     WorldPacket data(SMSG_CHAR_CUSTOMIZE, 1 + 8 + (newname.size() + 1) + 6);
     data << uint8(RESPONSE_SUCCESS);

@@ -12028,8 +12028,13 @@ void Unit::SetLevel(uint32 lvl)
     SetUInt32Value(UNIT_FIELD_LEVEL, lvl);
 
     // group update
-    if ((GetTypeId() == TYPEID_PLAYER) && ((Player*)this)->GetGroup())
-        ((Player*)this)->SetGroupUpdateFlag(GROUP_UPDATE_FLAG_LEVEL);
+    if (GetTypeId() == TYPEID_PLAYER)
+    {
+        if (((Player*)this)->GetGroup())
+            ((Player*)this)->SetGroupUpdateFlag(GROUP_UPDATE_FLAG_LEVEL);
+
+        sObjectMgr.UpdateCharacterNameDataLevel(GetGUIDLow(), lvl);
+    }
 }
 
 void Unit::SetHealth(uint32 val)
