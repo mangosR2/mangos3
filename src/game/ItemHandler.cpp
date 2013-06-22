@@ -642,7 +642,7 @@ void WorldSession::SendListInventory(ObjectGuid vendorguid)
                         if (itr->second.AchievementId && !guild->GetAchievementMgr().HasAchievement(itr->second.AchievementId))
                             continue;
 
-                        if ((itr->second.Racemask & _player->getRaceMask()) == 0)
+                        if (itr->second.Racemask > 0 && (itr->second.Racemask & _player->getRaceMask()) == 0)
                             continue;
 
                         if (itr->second.Standing && _player->GetReputationRank(GUILD_REP_FACTION) < itr->second.Standing)
