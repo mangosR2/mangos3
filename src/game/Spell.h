@@ -682,8 +682,9 @@ class Spell
 
         //List For Triggered Spells
         typedef std::list<SpellEntry const*> SpellInfoList;
-        SpellInfoList m_TriggerSpells;                      // casted by caster to same targets settings in m_targets at success finish of current spell
         SpellInfoList m_preCastSpells;                      // casted by caster to each target at spell hit before spell effects apply
+        SpellInfoList m_TriggerSpells;                      // casted by caster to same targets settings in m_targets at success finish of current spell
+        SpellInfoList m_NotTriggerSpells;                   // casted not triggered by caster to same targets settings in m_targets at success finish of current spell
 
         uint32 m_spellState;
         uint32 m_timer;
