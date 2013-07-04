@@ -40,13 +40,20 @@
 // Note: If you want to use 64-bit refs, change the types of both dtPolyRef & dtTileRef.
 // It is also recommended that you change dtHashRef() to a proper 64-bit hash.
 
+// added for CMaNGOS
+// we cannot have over 31 bits for either tile nor poly
+// without changing polyCount to use 64bits too.
+static const int STATIC_SALT_BITS = 12;
+static const int STATIC_TILE_BITS = 21;
+static const int STATIC_POLY_BITS = 31;
+
 /// A handle to a polygon within a navigation mesh tile.
 /// @ingroup detour
-typedef unsigned int dtPolyRef;
+typedef uint64 dtPolyRef;   // modified for CMaNGOS
 
 /// A handle to a tile within a navigation mesh.
 /// @ingroup detour
-typedef unsigned int dtTileRef;
+typedef uint64 dtTileRef;   // modified for CMaNGOS
 
 /// The maximum number of vertices per navigation polygon.
 /// @ingroup detour

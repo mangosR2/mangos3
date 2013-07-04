@@ -248,13 +248,18 @@ dtStatus dtNavMesh::init(const dtNavMeshParams* params)
 		m_nextFree = &m_tiles[i];
 	}
 	
-	// Init ID generator values.
+	/*// Init ID generator values.
 	m_tileBits = dtIlog2(dtNextPow2((unsigned int)params->maxTiles));
 	m_polyBits = dtIlog2(dtNextPow2((unsigned int)params->maxPolys));
 	// Only allow 31 salt bits, since the salt mask is calculated using 32bit uint and it will overflow.
 	m_saltBits = dtMin((unsigned int)31, 32 - m_tileBits - m_polyBits);
 	if (m_saltBits < 10)
-		return DT_FAILURE | DT_INVALID_PARAM;
+		return DT_FAILURE | DT_INVALID_PARAM;*/
+
+    // modified for CMaNGOS
+    m_tileBits = STATIC_TILE_BITS;
+    m_polyBits = STATIC_POLY_BITS;
+    m_saltBits = STATIC_SALT_BITS;
 	
 	return DT_SUCCESS;
 }

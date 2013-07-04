@@ -99,8 +99,9 @@ inline float dtQueryFilter::getCost(const float* pa, const float* pb,
 	return dtVdist(pa, pb) * m_areaCost[curPoly->getArea()];
 }
 #endif	
-	
-static const float H_SCALE = 0.999f; // Search heuristic scale.
+
+// modified for CMaNGOS
+static const float H_SCALE = 2.0f; // Search heuristic scale.
 
 
 dtNavMeshQuery* dtAllocNavMeshQuery()
@@ -510,6 +511,10 @@ dtStatus dtNavMeshQuery::closestPointOnPoly(dtPolyRef ref, const float* pos, flo
 		return DT_FAILURE | DT_INVALID_PARAM;
 	if (!tile)
 		return DT_FAILURE | DT_INVALID_PARAM;
+
+    // modified for CMaNGOS
+    if (poly->getType() == DT_POLYTYPE_OFFMESH_CONNECTION)
+        return DT_FAILURE;
 	
 	closestPointOnPolyInTile(tile, poly, pos, closest);
 	
