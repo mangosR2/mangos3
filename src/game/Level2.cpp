@@ -5557,10 +5557,11 @@ bool ChatHandler::HandleMmapLocCommand(char* /*args*/)
         PSendSysMessage("Dt     [??,??] (invalid poly, probably no tile loaded)");
     else
     {
-        const dtMeshTile* tile;
-        const dtPoly* poly;
+        const dtMeshTile* tile = NULL;
+        const dtPoly* poly = NULL;
         navmesh->getTileAndPolyByRef(polyRef, &tile, &poly);
-        if (tile)
+        dtStatus dtResult = navmesh->getTileAndPolyByRef(polyRef, &tile, &poly);
+        if (( dtStatusSucceed(dtResult)) && tile)
             PSendSysMessage("Dt     [%02i,%02i]", tile->header->x, tile->header->y);
         else
             PSendSysMessage("Dt     [??,??] (no tile loaded)");
