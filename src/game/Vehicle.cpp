@@ -265,7 +265,8 @@ bool VehicleKit::AddPassenger(Unit* passenger, int8 seatId)
 
         passenger->SetCharm(GetBase());
 
-        if (GetBase()->HasAuraType(SPELL_AURA_FLY) || GetBase()->HasAuraType(SPELL_AURA_MOD_FLIGHT_SPEED) || ((Creature*)GetBase())->CanFly())
+        if (GetBase()->HasAuraType(SPELL_AURA_FLY) || GetBase()->HasAuraType(SPELL_AURA_MOD_FLIGHT_SPEED) ||
+            (GetBase()->GetTypeId() == TYPEID_UNIT && ((Creature*)GetBase())->CanFly()))
         {
             WorldPacket data(SMSG_MOVE_SET_CAN_FLY, 8 + 4);
             data << GetBase()->GetPackGUID();
@@ -411,7 +412,8 @@ void VehicleKit::RemovePassenger(Unit* passenger, bool dismount /*false*/)
         player->SetMover(player);
         player->m_movementInfo.RemoveMovementFlag(MOVEFLAG_ROOT);
 
-        if ((GetBase()->HasAuraType(SPELL_AURA_FLY) || GetBase()->HasAuraType(SPELL_AURA_MOD_FLIGHT_SPEED)) &&
+        if ((GetBase()->HasAuraType(SPELL_AURA_FLY) || GetBase()->HasAuraType(SPELL_AURA_MOD_FLIGHT_SPEED) ||
+            (GetBase()->GetTypeId() == TYPEID_UNIT && ((Creature*)GetBase())->CanFly())) &&
             (!player->HasAuraType(SPELL_AURA_FLY) && !player->HasAuraType(SPELL_AURA_MOD_FLIGHT_SPEED)))
         {
             WorldPacket dataCF(SMSG_MOVE_UNSET_CAN_FLY, 8 + 4);
@@ -422,6 +424,9 @@ void VehicleKit::RemovePassenger(Unit* passenger, bool dismount /*false*/)
             player->m_movementInfo.RemoveMovementFlag(MOVEFLAG_FLYING);
             player->m_movementInfo.RemoveMovementFlag(MOVEFLAG_CAN_FLY);
         }
+
+        if (GetBase()->IsLevitating())
+            player->m_movementInfo.RemoveMovementFlag(MOVEFLAG_LEVITATING);
     }
 
     UpdateFreeSeatCount();
