@@ -13595,7 +13595,16 @@ void Unit::EjectVehiclePassenger(int8 seatId/*=-1*/)
         return;
 
     if (seatId < 0) // any passenger
-        seatId = vehKit->GetNextEmptySeatWithFlag(-1);
+    {
+        for (int8 i = 0; i < MAX_VEHICLE_SEAT; ++i)
+        {
+            if (vehKit->GetPassenger(i))
+            {
+                seatId = i;
+                break;
+            }
+        }
+    }
 
     if (seatId >= 0 && seatId < MAX_VEHICLE_SEAT)
        AddEvent(new PassengerEjectEvent(seatId, *this), 1);
