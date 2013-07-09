@@ -2225,6 +2225,9 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         void _EnterVehicle(VehicleKitPtr vehicle, int8 seatId = -1);
         void _ExitVehicle(bool forceDismount = false);
 
+        void EjectVehiclePassenger(Unit* pPassenger);
+        void EjectVehiclePassenger(int8 seatId = -1);
+
         void ChangeSeat(int8 seatId, bool next = true);
         VehicleKitPtr GetVehicle() const { return m_pVehicle; }
         VehicleKitPtr GetVehicleKit() const { return m_pVehicleKit; }

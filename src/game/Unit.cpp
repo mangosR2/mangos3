@@ -13574,6 +13574,33 @@ void Unit::_ExitVehicle(bool forceDismount)
         ((Player*)this)->ResummonPetTemporaryUnSummonedIfAny();
 }
 
+void Unit::EjectVehiclePassenger(Unit* pPassenger)
+{
+    if (!pPassenger)
+        return;
+
+    VehicleKitPtr vehKit = GetVehicleKit();
+    if (!vehKit)
+        return;
+
+    int8 seatId = vehKit->GetSeatId(pPassenger);
+    if (seatId >= 0)
+        EjectVehiclePassenger(seatId);
+}
+
+void Unit::EjectVehiclePassenger(int8 seatId/*=-1*/)
+{
+    VehicleKitPtr vehKit = GetVehicleKit();
+    if (!vehKit)
+        return;
+
+    if (seatId < 0) // any passenger
+        seatId = vehKit->GetNextEmptySeatWithFlag(-1);
+
+    if (seatId >= 0 && seatId < MAX_VEHICLE_SEAT)
+       AddEvent(new PassengerEjectEvent(seatId, *this), 1);
+}
+
 void Unit::SetPvP( bool state )
 {
     if (state)
