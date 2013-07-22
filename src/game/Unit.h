@@ -469,8 +469,6 @@ enum UnitMoveType
 
 #define MAX_MOVE_TYPE     9
 
-extern float baseMoveSpeed[MAX_MOVE_TYPE];
-
 #define BASE_CHARGE_SPEED 27.0f
 
 enum CombatRating
