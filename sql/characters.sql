@@ -28,6 +28,29 @@
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
+<<<<<<< HEAD
+=======
+-- Table structure for table `character_db_version`
+--
+
+DROP TABLE IF EXISTS `character_db_version`;
+CREATE TABLE `character_db_version` (
+  `required_12487_01_characters_characters` bit(1) default NULL
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Last applied sql update to DB';
+
+--
+-- Dumping data for table `character_db_version`
+--
+
+LOCK TABLES `character_db_version` WRITE;
+/*!40000 ALTER TABLE `character_db_version` DISABLE KEYS */;
+INSERT INTO `character_db_version` VALUES
+(NULL);
+/*!40000 ALTER TABLE `character_db_version` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+>>>>>>> b81789df45bef399c73994f2caabb728ba40c1b8
 -- Table structure for table `account_data`
 --
 
@@ -198,6 +221,98 @@ LOCK TABLES `bugreport` WRITE;
 UNLOCK TABLES;
 
 --
+<<<<<<< HEAD
+=======
+-- Table structure for table `characters`
+--
+
+DROP TABLE IF EXISTS `characters`;
+CREATE TABLE `characters` (
+  `guid` int(11) unsigned NOT NULL default '0' COMMENT 'Global Unique Identifier',
+  `account` int(11) unsigned NOT NULL default '0' COMMENT 'Account Identifier',
+  `name` varchar(12) NOT NULL default '',
+  `race` tinyint(3) unsigned NOT NULL default '0',
+  `class` tinyint(3) unsigned NOT NULL default '0',
+  `gender` TINYINT UNSIGNED NOT NULL default '0',
+  `level` TINYINT UNSIGNED NOT NULL default '0',
+  `xp` INT UNSIGNED NOT NULL default '0',
+  `money` INT UNSIGNED NOT NULL default '0',
+  `playerBytes` INT UNSIGNED NOT NULL default '0',
+  `playerBytes2` INT UNSIGNED NOT NULL default '0',
+  `playerFlags` INT UNSIGNED NOT NULL default '0',
+  `position_x` float NOT NULL default '0',
+  `position_y` float NOT NULL default '0',
+  `position_z` float NOT NULL default '0',
+  `map` int(11) unsigned NOT NULL default '0' COMMENT 'Map Identifier',
+  `dungeon_difficulty` tinyint(1) unsigned NOT NULL DEFAULT '0',
+  `orientation` float NOT NULL default '0',
+  `taximask` longtext,
+  `online` tinyint(3) unsigned NOT NULL default '0',
+  `cinematic` tinyint(3) unsigned NOT NULL default '0',
+  `totaltime` int(11) unsigned NOT NULL default '0',
+  `leveltime` int(11) unsigned NOT NULL default '0',
+  `logout_time` bigint(20) unsigned NOT NULL default '0',
+  `is_logout_resting` tinyint(3) unsigned NOT NULL default '0',
+  `rest_bonus` float NOT NULL default '0',
+  `resettalents_cost` int(11) unsigned NOT NULL default '0',
+  `resettalents_time` bigint(20) unsigned NOT NULL default '0',
+  `trans_x` float NOT NULL default '0',
+  `trans_y` float NOT NULL default '0',
+  `trans_z` float NOT NULL default '0',
+  `trans_o` float NOT NULL default '0',
+  `transguid` bigint(20) unsigned NOT NULL default '0',
+  `extra_flags` int(11) unsigned NOT NULL default '0',
+  `stable_slots` tinyint(1) unsigned NOT NULL default '0',
+  `at_login` int(11) unsigned NOT NULL default '0',
+  `zone` int(11) unsigned NOT NULL default '0',
+  `death_expire_time` bigint(20) unsigned NOT NULL default '0',
+  `taxi_path` text,
+  `arenaPoints` int(10) UNSIGNED NOT NULL default '0',
+  `totalHonorPoints` int(10) UNSIGNED NOT NULL default '0',
+  `todayHonorPoints` int(10) UNSIGNED NOT NULL default '0',
+  `yesterdayHonorPoints` int(10) UNSIGNED NOT NULL default '0',
+  `totalKills` int(10) UNSIGNED NOT NULL default '0',
+  `todayKills` smallint(5) UNSIGNED NOT NULL default '0',
+  `yesterdayKills` smallint(5) UNSIGNED NOT NULL default '0',
+  `chosenTitle` int(10) UNSIGNED NOT NULL default '0',
+  `knownCurrencies` bigint(20) UNSIGNED NOT NULL default '0',
+  `watchedFaction` int(10) UNSIGNED NOT NULL default '0',
+  `drunk` tinyint(3) UNSIGNED NOT NULL default '0',
+  `health` int(10) UNSIGNED NOT NULL default '0',
+  `power1` int(10) UNSIGNED NOT NULL default '0',
+  `power2` int(10) UNSIGNED NOT NULL default '0',
+  `power3` int(10) UNSIGNED NOT NULL default '0',
+  `power4` int(10) UNSIGNED NOT NULL default '0',
+  `power5` int(10) UNSIGNED NOT NULL default '0',
+  `power6` int(10) UNSIGNED NOT NULL default '0',
+  `power7` int(10) UNSIGNED NOT NULL default '0',
+  `specCount` tinyint(3) UNSIGNED NOT NULL default '1',
+  `activeSpec` tinyint(3) UNSIGNED NOT NULL default '0',
+  `exploredZones` longtext,
+  `equipmentCache` longtext,
+  `ammoId` int(10) UNSIGNED NOT NULL default '0',
+  `knownTitles` longtext,
+  `actionBars` tinyint(3) UNSIGNED NOT NULL default '0',
+  `deleteInfos_Account` int(11) UNSIGNED default NULL,
+  `deleteInfos_Name` varchar(12) default NULL,
+  `deleteDate` bigint(20) unsigned default NULL,
+  PRIMARY KEY  (`guid`),
+  KEY `idx_account` (`account`),
+  KEY `idx_online` (`online`),
+  KEY `idx_name` (`name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Player System';
+
+--
+-- Dumping data for table `characters`
+--
+
+LOCK TABLES `characters` WRITE;
+/*!40000 ALTER TABLE `characters` DISABLE KEYS */;
+/*!40000 ALTER TABLE `characters` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+>>>>>>> b81789df45bef399c73994f2caabb728ba40c1b8
 -- Table structure for table `character_account_data`
 --
 

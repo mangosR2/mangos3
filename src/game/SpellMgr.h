@@ -425,7 +425,7 @@ inline bool IsEffectRequiresTarget(SpellEntry const* spellInfo, SpellEffectIndex
         case SPELL_EFFECT_NONE:
             return false;
 
-        // this - hack for current mangos operate state with spells    
+        // this - hack for current mangos operate state with spells
         case SPELL_EFFECT_DUMMY:
             break;
 
@@ -729,7 +729,7 @@ inline Mechanics GetEffectMechanic(SpellEntry const* spellInfo, SpellEffectIndex
     return MECHANIC_NONE;
 }
 
-inline bool IsBinaryResistedSpell(SpellEntry const* spellInfo) 
+inline bool IsBinaryResistedSpell(SpellEntry const* spellInfo)
 {
     if (!spellInfo)
         return false;
@@ -1077,6 +1077,7 @@ enum SpellLinkedType
     SPELL_LINKED_TYPE_CASTONREMOVE      = 8,
     SPELL_LINKED_TYPE_SCRIPTEFFECT      = 9,
     SPELL_LINKED_TYPE_DUMMYEFFECT       = 10,
+    SPELL_LINKED_TYPE_NOT_TRIGGERED     = 11,
     SPELL_LINKED_TYPE_MAX,
 };
 

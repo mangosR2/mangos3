@@ -30,6 +30,7 @@
 #include "WorldObjectEvents.h"
 #include "WorldLocation.h"
 #include "LootMgr.h"
+#include "Util.h"
 
 #include <set>
 #include <string>
@@ -80,6 +81,7 @@ class UpdateMask;
 class InstanceData;
 class TerrainInfo;
 class Transport;
+class TransportBase;
 class TransportInfo;
 
 typedef UNORDERED_MAP<ObjectGuid, UpdateData> UpdateDataMapType;
@@ -126,7 +128,7 @@ struct UpdateFieldData
 class MANGOS_DLL_SPEC Object
 {
     public:
-        virtual ~Object ();
+        virtual ~Object();
 
         const bool& IsInWorld() const { return m_inWorld; }
         virtual void AddToWorld()
@@ -248,8 +250,9 @@ class MANGOS_DLL_SPEC Object
 
         void ApplyPercentModFloatValue(uint16 index, float val, bool apply)
         {
-            val = val != -100.0f ? val : -99.9f ;
-            SetFloatValue(index, GetFloatValue(index) * (apply?(100.0f+val)/100.0f : 100.0f / (100.0f+val)) );
+            float var = GetFloatValue(index);
+            ApplyPercentModFloatVar(var, val, apply);
+            SetFloatValue(index, var);
         }
 
         void SetFlag( uint16 index, uint32 newFlag );
@@ -471,11 +474,15 @@ class MANGOS_DLL_SPEC WorldObject : public Object
         bool IsBoarded() const { return m_transportInfo != NULL; }
         void SetTransportInfo(TransportInfo* transportInfo) { m_transportInfo = transportInfo; }
 
-        void Relocate(float x, float y, float z, float orientation);
-        void Relocate(float x, float y, float z);
-        void Relocate(WorldLocation const& location);
+        virtual bool IsTransport() const { return false; };
+        TransportBase* GetTransportBase();
 
+        void Relocate(WorldLocation const& location);
+        void Relocate(Position const& position);
         void SetOrientation(float orientation);
+
+        // FIXME - need remove wrapper after cleanup SD2
+        void Relocate(float x, float y, float z, float orientation = 0.0f) { Relocate(Position(x, y, z, orientation, GetPhaseMask())); };
 
         float const& GetPositionX() const     { return m_position.x; }
         float const& GetPositionY() const     { return m_position.y; }
@@ -484,11 +491,15 @@ class MANGOS_DLL_SPEC WorldObject : public Object
         void GetPosition(float &x, float &y, float &z ) const { x = m_position.x; y = m_position.y; z = m_position.z; }
         WorldLocation const& GetPosition() const { return m_position; };
 
-        virtual Transport* GetTransport() const { return NULL; }
-        virtual float GetTransOffsetX() const { return 0.0f; }
-        virtual float GetTransOffsetY() const { return 0.0f; }
-        virtual float GetTransOffsetZ() const { return 0.0f; }
-        virtual float GetTransOffsetO() const { return 0.0f; }
+        virtual bool IsOnTransport() const;
+        virtual Transport* GetTransport() const;
+        float GetTransOffsetX() const { return m_position.GetTransportPos().getX(); }
+        float GetTransOffsetY() const { return m_position.GetTransportPos().getY(); }
+        float GetTransOffsetZ() const { return m_position.GetTransportPos().getZ(); }
+        float GetTransOffsetO() const { return m_position.GetTransportPos().getO(); }
+        Position const& GetTransportPosition() const { return m_position.GetTransportPos(); };
+        void SetTransportPosition(Position const& pos) { m_position.SetTransportPosition(pos); };
+        void ClearTransportData() { m_position.ClearTransportData(); };
 
         void GetNearPoint2D( float &x, float &y, float distance, float absAngle) const;
         void GetNearPoint(WorldObject const* searcher, float &x, float &y, float &z, float searcher_bounding_radius, float distance2d, float absAngle) const;
@@ -587,23 +598,23 @@ class MANGOS_DLL_SPEC WorldObject : public Object
 
         virtual void CleanupsBeforeDelete();                   // used in destructor or explicitly before mass creature delete to remove cross-references to already deleted units
 
-        virtual void SendMessageToSet(WorldPacket *data, bool self);
-        virtual void SendMessageToSetInRange(WorldPacket *data, float dist, bool self);
-        void SendMessageToSetExcept(WorldPacket *data, Player const* skipped_receiver);
+        virtual void SendMessageToSet(WorldPacket* data, bool self) const;
+        virtual void SendMessageToSetInRange(WorldPacket* data, float dist, bool self) const;
+        void SendMessageToSetExcept(WorldPacket* data, Player const* skipped_receiver) const;
 
-        void MonsterSay(const char* text, uint32 language, Unit* target = NULL);
-        void MonsterYell(const char* text, uint32 language, Unit* target = NULL);
-        void MonsterTextEmote(const char* text, Unit* target, bool IsBossEmote = false);
-        void MonsterWhisper(const char* text, Unit* target, bool IsBossWhisper = false);
-        void MonsterSay(int32 textId, uint32 language, Unit* target = NULL);
-        void MonsterYell(int32 textId, uint32 language, Unit* target = NULL);
-        void MonsterTextEmote(int32 textId, Unit* target, bool IsBossEmote = false);
-        void MonsterWhisper(int32 textId, Unit* receiver, bool IsBossWhisper = false);
-        void MonsterYellToZone(int32 textId, uint32 language, Unit* target);
-        static void BuildMonsterChat(WorldPacket *data, ObjectGuid senderGuid, uint8 msgtype, char const* text, uint32 language, char const* name, ObjectGuid targetGuid, char const* targetName);
+        void MonsterSay(const char* text, uint32 language, Unit const* target = NULL) const;
+        void MonsterYell(const char* text, uint32 language, Unit const* target = NULL) const;
+        void MonsterTextEmote(const char* text, Unit const* target, bool IsBossEmote = false) const;
+        void MonsterWhisper(const char* text, Unit const* target, bool IsBossWhisper = false) const;
+        void MonsterSay(int32 textId, uint32 language, Unit const* target = NULL) const;
+        void MonsterYell(int32 textId, uint32 language, Unit const* target = NULL) const;
+        void MonsterTextEmote(int32 textId, Unit const* target, bool IsBossEmote = false) const;
+        void MonsterWhisper(int32 textId, Unit const* receiver, bool IsBossWhisper = false) const;
+        void MonsterYellToZone(int32 textId, uint32 language, Unit const* target) const;
+        static void BuildMonsterChat(WorldPacket* data, ObjectGuid senderGuid, uint8 msgtype, char const* text, uint32 language, char const* name, ObjectGuid targetGuid, char const* targetName);
 
-        void PlayDistanceSound(uint32 sound_id, Player* target = NULL);
-        void PlayDirectSound(uint32 sound_id, Player* target = NULL);
+        void PlayDistanceSound(uint32 sound_id, Player const* target = NULL) const;
+        void PlayDirectSound(uint32 sound_id, Player const* target = NULL) const;
 
         void SendObjectDeSpawnAnim(ObjectGuid guid);
         void SendGameObjectCustomAnim(ObjectGuid guid, uint32 animId = 0);
@@ -693,6 +704,12 @@ class MANGOS_DLL_SPEC WorldObject : public Object
         Movement::MoveSpline* movespline;
         ShortTimeTracker m_movesplineTimer;
 
+        // Visibility operations for object in (must be used only in active state!)
+        GuidSet& GetNotifiedClients() { return m_notifiedClients;};
+        void  AddNotifiedClient(ObjectGuid const& guid)    { m_notifiedClients.insert(guid); };
+        void  RemoveNotifiedClient(ObjectGuid const& guid) { m_notifiedClients.erase(guid); };
+        bool  HasNotifiedClients() const { return !m_notifiedClients.empty(); };
+
     protected:
         explicit WorldObject();
 
@@ -724,6 +741,8 @@ class MANGOS_DLL_SPEC WorldObject : public Object
         uint32 m_LastUpdateTime;
 
         WorldObjectEventProcessor m_Events;
+
+        GuidSet    m_notifiedClients;
 };
 
 #endif

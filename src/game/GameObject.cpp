@@ -130,9 +130,9 @@ void GameObject::RemoveFromWorld(bool remove)
 bool GameObject::Create(uint32 guidlow, uint32 name_id, Map* map, uint32 phaseMask, float x, float y, float z, float ang, QuaternionData rotation, uint8 animprogress, GOState go_state)
 {
     MANGOS_ASSERT(map);
-    Relocate(x, y, z, ang);
+
+    Relocate(WorldLocation(map->GetId(), x, y, z, ang, phaseMask, map->GetInstanceId()));
     SetMap(map);
-    SetPhaseMask(phaseMask, false);
 
     if (!IsPositionValid())
     {
@@ -253,15 +253,6 @@ bool GameObject::Create(uint32 guidlow, uint32 name_id, Map* map, uint32 phaseMa
 
 void GameObject::Update(uint32 update_diff, uint32 p_time)
 {
-    if (GetObjectGuid().IsMOTransport())
-    {
-        //GetTransportKit()->Update(update_diff, diff);
-        //DEBUG_LOG("Transport::Update %s", GetObjectGuid().GetString().c_str());
-        // TODO - move spline update to more correct place
-        UpdateSplineMovement(p_time);
-        return;
-    }
-
     switch (m_lootState)
     {
         case GO_NOT_READY:
@@ -344,6 +335,13 @@ void GameObject::Update(uint32 update_diff, uint32 p_time)
                             {
                                 // can be despawned or destroyed
                                 SetLootState(GO_JUST_DEACTIVATED);
+                                // Remove Wild-Summoned GO on timer expire
+                                if (!HasStaticDBSpawnData())
+                                {
+                                    if (Unit* owner = GetOwner())
+                                        owner->RemoveGameObject(this, false);
+                                    Delete();
+                                }
                                 return;
                             }
 
@@ -486,13 +484,11 @@ void GameObject::Update(uint32 update_diff, uint32 p_time)
                     break;
             }
 
-            if (!HasStaticDBSpawnData())                    // Remove wild summoned after use
+            // Remove wild summoned after use
+            if (!HasStaticDBSpawnData() && (!GetSpellId() || GetGOInfo()->GetDespawnPossibility()))
             {
-                if (GetOwnerGuid())
-                    if (Unit* owner = GetOwner())
-                        owner->RemoveGameObject(this, false);
-
-                SetRespawnTime(0);
+                if (Unit* owner = GetOwner())
+                    owner->RemoveGameObject(this, false);
                 Delete();
                 return;
             }
@@ -545,11 +541,11 @@ void GameObject::Update(uint32 update_diff, uint32 p_time)
             break;
         }
     }
+    UpdateSplineMovement(p_time);
 }
 
 void GameObject::UpdateSplineMovement(uint32 t_diff)
 {
-
     if (movespline->Finalized())
         return;
 
@@ -565,12 +561,13 @@ void GameObject::UpdateSplineMovement(uint32 t_diff)
     if (m_movesplineTimer.Passed() || arrived)
     {
         m_movesplineTimer.Reset(sWorld.getConfig(CONFIG_UINT32_POSITION_UPDATE_DELAY));
-        Location loc = movespline->ComputePosition();
+
+        Position loc = movespline->ComputePosition();
 
         if (IsBoarded())
-            GetTransportInfo()->SetLocalPosition(loc.x, loc.y, loc.z, loc.orientation);
+            GetTransportInfo()->SetLocalPosition(loc);
         else
-            Relocate(loc.x,loc.y,loc.z,loc.orientation);
+            Relocate(loc);
     }
 }
 
@@ -835,7 +832,7 @@ bool GameObject::isVisibleForInState(Player const* u, WorldObject const* viewPoi
         return false;
 
     // Transport always visible at this step implementation
-    if (IsTransport() && IsInMap(u))
+    if (IsTransport() && IsInMap(u) && isActiveObject())
         return true;
 
     // quick check visibility false cases for non-GM-mode
@@ -848,11 +845,34 @@ bool GameObject::isVisibleForInState(Player const* u, WorldObject const* viewPoi
         // special invisibility cases
         if (GetGOInfo()->type == GAMEOBJECT_TYPE_TRAP && GetGOInfo()->trap.stealthed)
         {
-            if (u->HasAura(2836) && u->isInFront(this, 15.0f))   // hack, maybe values are wrong
-                return true;
+            bool trapNotVisible = false;
 
-            if (GetOwner() && u->IsFriendlyTo(GetOwner()))
-                return true;
+            if (Unit* owner = GetOwner())
+            {
+                if (owner->GetTypeId() == TYPEID_PLAYER)
+                {
+                    Player* oPlayer = (Player*)owner;
+                    if ((GetMap()->IsBattleGroundOrArena() && oPlayer->GetBGTeam() != u->GetBGTeam()) ||
+                        (oPlayer->IsInDuelWith(u)) ||
+                        (oPlayer->GetTeam() != u->GetTeam()))
+                        trapNotVisible = true;
+                }
+                else
+                {
+                    if (u->IsFriendlyTo(owner))
+                        return true;
+                }
+            }
+
+            // only rogue have skill for traps detection
+            if (Aura* aura = ((Player*)u)->GetAura(2836, EFFECT_INDEX_0))
+            {
+                if (roll_chance_i(aura->GetModifier()->m_amount) && u->isInFront(this, 15.0f))
+                    return true;
+            }
+
+            if (trapNotVisible)
+                return false;
 
             if (m_lootState == GO_READY)
                 return false;

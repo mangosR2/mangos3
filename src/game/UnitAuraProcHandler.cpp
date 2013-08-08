@@ -2584,9 +2584,9 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, DamageInfo* damageI
                     triggered_spell_id = 53652;             // Beacon of Light
                     uint32 radius = GetSpellMaxRange(sSpellRangeStore.LookupEntry(sSpellStore.LookupEntry(triggered_spell_id)->rangeIndex));
 
-                    if (!beacon->IsWithinDistInMap(this, radius) || 
+                    if (!beacon->IsWithinDistInMap(this, radius) ||
                         !beacon->IsWithinLOSInMap(this) ||
-                        !beacon->IsWithinDistInMap(pVictim, radius) || 
+                        !beacon->IsWithinDistInMap(pVictim, radius) ||
                         !beacon->IsWithinLOSInMap(pVictim))
                         return SPELL_AURA_PROC_FAILED;
 
@@ -4263,13 +4263,36 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(Unit *pVictim, DamageIn
                 target = pVictim;
             }
             // Item - Icecrown 25 Normal/Heroic Healer Weapon Proc
-            if (auraSpellInfo->Id == 71865 || auraSpellInfo->Id == 71868)
+            else if (auraSpellInfo->Id == 71865 || auraSpellInfo->Id == 71868)
             {
                 // don't proc on self
                 if (procSpell->Id == 71864 || procSpell->Id == 71866)
                     return SPELL_AURA_PROC_FAILED;
 
                 target = pVictim;
+            }
+            // Item - Coliseum 25 Normal and Heroic Caster Trinket
+            else if (auraSpellInfo->Id == 67712 || auraSpellInfo->Id == 67758)
+            {
+                if (!pVictim || !pVictim->isAlive())
+                    return SPELL_AURA_PROC_FAILED;
+
+                uint32 castSpell = auraSpellInfo->Id == 67758 ? 67759 : 67713;
+
+                // stacking
+                CastSpell(this, castSpell, true, NULL, triggeredByAura);
+
+                // counting
+                Aura const* dummy = GetDummyAura(castSpell);
+
+                // release at 3 aura in stack (count contained in basepoint of trigger aura)
+                if (!dummy || dummy->GetStackAmount() < uint32(triggerAmount))
+                    return SPELL_AURA_PROC_FAILED;
+
+                RemoveAurasDueToSpell(castSpell);
+                trigger_spell_id = castSpell + 1;
+                target = pVictim;
+                break;
             }
             break;
         }
@@ -4858,7 +4881,7 @@ SpellAuraProcResult Unit::HandleOverrideClassScriptAuraProc(Unit *pVictim, Damag
     return SPELL_AURA_PROC_OK;
 }
 
-SpellAuraProcResult Unit::HandleMendingAuraProc( Unit* /*pVictim*/, DamageInfo* damageInfo, Aura const* triggeredByAura, SpellEntry const* /*procSpell*/, uint32 /*procFlag*/, uint32 /*procEx*/, uint32 /*cooldown*/ )
+SpellAuraProcResult Unit::HandleMendingAuraProc(Unit* /*pVictim*/, DamageInfo* damageInfo, Aura const* triggeredByAura, SpellEntry const* /*procSpell*/, uint32 /*procFlag*/, uint32 /*procEx*/, uint32 /*cooldown*/ )
 {
     // aura can be deleted at casts
     SpellEntry const* spellProto = triggeredByAura->GetSpellProto();
@@ -4867,10 +4890,13 @@ SpellAuraProcResult Unit::HandleMendingAuraProc( Unit* /*pVictim*/, DamageInfo* 
     ObjectGuid caster_guid = triggeredByAura->GetCasterGuid();
 
     // jumps
-    int32 jumps = triggeredByAura->GetHolder()->GetAuraCharges()-1;
+    int32 jumps = triggeredByAura->GetHolder()->GetAuraCharges() - 1;
+
+    // current aura holder expire
+    triggeredByAura->GetHolder()->SetAuraCharges(1, false);
 
     // next target selection
-    if (jumps > 0 && GetTypeId()==TYPEID_PLAYER && caster_guid.IsPlayer())
+    if (jumps > 0 && GetTypeId() == TYPEID_PLAYER && caster_guid.IsPlayer())
     {
         SpellEffectEntry const* spellEffect = spellProto->GetSpellEffect(effIdx);
         float radius;
@@ -4885,13 +4911,13 @@ SpellAuraProcResult Unit::HandleMendingAuraProc( Unit* /*pVictim*/, DamageInfo* 
 
             SpellAuraHolderPtr holder = GetSpellAuraHolder(spellProto->Id, caster->GetObjectGuid());
 
-            if (Player* target = ((Player*)this)->GetNextRandomRaidMember(radius))
+            if (Player* target = ((Player*)this)->GetNextRandomRaidMember(radius, true))
             {
                 SpellAuraHolderPtr new_holder = CreateSpellAuraHolder(spellProto, target, caster);
 
                 for (int32 i = 0; i < MAX_EFFECT_INDEX; ++i)
                 {
-                    Aura *aur = holder->GetAuraByEffectIndex(SpellEffectIndex(i));
+                    Aura* aur = holder->GetAuraByEffectIndex(SpellEffectIndex(i));
                     if (!aur)
                         continue;
 
@@ -4904,13 +4930,11 @@ SpellAuraProcResult Unit::HandleMendingAuraProc( Unit* /*pVictim*/, DamageInfo* 
                 // when applied to new one)
                 target->AddSpellAuraHolder(new_holder);
             }
-            else
-                holder->SetAuraCharges(1,false);
         }
     }
 
     // heal
-    CastCustomSpell(this,33110,&heal,NULL,NULL,true,NULL,NULL,caster_guid, spellProto);
+    CastCustomSpell(this, 33110, &heal, NULL, NULL, true, NULL, NULL, caster_guid, spellProto);
     return SPELL_AURA_PROC_OK;
 }
 
@@ -5246,7 +5270,7 @@ SpellAuraProcResult Unit::HandleSpellMagnetAuraProc(Unit *pVictim, DamageInfo* d
         // for spells that doesn't do damage but need to destroy totem anyway
         if ((!damageInfo->damage || damageInfo->damage < GetHealth()) && GetTypeId() == TYPEID_UNIT && ((Creature*)this)->IsTotem())
         {
-            DealDamage(this, GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
+            KillSelf();
             return SPELL_AURA_PROC_OK;
         }
     }
@@ -5329,7 +5353,7 @@ SpellAuraProcResult Unit::HandleModResistanceAuraProc(Unit* /*pVictim*/, DamageI
 /**
  * Function to operations with custom hardcoded proc-like effects, maked over proc system
  *
- * @param - as 
+ * @param - as
  * @retcode - enum SpellAuraProcResult
         SPELL_AURA_PROC_OK           - aura must proc anyway
         SPELL_AURA_PROC_CANT_TRIGGER - aura not may proc anyway

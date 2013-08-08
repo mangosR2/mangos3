@@ -144,7 +144,7 @@ m_subtype(subtype), m_defaultMovementType(IDLE_MOTION_TYPE), m_equipmentId(0),
 m_AlreadyCallAssistance(false), m_AlreadySearchedAssistance(false),
 m_regenHealth(true), m_AI_locked(false), m_isDeadByDefault(false),
 m_temporaryFactionFlags(TEMPFACTION_NONE), m_meleeDamageSchoolMask(SPELL_SCHOOL_MASK_NORMAL), m_originalEntry(0),
-m_creatureInfo(NULL)
+m_creatureInfo(NULL), m_modelInhabitType(-1)
 {
     m_regenTimer = 200;
     m_holyPowerRegenTimer = REGEN_TIME_HOLY_POWER;
@@ -199,9 +199,8 @@ void Creature::RemoveCorpse()
     if (respawnDelay)
         m_respawnTime = time(NULL) + respawnDelay;
 
-    float x, y, z, o;
-    GetRespawnCoord(x, y, z, &o);
-    GetMap()->Relocation(this, x, y, z, o);
+    WorldLocation loc = GetRespawnCoord();
+    GetMap()->Relocation(this, loc);
     DisableSpline();
 
     // forced recreate creature object at clients
@@ -305,6 +304,9 @@ bool Creature::InitEntry(uint32 Entry, CreatureData const* data /*=NULL*/, GameE
     UpdateSpeed(MOVE_RUN,  false);
 
     SetLevitate(cinfo->InhabitType & INHABIT_AIR, GetObjectGuid().IsPet() ? 2.0f : 4.0f);
+
+    if (CanSwim())
+        SetSwim(IsInWater());
 
     // checked at loading
     m_defaultMovementType = MovementGeneratorType(cinfo->MovementType);
@@ -435,6 +437,9 @@ uint32 Creature::ChooseDisplayId(const CreatureInfo* cinfo, const CreatureData* 
 
 void Creature::Update(uint32 update_diff, uint32 diff)
 {
+    if (CanSwim())
+        SetSwim(IsInWater());
+
     switch (m_deathState)
     {
         case JUST_ALIVED:
@@ -1307,9 +1312,13 @@ bool Creature::LoadFromDB(uint32 guidlow, Map* map)
         m_deathState = DEAD;
         if (CanFly())
         {
-            float tz = GetMap()->GetHeight(GetPhaseMask(), data->posX, data->posY, data->posZ);
-            if (data->posZ - tz > 0.1)
-                Relocate(data->posX, data->posY, tz);
+            Position loc = pos.m_pos;
+            float tz = GetMap()->GetHeight(GetPhaseMask(), loc.x, loc.y, loc.z);
+            if (loc.z - tz > 0.1)
+            {
+                loc.z = tz;
+                Relocate(loc);
+            }
         }
     }
     else if (m_respawnTime)                                 // respawn time set but expired
@@ -1337,9 +1346,13 @@ bool Creature::LoadFromDB(uint32 guidlow, Map* map)
             // Just set to dead, so need to relocate like above
             if (CanFly())
             {
-                float tz = GetMap()->GetHeight(data->phaseMask, data->posX, data->posY, data->posZ);
-                if (data->posZ - tz > 0.1)
-                    Relocate(data->posX, data->posY, tz);
+                Position loc = pos.m_pos;
+                float tz = GetMap()->GetHeight(GetPhaseMask(), loc.x, loc.y, loc.z);
+                if (loc.z - tz > 0.1)
+                {
+                    loc.z = tz;
+                    Relocate(loc);
+                }
             }
         }
     }
@@ -1560,6 +1573,10 @@ void Creature::SetDeathState(DeathState s)
         RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE);
 
         SetWalk(true, true);
+
+        if (CanSwim())
+            SetSwim(IsInWater());
+
         GetMotionMaster()->Initialize();
     }
 }
@@ -1815,24 +1832,7 @@ void Creature::CallAssistance()
     if (!m_AlreadyCallAssistance && getVictim() && !isCharmed())
     {
         SetNoCallAssistance(true);
-
-        float radius = sWorld.getConfig(CONFIG_FLOAT_CREATURE_FAMILY_ASSISTANCE_RADIUS);
-        if (radius > 0)
-        {
-            std::list<Creature*> assistList;
-
-            {
-                MaNGOS::AnyAssistCreatureInRangeCheck u_check(this, getVictim(), radius);
-                MaNGOS::CreatureListSearcher<MaNGOS::AnyAssistCreatureInRangeCheck> searcher(assistList, u_check);
-                Cell::VisitGridObjects(this, searcher, radius);
-            }
-
-            if (!assistList.empty())
-            {
-                AssistDelayEvent* event = new AssistDelayEvent(getVictim()->GetObjectGuid(), *this, assistList);
-                AddEvent(event, sWorld.getConfig(CONFIG_UINT32_CREATURE_FAMILY_ASSISTANCE_DELAY));
-            }
-        }
+        AI()->SendAIEvent(AI_EVENT_CALL_ASSISTANCE, getVictim(), sWorld.getConfig(CONFIG_UINT32_CREATURE_FAMILY_ASSISTANCE_DELAY), sWorld.getConfig(CONFIG_FLOAT_CREATURE_FAMILY_ASSISTANCE_RADIUS));
     }
 }
 
@@ -1846,6 +1846,7 @@ void Creature::CallForHelp(float fRadius)
     Cell::VisitGridObjects(this, worker, fRadius);
 }
 
+/// if enemy provided, check for initial combat help against enemy
 bool Creature::CanAssistTo(const Unit* u, const Unit* enemy, bool checkfaction /*= true*/) const
 {
     // we don't need help from zombies :)
@@ -1860,7 +1861,7 @@ bool Creature::CanAssistTo(const Unit* u, const Unit* enemy, bool checkfaction /
         return false;
 
     // skip fighting creature
-    if (isInCombat())
+    if (enemy && isInCombat())
         return false;
 
     // only free creature
@@ -1880,7 +1881,7 @@ bool Creature::CanAssistTo(const Unit* u, const Unit* enemy, bool checkfaction /
     }
 
     // skip non hostile to caster enemy creatures
-    if (!IsHostileTo(enemy))
+    if (enemy && !IsHostileTo(enemy))
         return false;
 
     return true;
@@ -2662,6 +2663,18 @@ void Creature::SetRoot(bool enable)
     }
 }
 
+void Creature::SetSwim(bool enable)
+{
+    if (enable)
+        m_movementInfo.AddMovementFlag(MOVEFLAG_SWIMMING);
+    else
+        m_movementInfo.RemoveMovementFlag(MOVEFLAG_SWIMMING);
+
+//    WorldPacket data(enable ? SMSG_SPLINE_MOVE_START_SWIM : SMSG_SPLINE_MOVE_STOP_SWIM, 8);
+//    data << GetPackGUID();
+//    SendMessageToSet(&data, true);
+}
+
 Unit* Creature::SelectPreferredTargetForSpell(SpellEntry const* spellInfo)
 {
     Unit* target = NULL;
@@ -2753,6 +2766,18 @@ Unit* Creature::SelectPreferredTargetForSpell(SpellEntry const* spellInfo)
     return target;
 }
 
+void Creature::SetRoot(bool enable)
+{
+    if (enable)
+        m_movementInfo.AddMovementFlag(MOVEFLAG_ROOT);
+    else
+        m_movementInfo.RemoveMovementFlag(MOVEFLAG_ROOT);
+
+    WorldPacket data(enable ? SMSG_SPLINE_MOVE_ROOT : SMSG_SPLINE_MOVE_UNROOT, 8);
+    data << GetPackGUID();
+    SendMessageToSet(&data, true);
+}
+
 void Creature::SetWaterWalk(bool enable)
 {
     if (enable)
@@ -2762,7 +2787,7 @@ void Creature::SetWaterWalk(bool enable)
 
     if (IsInWorld())
     {
-        WorldPacket data(enable ? SMSG_SPLINE_MOVE_WATER_WALK : SMSG_SPLINE_MOVE_LAND_WALK, 9);
+        WorldPacket data(enable ? SMSG_SPLINE_MOVE_WATER_WALK : SMSG_SPLINE_MOVE_LAND_WALK, 8);
         if (enable)
         {
             data.WriteGuidMask<6, 1, 4, 2, 3, 7, 5, 0>(GetObjectGuid());
@@ -2776,4 +2801,78 @@ void Creature::SetWaterWalk(bool enable)
 
         SendMessageToSet(&data, true);
     }
+}
+
+// TODO
+//void Creature::SetCanFly(bool enable)
+//{
+//    if (enable)
+//        m_movementInfo.AddMovementFlag(MOVEFLAG_CAN_FLY);
+//    else
+//        m_movementInfo.RemoveMovementFlag(MOVEFLAG_CAN_FLY);
+//
+//    Unit::SetCanFly(enable);
+//}
+
+void Creature::SetDisplayId(uint32 modelId)
+{
+    m_modelInhabitType = -1;
+    Unit::SetDisplayId(modelId);
+}
+
+uint32 Creature::GetModelInhabitType()
+{
+    if (m_modelInhabitType < 0)
+    {
+        uint32 miType = MODEL_INHABIT_ONLY_GROUND;
+        if (CreatureDisplayInfoEntry const* displayInfo = sCreatureDisplayInfoStore.LookupEntry(GetDisplayId()))
+        {
+            if (CreatureModelDataEntry const* modelData = sCreatureModelDataStore.LookupEntry(displayInfo->ModelId))
+                miType = modelData->modInhabitType;
+        }
+        m_modelInhabitType = miType;
+    }
+
+    return m_modelInhabitType;
+}
+
+bool Creature::CanWalk()
+{
+    if (!(m_creatureInfo->InhabitType & INHABIT_GROUND))
+        return false;
+
+    /*int32 modelInhabitType = GetModelInhabitType();
+    if ((modelInhabitType == MODEL_INHABIT_ONLY_SWIM) ||
+        (modelInhabitType == MODEL_INHABIT_ONLY_FLY))
+        return false;*/
+
+    return true;
+}
+
+bool Creature::CanSwim()
+{
+    if (!(m_creatureInfo->InhabitType & INHABIT_WATER))
+        return false;
+
+    int32 modelInhabitType = GetModelInhabitType();
+    if ((modelInhabitType == MODEL_INHABIT_ONLY_GROUND) ||
+        (modelInhabitType == MODEL_INHABIT_ONLY_FLY) ||
+        (modelInhabitType == MODEL_INHABIT_ONLY_UNDERWATER))
+        return false;
+
+    return true;
+}
+
+bool Creature::CanFly()
+{
+    if (!(m_creatureInfo->InhabitType & INHABIT_AIR) && !(GetByteValue(UNIT_FIELD_BYTES_1, 3) & UNIT_BYTE1_FLAG_HOVER) && !HasAuraType(SPELL_AURA_FLY))
+        return false;
+
+    int32 modelInhabitType = GetModelInhabitType();
+    if ((modelInhabitType == MODEL_INHABIT_ONLY_GROUND) ||
+        (modelInhabitType == MODEL_INHABIT_ONLY_SWIM) ||
+        (modelInhabitType == MODEL_INHABIT_ONLY_UNDERWATER))
+        return false;
+
+    return true;
 }

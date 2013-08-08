@@ -4082,8 +4082,6 @@ bool ChatHandler::HandleDamageCommand(char* args)
     if (!*args)
     {
         DamageInfo damageInfo  = DamageInfo(m_session->GetPlayer(), target, spellid, damage);
-        damageInfo.absorb      = 0;
-        damageInfo.resist      = 0;
         damageInfo.HitInfo     = HITINFO_AFFECTS_VICTIM;
         damageInfo.TargetState = VICTIMSTATE_NORMAL;
 
@@ -7463,26 +7461,18 @@ bool ChatHandler::HandleShowGearScoreCommand(char* args)
     return true;
 }
 
-bool ChatHandler::HandleMmap(char* args)
+bool ChatHandler::HandleMmapOn(char* /*args*/)
 {
-    bool on;
-    if (ExtractOnOff(&args, on))
-    {
-        if (on)
-        {
-            sWorld.setConfig(CONFIG_BOOL_MMAP_ENABLED, true);
-            SendSysMessage("WORLD: mmaps are now ENABLED (individual map settings still in effect)");
-        }
-        else
-        {
-            sWorld.setConfig(CONFIG_BOOL_MMAP_ENABLED, false);
-            SendSysMessage("WORLD: mmaps are now DISABLED");
-        }
-        return true;
-    }
+    sWorld.setConfig(CONFIG_BOOL_MMAP_ENABLED, true);
+    SendSysMessage("WORLD: mmaps are now ENABLED (individual map settings still in effect)");
 
-    on = sWorld.getConfig(CONFIG_BOOL_MMAP_ENABLED);
-    PSendSysMessage("mmaps are %sabled", on ? "en" : "dis");
+    return true;
+}
+
+bool ChatHandler::HandleMmapOff(char* /*args*/)
+{
+    sWorld.setConfig(CONFIG_BOOL_MMAP_ENABLED, false);
+    SendSysMessage("WORLD: mmaps are now DISABLED");
 
     return true;
 }
@@ -7562,7 +7552,7 @@ bool ChatHandler::HandleTransportListCommand(char* args)
             mapID,
             name.c_str(),
             transport->isActiveObject() ? "active" : "passive",
-            transport->GetPassengers().size(),
+            transport->GetTransportKit()->GetPassengers().size(),
             transport->GetPositionX(),
             transport->GetPositionY(),
             transport->GetPositionZ()
@@ -7693,24 +7683,24 @@ bool ChatHandler::HandleTransportPathCommand(char* args)
             map->GetId(),
             transport->GetName(),
             transport->isActiveObject() ? "active" : "passive",
-            transport->GetPassengers().size(),
+            transport->GetTransportKit()->GetPassengers().size(),
             transport->GetCurrent()->first,
-            transport->GetCurrent()->second.mapid,
-            transport->GetCurrent()->second.x,
-            transport->GetCurrent()->second.y,
-            transport->GetCurrent()->second.z
+            transport->GetCurrent()->second.loc.GetMapId(),
+            transport->GetCurrent()->second.loc.getX(),
+            transport->GetCurrent()->second.loc.getY(),
+            transport->GetCurrent()->second.loc.getZ()
         );
     PSendSysMessage("Transport: %s on map %u (%s), %s, passengers "SIZEFMTD", next time %u (map %u xyz %f %f %f)",
             transport->GetObjectGuid().GetString().c_str(), 
             map->GetId(),
             transport->GetName(),
             transport->isActiveObject() ? "active" : "passive",
-            transport->GetPassengers().size(),
+            transport->GetTransportKit()->GetPassengers().size(),
             transport->GetNext()->first,
-            transport->GetNext()->second.mapid,
-            transport->GetNext()->second.x,
-            transport->GetNext()->second.y,
-            transport->GetNext()->second.z
+            transport->GetNext()->second.loc.GetMapId(),
+            transport->GetNext()->second.loc.getX(),
+            transport->GetNext()->second.loc.getY(),
+            transport->GetNext()->second.loc.getZ()
         );
 
     return true;
@@ -7760,7 +7750,7 @@ bool ChatHandler::HandleTransportCommand(char* args)
             map->GetId(),
             transport->GetName(),
             transport->isActiveObject() ? "active" : "passive",
-            transport->GetPassengers().size(),
+            transport->GetTransportKit()->GetPassengers().size(),
             transport->GetPositionX(),
             transport->GetPositionY(),
             transport->GetPositionZ()
@@ -7809,7 +7799,7 @@ bool ChatHandler::HandleTransportGoCommand(char* args)
     }
     float z = transport->GetPositionZ() +2.0f;
     HandleGoHelper(player, transport->GetMap()->GetId(), transport->GetPositionX(), transport->GetPositionY(), &z);
-    transport->AddPassenger(player);
+    transport->AddPassenger(player, Position());
 
     return true;
 }

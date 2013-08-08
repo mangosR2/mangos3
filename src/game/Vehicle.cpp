@@ -43,6 +43,7 @@
 #include "Vehicle.h"
 #include "Unit.h"
 #include "CreatureAI.h"
+#include "Transports.h"
 #include "Util.h"
 #include "WorldPacket.h"
 #include "movement/MoveSpline.h"
@@ -178,27 +179,29 @@ Unit* VehicleKit::GetPassenger(int8 seatId) const
 }
 
 // Helper function to undo the turning of the vehicle to calculate a relative position of the passenger when boarding
-void VehicleKit::CalculateBoardingPositionOf(float gx, float gy, float gz, float go, float &lx, float &ly, float &lz, float &lo)
+Position VehicleKit::CalculateBoardingPositionOf(Position const& pos) const
 {
-    NormalizeRotatedPosition(gx - GetBase()->GetPositionX(), gy - GetBase()->GetPositionY(), lx, ly);
-
-    lz = gz - GetBase()->GetPositionZ();
-    lo = MapManager::NormalizeOrientation(go - GetBase()->GetOrientation());
+    Position posl = pos;
+    NormalizeRotatedPosition(pos.x - GetBase()->GetPositionX(), pos.y - GetBase()->GetPositionY(), posl.x, posl.y);
+    posl.z = pos.z - GetBase()->GetPositionZ();
+    posl.o = MapManager::NormalizeOrientation(pos.o - GetBase()->GetOrientation());
+    return posl;
 }
 
-void VehicleKit::CalculateSeatPositionOf(VehicleSeatEntry const* seatInfo, float &x, float &y, float &z, float &o)
+Position VehicleKit::CalculateSeatPositionOf(VehicleSeatEntry const* seatInfo) const
 {
     MANGOS_ASSERT(seatInfo);
 
-    x = y = z = o = 0.0f;
+    Position pos = Position();
 
 // FIXME - requires correct method for calculate seat offset
 /*
-    x = seatInfo->m_attachmentOffsetX + m_dst_x;
-    y = seatInfo->m_attachmentOffsetY + m_dst_y;
-    z = seatInfo->m_attachmentOffsetZ + m_dst_z;
-    o = seatInfo->m_passengerYaw      + m_dst_o;
+    pos.x = seatInfo->m_attachmentOffsetX + m_dst_x;
+    pos.y = seatInfo->m_attachmentOffsetY + m_dst_y;
+    pos.z = seatInfo->m_attachmentOffsetZ + m_dst_z;
+    pos.o = seatInfo->m_passengerYaw      + m_dst_o;
 */
+    return pos;
 }
 
 bool VehicleKit::AddPassenger(Unit* passenger, int8 seatId)
@@ -237,13 +240,9 @@ bool VehicleKit::AddPassenger(Unit* passenger, int8 seatId)
     GetBase()->SetPhaseMask(passenger->GetPhaseMask(), true);
 
     // Calculate passengers local position
-    float lx, ly, lz, lo;
-    CalculateBoardingPositionOf(passenger->GetPositionX(), passenger->GetPositionY(), passenger->GetPositionZ(), passenger->GetOrientation(), lx, ly, lz, lo);
+    Position localPos = CalculateBoardingPositionOf(passenger->GetPosition());
 
-    BoardPassenger(passenger, lx, ly, lz, lo, seat->first);        // Use TransportBase to store the passenger
-
-    passenger->m_movementInfo.ClearTransportData();
-    passenger->m_movementInfo.SetTransportData(GetBase()->GetObjectGuid(), lx, ly, lz, lo, WorldTimer::getMSTime(), seat->first, seatInfo);
+    BoardPassenger(passenger, localPos, seat->first);        // Use TransportBase to store the passenger
 
     if (passenger->GetTypeId() == TYPEID_PLAYER)
     {
@@ -286,7 +285,8 @@ bool VehicleKit::AddPassenger(Unit* passenger, int8 seatId)
 
         passenger->SetCharm(GetBase());
 
-        if (GetBase()->HasAuraType(SPELL_AURA_FLY) || GetBase()->HasAuraType(SPELL_AURA_MOD_FLIGHT_SPEED) || ((Creature*)GetBase())->CanFly())
+        if (GetBase()->HasAuraType(SPELL_AURA_FLY) || GetBase()->HasAuraType(SPELL_AURA_MOD_FLIGHT_SPEED) ||
+            (GetBase()->GetTypeId() == TYPEID_UNIT && ((Creature*)GetBase())->CanFly()))
         {
             WorldPacket data(SMSG_MOVE_SET_CAN_FLY, 8 + 4);
             data << GetBase()->GetPackGUID();
@@ -330,11 +330,9 @@ bool VehicleKit::AddPassenger(Unit* passenger, int8 seatId)
             ((Player*)passenger)->SetClientControl(GetBase(), 0);
     }
 
-    // need correct, position not normalized currently
     // Calculate passenger seat position (FIXME - requires correct calculation!)
-    // float lx, ly, lz, lo; - reuse variable definition from preview calculation
-    CalculateSeatPositionOf(seatInfo, lx, ly, lz, lo);
-    passenger->GetMotionMaster()->MoveBoardVehicle(lx, ly, lz, lo,
+    Position seatpos = CalculateSeatPositionOf(seatInfo);
+    passenger->GetMotionMaster()->MoveBoardVehicle(seatpos.x, seatpos.y, seatpos.z, seatpos.o,
         seatInfo->m_enterSpeed < M_NULL_F ? BASE_CHARGE_SPEED : seatInfo->m_enterSpeed,
         0.0f);
 
@@ -397,8 +395,6 @@ void VehicleKit::RemovePassenger(Unit* passenger, bool dismount /*false*/)
 
     UnBoardPassenger(passenger);                            // Use TransportBase to remove the passenger from storage list
 
-    passenger->m_movementInfo.ClearTransportData();
-
     if (seat->second.IsProtectPassenger())
     {
         if (passenger->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE))
@@ -436,7 +432,8 @@ void VehicleKit::RemovePassenger(Unit* passenger, bool dismount /*false*/)
         player->SetMover(player);
         player->m_movementInfo.RemoveMovementFlag(MOVEFLAG_ROOT);
 
-        if ((GetBase()->HasAuraType(SPELL_AURA_FLY) || GetBase()->HasAuraType(SPELL_AURA_MOD_FLIGHT_SPEED)) &&
+        if ((GetBase()->HasAuraType(SPELL_AURA_FLY) || GetBase()->HasAuraType(SPELL_AURA_MOD_FLIGHT_SPEED) ||
+            (GetBase()->GetTypeId() == TYPEID_UNIT && ((Creature*)GetBase())->CanFly())) &&
             (!player->HasAuraType(SPELL_AURA_FLY) && !player->HasAuraType(SPELL_AURA_MOD_FLIGHT_SPEED)))
         {
             WorldPacket dataCF(SMSG_MOVE_UNSET_CAN_FLY, 8 + 4);
@@ -447,6 +444,9 @@ void VehicleKit::RemovePassenger(Unit* passenger, bool dismount /*false*/)
             player->m_movementInfo.RemoveMovementFlag(MOVEFLAG_FLYING);
             player->m_movementInfo.RemoveMovementFlag(MOVEFLAG_CAN_FLY);
         }
+
+        if (GetBase()->IsLevitating())
+            player->m_movementInfo.RemoveMovementFlag(MOVEFLAG_LEVITATING);
     }
 
     UpdateFreeSeatCount();
@@ -525,6 +525,7 @@ void VehicleKit::InstallAccessory(VehicleAccessory const* accessory)
 
         SetDestination(accessory->m_offsetX, accessory->m_offsetY, accessory->m_offsetZ, accessory->m_offsetO, 0.0f, 0.0f);
         int32 seatId = accessory->seatId + 1;
+        summoned->SetPhaseMask(GetBase()->GetPhaseMask(), true);
         summoned->CastCustomSpell(GetBase(), SPELL_RIDE_VEHICLE_HARDCODED, &seatId, &seatId, NULL, true);
 
         SetDestination();
@@ -614,8 +615,14 @@ void VehicleKit::Dismount(Unit* passenger, VehicleSeatEntry const* seatInfo)
     if (tRadius < 1.0f || tRadius > 10.0f)
         tRadius = 1.0f;
 
+    // FIXME temp method for unmount on transport
+    if (GetBase()->IsOnTransport())
+    {
+        passenger->Relocate(GetBase()->GetTransport()->GetPosition());
+        GetBase()->GetTransport()->AddPassenger(passenger, GetBase()->GetTransportPosition());
+    }
     // Check for tru dismount while grid unload
-    if (passenger->GetTypeId() != TYPEID_PLAYER && !GetBase()->GetMap()->IsLoaded(pos.x, pos.y))
+    else if (passenger->GetTypeId() != TYPEID_PLAYER && !GetBase()->GetMap()->IsLoaded(pos.x, pos.y))
     {
         passenger->Relocate(pos);
     }
@@ -647,7 +654,7 @@ void VehicleKit::Dismount(Unit* passenger, VehicleSeatEntry const* seatInfo)
 
         // may be under water
         base->GetClosePoint(m_dst_x, m_dst_y, m_dst_z, tRadius, frand(2.0f, 3.0f), frand(M_PI_F / 2.0f, 3.0f * M_PI_F / 2.0f), passenger);
-        if (m_dst_z < pos.z)
+        if (m_dst_z < pos.z && !base->IsLevitating())
             m_dst_z = pos.z;
 
         if (passenger->GetTypeId() != TYPEID_PLAYER && !GetBase()->GetMap()->IsLoaded(m_dst_x, m_dst_y))
@@ -662,7 +669,7 @@ void VehicleKit::Dismount(Unit* passenger, VehicleSeatEntry const* seatInfo)
         // jump from vehicle without seatInfo (? error case)
         base->GetClosePoint(m_dst_x, m_dst_y, m_dst_z, tRadius, 2.0f, M_PI_F, passenger);
         passenger->UpdateAllowedPositionZ(m_dst_x, m_dst_y, m_dst_z);
-        if (m_dst_z < pos.z)
+        if (m_dst_z < pos.z && !base->IsLevitating())
             m_dst_z = pos.z;
 
         if (passenger->GetTypeId() != TYPEID_PLAYER && !GetBase()->GetMap()->IsLoaded(m_dst_x, m_dst_y))

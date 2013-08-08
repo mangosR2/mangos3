@@ -155,16 +155,19 @@ class MANGOS_DLL_SPEC Map : public GridRefManager<NGridType>
 
         virtual void Update(const uint32&);
 
-        void MessageBroadcast(Player *, WorldPacket *, bool to_self);
-        void MessageBroadcast(WorldObject *, WorldPacket *);
-        void MessageDistBroadcast(Player *, WorldPacket *, float dist, bool to_self, bool own_team_only = false);
-        void MessageDistBroadcast(WorldObject *, WorldPacket *, float dist);
+        void MessageBroadcast(Player const*, WorldPacket*, bool to_self);
+        void MessageBroadcast(WorldObject const*, WorldPacket*);
+        void MessageDistBroadcast(Player const*, WorldPacket*, float dist, bool to_self, bool own_team_only = false);
+        void MessageDistBroadcast(WorldObject const*, WorldPacket*, float dist);
 
-        float GetVisibilityDistance(WorldObject* obj = NULL) const;
+        float GetVisibilityDistance(WorldObject const* obj = NULL) const;
         //function for setting up visibility distance for maps on per-type/per-Id basis
         virtual void InitVisibilityDistance();
 
-        template<class T> void Relocation(T* object, float x, float y, float z, float orientation);
+        // Half-hack method for use with visible-over-grid active objects (like big WB and MOTransport)
+        bool IsVisibleGlobally(ObjectGuid const& guid);
+
+        template<class T> void Relocation(T* object, Position const& pos);
 
         // FIXME - remove this wrapper after SD2 correct
         void CreatureRelocation(Creature* object, float x, float y, float z, float orientation);
@@ -174,7 +177,7 @@ class MANGOS_DLL_SPEC Map : public GridRefManager<NGridType>
         bool IsRemovalGrid(float x, float y) const
         {
             GridPair p = MaNGOS::ComputeGridPair(x, y);
-            return( !getNGrid(p.x_coord, p.y_coord) || getNGrid(p.x_coord, p.y_coord)->GetGridState() == GRID_STATE_REMOVAL );
+            return (!getNGrid(p.x_coord, p.y_coord) || getNGrid(p.x_coord, p.y_coord)->GetGridState() == GRID_STATE_REMOVAL);
         }
 
         bool IsLoaded(float x, float y) const
@@ -183,6 +186,8 @@ class MANGOS_DLL_SPEC Map : public GridRefManager<NGridType>
             return loaded(p);
         }
         bool PreloadGrid(float x, float y);
+        void ActivateGrid(WorldLocation const& loc);
+        void ActivateGrid(NGridType* nGrid);
 
         bool GetUnloadLock(const GridPair &p) const { return getNGrid(p.x_coord, p.y_coord)->getUnloadLock(); }
         void SetUnloadLock(const GridPair &p, bool on) { getNGrid(p.x_coord, p.y_coord)->setUnloadExplicitLock(on); }
@@ -265,10 +270,13 @@ class MANGOS_DLL_SPEC Map : public GridRefManager<NGridType>
         bool ScriptsStart(ScriptMapMapName const& scripts, uint32 id, Object* source, Object* target, ScriptExecutionParam execParams = SCRIPT_EXEC_PARAM_NONE);
         void ScriptCommandStart(ScriptInfo const& script, uint32 delay, Object* source, Object* target);
 
+        typedef UNORDERED_SET<WorldObject*> ActiveNonPlayers;
         // must called with AddToWorld
         void AddToActive(WorldObject* obj);
         // must called with RemoveFromWorld
         void RemoveFromActive(WorldObject* obj);
+        ActiveNonPlayers const& GetActiveObjects() { return m_activeNonPlayers; };
+
 
         Player* GetPlayer(ObjectGuid const& guid, bool globalSearch = false);
         Creature* GetCreature(ObjectGuid  const& guid);
@@ -304,9 +312,9 @@ class MANGOS_DLL_SPEC Map : public GridRefManager<NGridType>
         InstanceData* GetInstanceData() const { return i_data; }
         uint32 GetScriptId() const { return i_script_id; }
 
-        void MonsterYellToMap(ObjectGuid guid, int32 textId, uint32 language, Unit* target);
-        void MonsterYellToMap(CreatureInfo const* cinfo, int32 textId, uint32 language, Unit* target, uint32 senderLowGuid = 0);
-        void PlayDirectSoundToMap(uint32 soundId, uint32 zoneId = 0);
+        void MonsterYellToMap(ObjectGuid guid, int32 textId, uint32 language, Unit const* target) const;
+        void MonsterYellToMap(CreatureInfo const* cinfo, int32 textId, uint32 language, Unit const* target, uint32 senderLowGuid = 0) const;
+        void PlayDirectSoundToMap(uint32 soundId, uint32 zoneId = 0) const;
 
         // Weather
         void SetMapWeather(WeatherState state, float grade);
@@ -362,8 +370,10 @@ class MANGOS_DLL_SPEC Map : public GridRefManager<NGridType>
 
         void SendInitSelf( Player * player );
 
-        void SendInitTransports(Player* player);
-        void SendRemoveTransports(Player* player);
+        void SendInitActiveObjects(Player* player);
+        void SendRemoveActiveObjects(Player* player);
+
+        void SendRemoveNotifyToStoredClients(WorldObject* object, bool destroy = false);
 
         bool CreatureCellRelocation(Creature* creature, Cell new_cell);
 
@@ -412,7 +422,6 @@ class MANGOS_DLL_SPEC Map : public GridRefManager<NGridType>
         MapRefManager m_mapRefManager;
         MapRefManager::iterator m_mapRefIter;
 
-        typedef UNORDERED_SET<WorldObject*> ActiveNonPlayers;
         ActiveNonPlayers m_activeNonPlayers;
         ActiveNonPlayers::iterator m_activeNonPlayersIter;
         MapStoredObjectTypesContainer m_objectsStore;

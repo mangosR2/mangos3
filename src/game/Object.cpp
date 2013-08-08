@@ -372,7 +372,6 @@ void Object::BuildMovementUpdate(ByteBuffer * data, uint16 updateFlags) const
 
         data->WriteBit(!unit->m_movementInfo.GetMovementFlags());
         data->WriteBit(!hasOrientation);
-
         data->WriteGuidMask<7, 3, 2>(Guid);
 
         if (unit->m_movementInfo.GetMovementFlags())
@@ -808,34 +807,30 @@ void Object::BuildValuesUpdate(uint8 updatetype, ByteBuffer * data, UpdateMask *
                     // GAMEOBJECT_TYPE_DUNGEON_DIFFICULTY can have lo flag = 2
                     //      most likely related to "can enter map" and then should be 0 if can not enter
 
-                    if (IsActivateToQuest)
+                    switch(((GameObject*)this)->GetGoType())
                     {
-                        switch(((GameObject*)this)->GetGoType())
-                        {
-                            case GAMEOBJECT_TYPE_QUESTGIVER:
-                                // GO also seen with GO_DYNFLAG_LO_SPARKLE explicit, relation/reason unclear (192861)
-                                *data << uint16(GO_DYNFLAG_LO_ACTIVATE);
-                                *data << uint16(-1);
-                                break;
-                            case GAMEOBJECT_TYPE_CHEST:
-                            case GAMEOBJECT_TYPE_GENERIC:
-                            case GAMEOBJECT_TYPE_SPELL_FOCUS:
-                            case GAMEOBJECT_TYPE_GOOBER:
-                                *data << uint16(GO_DYNFLAG_LO_ACTIVATE | GO_DYNFLAG_LO_SPARKLE);
-                                *data << uint16(-1);
-                                break;
-                            default:
-                                // unknown, not happen.
-                                *data << uint16(0);
-                                *data << uint16(-1);
-                                break;
-                        }
-                    }
-                    else
-                    {
-                        // disable quest object
-                        *data << uint16(0);
-                        *data << uint16(-1);
+                        case GAMEOBJECT_TYPE_QUESTGIVER:
+                            // GO also seen with GO_DYNFLAG_LO_SPARKLE explicit, relation/reason unclear (192861)
+                            *data << uint16(IsActivateToQuest ? GO_DYNFLAG_LO_ACTIVATE : GO_DYNFLAG_LO_NONE);
+                            *data << uint16(-1);
+                            break;
+                        case GAMEOBJECT_TYPE_CHEST:
+                        case GAMEOBJECT_TYPE_GENERIC:
+                        case GAMEOBJECT_TYPE_SPELL_FOCUS:
+                        case GAMEOBJECT_TYPE_GOOBER:
+                            *data << uint16(IsActivateToQuest ? (GO_DYNFLAG_LO_ACTIVATE | GO_DYNFLAG_LO_SPARKLE) : GO_DYNFLAG_LO_NONE);
+                            *data << uint16(-1);
+                            break;
+                        case GAMEOBJECT_TYPE_TRANSPORT:
+                        case GAMEOBJECT_TYPE_MO_TRANSPORT:
+                            *data << uint16(((GameObject*)this)->GetGoState() != GO_STATE_ACTIVE ? GO_DYNFLAG_LO_TRANSPORT_STOP : GO_DYNFLAG_LO_NONE);
+                            *data << uint16(-1);
+                            break;
+                        default:
+                            // unknown, not happen.
+                            *data << uint16(GO_DYNFLAG_LO_NONE);
+                            *data << uint16(-1);
+                            break;
                     }
                 }
                 else if (index == GAMEOBJECT_BYTES_1)
@@ -1270,17 +1265,18 @@ ObjectLockType& WorldObject::GetLock(MapLockType _lockType)
     return GetMap() ? GetMap()->GetLock(_lockType) : sWorld.GetLock(_lockType);
 }
 
-void WorldObject::Relocate(WorldLocation const& location)
+// Attention! This method cannot must call while relocation to other map!
+void WorldObject::Relocate(Position const& position)
 {
-    bool locationChanged    = !bool(location == m_position);
-    bool orientationChanged = bool(fabs(location.o - m_position.o) > M_NULL_F);
+    bool positionChanged    = !bool(position == m_position);
+    bool orientationChanged = bool(fabs(position.o - m_position.o) > M_NULL_F);
 
-    m_position = location;
+    m_position = position;
 
     if (isType(TYPEMASK_UNIT))
     {
-        if (locationChanged)
-            ((Unit*)this)->m_movementInfo.ChangePosition(m_position.x, m_position.y, m_position.z, m_position.o);
+        if (positionChanged)
+            ((Unit*)this)->m_movementInfo.ChangePosition(m_position);
         else if (orientationChanged)
             ((Unit*)this)->m_movementInfo.ChangeOrientation(m_position.o);
     }
@@ -1297,22 +1293,30 @@ void WorldObject::Relocate(float x, float y, float z, float orientation)
         ((Unit*)this)->m_movementInfo.ChangePosition(x, y, z, orientation);
 }
 
-void WorldObject::Relocate(float x, float y, float z)
-{
-    m_position.x = x;
-    m_position.y = y;
-    m_position.z = z;
-
-    if (isType(TYPEMASK_UNIT))
-        ((Unit*)this)->m_movementInfo.ChangePosition(x, y, z, GetOrientation());
-}
-
 void WorldObject::SetOrientation(float orientation)
 {
-    m_position.o = NormalizeOrientation(orientation);
+    Relocate(Position(GetPositionX(), GetPositionY(), GetPositionZ(), orientation, GetPhaseMask()));
+}
 
-    if (isType(TYPEMASK_UNIT))
-        ((Unit*)this)->m_movementInfo.ChangeOrientation(orientation);
+void WorldObject::Relocate(WorldLocation const& location)
+{
+    if (location.HasMap() && GetMapId() != location.GetMapId())
+    {
+        if (sMapMgr.IsValidMAP(location.GetMapId()))
+        {
+            SetLocationMapId(location.GetMapId());
+            if (GetInstanceId() != location.GetInstanceId())
+            {
+                if (!sMapMgr.FindMap(location.GetMapId(),location.GetInstanceId()))
+                    DEBUG_LOG("WorldObject::Relocate %s try relocate to non-existance instance %u (map %u).", GetObjectGuid().GetString().c_str(),location.GetInstanceId(), location.GetMapId());
+                SetLocationInstanceId(location.GetInstanceId());
+            }
+        }
+        else
+            sLog.outError("WorldObject::Relocate %s try relocate to non-existance map %u!", GetObjectGuid().GetString().c_str(), location.GetMapId());
+    }
+
+    Relocate(Position(location));
 }
 
 uint32 WorldObject::GetZoneId() const
@@ -1635,9 +1639,9 @@ void WorldObject::UpdateAllowedPositionZ(float x, float y, float &z) const
             }
             // non fly unit don't must be in air
             // non swim unit must be at ground (mostly speedup, because it don't must be in water and water level check less fast
-            else if (!((Creature const*)this)->CanFly())
+            else if (!((Creature*)this)->CanFly())
             {
-                bool canSwim = ((Creature const*)this)->CanSwim();
+                bool canSwim = ((Creature*)this)->CanSwim();
                 float ground_z = z;
                 float max_z = canSwim
                     ? GetTerrain()->GetWaterOrGroundLevel(x, y, z, &ground_z, !((Unit const*)this)->HasAuraType(SPELL_AURA_WATER_WALK))
@@ -1696,21 +1700,21 @@ bool WorldObject::IsPositionValid() const
     return MaNGOS::IsValidMapCoord(m_position.x,m_position.y,m_position.z,m_position.o);
 }
 
-void WorldObject::MonsterSay(const char* text, uint32 language, Unit* target)
+void WorldObject::MonsterSay(const char* text, uint32 language, Unit const* target) const
 {
     WorldPacket data(SMSG_MESSAGECHAT, 200);
     BuildMonsterChat(&data, GetObjectGuid(), CHAT_MSG_MONSTER_SAY, text, language, GetName(), target ? target->GetObjectGuid() : ObjectGuid(), target ? target->GetName() : "");
     SendMessageToSetInRange(&data,sWorld.getConfig(CONFIG_FLOAT_LISTEN_RANGE_SAY),true);
 }
 
-void WorldObject::MonsterYell(const char* text, uint32 language, Unit* target)
+void WorldObject::MonsterYell(const char* text, uint32 language, Unit const* target) const
 {
     WorldPacket data(SMSG_MESSAGECHAT, 200);
     BuildMonsterChat(&data, GetObjectGuid(), CHAT_MSG_MONSTER_YELL, text, language, GetName(), target ? target->GetObjectGuid() : ObjectGuid(), target ? target->GetName() : "");
     SendMessageToSetInRange(&data,sWorld.getConfig(CONFIG_FLOAT_LISTEN_RANGE_YELL),true);
 }
 
-void WorldObject::MonsterTextEmote(const char* text, Unit* target, bool IsBossEmote)
+void WorldObject::MonsterTextEmote(const char* text, Unit const* target, bool IsBossEmote) const
 {
     WorldPacket data(SMSG_MESSAGECHAT, 200);
     BuildMonsterChat(&data, GetObjectGuid(), IsBossEmote ? CHAT_MSG_RAID_BOSS_EMOTE : CHAT_MSG_MONSTER_EMOTE, text, LANG_UNIVERSAL,
@@ -1718,7 +1722,7 @@ void WorldObject::MonsterTextEmote(const char* text, Unit* target, bool IsBossEm
     SendMessageToSetInRange(&data, sWorld.getConfig(IsBossEmote ? CONFIG_FLOAT_LISTEN_RANGE_YELL : CONFIG_FLOAT_LISTEN_RANGE_TEXTEMOTE), true);
 }
 
-void WorldObject::MonsterWhisper(const char* text, Unit* target, bool IsBossWhisper)
+void WorldObject::MonsterWhisper(const char* text, Unit const* target, bool IsBossWhisper) const
 {
     if (!target || target->GetTypeId() != TYPEID_PLAYER)
         return;
@@ -1734,7 +1738,7 @@ namespace MaNGOS
     class MonsterChatBuilder
     {
         public:
-            MonsterChatBuilder(WorldObject const& obj, ChatMsg msgtype, int32 textId, uint32 language, Unit* target)
+            MonsterChatBuilder(WorldObject const& obj, ChatMsg msgtype, int32 textId, uint32 language, Unit const* target)
                 : i_object(obj), i_msgtype(msgtype), i_textId(textId), i_language(language), i_target(target) {}
             void operator()(WorldPacket& data, int32 loc_idx)
             {
@@ -1748,11 +1752,11 @@ namespace MaNGOS
             ChatMsg i_msgtype;
             int32 i_textId;
             uint32 i_language;
-            Unit* i_target;
+            Unit const* i_target;
     };
 }                                                           // namespace MaNGOS
 
-void WorldObject::MonsterSay(int32 textId, uint32 language, Unit* target)
+void WorldObject::MonsterSay(int32 textId, uint32 language, Unit const* target) const
 {
     float range = sWorld.getConfig(CONFIG_FLOAT_LISTEN_RANGE_SAY);
     MaNGOS::MonsterChatBuilder say_build(*this, CHAT_MSG_MONSTER_SAY, textId, language, target);
@@ -1761,7 +1765,7 @@ void WorldObject::MonsterSay(int32 textId, uint32 language, Unit* target)
     Cell::VisitWorldObjects(this, say_worker, range);
 }
 
-void WorldObject::MonsterYell(int32 textId, uint32 language, Unit* target)
+void WorldObject::MonsterYell(int32 textId, uint32 language, Unit const* target) const
 {
     float range = sWorld.getConfig(CONFIG_FLOAT_LISTEN_RANGE_YELL);
     MaNGOS::MonsterChatBuilder say_build(*this, CHAT_MSG_MONSTER_YELL, textId, language, target);
@@ -1770,7 +1774,7 @@ void WorldObject::MonsterYell(int32 textId, uint32 language, Unit* target)
     Cell::VisitWorldObjects(this, say_worker, range);
 }
 
-void WorldObject::MonsterYellToZone(int32 textId, uint32 language, Unit* target)
+void WorldObject::MonsterYellToZone(int32 textId, uint32 language, Unit const* target) const
 {
     MaNGOS::MonsterChatBuilder say_build(*this, CHAT_MSG_MONSTER_YELL, textId, language, target);
     MaNGOS::LocalizedPacketDo<MaNGOS::MonsterChatBuilder> say_do(say_build);
@@ -1783,7 +1787,7 @@ void WorldObject::MonsterYellToZone(int32 textId, uint32 language, Unit* target)
             say_do(itr->getSource());
 }
 
-void WorldObject::MonsterTextEmote(int32 textId, Unit* target, bool IsBossEmote)
+void WorldObject::MonsterTextEmote(int32 textId, Unit const* target, bool IsBossEmote) const
 {
     float range = sWorld.getConfig(IsBossEmote ? CONFIG_FLOAT_LISTEN_RANGE_YELL : CONFIG_FLOAT_LISTEN_RANGE_TEXTEMOTE);
 
@@ -1793,7 +1797,7 @@ void WorldObject::MonsterTextEmote(int32 textId, Unit* target, bool IsBossEmote)
     Cell::VisitWorldObjects(this, say_worker, range);
 }
 
-void WorldObject::MonsterWhisper(int32 textId, Unit* target, bool IsBossWhisper)
+void WorldObject::MonsterWhisper(int32 textId, Unit const* target, bool IsBossWhisper) const
 {
     if (!target || target->GetTypeId() != TYPEID_PLAYER)
         return;
@@ -1832,21 +1836,21 @@ void WorldObject::BuildMonsterChat(WorldPacket *data, ObjectGuid senderGuid, uin
     }
 }
 
-void WorldObject::SendMessageToSet(WorldPacket *data, bool /*bToSelf*/)
+void WorldObject::SendMessageToSet(WorldPacket* data, bool /*bToSelf*/) const
 {
     //if object is in world, map for it already created!
     if (IsInWorld())
         GetMap()->MessageBroadcast(this, data);
 }
 
-void WorldObject::SendMessageToSetInRange(WorldPacket *data, float dist, bool /*bToSelf*/)
+void WorldObject::SendMessageToSetInRange(WorldPacket* data, float dist, bool /*bToSelf*/) const
 {
     //if object is in world, map for it already created!
     if (IsInWorld())
         GetMap()->MessageDistBroadcast(this, data, dist);
 }
 
-void WorldObject::SendMessageToSetExcept(WorldPacket *data, Player const* skipped_receiver)
+void WorldObject::SendMessageToSetExcept(WorldPacket* data, Player const* skipped_receiver) const
 {
     //if object is in world, map for it already created!
     if (IsInWorld())
@@ -1871,7 +1875,7 @@ void WorldObject::SendGameObjectCustomAnim(ObjectGuid guid, uint32 animId /*= 0*
     SendMessageToSet(&data, true);
 }
 
-void WorldObject::SetMap(Map * map)
+void WorldObject::SetMap(Map* map)
 {
     MANGOS_ASSERT(map);
     m_currMap = map;
@@ -2167,7 +2171,7 @@ void WorldObject::SetPhaseMask(uint32 newPhaseMask, bool update)
         UpdateVisibilityAndView();
 }
 
-void WorldObject::PlayDistanceSound( uint32 sound_id, Player* target /*= NULL*/ )
+void WorldObject::PlayDistanceSound(uint32 sound_id, Player const* target /*= NULL*/) const
 {
     WorldPacket data(SMSG_PLAY_OBJECT_SOUND,4+8);
     data << uint32(sound_id);
@@ -2179,7 +2183,7 @@ void WorldObject::PlayDistanceSound( uint32 sound_id, Player* target /*= NULL*/ 
         SendMessageToSet( &data, true );
 }
 
-void WorldObject::PlayDirectSound( uint32 sound_id, Player* target /*= NULL*/ )
+void WorldObject::PlayDirectSound(uint32 sound_id, Player const* target /*= NULL*/) const
 {
     WorldPacket data(SMSG_PLAY_SOUND, 4);
     data << uint32(sound_id);
@@ -2278,7 +2282,7 @@ struct WorldObjectChangeAccumulator
         for(CameraMapType::iterator iter = m.begin(); iter != m.end(); ++iter)
         {
             Player* owner = iter->getSource()->GetOwner();
-            if (owner && owner != &i_object && owner->HaveAtClient(&i_object))
+            if (owner && owner != &i_object && owner->HaveAtClient(i_object.GetObjectGuid()))
                 i_object.BuildUpdateDataForPlayer(owner, i_updateDatas);
         }
     }
@@ -2483,4 +2487,24 @@ void WorldObject::UpdateEvents(uint32 update_diff, uint32 time)
     }
 
     GetEvents()->Update(update_diff);
+}
+
+Transport* WorldObject::GetTransport() const
+{
+    return IsOnTransport() ? sObjectMgr.GetTransportByGuid(GetTransportInfo()->GetTransportGuid()) : NULL;
+}
+
+bool WorldObject::IsOnTransport() const
+{
+    return GetTransportInfo() && GetTransportInfo()->GetTransportGuid().IsMOTransport();
+}
+
+TransportBase* WorldObject::GetTransportBase()
+{
+    if (GetObjectGuid().IsMOTransport())
+        return ((Transport*)this)->GetTransportBase();
+    else if (GetObjectGuid().IsUnit())
+        return ((Unit*)this)->GetTransportBase();
+
+    return NULL;
 }

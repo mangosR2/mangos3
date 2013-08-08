@@ -53,6 +53,7 @@
 #include "TargetedMovementGenerator.h"                      // for HandleNpcUnFollowCommand
 #include "MoveMap.h"                                        // for mmap manager
 #include "PathFinder.h"                                     // for mmap commands
+#include "movement/MoveSplineInit.h"
 
 static uint32 ReputationRankStrIndex[MAX_REPUTATION_RANK] =
 {
@@ -1028,7 +1029,7 @@ bool ChatHandler::HandleGameObjectMoveCommand(char* args)
         Map* map = obj->GetMap();
         map->Remove(obj, false);
 
-        obj->Relocate(chr->GetPositionX(), chr->GetPositionY(), chr->GetPositionZ(), obj->GetOrientation());
+        obj->Relocate(chr->GetPosition());
 
         map->Add(obj);
     }
@@ -1056,7 +1057,7 @@ bool ChatHandler::HandleGameObjectMoveCommand(char* args)
         Map* map = obj->GetMap();
         map->Remove(obj, false);
 
-        obj->Relocate(x, y, z, obj->GetOrientation());
+        obj->Relocate(WorldLocation(map->GetId(), x, y, z, obj->GetOrientation(), obj->GetPhaseMask(), map->GetInstanceId()));
 
         map->Add(obj);
     }
@@ -2034,23 +2035,20 @@ bool ChatHandler::HandleNpcMoveCommand(char* args)
     else
         lowguid = pCreature->GetGUIDLow();
 
-    float x = m_session->GetPlayer()->GetPositionX();
-    float y = m_session->GetPlayer()->GetPositionY();
-    float z = m_session->GetPlayer()->GetPositionZ();
-    float o = m_session->GetPlayer()->GetOrientation();
+    WorldLocation loc = m_session->GetPlayer()->GetPosition();
 
     if (pCreature)
     {
         if (CreatureData const* data = sObjectMgr.GetCreatureData(pCreature->GetGUIDLow()))
         {
-            const_cast<CreatureData*>(data)->posX = x;
-            const_cast<CreatureData*>(data)->posY = y;
-            const_cast<CreatureData*>(data)->posZ = z;
-            const_cast<CreatureData*>(data)->orientation = o;
+            const_cast<CreatureData*>(data)->posX = loc.x;
+            const_cast<CreatureData*>(data)->posY = loc.y;
+            const_cast<CreatureData*>(data)->posZ = loc.z;
+            const_cast<CreatureData*>(data)->orientation = loc.o;
         }
 
-        pCreature->SetRespawnCoord(x, y, z, o);
-        pCreature->GetMap()->Relocation(pCreature, x, y, z, o);
+        pCreature->SetRespawnCoord(loc);
+        pCreature->GetMap()->Relocation(pCreature, loc);
         pCreature->GetMotionMaster()->Initialize();
 
         if (pCreature->isAlive())                           // dead creature will reset movement generator at respawn
@@ -2060,7 +2058,7 @@ bool ChatHandler::HandleNpcMoveCommand(char* args)
         }
     }
 
-    WorldDatabase.PExecuteLog("UPDATE creature SET position_x = '%f', position_y = '%f', position_z = '%f', orientation = '%f' WHERE guid = '%u'", x, y, z, o, lowguid);
+    WorldDatabase.PExecuteLog("UPDATE creature SET position_x = '%f', position_y = '%f', position_z = '%f', orientation = '%f' WHERE guid = '%u'", loc.x, loc.y, loc.z, loc.o, lowguid);
     PSendSysMessage(LANG_COMMAND_CREATUREMOVED);
     return true;
 }
@@ -5549,15 +5547,24 @@ bool ChatHandler::HandleMmapPathCommand(char* args)
     char* para = strtok(args, " ");
 
     bool useStraightPath = false;
-    if (para && strcmp(para, "true") == 0)
-        useStraightPath = true;
+    bool followPath = false;
+    if (para && strcmp(para, "go") == 0)
+    {
+        followPath = true;
+        para = strtok(NULL, " ");
+        if (para && strcmp(para, "straight") == 0)
+            useStraightPath = true;
+    }
+    else
+        if (para && strcmp(para, "straight") == 0)
+            useStraightPath = true;
 
     // unit locations
     float x, y, z;
-    player->GetPosition(x, y, z);
+    target->GetPosition(x, y, z);
 
     // path
-    PathFinder path(target);
+    PathFinder path(player);
     path.setUseStrightPath(useStraightPath);
     path.calculate(x, y, z);
 
@@ -5579,9 +5586,20 @@ bool ChatHandler::HandleMmapPathCommand(char* args)
 
     // this entry visible only to GM's with "gm on"
     static const uint32 WAYPOINT_NPC_ENTRY = 1;
+    Creature* wp = NULL;
     for (uint32 i = 0; i < pointPath.size(); ++i)
-        player->SummonCreature(WAYPOINT_NPC_ENTRY, pointPath[i].x, pointPath[i].y, pointPath[i].z, 0, TEMPSUMMON_TIMED_DESPAWN, 9000);
+    {
+        wp = player->SummonCreature(WAYPOINT_NPC_ENTRY, pointPath[i].x, pointPath[i].y, pointPath[i].z, 0, TEMPSUMMON_TIMED_DESPAWN, 9000);
         // TODO: make creature not sink/fall
+    }
+
+    if (followPath)
+    {
+        Movement::MoveSplineInit<Unit*> init(*player);
+        init.MovebyPath(pointPath);
+        init.SetWalk(false);
+        init.Launch();
+    }
 
     return true;
 }
@@ -5629,10 +5647,11 @@ bool ChatHandler::HandleMmapLocCommand(char* /*args*/)
         PSendSysMessage("Dt     [??,??] (invalid poly, probably no tile loaded)");
     else
     {
-        const dtMeshTile* tile;
-        const dtPoly* poly;
+        const dtMeshTile* tile = NULL;
+        const dtPoly* poly = NULL;
         navmesh->getTileAndPolyByRef(polyRef, &tile, &poly);
-        if (tile)
+        dtStatus dtResult = navmesh->getTileAndPolyByRef(polyRef, &tile, &poly);
+        if (( dtStatusSucceed(dtResult)) && tile)
             PSendSysMessage("Dt     [%02i,%02i]", tile->header->x, tile->header->y);
         else
             PSendSysMessage("Dt     [??,??] (no tile loaded)");

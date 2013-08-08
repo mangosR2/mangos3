@@ -43,8 +43,7 @@ inline bool isStatic(MovementGenerator *mv)
 void MotionMaster::Initialize()
 {
     // stop current move
-    if (!m_owner->IsStopped())
-        m_owner->StopMoving();
+    m_owner->StopMoving();
 
     Clear(false,false);
 
@@ -113,6 +112,7 @@ void MotionMaster::MoveTargetedHome()
             {
                 case COMMAND_STAY:
                     MoveIdle();
+                    m_owner->StopMoving(true);
                     break;
                 case COMMAND_FOLLOW:
                 case COMMAND_ATTACK:
