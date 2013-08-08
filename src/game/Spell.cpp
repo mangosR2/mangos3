@@ -4845,10 +4845,7 @@ void Spell::SendEffectLogExecute(SpellEffectEntry const* effect, ObjectGuid targ
         case SPELL_EFFECT_SUMMON_OBJECT_WILD:
         case SPELL_EFFECT_CREATE_HOUSE:
         case SPELL_EFFECT_DUEL:
-        case SPELL_EFFECT_SUMMON_OBJECT_SLOT1:
-        case SPELL_EFFECT_SUMMON_OBJECT_SLOT2:
-        case SPELL_EFFECT_SUMMON_OBJECT_SLOT3:
-        case SPELL_EFFECT_SUMMON_OBJECT_SLOT4:
+        case SPELL_EFFECT_SUMMON_OBJECT_SLOT:
         case SPELL_EFFECT_171:
         {
             data << targetGuid.WriteAsPacked();
@@ -6594,10 +6591,8 @@ SpellCastResult Spell::CheckCast(bool strict)
 
                 break;
             }
-            case SPELL_EFFECT_SUMMON_OBJECT_SLOT1:
-            case SPELL_EFFECT_SUMMON_OBJECT_SLOT2:
-            case SPELL_EFFECT_SUMMON_OBJECT_SLOT3:
-            case SPELL_EFFECT_SUMMON_OBJECT_SLOT4:
+            // FIXME hack due to npc-on-transport not ready
+            case SPELL_EFFECT_SUMMON_OBJECT_SLOT:
             {
                 if (m_caster->GetTypeId() == TYPEID_PLAYER)
                     if (m_caster->IsOnTransport())
