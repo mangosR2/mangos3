@@ -216,22 +216,22 @@ set(TOMMATH_FILES
 )
 
 set(ZLIB_BZIP2_FILES
-           src/bzip2/blocksort.c
-           src/bzip2/bzlib.c
-           src/bzip2/compress.c
-           src/bzip2/crctable.c
-           src/bzip2/decompress.c
-           src/bzip2/huffman.c
-           src/bzip2/randtable.c
-           src/zlib/adler32.c
-           src/zlib/compress2.c
-           src/zlib/crc32.c
-           src/zlib/deflate.c
-           src/zlib/inffast.c
-           src/zlib/inflate.c
-           src/zlib/inftrees.c
-           src/zlib/trees.c
-           src/zlib/zutil.c
+           ../src/bzip2/blocksort.c
+           ../src/bzip2/bzlib.c
+           ../src/bzip2/compress.c
+           ../src/bzip2/crctable.c
+           ../src/bzip2/decompress.c
+           ../src/bzip2/huffman.c
+           ../src/bzip2/randtable.c
+           ../src/zlib/adler32.c
+           ../src/zlib/compress2.c
+           ../src/zlib/crc32.c
+           ../src/zlib/deflate.c
+           ../src/zlib/inffast.c
+           ../src/zlib/inflate.c
+           ../src/zlib/inftrees.c
+           ../src/zlib/trees.c
+           ../src/zlib/zutil.c
 )
 
 # set(TEST_SRC_FILES
