@@ -35,14 +35,14 @@
 
 // Include functions from zlib
 #ifndef __SYS_ZLIB
-#include "zlib/zlib.h"
+#include "../../src/zlib/zlib.h"
 #else
 #include <zlib.h>
 #endif
 
 // Include functions from bzlib
 #ifndef __SYS_BZLIB
-#include "bzip2/bzlib.h"
+#include "../../src/bzip2/bzlib.h"
 #else
 #include <bzlib.h>
 #endif
