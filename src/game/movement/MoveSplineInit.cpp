@@ -85,7 +85,7 @@ namespace Movement
         args.initialOrientation = real_position.orientation;
 
         uint32 moveFlags = unit.m_movementInfo.GetMovementFlags();
-        moveFlags |= (MOVEFLAG_SPLINE_ENABLED | MOVEFLAG_FORWARD);
+        moveFlags |= MOVEFLAG_FORWARD;
 
         if (moveFlags & MOVEFLAG_ROOT)
             moveFlags &= ~MOVEFLAG_MASK_MOVING;

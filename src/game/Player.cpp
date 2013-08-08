@@ -2097,10 +2097,10 @@ bool Player::TeleportTo(WorldLocation const& loc, uint32 options)
 
                 data << uint32(loc.GetMapId());
 
-                if (m_transport)
+                if (IsOnTransport())
                     data << float(m_movementInfo.GetTransportPos()->y);
                 else
-                    data << float(final_y);
+                    data << float(final.y);
 
                 GetSession()->SendPacket(&data);
                 SendSavedInstances();
@@ -15585,10 +15585,6 @@ bool Player::LoadFromDB(ObjectGuid guid, SqlQueryHolder *holder)
 
     SetUInt32Value(PLAYER_BYTES, fields[9].GetUInt32());
     SetUInt32Value(PLAYER_BYTES_2, fields[10].GetUInt32());
-
-    m_drunk = fields[45].GetUInt16();
-
-    SetUInt16Value(PLAYER_BYTES_3, 0, (m_drunk & 0xFFFE) | gender);
 
     SetUInt32Value(PLAYER_FLAGS, fields[11].GetUInt32());
 

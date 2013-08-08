@@ -3022,50 +3022,6 @@ void Unit::CalculateDamageAbsorbAndResist(Unit* pCaster, DamageInfo* damageInfo,
     // only split damage if not damaging yourself
     if (pCaster != this)
     {
-        AuraList const& vSplitDamageFlat = GetAurasByType(SPELL_AURA_SPLIT_DAMAGE_FLAT);
-        for(AuraList::const_iterator i = vSplitDamageFlat.begin(), next; i != vSplitDamageFlat.end() && RemainingDamage >= 0; i = next)
-        {
-            next = i; ++next;
-
-            // check damage school mask
-            if(((*i)->GetModifier()->m_miscvalue & damageInfo->SchoolMask()) == 0)
-                continue;
-
-            // Damage can be splitted only if aura has an alive caster
-            Unit *caster = (*i)->GetCaster();
-            if(!caster || caster == this || !caster->IsInWorld() || !caster->isAlive())
-                continue;
-
-            DamageInfo splitdamageInfo = DamageInfo(pCaster, caster, (*i)->GetSpellProto());
-            splitdamageInfo.CleanDamage(0, 0, BASE_ATTACK, MELEE_HIT_NORMAL);
-            splitdamageInfo.damageType = damageInfo->damageType;
-
-            if (RemainingDamage >= (*i)->GetModifier()->m_amount)
-                splitdamageInfo.damage = (*i)->GetModifier()->m_amount;
-            else
-                splitdamageInfo.damage = RemainingDamage;
-
-            RemainingDamage -= splitdamageInfo.damage;
-
-            pCaster->DealDamageMods(&splitdamageInfo);
-
-            splitdamageInfo.procVictim |= PROC_FLAG_TAKEN_ANY_DAMAGE;
-
-            if (splitdamageInfo.GetAbsorb())
-                splitdamageInfo.procEx |= PROC_EX_ABSORB;
-
-            if (splitdamageInfo.damage == 0)
-                splitdamageInfo.procEx &= ~PROC_EX_DIRECT_DAMAGE;
-            else
-                splitdamageInfo.procEx |= PROC_EX_DIRECT_DAMAGE;
-
-            caster->ProcDamageAndSpellFor(true,&splitdamageInfo);
-
-            pCaster->SendSpellNonMeleeDamageLog(caster, (*i)->GetSpellProto()->Id, splitdamageInfo.damage, damageInfo->SchoolMask(), splitdamageInfo.GetAbsorb(), 0, false, 0, false);
-            splitdamageInfo.cleanDamage = splitdamageInfo.damage - splitdamageInfo.GetAbsorb();
-            pCaster->DealDamage(caster, &splitdamageInfo, false);
-        }
-
         AuraList const& vSplitDamagePct = GetAurasByType(SPELL_AURA_SPLIT_DAMAGE_PCT);
         for(AuraList::const_iterator i = vSplitDamagePct.begin(), next; i != vSplitDamagePct.end() && RemainingDamage >= 0; i = next)
         {

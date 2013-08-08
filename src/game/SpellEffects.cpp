@@ -4795,11 +4795,11 @@ void Spell::EffectDummy(SpellEffectEntry const* effect)
     // So called only for not processed cases
     bool libraryResult = false;
     if (gameObjTarget)
-        libraryResult = sScriptMgr.OnEffectDummy(m_caster, m_spellInfo->Id, eff_idx, gameObjTarget, m_originalCasterGUID);
+        libraryResult = sScriptMgr.OnEffectDummy(m_caster, m_spellInfo->Id, effect->GetIndex(), gameObjTarget, m_originalCasterGUID);
     else if (unitTarget && unitTarget->GetTypeId() == TYPEID_UNIT)
-        libraryResult = sScriptMgr.OnEffectDummy(m_caster, m_spellInfo->Id, eff_idx, (Creature*)unitTarget, m_originalCasterGUID);
+        libraryResult = sScriptMgr.OnEffectDummy(m_caster, m_spellInfo->Id, effect->GetIndex(), (Creature*)unitTarget, m_originalCasterGUID);
     else if (itemTarget)
-        libraryResult = sScriptMgr.OnEffectDummy(m_caster, m_spellInfo->Id, eff_idx, itemTarget, m_originalCasterGUID);
+        libraryResult = sScriptMgr.OnEffectDummy(m_caster, m_spellInfo->Id, effect->GetIndex(), itemTarget, m_originalCasterGUID);
 
     if (libraryResult || !unitTarget)
         return;
@@ -8854,7 +8854,7 @@ void Spell::EffectScriptEffect(SpellEffectEntry const* effect)
                     if (!unitTarget)
                         return;
 
-                    m_caster->CastSpell(unitTarget, m_spellInfo->CalculateSimpleValue(eff_idx), true);
+                    m_caster->CastSpell(unitTarget, effect->CalculateSimpleValue(), true);
                     return;
                 }
                 case 39681:                                 // Summon Goblin Tonk
@@ -9244,7 +9244,7 @@ void Spell::EffectScriptEffect(SpellEffectEntry const* effect)
                     if (!unitTarget || m_caster->GetTypeId() != TYPEID_PLAYER)
                         return;
 
-                    unitTarget->CastSpell(m_caster, m_spellInfo->CalculateSimpleValue(eff_idx), true);
+                    unitTarget->CastSpell(m_caster, effect->CalculateSimpleValue(), true);
                     return;
                 }
                 case 45717:                                 // Fog of Corruption (player buff)
@@ -10273,7 +10273,7 @@ void Spell::EffectScriptEffect(SpellEffectEntry const* effect)
                             seatId = 2;
                             break;
                         default:
-                            seatId = m_spellInfo->EffectBasePoints[EFFECT_INDEX_0];
+                            seatId = m_spellInfo->CalculateSimpleValue(EFFECT_INDEX_0);
                             break;
                     }
 
@@ -11527,7 +11527,7 @@ void Spell::EffectScriptEffect(SpellEffectEntry const* effect)
     // So called only for not processed cases
     if (unitTarget->GetTypeId() == TYPEID_UNIT)
     {
-        if (sScriptMgr.OnEffectScriptEffect(m_caster, m_spellInfo->Id, effect->GetIndex(), (Creature*)unitTarget), m_originalCasterGUID))
+        if (sScriptMgr.OnEffectScriptEffect(m_caster, m_spellInfo->Id, effect->GetIndex(), (Creature*)unitTarget, m_originalCasterGUID))
             return;
     }
 
@@ -11711,7 +11711,7 @@ void Spell::EffectActivateObject(SpellEffectEntry const* effect)
     if (!gameObjTarget)
         return;
 
-    uint32 misc_value = m_spellInfo->EffectMiscValue[eff_idx];
+    uint32 misc_value = effect->EffectMiscValue;
 
     switch (misc_value)
     {

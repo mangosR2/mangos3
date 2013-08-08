@@ -169,7 +169,7 @@ void TransportBase::BoardPassenger(WorldObject* passenger, Position const& pos, 
     if (passenger->isType(TYPEMASK_UNIT))
     {
         ((Unit*)passenger)->m_movementInfo.ClearTransportData();
-        ((Unit*)passenger)->m_movementInfo.AddMovementFlag(MOVEFLAG_ONTRANSPORT);
+        //((Unit*)passenger)->m_movementInfo.AddMovementFlag(MOVEFLAG_ONTRANSPORT);
         ((Unit*)passenger)->m_movementInfo.SetTransportData(GetOwner()->GetObjectGuid(), pos, WorldTimer::getMSTime(), -1);
     }
     passenger->SetTransportPosition(pos);
@@ -184,7 +184,7 @@ void TransportBase::UnBoardPassenger(WorldObject* passenger)
     if (passenger->isType(TYPEMASK_UNIT))
     {
         ((Unit*)passenger)->m_movementInfo.ClearTransportData();
-        ((Unit*)passenger)->m_movementInfo.RemoveMovementFlag(MOVEFLAG_ONTRANSPORT);
+        //((Unit*)passenger)->m_movementInfo.RemoveMovementFlag(MOVEFLAG_ONTRANSPORT);
     }
     passenger->ClearTransportData();
 

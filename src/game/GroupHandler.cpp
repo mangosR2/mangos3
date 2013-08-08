@@ -219,7 +219,7 @@ void WorldSession::HandleGroupInviteOpcode(WorldPacket& recv_data)
     SendPartyResult(PARTY_OP_INVITE, membername, ERR_PARTY_RESULT_OK);
 }
 
-void WorldSession::HandleGroupAcceptOpcode(WorldPacket& recv_data)
+void WorldSession::HandleGroupInviteResponseOpcode(WorldPacket& recv_data)
 {
     bool unk = recv_data.ReadBit();
     bool accepted = recv_data.ReadBit();
@@ -235,66 +235,57 @@ void WorldSession::HandleGroupAcceptOpcode(WorldPacket& recv_data)
         // remove in from invites in any case
         group->RemoveInvite(GetPlayer());
 
-    if (group->GetLeaderGuid() == GetPlayer()->GetObjectGuid())
-    {
-            sLog.outError("HandleGroupInviteResponseOpcode: %s tried to accept an invite to his own group",
-            GetPlayer()->GetGuidStr().c_str());
-        return;
-    }
-
-    /** error handling **/
-    /********************/
-
-    // not have place
-    if (group->IsFull())
-    {
-        SendPartyResult(PARTY_OP_INVITE, "", ERR_GROUP_FULL);
-        return;
-    }
-
-    Player* leader = sObjectMgr.GetPlayer(group->GetLeaderGuid());
-
-    // forming a new group, create it
-    if (!group->IsCreated())
-    {
-        if (leader)
-            group->RemoveInvite(leader);
-        if (group->Create(group->GetLeaderGuid(), group->GetLeaderName()))
-            sObjectMgr.AddGroup(group);
-        else
+        if (group->GetLeaderGuid() == GetPlayer()->GetObjectGuid())
+        {
+                sLog.outError("HandleGroupInviteResponseOpcode: %s tried to accept an invite to his own group",
+                GetPlayer()->GetGuidStr().c_str());
             return;
-    }
+        }
 
-    // everything is fine, do it, PLAYER'S GROUP IS SET IN ADDMEMBER!!!
-    if (!group->AddMember(GetPlayer()->GetObjectGuid(), GetPlayer()->GetName()))
-        return;
+        // not have place
+        if (group->IsFull())
+        {
+            SendPartyResult(PARTY_OP_INVITE, "", ERR_GROUP_FULL);
+            return;
+        }
+
+        Player* leader = sObjectMgr.GetPlayer(group->GetLeaderGuid());
+
+        // forming a new group, create it
+        if (!group->IsCreated())
+        {
+            if (leader)
+                group->RemoveInvite(leader);
+            if (group->Create(group->GetLeaderGuid(), group->GetLeaderName()))
+                sObjectMgr.AddGroup(group);
+            else
+                return;
+        }
+
+        // everything is fine, do it, PLAYER'S GROUP IS SET IN ADDMEMBER!!!
+        if (!group->AddMember(GetPlayer()->GetObjectGuid(), GetPlayer()->GetName()))
+            return;
+
+    }
+    else
+    {
+        // uninvite, group can be deleted
+        GetPlayer()->UninviteFromGroup();
+
+        // remember leader if online
+        Player* leader = sObjectMgr.GetPlayer(group->GetLeaderGuid());
+        if (!leader || !leader->GetSession())
+            return;
+
+        // report
+        WorldPacket data(SMSG_GROUP_DECLINE, 10);             // guess size
+        data << GetPlayer()->GetName();
+        leader->GetSession()->SendPacket(&data);
+    }
 
     // Frozen Mod
     group->BroadcastGroupUpdate();
     // Frozen Mod
-}
-
-void WorldSession::HandleGroupDeclineOpcode(WorldPacket& /*recv_data*/ )
-{
-    Group  *group  = GetPlayer()->GetGroupInvite();
-    if (!group)
-        return;
-
-    // remember leader if online
-    Player* leader = sObjectMgr.GetPlayer(group->GetLeaderGuid());
-
-    // uninvite, group can be deleted
-    GetPlayer()->UninviteFromGroup();
-
-        // remember leader if online
-        Player* leader = sObjectMgr.GetPlayer(group->GetLeaderGuid());
-    if (!leader || !leader->GetSession())
-        return;
-
-    // report
-    WorldPacket data(SMSG_GROUP_DECLINE, 10);             // guess size
-    data << GetPlayer()->GetName();
-    leader->GetSession()->SendPacket(&data);
 }
 
 void WorldSession::HandleGroupUninviteGuidOpcode(WorldPacket & recv_data)
@@ -810,7 +801,7 @@ void WorldSession::BuildPartyMemberStatsChangedPacket(Player* player, WorldPacke
                                             // if aura is in auramask, so it seems no difference if there will be MAX_AURAS
         for(uint32 i = 0; i < MAX_AURAS; ++i)
         {
-            if (auraMask & (uint64(1) << i))
+            if (auramask & (uint64(1) << i))
             {
                 if (SpellAuraHolderPtr holder = player->GetVisibleAura(i))
                 {
@@ -945,9 +936,6 @@ void WorldSession::HandleRequestPartyMemberStatsOpcode(WorldPacket& recv_data)
         GROUP_UPDATE_FLAG_AURAS | GROUP_UPDATE_FLAG_PET_NAME | GROUP_UPDATE_FLAG_PET_AURAS |
         GROUP_UPDATE_FLAG_PHASE;
 
-    if(pet)
-        mask1 = 0x7FEFFEFF; // full mask & ~(GROUP_UPDATE_FLAG_VEHICLE_SEAT | GROUP_UPDATE_FLAG_UNK)
-
     Pet* pet = player->GetPet();
     if (pet)
         updateFlags |= GROUP_UPDATE_FLAG_PET_GUID | GROUP_UPDATE_FLAG_PET_CUR_HP | GROUP_UPDATE_FLAG_PET_MAX_HP |
@@ -1063,7 +1051,7 @@ void WorldSession::HandleRequestPartyMemberStatsOpcode(WorldPacket& recv_data)
         {
             if (SpellAuraHolderPtr holder = pet->GetVisibleAura(i))
             {
-                petAuraMask |= (uint64(1) << i);
+                petauramask |= (uint64(1) << i);
                 data << uint32(holder->GetId());
                 data << uint16(holder->GetAuraFlags());
                 if (holder->GetAuraFlags() & AFLAG_EFFECT_AMOUNT_SEND)
@@ -1074,7 +1062,7 @@ void WorldSession::HandleRequestPartyMemberStatsOpcode(WorldPacket& recv_data)
                         data << int32(0);
             }
         }
-        data.put<uint64>(petMaskPos, petAuraMask);          // GROUP_UPDATE_FLAG_PET_AURAS
+        data.put<uint64>(petMaskPos, petauramask);          // GROUP_UPDATE_FLAG_PET_AURAS
     }
     else
     {

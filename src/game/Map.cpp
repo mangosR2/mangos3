@@ -1142,7 +1142,7 @@ void Map::SendInitSelf(Player* player )
 {
     DETAIL_LOG("Creating player data for himself %u", player->GetGUIDLow());
 
-    UpdateData data;
+    UpdateData data(player->GetMapId());
     // build data for self presence in world at own client (one time for map)
     player->BuildCreateUpdateBlockForPlayer(&data, player);
 
@@ -1167,7 +1167,7 @@ void Map::SendInitActiveObjects(Player* player)
     if (activeObjects.empty())
         return;
 
-    UpdateData initData;
+    UpdateData initData(player->GetMapId());
     bool hasAny = false;
 
     for (ActiveNonPlayers::iterator itr = m_activeNonPlayers.begin(); itr != m_activeNonPlayers.end(); ++itr)
@@ -1198,7 +1198,7 @@ void Map::SendRemoveActiveObjects(Player* player)
     if (activeObjects.empty())
         return;
 
-    UpdateData initData;
+    UpdateData initData(player->GetMapId());
     bool hasAny = false;
 
     for (ActiveNonPlayers::iterator itr = m_activeNonPlayers.begin(); itr != m_activeNonPlayers.end(); ++itr)
@@ -1375,7 +1375,7 @@ void Map::AddToActive(WorldObject* obj)
                 Player* player = itr->getSource();
                 if (player && player->IsInWorld())
                 {
-                    UpdateData data;
+                    UpdateData data(player->GetMapId());
                     obj->BuildCreateUpdateBlockForPlayer(&data, player);
                     WorldPacket packet;
                     data.BuildPacket(&packet);
@@ -2709,7 +2709,7 @@ void Map::SendRemoveNotifyToStoredClients(WorldObject* object, bool destroy)
     else
     // Packet type rewrited to SMSG_UPDATE_OBJECT here
     {
-        UpdateData data;
+        UpdateData data(object->GetMapId());
         object->BuildOutOfRangeUpdateBlock(&data);
         data.BuildPacket(&out_packet);
     }
