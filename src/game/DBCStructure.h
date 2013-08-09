@@ -809,24 +809,24 @@ struct CreatureFamilyEntry
 
 struct CreatureModelDataEntry
 {
-    uint32 Id;                                              // 1
-    //uint32 Flags;                                         // 2
-    //char* ModelPath[16]                                   // 3
-    uint32 modInhabitType;                                  // 4 model inhabit type
-    float Scale;                                            // 5 Used in calculation of unit collision data
-    //int32 Unk2                                            // 6
-    //int32 Unk3                                            // 7
-    //uint32 Unk4                                           // 8
-    //uint32 Unk5                                           // 9
-    //float Unk6                                            // 10
-    //uint32 Unk7                                           // 11
-    //float Unk8                                            // 12
-    //uint32 Unk9                                           // 13
-    //uint32 Unk10                                          // 14
-    //float CollisionWidth;                                 // 15
-    float CollisionHeight;                                  // 16
-    float MountHeight;                                      // 17 Used in calculation of unit collision data when mounted
-    //float Unks[11]                                        // 18-28
+    uint32 Id;                                              // 0
+    //uint32 Flags;                                         // 1
+    //DBCString ModelPath                                   // 2
+    uint32 modInhabitType;                                  // 3 model inhabit type
+    float Scale;                                            // 4 Used in calculation of unit collision data
+    //int32 unk5                                            // 5
+    //int32 unk6                                            // 6
+    //int32 unk7                                            // 7
+    //int32 unk8                                            // 8
+    //float unk9                                            // 9
+    //int32 unk10                                           // 10
+    //int32 unk11                                           // 11
+    //int32 unk12                                           // 12
+    //int32 unk13                                           // 13
+    //float CollisionWidth;                                 // 14
+    float CollisionHeight;                                  // 15
+    float MountHeight;                                      // 16 Used in calculation of unit collision data when mounted
+    //float unks[14]                                        // 17-30
 };
 
 #define MAX_CREATURE_SPELL_DATA_SLOT 4
