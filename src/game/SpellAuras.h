@@ -462,6 +462,13 @@ class MANGOS_DLL_SPEC Aura
 
         void UpdateAura(uint32 diff);
 
+        void ChangeAmount(int32 amount, bool update = true)
+        {
+            m_modifier.m_amount = amount;
+            if (update)
+                GetHolder()->SendAuraUpdate(false);
+        }
+
         void SetRemoveMode(AuraRemoveMode mode) { m_removeMode = mode; }
 
         bool IsDeleted() const { return m_deleted;}

@@ -10004,13 +10004,9 @@ MountCapabilityEntry const* Unit::GetMountCapability(uint32 mountType) const
 
     uint32 zoneId, areaId;
     GetZoneAndAreaId(zoneId, areaId);
-    uint32 ridingSkill = 5000;
-
+    uint32 ridingSkill = 0;
     if (GetTypeId() == TYPEID_PLAYER)
-    {
-        Player* plr = (Player*)(this);
-        ridingSkill = plr->GetSkillValue(SKILL_RIDING);
-    }
+        ridingSkill = ((Player*)this)->GetSkillValue(SKILL_RIDING);
 
     for (uint32 i = MAX_MOUNT_CAPABILITIES; i > 0; --i)
     {
@@ -10018,7 +10014,7 @@ MountCapabilityEntry const* Unit::GetMountCapability(uint32 mountType) const
         if (!mountCapability)
             continue;
 
-        if (ridingSkill < mountCapability->RequiredRidingSkill)
+        if (GetTypeId() == TYPEID_PLAYER && ridingSkill < mountCapability->RequiredRidingSkill)
             continue;
 
         if (m_movementInfo.HasMovementFlag2(MOVEFLAG2_FULLSPEEDPITCHING))
@@ -10037,7 +10033,7 @@ MountCapabilityEntry const* Unit::GetMountCapability(uint32 mountType) const
                 continue;
         }
 
-        if (mountCapability->RequiredMap != -1 && int32(GetMapId()) != mountCapability->RequiredMap)
+        if (mountCapability->RequiredMap != -1 && GetMapId() != mountCapability->RequiredMap)
             continue;
 
         if (mountCapability->RequiredArea && (mountCapability->RequiredArea != zoneId && mountCapability->RequiredArea != areaId))
@@ -10046,7 +10042,7 @@ MountCapabilityEntry const* Unit::GetMountCapability(uint32 mountType) const
         if (mountCapability->RequiredAura && !HasAura(mountCapability->RequiredAura))
             continue;
 
-        if (mountCapability->RequiredSpell && (GetTypeId() != TYPEID_PLAYER || !(Player*)(this)->HasSpell(mountCapability->RequiredSpell)))
+        if (mountCapability->RequiredSpell && (GetTypeId() != TYPEID_PLAYER || !((Player*)this)->HasSpell(mountCapability->RequiredSpell)))
             continue;
 
         return mountCapability;
@@ -11320,6 +11316,16 @@ int32 Unit::CalculateSpellDamage(Unit const* target, SpellEntry const* spellProt
     SpellEffectEntry const* spellEffect = spellProto->GetSpellEffect(effect_index);
     if(!spellEffect)
         return 0;
+
+    switch (spellEffect->EffectApplyAuraName)
+    {
+        case SPELL_AURA_MOUNTED:
+            if (MountCapabilityEntry const* mountCapability = GetMountCapability(uint32(spellEffect->EffectMiscValueB)))
+                return int32(mountCapability->Id);
+            break;
+        default:
+            break;
+    }
 
     Player* unitPlayer = (GetTypeId() == TYPEID_PLAYER) ? (Player*)this : NULL;
     uint32 level = getLevel();
