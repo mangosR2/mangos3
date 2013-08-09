@@ -9497,7 +9497,7 @@ void Unit::MeleeDamageBonusDone(DamageInfo* damageInfo, uint32 stack)
             DonePercent *= GetModifierValue(UNIT_MOD_DAMAGE_OFFHAND, TOTAL_PCT);                    // no school check required
     }
 
-    if (!spellProto)
+    if (damageInfo->IsMeleeDamage())
     {
         // apply SPELL_AURA_MOD_AUTOATTACK_DAMAGE for white damage
         AuraList const& mModAutoAttackDamageAuras = GetAurasByType(SPELL_AURA_MOD_AUTOATTACK_DAMAGE);
