@@ -1608,16 +1608,12 @@ CREATE TABLE `db_script_string` (
   `content_loc6` text,
   `content_loc7` text,
   `content_loc8` text,
-<<<<<<< HEAD
-  PRIMARY KEY (`entry`)
-=======
   `sound` mediumint(8) unsigned NOT NULL DEFAULT '0',
   `type` tinyint(3) unsigned NOT NULL DEFAULT '0',
   `language` tinyint(3) unsigned NOT NULL DEFAULT '0',
   `emote` smallint(5) unsigned NOT NULL DEFAULT '0',
   `comment` text,
   PRIMARY KEY  (`entry`)
->>>>>>> b81789df45bef399c73994f2caabb728ba40c1b8
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 

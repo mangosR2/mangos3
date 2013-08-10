@@ -28,8 +28,6 @@
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
-<<<<<<< HEAD
-=======
 -- Table structure for table `character_db_version`
 --
 
@@ -50,7 +48,6 @@ INSERT INTO `character_db_version` VALUES
 UNLOCK TABLES;
 
 --
->>>>>>> b81789df45bef399c73994f2caabb728ba40c1b8
 -- Table structure for table `account_data`
 --
 
@@ -221,8 +218,6 @@ LOCK TABLES `bugreport` WRITE;
 UNLOCK TABLES;
 
 --
-<<<<<<< HEAD
-=======
 -- Table structure for table `characters`
 --
 
@@ -312,7 +307,6 @@ LOCK TABLES `characters` WRITE;
 UNLOCK TABLES;
 
 --
->>>>>>> b81789df45bef399c73994f2caabb728ba40c1b8
 -- Table structure for table `character_account_data`
 --
 
@@ -505,29 +499,6 @@ CREATE TABLE `character_currencies` (
 LOCK TABLES `character_currencies` WRITE;
 /*!40000 ALTER TABLE `character_currencies` DISABLE KEYS */;
 /*!40000 ALTER TABLE `character_currencies` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
--- Table structure for table `character_db_version`
---
-
-DROP TABLE IF EXISTS `character_db_version`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `character_db_version` (
-  `required_12300_02_characters_mail` bit(1) DEFAULT NULL
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Last applied sql update to DB';
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `character_db_version`
---
-
-LOCK TABLES `character_db_version` WRITE;
-/*!40000 ALTER TABLE `character_db_version` DISABLE KEYS */;
-INSERT INTO `character_db_version` (`required_12300_02_characters_mail`) VALUES
-(NULL);
-/*!40000 ALTER TABLE `character_db_version` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -1198,92 +1169,6 @@ CREATE TABLE `character_tutorial` (
 LOCK TABLES `character_tutorial` WRITE;
 /*!40000 ALTER TABLE `character_tutorial` DISABLE KEYS */;
 /*!40000 ALTER TABLE `character_tutorial` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
--- Table structure for table `characters`
---
-
-DROP TABLE IF EXISTS `characters`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `characters` (
-  `guid` int(11) unsigned NOT NULL DEFAULT '0' COMMENT 'Global Unique Identifier',
-  `account` int(11) unsigned NOT NULL DEFAULT '0' COMMENT 'Account Identifier',
-  `name` varchar(12) NOT NULL DEFAULT '',
-  `race` tinyint(3) unsigned NOT NULL DEFAULT '0',
-  `class` tinyint(3) unsigned NOT NULL DEFAULT '0',
-  `gender` tinyint(3) unsigned NOT NULL DEFAULT '0',
-  `level` tinyint(3) unsigned NOT NULL DEFAULT '0',
-  `xp` int(10) unsigned NOT NULL DEFAULT '0',
-  `money` bigint(40) unsigned NOT NULL DEFAULT '0',
-  `playerBytes` int(10) unsigned NOT NULL DEFAULT '0',
-  `playerBytes2` int(10) unsigned NOT NULL DEFAULT '0',
-  `playerFlags` int(10) unsigned NOT NULL DEFAULT '0',
-  `position_x` float NOT NULL DEFAULT '0',
-  `position_y` float NOT NULL DEFAULT '0',
-  `position_z` float NOT NULL DEFAULT '0',
-  `map` int(11) unsigned NOT NULL DEFAULT '0' COMMENT 'Map Identifier',
-  `dungeon_difficulty` tinyint(1) unsigned NOT NULL DEFAULT '0',
-  `orientation` float NOT NULL DEFAULT '0',
-  `taximask` longtext,
-  `online` tinyint(3) unsigned NOT NULL DEFAULT '0',
-  `cinematic` tinyint(3) unsigned NOT NULL DEFAULT '0',
-  `totaltime` int(11) unsigned NOT NULL DEFAULT '0',
-  `leveltime` int(11) unsigned NOT NULL DEFAULT '0',
-  `logout_time` bigint(20) unsigned NOT NULL DEFAULT '0',
-  `is_logout_resting` tinyint(3) unsigned NOT NULL DEFAULT '0',
-  `rest_bonus` float NOT NULL DEFAULT '0',
-  `resettalents_cost` int(11) unsigned NOT NULL DEFAULT '0',
-  `resettalents_time` bigint(20) unsigned NOT NULL DEFAULT '0',
-  `primary_trees` varchar(10) NOT NULL DEFAULT '0 0 ',
-  `trans_x` float NOT NULL DEFAULT '0',
-  `trans_y` float NOT NULL DEFAULT '0',
-  `trans_z` float NOT NULL DEFAULT '0',
-  `trans_o` float NOT NULL DEFAULT '0',
-  `transguid` bigint(20) unsigned NOT NULL DEFAULT '0',
-  `extra_flags` int(11) unsigned NOT NULL DEFAULT '0',
-  `stable_slots` tinyint(1) unsigned NOT NULL DEFAULT '0',
-  `at_login` int(11) unsigned NOT NULL DEFAULT '0',
-  `zone` int(11) unsigned NOT NULL DEFAULT '0',
-  `death_expire_time` bigint(20) unsigned NOT NULL DEFAULT '0',
-  `taxi_path` text,
-  `totalKills` int(10) unsigned NOT NULL DEFAULT '0',
-  `todayKills` smallint(5) unsigned NOT NULL DEFAULT '0',
-  `yesterdayKills` smallint(5) unsigned NOT NULL DEFAULT '0',
-  `chosenTitle` int(10) unsigned NOT NULL DEFAULT '0',
-  `watchedFaction` int(10) unsigned NOT NULL DEFAULT '0',
-  `drunk` smallint(5) unsigned NOT NULL DEFAULT '0',
-  `health` int(10) unsigned NOT NULL DEFAULT '0',
-  `power1` int(10) unsigned NOT NULL DEFAULT '0',
-  `power2` int(10) unsigned NOT NULL DEFAULT '0',
-  `power3` int(10) unsigned NOT NULL DEFAULT '0',
-  `power4` int(10) unsigned NOT NULL DEFAULT '0',
-  `power5` int(10) unsigned NOT NULL DEFAULT '0',
-  `specCount` tinyint(3) unsigned NOT NULL DEFAULT '1',
-  `activeSpec` tinyint(3) unsigned NOT NULL DEFAULT '0',
-  `exploredZones` longtext,
-  `equipmentCache` longtext,
-  `knownTitles` longtext,
-  `actionBars` tinyint(3) unsigned NOT NULL DEFAULT '0',
-  `slot` tinyint(3) unsigned NOT NULL DEFAULT '255',
-  `deleteInfos_Account` int(11) unsigned DEFAULT NULL,
-  `deleteInfos_Name` varchar(12) DEFAULT NULL,
-  `deleteDate` bigint(20) unsigned DEFAULT NULL,
-  PRIMARY KEY (`guid`),
-  KEY `idx_account` (`account`),
-  KEY `idx_online` (`online`),
-  KEY `idx_name` (`name`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Player System';
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `characters`
---
-
-LOCK TABLES `characters` WRITE;
-/*!40000 ALTER TABLE `characters` DISABLE KEYS */;
-/*!40000 ALTER TABLE `characters` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --

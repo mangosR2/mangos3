@@ -1,6 +1,19 @@
 #!/bin/bash
 #
 #
+PREFIX=${PWD}/bin
+CONF_OPTS+="-DPCH=1 "
+CONF_OPTS+="-DDEBUG=1 "
+CONF_OPTS+="-DACE_USE_EXTERNAL=1 "
+CONF_OPTS+="-DUSE_STD_MALLOC=1 "
+#CONF_OPTS+="-DUSE_TBB_MALLOC=1"
+LIB_INSTALL_DIR=${PWD}/lib
+INCLUDE_INSTALL_DIR=${PWD}/include
+
+CFLAGS="-march=native -O2 -DNDEBUG"
+#CFLAGS="-O1 -fno-inline"
+CFLAGS+=" -pipe -ggdb -fno-strict-aliasing -fno-delete-null-pointer-checks -D_LARGEFILE_SOURCE -finput-charset=utf-8 -fexec-charset=utf-8"
+CXXFLAGS="${CFLAGS}"
 
 cd ~/Mangos-Sources/mangos
 
@@ -19,14 +32,14 @@ if [ ! -d ./build ]; then
     echo "Reconfiguration...";
     mkdir build
     cd build
-    cmake \
-    -DACE_USE_EXTERNAL=1 \
-    -DUSE_STD_MALLOC=1 \
-    -DCMAKE_INSTALL_PREFIX=/home/mangos \
-    -DCMAKE_BUILD_TYPE=Release \
-    -DCMAKE_C_FLAGS_RELEASE:STRING="-march=native -O2 -ggdb -pipe -D_LARGEFILE_SOURCE -frename-registers -fno-strict-aliasing -fno-strength-reduce -fno-delete-null-pointer-checks -finput-charset=utf-8 -fexec-charset=utf-8" \
-    -DCMAKE_CXX_FLAGS_RELEASE:STRING="-march=native -O2 -ggdb -pipe -D_LARGEFILE_SOURCE -frename-registers -fno-strict-aliasing -fno-strength-reduce -fno-delete-null-pointer-checks -finput-charset=utf-8 -fexec-charset=utf-8" \
-    -DPCH=1 \
+    cmake .. ${CONF_OPTS} \
+        -DCMAKE_INSTALL_PREFIX="${PREFIX}" \
+        -DLIB_INSTALL_DIR="${LIB_INSTALL_DIR}" \
+        -DINCLUDE_INSTALL_DIR="${INCLUDE_INSTALL_DIR}" \
+        -DCMAKE_C_FLAGS="${CFLAGS}" \
+        -DCMAKE_CXX_FLAGS="${CXXFLAGS}" \
+        -DCMAKE_C_COMPILER="gcc" \
+        -DCMAKE_CXX_COMPILER="g++"
     ..
 else
     cd build
