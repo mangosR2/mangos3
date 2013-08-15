@@ -13842,9 +13842,7 @@ bool Unit::AddSpellAuraHolderToRemoveList(SpellAuraHolderPtr holder)
 
 bool Unit::CheckAndIncreaseCastCounter()
 {
-    uint32 maxCasts = sWorld.getConfig(CONFIG_UINT32_MAX_SPELL_CASTS_IN_CHAIN);
-
-    if (maxCasts && m_castCounter >= maxCasts)
+    if ((sWorld.getConfig(CONFIG_UINT32_MAX_SPELL_CASTS_IN_CHAIN) > 0)  && (m_castCounter >= sWorld.getConfig(CONFIG_UINT32_MAX_SPELL_CASTS_IN_CHAIN)))
         return false;
 
     ++m_castCounter;
