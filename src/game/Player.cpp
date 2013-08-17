@@ -5868,14 +5868,14 @@ bool Player::UpdateFishingSkill()
     return UpdateSkillPro(SKILL_FISHING,chance*10,gathering_skill_gain);
 }
 
-// levels sync. with spell requirement for skill levels to learn
-// bonus abilities in sSkillLineAbilityStore
-// Used only to avoid scan DBC at each skill grow
-static uint32 bonusSkillLevels[] = {75,150,225,300,375,450};
-
 bool Player::UpdateSkillPro(uint16 SkillId, int32 Chance, uint32 step)
 {
-    DEBUG_LOG("UpdateSkillPro(SkillId %d, Chance %3.1f%%)", SkillId, Chance/10.0);
+    // levels sync. with spell requirement for skill levels to learn
+    // bonus abilities in sSkillLineAbilityStore
+    // Used only to avoid scan DBC at each skill grow
+    static uint32 bonusSkillLevels[] = {75, 150, 225, 300, 375, 450, 525};
+
+    DEBUG_LOG("UpdateSkillPro(SkillId %d, Chance %3.1f%%)", SkillId, Chance / 10.0);
     if (!SkillId)
         return false;
 
@@ -5898,24 +5898,26 @@ bool Player::UpdateSkillPro(uint16 SkillId, int32 Chance, uint32 step)
     if (!MaxValue || !SkillValue || SkillValue >= MaxValue)
         return false;
 
-    int32 Roll = irand(1,1000);
-
-    if (Roll <= Chance)
+    if (irand(1, 1000) > Chance)
     {
-        uint16 new_value = SkillValue + step;
-        if (new_value > MaxValue)
-            new_value = MaxValue;
+        DEBUG_LOG("Player::UpdateSkillPro Chance=%3.1f%% missed", Chance / 10.0);
+        return false;
+    }
 
-        SetUInt16Value(PLAYER_SKILL_RANK_0 + field, offset, new_value);
-        if (itr->second.uState != SKILL_NEW)
-            itr->second.uState = SKILL_CHANGED;
-        for (uint32* bsl = &bonusSkillLevels[0]; *bsl; ++bsl)
+    uint16 new_value = SkillValue + step;
+    if (new_value > MaxValue)
+        new_value = MaxValue;
+
+    SetUInt16Value(PLAYER_SKILL_RANK_0 + field, offset, new_value);
+    if (itr->second.uState != SKILL_NEW)
+        itr->second.uState = SKILL_CHANGED;
+
+    for (uint32* bsl = &bonusSkillLevels[0]; *bsl; ++bsl)
+    {
+        if (SkillValue < *bsl && new_value >= *bsl)
         {
-            if (SkillValue < *bsl && new_value >= *bsl)
-            {
-                learnSkillRewardedSpells(SkillId, new_value);
-                break;
-            }
+            learnSkillRewardedSpells(SkillId, new_value);
+            break;
         }
 
         // Update depended enchants
@@ -5940,14 +5942,12 @@ bool Player::UpdateSkillPro(uint16 SkillId, int32 Chance, uint32 step)
                 }
             }
         }
-
-        GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_REACH_SKILL_LEVEL,SkillId);
-        DEBUG_LOG("Player::UpdateSkillPro Chance=%3.1f%% taken", Chance/10.0);
-        return true;
     }
 
-    DEBUG_LOG("Player::UpdateSkillPro Chance=%3.1f%% missed", Chance/10.0);
-    return false;
+
+    GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_REACH_SKILL_LEVEL, SkillId);
+    DEBUG_LOG("Player::UpdateSkillPro Chance=%3.1f%% taken", Chance / 10.0);
+    return true;
 }
 
 void Player::ModifySkillBonus(uint32 skillid,int32 val, bool talent)
