@@ -2509,17 +2509,41 @@ struct SpellEntry
         return SpellFamily(GetSpellFamilyName()) == family && GetSpellFamilyFlags().test<CFM_VALUES_10>();
     }
 
-    inline bool HasAttribute(SpellAttributes attribute) const { return Attributes & attribute; }
-    inline bool HasAttribute(SpellAttributesEx attribute) const { return AttributesEx & attribute; }
-    inline bool HasAttribute(SpellAttributesEx2 attribute) const { return AttributesEx2 & attribute; }
-    inline bool HasAttribute(SpellAttributesEx3 attribute) const { return AttributesEx3 & attribute; }
-    inline bool HasAttribute(SpellAttributesEx4 attribute) const { return AttributesEx4 & attribute; }
-    inline bool HasAttribute(SpellAttributesEx5 attribute) const { return AttributesEx5 & attribute; }
-    inline bool HasAttribute(SpellAttributesEx6 attribute) const { return AttributesEx6 & attribute; }
-    inline bool HasAttribute(SpellAttributesEx7 attribute) const { return AttributesEx7 & attribute; }
-    inline bool HasAttribute(SpellAttributesEx8 attribute) const { return AttributesEx8 & attribute; }
-    inline bool HasAttribute(SpellAttributesEx9 attribute) const { return AttributesEx9 & attribute; }
-    inline bool HasAttribute(SpellAttributesEx10 attribute) const { return AttributesEx10 & attribute; }
+    inline uint32 GetAttributes() const        { return Attributes; };
+    inline uint32 GetAttributesEx() const      { return AttributesEx; };
+    inline uint32 GetAttributesEx2() const     { return AttributesEx2; };
+    inline uint32 GetAttributesEx3() const     { return AttributesEx3; };
+    inline uint32 GetAttributesEx4() const     { return AttributesEx4; };
+    inline uint32 GetAttributesEx5() const     { return AttributesEx5; };
+    inline uint32 GetAttributesEx6() const     { return AttributesEx6; };
+    inline uint32 GetAttributesEx7() const     { return AttributesEx7; };
+    inline uint32 GetAttributesEx8() const     { return AttributesEx8; };
+    inline uint32 GetAttributesEx9() const     { return AttributesEx9; };
+    inline uint32 GetAttributesEx10() const     { return AttributesEx10; };
+    //inline uint32 GetAttributesEx11() const     { return AttributesEx11; };
+
+    inline bool HasAttribute(SpellAttributes attribute) const { return GetAttributes() & attribute; } 
+    inline bool HasAttribute(SpellAttributesEx attribute) const { return GetAttributesEx() & attribute; } 
+    inline bool HasAttribute(SpellAttributesEx2 attribute) const { return GetAttributesEx2() & attribute; } 
+    inline bool HasAttribute(SpellAttributesEx3 attribute) const { return GetAttributesEx3() & attribute; } 
+    inline bool HasAttribute(SpellAttributesEx4 attribute) const { return GetAttributesEx4() & attribute; } 
+    inline bool HasAttribute(SpellAttributesEx5 attribute) const { return GetAttributesEx5() & attribute; } 
+    inline bool HasAttribute(SpellAttributesEx6 attribute) const { return GetAttributesEx6() & attribute; } 
+    inline bool HasAttribute(SpellAttributesEx7 attribute) const { return GetAttributesEx7() & attribute; } 
+    inline bool HasAttribute(SpellAttributesEx8 attribute) const { return GetAttributesEx8() & attribute; } 
+    inline bool HasAttribute(SpellAttributesEx9 attribute) const { return GetAttributesEx9() & attribute; } 
+    inline bool HasAttribute(SpellAttributesEx10 attribute) const { return GetAttributesEx10() & attribute; }
+    //inline bool HasAttribute(SpellAttributesEx11 attribute) const { return GetAttributesEx11() & attribute; }
+
+    inline uint32 GetCastingTimeIndex() const        { return CastingTimeIndex; };
+    inline uint32 GetDurationIndex() const           { return DurationIndex; };
+    inline SpellRangeIndex GetRangeIndex() const     { return SpellRangeIndex(rangeIndex); };
+    inline float  GetSpeed() const                   { return speed; };
+    inline uint32 GetSpellVisual(uint idx = 0) const { return SpellVisual[idx]; };
+    inline uint32 GetSpellIconID() const             { return SpellIconID; };
+    inline uint32 GetActiveIconID() const            { return activeIconID; };
+    inline SpellSchoolMask GetSchoolMask() const     { return SpellSchoolMask(SchoolMask); };
+    inline Powers GetPowerType() const               { return Powers(powerType); };
 
     private:
         // prevent creating custom entries (copy data from original in fact)
@@ -2737,14 +2761,26 @@ struct TotemCategoryEntry
 
 struct TransportAnimationEntry
 {
-    //uint32    id;                                         // 0
-    uint32    transportEntry;                               // 1
-    uint32    timeFrame;                                    // 2
-    //float     xOffs;                                      // 3
-    //float     yOffs;                                      // 4
-    //float     zOffs;                                      // 5
-    //uint32    unk;                                        // 6
+    //uint32    id;                                         // 0       m_ID
+    uint32    transportEntry;                               // 1       transport GO entry
+    uint32    timeFrame;                                    // 2       linked time frame
+    float     x;                                            // 3       transport offset X
+    float     y;                                            // 4       transport offset Y
+    float     z;                                            // 5       transport offset Z
+    //uint32    animId;                                     // 6       animation ID
 };
+
+struct TransportRotationEntry
+{
+    //uint32    id;                                         // 0       m_ID
+    uint32    transportEntry;                               // 1       transport GO entry
+    uint32    timeFrame;                                    // 2       linked time frame
+    //float     qx;                                         // 3       rotation quaternion x
+    //float     qy;                                         // 4       rotation quaternion y
+    //float     qz;                                         // 5       rotation quaternion z
+    //float     qw;                                         // 6       rotation quaternion w
+};
+
 
 #define MAX_VEHICLE_SEAT 8
 
