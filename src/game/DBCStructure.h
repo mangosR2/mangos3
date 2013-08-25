@@ -2245,7 +2245,7 @@ struct SpellEntry
     inline uint32 GetDurationIndex() const           { return DurationIndex; };
     inline SpellRangeIndex GetRangeIndex() const     { return SpellRangeIndex(rangeIndex); };
     inline float  GetSpeed() const                   { return speed; };
-    inline uint32 GetSpellVisual(uint idx = 0) const { return SpellVisual[idx]; };
+    inline uint32 GetSpellVisual(uint8 idx = 0) const { return SpellVisual[idx]; };
     inline uint32 GetSpellIconID() const             { return SpellIconID; };
     inline uint32 GetActiveIconID() const            { return activeIconID; };
     inline SpellSchoolMask GetSchoolMask() const     { return SpellSchoolMask(SchoolMask); };
