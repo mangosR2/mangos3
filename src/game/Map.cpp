@@ -648,7 +648,7 @@ void Map::Update(const uint32 &t_diff)
     // non-player active objects
     if(!m_activeNonPlayers.empty())
     {
-        for(m_activeNonPlayersIter = m_activeNonPlayers.begin(); m_activeNonPlayersIter != m_activeNonPlayers.end(); )
+        for (m_activeNonPlayersIter = m_activeNonPlayers.begin(); m_activeNonPlayersIter != m_activeNonPlayers.end(); )
         {
             // skip not in world
             WorldObject* obj = *m_activeNonPlayersIter;
@@ -792,25 +792,27 @@ Map::Remove(T* obj, bool remove)
         return;
 
     DEBUG_LOG("Remove object (GUID: %u TypeId:%u) from grid[%u,%u]", obj->GetGUIDLow(), obj->GetTypeId(), cell.data.Part.grid_x, cell.data.Part.grid_y);
-    NGridType *grid = getNGrid(cell.GridX(), cell.GridY());
+    NGridType* grid = getNGrid(cell.GridX(), cell.GridY());
     MANGOS_ASSERT( grid != NULL );
 
-    RemoveFromActive(obj);
 
     if (remove)
         obj->CleanupsBeforeDelete();
-    obj->RemoveFromWorld(remove);
+
 
     if (!obj->isActiveObject())
         UpdateObjectVisibility(obj,cell,p);                     // i think will be better to call this function while object still in grid, this changes nothing but logically is better(as for me)
-
-    RemoveFromGrid(obj,grid,cell);
+    else
+    {
+        SendRemoveNotifyToStoredClients(obj, bool(obj->GetTypeId() == TYPEID_UNIT));
+        RemoveFromActive(obj);
+    }
 
     if (obj->GetTypeId() == TYPEID_UNIT)
         RemoveAttackersStorageFor(obj->GetObjectGuid());
 
-    if (obj->isActiveObject())
-        SendRemoveNotifyToStoredClients(obj, bool(obj->GetTypeId() == TYPEID_UNIT));
+    RemoveFromGrid(obj, grid, cell);
+    obj->RemoveFromWorld(remove);
 
     if (remove)
     {
@@ -1392,15 +1394,13 @@ void Map::AddToActive(WorldObject* obj)
 void Map::RemoveFromActive( WorldObject* obj )
 {
     // Map::Update for active object in proccess
-    if(m_activeNonPlayersIter != m_activeNonPlayers.end())
+    if (m_activeNonPlayersIter != m_activeNonPlayers.end())
     {
         ActiveNonPlayers::iterator itr = m_activeNonPlayers.find(obj);
-        if(itr == m_activeNonPlayersIter)
+        if (itr == m_activeNonPlayersIter)
             ++m_activeNonPlayersIter;
-        m_activeNonPlayers.erase(itr);
     }
-    else
-        m_activeNonPlayers.erase(obj);
+    m_activeNonPlayers.erase(obj);
 
     // also allow unloading spawn grid
     if (obj->GetTypeId()==TYPEID_UNIT)
