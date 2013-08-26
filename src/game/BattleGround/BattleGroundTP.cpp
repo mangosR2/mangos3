@@ -612,20 +612,56 @@ WorldSafeLocsEntry const* BattleGroundTP::GetClosestGraveYard(Player* player)
     // if a player dies in preparation phase - then the player can't cheat
     // and teleport to the graveyard outside the flagroom
     // and start running around, while the doors are still closed
-    if (player->GetTeam() == ALLIANCE)
+    if (GetStatus() == STATUS_WAIT_JOIN)
     {
-        if (GetStatus() == STATUS_IN_PROGRESS)
-            return sWorldSafeLocsStore.LookupEntry(TP_GRAVEYARD_MAIN_ALLIANCE);
-        else
+        if (player->GetTeam() == ALLIANCE)
             return sWorldSafeLocsStore.LookupEntry(TP_GRAVEYARD_FLAGROOM_ALLIANCE);
-    }
-    else
-    {
-        if (GetStatus() == STATUS_IN_PROGRESS)
-            return sWorldSafeLocsStore.LookupEntry(TP_GRAVEYARD_MAIN_HORDE);
         else
             return sWorldSafeLocsStore.LookupEntry(TP_GRAVEYARD_FLAGROOM_HORDE);
     }
+
+    BattleGroundTeamIndex teamIndex = GetTeamIndexByTeamId(player->GetTeam());
+
+    // Is there any occupied node for this team?
+    std::vector<uint32> nodes;
+    if (teamIndex == BG_TEAM_ALLIANCE)
+    {
+        nodes.push_back(TP_GRAVEYARD_MAIN_ALLIANCE);
+        nodes.push_back(TP_GRAVEYARD_CENTER_ALLIANCE);
+    }
+    else
+    {
+        nodes.push_back(TP_GRAVEYARD_MAIN_HORDE);
+        nodes.push_back(TP_GRAVEYARD_CENTER_HORDE);
+    }
+
+    WorldSafeLocsEntry const* good_entry = NULL;
+    // If so, select the closest node to place ghost on
+    if (!nodes.empty())
+    {
+        float plr_x = player->GetPositionX();
+        float plr_y = player->GetPositionY();
+
+        float mindist = 999999.0f;
+        for (uint8 i = 0; i < nodes.size(); ++i)
+        {
+            WorldSafeLocsEntry const*entry = sWorldSafeLocsStore.LookupEntry(nodes[i]);
+            if (!entry)
+                continue;
+            float dist = (entry->x - plr_x) * (entry->x - plr_x) + (entry->y - plr_y) * (entry->y - plr_y);
+            if (mindist > dist)
+            {
+                mindist = dist;
+                good_entry = entry;
+            }
+        }
+        nodes.clear();
+    }
+    // If not, place ghost on starting location
+    if (!good_entry)
+        good_entry = sWorldSafeLocsStore.LookupEntry(teamIndex == BG_TEAM_ALLIANCE ? TP_GRAVEYARD_FLAGROOM_ALLIANCE : TP_GRAVEYARD_FLAGROOM_HORDE);
+
+    return good_entry;
 }
 
 void BattleGroundTP::FillInitialWorldStates(WorldPacket& data, uint32& count)
