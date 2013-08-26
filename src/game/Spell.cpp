@@ -8461,9 +8461,9 @@ bool Spell::FillCustomTargetMap(SpellEffectIndex i, UnitList &targetUnitMap)
         }
         case 46584: // Raise Dead
         {
-            Unit* pCorpseTarget = (Unit*)FindCorpseUsing<MaNGOS::RaiseDeadObjectCheck>(CREATURE_TYPEMASK_NONE);
+            Unit* pCorpseTarget = (Unit*)FindCorpseUsing<MaNGOS::RaiseDeadObjectCheck>(CREATURE_TYPEMASK_HUMANOID_OR_UNDEAD);
 
-            if (pCorpseTarget)
+            if (pCorpseTarget && pCorpseTarget->IsInWorld())
                 targetUnitMap.push_back(pCorpseTarget);
             else
                 targetUnitMap.push_back((Unit*)m_caster);
