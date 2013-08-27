@@ -265,6 +265,7 @@ BattleGround::BattleGround()
     m_IsArena           = false;
     m_Winner            = TEAM_NONE;
     m_StartTime         = 0;
+    m_CountdownTimer    = 0;
     m_Events            = 0;
     m_IsRated           = false;
     m_IsRandom          = false;
@@ -490,6 +491,25 @@ void BattleGround::Update(uint32 diff)
 
         ModifyStartDelayTime(diff);
 
+         // Send packet every 10 seconds until the 2nd field reach 0
+        if (m_CountdownTimer >= 10000)
+        {
+            uint32 countdownMaxForBGType = isArena() ? ARENA_COUNTDOWN_MAX : BATTLEGROUND_COUNTDOWN_MAX;
+        
+            WorldPacket data(SMSG_START_TIMER, 4+4+4);
+            data << uint32(0); // unk
+            data << uint32(countdownMaxForBGType - (m_StartTime / 1000));
+            data << uint32(countdownMaxForBGType);
+
+            for (BattleGroundPlayerMap::const_iterator itr = GetPlayers().begin(); itr != GetPlayers().end(); ++itr)
+                if (Player* player = sObjectMgr.GetPlayer(itr->first))
+                    player->GetSession()->SendPacket(&data);
+
+            m_CountdownTimer = 0;
+        }
+        else
+            m_CountdownTimer += diff;		
+
         if (!(m_Events & BG_STARTING_EVENT_1))
         {
             m_Events |= BG_STARTING_EVENT_1;
@@ -578,24 +598,6 @@ void BattleGround::Update(uint32 diff)
                 RemovePlayerAtLeave(itr->first, true, true);// remove player from BG
                 // do not change any battleground's private variables
             }
-        }
-    }
-
-    // Arena time limit
-    if (isArena() && !m_ArenaEnded)
-    {
-        if (m_StartTime > uint32(ARENA_TIME_LIMIT))
-        {
-            Team winner;
-            // winner is team with higher damage
-            if (GetDamageDoneForTeam(ALLIANCE) > GetDamageDoneForTeam(HORDE))
-                winner = ALLIANCE;
-            else if (GetDamageDoneForTeam(HORDE) > GetDamageDoneForTeam(ALLIANCE))
-                winner = HORDE;
-            else
-                winner = TEAM_NONE;
-           EndBattleGround(winner);
-           m_ArenaEnded = true;
         }
     }
 
@@ -1390,6 +1392,16 @@ void BattleGround::AddPlayer(Player* plr)
             plr->CastSpell(plr, SPELL_PREPARATION, true);   // reduces all mana cost of spells.
 
         plr->CastSpell(plr, SPELL_BATTLEGROUND_DAMPENING, true);
+    }
+
+    if (GetStatus() == STATUS_WAIT_JOIN)                 // not started yet
+    {
+        int32 countdownMaxForBGType = isArena() ? ARENA_COUNTDOWN_MAX : BATTLEGROUND_COUNTDOWN_MAX;
+        WorldPacket data(SMSG_START_TIMER, 4+4+4);
+        data << uint32(0); // unk
+        data << uint32(countdownMaxForBGType - (m_StartTime / 1000));
+        data << uint32(countdownMaxForBGType);
+        plr->GetSession()->SendPacket(&data);
     }
 
     plr->GetAchievementMgr().ResetAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_KILL_CREATURE, ACHIEVEMENT_CRITERIA_CONDITION_MAP, GetMapId());
