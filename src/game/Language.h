@@ -766,9 +766,9 @@ enum MangosStrings
     LANG_BATTLEGROUND_ONLY_HORDE_USE    = 753,              // "Only The Horde can use that portal"
 //                                      = 754, not used
 //                                      = 755, not used
-//                                      = 756, not used
-//                                      = 757, not used
-//                                      = 758, not used
+    LANG_BG_BG_START_ONE_MINUTE         = 756,
+    LANG_BG_BG_START_HALF_MINUTE        = 757,
+    LANG_BG_BG_HAS_BEGUN                = 758,
     LANG_BG_AV_TOWER_TAKEN              = 759,
     LANG_BG_AV_TOWER_ASSAULTED          = 760,
     LANG_BG_AV_TOWER_DEFENDED           = 761,
@@ -825,7 +825,19 @@ enum MangosStrings
     LANG_FAIL_ENTER_SPECTRAL_REALM      = 816,
     LANG_NO_FLY_ZONE                    = 817,
     LANG_TELEREQ_QUEST_BLACK_MORASS     = 818,
-    // Room for in-game strings           819-999 not used
+    LANG_BG_BG_HAS_TAKEN_A_LIGHTHOUSE   = 818,
+    LANG_BG_BG_HAS_TAKEN_H_LIGHTHOUSE   = 819,
+    LANG_BG_BG_HAS_TAKEN_A_WATERWORKS   = 820,
+    LANG_BG_BG_HAS_TAKEN_H_WATERWORKS   = 821,
+    LANG_BG_BG_HAS_TAKEN_A_MINES        = 822,
+    LANG_BG_BG_HAS_TAKEN_H_MINES        = 823,
+    LANG_BG_BG_HAS_LOST_A_LIGHTHOUSE    = 824,
+    LANG_BG_BG_HAS_LOST_H_LIGHTHOUSE    = 825,
+    LANG_BG_BG_HAS_LOST_A_WATERWORKS    = 826,
+    LANG_BG_BG_HAS_LOST_H_WATERWORKS    = 827,
+    LANG_BG_BG_HAS_LOST_A_MINES         = 828,
+    LANG_BG_BG_HAS_LOST_H_MINES         = 829,
+    // Room for in-game strings           830-999 not used
 
     // Level 4 (CLI only commands)
     LANG_COMMAND_EXIT                   = 1000,
