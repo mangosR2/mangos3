@@ -644,7 +644,22 @@ enum MangosStrings
     LANG_BG_WS_F_PLACED                 = 613,
     LANG_BG_WS_ALLIANCE_FLAG_RESPAWNED  = 614,
     LANG_BG_WS_HORDE_FLAG_RESPAWNED     = 615,
-    // 616 - 635 not used
+    LANG_BG_TP_START_ONE_MINUTE         = 616,
+    LANG_BG_TP_START_HALF_MINUTE        = 617,
+    LANG_BG_TP_HAS_BEGUN                = 618,
+
+    LANG_BG_TP_CAPTURED_HF              = 619,
+    LANG_BG_TP_CAPTURED_AF              = 620,
+    LANG_BG_TP_DROPPED_HF               = 621,
+    LANG_BG_TP_DROPPED_AF               = 622,
+    LANG_BG_TP_RETURNED_AF              = 623,
+    LANG_BG_TP_RETURNED_HF              = 624,
+    LANG_BG_TP_PICKEDUP_HF              = 625,
+    LANG_BG_TP_PICKEDUP_AF              = 626,
+    LANG_BG_TP_F_PLACED                 = 627,
+    LANG_BG_TP_ALLIANCE_FLAG_RESPAWNED  = 628,
+    LANG_BG_TP_HORDE_FLAG_RESPAWNED     = 629,
+    // 630 - 635 not used
     LANG_BG_EY_START_ONE_MINUTE         = 636,
     LANG_BG_EY_START_HALF_MINUTE        = 637,
     LANG_BG_EY_HAS_BEGUN                = 638,

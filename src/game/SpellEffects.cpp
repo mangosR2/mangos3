@@ -45,6 +45,7 @@
 #include "BattleGround/BattleGround.h"
 #include "BattleGround/BattleGroundWS.h"
 #include "BattleGround/BattleGroundEY.h"
+#include "BattleGround/BattleGroundTP.h"
 #include "OutdoorPvP/OutdoorPvP.h"
 #include "Language.h"
 #include "SocialMgr.h"
@@ -8145,6 +8146,16 @@ void Spell::EffectSummonObjectWild(SpellEffectEntry const* effect)
                 }
                 break;
             }
+            case 726:                                      // TP
+            {
+                if (bg && bg->GetTypeID(true) == BATTLEGROUND_TP && bg->GetStatus() == STATUS_IN_PROGRESS)
+                {
+                    Team team = pl->GetTeam() == ALLIANCE ? HORDE : ALLIANCE;
+
+                    ((BattleGroundTP*)bg)->SetDroppedFlagGuid(pGameObj->GetObjectGuid(), team);
+                }
+                break;
+            } 
         }
     }
 
