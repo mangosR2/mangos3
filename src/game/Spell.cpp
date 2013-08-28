@@ -2476,6 +2476,8 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
         case TARGET_SINGLE_FRIEND_2:
             if (m_targets.getUnitTarget())
                 targetUnitMap.push_back(m_targets.getUnitTarget());
+            else if (IsSpellWithCasterSourceTargetsOnly(m_spellInfo))
+                targetUnitMap.push_back(GetCaster());
             break;
         case TARGET_NONCOMBAT_PET:
             if (Unit* target = m_targets.getUnitTarget())

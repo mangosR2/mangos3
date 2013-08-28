@@ -6381,8 +6381,7 @@ void Spell::EffectApplyAreaAura(SpellEffectIndex eff_idx)
 
     m_spellAuraHolder->CreateAura(AURA_CLASS_AREA_AURA, eff_idx, &m_currentBasePoints[eff_idx], m_spellAuraHolder, unitTarget, m_caster, m_CastItem);
 
-    if (m_spellInfo->EffectImplicitTargetA[eff_idx] == TARGET_SINGLE_FRIEND &&
-        m_spellInfo->EffectImplicitTargetB[eff_idx] == TARGET_NONE)
+    if (IsCasterSourceAuraTarget(m_spellInfo->GetEffectImplicitTargetAByIndex(eff_idx)))
         m_spellAuraHolder->SetAffectiveCasterGuid(m_originalCasterGUID);
 }
 
