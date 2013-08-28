@@ -2517,28 +2517,35 @@ bool SpellMgr::IsTargetMatchedWithCreatureType(SpellEntry const* pSpellInfo, Uni
     if (!pSpellInfo || !pTarget || !pTarget->IsInitialized())
         return false;
 
-    uint32 spellCreatureTargetMask = pSpellInfo->TargetCreatureType;
 
     if (IsSpellWithCasterSourceTargetsOnly(pSpellInfo))
         return true;
 
-    // Curse of Doom: not find another way to fix spell target check :/
-    if (pSpellInfo->SpellFamilyName == SPELLFAMILY_WARLOCK && pSpellInfo->Category == 1179)
+    uint32 spellCreatureTargetMask = 0;
+
+    switch (pSpellInfo->Id)
     {
-        // not allow cast at player
-        if (pTarget->GetTypeId() == TYPEID_PLAYER)
-            return false;
+        // Curse of Doom: not find another way to fix spell target check :/
+        case 603:
+        case 30910:
+        case 47867:
+        {
+            // not allow cast at player
+            if (pTarget->GetTypeId() == TYPEID_PLAYER)
+                return false;
 
-        spellCreatureTargetMask = 0x7FF;
+            spellCreatureTargetMask = 0x7FF;
+            break;
+        }
+        // Dismiss Pet and Taming Lesson skipped
+        case 2641:
+        case 23356:
+            /*spellCreatureTargetMask =  0;*/
+            break;
+        default:
+            spellCreatureTargetMask = pSpellInfo->TargetCreatureType;
+            break;
     }
-
-    // Dismiss Pet and Taming Lesson skipped
-    if (pSpellInfo->Id == 2641 || pSpellInfo->Id == 23356)
-        spellCreatureTargetMask =  0;
-
-    // skip creature type check for Grounding Totem
-    if (pTarget->GetUInt32Value(UNIT_CREATED_BY_SPELL) == 8177)
-        return true;
 
     if (spellCreatureTargetMask)
     {
