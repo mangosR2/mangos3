@@ -1502,7 +1502,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         bool IsFFAPvP() const { return HasByteFlag(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_FFA_PVP); }
         void SetFFAPvP(bool state);
         uint32 GetCreatureType() const;
-        uint32 GetCreatureTypeMask() const
+        virtual uint32 GetCreatureTypeMask() const
         {
             uint32 creatureType = GetCreatureType();
             return (creatureType >= 1) ? (1 << (creatureType - 1)) : 0;
