@@ -847,6 +847,18 @@ bool IsPositiveEffect(SpellEntry const* spellproto, SpellEffectIndex effIndex)
             }
             break;
         }
+        case SPELL_EFFECT_SCRIPT_EFFECT:
+        {
+            // some explicitly required script effect sets
+            switch (spellproto->Id)
+            {
+                case 46650:                                 // Open Brutallus Back Door
+                    return true;
+                default:
+                    break;
+            }
+            break;
+        }
         // always positive effects (check before target checks that provided non-positive result in some case for positive effects)
         case SPELL_EFFECT_HEAL:
         case SPELL_EFFECT_LEARN_SPELL:
@@ -2697,6 +2709,9 @@ bool SpellMgr::IsGroupBuff(SpellEntry const* spellInfo)
 
 bool SpellMgr::IsTargetMatchedWithCreatureType(SpellEntry const* pSpellInfo, Unit* pTarget)
 {
+    if (!pSpellInfo || !pTarget || !pTarget->IsInitialized())
+        return false;
+
     uint32 spellCreatureTargetMask = pSpellInfo->GetTargetCreatureType();
 
     if (IsSpellWithCasterSourceTargetsOnly(pSpellInfo))
@@ -2940,6 +2955,7 @@ uint32 SpellMgr::GetSpellMaxTargetsWithCustom(SpellEntry const* spellInfo, Unit 
                     unMaxTargets = 3;
                     break;
                 case 37676:                                 // Insidious Whisper
+                case 46650:                                 // Open Brutallus Back Door (SWP, Felmyst)
                 case 38028:                                 // Watery Grave
                 case 67757:                                 // Nerubian Burrower (Mode 3) (ToCrusader, Anub'arak)
                     unMaxTargets = 4;
