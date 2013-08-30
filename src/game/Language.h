@@ -644,10 +644,10 @@ enum MangosStrings
     LANG_BG_WS_F_PLACED                 = 613,
     LANG_BG_WS_ALLIANCE_FLAG_RESPAWNED  = 614,
     LANG_BG_WS_HORDE_FLAG_RESPAWNED     = 615,
+
     LANG_BG_TP_START_ONE_MINUTE         = 616,
     LANG_BG_TP_START_HALF_MINUTE        = 617,
     LANG_BG_TP_HAS_BEGUN                = 618,
-
     LANG_BG_TP_CAPTURED_HF              = 619,
     LANG_BG_TP_CAPTURED_AF              = 620,
     LANG_BG_TP_DROPPED_HF               = 621,
