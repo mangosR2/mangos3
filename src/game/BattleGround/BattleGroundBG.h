@@ -252,7 +252,7 @@ class BattleGroundBG : public BattleGround
         void SetTeamPoint(Team team, uint32 points = 0) { m_TeamScores[GetTeamIndexByTeamId(team)] = points; }
 
         uint32 m_HonorScoreTics[2];
-        uint32 m_TeamPointsCount[BG_TEAMS_COUNT];
+        uint32 m_TeamPointsCount[PVP_TEAM_COUNT];
 
         uint32 m_Points_Trigger[BG_BG_NODES_MAX];
 

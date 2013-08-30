@@ -111,10 +111,10 @@ class BattleGroundTP : public BattleGround
         virtual void StartingEventOpenDoors() override;
 
         /* BG Flags */
-        ObjectGuid GetAllianceFlagPickerGuid() const { return m_FlagKeepers[TEAM_INDEX_ALLIANCE]; }
-        ObjectGuid GetHordeFlagPickerGuid() const   { return m_FlagKeepers[TEAM_INDEX_HORDE]; }
-        void SetAllianceFlagPicker(ObjectGuid guid) { m_FlagKeepers[TEAM_INDEX_ALLIANCE] = guid; }
-        void SetHordeFlagPicker(ObjectGuid guid)    { m_FlagKeepers[TEAM_INDEX_HORDE] = guid; }
+        ObjectGuid GetAllianceFlagCarrierGuid() const { return m_FlagKeepers[TEAM_INDEX_ALLIANCE]; }
+        ObjectGuid GetHordeFlagCarrierGuid() const    { return m_FlagKeepers[TEAM_INDEX_HORDE]; }
+        void SetAllianceFlagCarrier(ObjectGuid guid) { m_FlagKeepers[TEAM_INDEX_ALLIANCE] = guid; }
+        void SetHordeFlagCarrier(ObjectGuid guid)    { m_FlagKeepers[TEAM_INDEX_HORDE] = guid; }
         void ClearAllianceFlagPicker()              { m_FlagKeepers[TEAM_INDEX_ALLIANCE].Clear(); }
         void ClearHordeFlagPicker()                 { m_FlagKeepers[TEAM_INDEX_HORDE].Clear(); }
         bool IsAllianceFlagPickedup() const         { return !m_FlagKeepers[TEAM_INDEX_ALLIANCE].IsEmpty(); }
@@ -151,12 +151,12 @@ class BattleGroundTP : public BattleGround
         void SetTeamPoint(Team team, uint32 points = 0) { m_TeamScores[GetTeamIndex(team)] = points; }
         void RemovePoint(Team team, uint32 points = 1)  { m_TeamScores[GetTeamIndex(team)] -= points; }
     private:
-        ObjectGuid m_FlagKeepers[BG_TEAMS_COUNT];
+        ObjectGuid m_FlagKeepers[PVP_TEAM_COUNT];
 
-        ObjectGuid m_DroppedFlagGuid[BG_TEAMS_COUNT];
-        uint8 m_FlagState[BG_TEAMS_COUNT];
-        int32 m_FlagsTimer[BG_TEAMS_COUNT];
-        int32 m_FlagsDropTimer[BG_TEAMS_COUNT];
+        ObjectGuid m_DroppedFlagGuid[PVP_TEAM_COUNT];
+        uint8 m_FlagState[PVP_TEAM_COUNT];
+        int32 m_FlagsTimer[PVP_TEAM_COUNT];
+        int32 m_FlagsDropTimer[PVP_TEAM_COUNT];
 
         uint32 m_ReputationCapture;
         uint32 m_HonorWinKills;

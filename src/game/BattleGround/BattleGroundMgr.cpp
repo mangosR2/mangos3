@@ -1355,7 +1355,7 @@ void BattleGroundMgr::BuildPvpLogDataPacket(WorldPacket* data, BattleGround* bg)
     if (bg->isArena())
     {
         // it seems this must be according to BG_WINNER_A/H and _NOT_ BG_TEAM_A/H
-        for (int8 i = 0; i < BG_TEAMS_COUNT; ++i)
+        for (int8 i = 0; i < PVP_TEAM_COUNT; ++i)
         {
             if (ArenaTeam* at = sObjectMgr.GetArenaTeamById(bg->m_ArenaTeamIds[i]))
                 data->WriteBits(at->GetName().length(), 8);
@@ -1474,7 +1474,7 @@ void BattleGroundMgr::BuildPvpLogDataPacket(WorldPacket* data, BattleGround* bg)
 
     if (bg->isRated())                                      // arena
     {
-        for (int8 i = 0; i < BG_TEAMS_COUNT; ++i)
+        for (int8 i = 0; i < PVP_TEAM_COUNT; ++i)
         {
             uint32 pointsLost = bg->m_ArenaTeamRatingChanges[i] < 0 ? abs(bg->m_ArenaTeamRatingChanges[i]) : 0;
             uint32 pointsGained = bg->m_ArenaTeamRatingChanges[i] > 0 ? bg->m_ArenaTeamRatingChanges[i] : 0;
@@ -1491,7 +1491,7 @@ void BattleGroundMgr::BuildPvpLogDataPacket(WorldPacket* data, BattleGround* bg)
 
     if (bg->isArena())
     {
-        for (int8 i = 0; i < BG_TEAMS_COUNT; ++i)
+        for (int8 i = 0; i < PVP_TEAM_COUNT; ++i)
         {
             if (ArenaTeam* at = sObjectMgr.GetArenaTeamById(bg->m_ArenaTeamIds[i]))
                 data->append(at->GetName().data(), at->GetName().length());
@@ -1747,7 +1747,7 @@ BattleGround* BattleGroundMgr::CreateNewBattleGround(BattleGroundTypeId bgTypeId
             bg = new BattleGroundRB(*(BattleGroundRB*)bg_template);
             break;
         case BATTLEGROUND_TP:
-            //bg = new BattleGroundTP(*(BattleGroundTP*)bg_template);
+            bg = new BattleGroundTP(*(BattleGroundTP*)bg_template);
             break;
         case BATTLEGROUND_BG:
             //bg = new BattleGroundBG(*(BattleGroundBG*)bg_template);
@@ -1801,7 +1801,7 @@ uint32 BattleGroundMgr::CreateBattleGround(BattleGroundTypeId bgTypeId, bool IsA
         case BATTLEGROUND_RV: bg = new BattleGroundRV; break;
         case BATTLEGROUND_IC: bg = new BattleGroundIC; break;
         case BATTLEGROUND_RB: bg = new BattleGroundRB; break;
-        //case BATTLEGROUND_TP: bg = new BattleGroundTP; break;
+        case BATTLEGROUND_TP: bg = new BattleGroundTP; break;
         //case BATTLEGROUND_BG: bg = new BattleGroundBG; break;
         default:              bg = new BattleGround;   break;                           // placeholder for non implemented BG
     }

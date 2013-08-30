@@ -332,6 +332,8 @@ BattleGround/BattleGroundRV.cpp
 BattleGround/BattleGroundRV.h
 BattleGround/BattleGroundSA.cpp
 BattleGround/BattleGroundSA.h
+BattleGround/BattleGroundTP.cpp
+BattleGround/BattleGroundTP.h
 BattleGround/BattleGroundWS.cpp
 BattleGround/BattleGroundWS.h
 

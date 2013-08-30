@@ -57,11 +57,11 @@ void BattleGroundBG::Update(uint32 diff)
         if (m_PointAddingTimer <= 0)
         {
             m_PointAddingTimer = BG_BG_FPOINTS_TICK_TIME;
-            if (m_TeamPointsCount[BG_TEAM_ALLIANCE] > 0)
-                AddPoints(ALLIANCE, BG_BG_TickPoints[m_TeamPointsCount[BG_TEAM_ALLIANCE] - 1]);
-            if (m_TeamPointsCount[BG_TEAM_HORDE] > 0)
-                AddPoints(HORDE, BG_BG_TickPoints[m_TeamPointsCount[BG_TEAM_HORDE] - 1]);
-        }      
+            if (m_TeamPointsCount[TEAM_INDEX_ALLIANCE] > 0)
+                AddPoints(ALLIANCE, BG_BG_TickPoints[m_TeamPointsCount[TEAM_INDEX_ALLIANCE] - 1]);
+            if (m_TeamPointsCount[TEAM_INDEX_HORDE] > 0)
+                AddPoints(HORDE, BG_BG_TickPoints[m_TeamPointsCount[TEAM_INDEX_HORDE] - 1]);
+        }
     }
 }
 
@@ -87,7 +87,7 @@ void BattleGroundBG::StartingEventOpenDoors()
 
 void BattleGroundBG::AddPoints(Team team, uint32 points)
 {
-    BattleGroundTeamIndex team_index = GetTeamIndexByTeamId(team);
+    TeamIndex team_index = GetTeamIndexByTeamId(team);
     m_TeamScores[team_index] += points;
     m_HonorScoreTics[team_index] += points;
     if (m_HonorScoreTics[team_index] >= m_HonorTics)
@@ -248,9 +248,9 @@ void BattleGroundBG::EndBattleGround(Team winner)
 void BattleGroundBG::UpdatePointsCount(Team team)
 {
     if (team == ALLIANCE)
-        UpdateWorldState(BG_ALLIANCE_BASE, m_TeamPointsCount[BG_TEAM_ALLIANCE]);
+        UpdateWorldState(BG_ALLIANCE_BASE, m_TeamPointsCount[TEAM_INDEX_ALLIANCE]);
     else
-        UpdateWorldState(BG_HORDE_BASE, m_TeamPointsCount[BG_TEAM_HORDE]);
+        UpdateWorldState(BG_HORDE_BASE, m_TeamPointsCount[TEAM_INDEX_HORDE]);
 }
 
 void BattleGroundBG::UpdatePointsIcons(Team team, uint32 point)
@@ -350,12 +350,12 @@ void BattleGroundBG::Reset()
     // call parent's class reset
     BattleGround::Reset();
 
-    m_TeamScores[BG_TEAM_ALLIANCE] = 0;
-    m_TeamScores[BG_TEAM_HORDE] = 0;
-    m_TeamPointsCount[BG_TEAM_ALLIANCE] = 0;
-    m_TeamPointsCount[BG_TEAM_HORDE] = 0;
-    m_HonorScoreTics[BG_TEAM_ALLIANCE] = 0;
-    m_HonorScoreTics[BG_TEAM_HORDE] = 0;
+    m_TeamScores[TEAM_INDEX_ALLIANCE] = 0;
+    m_TeamScores[TEAM_INDEX_HORDE] = 0;
+    m_TeamPointsCount[TEAM_INDEX_ALLIANCE] = 0;
+    m_TeamPointsCount[TEAM_INDEX_HORDE] = 0;
+    m_HonorScoreTics[TEAM_INDEX_ALLIANCE] = 0;
+    m_HonorScoreTics[TEAM_INDEX_HORDE] = 0;
     m_PointAddingTimer = 0;
     m_TowerCapCheckTimer = 0;
     bool isBGWeekend = BattleGroundMgr::IsBGWeekend(GetTypeID());
@@ -396,9 +396,9 @@ void BattleGroundBG::EventTeamLostPoint(Player* source, uint32 point)
         return;
 
     if (team == ALLIANCE)
-        --m_TeamPointsCount[BG_TEAM_ALLIANCE];
+        --m_TeamPointsCount[TEAM_INDEX_ALLIANCE];
     else
-        --m_TeamPointsCount[BG_TEAM_HORDE];
+        --m_TeamPointsCount[TEAM_INDEX_HORDE];
 
     // it's important to set the OwnedBy before despawning spiritguides, else
     // player won't get teleported away
@@ -458,8 +458,8 @@ void BattleGroundBG::UpdatePlayerScore(Player* source, uint32 type, uint32 value
 
 void BattleGroundBG::FillInitialWorldStates(WorldPacket& data, uint32& count)
 {
-    FillInitialWorldState(data, count, BG_HORDE_BASE,    m_TeamPointsCount[BG_TEAM_HORDE]);
-    FillInitialWorldState(data, count, BG_ALLIANCE_BASE, m_TeamPointsCount[BG_TEAM_ALLIANCE]);
+    FillInitialWorldState(data, count, BG_HORDE_BASE,    m_TeamPointsCount[TEAM_INDEX_HORDE]);
+    FillInitialWorldState(data, count, BG_ALLIANCE_BASE, m_TeamPointsCount[TEAM_INDEX_ALLIANCE]);
     FillInitialWorldState(data, count, 0xab6, 0x0);
     FillInitialWorldState(data, count, 0xab5, 0x0);
     FillInitialWorldState(data, count, 0xab4, 0x0);

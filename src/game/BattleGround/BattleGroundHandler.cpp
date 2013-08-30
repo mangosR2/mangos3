@@ -263,7 +263,6 @@ void WorldSession::HandleBattleGroundPlayerPositionsOpcode(WorldPacket& /*recv_d
                 ++flagCarrierCountH;
             break;
         }
-        /*
         case BATTLEGROUND_TP:
         {
             if (flagCarrierA = sObjectMgr.GetPlayer(((BattleGroundTP*)bg)->GetAllianceFlagCarrierGuid()))
@@ -273,7 +272,6 @@ void WorldSession::HandleBattleGroundPlayerPositionsOpcode(WorldPacket& /*recv_d
                 ++flagCarrierCountH;
             break;
         }
-        */
         case BATTLEGROUND_EY:
         {
             if (flagCarrierH = sObjectMgr.GetPlayer(((BattleGroundEY*)bg)->GetFlagCarrierGuid()))
@@ -283,9 +281,6 @@ void WorldSession::HandleBattleGroundPlayerPositionsOpcode(WorldPacket& /*recv_d
         case BATTLEGROUND_AB:
         case BATTLEGROUND_AV:
             // for other BG types - send default
-            break;
-        case BATTLEGROUND_TP:
-            // ToDo: Fixme!
             break;
         default:
             // maybe it is sent also in arena - do nothing
