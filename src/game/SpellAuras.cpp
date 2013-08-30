@@ -7375,6 +7375,7 @@ void Aura::HandleAuraModIncreaseHealth(bool apply, bool Real)
 
             // Cases where m_amount already has the correct value (spells cast with CastCustomSpell or absolute values)
         case 12976:                                         // Warrior Last Stand triggered spell (Cast with percentage-value by CastCustomSpell)
+        case 53478:                                         // Hunter Last Stand triggered spell (Cast with percentage-value by CastCustomSpell)
         case 28726:                                         // Nightmare Seed
         case 31616:                                         // Nature's Guardian (Cast with percentage-value by CastCustomSpell)
         case 34511:                                         // Valor (Bulwark of Kings, Bulwark of the Ancient Kings)
@@ -8092,6 +8093,7 @@ void Aura::HandleShapeshiftBoosts(bool apply)
 {
     uint32 spellId1 = 0;
     uint32 spellId2 = 0;
+    uint32 spellId3 = 0;
     uint32 HotWSpellId = 0;
     uint32 MasterShaperSpellId = 0;
 
@@ -8107,7 +8109,9 @@ void Aura::HandleShapeshiftBoosts(bool apply)
             MasterShaperSpellId = 48420;
             break;
         case FORM_TREE:
-            spellId1 = 34123;
+            spellId1 = 5420;
+            spellId2 = 81097;
+            spellId3 = 81098;
             MasterShaperSpellId = 48422;
             break;
         case FORM_TRAVEL:
@@ -8191,6 +8195,12 @@ void Aura::HandleShapeshiftBoosts(bool apply)
             if(target->GetTypeId() == TYPEID_PLAYER)
                 ((Player*)target)->RemoveSpellCooldown(spellId2);
             target->CastSpell(target, spellId2, true, NULL, this);
+        if (spellId3)
+        {
+            if (target->GetTypeId() == TYPEID_PLAYER && ((Player*)target)->HasSpellCooldown(spellId3))
+                ((Player*)target)->RemoveSpellCooldown(spellId3);
+
+            target->CastSpell(target, spellId3, true, NULL, this);
         }
 
         if (target->GetTypeId() == TYPEID_PLAYER)
@@ -8198,9 +8208,13 @@ void Aura::HandleShapeshiftBoosts(bool apply)
             const PlayerSpellMap& sp_list = ((Player *)target)->GetSpellMap();
             for (PlayerSpellMap::const_iterator itr = sp_list.begin(); itr != sp_list.end(); ++itr)
             {
-                if (itr->second.state == PLAYERSPELL_REMOVED) continue;
-                if (itr->first==spellId1 || itr->first==spellId2) continue;
-                SpellEntry const *spellInfo = sSpellStore.LookupEntry(itr->first);
+                if (itr->second.state == PLAYERSPELL_REMOVED)
+                    continue;
+
+                if (itr->first == spellId1 || itr->first == spellId2 || itr->first==spellId3)
+                    continue;
+
+                SpellEntry const* spellInfo = sSpellStore.LookupEntry(itr->first);
                 if (!spellInfo || !IsNeedCastSpellAtFormApply(spellInfo, form))
                     continue;
                 target->CastSpell(target, itr->first, true, NULL, this);
@@ -8317,6 +8331,8 @@ void Aura::HandleShapeshiftBoosts(bool apply)
             target->RemoveAurasDueToSpell(spellId1);
         if (spellId2)
             target->RemoveAurasDueToSpell(spellId2);
+        if(spellId3)
+            target->RemoveAurasDueToSpell(spellId3);
         if (MasterShaperSpellId)
             target->RemoveAurasDueToSpell(MasterShaperSpellId);
 
@@ -8326,11 +8342,16 @@ void Aura::HandleShapeshiftBoosts(bool apply)
             const PlayerSpellMap& sp_list = ((Player *)target)->GetSpellMap();
             for (PlayerSpellMap::const_iterator itr = sp_list.begin(); itr != sp_list.end(); ++itr)
             {
-                if (itr->second.state == PLAYERSPELL_REMOVED) continue;
-                if (itr->first==spellId1 || itr->first==spellId2) continue;
-                SpellEntry const *spellInfo = sSpellStore.LookupEntry(itr->first);
+                if (itr->second.state == PLAYERSPELL_REMOVED)
+                    continue;
+
+                if (itr->first == spellId1 || itr->first == spellId2 || itr->first==spellId3) 
+                    continue;
+
+                SpellEntry const* spellInfo = sSpellStore.LookupEntry(itr->first);
                 if (!spellInfo || !IsPassiveSpell(spellInfo))
                     continue;
+
                 if (spellInfo->HasAttribute(SPELL_ATTR_EX2_NOT_NEED_SHAPESHIFT) && (spellInfo->GetStancesNot() & (1 << (form - 1))))
                     target->CastSpell(target, itr->first, true, NULL, this);
             }

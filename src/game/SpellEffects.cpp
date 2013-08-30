@@ -1148,6 +1148,12 @@ void Spell::EffectSchoolDMG(SpellEffectEntry const* effect)
                         base += ((Player*)m_caster)->GetAmmoDPS();
                     damage += int32(float(base)/m_caster->GetAttackTime(RANGED_ATTACK)*2800 + ap*0.1f);
                 }
+                // Kill Command
+                if (m_spellInfo->Id == 83381)
+                {
+                    float rap = m_caster->GetTotalAttackPowerValue(RANGED_ATTACK);
+                    damage = int32((damage + (rap * 0.516f)));
+                }
                 break;
             }
             case SPELLFAMILY_PALADIN:
@@ -4035,11 +4041,18 @@ void Spell::EffectDummy(SpellEffectEntry const* effect)
                     m_caster->CastSpell(unitTarget, 21887, true); // spell mod
                     return;
                 }
-                // Last Stand
+                // Last Stand Warrior
                 case 12975:
                 {
                     int32 healthModSpellBasePoints0 = int32(m_caster->GetMaxHealth()*0.3);
                     m_caster->CastCustomSpell(m_caster, 12976, &healthModSpellBasePoints0, NULL, NULL, true, NULL);
+                    return;
+                }
+                // Last Stand Hunter
+                case 53479:
+                {
+                    int32 healthModSpellBasePoints0 = int32(m_caster->GetMaxHealth() * 0.3);
+                    m_caster->CastCustomSpell(m_caster, 53478, &healthModSpellBasePoints0, NULL, NULL, true, NULL);
                     return;
                 }
                 // Bloodthirst

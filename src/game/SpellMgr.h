@@ -74,7 +74,7 @@ enum SpellSpecific
     SPELL_DRINK             = 21,
     SPELL_FOOD_AND_DRINK    = 22,
     SPELL_UA_IMMOLATE       = 23,                           // Unstable Affliction and Immolate
-    SPELL_BLEED_DEBUFF      = 24,                           // Mangle and Trauma
+    SPELL_WARLOCK_BANE      = 24,
     SPELL_MAGE_INTELLECT    = 25,
     SPELL_SCROLL            = 30
 };

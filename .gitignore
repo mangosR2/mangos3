@@ -25,6 +25,7 @@ bin
 build
 tags
 TAGS
+dev.txt
 !.gitignore
 !.gitattributes
 !.travis.yml
