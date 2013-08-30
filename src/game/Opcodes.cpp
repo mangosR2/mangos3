@@ -1509,7 +1509,6 @@ void InitializeOpcodes()
     OPCODE(SMSG_MOVE_UNSET_CAN_TRANSITION_BETWEEN_SWIM_AND_FLY, STATUS_NEVER, PROCESS_INPLACE,  &WorldSession::Handle_ServerSide       );
     OPCODE(SMSG_MOVE_SET_CAN_TRANSITION_BETWEEN_SWIM_AND_FLY, STATUS_NEVER,    PROCESS_INPLACE, &WorldSession::Handle_ServerSide       );
     OPCODE(MSG_GM_RESETINSTANCELIMIT,                    STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide       );
-    OPCODE(SMSG_INSTANCE_DIFFICULTY,                     STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide       );
     OPCODE(SMSG_CHARACTER_PROFILE_REALM_CONNECTED,       STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide       );
     OPCODE(SMSG_CHARACTER_PROFILE,                       STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide       );
     OPCODE(SMSG_LOTTERY_RESULT_OBSOLETE,                 STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide       );
