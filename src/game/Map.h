@@ -329,6 +329,7 @@ class MANGOS_DLL_SPEC Map : public GridRefManager<NGridType>
         GuidSet& GetAttackersFor(ObjectGuid const& targetGuid);
         void CreateAttackersStorageFor(ObjectGuid const& targetGuid);
         void RemoveAttackersStorageFor(ObjectGuid const& targetGuid);
+        bool IsInCombat(ObjectGuid const& targetGuid) const;
 
         // multithread locking
         ObjectLockType& GetLock(MapLockType _locktype = MAP_LOCK_TYPE_DEFAULT) { return i_lock[_locktype]; }

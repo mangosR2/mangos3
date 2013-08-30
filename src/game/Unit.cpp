@@ -7263,7 +7263,8 @@ bool Unit::AttackStop(bool targetSwitch /*=false*/)
     }
 
     Unit* victim = GetMap()->GetUnit(m_attackingGuid);
-    GetMap()->RemoveAttackerFor(m_attackingGuid,GetObjectGuid());
+    GetMap()->RemoveAttackerFor(m_attackingGuid, GetObjectGuid());
+    GetMap()->RemoveAttackerFor(GetObjectGuid(), m_attackingGuid);
     m_attackingGuid.Clear();
 
     // Clear our target
@@ -7345,18 +7346,24 @@ void Unit::RemoveAllAttackers()
         return;
 
     GuidSet& attackers = GetMap()->GetAttackersFor(GetObjectGuid());
-
-    for (GuidSet::iterator itr = attackers.begin(); itr != attackers.end();)
+    for (GuidSet::iterator itr = attackers.begin(); !attackers.empty() && itr != attackers.end();)
     {
-        ObjectGuid guid = *itr++;
+        ObjectGuid guid = *itr;
         Unit* attacker = GetMap()->GetUnit(guid);
-        if(!attacker || !attacker->AttackStop())
+        if (!attacker || !attacker->AttackStop())
         {
-            sLog.outError("WORLD: Unit has an attacker that isn't attacking it!");
+            sLog.outError("Unit::RemoveAllAttackers %s has attacker %s that isn't attacking it!", GetObjectGuid().GetString().c_str(), guid.GetString().c_str());
             GetMap()->RemoveAttackerFor(GetObjectGuid(),guid);
         }
+        itr = attackers.begin();
     }
-    GetMap()->RemoveAllAttackersFor(GetObjectGuid());
+
+    // Cleanup
+    if (!attackers.empty())
+    {
+        sLog.outError("Unit::RemoveAllAttackers %s has %u attackers after step-to-step cleanup!", GetObjectGuid().GetString().c_str(), attackers.size());
+        GetMap()->RemoveAllAttackersFor(GetObjectGuid());
+    }
 }
 
 bool Unit::HasAuraStateForCaster(AuraState flag, ObjectGuid casterGuid) const
