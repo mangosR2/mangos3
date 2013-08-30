@@ -2512,6 +2512,18 @@ void World::InitRandomBGResetTime()
         delete result;
 }
 
+void World::ResetDailyQuests()
+{
+    DETAIL_LOG("Daily quests reset for all characters.");
+    CharacterDatabase.Execute("DELETE FROM character_queststatus_daily");
+    for(SessionMap::const_iterator itr = m_sessions.begin(); itr != m_sessions.end(); ++itr)
+        if (itr->second->GetPlayer())
+            itr->second->GetPlayer()->ResetDailyQuestStatus();
+
+    m_NextDailyQuestReset = time_t(m_NextDailyQuestReset + DAY);
+    CharacterDatabase.PExecute("UPDATE saved_variables SET NextDailyQuestResetTime = '"UI64FMTD"'", uint64(m_NextDailyQuestReset));
+}
+
 void World::SetMonthlyQuestResetTime(bool initialize)
 {
     if (initialize)
@@ -2594,18 +2606,6 @@ void World::InitCurrencyResetTime()
         CharacterDatabase.PExecute("INSERT INTO `saved_variables` (`NextCurrenciesResetTime`) VALUES ('" UI64FMTD "')", uint64(m_NextCurrencyReset));
     else
         delete result;
-}
-
-void World::ResetDailyQuests()
-{
-    DETAIL_LOG("Daily quests reset for all characters.");
-    CharacterDatabase.Execute("DELETE FROM character_queststatus_daily");
-    for(SessionMap::const_iterator itr = m_sessions.begin(); itr != m_sessions.end(); ++itr)
-        if (itr->second->GetPlayer())
-            itr->second->GetPlayer()->ResetDailyQuestStatus();
-
-    m_NextDailyQuestReset = time_t(m_NextDailyQuestReset + DAY);
-    CharacterDatabase.PExecute("UPDATE saved_variables SET NextDailyQuestResetTime = '"UI64FMTD"'", uint64(m_NextDailyQuestReset));
 }
 
 void World::ResetWeeklyQuests()

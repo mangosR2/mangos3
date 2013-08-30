@@ -684,12 +684,12 @@ bool IsSingleFromSpellSpecificPerTarget(SpellSpecific spellSpec1,SpellSpecific s
         case SPELL_MAGE_POLYMORPH:
         case SPELL_PRESENCE:
         case SPELL_WELL_FED:
-        case SPELL_BLEED_DEBUFF:
+        case SPELL_WARLOCK_BANE:
         case SPELL_MAGE_INTELLECT:
-            return spellSpec1==spellSpec2;
+            return spellSpec1 == spellSpec2;
         case SPELL_BATTLE_ELIXIR:
-            return spellSpec2==SPELL_BATTLE_ELIXIR
-                || spellSpec2==SPELL_FLASK_ELIXIR;
+            return spellSpec2 == SPELL_BATTLE_ELIXIR
+                || spellSpec2 == SPELL_FLASK_ELIXIR;
         case SPELL_GUARDIAN_ELIXIR:
             return spellSpec2==SPELL_GUARDIAN_ELIXIR
                 || spellSpec2==SPELL_FLASK_ELIXIR;

@@ -695,16 +695,15 @@ class World
 
         void InitCurrencyResetTime();
         void InitDailyQuestResetTime();
+        void InitRandomBGResetTime();
         void InitWeeklyQuestResetTime();
 
         void SetMonthlyQuestResetTime(bool initialize = true);
         void ResetCurrencyWeekCounts();
         void ResetDailyQuests();
+        void ResetRandomBG();
         void ResetWeeklyQuests();
         void ResetMonthlyQuests();
-
-        void InitRandomBGResetTime();
-        void ResetRandomBG();
 
     private:
         void setConfig(eConfigUInt32Values index, char const* fieldname, uint32 defvalue);
@@ -773,10 +772,9 @@ class World
         // scheduled reset times
         time_t m_NextCurrencyReset;
         time_t m_NextDailyQuestReset;
+        time_t m_NextRandomBGReset;
         time_t m_NextWeeklyQuestReset;
         time_t m_NextMonthlyQuestReset;
-
-        time_t m_NextRandomBGReset;
 
         //Player Queue
         Queue m_QueuedSessions;

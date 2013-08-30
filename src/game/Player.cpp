@@ -8447,7 +8447,7 @@ void Player::SendLoot(ObjectGuid guid, LootType loot_type)
                 if ((go->GetEntry() == BG_AV_OBJECTID_MINE_N || go->GetEntry() == BG_AV_OBJECTID_MINE_S))
                 {
                     if (BattleGround* bg = GetBattleGround())
-                        if (bg->GetTypeID() == BATTLEGROUND_AV)
+                        if (bg->GetTypeID(true) == BATTLEGROUND_AV)
                             if (!(((BattleGroundAV*)bg)->PlayerCanDoMineQuest(go->GetEntry(), GetTeam())))
                             {
                                 SendLootRelease(guid);

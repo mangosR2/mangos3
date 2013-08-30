@@ -8195,6 +8195,7 @@ void Aura::HandleShapeshiftBoosts(bool apply)
             if(target->GetTypeId() == TYPEID_PLAYER)
                 ((Player*)target)->RemoveSpellCooldown(spellId2);
             target->CastSpell(target, spellId2, true, NULL, this);
+        }
         if (spellId3)
         {
             if (target->GetTypeId() == TYPEID_PLAYER && ((Player*)target)->HasSpellCooldown(spellId3))
