@@ -931,7 +931,7 @@ struct EmotesEntry
     uint32  EmoteType;                                      // 4        m_EmoteSpecProc (determine how emote are shown)
     uint32  UnitStandState;                                 // 5        m_EmoteSpecProcParam
     //uint32  SoundId;                                      // 6        m_EventSoundID
-    //uint32 unk;                                           // 7 - 4.2.0
+    //uint32  SpellVisualKitId;                             // 7        entry from SpellVisualKit.dbc
 };
 
 struct EmotesTextEntry
