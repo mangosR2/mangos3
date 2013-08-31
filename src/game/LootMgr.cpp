@@ -26,6 +26,7 @@
 #include "SpellMgr.h"
 #include "DBCStores.h"
 #include "SQLStorages.h"
+#include "SpellAuras.h"
 
 static eConfigFloatValues const qualityToRate[MAX_ITEM_QUALITY] =
 {
