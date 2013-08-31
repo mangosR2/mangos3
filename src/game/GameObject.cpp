@@ -40,6 +40,7 @@
 #include "OutdoorPvP/OutdoorPvP.h"
 #include "Util.h"
 #include "ScriptMgr.h"
+#include "Transports.h"
 #include "vmap/GameObjectModel.h"
 #include "vmap/DynamicTree.h"
 #include "SQLStorages.h"
@@ -794,8 +795,10 @@ bool GameObject::IsTransport() const
 {
     // If something is marked as a transport, don't transmit an out of range packet for it.
     GameObjectInfo const* gInfo = GetGOInfo();
-    if (!gInfo) return false;
-    return gInfo->type == GAMEOBJECT_TYPE_TRANSPORT || gInfo->type == GAMEOBJECT_TYPE_MO_TRANSPORT;
+    if (!gInfo)
+        return false;
+
+    return (gInfo->type == GAMEOBJECT_TYPE_MO_TRANSPORT && ((Transport*)(this))->IsTransport());
 }
 
 // is Dynamic transport = non-stop Transport
