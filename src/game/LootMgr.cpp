@@ -388,6 +388,20 @@ LootItem::LootItem(LootStoreItem const& li, Loot* loot)
     needs_quest = li.needs_quest;
     randomSuffix = GenerateEnchSuffixFactor(itemid);
     randomPropertyId = Item::GenerateItemRandomPropertyId(itemid);
+
+        float multiplier = 1.0f;
+        if (loot)
+            if (Player const* lootOwner = loot->GetLootOwner())
+            {
+                Unit::AuraList const& auras = lootOwner->GetAurasByType(SPELL_AURA_MOD_ITEM_LOOT);
+                for (Unit::AuraList::const_iterator itr = auras.begin(); itr != auras.end(); ++itr)
+                {
+                    if ((*itr)->GetMiscValue() == proto->Class && (*itr)->GetMiscBValue() & (1 << proto->SubClass))
+                        multiplier *= ((*itr)->GetModifier()->m_amount + 100.0f) / 100.0f;
+                }
+            }
+
+        count = uint32(count * multiplier + 0.5f);
     }
 }
 
