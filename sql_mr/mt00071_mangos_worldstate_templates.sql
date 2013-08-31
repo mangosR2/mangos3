@@ -586,8 +586,8 @@ INSERT INTO `worldstate_template` (`state_id`, `type`, `condition`, `flags`, `de
 (1601, 4, 726, @FLAG_INITIAL_ACTIVE, 3, 0, '', ''),
 (2338, 4, 726, @FLAG_INITIAL_ACTIVE, 1, 0, '', ''),
 (2339, 4, 726, @FLAG_INITIAL_ACTIVE, 1, 0, '', ''),
-(4247, 4, 726, @FLAG_INITIAL_ACTIVE, 1, 0, '', ''),
-(4248, 4, 726, @FLAG_INITIAL_ACTIVE, 25, 0, '', '');
+(4247, 4, 726, @FLAG_INITIAL_ACTIVE, 0, 0, '', ''),
+(4248, 4, 726, @FLAG_INITIAL_ACTIVE, 25, 4247, '', '');
 
 -- Arenas
 -- Dalaran arena

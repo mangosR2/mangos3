@@ -666,38 +666,36 @@ WorldSafeLocsEntry const* BattleGroundTP::GetClosestGraveYard(Player* player)
 
 void BattleGroundTP::FillInitialWorldStates(WorldPacket& data, uint32& count)
 {
-    // FIXME - need move this in DB!
-/*
-    FillInitialWorldState(data, count, BG_TP_FLAG_CAPTURES_ALLIANCE, GetTeamScore(ALLIANCE));
-    FillInitialWorldState(data, count, BG_TP_FLAG_CAPTURES_HORDE, GetTeamScore(HORDE));
+    FillInitialWorldState(BG_TP_FLAG_CAPTURES_ALLIANCE, GetTeamScore(ALLIANCE));
+    FillInitialWorldState(BG_TP_FLAG_CAPTURES_HORDE, GetTeamScore(HORDE));
 
     if (m_FlagState[TEAM_INDEX_ALLIANCE] == BG_TP_FLAG_STATE_ON_GROUND)
-        FillInitialWorldState(data, count, BG_TP_FLAG_UNK_ALLIANCE, -1);
+        FillInitialWorldState(BG_TP_FLAG_UNK_ALLIANCE, -1);
     else if (m_FlagState[TEAM_INDEX_ALLIANCE] == BG_TP_FLAG_STATE_ON_PLAYER)
-        FillInitialWorldState(data, count, BG_TP_FLAG_UNK_ALLIANCE, 1);
+        FillInitialWorldState(BG_TP_FLAG_UNK_ALLIANCE, 1);
     else
-        FillInitialWorldState(data, count, BG_TP_FLAG_UNK_ALLIANCE, 0);
+        FillInitialWorldState(BG_TP_FLAG_UNK_ALLIANCE, 0);
 
     if (m_FlagState[TEAM_INDEX_HORDE] == BG_TP_FLAG_STATE_ON_GROUND)
-        FillInitialWorldState(data, count, BG_TP_FLAG_UNK_HORDE, -1);
+        FillInitialWorldState(BG_TP_FLAG_UNK_HORDE, -1);
     else if (m_FlagState[TEAM_INDEX_HORDE] == BG_TP_FLAG_STATE_ON_PLAYER)
-        FillInitialWorldState(data, count, BG_TP_FLAG_UNK_HORDE, 1);
+        FillInitialWorldState(BG_TP_FLAG_UNK_HORDE, 1);
     else
-        FillInitialWorldState(data, count, BG_TP_FLAG_UNK_HORDE, 0);
+        FillInitialWorldState(BG_TP_FLAG_UNK_HORDE, 0);
 
-    FillInitialWorldState(data, count, BG_TP_FLAG_CAPTURES_MAX, BG_TP_MAX_TEAM_SCORE);
+    FillInitialWorldState(BG_TP_FLAG_CAPTURES_MAX, BG_TP_MAX_TEAM_SCORE);
 
     if (m_FlagState[TEAM_INDEX_HORDE] == BG_TP_FLAG_STATE_ON_PLAYER)
-        FillInitialWorldState(data, count, BG_TP_FLAG_STATE_HORDE, 2);
+        FillInitialWorldState(BG_TP_FLAG_STATE_HORDE, 2);
     else
-        FillInitialWorldState(data, count, BG_TP_FLAG_STATE_HORDE, 1);
+        FillInitialWorldState(BG_TP_FLAG_STATE_HORDE, 1);
 
     if (m_FlagState[TEAM_INDEX_ALLIANCE] == BG_TP_FLAG_STATE_ON_PLAYER)
-        FillInitialWorldState(data, count, BG_TP_FLAG_STATE_ALLIANCE, 2);
+        FillInitialWorldState(BG_TP_FLAG_STATE_ALLIANCE, 2);
     else
-        FillInitialWorldState(data, count, BG_TP_FLAG_STATE_ALLIANCE, 1);
+        FillInitialWorldState(BG_TP_FLAG_STATE_ALLIANCE, 1);
 
-    FillInitialWorldState(data, count, BG_TP_TIME_ENABLED, WORLD_STATE_ADD);
-    FillInitialWorldState(data, count, BG_TP_TIME_REMAINING, GetRemainingTimeInMinutes());
-*/
+    FillInitialWorldState(BG_TP_TIME_ENABLED, WORLD_STATE_ADD);
+    FillInitialWorldState(BG_TP_TIME_REMAINING, GetRemainingTimeInMinutes());
+
 }
