@@ -405,7 +405,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleNULL,                                      //348 SPELL_AURA_MOD_MONEY_TO_GUILD_BANK 2 spells in 4.3.4
     &Aura::HandleNoImmediateEffect,                         //349 SPELL_AURA_MOD_CURRENCY_GAIN 16 spells in 4.3.4
     &Aura::HandleNULL,                                      //350 SPELL_AURA_MOD_ITEM_LOOT 1 spells in 4.3.4
-    &Aura::HandleNULL,                                      //351 SPELL_AURA_MOD_CURRENCY_LOOT 8 spells in 4.3.4
+    &Aura::HandleNoImmediateEffect,                         //351 SPELL_AURA_MOD_CURRENCY_LOOT 8 spells in 4.3.4
     &Aura::HandleNULL,                                      //352 SPELL_AURA_ALLOW_WORGEN_TRANSFORM 1 spells in 4.3.4 enables worgen<>human form switches
     &Aura::HandleNULL,                                      //353 SPELL_AURA_MOD_CAMOUFLAGE 3 spells in 4.3.4
     &Aura::HandleNoImmediateEffect,                         //354 SPELL_AURA_MOD_HEALING_DONE_FROM_PCT_HEALTH 2 spells in 4.3.4

@@ -354,7 +354,7 @@ bool LootStoreItem::IsValid(LootStore const& store, uint32 entry) const
 //
 
 // Constructor, copies most fields from LootStoreItem and generates random count
-LootItem::LootItem(LootStoreItem const& li)
+LootItem::LootItem(LootStoreItem const& li, Loot* loot)
 {
     itemid      = li.itemid;
     type        = li.type;
@@ -373,7 +373,13 @@ LootItem::LootItem(LootStoreItem const& li)
         needs_quest = false;
         randomSuffix = 0;
         randomPropertyId = 0;
-        count = uint32(count * sWorld.getConfig(CONFIG_FLOAT_RATE_DROP_CURRENCY_AMOUNT));
+
+        float multiplier = sWorld.getConfig(CONFIG_FLOAT_RATE_DROP_CURRENCY_AMOUNT);
+        if (loot)
+            if (Player const* lootOwner = loot->GetLootOwner())
+                multiplier *= lootOwner->GetTotalAuraMultiplierByMiscValue(SPELL_AURA_MOD_CURRENCY_LOOT, sCurrencyTypesStore.LookupEntry(itemid)->Category);
+
+        count = uint32(count * multiplier + 0.5f);
     }
     else
     {
@@ -498,11 +504,11 @@ void Loot::AddItem(LootStoreItem const& item)
     if (item.needs_quest)                                   // Quest drop
     {
         if (m_questItems.size() < MAX_NR_QUEST_ITEMS)
-            m_questItems.push_back(LootItem(item));
+            m_questItems.push_back(LootItem(item, this));
     }
     else if (items.size() < MAX_NR_LOOT_ITEMS)              // Non-quest drop
     {
-        items.push_back(LootItem(item));
+        items.push_back(LootItem(item, this));
 
         // non-conditional one-player only items are counted here,
         // currencies are counter in FillCurrencyLoot,
@@ -523,6 +529,8 @@ bool Loot::FillLoot(uint32 loot_id, LootStore const& store, Player* loot_owner, 
     // Must be provided
     if (!loot_owner)
         return false;
+
+    m_lootOwner = loot_owner;
 
     LootTemplate const* tab = store.GetLootFor(loot_id);
 
