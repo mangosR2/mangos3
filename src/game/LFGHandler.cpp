@@ -41,17 +41,21 @@ void WorldSession::HandleLfgJoinOpcode( WorldPacket & recv_data )
         DEBUG_LOG("CMSG_LFG_JOIN %u processing...", GetPlayer()->GetObjectGuid().GetCounter());
 
     uint8  numDungeons;
-    uint32 dungeonID;
     uint32 roles;
     std::string comment;
-    LFGDungeonSet newDungeons;
-    newDungeons.clear();
+    uint32 commentSize;
+
 
     recv_data >> roles;                                     // lfg roles
-    recv_data >> Unused<uint8>();                           // unk1 (unused?)
-    recv_data >> Unused<uint8>();                           // unk2 (unused?)
 
-    recv_data >> numDungeons;
+    for (uint8 i = 0; i < 3; ++i)
+    {
+        recv_data.read_skip<uint32>();
+    }
+
+    commentSize = recv_data.ReadBits(9);
+    numDungeons = recv_data.ReadBits(24);
+
     if (!numDungeons)
     {
         DEBUG_LOG("CMSG_LFG_JOIN %u no dungeons selected", GetPlayer()->GetObjectGuid().GetCounter());
@@ -59,19 +63,19 @@ void WorldSession::HandleLfgJoinOpcode( WorldPacket & recv_data )
         return;
     }
 
+    comment = recv_data.ReadString(commentSize);
+
+    LFGDungeonSet newDungeons;
+    newDungeons.clear();
+
     for (int8 i = 0 ; i < numDungeons; ++i)
     {
+        uint32 dungeonID;
         recv_data >> dungeonID;
         LFGDungeonEntry const* dungeon = sLFGMgr.GetDungeon(dungeonID & 0x00FFFFFF);    // remove the type from the dungeon entry
         if (dungeon)
             newDungeons.insert(dungeon);
     }
-
-    uint8 counter2;                                         // unk - always 3
-    recv_data >> counter2;
-    for (uint8 i = 0; i < counter2; i++)
-        recv_data >> Unused<uint8>();                       // unk (unused?)
-    recv_data >> comment;                                   // lfg comment
 
     GetPlayer()->GetLFGPlayerState()->SetDungeons(newDungeons);
     if (GetPlayer()->GetGroup())
@@ -104,7 +108,7 @@ void WorldSession::HandleLfgGetStatus(WorldPacket & /*recv_data*/)
     // Need implement
 }
 
-void WorldSession::HandleLfrSearchOpcode( WorldPacket & recv_data )
+void WorldSession::HandleLfrSearchOpcode(WorldPacket& recv_data)
 {
     uint32 entry;                                           // Raid id to search
     recv_data >> entry;
@@ -117,7 +121,7 @@ void WorldSession::HandleLfrSearchOpcode( WorldPacket & recv_data )
     SendLfgUpdateList(entry & 0x00FFFFFF);
 }
 
-void WorldSession::HandleLfrLeaveOpcode( WorldPacket & recv_data )
+void WorldSession::HandleLfrLeaveOpcode(WorldPacket& recv_data)
 {
     uint32 entry;                                          // Raid id queue to leave
     recv_data >> entry;
@@ -154,12 +158,11 @@ void WorldSession::HandleLfgClearOpcode( WorldPacket & /*recv_data */ )
 
 }
 
-void WorldSession::HandleSetLfgCommentOpcode( WorldPacket & recv_data )
+void WorldSession::HandleSetLfgCommentOpcode(WorldPacket& recv_data)
 {
-    std::string comment;
-    recv_data >> comment;
+    std::string comment = recv_data.ReadString(recv_data.ReadBits(9));
 
-    DEBUG_LOG("CMSG_SET_LFG_COMMENT: [%s]", comment.c_str());
+    DEBUG_LOG("CMSG_SET_LFG_COMMENT: %s [%s]", GetPlayer()->GetGuidStr().c_str(), comment.c_str());
 
     GetPlayer()->GetLFGPlayerState()->SetComment(comment);
 }
@@ -231,7 +234,7 @@ void WorldSession::HandleLfgPlayerLockInfoRequestOpcode(WorldPacket &/*recv_data
         {
             data << uint32((*itr)->Entry());                     // Entry
             LFGReward const* reward = sLFGMgr.GetRandomDungeonReward(*itr,GetPlayer());
-            Quest const* qRew = NULL;
+            Quest const* quest = NULL;
             if (reward)
             {
                 Quest const* pQuest = sObjectMgr.GetQuestTemplate(reward->reward[0].questId);
@@ -239,29 +242,122 @@ void WorldSession::HandleLfgPlayerLockInfoRequestOpcode(WorldPacket &/*recv_data
                 if (!GetPlayer()->CanTakeQuest(pQuest, false))
                     done = 1;
 
-                qRew = sObjectMgr.GetQuestTemplate(reward->reward[done].questId);
+                quest = sObjectMgr.GetQuestTemplate(reward->reward[done].questId);
             }
-            if (qRew)
+            if (quest)
             {
                 data << uint8(done);
-                data << uint32(qRew->GetRewOrReqMoney());
-                data << uint32(qRew->XPValue(GetPlayer()));
-                data << uint32(reward->reward[done].variableMoney);
-                data << uint32(reward->reward[done].variableXP);
-                data << uint8(qRew->GetRewItemsCount());
-                if (qRew->GetRewItemsCount())
+                data << uint32(500); // Times precision
+                data << uint32(500); // Available times per week
+
+                data << uint32(396); // Unknown 4.3.4
+                data << uint32(0); // Unknown 4.3.4
+
+                data << uint32(100000); // Unknown 4.3.4
+                data << uint32(0); // Unknown 4.3.4
+                data << uint32(0); // Unknown 4.3.4
+                data << uint32(0); // Unknown 4.3.4
+                data << uint32(100000); // Unknown 4.3.4
+                data << uint32(70000); // Unknown 4.3.4
+                data << uint32(80000); // Unknown 4.3.4
+
+                data << uint32(90000); // Unknown 4.3.4
+                data << uint32(50000); // isComplited
+
+                data << uint8(100); // seasonal ?
                 {
+                    for (uint8 i = 0; i < 3; ++i) // 3 - Max roles ?
+                    {
+                        uint8 callToArmsRoleMask = 0; // TODO Call to arms role check (LfgRoles) Not implemented
+                        data << uint32(callToArmsRoleMask);
+                        if (callToArmsRoleMask > 0)
+                        {
+                            /* Call to Arms bonus*/
+
+                            data << uint32(0); // Call to arms Money
+                            data << uint32(0); // Call to arms XP
+
+//                            uint8 totalRewardCount = uint8(quest->GetRewCurrencyCount() + quest->GetRewItemsCount());
+                            uint8 totalRewardCount = uint8(quest->GetRewItemsCount());
+                            if (totalRewardCount > 16)
+                                totalRewardCount = 16;
+    
+                            data << uint8(totalRewardCount);
+                            if (totalRewardCount)
+                            {
+                                for (uint8 j = 0; j < QUEST_REWARD_CURRENCY_COUNT; ++j)
+                                {
+                                    uint32 id = quest->RewCurrencyId[j];
+                                    if (!id)
+                                        continue;
+
+                                    uint32 amount = quest->RewCurrencyCount[j];
+                                    if (CurrencyTypesEntry const* currency = sCurrencyTypesStore.LookupEntry(id))
+                                        amount *= currency->GetPrecision();
+
+                                    data << uint32(id);
+                                    data << uint32(0);
+                                    data << uint32(amount);
+                                    data << uint8(true); // Is currency
+                                }
+
+                                ItemPrototype const* iProto = NULL;
+                                for (uint8 j = 0; j < QUEST_REWARDS_COUNT; ++j)
+                                {
+                                    if (!quest->RewItemId[j])
+                                        continue;
+
+                                    iProto = sObjectMgr.GetItemPrototype(quest->RewItemId[j]);
+
+                                    data << uint32(quest->RewItemId[j]);
+                                    data << uint32(iProto ? iProto->DisplayInfoID : 0);
+                                    data << uint32(quest->RewItemCount[j]);
+                                    data << uint8(false); // Is currency
+                                }
+                            }
+                        }
+                    }
+                }
+
+                data << uint32(quest->GetRewOrReqMoney());
+                data << uint32(quest->XPValue(_player));
+
+//                uint8 totalRewardCount = uint8(quest->GetRewCurrencyCount() + quest->GetRewItemsCount());
+                uint8 totalRewardCount = uint8(quest->GetRewItemsCount());
+                if (totalRewardCount > 16)
+                    totalRewardCount = 16;
+
+                data << uint8(totalRewardCount);
+                if (totalRewardCount)
+                {
+                    for (uint8 i = 0; i < QUEST_REWARD_CURRENCY_COUNT; ++i)
+                    {
+                        uint32 id = quest->RewCurrencyId[i];
+                        if (!id)
+                            continue;
+
+                        uint32 amount = quest->RewCurrencyCount[i];
+                        if (CurrencyTypesEntry const* currency = sCurrencyTypesStore.LookupEntry(id))
+                            amount *= currency->GetPrecision();
+
+                        data << uint32(id);
+                        data << uint32(0);
+                        data << uint32(amount);
+                        data << uint8(true); // Is currency
+                    }
+
                     ItemPrototype const* iProto = NULL;
                     for (uint8 i = 0; i < QUEST_REWARDS_COUNT; ++i)
                     {
-                        if (!qRew->RewItemId[i])
+                        if (!quest->RewItemId[i])
                             continue;
 
-                        iProto = ObjectMgr::GetItemPrototype(qRew->RewItemId[i]);
+                        iProto = sObjectMgr.GetItemPrototype(quest->RewItemId[i]);
 
-                        data << uint32(qRew->RewItemId[i]);
+                        data << uint32(quest->RewItemId[i]);
                         data << uint32(iProto ? iProto->DisplayInfoID : 0);
-                        data << uint32(qRew->RewItemCount[i]);
+                        data << uint32(quest->RewItemCount[i]);
+                        data << uint8(false); // Is currency
                     }
                 }
             }
@@ -272,6 +368,17 @@ void WorldSession::HandleLfgPlayerLockInfoRequestOpcode(WorldPacket &/*recv_data
                 data << uint32(0);
                 data << uint32(0);
                 data << uint32(0);
+
+                for (int8 i = 0; i < 9; ++i)
+                    data << uint32(0); // Unknown 4.3.4
+
+                data << uint8(1);
+                for (int8 i = 0; i < 3; ++i)
+                    data << uint32(0); // Unknown 4.3.4
+
+                for (int8 i = 0; i < 2; ++i)
+                    data << uint32(0); // Unknown 4.3.4
+
                 data << uint8(0);
             }
         }
@@ -288,6 +395,8 @@ void WorldSession::HandleLfgPlayerLockInfoRequestOpcode(WorldPacket &/*recv_data
         {
             data << uint32((*itr->first).Entry());                   // Dungeon entry + type
             data << uint32(itr->second);                             // Lock status
+            data << uint32((*itr->first).minlevel);                  // Required player ILvL
+            data << uint32(0 /*GetPlayer()->GetLevel()*/);                 // Player ILvL
         }
     }
     SendPacket(&data);
@@ -354,12 +463,31 @@ void WorldSession::HandleLfgPartyLockInfoRequestOpcode(WorldPacket & /*recv_data
 void WorldSession::HandleLfgProposalResultOpcode(WorldPacket &recv_data)
 {
     uint32 ID;                                              // Internal proposal ID
+    uint32 time;
+    uint32 roles;
+    uint32 unk;
     bool   accept;                                          // Accept to join?
+
+    ObjectGuid playerGuid;
+    ObjectGuid instanceGuid;
+
     recv_data >> ID;
-    recv_data >> accept;
+    recv_data >> time;
+    recv_data >> roles;
+    recv_data >> unk;
+
+    recv_data.ReadGuidMask<4, 5, 0, 6, 2, 7, 1, 3>(playerGuid);
+    recv_data.ReadGuidBytes<7, 4, 3, 2, 6, 0, 1, 5>(playerGuid);
+
+    recv_data.ReadGuidMask<7>(instanceGuid);
+
+    accept = recv_data.ReadBit();
+
+    recv_data.ReadGuidMask<1, 3, 0, 5, 4, 6, 2>(instanceGuid);
+    recv_data.ReadGuidBytes<7, 1, 5, 6, 3, 4, 0, 2>(instanceGuid);
 
     DEBUG_LOG("CMSG_LFG_PROPOSAL_RESULT %u proposal: %u accept: %u", GetPlayer()->GetObjectGuid().GetCounter(), ID, accept ? 1 : 0);
-    sLFGMgr.UpdateProposal(ID, GetPlayer()->GetObjectGuid(), accept);
+    sLFGMgr.UpdateProposal(ID, playerGuid, accept);
 }
 
 void WorldSession::SendLfgJoinResult(LFGJoinResult checkResult, uint8 checkValue, bool withLockMap)
