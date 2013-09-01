@@ -187,7 +187,7 @@ void LFGMgr::LoadRewards()
         uint32 otherMoneyVar = fields[6].GetUInt32();
         uint32 otherXPVar = fields[7].GetUInt32();
 
-        if (!sLFGDungeonStore.LookupEntry(dungeonId))
+        if (!GetDungeon(dungeonId))
         {
             sLog.outErrorDb("LFGMgr: Dungeon %u specified in table `lfg_dungeon_rewards` does not exist!", dungeonId);
             continue;

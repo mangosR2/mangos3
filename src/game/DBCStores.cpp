@@ -428,7 +428,7 @@ void LoadDBCStores(const std::string& dataPath)
         exit(1);
     }
 
-    const uint32 DBCFilesCount = 124;
+    const uint32 DBCFilesCount = 126;
 
     BarGoLink bar(DBCFilesCount);
 
@@ -564,6 +564,10 @@ void LoadDBCStores(const std::string& dataPath)
     LoadDBC(availableDbcLocales,bar,bad_dbc_files,sItemRandomPropertiesStore,dbcPath,"ItemRandomProperties.dbc");
     LoadDBC(availableDbcLocales,bar,bad_dbc_files,sItemRandomSuffixStore,    dbcPath,"ItemRandomSuffix.dbc");
     LoadDBC(availableDbcLocales,bar,bad_dbc_files,sItemSetStore,             dbcPath,"ItemSet.dbc");
+
+    LoadDBC(availableDbcLocales,bar,bad_dbc_files,sLFGDungeonStore,          dbcPath,"LFGDungeons.dbc");
+    LoadDBC(availableDbcLocales,bar,bad_dbc_files,sLFGDungeonExpansionStore, dbcPath,"LFGDungeonExpansion.dbc");
+
     LoadDBC(availableDbcLocales,bar,bad_dbc_files,sLockStore,                dbcPath,"Lock.dbc");
     LoadDBC(availableDbcLocales,bar,bad_dbc_files,sMailTemplateStore,        dbcPath,"MailTemplate.dbc");
     LoadDBC(availableDbcLocales,bar,bad_dbc_files,sMapStore,                 dbcPath,"Map.dbc");
@@ -855,7 +859,7 @@ void LoadDBCStores(const std::string& dataPath)
     }
 
     LoadDBC(availableDbcLocales,bar,bad_dbc_files,sTotemCategoryStore,       dbcPath,"TotemCategory.dbc");
-    
+
     LoadDBC(availableDbcLocales,bar,bad_dbc_files,sTransportAnimationStore,  dbcPath,"TransportAnimation.dbc");
     for (uint32 i = 0; i < sTransportAnimationStore.GetNumRows(); ++i)
         if (TransportAnimationEntry const* entry = sTransportAnimationStore.LookupEntry(i))
