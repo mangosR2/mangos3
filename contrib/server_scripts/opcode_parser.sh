@@ -1,6 +1,7 @@
 #!/bin/bash
-version="15952"
+version="15595"
 _file=opcodes_mangos_$version.sql
+_hfile=Opcodes$version.h
 
 echo "-- Opcode table for client build $version" >./$_file
 echo "" >>./$_file
@@ -19,3 +20,9 @@ echo 'INSERT INTO `opcodes` (`name`, `value`, `version`, `flags`) VALUES' >>./$_
 cat ./Opcodes.h |grep "^\ *.MSG"|sed 's/^\ */\(\"/'|sed 's/\ *= */\"\,/'|sed 's/ *\/.*$//'|sed "s/\,$/\,"$version"\,0\)\,/" >>./$_file
 echo '("NUM_MSG_TYPES",0x0,'$version',1);' >>./$_file
 
+echo 'enum Opcodes' >./$_hfile
+echo '{' >>./$_hfile
+cat ./Opcodes.h ./Opcodes1.h |grep "^\ *.MSG"|sed 's/^\ */    /'|sed 's/\ *=.*$/,/' |sort -u >>./$_hfile
+echo '' >>./$_hfile
+echo '    NUM_MSG_TYPES' >>./$_hfile
+echo '};' >>./$_hfile
