@@ -247,7 +247,7 @@ bool VehicleKit::AddPassenger(Unit* passenger, int8 seatId)
     if (passenger->GetTypeId() == TYPEID_PLAYER)
     {
         ((Player*)passenger)->SetViewPoint(GetBase());
-        passenger->SetRoot(true);
+        passenger->SetRoot(true, (seatInfo->m_flags & (SEAT_FLAG_CAN_CAST | SEAT_FLAG_CAN_ATTACK) ? 2 : 0));
     }
 
     if (seat->second.IsProtectPassenger())

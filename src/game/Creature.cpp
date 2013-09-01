@@ -2630,7 +2630,7 @@ void Creature::SetLevitate(bool enable, float altitude)
     }
 }
 
-void Creature::SetRoot(bool enable)
+void Creature::SetRoot(bool enable, uint32 /*val*/)
 {
     if (enable)
         m_movementInfo.AddMovementFlag(MOVEFLAG_ROOT);
@@ -2757,7 +2757,7 @@ Unit* Creature::SelectPreferredTargetForSpell(SpellEntry const* spellInfo)
     return target;
 }
 
-void Creature::SetWaterWalk(bool enable)
+void Creature::SetWaterWalk(bool enable, uint32 /* val*/)
 {
     if (enable)
         m_movementInfo.AddMovementFlag(MOVEFLAG_WATERWALKING);

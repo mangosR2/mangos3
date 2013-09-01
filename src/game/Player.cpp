@@ -4765,17 +4765,17 @@ void Player::DeleteOldCharacters(uint32 keepDays)
     }
 }
 
-void Player::SetRoot(bool enable)
+void Player::SetRoot(bool enable, uint32 val)
 {
     WorldPacket data;
-    BuildForceMoveRootPacket(&data, enable, 0);
+    BuildForceMoveRootPacket(&data, enable, val);
     GetSession()->SendPacket(&data);
 }
 
-void Player::SetWaterWalk(bool enable)
+void Player::SetWaterWalk(bool enable, uint32 val)
 {
     WorldPacket data;
-    BuildMoveWaterWalkPacket(&data, enable, 0);
+    BuildMoveWaterWalkPacket(&data, enable, val);
     GetSession()->SendPacket(&data);
 }
 
@@ -20770,18 +20770,20 @@ void Player::SendInitialPacketsAfterAddToMap()
             auraList.front()->ApplyModifier(true,true);
     }
 
-    if (HasAuraType(SPELL_AURA_MOD_STUN))
-        SetRoot(true);
-
-    // manual send package (have code in ApplyModifier(true,true); that don't must be re-applied.
-    if (HasAuraType(SPELL_AURA_MOD_ROOT) || GetVehicle())
+    if (GetVehicle())
     {
-        SetRoot(true);
+        SetRoot(true, (m_movementInfo.GetVehicleSeatFlags() & (SEAT_FLAG_CAN_CAST | SEAT_FLAG_CAN_ATTACK) ? 2 : 0));
     }
+    else
+        if (HasAuraType(SPELL_AURA_MOD_STUN) || HasAuraType(SPELL_AURA_MOD_ROOT))
+            SetRoot(true);
 
     SendAurasForTarget(this);
     SendEnchantmentDurations();                             // must be after add to map
     SendItemDurations();                                    // must be after add to map
+
+    if (getClass() == CLASS_HUNTER)
+        GetSession()->SendStablePet(ObjectGuid());
 
     UpdateSpeed(MOVE_RUN, true, 1.0f, true);
     UpdateSpeed(MOVE_SWIM, true, 1.0f, true);

@@ -1691,8 +1691,8 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         bool IsRooted() const { return m_movementInfo.HasMovementFlag(MOVEFLAG_ROOT); }
         bool IsSwimming() const { return m_movementInfo.HasMovementFlag(MOVEFLAG_SWIMMING); }
 
-        virtual void SetRoot(bool enabled) {}
-        virtual void SetWaterWalk(bool enabled) {}
+        virtual void SetRoot(bool enabled, uint32 val = 0) {}
+        virtual void SetWaterWalk(bool enabled, uint32 val = 0) {}
 
         void SetInFront(Unit const* target);
         void SetFacingTo(float ori);
