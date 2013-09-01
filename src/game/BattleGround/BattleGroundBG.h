@@ -135,8 +135,8 @@ enum BGBattleGroundObjectTypes
 
 enum BG_BG_Score
 {
-    BG_BG_WARNING_NEAR_VICTORY_SCORE    = 1400,
-    BG_BG_MAX_TEAM_SCORE                = 1600
+    BG_BG_WARNING_NEAR_VICTORY_SCORE    = 1800,
+    BG_BG_MAX_TEAM_SCORE                = 2000
 };
 
 enum BGBattleGroundPointState
