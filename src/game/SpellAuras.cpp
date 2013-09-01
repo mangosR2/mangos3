@@ -12660,7 +12660,7 @@ void SpellAuraHolder::HandleSpellSpecificBoostsForward(bool apply)
 
 SpellAuraHolder::~SpellAuraHolder()
 {
-//    DEBUG_LOG("SpellAuraHolder:: destructor for SpellAuraHolder of spell %u called.", GetId());
+//    DEBUG_FILTERED_LOG(LOG_FILTER_SPELL_CAST, "SpellAuraHolder:: destructor for SpellAuraHolder of spell %u called.", GetId());
 }
 
 void SpellAuraHolder::Update(uint32 diff)

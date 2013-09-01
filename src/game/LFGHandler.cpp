@@ -26,7 +26,7 @@
 #include "World.h"
 #include "LFGMgr.h"
 
-void WorldSession::HandleLfgJoinOpcode( WorldPacket & recv_data )
+void WorldSession::HandleLfgJoinOpcode(WorldPacket& recv_data)
 {
     if (!GetPlayer())
         return;
@@ -37,8 +37,6 @@ void WorldSession::HandleLfgJoinOpcode( WorldPacket & recv_data )
         DEBUG_LOG("CMSG_LFG_JOIN %u failed - Dungeon finder disabled", GetPlayer()->GetObjectGuid().GetCounter());
         return;
     }
-    else
-        DEBUG_LOG("CMSG_LFG_JOIN %u processing...", GetPlayer()->GetObjectGuid().GetCounter());
 
     uint8  numDungeons;
     uint32 roles;
@@ -58,10 +56,12 @@ void WorldSession::HandleLfgJoinOpcode( WorldPacket & recv_data )
 
     if (!numDungeons)
     {
-        DEBUG_LOG("CMSG_LFG_JOIN %u no dungeons selected", GetPlayer()->GetObjectGuid().GetCounter());
+        DEBUG_LOG("CMSG_LFG_JOIN %s no dungeons selected", GetPlayer()->GetObjectGuid().GetString().c_str());
         recv_data.rpos(recv_data.wpos());
         return;
     }
+    else
+        DEBUG_LOG("CMSG_LFG_JOIN %s selected %u dungeons", GetPlayer()->GetObjectGuid().GetString().c_str(), numDungeons);
 
     comment = recv_data.ReadString(commentSize);
 
@@ -204,15 +204,17 @@ void WorldSession::HandleLfgTeleportOpcode(WorldPacket &recv_data)
     sLFGMgr.Teleport(GetPlayer(), agree, true);
 }
 
-void WorldSession::HandleLfgPlayerLockInfoRequestOpcode(WorldPacket &/*recv_data*/)
+void WorldSession::HandleLfgPlayerLockInfoRequestOpcode(WorldPacket& recv_data)
 {
     if (!sWorld.getConfig(CONFIG_BOOL_LFR_ENABLE) && !sWorld.getConfig(CONFIG_BOOL_LFG_ENABLE))
     {
-        DEBUG_LOG("CMSG_LFD_PLAYER_LOCK_INFO_REQUEST %u failed - Dungeon finder disabled", GetPlayer()->GetObjectGuid().GetCounter());
+        DEBUG_LOG("CMSG_DUNGEON_FINDER_GET_SYSTEM_INFO %u failed - Dungeon finder disabled", GetPlayer()->GetObjectGuid().GetCounter());
         return;
     }
 
-    DEBUG_LOG("CMSG_LFD_PLAYER_LOCK_INFO_REQUEST %u ", GetPlayer()->GetObjectGuid().GetCounter());
+    uint8 _data;
+    recv_data >> _data;
+    DEBUG_LOG("CMSG_DUNGEON_FINDER_GET_SYSTEM_INFO %s %u", GetPlayer()->GetObjectGuid().GetString().c_str(), _data);
 
     LFGDungeonSet    randomlist = sLFGMgr.GetRandomDungeonsForPlayer(GetPlayer());
     LFGLockStatusMap const lockSet = *GetPlayer()->GetLFGPlayerState()->GetLockMap();
@@ -277,8 +279,7 @@ void WorldSession::HandleLfgPlayerLockInfoRequestOpcode(WorldPacket &/*recv_data
                             data << uint32(0); // Call to arms Money
                             data << uint32(0); // Call to arms XP
 
-//                            uint8 totalRewardCount = uint8(quest->GetRewCurrencyCount() + quest->GetRewItemsCount());
-                            uint8 totalRewardCount = uint8(quest->GetRewItemsCount());
+                            uint8 totalRewardCount = uint8(quest->GetRewCurrencyCount() + quest->GetRewItemsCount());
                             if (totalRewardCount > 16)
                                 totalRewardCount = 16;
     
@@ -322,8 +323,7 @@ void WorldSession::HandleLfgPlayerLockInfoRequestOpcode(WorldPacket &/*recv_data
                 data << uint32(quest->GetRewOrReqMoney());
                 data << uint32(quest->XPValue(_player));
 
-//                uint8 totalRewardCount = uint8(quest->GetRewCurrencyCount() + quest->GetRewItemsCount());
-                uint8 totalRewardCount = uint8(quest->GetRewItemsCount());
+                uint8 totalRewardCount = uint8(quest->GetRewCurrencyCount() + quest->GetRewItemsCount());
                 if (totalRewardCount > 16)
                     totalRewardCount = 16;
 
@@ -1052,7 +1052,10 @@ void WorldSession::SendLfgPlayerReward(LFGDungeonEntry const* dungeon, const LFG
     if (!dungeon || !realdungeon || !reward || !qRew)
         return;
 
-    uint8 itemNum = uint8(qRew ? qRew->GetRewItemsCount() : 0);
+    uint8 itemNum = uint8(qRew->GetRewCurrencyCount() + qRew->GetRewItemsCount());
+    if (itemNum > 16)
+        itemNum = 16;
+
     uint8 done = uint8(isSecond);
 
     DEBUG_LOG("SMSG_LFG_PLAYER_REWARD %u dungeonEntry: %u ", GetPlayer()->GetObjectGuid().GetCounter(), dungeon->ID);
@@ -1060,8 +1063,8 @@ void WorldSession::SendLfgPlayerReward(LFGDungeonEntry const* dungeon, const LFG
     WorldPacket data(SMSG_LFG_PLAYER_REWARD, 4 + 4 + 1 + 4 + 4 + 4 + 4 + 4 + 1 + itemNum * (4 + 4 + 4));
     data << uint32(dungeon->Entry());                                            // Random Dungeon Finished
     data << uint32(realdungeon->Entry());                                        // Dungeon Finished
-    data << uint8(done);
-    data << uint32(1);
+//    data << uint8(done);
+//    data << uint32(1);
     data << uint32(qRew->GetRewOrReqMoney());
     data << uint32(qRew->XPValue(GetPlayer()));
     data << uint32(reward->reward[done].variableMoney);
@@ -1080,6 +1083,21 @@ void WorldSession::SendLfgPlayerReward(LFGDungeonEntry const* dungeon, const LFG
             data << uint32(qRew->RewItemId[i]);
             data << uint32(iProto ? iProto->DisplayInfoID : 0);
             data << uint32(qRew->RewItemCount[i]);
+            data << uint8(false); // Is currency
+        }
+
+        for (uint8 i = 0; i < QUEST_REWARD_CURRENCY_COUNT; ++i)
+        {
+            if (uint32 currencyId = qRew->RewCurrencyId[i])
+            {
+                uint32 amount = qRew->RewCurrencyCount[i];
+                amount *= GetCurrencyPrecision(currencyId);
+
+                data << uint32(currencyId);
+                data << uint32(0);
+                data << uint32(amount);
+                data << uint8(true); // Is currency
+            }
         }
     }
     SendPacket(&data);

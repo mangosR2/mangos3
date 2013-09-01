@@ -2380,7 +2380,7 @@ void Unit::DealMeleeDamage(DamageInfo* damageInfo, bool durabilityLoss)
 
 void Unit::HandleEmoteCommand(uint32 emote_id)
 {
-    DEBUG_LOG("SMSG_EMOTE %u", emote_id);
+    DEBUG_FILTER_LOG(LOG_FILTER_CREATURE_MOVES, "Unit::HandleEmoteCommand SMSG_EMOTE %s, %u", GetObjectGuid().GetString().c_str(), emote_id);
     WorldPacket data( SMSG_EMOTE, 4 + 8 );
     data << uint32(emote_id);
     data << GetObjectGuid();
@@ -5362,7 +5362,7 @@ bool Unit::AddSpellAuraHolder(SpellAuraHolderPtr holder)
             AddAuraToModList(aur);
 
     holder->ApplyAuraModifiers(true, true);                 // This is the place where auras are actually applied onto the target
-    DEBUG_LOG("Holder of spell %u now is in use", holder->GetId());
+    DEBUG_FILTER_LOG(LOG_FILTER_SPELL_CAST, "Unit::AddSpellAuraHolder Holder of spell %u now is in use", holder->GetId());
 
     // if aura deleted before boosts apply ignore
     // this can be possible it it removed indirectly by triggered spell effect at ApplyModifier

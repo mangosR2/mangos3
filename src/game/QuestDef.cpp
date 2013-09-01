@@ -170,6 +170,7 @@ Quest::Quest(Field * questRecord)
     m_rewitemscount = 0;
     m_rewchoiceitemscount = 0;
     m_reqCurrencyCount = 0;
+    m_rewCurrencyCount = 0;
 
     for (int i=0; i < QUEST_ITEM_OBJECTIVES_COUNT; ++i)
     {
@@ -199,6 +200,12 @@ Quest::Quest(Field * questRecord)
     {
         if (ReqCurrencyId[i])
             ++m_reqCurrencyCount;
+    }
+
+    for (int i = 0; i < QUEST_REWARD_CURRENCY_COUNT; ++i)
+    {
+        if (RewCurrencyId[i])
+            ++m_rewCurrencyCount;
     }
 }
 

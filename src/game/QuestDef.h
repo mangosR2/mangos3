@@ -324,6 +324,7 @@ class Quest
         uint32 GetReqCurrencyCount() const { return m_reqCurrencyCount; }
         uint32 GetRewChoiceItemsCount() const { return m_rewchoiceitemscount; }
         uint32 GetRewItemsCount() const { return m_rewitemscount; }
+        uint32 GetRewCurrencyCount() const { return m_rewCurrencyCount; }
 
         typedef std::vector<int32> PrevQuests;
         PrevQuests prevQuests;
@@ -337,6 +338,7 @@ class Quest
         uint32 m_reqCurrencyCount;
         uint32 m_rewchoiceitemscount;
         uint32 m_rewitemscount;
+        uint32 m_rewCurrencyCount;
 
         bool m_isActive;
 
