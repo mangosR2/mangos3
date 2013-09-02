@@ -1782,7 +1782,7 @@ void ObjectMgr::LoadItemPrototypes()
     // check data correctness
     for (uint32 i = 1; i < sItemStorage.GetMaxEntry(); ++i)
     {
-        ItemPrototype const* proto = sItemStorage.LookupEntry<ItemPrototype >(i);
+        ItemPrototype const* proto = sItemStorage.LookupEntry<ItemPrototype>(i);
         //ItemEntry const *dbcitem = sItemStore.LookupEntry(i);
         if(!proto)
         {
@@ -2014,13 +2014,13 @@ void ObjectMgr::LoadItemPrototypes()
                 sLog.outErrorDb("Item (Entry: %u) has wrong stat_type%d (%u)",i,j+1,proto->ItemStat[j].ItemStatType);
                 const_cast<ItemPrototype*>(proto)->ItemStat[j].ItemStatType = 0;
             }
-
+/*
             if (abs(proto->ItemStat[j].ItemStatValue) >= MAX_CLIENT_STAT_VALUE)
             {
                 sLog.outErrorDb("Item (Entry: %u) has wrong stat_value%d (%u)",i,j+1,proto->ItemStat[j].ItemStatValue);
                 const_cast<ItemPrototype*>(proto)->ItemStat[j].ItemStatValue = 0;
             }
-
+*/
             switch(proto->ItemStat[j].ItemStatType)
             {
                 case ITEM_MOD_HEALTH:
@@ -2275,7 +2275,7 @@ void ObjectMgr::LoadItemPrototypes()
                 const_cast<ItemPrototype*>(proto)->RequiredDisenchantSkill = -1;
             }
         }
-
+/*
         if (proto->DisenchantID)
         {
             if (proto->Quality > ITEM_QUALITY_EPIC || proto->Quality < ITEM_QUALITY_UNCOMMON)
@@ -2300,7 +2300,7 @@ void ObjectMgr::LoadItemPrototypes()
             if (proto->RequiredDisenchantSkill >= 0)
                 ERROR_DB_STRICT_LOG("Item (Entry: %u) marked as disenchantable by RequiredDisenchantSkill, but not have disenchanting loot id.", i);
         }
-
+*/
         if (proto->FoodType >= MAX_PET_DIET)
         {
             sLog.outErrorDb("Item (Entry: %u) has wrong FoodType value (%u)", i, proto->FoodType);
@@ -9586,7 +9586,7 @@ void ObjectMgr::LoadVendors(char const* tableName, bool isTemplates)
 
         uint32 entry        = fields[0].GetUInt32();
         uint32 item_id      = abs(fields[1].GetInt32());
-        uint8  type         = fields[1].GetInt32() > 0 ? VENDOR_ITEM_TYPE_ITEM : VENDOR_ITEM_TYPE_CURRENCY;
+        VendorItemType type = fields[1].GetInt32() > 0 ? VENDOR_ITEM_TYPE_ITEM : VENDOR_ITEM_TYPE_CURRENCY;
         uint32 maxcount     = fields[2].GetUInt32();
         uint32 incrtime     = fields[3].GetUInt32();
         uint32 ExtendedCost = fields[4].GetUInt32();
@@ -9597,7 +9597,7 @@ void ObjectMgr::LoadVendors(char const* tableName, bool isTemplates)
 
         VendorItemData& vList = vendorList[entry];
 
-        vList.AddItem(item_id, maxcount, incrtime, ExtendedCost, conditionId);
+        vList.AddItem(item_id, type, maxcount, incrtime, ExtendedCost, conditionId);
         ++count;
 
     }
@@ -9605,7 +9605,7 @@ void ObjectMgr::LoadVendors(char const* tableName, bool isTemplates)
     delete result;
 
     sLog.outString();
-    sLog.outString( ">> Loaded %u vendor %sitems", count, isTemplates ? "template " : "");
+    sLog.outString( ">> Loaded %u vendor %s items", count, isTemplates ? "template" : "");
 }
 
 
@@ -9969,15 +9969,15 @@ void ObjectMgr::LoadGossipMenus()
         sLog.outErrorDb("Table `dbscripts_on_gossip` contains unused script, id %u.", *itr);
 }
 
-void ObjectMgr::AddVendorItem(uint32 entry, uint32 item, uint8 type, uint32 maxcount, uint32 incrtime, uint32 extendedcost)
+void ObjectMgr::AddVendorItem(uint32 entry, uint32 item, VendorItemType type, uint32 maxcount, uint32 incrtime, uint32 extendedcost)
 {
     VendorItemData& vList = m_mCacheVendorItemMap[entry];
-    vList.AddItem(item, maxcount, incrtime, extendedcost, 0);
+    vList.AddItem(item, type, maxcount, incrtime, extendedcost, 0);
 
     WorldDatabase.PExecuteLog("INSERT INTO npc_vendor (entry,item,maxcount,incrtime,extendedcost) VALUES('%u','%i','%u','%u','%u')", entry, type == VENDOR_ITEM_TYPE_CURRENCY ? -int32(item) : item, maxcount, incrtime, extendedcost);
 }
 
-bool ObjectMgr::RemoveVendorItem(uint32 entry, uint32 item, uint8 type)
+bool ObjectMgr::RemoveVendorItem(uint32 entry, uint32 item, VendorItemType type)
 {
     CacheVendorItemMap::iterator  iter = m_mCacheVendorItemMap.find(entry);
     if(iter == m_mCacheVendorItemMap.end())
@@ -9990,7 +9990,7 @@ bool ObjectMgr::RemoveVendorItem(uint32 entry, uint32 item, uint8 type)
     return true;
 }
 
-bool ObjectMgr::IsVendorItemValid(bool isTemplate, char const* tableName, uint32 vendor_entry, uint32 item_id, uint8 type, uint32 maxcount, uint32 incrtime, uint32 ExtendedCost, uint16 conditionId, Player* pl, std::set<uint32>* skip_vendors) const
+bool ObjectMgr::IsVendorItemValid(bool isTemplate, char const* tableName, uint32 vendor_entry, uint32 item_id, VendorItemType type, uint32 maxcount, uint32 incrtime, uint32 ExtendedCost, uint16 conditionId, Player* pl, std::set<uint32>* skip_vendors) const
 {
     char const* idStr = isTemplate ? "vendor template" : "vendor";
     char const* nameStr = type == VENDOR_ITEM_TYPE_CURRENCY ? "Currency" : "Item";

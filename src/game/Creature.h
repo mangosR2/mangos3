@@ -338,7 +338,7 @@ enum SelectFlags
 
 // Vendors
 
-enum
+enum VendorItemType
 {
     VENDOR_ITEM_TYPE_NONE           = 0,
     VENDOR_ITEM_TYPE_ITEM           = 1,
@@ -348,11 +348,11 @@ enum
 
 struct VendorItem
 {
-    VendorItem(uint32 _item, uint32 _maxcount, uint32 _incrtime, uint32 _ExtendedCost, uint16 _conditionId)
-        : item(_item), maxcount(_maxcount), incrtime(_incrtime), ExtendedCost(_ExtendedCost), conditionId(_conditionId) {}
+    VendorItem(uint32 _item, VendorItemType _type, uint32 _maxcount, uint32 _incrtime, uint32 _ExtendedCost, uint16 _conditionId)
+        : item(_item), type(_type), maxcount(_maxcount), incrtime(_incrtime), ExtendedCost(_ExtendedCost), conditionId(_conditionId) {}
 
     uint32 item;
-    uint8  type;
+    VendorItemType  type;
     uint32 maxcount;                                        // 0 for infinity item amount, for type = VENDOR_ITEM_TYPE_CURRENCY, maxcount = currency count
     uint32 incrtime;                                        // time for restore items amount if maxcount != 0
     uint32 ExtendedCost;                                    // index in ItemExtendedCost.dbc
@@ -373,12 +373,12 @@ struct VendorItemData
     }
     bool Empty() const { return m_items.empty(); }
     uint8 GetItemCount() const { return m_items.size(); }
-    void AddItem(uint32 item, uint32 maxcount, uint32 ptime, uint32 ExtendedCost, uint16 conditonId)
+    void AddItem(uint32 item, VendorItemType type, uint32 maxcount, uint32 ptime, uint32 ExtendedCost, uint16 conditonId)
     {
-        m_items.push_back(new VendorItem(item, maxcount, ptime, ExtendedCost, conditonId));
+        m_items.push_back(new VendorItem(item, type, maxcount, ptime, ExtendedCost, conditonId));
     }
     bool RemoveItem(uint32 item_id, uint8 type);
-    VendorItem const* FindItemCostPair(uint32 item_id, uint8 type, uint32 extendedCost) const;
+    VendorItem const* FindItemCostPair(uint32 item_id, VendorItemType type, uint32 extendedCost) const;
 
     void Clear()
     {

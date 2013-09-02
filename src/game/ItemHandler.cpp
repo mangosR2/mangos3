@@ -560,8 +560,6 @@ void WorldSession::HandleListInventoryOpcode(WorldPacket& recv_data)
 
 void WorldSession::SendListInventory(ObjectGuid vendorguid)
 {
-    DEBUG_LOG("WORLD: Sent SMSG_LIST_INVENTORY");
-
     Creature* pCreature = GetPlayer()->GetNPCIfCanInteractWith(vendorguid, UNIT_NPC_FLAG_VENDOR);
 
     if (!pCreature)
@@ -576,7 +574,8 @@ void WorldSession::SendListInventory(ObjectGuid vendorguid)
         GetPlayer()->RemoveSpellsCausingAura(SPELL_AURA_FEIGN_DEATH);
 
     // Stop the npc if moving
-    pCreature->StopMoving();
+    if (!pCreature->IsStopped())
+        pCreature->StopMoving();
 
     VendorItemData const* vItems = pCreature->GetVendorItems();
     VendorItemData const* tItems = pCreature->GetVendorTemplateItems();
@@ -587,6 +586,8 @@ void WorldSession::SendListInventory(ObjectGuid vendorguid)
     std::vector<bool> bitFlags;
 
     float discountMod = _player->GetReputationPriceDiscount(pCreature);
+    if (int32 auraMod = _player->GetTotalAuraModifier(SPELL_AURA_MOD_VENDOR_PRICE))
+        discountMod *=  (float)auraMod / 100.0f;
 
     uint8 count = 0;
     ByteBuffer buffer;
@@ -601,9 +602,12 @@ void WorldSession::SendListInventory(ObjectGuid vendorguid)
 
             if (crItem->type == VENDOR_ITEM_TYPE_ITEM)
             {
-                ItemPrototype const * pProto = ObjectMgr::GetItemPrototype(crItem->item);
+                ItemPrototype const* pProto = ObjectMgr::GetItemPrototype(crItem->item);
                 if (!pProto)
+                {
+                    sLog.outError("WorldSession::SendListInventory %s (vendor) nas item %u, absent in item storage!", vendorguid.GetString().c_str(), crItem->item);
                     continue;
+                }
 
                 if (!_player->isGameMaster())
                 {
@@ -653,7 +657,10 @@ void WorldSession::SendListInventory(ObjectGuid vendorguid)
             {
                 CurrencyTypesEntry const * pCurrency = sCurrencyTypesStore.LookupEntry(crItem->item);
                 if (!pCurrency)
+                {
+                    sLog.outError("WorldSession::SendListInventory %s (vendor) nas currency %u, absent in item storage!", vendorguid.GetString().c_str(), crItem->item);
                     continue;
+                }
 
                 if (pCurrency->Category == CURRENCY_CATEGORY_META)
                     continue;
@@ -669,7 +676,10 @@ void WorldSession::SendListInventory(ObjectGuid vendorguid)
                 buyCount = crItem->maxcount;
             }
             else
+            {
+                sLog.outError("WorldSession::SendListInventory %s (vendor) nas item %u unknown type %u!", vendorguid.GetString().c_str(), crItem->item, crItem->type);
                 continue;
+            }
 
             bitFlags.push_back(crItem->ExtendedCost == 0);
             bitFlags.push_back(true);                       // unk
@@ -705,6 +715,8 @@ void WorldSession::SendListInventory(ObjectGuid vendorguid)
     data.WriteGuidBytes<5, 4, 1, 0, 6>(vendorguid);
     data << uint8(count == 0);
     data.WriteGuidBytes<2, 3, 7>(vendorguid);
+
+    DEBUG_LOG("WORLD: %s send SMSG_LIST_INVENTORY to player %s, items count %u", vendorguid.GetString().c_str(), GetPlayer()->GetObjectGuid().GetString().c_str(), count);
 
     SendPacket(&data);
 }
