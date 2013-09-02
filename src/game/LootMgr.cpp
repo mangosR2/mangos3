@@ -686,7 +686,7 @@ QuestItemList* Loot::FillNonQuestNonFFANonCurrencyConditionalLoot(Player* player
     for (uint8 i = 0; i < items.size(); ++i)
     {
         LootItem& item = items[i];
-        if (!item.is_looted && !item.freeforall && !item.currency && item.AllowedForPlayer(player, m_lootTarget))
+        if (!item.is_looted && !item.freeforall && !item.currency && item.conditionId && item.AllowedForPlayer(player, m_lootTarget))
         {
             ql->push_back(QuestItem(i));
             if (!item.is_counted)
@@ -911,6 +911,7 @@ ByteBuffer& operator<<(ByteBuffer& b, LootView const& lv)
     size_t currency_count_pos = b.wpos();                   // pos of currency count byte
     b << uint8(0);                                          // currency count placeholder
 
+
     for (uint8 i = 0; i < l.items.size(); ++i)
     {
         LootSlotType slot_type = l.items[i].GetSlotTypeForSharedLoot(lv.permission, lv.viewer, l.GetLootTarget());
@@ -954,7 +955,7 @@ ByteBuffer& operator<<(ByteBuffer& b, LootView const& lv)
             LootItem& item = l.m_questItems[qi->index];
             if (!qi->is_looted && !item.is_looted)
             {
-                b << uint8(l.items.size() + (qi - q_list.begin()));
+                b << uint8(qi->index);
                 b << item;
                 b << uint8(slot_type);                      // allow loot
                 ++itemsShown;
@@ -994,6 +995,8 @@ ByteBuffer& operator<<(ByteBuffer& b, LootView const& lv)
             }
         }
     }
+
+    DEBUG_LOG("WORLD: Filling loot view for %s, items %u currencies %u", lv.viewer->GetGuidStr().c_str(), itemsShown, currenciesShown);
 
     // update number of items and currencies shown
     b.put<uint8>(count_pos, itemsShown);
