@@ -42,6 +42,7 @@ LFGMgr::LFGMgr()
     }
 
     m_proposalID   = 1;
+    m_queueID      = 1;
     m_LFGupdateTimer.SetInterval(LFG_UPDATE_INTERVAL);
     m_LFGupdateTimer.Reset();
     m_LFRupdateTimer.SetInterval(LFR_UPDATE_INTERVAL);
@@ -521,10 +522,9 @@ void LFGMgr::AddToQueue(ObjectGuid guid, LFGType type, bool inBegin)
     RemoveFromQueue(guid);
 
     // Joining process
-    LFGQueueInfo newLFGQueueInfo = LFGQueueInfo(guid, type);
     {
         WriteGuard Guard(GetLock());
-        m_queueInfoMap.insert(std::make_pair(guid, newLFGQueueInfo));
+        m_queueInfoMap.insert(std::make_pair(guid, LFGQueueInfo(guid, type, GenerateQueueID())));
     }
     // we must be save, that we add this info in Queue
     LFGQueueInfo* pqInfo = GetQueueInfo(guid);
@@ -1233,9 +1233,12 @@ LFGProposal* LFGMgr::GetProposal(uint32 ID)
 
 uint32 LFGMgr::GenerateProposalID()
 {
-    uint32 newID = m_proposalID;
-    ++m_proposalID;
-    return newID;
+    return ++m_proposalID;
+}
+
+uint32 LFGMgr::GenerateQueueID()
+{
+    return ++m_queueID;
 }
 
 void LFGMgr::UpdateProposal(uint32 ID, ObjectGuid guid, bool accept)
@@ -2605,8 +2608,8 @@ void LFGMgr::UpdateQueueStatus(LFGType type)
 
     for (LFGQueueInfoMap::const_iterator itr = m_queueInfoMap.begin(); itr != m_queueInfoMap.end(); ++itr)
     {
-        LFGQueueInfo pqInfo = itr->second;
-        ObjectGuid guid = itr->first;       // Player or Group guid
+        LFGQueueInfo const& pqInfo = itr->second;
+        ObjectGuid   const& guid   = itr->first;       // Player or Group guid
 
         if (pqInfo.GetDungeonType() != type)
             continue;
@@ -2636,7 +2639,7 @@ void LFGMgr::UpdateQueueStatus(LFGType type)
         }
     }
 
-    LFGQueueStatus status = m_queueStatus[type];
+    LFGQueueStatus& status = m_queueStatus[type];
 
     status.dps     = damagers;
     status.tanks   = tanks;
