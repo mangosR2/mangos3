@@ -917,10 +917,10 @@ void World::LoadConfigSettings(bool reload)
         if (clientCacheId > 0)
         {
             setConfig(CONFIG_UINT32_CLIENTCACHE_VERSION, clientCacheId);
-            sLog.outString("Client cache version set to: %u", clientCacheId);
+            sLog.outString("BOOT: Client cache version set to: %u", clientCacheId);
         }
         else
-            sLog.outError("ClientCacheVersion can't be negative %d, ignored.", clientCacheId);
+            sLog.outError("BOOT: ClientCacheVersion can't be negative %d, ignored.", clientCacheId);
     }
 
     setConfig(CONFIG_UINT32_INSTANT_LOGOUT, "InstantLogout", SEC_MODERATOR);
@@ -1044,7 +1044,7 @@ void World::LoadConfigSettings(bool reload)
     else
     {
         m_dataPath = dataPath;
-        sLog.outString("Using DataDir %s", m_dataPath.c_str());
+        sLog.outString("BOOT: Using DataDir %s", m_dataPath.c_str());
     }
 
     setConfig(CONFIG_BOOL_VMAP_INDOOR_CHECK, "vmap.enableIndoorCheck", true);
@@ -1053,25 +1053,25 @@ void World::LoadConfigSettings(bool reload)
     std::string ignoreSpellIds = sConfig.GetStringDefault("vmap.ignoreSpellIds", "");
 
     if (!enableHeight)
-        sLog.outError("VMAP height use disabled! Creatures movements and other things will be in broken state.");
+        sLog.outError("BOOT: VMAP height use disabled! Creatures movements and other things will be in broken state.");
 
     VMAP::VMapFactory::createOrGetVMapManager()->setEnableLineOfSightCalc(enableLOS);
     VMAP::VMapFactory::createOrGetVMapManager()->setEnableHeightCalc(enableHeight);
     VMAP::VMapFactory::preventSpellsFromBeingTestedForLoS(ignoreSpellIds.c_str());
-    sLog.outString( "WORLD: VMap support included. LineOfSight:%i, getHeight:%i, indoorCheck:%i",
+    sLog.outString( "BOOT: VMap support included. LineOfSight:%i, getHeight:%i, indoorCheck:%i",
         enableLOS, enableHeight, getConfig(CONFIG_BOOL_VMAP_INDOOR_CHECK) ? 1 : 0);
-    sLog.outString( "WORLD: VMap data directory is: %svmaps",m_dataPath.c_str());
+    sLog.outString( "BOOT: VMap data directory is: %svmaps",m_dataPath.c_str());
 
     setConfig(CONFIG_BOOL_MMAP_ENABLED, "mmap.enabled", true);
     std::string ignoreMapIds = sConfig.GetStringDefault("mmap.ignoreMapIds", "");
     MMAP::MMapFactory::preventPathfindingOnMaps(ignoreMapIds.c_str());
-    sLog.outString("WORLD: mmap pathfinding %sabled", getConfig(CONFIG_BOOL_MMAP_ENABLED) ? "en" : "dis");
+    sLog.outString("BOOT: mmap pathfinding %sabled", getConfig(CONFIG_BOOL_MMAP_ENABLED) ? "en" : "dis");
 
     // reset duel system
     setConfig(CONFIG_BOOL_RESET_DUEL_AREA_ENABLED, "DuelReset.Enable", false);
     std::string areaIdsEnabledDuel = sConfig.GetStringDefault("DuelReset.AreaIds", "");
     setDuelResetEnableAreaIds(areaIdsEnabledDuel.c_str());
-    sLog.outString("WORLD: reset duel area %sabled", getConfig(CONFIG_BOOL_RESET_DUEL_AREA_ENABLED) ? "en" : "dis");
+    sLog.outString("BOOT: reset duel area %sabled", getConfig(CONFIG_BOOL_RESET_DUEL_AREA_ENABLED) ? "en" : "dis");
 
     // chat log and lexics cutter settings
     if (reload)

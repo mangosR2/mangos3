@@ -1411,7 +1411,19 @@ void Spell::EffectDummy(SpellEffectEntry const* effect)
                     else                                    // normal root
                         spell_id = 13099;
 
-                    m_caster->CastSpell(unitTarget,spell_id,true,NULL);
+                    m_caster->CastSpell(unitTarget, spell_id, true);
+                    return;
+                }
+                case 13280:                                 // Gnomish Death Ray
+                {
+                    if (!unitTarget)
+                        return;
+
+                    if (roll_chance_i(15))
+                        m_caster->CastSpell(m_caster, 13493, true);
+                    else
+                        m_caster->CastSpell(unitTarget, 13279, true);
+
                     return;
                 }
                 case 13567:                                 // Dummy Trigger
@@ -1585,12 +1597,28 @@ void Spell::EffectDummy(SpellEffectEntry const* effect)
                     DEBUG_LOG("Gameobject, create custom in SpellEffects.cpp EffectDummy");
 
                     // Expect created without owner, but with level from _template
-                    pGameObj->SetRespawnTime(MINUTE/2);
+                    pGameObj->SetRespawnTime(MINUTE / 2);
                     pGameObj->SetUInt32Value(GAMEOBJECT_LEVEL, pGameObj->GetGOInfo()->trap.level);
                     pGameObj->SetSpellId(m_spellInfo->Id);
 
                     map->Add(pGameObj);
 
+                    return;
+                }
+                case 19869:                                 // Dragon Orb
+                {
+                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER || unitTarget->HasAura(23958))
+                        return;
+
+                    unitTarget->CastSpell(unitTarget, 19832, true);
+                    return;
+                }
+                case 20037:                                 // Explode Orb Effect
+                {
+                    if (!unitTarget)
+                        return;
+
+                    unitTarget->CastSpell(unitTarget, 20038, true);
                     return;
                 }
                 case 20577:                                 // Cannibalize
@@ -1844,6 +1872,14 @@ void Spell::EffectDummy(SpellEffectEntry const* effect)
                     unitTarget->CastSpell(unitTarget, 29952, true, NULL, NULL, m_caster->GetObjectGuid());
                     return;
                 }
+                case 29970:                                 // Deactivate Blizzard (Naxxramas: Sapphiron)
+                {
+                    if (!unitTarget)
+                        return;
+
+                    unitTarget->RemoveAurasDueToSpell(29952);
+                    return;
+                }
                 case 29979:                                 // Massive Magnetic Pull
                 {
                     if (!unitTarget)
@@ -1885,6 +1921,7 @@ void Spell::EffectDummy(SpellEffectEntry const* effect)
                     return;
                 }
                 case 32146:                                 // Liquid Fire
+                case 45474:                                 // Ragefist's Torch
                 {
                     if (!unitTarget || unitTarget->GetTypeId() != TYPEID_UNIT || m_caster->GetTypeId() != TYPEID_PLAYER)
                         return;
@@ -1959,6 +1996,29 @@ void Spell::EffectDummy(SpellEffectEntry const* effect)
                         return;
 
                     unitTarget->CastSpell(unitTarget, m_spellInfo->Id == 33923 ? 33666 : 38795, true);
+                    return;
+                }
+                case 34665:                                 // Administer Antidote
+                {
+                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_UNIT || m_caster->GetTypeId() != TYPEID_PLAYER)
+                        return;
+
+                    uint32 health = unitTarget->GetHealth();
+
+                    float x, y, z, o;
+                    unitTarget->GetPosition(x, y, z);
+                    o = unitTarget->GetOrientation();
+
+                    ((Creature*)unitTarget)->ForcedDespawn();
+
+                    if (Creature* pSummon = m_caster->SummonCreature(16992, x, y, z, o, TEMPSUMMON_TIMED_OR_DEAD_DESPAWN, 180000))
+                    {
+                        pSummon->SetHealth(health);
+                        ((Player*)m_caster)->RewardPlayerAndGroupAtEvent(16992, pSummon);
+
+                        if (pSummon->AI())
+                            pSummon->AI()->AttackStart(m_caster);
+                    }
                     return;
                 }
                 case 35745:                                 // Socrethar's Stone

@@ -20,7 +20,7 @@
 #define MANGOS_SYSTEMCONFIG_H
 
 #ifndef _PACKAGENAME
-#define _PACKAGENAME "MaNGOS"
+#define _PACKAGENAME "MangosR2"
 #endif
 
 #include "config.h"
