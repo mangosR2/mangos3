@@ -328,11 +328,24 @@ void Spell::EffectSchoolDMG(SpellEffectIndex effect_idx)
 {
     if (unitTarget && unitTarget->isAlive())
     {
-        switch(m_spellInfo->SpellFamilyName)
+        if (unitTarget->GetEntry() == 26125 && m_caster->GetObjectGuid().IsCreature() && IsAreaOfEffectSpell(m_spellInfo)) // Ghoul
+        {
+            if (Player* pOwner = unitTarget->GetCharmerOrOwnerPlayerOrPlayerItself())
+            {
+                // Night of the Dead avoidance
+                Aura* pAura = pOwner->GetAura(55620, EFFECT_INDEX_0); // Rank 1
+                if (!pAura)
+                    pAura = pOwner->GetAura(55623, EFFECT_INDEX_0);   // Rank 2
+                if (pAura)
+                    damage -= damage * pAura->GetSpellProto()->CalculateSimpleValue(EFFECT_INDEX_2) / 100;
+            }
+        }
+
+        switch (m_spellInfo->SpellFamilyName)
         {
             case SPELLFAMILY_GENERIC:
             {
-                switch(m_spellInfo->Id)                     // better way to check unknown
+                switch (m_spellInfo->Id)                    // better way to check unknown
                 {
                     case 19698:
                         damage = unitTarget->GetHealth() / 16;
