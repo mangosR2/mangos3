@@ -1578,12 +1578,28 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     DEBUG_LOG("Gameobject, create custom in SpellEffects.cpp EffectDummy");
 
                     // Expect created without owner, but with level from _template
-                    pGameObj->SetRespawnTime(MINUTE/2);
+                    pGameObj->SetRespawnTime(MINUTE / 2);
                     pGameObj->SetUInt32Value(GAMEOBJECT_LEVEL, pGameObj->GetGOInfo()->trap.level);
                     pGameObj->SetSpellId(m_spellInfo->Id);
 
                     map->Add(pGameObj);
 
+                    return;
+                }
+                case 19869:                                 // Dragon Orb
+                {
+                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER || unitTarget->HasAura(23958))
+                        return;
+
+                    unitTarget->CastSpell(unitTarget, 19832, true);
+                    return;
+                }
+                case 20037:                                 // Explode Orb Effect
+                {
+                    if (!unitTarget)
+                        return;
+
+                    unitTarget->CastSpell(unitTarget, 20038, true);
                     return;
                 }
                 case 20577:                                 // Cannibalize
