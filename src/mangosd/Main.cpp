@@ -103,7 +103,7 @@ extern int main(int argc, char **argv)
                 cfg_file = cmd_opts.opt_arg();
                 break;
             case 'v':
-                printf("%s\n", _FULLVERSION(REVISION_NR));
+                printf("%s\n", _FULLVERSION(REVISION_R2));
                 printf("%s\n", _R2FULLVERSION(REVISION_DATE,REVISION_TIME,REVISION_R2,REVISION_ID));
                 return 0;
             case 's':
@@ -179,31 +179,19 @@ extern int main(int argc, char **argv)
     }
 #endif
 
-    sLog.outString( "%s [world-daemon]", _FULLVERSION(REVISION_NR) );
-    sLog.outString( "%s [world-daemon]", _R2FULLVERSION(REVISION_DATE,REVISION_TIME,REVISION_R2,REVISION_ID) );
-    sLog.outString( "<Ctrl-C> to stop." );
-    sLog.outString("\n\n"
-        "MM   MM         MM   MM  MMMMM   MMMM   MMMMM\n"
-        "MM   MM         MM   MM MMM MMM MM  MM MMM MMM\n"
-        "MMM MMM         MMM  MM MMM MMM MM  MM MMM\n"
-        "MM M MM         MMMM MM MMM     MM  MM  MMM\n"
-        "MM M MM  MMMMM  MM MMMM MMM     MM  MM   MMM\n"
-        "MM M MM M   MMM MM  MMM MMMMMMM MM  MM    MMM\n"
-        "MM   MM     MMM MM   MM MM  MMM MM  MM     MMM\n"
-        "MM   MM MMMMMMM MM   MM MMM MMM MM  MM MMM MMM\n"
-        "MM   MM MM  MMM MM   MM  MMMMMM  MMMM   MMMMM\n"
-        "        MM  MMM http://getmangos.com\n"
-        "        MMMMMM  R2 modifications included (https://github.com/mangosR2/mangos)\n\n");
-    sLog.outString("Using configuration file %s.", cfg_file);
+    sLog.outString("BOOT: [world-daemon] %s, http://github.com/mangosR2/mangos", _FULLVERSION(REVISION_R2) );
+    sLog.outString("BOOT: [world-daemon] %s", _R2FULLVERSION(REVISION_DATE,REVISION_TIME,REVISION_R2,REVISION_ID) );
+    sLog.outString("BOOT: Please, visit to github branch or forum http://mangosr2.2x2forum.com for report bugs");
+    sLog.outString("BOOT: Using configuration file %s.", cfg_file);
 
-    sLog.outString("Using %s (Library: %s)", OPENSSL_VERSION_TEXT, SSLeay_version(SSLEAY_VERSION));
+    sLog.outString("BOOT: Using %s (Library: %s)", OPENSSL_VERSION_TEXT, SSLeay_version(SSLEAY_VERSION));
     if (SSLeay() < 0x009080bfL )
     {
-        DETAIL_LOG("WARNING: Outdated version of OpenSSL lib. Logins to server may not work!");
-        DETAIL_LOG("WARNING: Minimal required version [OpenSSL 0.9.8k]");
+        DETAIL_LOG("BOOT:WARNING: Outdated version of OpenSSL lib. Logins to server may not work!");
+        DETAIL_LOG("BOOT:WARNING: Minimal required version [OpenSSL 0.9.8k]");
     }
 
-    sLog.outString("Using ACE: %s", ACE_VERSION);
+    sLog.outString("BOOT: Using ACE %s", ACE_VERSION);
 
     ///- Set progress bars show mode
     BarGoLink::SetOutputState(sConfig.GetBoolDefault("ShowProgressBars", true));

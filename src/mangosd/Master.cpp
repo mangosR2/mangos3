@@ -188,12 +188,12 @@ int Master::Run()
         uint32 pid = CreatePIDFile(pidfile);
         if( !pid )
         {
-            sLog.outError( "Cannot create PID file %s.\n", pidfile.c_str() );
+            sLog.outError( "BOOT: Cannot create PID file %s.", pidfile.c_str() );
             Log::WaitBeforeContinueIfNeed();
             return 1;
         }
 
-        sLog.outString( "Daemon PID: %u\n", pid );
+        sLog.outString( "BOOT: Daemon PID: %u", pid );
     }
 
     ///- Start the databases
@@ -264,14 +264,14 @@ int Master::Run()
 
                 if(!curAff )
                 {
-                    sLog.outError("Processors marked in UseProcessors bitmask (hex) %x not accessible for mangosd. Accessible processors bitmask (hex): %x",Aff,appAff);
+                    sLog.outError("BOOT: Processors marked in UseProcessors bitmask (hex) %x not accessible for mangosd. Accessible processors bitmask (hex): %x",Aff,appAff);
                 }
                 else
                 {
                     if(SetProcessAffinityMask(hProcess,curAff))
-                        sLog.outString("Using processors (bitmask, hex): %x", curAff);
+                        sLog.outString("BOOT: Using processors (bitmask, hex): %x", curAff);
                     else
-                        sLog.outError("Can't set used processors (hex): %x",curAff);
+                        sLog.outError("BOOT: Can't set used processors (hex): %x",curAff);
                 }
             }
             sLog.outString();
@@ -283,9 +283,9 @@ int Master::Run()
         if(Prio)
         {
             if(SetPriorityClass(hProcess,HIGH_PRIORITY_CLASS))
-                sLog.outString("mangosd process priority class set to HIGH");
+                sLog.outString("BOOT: mangosd process priority class set to HIGH");
             else
-                sLog.outError("Can't set mangosd process priority class.");
+                sLog.outError("BOOT: Can't set mangosd process priority class.");
             sLog.outString();
         }
     }
@@ -318,7 +318,7 @@ int Master::Run()
 
     if (sWorldSocketMgr->StartNetwork (wsport, bind_ip) == -1)
     {
-        sLog.outError ("Failed to start network");
+        sLog.outError ("BOOT: Failed to start network");
         Log::WaitBeforeContinueIfNeed();
         World::StopNow(ERROR_EXIT_CODE);
         // go down and shutdown the server
@@ -369,7 +369,7 @@ int Master::Run()
     WorldDatabase.HaltDelayThread();
     LoginDatabase.HaltDelayThread();
 
-    sLog.outString( "Halting process..." );
+    sLog.outString( "BOOT: Halting process..." );
 
     if (cliThread)
     {
@@ -433,10 +433,10 @@ bool Master::_StartDB()
     int nConnections = sConfig.GetIntDefault("WorldDatabaseConnections", 1);
     if(dbstring.empty())
     {
-        sLog.outError("Database not specified in configuration file");
+        sLog.outError("BOOT: Database not specified in configuration file");
         return false;
     }
-    sLog.outString("World Database total connections: %i", nConnections + 1);
+    sLog.outString("BOOT: World Database total connections: %i", nConnections + 1);
 
 #ifdef MANGOSR2_SINGLE_THREAD
     if (nConnections > 1)
@@ -449,7 +449,7 @@ bool Master::_StartDB()
     ///- Initialise the world database
     if(!WorldDatabase.Initialize(dbstring.c_str(), nConnections))
     {
-        sLog.outError("Cannot connect to world database %s",dbstring.c_str());
+        sLog.outError("BOOT: Cannot connect to world database %s",dbstring.c_str());
         return false;
     }
 
@@ -464,18 +464,18 @@ bool Master::_StartDB()
     nConnections = sConfig.GetIntDefault("CharacterDatabaseConnections", 1);
     if(dbstring.empty())
     {
-        sLog.outError("Character Database not specified in configuration file");
+        sLog.outError("BOOT: Character Database not specified in configuration file");
 
         ///- Wait for already started DB delay threads to end
         WorldDatabase.HaltDelayThread();
         return false;
     }
-    sLog.outString("Character Database total connections: %i", nConnections + 1);
+    sLog.outString("BOOT: Character Database total connections: %i", nConnections + 1);
 
 #ifdef MANGOSR2_SINGLE_THREAD
     if (nConnections > 1)
     {
-        sLog.outError(" Your OS (%s) not support set CharacterDatabaseConnections > 1! Resetted to 1", MANGOSR2_SINGLE_THREAD);
+        sLog.outError("BOOT: Your OS (%s) not support set CharacterDatabaseConnections > 1! Resetted to 1", MANGOSR2_SINGLE_THREAD);
         nConnections = 1;
     }
 #endif
@@ -483,7 +483,7 @@ bool Master::_StartDB()
     ///- Initialise the Character database
     if(!CharacterDatabase.Initialize(dbstring.c_str(), nConnections))
     {
-        sLog.outError("Cannot connect to Character database %s",dbstring.c_str());
+        sLog.outError("BOOT: Cannot connect to Character database %s",dbstring.c_str());
 
         ///- Wait for already started DB delay threads to end
         WorldDatabase.HaltDelayThread();
@@ -503,7 +503,7 @@ bool Master::_StartDB()
     nConnections = sConfig.GetIntDefault("LoginDatabaseConnections", 1);
     if(dbstring.empty())
     {
-        sLog.outError("Login database not specified in configuration file");
+        sLog.outError("BOOT: Login database not specified in configuration file");
 
         ///- Wait for already started DB delay threads to end
         WorldDatabase.HaltDelayThread();
@@ -512,19 +512,19 @@ bool Master::_StartDB()
     }
 
     ///- Initialise the login database
-    sLog.outString("Login Database total connections: %i", nConnections + 1);
+    sLog.outString("BOOT: Login Database total connections: %i", nConnections + 1);
 
 #ifdef MANGOSR2_SINGLE_THREAD
     if (nConnections > 1)
     {
-        sLog.outError(" Your OS (%s) not support set LoginDatabaseConnections > 1! Resetted to 1", MANGOSR2_SINGLE_THREAD);
+        sLog.outError("BOOT: Your OS (%s) not support set LoginDatabaseConnections > 1! Resetted to 1", MANGOSR2_SINGLE_THREAD);
         nConnections = 1;
     }
 #endif
 
     if(!LoginDatabase.Initialize(dbstring.c_str(), nConnections))
     {
-        sLog.outError("Cannot connect to login database %s",dbstring.c_str());
+        sLog.outError("BOOT: Cannot connect to login database %s",dbstring.c_str());
 
         ///- Wait for already started DB delay threads to end
         WorldDatabase.HaltDelayThread();
@@ -545,7 +545,7 @@ bool Master::_StartDB()
     uint32 realmID = sConfig.GetIntDefault("RealmID", 0);
     if(!realmID)
     {
-        sLog.outError("Realm ID not defined in configuration file");
+        sLog.outError("BOOT: Realm ID not defined in configuration file");
 
         ///- Wait for already started DB delay threads to end
         WorldDatabase.HaltDelayThread();
@@ -554,15 +554,15 @@ bool Master::_StartDB()
         return false;
     }
 
-    sLog.outString("Realm running as realm ID %d", realmID);
+    sLog.outString("BOOT: Realm running as realm ID %d", realmID);
 
     ///- Clean the database before starting
     clearOnlineAccounts();
 
     sWorld.LoadDBVersion();
 
-    sLog.outString("Using World DB: %s", sWorld.GetDBVersion());
-    sLog.outString("Using creature EventAI: %s", sWorld.GetCreatureEventAIVersion());
+    sLog.outString("BOOT: Using World DB: %s", sWorld.GetDBVersion());
+    sLog.outString("BOOT: Using creature EventAI: %s", sWorld.GetCreatureEventAIVersion());
     return true;
 }
 
