@@ -65,7 +65,7 @@ void CreatureEventAI::GetAIInformation(ChatHandler& reader)
 inline bool IsEventFlagsFitForNormalMap(uint8 eFlags)
 {
     return !(eFlags & (EFLAG_DIFFICULTY_0 | EFLAG_DIFFICULTY_1 | EFLAG_DIFFICULTY_2 | EFLAG_DIFFICULTY_3)) ||
-                (eFlags & EFLAG_DIFFICULTY_0);
+            (eFlags & EFLAG_DIFFICULTY_0);
 }
 
 CreatureEventAI::CreatureEventAI(Creature* c) : CreatureAI(c),
@@ -435,7 +435,10 @@ bool CreatureEventAI::ProcessEvent(CreatureEventAIHolder& pHolder, Unit* pAction
     if (!(pHolder.Event.event_flags & EFLAG_RANDOM_ACTION))
     {
         for (uint32 j = 0; j < MAX_ACTIONS; ++j)
-            ProcessAction(pHolder.Event.action[j], rnd, pHolder.Event.event_id, pActionInvoker, pAIEventSender);
+        {
+            if (pHolder.Event.action[j].type != ACTION_T_NONE)
+                ProcessAction(pHolder.Event.action[j], rnd, pHolder.Event.event_id, pActionInvoker, pAIEventSender);
+        }
     }
     // Process actions, random case
     else
@@ -443,8 +446,10 @@ bool CreatureEventAI::ProcessEvent(CreatureEventAIHolder& pHolder, Unit* pAction
         // amount of real actions
         uint32 count = 0;
         for (uint32 j = 0; j < MAX_ACTIONS; ++j)
+        {
             if (pHolder.Event.action[j].type != ACTION_T_NONE)
                 ++count;
+        }
 
         if (count)
         {
@@ -642,7 +647,7 @@ void CreatureEventAI::ProcessAction(CreatureEventAI_Action const& action, uint32
             Creature* pCreature = NULL;
 
             if (action.summon.duration)
-                pCreature = m_creature->SummonCreature(action.summon.creatureId, TEMPSUMMON_TIMED_OR_DEAD_DESPAWN, action.summon.duration);
+                pCreature = m_creature->SummonCreature(action.summon.creatureId, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, action.summon.duration);
             else
                 pCreature = m_creature->SummonCreature(action.summon.creatureId, TEMPSUMMON_TIMED_OOC_DESPAWN, 0);
 
@@ -810,7 +815,7 @@ void CreatureEventAI::ProcessAction(CreatureEventAI_Action const& action, uint32
 
             Creature* pCreature = NULL;
             if ((*i).second.SpawnTimeSecs)
-                pCreature = m_creature->SummonCreature(action.summon_id.creatureId, (*i).second.position_x, (*i).second.position_y, (*i).second.position_z, (*i).second.orientation, TEMPSUMMON_TIMED_OR_DEAD_DESPAWN, (*i).second.SpawnTimeSecs);
+                pCreature = m_creature->SummonCreature(action.summon_id.creatureId, (*i).second.position_x, (*i).second.position_y, (*i).second.position_z, (*i).second.orientation, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, (*i).second.SpawnTimeSecs);
             else
                 pCreature = m_creature->SummonCreature(action.summon_id.creatureId, (*i).second.position_x, (*i).second.position_y, (*i).second.position_z, (*i).second.orientation, TEMPSUMMON_TIMED_OOC_DESPAWN, 0);
 
@@ -872,7 +877,6 @@ void CreatureEventAI::ProcessAction(CreatureEventAI_Action const& action, uint32
         case ACTION_T_UPDATE_TEMPLATE:
             if (m_creature->GetEntry() == action.update_template.creatureId)
             {
-
                 sLog.outErrorEventAI("Event %d ACTION_T_UPDATE_TEMPLATE call with param1 == current entry. Creature %d", EventId, m_creature->GetEntry());
                 return;
             }
@@ -882,7 +886,6 @@ void CreatureEventAI::ProcessAction(CreatureEventAI_Action const& action, uint32
         case ACTION_T_DIE:
             if (m_creature->isDead())
             {
-
                 sLog.outErrorEventAI("Event %d ACTION_T_DIE on dead creature. Creature %d", EventId, m_creature->GetEntry());
                 return;
             }
@@ -1317,7 +1320,7 @@ inline int32 CreatureEventAI::GetRandActionParam(uint32 rnd, int32 param1, int32
 
 inline Unit* CreatureEventAI::GetTargetByType(uint32 Target, Unit* pActionInvoker, Creature* pAIEventSender, bool& isError, uint32 forSpellId, uint32 selectFlags)
 {
-    Unit* resTarget;
+    Unit* resTarget = NULL;
     switch (Target)
     {
         case TARGET_T_SELF:
@@ -1366,7 +1369,6 @@ inline Unit* CreatureEventAI::GetTargetByType(uint32 Target, Unit* pActionInvoke
             if (!resTarget)
                 isError = true;
             return resTarget;
-
         case TARGET_T_VEHICLE_PASSENGER:
         {
             if (m_creature->IsVehicle())

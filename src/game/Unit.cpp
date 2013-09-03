@@ -610,7 +610,7 @@ Unit::~Unit()
 
     // those should be already removed at "RemoveFromWorld()" call
     MANGOS_ASSERT(m_gameObj.size() == 0);
-    MANGOS_ASSERT(m_dynObjGUIDs.size() == 0);
+    MANGOS_ASSERT(m_dynObjGuids.size() == 0);
     MANGOS_ASSERT(m_deletedHolders.size() == 0);
 }
 
@@ -6582,24 +6582,25 @@ uint8 Unit::GetVisibleAurasCount() const
 
 void Unit::AddDynObject(DynamicObject* dynObj)
 {
-    m_dynObjGUIDs.push_back(dynObj->GetObjectGuid());
+    m_dynObjGuids.push_back(dynObj->GetObjectGuid());
 }
 
 void Unit::RemoveDynObject(uint32 spellid)
 {
-    if (m_dynObjGUIDs.empty())
+    if (m_dynObjGuids.empty())
         return;
-    for (GuidList::iterator i = m_dynObjGUIDs.begin(); i != m_dynObjGUIDs.end();)
+
+    for (GuidList::iterator i = m_dynObjGuids.begin(); i != m_dynObjGuids.end();)
     {
         DynamicObject* dynObj = GetMap()->GetDynamicObject(*i);
         if(!dynObj)
         {
-            i = m_dynObjGUIDs.erase(i);
+            i = m_dynObjGuids.erase(i);
         }
         else if (spellid == 0 || dynObj->GetSpellId() == spellid)
         {
             dynObj->Delete();
-            i = m_dynObjGUIDs.erase(i);
+            i = m_dynObjGuids.erase(i);
         }
         else
             ++i;
@@ -6608,22 +6609,23 @@ void Unit::RemoveDynObject(uint32 spellid)
 
 void Unit::RemoveAllDynObjects()
 {
-    while(!m_dynObjGUIDs.empty())
+    while(!m_dynObjGuids.empty())
     {
-        if (DynamicObject* dynObj = GetMap()->GetDynamicObject(*m_dynObjGUIDs.begin()))
+        if (DynamicObject* dynObj = GetMap()->GetDynamicObject(*m_dynObjGuids.begin()))
             dynObj->Delete();
-        m_dynObjGUIDs.erase(m_dynObjGUIDs.begin());
+
+        m_dynObjGuids.erase(m_dynObjGuids.begin());
     }
 }
 
 DynamicObject* Unit::GetEffectiveDynObject(uint32 spellId, SpellEffectIndex effIndex, Unit* pTarget)
 {
-    for (GuidList::iterator itr = m_dynObjGUIDs.begin(); itr != m_dynObjGUIDs.end();)
+    for (GuidList::iterator itr = m_dynObjGuids.begin(); itr != m_dynObjGuids.end();)
     {
         DynamicObject* dynObj = GetMap()->GetDynamicObject(*itr);
         if(!dynObj)
         {
-            itr = m_dynObjGUIDs.erase(itr);
+            itr = m_dynObjGuids.erase(itr);
             continue;
         }
 
@@ -6636,12 +6638,12 @@ DynamicObject* Unit::GetEffectiveDynObject(uint32 spellId, SpellEffectIndex effI
 
 DynamicObject * Unit::GetDynObject(uint32 spellId, SpellEffectIndex effIndex)
 {
-    for (GuidList::iterator i = m_dynObjGUIDs.begin(); i != m_dynObjGUIDs.end();)
+    for (GuidList::iterator i = m_dynObjGuids.begin(); i != m_dynObjGuids.end();)
     {
         DynamicObject* dynObj = GetMap()->GetDynamicObject(*i);
         if(!dynObj)
         {
-            i = m_dynObjGUIDs.erase(i);
+            i = m_dynObjGuids.erase(i);
             continue;
         }
 
@@ -6654,12 +6656,12 @@ DynamicObject * Unit::GetDynObject(uint32 spellId, SpellEffectIndex effIndex)
 
 DynamicObject * Unit::GetDynObject(uint32 spellId)
 {
-    for (GuidList::iterator i = m_dynObjGUIDs.begin(); i != m_dynObjGUIDs.end();)
+    for (GuidList::iterator i = m_dynObjGuids.begin(); i != m_dynObjGuids.end();)
     {
         DynamicObject* dynObj = GetMap()->GetDynamicObject(*i);
         if(!dynObj)
         {
-            i = m_dynObjGUIDs.erase(i);
+            i = m_dynObjGuids.erase(i);
             continue;
         }
 
@@ -7449,7 +7451,8 @@ bool Unit::AttackStop(bool targetSwitch /*=false*/)
     }
 
     Unit* victim = GetMap()->GetUnit(m_attackingGuid);
-    GetMap()->RemoveAttackerFor(m_attackingGuid,GetObjectGuid());
+    GetMap()->RemoveAttackerFor(m_attackingGuid, GetObjectGuid());
+    GetMap()->RemoveAttackerFor(GetObjectGuid(), m_attackingGuid);
     m_attackingGuid.Clear();
 
     // Clear our target
@@ -7531,18 +7534,24 @@ void Unit::RemoveAllAttackers()
         return;
 
     GuidSet& attackers = GetMap()->GetAttackersFor(GetObjectGuid());
-
-    for (GuidSet::iterator itr = attackers.begin(); itr != attackers.end();)
+    for (GuidSet::iterator itr = attackers.begin(); !attackers.empty() && itr != attackers.end();)
     {
-        ObjectGuid guid = *itr++;
+        ObjectGuid guid = *itr;
         Unit* attacker = GetMap()->GetUnit(guid);
-        if(!attacker || !attacker->AttackStop())
+        if (!attacker || !attacker->AttackStop())
         {
-            sLog.outError("WORLD: Unit has an attacker that isn't attacking it!");
+            sLog.outError("Unit::RemoveAllAttackers %s has attacker %s that isn't attacking it!", GetObjectGuid().GetString().c_str(), guid.GetString().c_str());
             GetMap()->RemoveAttackerFor(GetObjectGuid(),guid);
         }
+        itr = attackers.begin();
     }
-    GetMap()->RemoveAllAttackersFor(GetObjectGuid());
+
+    // Cleanup
+    if (!attackers.empty())
+    {
+        sLog.outError("Unit::RemoveAllAttackers %s has %u attackers after step-to-step cleanup!", GetObjectGuid().GetString().c_str(), attackers.size());
+        GetMap()->RemoveAllAttackersFor(GetObjectGuid());
+    }
 }
 
 bool Unit::HasAuraStateForCaster(AuraState flag, ObjectGuid casterGuid) const

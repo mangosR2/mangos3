@@ -23,6 +23,8 @@
 #
 bin
 build
+win
+win/*
 tags
 TAGS
 dev.txt

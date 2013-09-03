@@ -41,7 +41,7 @@ class Totem : public Creature
         void UnSummon();
         uint32 GetSpell(uint32 idx = 0) const { return ((Creature*)this)->GetSpell(idx); }
         uint32 GetTotemDuration() const { return m_duration; }
-        Unit *GetOwner();
+        Unit* GetOwner();
         TotemType GetTotemType() const { return m_type; }
         void SetTypeBySummonSpell(SpellEntry const * spellProto);
         void SetDuration(uint32 dur) { m_duration = dur; }
