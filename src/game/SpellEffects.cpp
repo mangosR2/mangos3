@@ -314,6 +314,11 @@ void Spell::EffectSchoolDMG(SpellEffectIndex effect_idx)
             {
                 switch(m_spellInfo->Id)                     // better way to check unknown
                 {
+                    case 19698:
+                        damage = unitTarget->GetHealth() / 16;
+                        if (damage < 200)
+                            damage = 200;
+                        break;
                     // Meteor like spells (divided damage to targets)
                     case 24340: case 26558: case 28884:     // Meteor
                     case 36837: case 38903: case 41276:     // Meteor

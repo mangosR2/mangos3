@@ -1355,7 +1355,9 @@ void Aura::TriggerSpell()
 //                    // Ranshalla Waiting
 //                    case 18953: break;
 //                    // Inferno
-//                    case 19695: break;
+                    case 19695:
+                        trigger_spell_id = 19698;
+                        break;
 //                    // Frostwolf Muzzle DND
 //                    case 21794: break;
 //                    // Alterac Ram Collar DND
