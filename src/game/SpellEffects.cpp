@@ -1300,6 +1300,27 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     unitTarget->CastSpell(unitTarget, 24085, true);
                     return;
                 }
+                case 7769:                                  // Strafe Jotunheim Building
+                {
+                    Unit* pCaster = GetCaster();
+                    if (!pCaster)
+                        return;
+
+                    Creature* pBuilding = pCaster->GetClosestCreatureWithEntry(pCaster, 30599, 50.0f);
+                    if (!pBuilding)
+                        return;
+
+                    if (pBuilding->HasAura(7448))           // Do not give credit for already burning buildings
+                        return;
+
+                    Player* pPlayer = pCaster->GetCharmerOrOwnerPlayerOrPlayerItself();
+                    if (!pPlayer)
+                        return;
+
+                    pPlayer->KilledMonsterCredit(30576);
+                    pBuilding->CastSpell(pBuilding, 7448, true);
+                    return;
+                }
                 case 8063:                                  // Deviate Fish
                 {
                     if (m_caster->GetTypeId() != TYPEID_PLAYER)
