@@ -1979,6 +1979,29 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     unitTarget->CastSpell(unitTarget, m_spellInfo->Id == 33923 ? 33666 : 38795, true);
                     return;
                 }
+                case 34665:                                 // Administer Antidote
+                {
+                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_UNIT || m_caster->GetTypeId() != TYPEID_PLAYER)
+                        return;
+
+                    uint32 health = unitTarget->GetHealth();
+
+                    float x, y, z, o;
+                    unitTarget->GetPosition(x, y, z);
+                    o = unitTarget->GetOrientation();
+
+                    ((Creature*)unitTarget)->ForcedDespawn();
+
+                    if (Creature* pSummon = m_caster->SummonCreature(16992, x, y, z, o, TEMPSUMMON_TIMED_OR_DEAD_DESPAWN, 180000))
+                    {
+                        pSummon->SetHealth(health);
+                        ((Player*)m_caster)->RewardPlayerAndGroupAtEvent(16992, pSummon);
+
+                        if (pSummon->AI())
+                            pSummon->AI()->AttackStart(m_caster);
+                    }
+                    return;
+                }
                 case 35745:                                 // Socrethar's Stone
                 {
                     uint32 spell_id;
