@@ -2030,7 +2030,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         DynamicObject* GetDynObject(uint32 spellId);
         void AddDynObject(DynamicObject* dynObj);
         void RemoveDynObject(uint32 spellid);
-        void RemoveDynObjectWithGUID(ObjectGuid guid) { m_dynObjGUIDs.remove(guid); }
+        void RemoveDynObjectWithGuid(ObjectGuid const& guid) { m_dynObjGuids.remove(guid); }
         void RemoveAllDynObjects();
 
         GameObject* GetGameObject(uint32 spellId) const;
@@ -2283,7 +2283,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         // Store Auras for which the target must be tracked
         TrackedAuraTargetMap m_trackedAuraTargets[MAX_TRACKED_AURA_TYPES];
 
-        GuidList m_dynObjGUIDs;
+        GuidList m_dynObjGuids;
 
         typedef std::list<GameObject*> GameObjectList;
         GameObjectList m_gameObj;

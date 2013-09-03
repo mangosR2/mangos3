@@ -290,9 +290,9 @@ void Object::BuildValuesUpdateBlockForPlayer(UpdateData *data, Player *target) c
     data->AddUpdateBlock(buf);
 }
 
-void Object::BuildOutOfRangeUpdateBlock(UpdateData * data) const
+void Object::BuildOutOfRangeUpdateBlock(UpdateData* data) const
 {
-    data->AddOutOfRangeGUID(GetObjectGuid());
+    data->AddOutOfRangeGuid(GetObjectGuid());
 }
 
 void Object::DestroyForPlayer( Player *target, bool anim ) const
