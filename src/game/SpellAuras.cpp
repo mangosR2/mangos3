@@ -10290,7 +10290,7 @@ void Aura::PeriodicDummyTick()
             // Death Rune Mastery
             // Reaping
             // Blood of the North
-            if (spell->GetSpellIconID == 3041 || (spell->GetSpellIconID == 22 && spell->GetSpellIconID= 62459) || spell->GetSpellIconID == 2622)
+            if (spell->GetSpellIconID == 3041 || (spell->GetSpellIconID == 22 && spell->GetSpellIconID == 62459) || spell->GetSpellIconID == 2622)
             {
                 if (target->GetTypeId() != TYPEID_PLAYER)
                     return;
