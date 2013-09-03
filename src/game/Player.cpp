@@ -469,6 +469,7 @@ Player::Player (WorldSession *session): Unit(), m_mover(this), m_camera(NULL), m
 
     m_DailyQuestChanged = false;
     m_WeeklyQuestChanged = false;
+    m_MonthlyQuestChanged = false;
 
     m_lastLiquid = NULL;
 

@@ -2468,6 +2468,16 @@ GuidSet& Map::GetAttackersFor(ObjectGuid const& targetGuid)
     return m_attackersMap[targetGuid];
 }
 
+bool Map::IsInCombat(ObjectGuid const& targetGuid) const
+{
+    ReadGuard Guard(const_cast<Map*>(this)->GetLock());
+    AttackersMap::const_iterator itr = m_attackersMap.find(targetGuid);
+    if (itr == m_attackersMap.end())
+        return false;
+
+    return !itr->second.empty();
+}
+
 void Map::CreateAttackersStorageFor(ObjectGuid const& targetGuid)
 {
     if (targetGuid.IsEmpty())
