@@ -2224,7 +2224,15 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     ((Creature*)unitTarget)->ForcedDespawn(2000);
                     float x, y, z;
                     unitTarget->GetClosePoint(x, y, z, unitTarget->GetObjectBoundingRadius(), 10.0f, unitTarget->GetOrientation());
-                    unitTarget->MonsterMoveWithSpeed(x, y, z, 28);
+                    unitTarget->MonsterMoveWithSpeed(x, y, z, 28.0f);
+                    return;
+                }
+                case 43106:                                 // Brave's Flare Effect
+                {
+                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_UNIT || m_caster->GetTypeId() != TYPEID_PLAYER)
+                        return;
+
+                    ((Player*)m_caster)->KilledMonsterCredit(((Creature*)unitTarget)->GetEntry());
                     return;
                 }
                 case 43036:                                 // Dismembering Corpse
