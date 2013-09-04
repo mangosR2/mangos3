@@ -2590,14 +2590,16 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                 }
                 case 45990:                                 // Collect Oil
                 {
-                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_UNIT)
+                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_UNIT || m_caster->GetTypeId() != TYPEID_PLAYER)
                         return;
 
-                    if (const SpellEntry *pSpell = sSpellStore.LookupEntry(45991))
+                    if (SpellEntry const* pSpell = sSpellStore.LookupEntry(45991))
                     {
                         unitTarget->CastSpell(unitTarget, pSpell, true);
                         ((Creature*)unitTarget)->ForcedDespawn(m_duration);
+                        ((Player*)m_caster)->KilledMonsterCredit(unitTarget->GetEntry(), unitTarget->GetObjectGuid());
                     }
+
                     return;
                 }
                 case 46167:                                 // Planning for the Future: Create Snowfall Glade Pup Cover
