@@ -2432,6 +2432,18 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     unitTarget->CastSpell(m_caster, 45456, true);
                     break;
                 }
+                case 45277:                                 // Throw Torch
+                {
+                    if (!unitTarget)
+                        return;
+
+                    unitTarget->CastSpell(unitTarget, 45276, true, m_CastItem, NULL, m_originalCasterGuid);
+
+                    if (unitTarget->GetTypeId() == TYPEID_PLAYER && unitTarget->GetZoneId() == 4395)
+                        unitTarget->CastSpell(unitTarget, 45280, true);
+
+                    return;
+                }
                 case 45536:                                // Complete Ancestor Ritual, KillCredit for (Q:11610)
                 {
                     if (!gameObjTarget || m_caster->GetTypeId() != TYPEID_PLAYER)
