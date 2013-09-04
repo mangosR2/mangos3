@@ -2269,6 +2269,19 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     unitTarget->CastSpell(unitTarget, 42493, true, NULL, NULL, m_caster->GetObjectGuid());
                     return;
                 }
+                case 43152:                                 // Lynx Rush
+                {
+                    if (!unitTarget || m_caster->GetTypeId() != TYPEID_UNIT)
+                        return;
+
+                    // Rush 9 targets in a row
+                    for (uint8 i = 0; i < 9; ++i)
+                    {
+                        if (Unit* target = ((Creature*)m_caster)->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                            m_caster->CastSpell(target, 43153, true);
+                    }
+                    return;
+                }
                 case 43209:                                 // Place Ram Meat
                 {
                     if (!unitTarget)
