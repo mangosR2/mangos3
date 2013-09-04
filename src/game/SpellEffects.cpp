@@ -2617,7 +2617,7 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
 
                     uint32 spellId = 0;
 
-                    switch(m_spellInfo->Id)
+                    switch (m_spellInfo->Id)
                     {
                         case 46167: spellId = 46773; break;
                         case 50918: spellId = 50919; break;
@@ -2630,14 +2630,14 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                         case 74904: spellId = 74905; break;
                     }
 
-                    if (const SpellEntry *pSpell = sSpellStore.LookupEntry(spellId))
+                    if (SpellEntry const* pSpell = sSpellStore.LookupEntry(spellId))
                     {
                         unitTarget->CastSpell(m_caster, spellId, true);
 
                         Creature* creatureTarget = (Creature*)unitTarget;
 
-                        if (const SpellCastTimesEntry *pCastTime = sSpellCastTimesStore.LookupEntry(pSpell->GetCastingTimeIndex()))
-                            creatureTarget->ForcedDespawn(pCastTime->CastTime + 1);
+                        if (const SpellCastTimesEntry* pCastTime = sSpellCastTimesStore.LookupEntry(pSpell->GetCastingTimeIndex()))
+                            creatureTarget->ForcedDespawn(pCastTime->CastTime < 0 ? 0 : pCastTime->CastTime + 1);
                     }
                     return;
                 }
