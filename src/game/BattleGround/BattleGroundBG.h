@@ -117,15 +117,15 @@ const float BG_BG_NodePositions[BG_BG_NODES_MAX][3] =
 enum BGBattleGroundObjectTypes
 {
     // buffs
-    BG_BG_OBJECT_SPEEDBUFF_LIGHTHOUSE           = 1,
-    BG_BG_OBJECT_REGENBUFF_LIGHTHOUSE           = 2,
-    BG_BG_OBJECT_BERSERKBUFF_LIGHTHOUSE         = 3,
-    BG_BG_OBJECT_SPEEDBUFF_WATERWORKS           = 4,
-    BG_BG_OBJECT_REGENBUFF_WATERWORKS           = 5,
-    BG_BG_OBJECT_BERSERKBUFF_WATERWORKS         = 6,
-    BG_BG_OBJECT_SPEEDBUFF_MINES                = 7,
-    BG_BG_OBJECT_REGENBUFF_MINES                = 8,
-    BG_BG_OBJECT_BERSERKBUFF_MINES              = 9,
+    BG_BG_OBJECT_SPEEDBUFF_LIGHTHOUSE           = 0,
+    BG_BG_OBJECT_REGENBUFF_LIGHTHOUSE           = 1,
+    BG_BG_OBJECT_BERSERKBUFF_LIGHTHOUSE         = 2,
+    BG_BG_OBJECT_SPEEDBUFF_WATERWORKS           = 3,
+    BG_BG_OBJECT_REGENBUFF_WATERWORKS           = 4,
+    BG_BG_OBJECT_BERSERKBUFF_WATERWORKS         = 5,
+    BG_BG_OBJECT_SPEEDBUFF_MINES                = 6,
+    BG_BG_OBJECT_REGENBUFF_MINES                = 7,
+    BG_BG_OBJECT_BERSERKBUFF_MINES              = 8,
     BG_BG_OBJECT_MAX                            = 9
 };
 
