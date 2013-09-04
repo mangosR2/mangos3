@@ -2926,6 +2926,12 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     }
                     return;
                 }
+                case 49625:                                 // Brave's Flare
+                {
+                    // Trigger Brave's Flare Effect (with EffectTarget)
+                    m_caster->CastSpell(m_caster, 43106, true);
+                    return;
+                }
                 case 49634:                                 // Sergeant's Flare
                 {
                     if (!unitTarget || unitTarget->GetTypeId() != TYPEID_UNIT)
