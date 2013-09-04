@@ -2437,7 +2437,7 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     if (!unitTarget)
                         return;
 
-                    unitTarget->CastSpell(unitTarget, 45276, true, m_CastItem, NULL, m_originalCasterGuid);
+                    unitTarget->CastSpell(unitTarget, 45276, true, m_CastItem, NULL, m_originalCasterGUID);
 
                     if (unitTarget->GetTypeId() == TYPEID_PLAYER && unitTarget->GetZoneId() == 4395)
                         unitTarget->CastSpell(unitTarget, 45280, true);
@@ -2542,7 +2542,7 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                 }
                 case 45819:                                 // Throw Torch
                 {
-                    m_caster->CastSpell(m_targets.m_destX, m_targets.m_destY, m_targets.m_destZ, 45277, true, m_CastItem, NULL, m_originalCasterGuid);
+                    m_caster->CastSpell(m_targets.getDestination().x, m_targets.getDestination().y, m_targets.getDestination().z, 45277, true, m_CastItem, NULL, m_originalCasterGUID);
                     return;
                 }
                 case 45958:                                 // Signal Alliance
