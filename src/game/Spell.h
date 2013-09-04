@@ -521,8 +521,8 @@ class Spell
         // real source of cast affects, explicit caster, or DoT/HoT applier, or GO owner, or wild GO itself. Can be NULL
         WorldObject* GetAffectiveCasterObject() const;
         // limited version returning NULL in cases wild gameobject caster object, need for Aura (auras currently not support non-Unit caster)
-        Unit* GetAffectiveCaster() const { return m_originalCasterGUID ? m_originalCaster : m_caster; }
-        // m_originalCasterGUID can store GO guid, and in this case this is visual caster
+        Unit* GetAffectiveCaster() const { return m_originalCasterGuid ? m_originalCaster : m_caster; }
+        // m_originalCasterGuid can store GO guid, and in this case this is visual caster
         WorldObject* GetCastingObject() const;
 
         // Unstead of GetAffectiveCaster() not return NULL if original caster is GameObject.
@@ -558,7 +558,7 @@ class Spell
 
         Unit* m_caster;
 
-        ObjectGuid m_originalCasterGUID;                    // real source of cast (aura caster/etc), used for spell targets selection
+        ObjectGuid m_originalCasterGuid;                    // real source of cast (aura caster/etc), used for spell targets selection
                                                             // e.g. damage around area spell trigered by victim aura and da,age emeies of aura caster
         Unit* m_originalCaster;                             // cached pointer for m_originalCaster, updated at Spell::UpdatePointers()
 

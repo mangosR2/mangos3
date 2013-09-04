@@ -408,7 +408,7 @@ Spell::Spell( Unit* caster, SpellEntry const *info, bool triggered, ObjectGuid o
     // Set health leech amount to zero
     m_healthLeech = 0;
 
-    m_originalCasterGUID = originalCasterGUID ? originalCasterGUID : m_caster->GetObjectGuid();
+    m_originalCasterGuid = originalCasterGUID ? originalCasterGUID : m_caster->GetObjectGuid();
 
     UpdateOriginalCasterPointer();
 
@@ -5312,7 +5312,7 @@ void Spell::CastTriggerSpells()
 {
     for (SpellInfoList::const_iterator si = m_TriggerSpells.begin(); si != m_TriggerSpells.end(); ++si)
     {
-        Spell* spell = new Spell(m_caster, (*si), true, m_originalCasterGUID);
+        Spell* spell = new Spell(m_caster, (*si), true, m_originalCasterGuid);
         spell->prepare(&m_targets);                         // use original spell original targets
     }
 }
@@ -5320,7 +5320,7 @@ void Spell::CastNotTriggerSpells()
 {
     for (SpellInfoList::const_iterator si = m_NotTriggerSpells.begin(); si != m_NotTriggerSpells.end(); ++si)
     {
-        Spell* spell = new Spell(m_caster, (*si), false, m_originalCasterGUID);
+        Spell* spell = new Spell(m_caster, (*si), false, m_originalCasterGuid);
         spell->prepare(&m_targets);                         // use original spell original targets
     }
 }
@@ -7876,16 +7876,16 @@ void Spell::DelayedChannel()
 
 void Spell::UpdateOriginalCasterPointer()
 {
-    if (m_originalCasterGUID == m_caster->GetObjectGuid())
+    if (m_originalCasterGuid == m_caster->GetObjectGuid())
         m_originalCaster = m_caster;
-    else if (m_originalCasterGUID.IsGameObject())
+    else if (m_originalCasterGuid.IsGameObject())
     {
-        GameObject* go = m_caster->IsInWorld() ? m_caster->GetMap()->GetGameObject(m_originalCasterGUID) : NULL;
+        GameObject* go = m_caster->IsInWorld() ? m_caster->GetMap()->GetGameObject(m_originalCasterGuid) : NULL;
         m_originalCaster = go ? go->GetOwner() : NULL;
     }
     else
     {
-        Unit* unit = ObjectAccessor::GetUnit(*m_caster, m_originalCasterGUID);
+        Unit* unit = ObjectAccessor::GetUnit(*m_caster, m_originalCasterGuid);
         m_originalCaster = unit && unit->IsInWorld() ? unit : NULL;
     }
 }
@@ -8271,18 +8271,18 @@ void Spell::FillRaidOrPartyHealthPriorityTargets(UnitList &targetUnitMap, Unit* 
 
 WorldObject* Spell::GetAffectiveCasterObject() const
 {
-    if (!m_originalCasterGUID)
+    if (!m_originalCasterGuid)
         return m_caster;
 
-    if (m_originalCasterGUID.IsGameObject() && m_caster->GetMap())
-        return m_caster->GetMap()->GetGameObject(m_originalCasterGUID);
+    if (m_originalCasterGuid.IsGameObject() && m_caster->GetMap())
+        return m_caster->GetMap()->GetGameObject(m_originalCasterGuid);
     return m_originalCaster;
 }
 
 WorldObject* Spell::GetCastingObject() const
 {
-    if (m_originalCasterGUID.IsGameObject())
-        return m_caster->GetMap() ? m_caster->GetMap()->GetGameObject(m_originalCasterGUID) : NULL;
+    if (m_originalCasterGuid.IsGameObject())
+        return m_caster->GetMap() ? m_caster->GetMap()->GetGameObject(m_originalCasterGuid) : NULL;
     else
         return m_caster;
 }
