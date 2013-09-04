@@ -2503,6 +2503,16 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     m_caster->RemoveAurasDueToSpell(45683);
                     return;
                 }
+                case 45692:                                 // Use Tuskarr Torch (for Quest: Burn in Effigy)
+                {
+                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_UNIT)
+                        return;
+
+                    // let them burn! niah! (flame spell could be wrong one, anyway visual effect is correct)
+                    unitTarget->CastSpell(unitTarget, 64561, true);
+                    ((Creature*)unitTarget)->ForcedDespawn(15000);
+                    return;
+                }
                 case 45958:                                 // Signal Alliance
                 {
                     m_caster->CastSpell(m_caster, m_spellInfo->CalculateSimpleValue(eff_idx), true);
