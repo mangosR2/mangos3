@@ -2282,6 +2282,23 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     }
                     return;
                 }
+                case 43178:                                 // Plant Forsaken Banner
+                {
+                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_UNIT || m_caster->GetTypeId() != TYPEID_PLAYER)
+                        return;
+
+                    uint32 entry;
+                    switch (((Creature*)unitTarget)->GetEntry())
+                    {
+                        case 24161: entry = 24166; break; // Oric the Baleful
+                        case 24016: entry = 24165; break; // Ulf the Bloodletter
+                        case 24162: entry = 24167; break; // Gunnar Thorvardsson
+                        default: return;
+                    }
+
+                    ((Player*)m_caster)->KilledMonsterCredit(entry);
+                    return;
+                }
                 case 43209:                                 // Place Ram Meat
                 {
                     if (!unitTarget)
