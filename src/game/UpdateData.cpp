@@ -30,14 +30,14 @@ UpdateData::UpdateData(uint16 map) : m_blockCount(0), m_map(map)
 {
 }
 
-void UpdateData::AddOutOfRangeGUID(GuidSet& guids)
+void UpdateData::AddOutOfRangeGuids(GuidSet& guids)
 {
-    m_outOfRangeGUIDs.insert(guids.begin(),guids.end());
+    m_outOfRangeGuids.insert(guids.begin(), guids.end());
 }
 
-void UpdateData::AddOutOfRangeGUID(ObjectGuid const &guid)
+void UpdateData::AddOutOfRangeGuid(ObjectGuid const &guid)
 {
-    m_outOfRangeGUIDs.insert(guid);
+    m_outOfRangeGuids.insert(guid);
 }
 
 void UpdateData::AddUpdateBlock(const ByteBuffer &block)
@@ -106,17 +106,17 @@ bool UpdateData::BuildPacket(WorldPacket *packet)
 {
     MANGOS_ASSERT(packet->empty());                         // shouldn't happen
 
-    ByteBuffer buf(4 + (m_outOfRangeGUIDs.empty() ? 0 : 1 + 4 + 9 * m_outOfRangeGUIDs.size()) + m_data.wpos());
+    ByteBuffer buf(4 + (m_outOfRangeGuids.empty() ? 0 : 1 + 4 + 9 * m_outOfRangeGuids.size()) + m_data.wpos());
 
     buf << uint16(m_map);
-    buf << uint32(!m_outOfRangeGUIDs.empty() ? m_blockCount + 1 : m_blockCount);
+    buf << uint32((!m_outOfRangeGuids.empty() ? m_blockCount + 1 : m_blockCount));
 
-    if(!m_outOfRangeGUIDs.empty())
+    if (!m_outOfRangeGuids.empty())
     {
         buf << uint8(UPDATETYPE_OUT_OF_RANGE_OBJECTS);
-        buf << uint32(m_outOfRangeGUIDs.size());
+        buf << uint32(m_outOfRangeGuids.size());
 
-        for(GuidSet::const_iterator i = m_outOfRangeGUIDs.begin(); i != m_outOfRangeGUIDs.end(); ++i)
+        for (GuidSet::const_iterator i = m_outOfRangeGuids.begin(); i != m_outOfRangeGuids.end(); ++i)
             buf << i->WriteAsPacked();
     }
 
@@ -139,8 +139,8 @@ bool UpdateData::BuildPacket(WorldPacket *packet)
     //}
     //else                                                    // send small packets without compression
     {
-        packet->append( buf );
-        packet->SetOpcode( SMSG_UPDATE_OBJECT );
+        packet->append(buf);
+        packet->SetOpcode(SMSG_UPDATE_OBJECT);
     }
 
     return true;
@@ -149,7 +149,7 @@ bool UpdateData::BuildPacket(WorldPacket *packet)
 void UpdateData::Clear()
 {
     m_data.clear();
-    m_outOfRangeGUIDs.clear();
+    m_outOfRangeGuids.clear();
     m_blockCount = 0;
     m_map = 0;
 }

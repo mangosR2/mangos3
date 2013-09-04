@@ -87,7 +87,6 @@ void CreatureEventAIMgr::CheckUnusedAITexts()
 // -------------------
 void CreatureEventAIMgr::LoadCreatureEventAI_Summons(bool check_entry_use)
 {
-
     // Drop Existing EventSummon Map
     m_CreatureEventAI_Summon_Map.clear();
 
@@ -167,7 +166,6 @@ void CreatureEventAIMgr::CheckUnusedAISummons()
                     }
                     default: break;
                 }
-
             }
         }
     }
@@ -833,7 +831,12 @@ void CreatureEventAIMgr::LoadCreatureEventAI_Scripts()
                 if (ainame && !hasevent)
                     sLog.outErrorEventAI("EventAI not has script for creature entry (%u), but AIName = '%s'.", i, cInfo->AIName);
                 else if (!ainame && hasevent)
-                    sLog.outErrorEventAI("EventAI has script for creature entry (%u), but AIName = '%s' instead 'EventAI'.", i, cInfo->AIName);
+                {
+                    if (cInfo->ScriptID)
+                        sLog.outErrorEventAI("EventAI has script for creature entry (%u), but AIName = '%s' instead 'EventAI'. ScriptName = '%s'", i, cInfo->AIName, sScriptMgr.GetScriptName(cInfo->ScriptID));
+                    else
+                        sLog.outErrorEventAI("EventAI has script for creature entry (%u), but AIName = '%s' instead 'EventAI'.", i, cInfo->AIName);
+                }
             }
         }
 

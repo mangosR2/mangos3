@@ -2407,6 +2407,7 @@ struct SpellEntry
     uint32 GetSpellEffectIdByIndex(SpellEffectIndex index) const;
     uint32 GetAuraInterruptFlags() const;
     uint32 GetEffectImplicitTargetAByIndex(SpellEffectIndex index) const;
+    uint32 GetEffectImplicitTargetBByIndex(SpellEffectIndex index) const;
     int32 GetAreaGroupId() const;
     uint32 GetFacingCasterFlags() const;
     uint32 GetBaseLevel() const;
