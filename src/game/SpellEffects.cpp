@@ -2528,6 +2528,11 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     }
                     return;
                 }
+                case 45819:                                 // Throw Torch
+                {
+                    m_caster->CastSpell(m_targets.m_destX, m_targets.m_destY, m_targets.m_destZ, 45277, true, m_CastItem, NULL, m_originalCasterGuid);
+                    return;
+                }
                 case 45958:                                 // Signal Alliance
                 {
                     m_caster->CastSpell(m_caster, m_spellInfo->CalculateSimpleValue(eff_idx), true);
