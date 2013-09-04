@@ -2766,6 +2766,17 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
 
                     return;
                 }
+                case 47129:                                 // Totemic Beacon (Midsummer Fire Festival)
+                {
+                    if (eff_idx != EFFECT_INDEX_0)
+                        return;
+
+                    float fDestX, fDestY, fDestZ;
+                    m_caster->GetNearPoint(m_caster, fDestX, fDestY, fDestZ, m_caster->GetObjectBoundingRadius(), 30.0f, 0.0f);
+
+                    if (Creature* pWolf = m_caster->SummonCreature(25324, fDestX, fDestY, fDestZ, 0.0f, TEMPSUMMON_TIMED_DESPAWN, 60000))
+                        pWolf->GetMotionMaster()->MoveFollow(m_caster, PET_FOLLOW_DIST, pWolf->GetAngle(m_caster));
+                }
                 case 47170:                                 // Impale Leviroth
                 {
                     if (!unitTarget || unitTarget->GetTypeId() != TYPEID_UNIT)
