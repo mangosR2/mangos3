@@ -2513,6 +2513,21 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     ((Creature*)unitTarget)->ForcedDespawn(15000);
                     return;
                 }
+                case 45780:                                 // Use Tuskarr Torch (for Quest: Burn in Effigy)
+                {
+                    if (!unitTarget)
+                        return;
+
+                    if (Unit* pCaster = GetCaster())
+                    {
+                       if (Creature* pCre = pCaster->GetClosestCreatureWithEntry(pCaster, 25584, 50.0f))
+                       {
+                           pCaster->DealDamage(pCre, pCre->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
+                           pCre->GetMotionMaster()->MoveFall();
+                       }
+                    }
+                    return;
+                }
                 case 45958:                                 // Signal Alliance
                 {
                     m_caster->CastSpell(m_caster, m_spellInfo->CalculateSimpleValue(eff_idx), true);
