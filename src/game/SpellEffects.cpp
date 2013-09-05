@@ -2542,7 +2542,7 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                 }
                 case 45819:                                 // Throw Torch
                 {
-                    m_caster->CastSpell(m_targets.getDestination().x, m_targets.getDestination().y, m_targets.getDestination().z, 45277, true, m_CastItem, NULL, m_originalCasterGuid);
+                    m_caster->CastSpell(m_targets.getDestination(), 45277, true, m_CastItem, NULL, m_originalCasterGuid);
                     return;
                 }
                 case 45958:                                 // Signal Alliance
@@ -3763,7 +3763,7 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
 
                     if (VehicleKitPtr vehicleKit = unitTarget->GetVehicleKit())
                     {
-                        vehicleKit->SetDestination(m_targets.getDestination().x, m_targets.getDestination().y, m_targets.getDestination().z, unitTarget->GetOrientation(),  m_targets.GetSpeed(), m_targets.GetElevation());
+                        vehicleKit->SetDestination(m_targets.getDestination().getX(), m_targets.getDestination().getY(), m_targets.getDestination().getZ(), unitTarget->GetOrientation(),  m_targets.GetSpeed(), m_targets.GetElevation());
                     }
                     return;
                 }
@@ -7085,7 +7085,7 @@ void Spell::EffectDistract(SpellEffectIndex /*eff_idx*/)
     if (unitTarget->hasUnitState(UNIT_STAT_CAN_NOT_REACT))
         return;
 
-    unitTarget->SetFacingTo(unitTarget->GetAngle(m_targets.getDestination().x, m_targets.getDestination().y));
+    unitTarget->SetFacingTo(unitTarget->GetAngle(m_targets.getDestination().getX(), m_targets.getDestination().getY()));
     unitTarget->clearUnitState(UNIT_STAT_MOVING);
 
     if (unitTarget->GetTypeId() == TYPEID_UNIT)

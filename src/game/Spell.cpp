@@ -255,7 +255,7 @@ void SpellCastTargets::read(ByteBuffer& data, Unit* caster)
         m_src = caster->GetPosition();
         data >> m_srcTransportGUID.ReadAsPacked();
         data >> m_src.x >> m_src.y >> m_src.z;
-        if(!MaNGOS::IsValidMapCoord(getSource().x, getSource().y, getSource().z))
+        if(!MaNGOS::IsValidMapCoord(getSource().getX(), getSource().getY(), getSource().getZ()))
             throw ByteBufferException(false, data.rpos(), 0, data.size());
     }
 
@@ -264,7 +264,7 @@ void SpellCastTargets::read(ByteBuffer& data, Unit* caster)
         m_dest = caster->GetPosition();
         data >> m_destTransportGUID.ReadAsPacked();
         data >> m_dest.x >> m_dest.y >> m_dest.z;
-        if(!MaNGOS::IsValidMapCoord(getDestination().x, getDestination().y, getDestination().z))
+        if(!MaNGOS::IsValidMapCoord(getDestination().getX(), getDestination().getY(), getDestination().getZ()))
             throw ByteBufferException(false, data.rpos(), 0, data.size());
     }
 
@@ -1897,7 +1897,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
             {
                 m_targets.setSource(m_targets.getDestination());
                 WorldLocation loc = m_targets.getDestination();
-                m_caster->GetRandomPoint(m_targets.getDestination().x, m_targets.getDestination().y, m_targets.getDestination().z, radius, loc.x, loc.y, loc.z);
+                m_caster->GetRandomPoint(m_targets.getDestination().getX(), m_targets.getDestination().getY(), m_targets.getDestination().getZ(), radius, loc.x, loc.y, loc.z);
                 m_targets.setDestination(loc);
                 targetUnitMap.push_back(m_caster);
             }
@@ -7039,9 +7039,9 @@ SpellCastResult Spell::CheckCastTargets() const
                     if (fabs(m_caster->GetPositionZ() - m_targets.getDestination().getZ()) > 8.0f)
                         return SPELL_FAILED_NOPATH;
 
-                    float pz  = m_caster->GetMap()->GetHeight(m_caster->GetPhaseMask(), m_targets.getDestination().x, m_targets.getDestination().y, m_targets.getDestination().z);
+                    float pz  = m_caster->GetMap()->GetHeight(m_caster->GetPhaseMask(), m_targets.getDestination().getX(), m_targets.getDestination().getY(), m_targets.getDestination().getZ());
 
-                    if (fabs(pz - m_targets.getDestination().z) > 8.0f)
+                    if (fabs(pz - m_targets.getDestination().getZ()) > 8.0f)
                         return SPELL_FAILED_NOPATH;
                 }
                 else
