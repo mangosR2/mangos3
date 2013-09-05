@@ -214,10 +214,10 @@ class LFGMgr
         void StartRoleCheck(Group* pGroup);
         void UpdateRoleCheck(Group* pGroup);
         bool CheckRoles(Group* pGroup, Player* pPlayer = NULL);
-        bool CheckRoles(LFGRolesMap* roleMap);
+        bool CheckRoles(LFGRolesMap& roleMap);
         bool RoleChanged(Player* pPlayer, LFGRoleMask roles);
         void SetGroupRoles(Group* pGroup, GuidSet* = NULL);
-        void SetRoles(LFGRolesMap* roleMap);
+        bool SetRoles(LFGRolesMap& roleMap);
 
         // Social check system
         bool HasIgnoreState(ObjectGuid guid1, ObjectGuid guid2);

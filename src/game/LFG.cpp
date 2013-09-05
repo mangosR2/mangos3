@@ -100,6 +100,7 @@ LFGLockStatusMap const* LFGPlayerState::GetLockMap()
 
 void LFGPlayerState::SetRoles(LFGRoleMask roles)
 {
+    LFGMgr::WriteGuard Guard(sLFGMgr.GetLock());
     m_rolesMask = roles;
 
     if (Group* group = m_pPlayer->GetGroup())
