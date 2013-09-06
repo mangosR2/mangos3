@@ -3766,6 +3766,29 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     m_caster->CastSpell(m_caster, spell_id, true);
                     return;
                 }
+                case 66181:                                 // Anub'arak Find Never Cold and Cast Ice Spikes
+                {
+                    if (!unitTarget)
+                        return;
+
+                    m_caster->RemoveAurasDueToSpell(65920); // Remove Aura Spike 01
+                    m_caster->RemoveAurasDueToSpell(65922); // Remove Aura Spike 02
+                    m_caster->RemoveAurasDueToSpell(65923); // Remove Aura Spike 03
+                    m_caster->CastSpell(m_caster, 67732, true); // cast Ice Spike
+
+                    Unit* pVictim = m_caster->getVictim();
+                    if (pVictim && pVictim->HasAura(67574)) // Remove Target Aura
+                        pVictim->RemoveAurasDueToSpell(67574);
+
+                    if (unitTarget->GetTypeId() != TYPEID_PLAYER)
+                        ((Creature*)unitTarget)->ForcedDespawn(700);
+
+                    float x, y, z;
+                    m_caster->GetClosePoint(x, y, z, m_caster->GetObjectBoundingRadius(), 10.0f, frand(0.0f, M_PI_F * 2));
+                    m_caster->NearTeleportTo(x, y, z, m_caster->GetOrientation());
+                    m_caster->CastSpell(m_caster, 65920, true); // Cast Aura Spike 01
+                    return;
+                }
                 case 66218:                                 // Launch - set position
                 {
                     if (!unitTarget || unitTarget->GetTypeId() != TYPEID_UNIT)
