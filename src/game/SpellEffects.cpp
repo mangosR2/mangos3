@@ -3537,6 +3537,22 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
 
                     return;
                 }
+                case 55804:                                 // Healing Finished (triggered by item spell Telluric Poultice)
+                {
+                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_UNIT || unitTarget->isInCombat())
+                        return;
+
+                    Unit* pCaster = GetAffectiveCaster();
+                    if (!pCaster || pCaster->GetTypeId() != TYPEID_PLAYER)
+                        return;
+
+                    ((Creature*)unitTarget)->ForcedDespawn(30000);
+                    unitTarget->SetByteValue(UNIT_FIELD_BYTES_1, 0, UNIT_STAND_STATE_STAND);
+                    unitTarget->GetMotionMaster()->Clear();
+                    unitTarget->GetMotionMaster()->MoveFollow(pCaster, PET_FOLLOW_DIST, unitTarget->GetAngle(pCaster));
+                    ((Player*)pCaster)->KilledMonsterCredit(unitTarget->GetEntry(), unitTarget->GetObjectGuid());
+                    return;
+                }
                 case 55818:                                 // Hurl Boulder
                 {
                     // unclear how many summon min/max random, best guess below
