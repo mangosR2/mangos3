@@ -3789,6 +3789,12 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     m_caster->CastSpell(m_caster, 65920, true); // Cast Aura Spike 01
                     return;
                 }
+                case 67322: // Burrower Cast (Toc10)
+                {
+                    if (!m_caster->HasAura(66193) && !m_caster->HasAura(67855) && !m_caster->HasAura(67856) && !m_caster->HasAura(67857))
+                        m_caster->CastSpell(m_caster, 68394, false); // Cast Burrower
+                    return;
+                }
                 case 66218:                                 // Launch - set position
                 {
                     if (!unitTarget || unitTarget->GetTypeId() != TYPEID_UNIT)
