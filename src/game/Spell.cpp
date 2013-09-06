@@ -8522,12 +8522,27 @@ bool Spell::FillCustomTargetMap(SpellEffectIndex i, UnitList &targetUnitMap)
         }
         case 46584: // Raise Dead
         {
-            Unit* pCorpseTarget = (Unit*)FindCorpseUsing<MaNGOS::RaiseDeadObjectCheck>(CREATURE_TYPEMASK_HUMANOID_OR_UNDEAD);
-
-            if (pCorpseTarget && pCorpseTarget->IsInWorld())
-                targetUnitMap.push_back(pCorpseTarget);
-            else
-                targetUnitMap.push_back((Unit*)m_caster);
+            Unit* pCorpseTarget = NULL;
+            WorldObject* result = FindCorpseUsing<MaNGOS::RaiseDeadObjectCheck>(CREATURE_TYPEMASK_HUMANOID_OR_UNDEAD);
+            if (result && result->IsInWorld())
+            {
+                switch (result->GetTypeId())
+                {
+                    case TYPEID_UNIT:
+                    case TYPEID_PLAYER:
+                        pCorpseTarget =(Unit*)result;
+                        break;
+                    case TYPEID_CORPSE:
+                        if (Player* owner = ObjectAccessor::FindPlayer(((Corpse*)result)->GetOwnerGuid()))
+                            if (owner->IsInMap(m_caster) && !owner->isAlive())
+                                pCorpseTarget =(Unit*)owner;
+                        break;
+                    default:
+                        /* pCorpseTarget == NULL;*/
+                        break;
+                }
+            }
+            targetUnitMap.push_back(pCorpseTarget ? pCorpseTarget : (Unit*)m_caster);
             break;
         }
         case 47496: // Ghoul's explode
@@ -8765,7 +8780,7 @@ bool Spell::FillCustomTargetMap(SpellEffectIndex i, UnitList &targetUnitMap)
         case 61999: // Raise ally
         {
             WorldObject* result = FindCorpseUsing<MaNGOS::RaiseAllyObjectCheck>(CREATURE_TYPEMASK_NONE);
-            if (result)
+            if (result && result->GetTypeId() == TYPEID_UNIT)
                 targetUnitMap.push_back((Unit*)result);
             else
                 targetUnitMap.push_back((Unit*)m_caster);
