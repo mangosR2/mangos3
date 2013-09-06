@@ -1324,6 +1324,20 @@ void Aura::TriggerSpell()
     // specific code for cases with no trigger spell provided in field
     if (triggeredSpellInfo == NULL)
     {
+        // Server side spells
+        switch (trigger_spell_id)
+        {
+            // Ice Tomb (Sindragosa)
+            case 70159:
+            {
+                if (triggerTarget->HasAura(70157))
+                    return;
+                trigger_spell_id = 70157;
+            }
+            default:
+                break;
+        }
+
         switch(auraSpellInfo->SpellFamilyName)
         {
             case SPELLFAMILY_GENERIC:

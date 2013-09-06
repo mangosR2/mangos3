@@ -3920,13 +3920,6 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     }
                     return;
                 }
-                case 69675:                                 // Ice Tomb (Sindragosa)
-                {
-                    if (unitTarget)
-                        m_caster->CastSpell(unitTarget, 70157, true, 0, 0, ObjectGuid(), m_spellInfo);
-
-                    return;
-                }
                 case 69712:                                 // Ice Tomb (Sindragosa)
                 {
                     // trigger spheres to targets with Frost Beacon mark
