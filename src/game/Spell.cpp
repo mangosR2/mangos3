@@ -7931,19 +7931,19 @@ bool Spell::CheckTargetBeforeLimitation(Unit* target, SpellEffectIndex eff)
     return true;
 }
 
-bool Spell::CheckTarget(Unit* target, SpellEffectIndex eff )
+bool Spell::CheckTarget(Unit* target, SpellEffectIndex eff)
 {
     if (!target)
         return false;
 
     // Check targets for creature type mask and remove not appropriate (skip explicit self target case, maybe need other explicit targets)
-    if (m_spellInfo->EffectImplicitTargetA[eff] != TARGET_SELF )
+    if (m_spellInfo->EffectImplicitTargetA[eff] != TARGET_SELF)
     {
         if (!SpellMgr::IsTargetMatchedWithCreatureType(m_spellInfo, target))
             return false;
     }
 
-     // check right target                                                                                       // should activ for spells 72034, 72096
+    // check right target                                                                                       // should activ for spells 72034, 72096
     if (m_spellInfo->HasAttribute(SPELL_ATTR_EX3_TARGET_ONLY_PLAYER) && target->GetTypeId() != TYPEID_PLAYER &&
         m_spellInfo->EffectImplicitTargetA[eff] != TARGET_SCRIPT && m_spellInfo->EffectImplicitTargetA[eff] != TARGET_SELF)
     {
@@ -7952,14 +7952,16 @@ bool Spell::CheckTarget(Unit* target, SpellEffectIndex eff )
     // Check Aura spell req (need for AoE spells)
     if (m_spellInfo->targetAuraSpell && !target->HasAura(m_spellInfo->targetAuraSpell))
         return false;
+
     if (m_spellInfo->excludeTargetAuraSpell && target->HasAura(m_spellInfo->excludeTargetAuraSpell))
         return false;
+
     if (m_spellInfo->TargetAuraStateNot && target->HasAura(m_spellInfo->TargetAuraStateNot))
         return false;
 
     // Check targets for not_selectable unit flag and remove
     // A player can cast spells on his pet (or other controlled unit) though in any state
-    if (target != m_caster && target->GetCharmerOrOwnerGuid() != m_caster->GetObjectGuid())
+    if (target != m_caster && target->isType(TYPEMASK_UNIT) && target->GetCharmerOrOwnerGuid() != m_caster->GetObjectGuid())
     {
         // any unattackable target skipped
         if (target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE) && target->GetObjectGuid() != m_caster->GetCharmerOrOwnerGuid())
@@ -7974,7 +7976,7 @@ bool Spell::CheckTarget(Unit* target, SpellEffectIndex eff )
             m_spellInfo->EffectImplicitTargetA[eff] != TARGET_AREAEFFECT_INSTANT &&
             m_spellInfo->EffectImplicitTargetB[eff] != TARGET_AREAEFFECT_INSTANT &&
             m_spellInfo->EffectImplicitTargetA[eff] != TARGET_AREAEFFECT_CUSTOM &&
-            m_spellInfo->EffectImplicitTargetB[eff] != TARGET_AREAEFFECT_CUSTOM )
+            m_spellInfo->EffectImplicitTargetB[eff] != TARGET_AREAEFFECT_CUSTOM)
             return false;
     }
 
@@ -7986,12 +7988,13 @@ bool Spell::CheckTarget(Unit* target, SpellEffectIndex eff )
     }
 
     // Check player targets and remove if in GM mode or GM invisibility (for not self casting case)
-    if ( target != m_caster && target->GetTypeId() == TYPEID_PLAYER)
+    if (target != m_caster && target->GetTypeId() == TYPEID_PLAYER &&
+        !(((Player*)target)->isGameMaster() && target->IsVehicle()))
     {
-        if(((Player*)target)->GetVisibility() == VISIBILITY_OFF)
+        if (((Player*)target)->GetVisibility() == VISIBILITY_OFF)
             return false;
 
-        if(((Player*)target)->isGameMaster() && !IsPositiveSpell(m_spellInfo->Id))
+        if (((Player*)target)->isGameMaster() && !IsPositiveSpell(m_spellInfo->Id))
             return false;
     }
 
@@ -8008,8 +8011,8 @@ bool Spell::CheckTarget(Unit* target, SpellEffectIndex eff )
         m_spellInfo->EffectImplicitTargetB[eff] == TARGET_ALL_RAID_AROUND_CASTER)
         return true;
 
-    // Check targets for LOS visibility (except spells without range limitations )
-    switch(m_spellInfo->Effect[eff])
+    // Check targets for LOS visibility (except spells without range limitations)
+    switch (m_spellInfo->Effect[eff])
     {
         case SPELL_EFFECT_FRIEND_SUMMON:
         case SPELL_EFFECT_SUMMON_PLAYER:                    // from anywhere
@@ -8023,14 +8026,14 @@ bool Spell::CheckTarget(Unit* target, SpellEffectIndex eff )
                 if (!m_targets.getCorpseTargetGuid())
                     return false;
 
-                Corpse *corpse = m_caster->GetMap()->GetCorpse(m_targets.getCorpseTargetGuid());
-                if(!corpse)
+                Corpse* corpse = m_caster->GetMap()->GetCorpse(m_targets.getCorpseTargetGuid());
+                if (!corpse)
                     return false;
 
                 if (target->GetObjectGuid() != corpse->GetOwnerGuid())
                     return false;
 
-                if(!m_spellInfo->HasAttribute(SPELL_ATTR_EX2_IGNORE_LOS) && !corpse->IsWithinLOSInMap(m_caster))
+                if (!m_spellInfo->HasAttribute(SPELL_ATTR_EX2_IGNORE_LOS) && !corpse->IsWithinLOSInMap(m_caster))
                     return false;
             }
 
@@ -8046,8 +8049,10 @@ bool Spell::CheckTarget(Unit* target, SpellEffectIndex eff )
                         return false;
                 }
                 else if (WorldObject* caster = GetCastingObject())
+                {
                     if (!target->IsVisibleTargetForSpell(caster, m_spellInfo))
                         return false;
+                }
             }
             break;
     }
