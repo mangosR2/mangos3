@@ -5249,10 +5249,11 @@ void Spell::EffectTriggerSpell(SpellEffectIndex effIndex)
                 pet->CastSpell(pet, 28305, true);
             return;
         }
-        case 53258:                                         // Empower Rune Weapon
+        case 58832:                                         // Mirror Image
         {
+            // Glyph of Mirror Image
             if (m_caster->HasAura(63093))
-                m_caster->CastSpell(m_caster, 65047, true); // Mirror Image
+               m_caster->CastSpell(m_caster, 65047, true);  // creates a 4th copy
             break;
         }
         // Coldflame (Lord Marrowgar - Icecrown Citadel) - have casting time 0.2s, must be casted with triggered=false
