@@ -484,6 +484,197 @@ template<typename T> WorldObject* Spell::FindCorpseUsing(uint32 corpseTypeMask)
     return result;
 }
 
+template<class T>
+bool Spell::CheckTargetBeforeLimitation(T* target, SpellEffectIndex eff)
+{
+    DETAIL_FILTER_LOG(LOG_FILTER_SPELL_CAST, "Spell::CheckTargetBeforeLimitation unhandled target check call, spell %u caster %s, target %s", 
+        m_spellInfo->Id, 
+        m_caster ? m_caster->GetObjectGuid().GetString().c_str() : "<none>",
+        target ? target->GetObjectGuid().GetString().c_str() : "<none>");
+    return false;
+};
+
+
+template<>
+bool Spell::CheckTargetBeforeLimitation(Unit* target, SpellEffectIndex eff)
+{
+    if (!target)
+        return false;
+    // check right target                                                                                       // should activ for spells 72034, 72096
+    if (!target->isAlive() && !IsSpellAllowDeadTarget(m_spellInfo))
+        return false;
+    if (m_spellInfo->HasAttribute(SPELL_ATTR_EX3_TARGET_ONLY_PLAYER) && target->GetTypeId() != TYPEID_PLAYER &&
+        m_spellInfo->EffectImplicitTargetA[eff] != TARGET_SCRIPT && m_spellInfo->EffectImplicitTargetA[eff] != TARGET_SELF)
+    {
+        return false;
+    }
+    // Check Aura spell req (need for AoE spells)
+    if (m_spellInfo->targetAuraSpell && !target->HasAura(m_spellInfo->targetAuraSpell))
+        return false;
+    if (m_spellInfo->excludeTargetAuraSpell && target->HasAura(m_spellInfo->excludeTargetAuraSpell))
+        return false;
+    if (m_spellInfo->TargetAuraStateNot && target->HasAura(m_spellInfo->TargetAuraStateNot))
+        return false;
+    return true;
+}
+
+template<class T>
+bool Spell::CheckTarget(T* target, SpellEffectIndex eff)
+{
+
+    DETAIL_FILTER_LOG(LOG_FILTER_SPELL_CAST, "Spell::CheckTarget unhandled target check call, spell %u, caster %s, target %s", 
+        m_spellInfo->Id, 
+        m_caster ? m_caster->GetObjectGuid().GetString().c_str() : "<none>",
+        target ? target->GetObjectGuid().GetString().c_str() : "<none>");
+
+    return false;
+};
+
+template <>
+bool Spell::CheckTarget(Unit* target, SpellEffectIndex eff)
+{
+    if (!target)
+        return false;
+
+    // Check targets for creature type mask and remove not appropriate (skip explicit self target case, maybe need other explicit targets)
+    if (m_spellInfo->EffectImplicitTargetA[eff] != TARGET_SELF)
+    {
+        if (!SpellMgr::IsTargetMatchedWithCreatureType(m_spellInfo, target))
+            return false;
+    }
+
+    // check right target                                                                                       // should activ for spells 72034, 72096
+    if (m_spellInfo->HasAttribute(SPELL_ATTR_EX3_TARGET_ONLY_PLAYER) && target->GetTypeId() != TYPEID_PLAYER &&
+        m_spellInfo->EffectImplicitTargetA[eff] != TARGET_SCRIPT && m_spellInfo->EffectImplicitTargetA[eff] != TARGET_SELF)
+    {
+        return false;
+    }
+    // Check Aura spell req (need for AoE spells)
+    if (m_spellInfo->targetAuraSpell && !target->HasAura(m_spellInfo->targetAuraSpell))
+        return false;
+
+    if (m_spellInfo->excludeTargetAuraSpell && target->HasAura(m_spellInfo->excludeTargetAuraSpell))
+        return false;
+
+    if (m_spellInfo->TargetAuraStateNot && target->HasAura(m_spellInfo->TargetAuraStateNot))
+        return false;
+
+    // Check targets for not_selectable unit flag and remove
+    // A player can cast spells on his pet (or other controlled unit) though in any state
+    if (target != m_caster && target->isType(TYPEMASK_UNIT) && target->GetCharmerOrOwnerGuid() != m_caster->GetObjectGuid())
+    {
+        // any unattackable target skipped
+        if (target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE) && target->GetObjectGuid() != m_caster->GetCharmerOrOwnerGuid())
+            return false;
+
+        // unselectable targets skipped in all cases except TARGET_SCRIPT targeting
+        // in case TARGET_SCRIPT target selected by server always and can't be cheated
+        if ((!m_IsTriggeredSpell || target != m_targets.getUnitTarget()) &&
+            target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE) &&
+            m_spellInfo->EffectImplicitTargetA[eff] != TARGET_SCRIPT &&
+            m_spellInfo->EffectImplicitTargetB[eff] != TARGET_SCRIPT &&
+            m_spellInfo->EffectImplicitTargetA[eff] != TARGET_AREAEFFECT_INSTANT &&
+            m_spellInfo->EffectImplicitTargetB[eff] != TARGET_AREAEFFECT_INSTANT &&
+            m_spellInfo->EffectImplicitTargetA[eff] != TARGET_AREAEFFECT_CUSTOM &&
+            m_spellInfo->EffectImplicitTargetB[eff] != TARGET_AREAEFFECT_CUSTOM)
+            return false;
+    }
+
+    if (target != m_caster && m_caster->GetCharmerOrOwnerGuid() == target->GetObjectGuid())
+    {
+        if (m_spellInfo->EffectImplicitTargetA[eff] == TARGET_MASTER ||
+            m_spellInfo->EffectImplicitTargetB[eff] == TARGET_MASTER)
+            return true;
+    }
+
+    // Check player targets and remove if in GM mode or GM invisibility (for not self casting case)
+    if (target != m_caster && target->GetTypeId() == TYPEID_PLAYER &&
+        !(((Player*)target)->isGameMaster() && target->IsVehicle()))
+    {
+        if (((Player*)target)->GetVisibility() == VISIBILITY_OFF)
+            return false;
+
+        if (((Player*)target)->isGameMaster() && !IsPositiveSpell(m_spellInfo->Id))
+            return false;
+    }
+
+    // Check Sated & Exhaustion debuffs
+    if (((m_spellInfo->Id == 2825) && (target->HasAura(57724) || target->HasAura(57723))) ||
+        ((m_spellInfo->Id == 32182) && (target->HasAura(57724)|| target->HasAura(57723))))
+        return false;
+
+    // Check vampiric bite
+    if (m_spellInfo->Id == 70946 && target->HasAura(70867))
+        return false;
+
+    if (m_spellInfo->EffectImplicitTargetA[eff] == TARGET_ALL_RAID_AROUND_CASTER ||
+        m_spellInfo->EffectImplicitTargetB[eff] == TARGET_ALL_RAID_AROUND_CASTER)
+        return true;
+
+    // Check targets for LOS visibility (except spells without range limitations)
+    switch (m_spellInfo->Effect[eff])
+    {
+        case SPELL_EFFECT_FRIEND_SUMMON:
+        case SPELL_EFFECT_SUMMON_PLAYER:                    // from anywhere
+            break;
+        case SPELL_EFFECT_DUMMY:
+            break;
+        case SPELL_EFFECT_RESURRECT_NEW:
+            // player far away, maybe his corpse near?
+            if (target != m_caster && !target->IsVisibleTargetForSpell(m_caster, m_spellInfo))
+            {
+                if (!m_targets.getCorpseTargetGuid())
+                    return false;
+
+                Corpse* corpse = m_caster->GetMap()->GetCorpse(m_targets.getCorpseTargetGuid());
+                if (!corpse)
+                    return false;
+
+                if (target->GetObjectGuid() != corpse->GetOwnerGuid())
+                    return false;
+
+                if (!m_spellInfo->HasAttribute(SPELL_ATTR_EX2_IGNORE_LOS) && !corpse->IsWithinLOSInMap(m_caster))
+                    return false;
+            }
+
+            // all ok by some way or another, skip normal check
+            break;
+        default:                                            // normal case
+            // Get GO cast coordinates if original caster -> GO
+            if (target != m_caster)
+            {
+                if (DynamicObject* dynObj = m_caster->GetDynObject(m_triggeredByAuraSpell ? m_triggeredByAuraSpell->Id : m_spellInfo->Id))
+                {
+                    if (!target->IsVisibleTargetForSpell(dynObj, m_spellInfo))
+                        return false;
+                }
+                else if (WorldObject* caster = GetCastingObject())
+                {
+                    if (!target->IsVisibleTargetForSpell(caster, m_spellInfo))
+                        return false;
+                }
+            }
+            break;
+    }
+
+    switch (m_spellInfo->Id)
+    {
+        case 37433:                                         // Spout (The Lurker Below), only players affected if its not in water
+            if (target->GetTypeId() != TYPEID_PLAYER || target->IsInWater())
+                return false;
+            break;
+        case 68921:                                         // Soulstorm (FoS), only targets farer than 10 away
+        case 69049:                                         // Soulstorm            - = -
+            if (m_caster->IsWithinDist(target, 10.0f, false))
+                return false;
+            break;
+        default:
+            break;
+    }
+
+    return true;
+}
+
 void Spell::FillTargetMap()
 {
     // TODO: ADD the correct target FILLS!!!!!!
@@ -7909,171 +8100,6 @@ CurrentSpellTypes Spell::GetCurrentContainer()
         return (CURRENT_GENERIC_SPELL);
 }
 
-bool Spell::CheckTargetBeforeLimitation(Unit* target, SpellEffectIndex eff)
-{
-    if (!target)
-        return false;
-    // check right target                                                                                       // should activ for spells 72034, 72096
-    if (!target->isAlive() && !IsSpellAllowDeadTarget(m_spellInfo))
-        return false;
-    if (m_spellInfo->HasAttribute(SPELL_ATTR_EX3_TARGET_ONLY_PLAYER) && target->GetTypeId() != TYPEID_PLAYER &&
-        m_spellInfo->EffectImplicitTargetA[eff] != TARGET_SCRIPT && m_spellInfo->EffectImplicitTargetA[eff] != TARGET_SELF)
-    {
-        return false;
-    }
-    // Check Aura spell req (need for AoE spells)
-    if (m_spellInfo->targetAuraSpell && !target->HasAura(m_spellInfo->targetAuraSpell))
-        return false;
-    if (m_spellInfo->excludeTargetAuraSpell && target->HasAura(m_spellInfo->excludeTargetAuraSpell))
-        return false;
-    if (m_spellInfo->TargetAuraStateNot && target->HasAura(m_spellInfo->TargetAuraStateNot))
-        return false;
-    return true;
-}
-
-bool Spell::CheckTarget(Unit* target, SpellEffectIndex eff)
-{
-    if (!target)
-        return false;
-
-    // Check targets for creature type mask and remove not appropriate (skip explicit self target case, maybe need other explicit targets)
-    if (m_spellInfo->EffectImplicitTargetA[eff] != TARGET_SELF)
-    {
-        if (!SpellMgr::IsTargetMatchedWithCreatureType(m_spellInfo, target))
-            return false;
-    }
-
-    // check right target                                                                                       // should activ for spells 72034, 72096
-    if (m_spellInfo->HasAttribute(SPELL_ATTR_EX3_TARGET_ONLY_PLAYER) && target->GetTypeId() != TYPEID_PLAYER &&
-        m_spellInfo->EffectImplicitTargetA[eff] != TARGET_SCRIPT && m_spellInfo->EffectImplicitTargetA[eff] != TARGET_SELF)
-    {
-        return false;
-    }
-    // Check Aura spell req (need for AoE spells)
-    if (m_spellInfo->targetAuraSpell && !target->HasAura(m_spellInfo->targetAuraSpell))
-        return false;
-
-    if (m_spellInfo->excludeTargetAuraSpell && target->HasAura(m_spellInfo->excludeTargetAuraSpell))
-        return false;
-
-    if (m_spellInfo->TargetAuraStateNot && target->HasAura(m_spellInfo->TargetAuraStateNot))
-        return false;
-
-    // Check targets for not_selectable unit flag and remove
-    // A player can cast spells on his pet (or other controlled unit) though in any state
-    if (target != m_caster && target->isType(TYPEMASK_UNIT) && target->GetCharmerOrOwnerGuid() != m_caster->GetObjectGuid())
-    {
-        // any unattackable target skipped
-        if (target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE) && target->GetObjectGuid() != m_caster->GetCharmerOrOwnerGuid())
-            return false;
-
-        // unselectable targets skipped in all cases except TARGET_SCRIPT targeting
-        // in case TARGET_SCRIPT target selected by server always and can't be cheated
-        if ((!m_IsTriggeredSpell || target != m_targets.getUnitTarget()) &&
-            target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE) &&
-            m_spellInfo->EffectImplicitTargetA[eff] != TARGET_SCRIPT &&
-            m_spellInfo->EffectImplicitTargetB[eff] != TARGET_SCRIPT &&
-            m_spellInfo->EffectImplicitTargetA[eff] != TARGET_AREAEFFECT_INSTANT &&
-            m_spellInfo->EffectImplicitTargetB[eff] != TARGET_AREAEFFECT_INSTANT &&
-            m_spellInfo->EffectImplicitTargetA[eff] != TARGET_AREAEFFECT_CUSTOM &&
-            m_spellInfo->EffectImplicitTargetB[eff] != TARGET_AREAEFFECT_CUSTOM)
-            return false;
-    }
-
-    if (target != m_caster && m_caster->GetCharmerOrOwnerGuid() == target->GetObjectGuid())
-    {
-        if (m_spellInfo->EffectImplicitTargetA[eff] == TARGET_MASTER ||
-            m_spellInfo->EffectImplicitTargetB[eff] == TARGET_MASTER)
-            return true;
-    }
-
-    // Check player targets and remove if in GM mode or GM invisibility (for not self casting case)
-    if (target != m_caster && target->GetTypeId() == TYPEID_PLAYER &&
-        !(((Player*)target)->isGameMaster() && target->IsVehicle()))
-    {
-        if (((Player*)target)->GetVisibility() == VISIBILITY_OFF)
-            return false;
-
-        if (((Player*)target)->isGameMaster() && !IsPositiveSpell(m_spellInfo->Id))
-            return false;
-    }
-
-    // Check Sated & Exhaustion debuffs
-    if (((m_spellInfo->Id == 2825) && (target->HasAura(57724) || target->HasAura(57723))) ||
-        ((m_spellInfo->Id == 32182) && (target->HasAura(57724)|| target->HasAura(57723))))
-        return false;
-
-    // Check vampiric bite
-    if (m_spellInfo->Id == 70946 && target->HasAura(70867))
-        return false;
-
-    if (m_spellInfo->EffectImplicitTargetA[eff] == TARGET_ALL_RAID_AROUND_CASTER ||
-        m_spellInfo->EffectImplicitTargetB[eff] == TARGET_ALL_RAID_AROUND_CASTER)
-        return true;
-
-    // Check targets for LOS visibility (except spells without range limitations)
-    switch (m_spellInfo->Effect[eff])
-    {
-        case SPELL_EFFECT_FRIEND_SUMMON:
-        case SPELL_EFFECT_SUMMON_PLAYER:                    // from anywhere
-            break;
-        case SPELL_EFFECT_DUMMY:
-            break;
-        case SPELL_EFFECT_RESURRECT_NEW:
-            // player far away, maybe his corpse near?
-            if (target != m_caster && !target->IsVisibleTargetForSpell(m_caster, m_spellInfo))
-            {
-                if (!m_targets.getCorpseTargetGuid())
-                    return false;
-
-                Corpse* corpse = m_caster->GetMap()->GetCorpse(m_targets.getCorpseTargetGuid());
-                if (!corpse)
-                    return false;
-
-                if (target->GetObjectGuid() != corpse->GetOwnerGuid())
-                    return false;
-
-                if (!m_spellInfo->HasAttribute(SPELL_ATTR_EX2_IGNORE_LOS) && !corpse->IsWithinLOSInMap(m_caster))
-                    return false;
-            }
-
-            // all ok by some way or another, skip normal check
-            break;
-        default:                                            // normal case
-            // Get GO cast coordinates if original caster -> GO
-            if (target != m_caster)
-            {
-                if (DynamicObject* dynObj = m_caster->GetDynObject(m_triggeredByAuraSpell ? m_triggeredByAuraSpell->Id : m_spellInfo->Id))
-                {
-                    if (!target->IsVisibleTargetForSpell(dynObj, m_spellInfo))
-                        return false;
-                }
-                else if (WorldObject* caster = GetCastingObject())
-                {
-                    if (!target->IsVisibleTargetForSpell(caster, m_spellInfo))
-                        return false;
-                }
-            }
-            break;
-    }
-
-    switch (m_spellInfo->Id)
-    {
-        case 37433:                                         // Spout (The Lurker Below), only players affected if its not in water
-            if (target->GetTypeId() != TYPEID_PLAYER || target->IsInWater())
-                return false;
-            break;
-        case 68921:                                         // Soulstorm (FoS), only targets farer than 10 away
-        case 69049:                                         // Soulstorm            - = -
-            if (m_caster->IsWithinDist(target, 10.0f, false))
-                return false;
-            break;
-        default:
-            break;
-    }
-
-    return true;
-}
 
 bool Spell::IsNeedSendToClient() const
 {
