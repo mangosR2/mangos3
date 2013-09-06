@@ -3172,7 +3172,6 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                 {
                     // It is possible that Nass Heartbeat (spell id 61438) is involved in this
                     // If so, unclear how it should work and using the below instead (even though it could be a bit hack-ish)
-
                     if (!unitTarget || unitTarget->GetTypeId() != TYPEID_UNIT)
                         return;
 
@@ -3180,29 +3179,24 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     if (m_caster != unitTarget->GetOwner())
                         return;
 
-                    // This means we already set state (see below) and need to wait.
-                    if (unitTarget->hasUnitState(UNIT_STAT_ROOT))
-                        return;
+                    m_caster->clearUnitState(UNIT_STAT_ROOT);
 
                     // Expecting pTargetDummy to be summoned by AI at death of target creatures.
-
-                    Creature* pTargetDummy = NULL;
                     float fRange = GetSpellMaxRange(sSpellRangeStore.LookupEntry(m_spellInfo->GetRangeIndex()));
 
-                    MaNGOS::NearestCreatureEntryWithLiveStateInObjectRangeCheck u_check(*m_caster, 28523, true, false, fRange*2);
-                    MaNGOS::CreatureLastSearcher<MaNGOS::NearestCreatureEntryWithLiveStateInObjectRangeCheck> searcher(pTargetDummy, u_check);
-
-                    Cell::VisitGridObjects(m_caster, searcher, fRange*2);
-
+                    Creature* pTargetDummy = m_caster->GetClosestCreatureWithEntry(m_caster, 28523, fRange * 2.0f);
                     if (pTargetDummy)
                     {
-                        unitTarget->MonsterMoveWithSpeed(pTargetDummy->GetPositionX(), pTargetDummy->GetPositionY(), pTargetDummy->GetPositionZ(), 24.f);
+                        // Set player's faction to Nass
+                        unitTarget->setFaction(m_caster->getFaction());
+
+                        unitTarget->MonsterMoveWithSpeed(pTargetDummy->GetPositionX(), pTargetDummy->GetPositionY(), pTargetDummy->GetPositionZ(), 24.0f);
 
                         // Add state to temporarily prevent follow
                         unitTarget->addUnitState(UNIT_STAT_ROOT);
 
                         // Collect Hair Sample
-                        unitTarget->CastSpell(pTargetDummy, 51870, true);
+                        unitTarget->CastSpell(unitTarget, 51870, true);
                     }
 
                     return;
