@@ -198,6 +198,15 @@ void MapManager::Update(uint32 diff)
     if( !i_timer.Passed())
         return;
 
+    if (m_threadsCountPreferred != m_threadsCount)
+    {
+        m_updater.reactivate(m_threadsCountPreferred);
+        sLog.outDetail("MapManager::Update map virtual server threads pool reactivated, new threads count is %u", m_threadsCountPreferred);
+        m_threadsCount = m_threadsCountPreferred;
+    }
+    else
+        m_updater.reactivate(m_threadsCount);
+
     UpdateLoadBalancer(true);
 
     for (MapMapType::iterator iter=i_maps.begin(); iter != i_maps.end(); ++iter)
@@ -211,16 +220,10 @@ void MapManager::Update(uint32 diff)
     }
 
     if (m_updater.activated())
-        m_updater.wait();
+        m_updater.queue_wait();
 
     UpdateLoadBalancer(false);
 
-    if (m_updater.IsBroken() || m_threadsCountPreferred != m_threadsCount)
-    {
-        m_updater.ReActivate(m_threadsCountPreferred);
-        sLog.outDetail("MapManager::Update map virtual server threads pool reactivated, new threads count is %u", m_threadsCountPreferred);
-        m_threadsCount = m_threadsCountPreferred;
-    }
 
     //remove all maps which can be unloaded
     MapMapType::iterator iter = i_maps.begin();

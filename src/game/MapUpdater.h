@@ -1,4 +1,5 @@
 /*
+ * Copyright (C) 2011-2013 /dev/rsa for MangosR2 <http://github.com/MangosR2>
  * Copyright (C) 2005-2010 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -19,14 +20,10 @@
 #ifndef _MAP_UPDATER_H_INCLUDED
 #define _MAP_UPDATER_H_INCLUDED
 
-#include <ace/Thread_Mutex.h>
-#include <ace/Condition_Thread_Mutex.h>
-
-#include "DelayExecutor.h"
+#include "ObjectUpdateTaskBase.h"
 #include "Common.h"
 
 class Map;
-struct MapID;
 
 struct MapBrokenData
 {
@@ -38,63 +35,33 @@ struct MapBrokenData
     void Reset()
     {
         count = 1;
-        lastErrorTime = time(NULL);
+        lastErrorTime = WorldTimer::getMSTime();
     };
 
-    void IncreaseCount() { ++count; lastErrorTime = time(NULL);};
+    void IncreaseCount() { ++count; lastErrorTime = WorldTimer::getMSTime();};
     uint32 count;
-    time_t lastErrorTime;
+    uint32 lastErrorTime;
 };
 
-typedef std::map<ACE_thread_t const, MapID> ThreadMapMap;
-typedef std::map<ACE_thread_t const, uint32/*MSTime*/>  ThreadStartTimeMap;
-typedef std::map<MapID,MapBrokenData> MapBrokenDataMap;
+typedef std::map<Map*,MapBrokenData> MapBrokenDataMap;
 
-class MapUpdater
+class MapUpdater : public ObjectUpdateTaskBase<class Map>
 {
     public:
 
-        MapUpdater();
-        virtual ~MapUpdater();
+        MapUpdater() : ObjectUpdateTaskBase()
+        {}
 
-        friend class MapUpdateRequest;
+        virtual ~MapUpdater() {};
 
-        int schedule_update(Map& map, ACE_UINT32 diff);
-
-        int wait();
-
-        int activate(size_t num_threads);
-
-        int deactivate();
-
-        bool activated();
-
-        void update_finished();
-
-        void register_thread(ACE_thread_t const threadId, uint32 mapId, uint32 instanceId);
-        void unregister_thread(ACE_thread_t const threadId);
-
-        MapID const* GetMapPairByThreadId(ACE_thread_t const threadId);
+        Map* GetMapByThreadId(ACE_thread_t const threadId);
         void FreezeDetect();
 
-        void SetBroken( bool value = false) { m_broken = value; };
-        bool IsBroken() { return m_broken; };
-        void ReActivate( uint32 threads);
-
-        void MapBrokenEvent(MapID const* mapPair);
-        MapBrokenData const* GetMapBrokenData(MapID const* mapPair);
+        void MapBrokenEvent(Map* map);
+        MapBrokenData const* GetMapBrokenData(Map* map);
 
     private:
-
-        ACE_Thread_Mutex m_mutex;
-        ACE_Condition_Thread_Mutex m_condition;
-        DelayExecutor m_executor;
-        size_t pending_requests;
-
-        ThreadMapMap m_threads;
-        ThreadStartTimeMap m_starttime;
         MapBrokenDataMap   m_brokendata;
-        bool m_broken;
 };
 
 #endif //_MAP_UPDATER_H_INCLUDED

@@ -609,13 +609,13 @@ void Master::_OnSignal(int s)
                 sLog.outError("VMSS:: Signal %.2u received from thread "I64FMT".\r\n",s,threadId);
                 ACE_Stack_Trace _StackTrace;
                 std::string StackTrace = _StackTrace.c_str();
-                if (MapID const* mapPair = sMapMgr.GetMapUpdater()->GetMapPairByThreadId(threadId))
+                if (Map* map = sMapMgr.GetMapUpdater()->getObject(threadId))
                 {
-                    MapBrokenData const* pMBData = sMapMgr.GetMapUpdater()->GetMapBrokenData(mapPair);
+                    MapBrokenData const* pMBData = sMapMgr.GetMapUpdater()->GetMapBrokenData(map);
                     uint32 counter = pMBData ? pMBData->count : 0;
 
-                    sLog.outError("VMSS:: crushed thread is update map %u, instance %u, counter %u",mapPair->nMapId, mapPair->nInstanceId, counter);
-                    sLog.outError("VMSS:: BackTrace for map %u: ",mapPair->nMapId);
+                    sLog.outError("VMSS:: crushed thread is update map %u, instance %u, counter %u",map->GetId(), map->GetInstanceId(), counter);
+                    sLog.outError("VMSS:: BackTrace for map %u: ",map->GetId());
 
                     size_t found = 0;
                     while (found < StackTrace.size())
@@ -623,29 +623,26 @@ void Master::_OnSignal(int s)
                         size_t next = StackTrace.find_first_of("\n",found);
                         std::string to_log = StackTrace.substr(found, (next - found));
                         if (to_log.size() > 1)
-                            sLog.outError("VMSS:%u: %s",mapPair->nMapId,to_log.c_str());
+                            sLog.outError("VMSS:%u: %s",map->GetId(), to_log.c_str());
                         found = next+1;
                     }
-                    sLog.outError("VMSS:: /BackTrace for map %u: ",mapPair->nMapId);
+                    sLog.outError("VMSS:: /BackTrace for map %u: ",map->GetId());
 
-                    if (Map* map = sMapMgr.FindMap(mapPair->nMapId, mapPair->nInstanceId))
-                        if (!sWorld.getConfig(CONFIG_BOOL_VMSS_TRYSKIPFIRST) || counter > 0)
-                            map->SetBroken(true);
+                    if (!sWorld.getConfig(CONFIG_BOOL_VMSS_TRYSKIPFIRST) || counter > 0)
+                        map->SetBroken(true);
 
-                    sMapMgr.GetMapUpdater()->MapBrokenEvent(mapPair);
+                    sMapMgr.GetMapUpdater()->MapBrokenEvent(map);
 
                     if (counter > sWorld.getConfig(CONFIG_UINT32_VMSS_MAXTHREADBREAKS))
                     {
-                        sLog.outError("VMSS:: Limit of map restarting (map %u instance %u) exceeded. Stopping world!",mapPair->nMapId, mapPair->nInstanceId);
+                        sLog.outError("VMSS:: Limit of map restarting (map %u instance %u) exceeded. Stopping world!",map->GetId(), map->GetInstanceId());
                         signal(s, SIG_DFL);
                         ACE_OS::kill(getpid(), s);
                     }
                     else
                     {
-                        sLog.outError("VMSS:: Restarting virtual map server (map %u instance %u). Count of restarts: %u",mapPair->nMapId, mapPair->nInstanceId, sMapMgr.GetMapUpdater()->GetMapBrokenData(mapPair)->count);
-                        sMapMgr.GetMapUpdater()->unregister_thread(threadId);
-                        sMapMgr.GetMapUpdater()->update_finished();
-                        sMapMgr.GetMapUpdater()->SetBroken(true);
+                        sLog.outError("VMSS:: Restarting virtual map server (map %u instance %u). Count of restarts: %u",map->GetId(), map->GetInstanceId(), sMapMgr.GetMapUpdater()->GetMapBrokenData(map)->count);
+                        sMapMgr.GetMapUpdater()->kill_thread(threadId, false);
                         ACE_OS::thr_exit();
                     }
                 }
