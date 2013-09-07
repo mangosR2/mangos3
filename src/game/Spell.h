@@ -439,8 +439,8 @@ class Spell
 
         typedef std::list<Unit*> UnitList;
         void FillTargetMap();
-        bool FillCustomTargetMap(SpellEffectIndex effIndex, UnitList &targetUnitMap);
-        void SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList &targetUnitMap);
+        bool FillCustomTargetMap(SpellEffectIndex effIndex, UnitList& targetUnitMap, uint8& effToIndex);
+        void SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList& targetUnitMap);
 
         void FillAreaTargets(UnitList &targetUnitMap, float radius, SpellNotifyPushType pushType, SpellTargets spellTargets, WorldObject* originalCaster = NULL);
         void FillRaidOrPartyTargets(UnitList &targetUnitMap, Unit* member, Unit* center, float radius, bool raid, bool withPets, bool withcaster);

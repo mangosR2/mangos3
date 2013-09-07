@@ -681,7 +681,7 @@ void Spell::FillTargetMap()
 
     UnitList tmpUnitLists[MAX_EFFECT_INDEX];                // Stores the temporary Target Lists for each effect
     uint8 effToIndex[MAX_EFFECT_INDEX] = {0, 1, 2};         // Helper array, to link to another tmpUnitList, if the targets for both effects match
-    for(int i = 0; i < MAX_EFFECT_INDEX; ++i)
+    for(int i = EFFECT_INDEX_0; i < MAX_EFFECT_INDEX; ++i)
     {
         // not call for empty effect.
         // Also some spells use not used effect targets for store targets for dummy effect in triggered spells
@@ -702,14 +702,16 @@ void Spell::FillTargetMap()
         if (IsAreaAuraEffect(m_spellInfo->Effect[i]))
             AddUnitTarget(m_caster, SpellEffectIndex(i));
 
-
         // no double fill for same targets
-        for (int j = 0; j < i; ++j)
+        for (uint8 j = EFFECT_INDEX_0; j < i; ++j)
         {
+            if (m_spellInfo->Effect[j] == SPELL_EFFECT_NONE)
+                continue;
+
             // Check if same target, but handle i.e. AreaAuras different
-            if (m_spellInfo->EffectImplicitTargetA[i] == m_spellInfo->EffectImplicitTargetA[j] && m_spellInfo->EffectImplicitTargetB[i] == m_spellInfo->EffectImplicitTargetB[j]
-                && m_spellInfo->Effect[j] != SPELL_EFFECT_NONE
-                && !IsAreaAuraEffect(m_spellInfo->Effect[i]) && !IsAreaAuraEffect(m_spellInfo->Effect[j]))
+            if (m_spellInfo->EffectImplicitTargetA[i] == m_spellInfo->EffectImplicitTargetA[j] && 
+                m_spellInfo->EffectImplicitTargetB[i] == m_spellInfo->EffectImplicitTargetB[j] && 
+                !IsAreaAuraEffect(m_spellInfo->Effect[i]) && !IsAreaAuraEffect(m_spellInfo->Effect[j]))
                 // Add further conditions here if required
             {
                 effToIndex[i] = j;                          // effect i has same targeting list as effect j
@@ -718,7 +720,7 @@ void Spell::FillTargetMap()
         }
 
         // New target combination and fail custom fill method
-        if (!FillCustomTargetMap(SpellEffectIndex(i),tmpUnitLists[i]) && effToIndex[i] == i)
+        if (!FillCustomTargetMap(SpellEffectIndex(i),tmpUnitLists[i], effToIndex[i]) && effToIndex[i] == i)
         {
             // TargetA/TargetB dependent from each other, we not switch to full support this dependences
             // but need it support in some know cases
@@ -2005,7 +2007,10 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
         {
             // Get a random point AT the circumference
             float angle = 2.0f * M_PI_F * rand_norm_f();
-            m_targets.setDestination(m_caster->GetClosePoint(0.0f, radius, angle));
+            if (m_targets.getUnitTarget() && m_targets.getUnitTarget() != m_caster)
+                angle = MapManager::NormalizeOrientation(m_caster->GetAngle(m_targets.getUnitTarget()) - m_caster->GetOrientation());
+
+            m_targets.setDestination(m_caster->GetClosePoint(m_caster->GetObjectBoundingRadius(), radius, angle));
 
             // This targetMode is often used as 'last' implicitTarget for positive spells, that just require coordinates
             // and no unitTarget (e.g. summon effects). As MaNGOS always needs a unitTarget we add just the caster here.
@@ -8469,7 +8474,7 @@ float Spell::GetBaseSpellSpeed()
     return speed_proto;
 }
 
-bool Spell::FillCustomTargetMap(SpellEffectIndex i, UnitList &targetUnitMap)
+bool Spell::FillCustomTargetMap(SpellEffectIndex i, UnitList& targetUnitMap, uint8& effToIndex)
 {
     float radius;
     uint32 unMaxTargets = 0;
@@ -9095,6 +9100,14 @@ bool Spell::FillCustomTargetMap(SpellEffectIndex i, UnitList &targetUnitMap)
             }
 
             unMaxTargets = 3;
+            break;
+        }
+        case 70961: // Shattered Bones
+        {
+            if (i != EFFECT_INDEX_1)
+                return false;
+
+            effToIndex = EFFECT_INDEX_0;
             break;
         }
         case 70117: // Icy grip (Sindragosa encounter)

@@ -3959,11 +3959,6 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     m_caster->RemoveSpellCooldown(53385, true);
                     return;
                 }
-                case 70961:                                 // Shattered Bones (Icecrown Citadel, trash mob The Damned)
-                {
-                    m_caster->CastSpell(m_caster, m_spellInfo->CalculateSimpleValue(eff_idx), true);
-                    break;
-                }
                 case 70895:                                 // Dark Transformation (Icecrown Citadel, Lady Deathwhisper encounter)
                 {
                     if (!unitTarget)
@@ -3994,6 +3989,14 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                             unitTarget->CastSpell(unitTarget, 71236, false);
                             break;
                     }
+                    break;
+                }
+                case 70961:                                 // Shattered Bones (Icecrown Citadel, trash mob The Damned)
+                {
+                    if (!unitTarget || unitTarget == m_caster)
+                        return;
+
+                    m_caster->CastSpell(unitTarget, m_spellInfo->CalculateSimpleValue(eff_idx), true);
                     break;
                 }
                 case 71281:                                 // Slave Trigger Closest (Q:24498)
