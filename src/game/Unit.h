@@ -172,8 +172,6 @@ enum UnitBytes1_Flags
     UNIT_BYTE1_FLAG_ALL          = 0xFF
 };
 
-#define UNIT_BYTE1_FLAG_UNK_2 UNIT_BYTE1_FLAG_HOVER
-
 // byte value (UNIT_FIELD_BYTES_2,0)
 enum SheathState
 {
