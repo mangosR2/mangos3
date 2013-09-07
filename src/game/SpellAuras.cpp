@@ -2018,8 +2018,11 @@ void Aura::TriggerSpell()
                     case 70017:                             // Gunship Cannon Fire
                         trigger_spell_id = 70021;
                         break;
-//                    // Ice Tomb
-//                    case 70157: break;
+                    // Ice Tomb
+                    case 70157:
+                        if (uint32(time(NULL) - GetAuraApplyTime()) >= 20 && !triggerTarget->HasAura(71665))
+                            triggerTarget->CastSpell(triggerTarget, 71665, true);
+                        return;
                     case 70842:                             // Mana Barrier
                     {
                         if (!triggerTarget || triggerTarget->getPowerType() != POWER_MANA)
@@ -6227,22 +6230,13 @@ void Aura::HandlePeriodicTriggerSpell(bool apply, bool /*Real*/)
         {
             if (apply)
             {
-                if (GameObject *pGO = target->SummonGameobject(201722, target->GetPositionX(), target->GetPositionY(), target->GetPositionZ(), 0.0f, 180))
-                {
-                    pGO->SetSpellId(GetId());
-                    target->AddGameObject(pGO);
-                }
-                if (Creature *pCreature = target->SummonCreature(36980, target->GetPositionX(), target->GetPositionY(), target->GetPositionZ(), 0.0f, TEMPSUMMON_TIMED_DESPAWN, 180000))
-                {
+                if (Creature* pCreature = target->SummonCreature(36980, target->GetPositionX(), target->GetPositionY(), target->GetPositionZ(), 0.0f, TEMPSUMMON_MANUAL_DESPAWN, 0))
                     pCreature->SetCreatorGuid(target->GetObjectGuid());
-                }
             }
             else
             {
-                if (GameObject *pGo = target->GetGameObject(GetId()))
-                    pGo->Delete();
+                target->RemoveAurasDueToSpell(71665); // Asphyxiation
             }
-
             return;
         }
         case 71530:                                     // Essence of the Blood Queen (Queen Lana'thel)
