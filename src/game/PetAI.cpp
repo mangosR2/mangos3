@@ -499,7 +499,7 @@ void PetAI::UpdateAI(const uint32 diff)
             if (m_attackDistanceRecheckTimer.Passed())
             {
                 m_attackDistanceRecheckTimer.Reset();
-                if (sWorld.getConfig(CONFIG_BOOL_PET_ADVANCED_AI) && m_AIType == PET_AI_RANGED)
+                if (sWorld.getConfig(CONFIG_BOOL_PET_ADVANCED_AI) && m_AIType == PET_AI_RANGED && m_creature->getVictim())
                 {
                     float dist = m_creature->GetDistance(m_creature->getVictim());
                     if ((m_creature->CanReachWithMeleeAttack(m_creature->getVictim()) &&
@@ -513,7 +513,7 @@ void PetAI::UpdateAI(const uint32 diff)
 
                 if (sWorld.getConfig(CONFIG_BOOL_PET_ADVANCED_AI))
                 {
-                    // AOE check
+                    // FIXME: AOE check
                 }
             }
         }

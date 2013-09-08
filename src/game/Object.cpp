@@ -1189,6 +1189,9 @@ InstanceData* WorldObject::GetInstanceData() const
 
 float WorldObject::GetDistance(const WorldObject* obj) const
 {
+    if (!obj)
+        return (MAX_VISIBILITY_DISTANCE + 1.0f);
+
     float sizefactor = GetObjectBoundingRadius() + obj->GetObjectBoundingRadius();
     float dist = GetDistance(obj->GetPosition()) - sizefactor;
     return ( dist > M_NULL_F ? dist : 0.0f);
