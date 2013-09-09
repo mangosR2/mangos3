@@ -38,7 +38,6 @@ add_library(zlib
     ../../dep/src/zlib/crc32.c
     ../../dep/src/zlib/deflate.c
     ../../dep/src/zlib/example.c
-    ../../dep/src/zlib/gzio.c
     ../../dep/src/zlib/infback.c
     ../../dep/src/zlib/inffast.c
     ../../dep/src/zlib/inflate.c

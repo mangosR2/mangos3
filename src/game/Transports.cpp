@@ -38,6 +38,12 @@ Transport::Transport() : GameObject(), m_transportKit(NULL)
 
 Transport::~Transport()
 {
+    if (IsInWorld())
+    {
+        if (GetMap())
+            GetMap()->Remove((GameObject*)this, true);
+    }
+
     if (m_transportKit)
         delete m_transportKit;
 }

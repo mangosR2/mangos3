@@ -17599,10 +17599,10 @@ void Player::SaveToDB()
     {
         uberInsert.addUInt32(GetTeleportDest().GetMapId());
         uberInsert.addUInt32(GetDifficulty());
-        uberInsert.addFloat(finiteAlways(GetTeleportDest().x));
-        uberInsert.addFloat(finiteAlways(GetTeleportDest().y));
-        uberInsert.addFloat(finiteAlways(GetTeleportDest().z));
-        uberInsert.addFloat(finiteAlways(GetTeleportDest().orientation));
+        uberInsert.addFloat(finiteAlways(GetTeleportDest().getX()));
+        uberInsert.addFloat(finiteAlways(GetTeleportDest().getY()));
+        uberInsert.addFloat(finiteAlways(GetTeleportDest().getZ()));
+        uberInsert.addFloat(finiteAlways(GetTeleportDest().getO()));
     }
 
     std::ostringstream ss;
