@@ -2153,7 +2153,7 @@ uint8 Creature::getRace() const
 
 bool Creature::IsInEvadeMode() const
 {
-    return IsInUnitState(UNIT_ACTION_HOME);
+    return IsInUnitState(UNIT_ACTION_HOME) || hasUnitState(UNIT_STAT_DELAYED_EVADE);
 }
 
 bool Creature::HasSpell(uint32 spellID)

@@ -302,18 +302,16 @@ bool AttackResumeEvent::Execute(uint64 /*e_time*/, uint32 /*p_time*/)
         return true;
 
     Unit* victim = m_owner.getVictim();
-
     if (!victim || !victim->IsInMap(&m_owner))
         return true;
 
-    switch(m_owner.GetObjectGuid().GetHigh())
+    switch (m_owner.GetObjectGuid().GetHigh())
     {
         case HIGHGUID_UNIT:
         case HIGHGUID_VEHICLE:
         {
             m_owner.AttackStop(!b_force);
-            CreatureAI* ai = ((Creature*)&m_owner)->AI();
-            if (ai)
+            if (CreatureAI* ai = ((Creature*)&m_owner)->AI())
             {
             // Reset EventAI now unsafe, temp disabled (require correct writing EventAI scripts)
             //    if (CreatureEventAI* eventai = (CreatureEventAI*)ai)
@@ -325,13 +323,13 @@ bool AttackResumeEvent::Execute(uint64 /*e_time*/, uint32 /*p_time*/)
         case HIGHGUID_PET:
         {
             m_owner.AttackStop(!b_force);
-           ((Pet*)&m_owner)->AI()->AttackStart(victim);
+            ((Pet*)&m_owner)->AI()->AttackStart(victim);
             break;
         }
         case HIGHGUID_PLAYER:
             break;
         default:
-            sLog.outError("AttackResumeEvent::Execute try execute for unsupported owner %s!", m_owner.GetObjectGuid().GetString().c_str());
+            sLog.outError("AttackResumeEvent::Execute try execute for unsupported owner %s!", m_owner.GetGuidStr().c_str());
         break;
     }
     return true;
@@ -344,8 +342,17 @@ bool ForcedDespawnDelayEvent::Execute(uint64 /*e_time*/, uint32 /*p_time*/)
     return true;
 }
 
+EvadeDelayEvent::EvadeDelayEvent(Unit& owner, bool force /*=false*/) :
+    BasicEvent(WORLDOBJECT_EVENT_TYPE_UNIQUE), m_owner(owner), b_force(force)
+{
+    if (m_owner.GetTypeId() == TYPEID_UNIT)
+        m_owner.addUnitState(UNIT_STAT_DELAYED_EVADE);
+}
+
 bool EvadeDelayEvent::Execute(uint64 /*e_time*/, uint32 /*p_time*/)
 {
+    m_owner.clearUnitState(UNIT_STAT_DELAYED_EVADE);
+
     if (m_owner.IsInEvadeMode())
         return true;
 
@@ -413,7 +420,7 @@ bool EvadeDelayEvent::Execute(uint64 /*e_time*/, uint32 /*p_time*/)
         }
         case HIGHGUID_PLAYER:
         default:
-            sLog.outError("EvadeDelayEvent::Execute try execute for unsupported owner %s!", m_owner.GetObjectGuid().GetString().c_str());
+            sLog.outError("EvadeDelayEvent::Execute try execute for unsupported owner %s!", m_owner.GetGuidStr().c_str());
         break;
     }
     return true;
@@ -577,4 +584,3 @@ void BGQueueRemoveEvent::Abort(uint64 /*e_time*/)
 {
     //do nothing
 }
-

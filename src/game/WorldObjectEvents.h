@@ -150,7 +150,7 @@ class AttackResumeEvent : public BasicEvent
 class EvadeDelayEvent : public BasicEvent
 {
     public:
-        EvadeDelayEvent(Unit& owner, bool force = false) : BasicEvent(WORLDOBJECT_EVENT_TYPE_UNIQUE), m_owner(owner), b_force(force) {};
+        EvadeDelayEvent(Unit& owner, bool force = false);
         bool Execute(uint64 e_time, uint32 p_time);
     private:
         EvadeDelayEvent();
