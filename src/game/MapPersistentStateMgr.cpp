@@ -216,16 +216,52 @@ DungeonPersistentState::DungeonPersistentState( uint16 MapId, uint32 InstanceId,
 
 DungeonPersistentState::~DungeonPersistentState()
 {
-    while(!m_playerList.empty())
+    while (!m_playerList.empty())
     {
-        Player *player = *(m_playerList.begin());
-        player->UnbindInstance(GetMapId(), GetDifficulty(), true);
+        GuidSet::iterator itr = m_playerList.begin();
+        if (Player* player = ObjectAccessor::FindPlayer(*itr))
+            player->UnbindInstance(GetMapId(), GetDifficulty(), true);
+        else
+            m_playerList.erase(itr);
     }
-    while(!m_groupList.empty())
+    while (!m_groupList.empty())
     {
-        Group *group = *(m_groupList.begin());
-        group->UnbindInstance(GetMapId(), GetDifficulty(), true);
+        GuidSet::iterator itr = m_groupList.begin();
+        if (Group* group = sObjectMgr.GetGroup(*itr))
+            group->UnbindInstance(GetMapId(), GetDifficulty(), true);
+        else
+            m_groupList.erase(itr);
     }
+}
+
+void DungeonPersistentState::AddPlayer(Player* player)
+{
+    if (!player)
+        return;
+    m_playerList.insert(player->GetObjectGuid());
+}
+
+bool DungeonPersistentState::RemovePlayer(Player* player)
+{
+    if (!player)
+        return false;
+    m_playerList.erase(player->GetObjectGuid());
+    return UnloadIfEmpty();
+}
+
+void DungeonPersistentState::AddGroup(Group* group)
+{
+    if (!group)
+        return;
+     m_groupList.insert(group->GetObjectGuid());
+}
+
+bool DungeonPersistentState::RemoveGroup(Group* group)
+{
+    if (!group)
+        return false;
+     m_groupList.erase(group->GetObjectGuid());
+      return UnloadIfEmpty();
 }
 
 bool DungeonPersistentState::CanBeUnload() const

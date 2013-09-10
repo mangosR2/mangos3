@@ -226,11 +226,11 @@ class DungeonPersistentState : public MapPersistentState
 
         /* online players bound to the instance (perm/solo)
            does not include the members of the group unless they have permanent saves */
-        void AddPlayer(Player *player) { m_playerList.push_back(player); }
-        bool RemovePlayer(Player *player) { m_playerList.remove(player); return UnloadIfEmpty(); }
+        void AddPlayer(Player* player);
+        bool RemovePlayer(Player* player);
         /* all groups bound to the instance */
-        void AddGroup(Group *group) { m_groupList.push_back(group); }
-        bool RemoveGroup(Group *group) { m_groupList.remove(group); return UnloadIfEmpty(); }
+        void AddGroup(Group* group);
+        bool RemoveGroup(Group* group);
 
         /* for normal instances this corresponds to max(creature respawn time) + X hours
            for raid/heroic instances this caches the global respawn time for the map */
@@ -273,9 +273,6 @@ class DungeonPersistentState : public MapPersistentState
         bool HasBounds() const { return !m_playerList.empty() || !m_groupList.empty(); }
 
     private:
-        typedef std::list<Player*> PlayerListType;
-        typedef std::list<Group*> GroupListType;
-
         time_t m_resetTime;
         bool m_canReset;
         bool m_isExtended;
@@ -283,8 +280,8 @@ class DungeonPersistentState : public MapPersistentState
         /* the only reason the instSave-object links are kept is because
            the object-instSave links need to be broken at reset time
            TODO: maybe it's enough to just store the number of players/groups */
-        PlayerListType m_playerList;                        // lock MapPersistentState from unload
-        GroupListType m_groupList;                          // lock MapPersistentState from unload
+        GuidSet m_playerList;                               // lock MapPersistentState from unload
+        GuidSet m_groupList;                                // lock MapPersistentState from unload
 
         SpawnedPoolData m_spawnedPoolData;                  // Pools spawns state for map copy
 
