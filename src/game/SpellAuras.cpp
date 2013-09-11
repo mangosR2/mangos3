@@ -9784,8 +9784,16 @@ void Aura::PeriodicDummyTick()
                     target->CastSpell(target, 62593, true);
                     return;
                 }
-                case 62717:                                 // Slag Pot (periodic dmg)
-                case 63477:
+                case 62717:                                 // Slag Pot
+                {
+                    target->CastSpell(target, 65722, true, NULL, this);
+
+                    // cast Slag Imbued if the target survives up to the last tick
+                    if (GetAuraTicks() == 10)
+                        target->CastSpell(target, 63536, true, NULL, this);
+                    return;
+                }
+                case 64217:                                 // Overcharged
                 {
                     Unit *caster = GetCaster();
 
@@ -9800,6 +9808,15 @@ void Aura::PeriodicDummyTick()
 
                     if (caster && target)
                         caster->CastCustomSpell(target, 63278, 0, &(spell->EffectBasePoints[0]), 0, false, 0, 0, caster->GetObjectGuid() , spell);
+                    return;
+                }
+                case 63477:                                 // Slag Pot (H)
+                {
+                    target->CastSpell(target, 65723, true, NULL, this);
+
+                    // cast Slag Imbued if the target survives up to the last tick
+                    if (GetAuraTicks() == 10)
+                        target->CastSpell(target, 62836, true, NULL, this);
                     return;
                 }
                 case 69008:                                 // Soulstorm (OOC aura)
