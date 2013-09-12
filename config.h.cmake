@@ -1,5 +1,5 @@
-#ifndef HAVE_CONFIG_H
-#define HAVE_CONFIG_H
+#ifndef MANGOS_CONFIG_H
+#define MANGOS_CONFIG_H
 
 #cmakedefine HAVE_ACE_STACK_TRACE_H
 
@@ -9,4 +9,4 @@
 
 #define CLIENT_VERSION ${CLIENT_VERSION}
 
-#endif /* HAVE_CONFIG_H */
+#endif /* MANGOS_CONFIG_H */

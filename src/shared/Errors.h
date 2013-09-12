@@ -21,7 +21,7 @@
 
 #include "Common.h"
 
-#ifndef HAVE_CONFIG_H
+#ifndef MANGOS_CONFIG_H
 #  define HAVE_ACE_STACK_TRACE_H 1
 #endif
 
