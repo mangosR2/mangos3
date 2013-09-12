@@ -10724,15 +10724,6 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     unitTarget->CastSpell(unitTarget, spellid, true);
                     break;
                 }
-                case 64475:                                 // Ignis Strength of the Creator stack decreasing
-                {
-                    if (!unitTarget)
-                        return;
-                    if (SpellAuraHolderPtr holder = unitTarget->GetSpellAuraHolder(64473))
-                        if (holder->ModStackAmount(-1))
-                            unitTarget->RemoveSpellAuraHolder(holder);
-                    break;
-                }
                 case 65238:                                 // Shattered Illusion (Ulduar - Yogg Saron)
                 {
                     if (!unitTarget)
@@ -10805,14 +10796,6 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
 
                     if (Unit* charmer = unitTarget->GetCharmer())
                         charmer->CastSpell(charmer, damage, true);
-                    return;
-                }
-                case 62707:                                 // Grab
-                {
-                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
-                        return;
-
-                    unitTarget->CastSpell(unitTarget, 62708, true);
                     return;
                 }
                 case 64456:                                 // Feral Essence Application Removal

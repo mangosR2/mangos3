@@ -95,24 +95,27 @@ void MapManager::InitializeVisibilityDistanceInfo()
         (*iter).second->InitVisibilityDistance();
 }
 
-Map* MapManager::CreateMap(uint32 id, const WorldObject* obj)
+Map* MapManager::CreateMap(uint32 id, WorldObject const* obj)
 {
     MANGOS_ASSERT(obj);
     //if(!obj->IsInWorld()) sLog.outError("GetMap: called for map %d with object (typeid %d, guid %d, mapid %d, instanceid %d) who is not in world!", id, obj->GetTypeId(), obj->GetGUIDLow(), obj->GetMapId(), obj->GetInstanceId());
     Guard _guard(*this);
 
-    Map * m = NULL;
+    Map* m = NULL;
 
-    const MapEntry* entry = sMapStore.LookupEntry(id);
+    MapEntry const* entry = sMapStore.LookupEntry(id);
     if(!entry)
         return NULL;
 
-    if(entry->Instanceable())
+    if (entry->Instanceable())
     {
-        MANGOS_ASSERT(obj->GetTypeId() == TYPEID_PLAYER);
         //create DungeonMap object
-        if(obj->GetTypeId() == TYPEID_PLAYER)
+        if (obj->GetTypeId() == TYPEID_PLAYER)
             m = CreateInstance(id, (Player*)obj);
+        else if (obj->GetObjectGuid().IsMOTransport())
+            DEBUG_FILTER_LOG(LOG_FILTER_TRANSPORT_MOVES,"MapManager::CreateMap %s try create map %u (no instance given), currently not implemented.",obj->GetObjectGuid().GetString().c_str(), id);
+        else
+            sLog.outError("MapManager::CreateMap %s try create map %u (no instance given), BUG, wrong usage!",obj->GetObjectGuid().GetString().c_str(), id);
     }
     else
     {
@@ -313,7 +316,7 @@ uint32 MapManager::GetNumPlayersInInstances()
 Map* MapManager::CreateInstance(uint32 id, Player * player)
 {
     Map* map = NULL;
-    Map * pNewMap = NULL;
+    Map* pNewMap = NULL;
     uint32 NewInstanceId = 0;                                   // instanceId of the resulting map
     const MapEntry* entry = sMapStore.LookupEntry(id);
 
