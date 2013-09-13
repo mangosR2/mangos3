@@ -112,10 +112,10 @@ Map* MapManager::CreateMap(uint32 id, WorldObject const* obj)
         //create DungeonMap object
         if (obj->GetTypeId() == TYPEID_PLAYER)
             m = CreateInstance(id, (Player*)obj);
-        else if (obj->GetObjectGuid().IsMOTransport())
-            DEBUG_FILTER_LOG(LOG_FILTER_TRANSPORT_MOVES,"MapManager::CreateMap %s try create map %u (no instance given), currently not implemented.",obj->GetObjectGuid().GetString().c_str(), id);
+        else if (obj->IsInitialized() && obj->GetObjectGuid().IsMOTransport())
+            DEBUG_FILTER_LOG(LOG_FILTER_TRANSPORT_MOVES,"MapManager::CreateMap %s try create map %u (no instance given), currently not implemented.",obj->IsInitialized() ? obj->GetObjectGuid().GetString().c_str() : "<uninitialized>", id);
         else
-            sLog.outError("MapManager::CreateMap %s try create map %u (no instance given), BUG, wrong usage!",obj->GetObjectGuid().GetString().c_str(), id);
+            DETAIL_LOG("MapManager::CreateMap %s try create map %u (no instance given), BUG, wrong usage!",obj->IsInitialized() ? obj->GetObjectGuid().GetString().c_str() : "<uninitialized>", id);
     }
     else
     {

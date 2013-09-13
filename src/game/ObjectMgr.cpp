@@ -10101,7 +10101,7 @@ void ObjectMgr::LoadTransports()
     {
         bar.step();
 
-        Transport *t = new Transport;
+        Transport* t = new Transport;
 
         Field *fields = result->Fetch();
 
