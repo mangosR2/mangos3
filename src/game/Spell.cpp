@@ -487,8 +487,8 @@ template<typename T> WorldObject* Spell::FindCorpseUsing(uint32 corpseTypeMask)
 template<class T>
 bool Spell::CheckTargetBeforeLimitation(T* target, SpellEffectIndex eff)
 {
-    DETAIL_FILTER_LOG(LOG_FILTER_SPELL_CAST, "Spell::CheckTargetBeforeLimitation unhandled target check call, spell %u caster %s, target %s", 
-        m_spellInfo->Id, 
+    DETAIL_FILTER_LOG(LOG_FILTER_SPELL_CAST, "Spell::CheckTargetBeforeLimitation unhandled target check call, spell %u caster %s, target %s",
+        m_spellInfo->Id,
         m_caster ? m_caster->GetObjectGuid().GetString().c_str() : "<none>",
         target ? target->GetObjectGuid().GetString().c_str() : "<none>");
     return false;
@@ -522,8 +522,8 @@ template<class T>
 bool Spell::CheckTarget(T* target, SpellEffectIndex eff)
 {
 
-    DETAIL_FILTER_LOG(LOG_FILTER_SPELL_CAST, "Spell::CheckTarget unhandled target check call, spell %u, caster %s, target %s", 
-        m_spellInfo->Id, 
+    DETAIL_FILTER_LOG(LOG_FILTER_SPELL_CAST, "Spell::CheckTarget unhandled target check call, spell %u, caster %s, target %s",
+        m_spellInfo->Id,
         m_caster ? m_caster->GetObjectGuid().GetString().c_str() : "<none>",
         target ? target->GetObjectGuid().GetString().c_str() : "<none>");
 
@@ -709,8 +709,8 @@ void Spell::FillTargetMap()
                 continue;
 
             // Check if same target, but handle i.e. AreaAuras different
-            if (m_spellInfo->EffectImplicitTargetA[i] == m_spellInfo->EffectImplicitTargetA[j] && 
-                m_spellInfo->EffectImplicitTargetB[i] == m_spellInfo->EffectImplicitTargetB[j] && 
+            if (m_spellInfo->EffectImplicitTargetA[i] == m_spellInfo->EffectImplicitTargetA[j] &&
+                m_spellInfo->EffectImplicitTargetB[i] == m_spellInfo->EffectImplicitTargetB[j] &&
                 !IsAreaAuraEffect(m_spellInfo->Effect[i]) && !IsAreaAuraEffect(m_spellInfo->Effect[j]))
                 // Add further conditions here if required
             {
@@ -2151,7 +2151,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
             m_targets.m_targetMask = 0;
             unMaxTargets = unEffectChainTarget;
             float maxRange = radius + unMaxTargets * CHAIN_SPELL_JUMP_RADIUS;
-            
+
             UnitList tempTargetUnitMap;
             switch (targetMode)
             {
@@ -2812,6 +2812,9 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
         }
         case TARGET_LARGE_FRONTAL_CONE:
             FillAreaTargets(targetUnitMap, radius, PUSH_IN_FRONT_90, SPELL_TARGETS_AOE_DAMAGE);
+            break;
+        case TARGET_FRIENDLY_FRONTAL_CONE:
+            FillAreaTargets(targetUnitMap, radius, PUSH_IN_FRONT_30, SPELL_TARGETS_FRIENDLY);
             break;
         case TARGET_NARROW_FRONTAL_CONE:
             FillAreaTargets(targetUnitMap, radius, PUSH_IN_FRONT_15, SPELL_TARGETS_AOE_DAMAGE);
