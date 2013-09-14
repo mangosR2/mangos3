@@ -27,3 +27,10 @@ VALUES (69846, 0, 0, 0, 384, 136, 4, 0, 0, 0, 0, 0, 0, 0, 64, 0, 0, 0, 0, 0, 0, 
 UPDATE `spell_dbc` SET
 `Speed` = 0 -- old value = 8
 WHERE `Id` = 69846;
+
+-- ---------- --
+-- 2013-09-15 --
+-- ---------- --
+
+-- mr2935
+UPDATE `spell_target_position` SET `target_position_z` = 1050.99 WHERE `id` IN(72546, 73655);
