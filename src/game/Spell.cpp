@@ -9542,22 +9542,6 @@ bool Spell::FillCustomTargetMap(SpellEffectIndex i, UnitList& targetUnitMap, uin
             FillAreaTargets(targetUnitMap, radius, PUSH_SELF_CENTER, SPELL_TARGETS_AOE_DAMAGE);
             break;
         }
-        case 74086:                                     // Destroy Soul (Lich King)
-        {
-            radius = 50.0f;
-            UnitList tempTargetUnitMap;
-            FillAreaTargets(tempTargetUnitMap, radius, PUSH_SELF_CENTER, SPELL_TARGETS_ALL);
-            for (UnitList::iterator itr = tempTargetUnitMap.begin(); itr != tempTargetUnitMap.end();++itr)
-            {
-                // target Terenas
-                if ((*itr) && ((*itr)->GetEntry() == 36823 ||
-                    (*itr)->GetTypeId() == TYPEID_PLAYER)) // and target player inside Frostmourne
-                    targetUnitMap.push_back(*itr);
-            }
-            // and self
-            targetUnitMap.push_back(m_caster);
-            break;
-        }
         case 74282:                                     // Shadow Trap (search target) (Lich King)
         {
             radius = 5.0f;
