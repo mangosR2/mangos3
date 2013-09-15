@@ -1313,7 +1313,7 @@ enum Targets
     TARGET_LEFT_FROM_VICTIM                 = 67,
     TARGET_68                               = 68,
     TARGET_69                               = 69,
-    TARGET_70                               = 70,
+    TARGET_SINGLE_ENEMY_2                   = 70,
     TARGET_71                               = 71,
     TARGET_RANDOM_NEARBY_LOC                = 72,                // used in teleport onto nearby locations
     TARGET_RANDOM_CIRCUMFERENCE_POINT       = 73,
