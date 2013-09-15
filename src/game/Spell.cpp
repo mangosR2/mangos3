@@ -2178,20 +2178,29 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
                 }
             }
 
-            if (tempTargetUnitMap.empty())
+            uint32 numTargets = tempTargetUnitMap.size();
+            if (!numTargets)
                 break;
 
-            tempTargetUnitMap.sort(TargetDistanceOrderNear(m_caster));
+            if (numTargets > 1)
+                tempTargetUnitMap.sort(TargetDistanceOrderNear(m_caster));
 
             // Now to get us a random target that's in the initial range of the spell
-            uint32 numTargets = 0;
+            numTargets = 0;
             for (UnitList::const_iterator itr = tempTargetUnitMap.begin(); itr != tempTargetUnitMap.end(); ++itr)
             {
                 if ((*itr)->IsWithinDist(m_caster, radius))
                     ++numTargets;
             }
+
             if (!numTargets)
                 break;
+
+            if (numTargets == 1)
+            {
+                targetUnitMap.push_back(*tempTargetUnitMap.begin());
+                break;
+            }
 
             UnitList::iterator itr = tempTargetUnitMap.begin();
             std::advance(itr, urand(0, numTargets - 1));
@@ -2220,8 +2229,11 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
 
                 prevUnit = *nextItr;
                 targetUnitMap.push_back(prevUnit);
+
                 tempTargetUnitMap.erase(nextItr);
-                tempTargetUnitMap.sort(TargetDistanceOrderNear(prevUnit));
+                if (tempTargetUnitMap.size() > 1)
+                    tempTargetUnitMap.sort(TargetDistanceOrderNear(prevUnit));
+
                 nextItr = tempTargetUnitMap.begin();
                 --numTargets;
             }
@@ -2253,65 +2265,75 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
                     }
                     targetUnitMap.push_back(pUnitTarget);
                 }
+                break;
             }
+
+            Unit* pUnitTarget = m_targets.getUnitTarget();
+            WorldObject* originalCaster = GetAffectiveCasterObject();
+            if (!pUnitTarget || !originalCaster)
+                break;
+
+            unMaxTargets = unEffectChainTarget;
+
+            float maxRange;
+            if (m_spellInfo->DmgClass == SPELL_DAMAGE_CLASS_MELEE)
+                maxRange = radius;
             else
+                // FIXME: This very like horrible hack and wrong for most spells
+                maxRange = radius + unMaxTargets * CHAIN_SPELL_JUMP_RADIUS;
+
+            UnitList tempTargetUnitMap;
             {
-                Unit* pUnitTarget = m_targets.getUnitTarget();
-                WorldObject* originalCaster = GetAffectiveCasterObject();
-                if(!pUnitTarget || !originalCaster)
-                    break;
+                MaNGOS::AnyAoEVisibleTargetUnitInObjectRangeCheck u_check(pUnitTarget, originalCaster, maxRange);
+                MaNGOS::UnitListSearcher<MaNGOS::AnyAoEVisibleTargetUnitInObjectRangeCheck> searcher(tempTargetUnitMap, u_check);
+                Cell::VisitAllObjects(m_caster, searcher, maxRange);
+            }
 
-                unMaxTargets = unEffectChainTarget;
+            uint32 numTargets = tempTargetUnitMap.size();
+            if (!numTargets)
+                break;
 
-                float max_range;
-                if (m_spellInfo->DmgClass == SPELL_DAMAGE_CLASS_MELEE)
-                    max_range = radius;
-                else
-                    //FIXME: This very like horrible hack and wrong for most spells
-                    max_range = radius + unMaxTargets * CHAIN_SPELL_JUMP_RADIUS;
-
-                UnitList tempTargetUnitMap;
-                {
-                    MaNGOS::AnyAoEVisibleTargetUnitInObjectRangeCheck u_check(pUnitTarget, originalCaster, max_range);
-                    MaNGOS::UnitListSearcher<MaNGOS::AnyAoEVisibleTargetUnitInObjectRangeCheck> searcher(tempTargetUnitMap, u_check);
-                    Cell::VisitAllObjects(m_caster, searcher, max_range);
-                }
-
-                if (tempTargetUnitMap.empty())
-                    break;
-
+            if (numTargets > 1)
                 tempTargetUnitMap.sort(TargetDistanceOrderNear(pUnitTarget));
 
-                if (*tempTargetUnitMap.begin() == pUnitTarget)
-                    tempTargetUnitMap.erase(tempTargetUnitMap.begin());
+            targetUnitMap.push_back(pUnitTarget);
 
-                targetUnitMap.push_back(pUnitTarget);
-                uint32 t = unMaxTargets - 1;
-                Unit *prev = pUnitTarget;
-                UnitList::iterator next = tempTargetUnitMap.begin();
+            if (*tempTargetUnitMap.begin() == pUnitTarget)
+            {
+                tempTargetUnitMap.erase(tempTargetUnitMap.begin());
+                if (tempTargetUnitMap.empty())
+                    break;
+            }
 
-                while (t && next != tempTargetUnitMap.end())
+            numTargets = unMaxTargets - 1;
+            bool checkLOS = !m_spellInfo->HasAttribute(SPELL_ATTR_EX2_IGNORE_LOS);
+            bool checkCC = m_spellInfo->HasAttribute(SPELL_ATTR_EX6_IGNORE_CCED_TARGETS);
+            Unit* prevUnit = pUnitTarget;
+
+            UnitList::iterator nextItr = tempTargetUnitMap.begin();
+            while (numTargets && nextItr != tempTargetUnitMap.end())
+            {
+                if (!prevUnit->IsWithinDist(*nextItr, CHAIN_SPELL_JUMP_RADIUS))
+                    break;
+
+                if (prevUnit == (Unit*)m_caster)
+                    break;
+
+                if ((checkLOS && !prevUnit->IsWithinLOSInMap(*nextItr)) || (checkCC && !(*nextItr)->CanFreeMove()))
                 {
-                    if (!prev->IsWithinDist(*next,CHAIN_SPELL_JUMP_RADIUS))
-                        break;
-
-                    if (prev == (Unit*)m_caster)
-                        break;
-
-                    if ((!m_spellInfo->HasAttribute(SPELL_ATTR_EX2_IGNORE_LOS) && !prev->IsWithinLOSInMap(*next)) || (m_spellInfo->HasAttribute(SPELL_ATTR_EX6_IGNORE_CCED_TARGETS) && !(*next)->CanFreeMove()))
-                    {
-                        ++next;
-                        continue;
-                    }
-
-                    prev = *next;
-                    targetUnitMap.push_back(prev);
-                    tempTargetUnitMap.erase(next);
-                    tempTargetUnitMap.sort(TargetDistanceOrderNear(prev));
-                    next = tempTargetUnitMap.begin();
-
-                    --t;
+                    ++nextItr;
+                    continue;
                 }
+
+                prevUnit = *nextItr;
+                targetUnitMap.push_back(prevUnit);
+
+                tempTargetUnitMap.erase(nextItr);
+                if (tempTargetUnitMap.size() > 1)
+                    tempTargetUnitMap.sort(TargetDistanceOrderNear(prevUnit));
+
+                nextItr = tempTargetUnitMap.begin();
+                --numTargets;
             }
             break;
         }
@@ -2968,61 +2990,71 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
         case TARGET_CHAIN_HEAL:
         {
             Unit* pUnitTarget = m_targets.getUnitTarget();
-            if(!pUnitTarget)
+            if (!pUnitTarget)
                 break;
 
             if (unEffectChainTarget <= 1)
-                targetUnitMap.push_back(pUnitTarget);
-            else
             {
-                unMaxTargets = unEffectChainTarget;
-                float max_range = radius + unMaxTargets * CHAIN_SPELL_JUMP_RADIUS;
+                targetUnitMap.push_back(pUnitTarget);
+                break;
+            }
 
-                UnitList tempTargetUnitMap;
+            unMaxTargets = unEffectChainTarget;
+            float maxRange = radius + unMaxTargets * CHAIN_SPELL_JUMP_RADIUS;
 
-                FillAreaTargets(tempTargetUnitMap, max_range, PUSH_SELF_CENTER, SPELL_TARGETS_FRIENDLY);
+            UnitList tempTargetUnitMap;
+            FillAreaTargets(tempTargetUnitMap, maxRange, PUSH_SELF_CENTER, SPELL_TARGETS_FRIENDLY);
 
-                if (m_caster != pUnitTarget && std::find(tempTargetUnitMap.begin(), tempTargetUnitMap.end(), m_caster) == tempTargetUnitMap.end())
-                    tempTargetUnitMap.push_front(m_caster);
+            if (m_caster != pUnitTarget && std::find(tempTargetUnitMap.begin(), tempTargetUnitMap.end(), m_caster) == tempTargetUnitMap.end())
+                tempTargetUnitMap.push_front(m_caster);
 
+            uint32 numTargets = tempTargetUnitMap.size();
+            if (!numTargets)
+                break;
+
+            if (numTargets > 1)
                 tempTargetUnitMap.sort(TargetDistanceOrderNear(pUnitTarget));
 
+            targetUnitMap.push_back(pUnitTarget);
+
+            if (*tempTargetUnitMap.begin() == pUnitTarget)
+            {
+                tempTargetUnitMap.erase(tempTargetUnitMap.begin());
                 if (tempTargetUnitMap.empty())
                     break;
+            }
 
-                if (*tempTargetUnitMap.begin() == pUnitTarget)
-                    tempTargetUnitMap.erase(tempTargetUnitMap.begin());
+            numTargets = unMaxTargets - 1;
+            bool checkLOS = !m_spellInfo->HasAttribute(SPELL_ATTR_EX2_IGNORE_LOS);
+            Unit* prevUnit = pUnitTarget;
 
-                targetUnitMap.push_back(pUnitTarget);
-                uint32 t = unMaxTargets - 1;
-                Unit *prev = pUnitTarget;
-                UnitList::iterator next = tempTargetUnitMap.begin();
+            UnitList::iterator nextItr = tempTargetUnitMap.begin();
+            while (numTargets && nextItr != tempTargetUnitMap.end())
+            {
+                if (!prevUnit->IsWithinDist(*nextItr, CHAIN_SPELL_JUMP_RADIUS))
+                    break;
 
-                while(t && next != tempTargetUnitMap.end())
+                if (checkLOS && !prevUnit->IsWithinLOSInMap(*nextItr))
                 {
-                    if(!prev->IsWithinDist(*next, CHAIN_SPELL_JUMP_RADIUS))
-                        break;
-
-                    if (!m_spellInfo->HasAttribute(SPELL_ATTR_EX2_IGNORE_LOS) && !prev->IsWithinLOSInMap (*next))
-                    {
-                        ++next;
-                        continue;
-                    }
-
-                    if((*next)->GetHealth() == (*next)->GetMaxHealth())
-                    {
-                        next = tempTargetUnitMap.erase(next);
-                        continue;
-                    }
-
-                    prev = *next;
-                    targetUnitMap.push_back(prev);
-                    tempTargetUnitMap.erase(next);
-                    tempTargetUnitMap.sort(TargetDistanceOrderNear(prev));
-                    next = tempTargetUnitMap.begin();
-
-                    --t;
+                    ++nextItr;
+                    continue;
                 }
+
+                if ((*nextItr)->GetHealth() == (*nextItr)->GetMaxHealth())
+                {
+                    nextItr = tempTargetUnitMap.erase(nextItr);
+                    continue;
+                }
+
+                prevUnit = *nextItr;
+                targetUnitMap.push_back(prevUnit);
+
+                tempTargetUnitMap.erase(nextItr);
+                if (tempTargetUnitMap.size() > 1)
+                    tempTargetUnitMap.sort(TargetDistanceOrderNear(prevUnit));
+
+                nextItr = tempTargetUnitMap.begin();
+                --numTargets;
             }
             break;
         }
