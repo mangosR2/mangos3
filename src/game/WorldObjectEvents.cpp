@@ -66,18 +66,21 @@ void WorldObjectEventProcessor::AddEvent(BasicEvent* Event, uint64 e_time, bool 
 
 void WorldObjectEventProcessor::RenewEvents()
 {
+    bool needInsert;
     while (!m_queue.empty())
     {
         if (m_queue.front().second)
         {
-            switch (m_queue.front().second->GetType())
+            needInsert = true;
+            WorldObjectEventType eventType = WorldObjectEventType(m_queue.front().second->GetType());
+            switch (eventType)
             {
                 case WORLDOBJECT_EVENT_TYPE_UNIQUE:
+                case WORLDOBJECT_EVENT_TYPE_EVADE_UNIQUE:
                 {
-                    bool needInsert = true;
                     for (EventList::const_iterator i = m_events.begin(); i != m_events.end(); ++i)
                     {
-                        if (i->second->GetType() == WORLDOBJECT_EVENT_TYPE_UNIQUE)
+                        if (i->second->GetType() == eventType)
                         {
                             BasicEvent* event = m_queue.front().second;
                             delete event;
@@ -85,17 +88,16 @@ void WorldObjectEventProcessor::RenewEvents()
                             break;
                         }
                     }
-                    if (needInsert)
-                        m_events.insert(m_queue.front());
                     break;
                 }
                 case WORLDOBJECT_EVENT_TYPE_REPEATABLE:
                 case WORLDOBJECT_EVENT_TYPE_DEATH:
                 case WORLDOBJECT_EVENT_TYPE_COMMON:
                 default:
-                    m_events.insert(m_queue.front());
                     break;
             }
+            if (needInsert)
+                m_events.insert(m_queue.front());
         }
         m_queue.pop();
     }
@@ -343,7 +345,7 @@ bool ForcedDespawnDelayEvent::Execute(uint64 /*e_time*/, uint32 /*p_time*/)
 }
 
 EvadeDelayEvent::EvadeDelayEvent(Unit& owner, bool force /*=false*/) :
-    BasicEvent(WORLDOBJECT_EVENT_TYPE_UNIQUE), m_owner(owner), b_force(force)
+    BasicEvent(WORLDOBJECT_EVENT_TYPE_EVADE_UNIQUE), m_owner(owner), b_force(force)
 {
     if (m_owner.GetTypeId() == TYPEID_UNIT)
         m_owner.addUnitState(UNIT_STAT_DELAYED_EVADE);
