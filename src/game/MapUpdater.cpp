@@ -38,6 +38,9 @@ void MapUpdater::FreezeDetect()
         {
             if (Map* map = rq->getObject())
             {
+                if (sWorld.getConfig(CONFIG_BOOL_VMSS_CONTINENTS_SKIP) && map->IsContinent())
+                    continue;
+
                 bool b_needKill = false;
                 if (map->IsBroken())
                 {
