@@ -348,7 +348,7 @@ bool Transport::AddPassenger(WorldObject* passenger, Position const& transportPo
     if (passenger->isType(TYPEMASK_UNIT))
     {
         GuidSet const& groupPets = ((Unit*)passenger)->GetPets();
-        if (!m_groupPets.empty())
+        if (!groupPets.empty())
         {
             for (GuidSet::const_iterator itr = groupPets.begin(); itr != groupPets.end(); ++itr)
                 if (Pet* pPet = GetMap()->GetPet(*itr))
