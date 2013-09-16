@@ -7631,11 +7631,10 @@ void Unit::RemovePetFromList(Pet* pet)
 {
     m_groupPets.erase(pet->GetObjectGuid());
 
-    GroupPetList m_groupPetsTmp = GetPets();
-    for(GroupPetList::const_iterator itr = m_groupPetsTmp.begin(); itr != m_groupPetsTmp.end(); ++itr)
+    GuidSet groupPetsCopy = GetPets();
+    for (GuidSet::const_iterator itr = groupPetsCopy.begin(); itr != groupPetsCopy.end(); ++itr)
     {
-        Pet* _pet = GetMap()->GetPet(*itr);
-        if (!_pet)
+        if (!GetMap()->GetPet(*itr))
             m_groupPets.erase(*itr);
     }
 }
@@ -13126,37 +13125,41 @@ void Unit::SetContestedPvP(Player *attackedPlayer)
 void Unit::AddPetAura(PetAura const* petSpell)
 {
     m_petAuras.insert(petSpell);
+
     if (GetPet())
     {
-        GroupPetList m_groupPets = GetPets();
-        if (!m_groupPets.empty())
+        GuidSet groupPetsCopy = GetPets();
+        if (!groupPetsCopy.empty())
         {
-            for (GroupPetList::const_iterator itr = m_groupPets.begin(); itr != m_groupPets.end(); ++itr)
-                if (Pet* _pet = GetMap()->GetPet(*itr))
-                    _pet->CastPetAura(petSpell);
+            for (GuidSet::const_iterator itr = groupPetsCopy.begin(); itr != groupPetsCopy.end(); ++itr)
+            {
+                if (Pet* pPet = GetMap()->GetPet(*itr))
+                    pPet->CastPetAura(petSpell);
+            }
         }
     }
-
 }
 
 void Unit::RemovePetAura(PetAura const* petSpell)
 {
     m_petAuras.erase(petSpell);
+
     if (GetPet())
     {
-        GroupPetList m_groupPets = GetPets();
-        if (!m_groupPets.empty())
+        GuidSet groupPetsCopy = GetPets();
+        if (!groupPetsCopy.empty())
         {
-            for (GroupPetList::const_iterator itr = m_groupPets.begin(); itr != m_groupPets.end(); ++itr)
-                if (Pet* _pet = GetMap()->GetPet(*itr))
-                    _pet->RemoveAurasDueToSpell(petSpell->GetAura(_pet->GetEntry()));
+            for (GuidSet::const_iterator itr = groupPetsCopy.begin(); itr != groupPetsCopy.end(); ++itr)
+            {
+                if (Pet* pPet = GetMap()->GetPet(*itr))
+                    pPet->RemoveAurasDueToSpell(petSpell->GetAura(pPet->GetEntry()));
+            }
         }
     }
 }
 
 void Unit::RemoveAurasAtMechanicImmunity(uint32 mechMask, uint32 exceptSpellId, bool non_positive /*= false*/)
 {
-
     SpellIdSet         spellsToRemove;
     std::set<Aura*>    aurasToRemove;
 

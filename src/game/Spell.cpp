@@ -2241,14 +2241,12 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
         }
         case TARGET_PET:
         {
-            Pet* tmpUnit = m_caster->GetPet();
-            if (!tmpUnit) break;
-            GroupPetList m_groupPets = m_caster->GetPets();
-            if (!m_groupPets.empty())
+            GuidSet const& groupPets = m_caster->GetPets();
+            if (!groupPets.empty())
             {
-                for (GroupPetList::const_iterator itr = m_groupPets.begin(); itr != m_groupPets.end(); ++itr)
-                    if (Pet* _pet = m_caster->GetMap()->GetPet(*itr))
-                        targetUnitMap.push_back(_pet);
+                for (GuidSet::const_iterator itr = groupPets.begin(); itr != groupPets.end(); ++itr)
+                    if (Pet* pPet = m_caster->GetMap()->GetPet(*itr))
+                        targetUnitMap.push_back(pPet);
             }
             break;
         }
@@ -2932,31 +2930,27 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
             }
 
             Group* pGroup = pTarget ? pTarget->GetGroup() : NULL;
-
             if (pGroup)
             {
                 uint8 subgroup = pTarget->GetSubGroup();
 
-                for(GroupReference *itr = pGroup->GetFirstMember(); itr != NULL; itr = itr->next())
+                for (GroupReference* itr = pGroup->GetFirstMember(); itr != NULL; itr = itr->next())
                 {
                     Player* Target = itr->getSource();
 
                     // IsHostileTo check duel and controlled by enemy
                     if (Target && Target->GetSubGroup() == subgroup && !m_caster->IsHostileTo(Target))
                     {
-                        if ( pTarget->IsWithinDistInMap(Target, radius) )
+                        if (pTarget->IsWithinDistInMap(Target, radius))
                             targetUnitMap.push_back(Target);
 
-                        if (Target->GetPet())
+                        GuidSet const& groupPets = Target->GetPets();
+                        if (!groupPets.empty())
                         {
-                            GroupPetList m_groupPets = Target->GetPets();
-                            if (!m_groupPets.empty())
-                            {
-                                for (GroupPetList::const_iterator itr = m_groupPets.begin(); itr != m_groupPets.end(); ++itr)
-                                    if (Pet* _pet = Target->GetMap()->GetPet(*itr))
-                                        if ( pTarget->IsWithinDistInMap(_pet, radius) )
-                                            targetUnitMap.push_back(_pet);
-                            }
+                            for (GuidSet::const_iterator itr = groupPets.begin(); itr != groupPets.end(); ++itr)
+                                if (Pet* pPet = Target->GetMap()->GetPet(*itr))
+                                    if (pTarget->IsWithinDistInMap(pPet, radius))
+                                        targetUnitMap.push_back(pPet);
                         }
                     }
                 }
@@ -2971,7 +2965,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
                 targetUnitMap.push_back(pTarget);
 
                 if (Pet* pet = pTarget->GetPet())
-                    if ( m_caster->IsWithinDistInMap(pet, radius) )
+                    if (m_caster->IsWithinDistInMap(pet, radius))
                         targetUnitMap.push_back(pet);
             }
             break;
@@ -8221,7 +8215,7 @@ void Spell::FillRaidOrPartyTargets(UnitList &targetUnitMap, Unit* member, Unit* 
     {
         uint8 subgroup = pMember->GetSubGroup();
 
-        for(GroupReference *itr = pGroup->GetFirstMember(); itr != NULL; itr = itr->next())
+        for (GroupReference* itr = pGroup->GetFirstMember(); itr != NULL; itr = itr->next())
         {
             Player* Target = itr->getSource();
 
@@ -8234,18 +8228,21 @@ void Spell::FillRaidOrPartyTargets(UnitList &targetUnitMap, Unit* member, Unit* 
                     targetUnitMap.push_back(Target);
 
                 if (withPets)
-                    if (Target->GetPet())
+                {
+                    GuidSet const& groupPets = Target->GetPets();
+                    if (!groupPets.empty())
                     {
-                        GroupPetList m_groupPets = Target->GetPets();
-                        if (!m_groupPets.empty())
+                        for (GuidSet::const_iterator itr = groupPets.begin(); itr != groupPets.end(); ++itr)
                         {
-                            for (GroupPetList::const_iterator itr = m_groupPets.begin(); itr != m_groupPets.end(); ++itr)
-                                if (Pet* _pet = Target->GetMap()->GetPet(*itr))
-                                    if ((_pet == center || center->IsWithinDistInMap(_pet, radius)) &&
-                                    (withcaster || _pet != m_caster))
-                                         targetUnitMap.push_back(_pet);
+                            if (Pet* pPet = Target->GetMap()->GetPet(*itr))
+                            {
+                                if ((pPet == center || center->IsWithinDistInMap(pPet, radius)) &&
+                                    (withcaster || pPet != m_caster))
+                                     targetUnitMap.push_back(pPet);
+                            }
                         }
                     }
+                }
             }
         }
     }
@@ -8574,16 +8571,15 @@ bool Spell::FillCustomTargetMap(SpellEffectIndex i, UnitList& targetUnitMap, uin
             }
             else
             {
-                unitTarget = NULL;
-                GuardianPetList const* petList = &m_caster->GetGuardians();
-
-                if (petList)
+                GuidSet const& guardians = m_caster->GetGuardians();
+                if (!guardians.empty())
                 {
-
-                    for (GuardianPetList::const_iterator itr = petList->begin(); itr != petList->end(); ++itr)
+                    for (GuidSet::const_iterator itr = guardians.begin(); itr != guardians.end(); ++itr)
+                    {
                         if (Unit* ghoul = m_caster->GetMap()->GetUnit(*itr))
                             if (ghoul->GetEntry() == 24207 || ghoul->GetEntry() == 26125)
                                 targetUnitMap.push_back(ghoul);
+                    }
 
                     if (targetUnitMap.size() > 1)
                     {
@@ -8763,16 +8759,16 @@ bool Spell::FillCustomTargetMap(SpellEffectIndex i, UnitList& targetUnitMap, uin
         }
         case 58836:  // Initialize Images
         {
-            if ( i != EFFECT_INDEX_0)
+            if (i != EFFECT_INDEX_0)
                 return false;
 
-            GroupPetList guardians = m_caster->GetGuardians();
+            GuidSet const& guardians = m_caster->GetGuardians();
             if (guardians.empty())
                 return true;
 
-            for (GuardianPetList::const_iterator itr = guardians.begin(); itr != guardians.end(); ++itr)
-                if (Pet* _pet = m_caster->GetMap()->GetPet(*itr))
-                    targetUnitMap.push_back(_pet);
+            for (GuidSet::const_iterator itr = guardians.begin(); itr != guardians.end(); ++itr)
+                if (Pet* pPet = m_caster->GetMap()->GetPet(*itr))
+                    targetUnitMap.push_back(pPet);
 
             break;
         }
@@ -9101,14 +9097,6 @@ bool Spell::FillCustomTargetMap(SpellEffectIndex i, UnitList& targetUnitMap, uin
             unMaxTargets = 3;
             break;
         }
-        case 70961: // Shattered Bones
-        {
-            if (i != EFFECT_INDEX_1)
-                return false;
-
-            effToIndex = EFFECT_INDEX_0;
-            break;
-        }
         case 70117: // Icy grip (Sindragosa encounter)
         {
             UnitList tempTargetUnitMap;
@@ -9249,11 +9237,15 @@ bool Spell::FillCustomTargetMap(SpellEffectIndex i, UnitList& targetUnitMap, uin
             }
             else
             {
-               GroupPetList const& groupPets = m_caster->GetPets();
+               GuidSet const& groupPets = m_caster->GetPets();
                if (!groupPets.empty())
-                   for (GroupPetList::const_iterator itr = groupPets.begin(); itr != groupPets.end(); ++itr)
-                       if (Pet* pet = m_caster->GetMap()->GetPet(*itr))
-                           targetUnitMap.push_back((Unit*)pet);
+               {
+                   for (GuidSet::const_iterator itr = groupPets.begin(); itr != groupPets.end(); ++itr)
+                   {
+                       if (Pet* pPet = m_caster->GetMap()->GetPet(*itr))
+                           targetUnitMap.push_back((Unit*)pPet);
+                   }
+               }
             }
             break;
         }
@@ -9283,6 +9275,14 @@ bool Spell::FillCustomTargetMap(SpellEffectIndex i, UnitList& targetUnitMap, uin
 
             targetUnitMap.remove(m_caster);
             unMaxTargets = 1;
+            break;
+        }
+        case 70961: // Shattered Bones
+        {
+            if (i != EFFECT_INDEX_1)
+                return false;
+
+            effToIndex = EFFECT_INDEX_0;
             break;
         }
         case 71075: // Invocation of Blood (V) Move

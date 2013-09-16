@@ -7361,9 +7361,7 @@ void Spell::DoSummonGuardian(SpellEffectIndex eff_idx, uint32 forceFaction)
 
         spawnCreature->SetCreateSpellID(originalSpellID);
         spawnCreature->SetDuration(m_duration);
-
-        GroupPetList guardians = m_caster->GetGuardians();
-        spawnCreature->SetPetCounter(guardians.size());
+        spawnCreature->SetPetCounter(m_caster->GetGuardians().size());
 
         // If dest location present. FIXME - need correct summon pos from pet number
         CreatureCreatePos pos = CreatureCreatePos(m_caster->GetMap(), center);
