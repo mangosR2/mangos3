@@ -5182,7 +5182,7 @@ bool Unit::AddSpellAuraHolder(SpellAuraHolderPtr holder)
             AddAuraToModList(aur);
 
     holder->ApplyAuraModifiers(true, true);                 // This is the place where auras are actually applied onto the target
-    DEBUG_LOG("Holder of spell %u now is in use", holder->GetId());
+    DETAIL_FILTER_LOG(LOG_FILTER_SPELL_CAST, "Unit::AddSpellAuraHolder holder of spell %u on unit %s now is in use", holder->GetId(), GetObjectGuid().GetString().c_str());
 
     // if aura deleted before boosts apply ignore
     // this can be possible it it removed indirectly by triggered spell effect at ApplyModifier
