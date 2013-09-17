@@ -234,34 +234,22 @@ DungeonPersistentState::~DungeonPersistentState()
     }
 }
 
-void DungeonPersistentState::AddPlayer(Player* player)
+void DungeonPersistentState::AddToUnbind(ObjectGuid const& guid)
 {
-    if (!player)
-        return;
-    m_playerList.insert(player->GetObjectGuid());
+    if (guid.IsPlayer())
+        m_playerList.insert(guid);
+    else if (guid.IsGroup())
+        m_groupList.insert(guid);
 }
 
-bool DungeonPersistentState::RemovePlayer(Player* player)
+void DungeonPersistentState::RemoveFromUnbind(ObjectGuid const& guid)
 {
-    if (!player)
-        return false;
-    m_playerList.erase(player->GetObjectGuid());
-    return UnloadIfEmpty();
-}
+    if (guid.IsPlayer())
+        m_playerList.erase(guid);
+    else if (guid.IsGroup())
+        m_groupList.erase(guid);
 
-void DungeonPersistentState::AddGroup(Group* group)
-{
-    if (!group)
-        return;
-     m_groupList.insert(group->GetObjectGuid());
-}
-
-bool DungeonPersistentState::RemoveGroup(Group* group)
-{
-    if (!group)
-        return false;
-     m_groupList.erase(group->GetObjectGuid());
-      return UnloadIfEmpty();
+    UnloadIfEmpty();
 }
 
 bool DungeonPersistentState::CanBeUnload() const

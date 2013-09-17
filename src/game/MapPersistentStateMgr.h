@@ -224,13 +224,10 @@ class DungeonPersistentState : public MapPersistentState
         uint8 GetPlayerCount() const { return m_playerList.size(); }
         uint8 GetGroupCount() const { return m_groupList.size(); }
 
-        /* online players bound to the instance (perm/solo)
-           does not include the members of the group unless they have permanent saves */
-        void AddPlayer(Player* player);
-        bool RemovePlayer(Player* player);
-        /* all groups bound to the instance */
-        void AddGroup(Group* group);
-        bool RemoveGroup(Group* group);
+        /* online players (perm/solo) and all groups bound to the instance.
+           for players: does not include the members of the group unless they have permanent saves */
+        void AddToUnbind(ObjectGuid const& guid);
+        void RemoveFromUnbind(ObjectGuid const& guid);
 
         /* for normal instances this corresponds to max(creature respawn time) + X hours
            for raid/heroic instances this caches the global respawn time for the map */

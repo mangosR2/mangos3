@@ -629,8 +629,10 @@ Player::~Player ()
 
     // clean up player-instance binds, may unload some instance saves
     for (uint8 i = 0; i < MAX_DIFFICULTY; ++i)
+    {
         for (BoundInstancesMap::iterator itr = m_boundInstances[i].begin(); itr != m_boundInstances[i].end(); ++itr)
-            itr->second.state->RemovePlayer(this);
+            itr->second.state->RemoveFromUnbind(GetObjectGuid());
+    }
 
     delete m_declinedname;
     delete m_runes;
@@ -17390,7 +17392,7 @@ void Player::UnbindInstance(BoundInstancesMap::iterator &itr, Difficulty difficu
 
         sCalendarMgr.SendCalendarRaidLockoutRemove(GetObjectGuid(), itr->second.state);
 
-        itr->second.state->RemovePlayer(this);              // state can become invalid
+        itr->second.state->RemoveFromUnbind(GetObjectGuid());  // state can become invalid
         m_boundInstances[difficulty].erase(itr++);
     }
 }
@@ -17419,8 +17421,9 @@ InstancePlayerBind* Player::BindToInstance(DungeonPersistentState *state, bool p
         if (bind.state != state)
         {
             if (bind.state)
-                bind.state->RemovePlayer(this);
-            state->AddPlayer(this);
+                bind.state->RemoveFromUnbind(GetObjectGuid());
+
+            state->AddToUnbind(GetObjectGuid());
         }
 
         if (permanent)
@@ -18777,7 +18780,7 @@ void Player::ResetInstances(InstanceResetMethod method, bool isRaid)
         m_boundInstances[diff].erase(itr++);
 
         // the following should remove the instance save from the manager and delete it as well
-        state->RemovePlayer(this);
+        state->RemoveFromUnbind(GetObjectGuid());
     }
 }
 
