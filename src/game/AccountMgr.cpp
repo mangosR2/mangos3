@@ -297,7 +297,6 @@ RafLinkedList* AccountMgr::GetRAFAccounts(uint32 accid, bool referred)
             while (result->NextRow());
             delete result;
         }
-        ReadGuard Guard(GetLock());
         mRAFLinkedMap.insert(RafLinkedMap::value_type(std::pair<uint32,bool>(accid, referred), acclist));
         itr = mRAFLinkedMap.find(std::pair<uint32,bool>(accid, referred));
     }
@@ -420,7 +419,6 @@ void AccountMgr::ClearPlayerDataCache(ObjectGuid guid)
     {
         uint32 accId = cache->account;
 
-        WriteGuard Guard(GetLock());
         PlayerDataCacheMap::iterator itr = mPlayerDataCacheMap.find(guid);
         if (itr != mPlayerDataCacheMap.end())
             mPlayerDataCacheMap.erase(itr);
@@ -442,8 +440,6 @@ void AccountMgr::MakePlayerDataCache(Player* player)
 
     ObjectGuid guid = player->GetObjectGuid();
 
-    WriteGuard Guard(GetLock());
-
     PlayerDataCache cache;
     cache.account  = player->GetSession()->GetAccountId();;
     cache.lowguid  = guid.GetCounter();
@@ -457,7 +453,6 @@ PlayerDataCache const* AccountMgr::GetPlayerDataCache(ObjectGuid guid, bool forc
 {
     PlayerDataCacheMap::const_iterator itr;
     {
-        ReadGuard Guard(GetLock());
         itr = mPlayerDataCacheMap.find(guid);
         if (itr != mPlayerDataCacheMap.end()) 
             return &itr->second;
@@ -481,14 +476,12 @@ PlayerDataCache const* AccountMgr::GetPlayerDataCache(ObjectGuid guid, bool forc
             cache.name    = (*result)[1].GetCppString();
             cache.race    = (*result)[2].GetUInt8();
 
-            WriteGuard Guard(GetLock());
             mPlayerDataCacheMap.insert(PlayerDataCacheMap::value_type(guid, cache));
             delete result;
         }
     }
 
     {
-        ReadGuard Guard(GetLock());
         itr = mPlayerDataCacheMap.find(guid);
         if (itr != mPlayerDataCacheMap.end()) 
             return &itr->second;
@@ -500,7 +493,6 @@ PlayerDataCache const* AccountMgr::GetPlayerDataCache(ObjectGuid guid, bool forc
 PlayerDataCache const* AccountMgr::GetPlayerDataCache(const std::string& name)
 {
     {
-        ReadGuard Guard(GetLock());
         for (PlayerDataCacheMap::const_iterator itr = mPlayerDataCacheMap.begin(); itr != mPlayerDataCacheMap.end(); ++itr)
             if (itr->second.name == name)
                 return &itr->second;
@@ -519,13 +511,11 @@ PlayerDataCache const* AccountMgr::GetPlayerDataCache(const std::string& name)
 
         guid = ObjectGuid(HIGHGUID_PLAYER, cache.lowguid);
 
-        WriteGuard Guard(GetLock());
         mPlayerDataCacheMap.insert(PlayerDataCacheMap::value_type(guid, cache));
         delete result;
     }
 
     {
-        ReadGuard Guard(GetLock());
         PlayerDataCacheMap::const_iterator itr = mPlayerDataCacheMap.find(guid);
         if (itr != mPlayerDataCacheMap.end()) 
             return &itr->second;
