@@ -568,7 +568,7 @@ void PetAI::UpdateAI(const uint32 diff)
     // Autocast (casted only in combat or persistent spells in any state)
     if (!sWorld.getConfig(CONFIG_BOOL_PET_ADVANCED_AI) && m_AIType != PET_AI_PASSIVE)
     {
-        typedef std::vector<std::pair<ObjectGuid, uint32>> TargetSpellList;
+        typedef std::vector<std::pair<ObjectGuid, uint32> > TargetSpellList;
         TargetSpellList targetSpellStore;
 
         for (uint8 i = 0; i < m_creature->GetPetAutoSpellSize(); ++i)
