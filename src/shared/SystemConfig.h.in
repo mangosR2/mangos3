@@ -23,7 +23,7 @@
 #define _PACKAGENAME "MangosR2"
 #endif
 
-#include "config.h"
+#include "../../config.h"
 #include "Platform/Define.h"
 
 #ifndef _VERSION
