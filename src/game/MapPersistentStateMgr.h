@@ -226,8 +226,8 @@ class DungeonPersistentState : public MapPersistentState
 
         /* online players (perm/solo) and all groups bound to the instance.
            for players: does not include the members of the group unless they have permanent saves */
-        void AddToUnbind(ObjectGuid const& guid);
-        void RemoveFromUnbind(ObjectGuid const& guid);
+        void AddToUnbindList(ObjectGuid const& guid);
+        void RemoveFromUnbindList(ObjectGuid const& guid);
 
         /* for normal instances this corresponds to max(creature respawn time) + X hours
            for raid/heroic instances this caches the global respawn time for the map */

@@ -114,7 +114,7 @@ Group::~Group()
     for (uint8 i = 0; i < MAX_DIFFICULTY; ++i)
     {
         for (BoundInstancesMap::iterator itr2 = m_boundInstances[i].begin(); itr2 != m_boundInstances[i].end(); ++itr2)
-            itr2->second.state->RemoveFromUnbind(GetObjectGuid());
+            itr2->second.state->RemoveFromUnbindList(GetObjectGuid());
     }
 
     // recheck deletion in ObjectMgr (must be deleted wile disband, but additional check not be bad)
@@ -1407,7 +1407,7 @@ void Group::_setLeader(ObjectGuid guid)
                 {
                     if (itr->second.perm)
                     {
-                        itr->second.state->RemoveFromUnbind(GetObjectGuid());
+                        itr->second.state->RemoveFromUnbindList(GetObjectGuid());
                         m_boundInstances[i].erase(itr++);
                     }
                     else
@@ -1913,7 +1913,7 @@ void Group::ResetInstances(InstanceResetMethod method, bool isRaid, Player* Send
             itr = m_boundInstances[diff].begin();
             // this unloads the instance save unless online players are bound to it
             // (eg. permanent binds or GM solo binds)
-            state->RemoveFromUnbind(GetObjectGuid());
+            state->RemoveFromUnbindList(GetObjectGuid());
         }
         else
             ++itr;
@@ -1974,9 +1974,9 @@ InstanceGroupBind* Group::BindToInstance(DungeonPersistentState *state, bool per
         if (bind.state != state)
         {
             if (bind.state)
-                bind.state->RemoveFromUnbind(GetObjectGuid());
+                bind.state->RemoveFromUnbindList(GetObjectGuid());
 
-            state->AddToUnbind(GetObjectGuid());
+            state->AddToUnbindList(GetObjectGuid());
         }
 
         bind.state = state;
@@ -1999,7 +1999,7 @@ void Group::UnbindInstance(uint32 mapid, uint8 difficulty, bool unload)
             CharacterDatabase.PExecute("DELETE FROM group_instance WHERE leaderGuid = '%u' AND instance = '%u'",
                 GetLeaderGuid().GetCounter(), itr->second.state->GetInstanceId());
 
-        itr->second.state->RemoveFromUnbind(GetObjectGuid());  // state can become invalid
+        itr->second.state->RemoveFromUnbindList(GetObjectGuid());  // state can become invalid
         m_boundInstances[difficulty].erase(itr);
     }
 }

@@ -234,7 +234,7 @@ DungeonPersistentState::~DungeonPersistentState()
     }
 }
 
-void DungeonPersistentState::AddToUnbind(ObjectGuid const& guid)
+void DungeonPersistentState::AddToUnbindList(ObjectGuid const& guid)
 {
     if (guid.IsPlayer())
         m_playerList.insert(guid);
@@ -242,7 +242,7 @@ void DungeonPersistentState::AddToUnbind(ObjectGuid const& guid)
         m_groupList.insert(guid);
 }
 
-void DungeonPersistentState::RemoveFromUnbind(ObjectGuid const& guid)
+void DungeonPersistentState::RemoveFromUnbindList(ObjectGuid const& guid)
 {
     if (guid.IsPlayer())
         m_playerList.erase(guid);
