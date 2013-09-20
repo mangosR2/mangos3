@@ -8219,6 +8219,9 @@ void Spell::FillRaidOrPartyTargets(UnitList &targetUnitMap, Unit* member, Unit* 
         {
             Player* Target = itr->getSource();
 
+            if (!Target || !Target->IsInWorld() || !Target->GetMap())
+                continue;
+
             // IsHostileTo check duel and controlled by enemy
             if (Target && (raid || subgroup==Target->GetSubGroup())
                 && !m_caster->IsHostileTo(Target))
