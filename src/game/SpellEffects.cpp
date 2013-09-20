@@ -8469,7 +8469,10 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                 case 2270:                                          // Spells 73142 , 73143 , 73144 , 73145
                 {
                     if (unitTarget)
-                        unitTarget->CastSpell(unitTarget, 69062, true); // enter vehicle
+                    {
+                        unitTarget->CastSpell(unitTarget, 72670, true); // enter vehicle - Possible 69062, 72669 !
+                        unitTarget->CastSpell(unitTarget, m_spellInfo->CalculateSimpleValue(EFFECT_INDEX_1), true, 0, 0, m_caster->GetObjectGuid(), m_spellInfo);
+                    }
                     return;
                 }
                 case 1988:                                          // Pungent Blight (Festergut) - Spells 69195 , 71219 , 73031 , 73032
