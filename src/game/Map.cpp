@@ -2215,6 +2215,7 @@ void Map::SendObjectUpdates()
         WorldObject* obj = GetWorldObject(guid);
         if (obj && obj->IsInWorld())
         {
+            ReadGuard Guard(GetLock(MAP_LOCK_TYPE_MAPOBJECTS));
             if (obj->IsMarkedForClientUpdate())
                 obj->BuildUpdateData(update_players);
             if (obj->GetObjectsUpdateQueue() && !obj->GetObjectsUpdateQueue()->empty())
@@ -2434,7 +2435,7 @@ void Map::AddAttackerFor(ObjectGuid const& targetGuid, ObjectGuid const& attacke
     if (targetGuid.IsEmpty() || attackerGuid.IsEmpty())
         return;
 
-    WriteGuard Guard(GetLock());
+    WriteGuard Guard(GetLock(MAP_LOCK_TYPE_DEFAULT));
     AttackersMap::iterator itr = m_attackersMap.find(targetGuid);
     if (itr != m_attackersMap.end())
     {
@@ -2452,7 +2453,7 @@ void Map::RemoveAttackerFor(ObjectGuid const& targetGuid, ObjectGuid const& atta
     if (targetGuid.IsEmpty() || attackerGuid.IsEmpty())
         return;
 
-    WriteGuard Guard(GetLock());
+    WriteGuard Guard(GetLock(MAP_LOCK_TYPE_DEFAULT));
     AttackersMap::iterator itr = m_attackersMap.find(targetGuid);
     if (itr != m_attackersMap.end())
     {
@@ -2465,7 +2466,7 @@ void Map::RemoveAllAttackersFor(ObjectGuid const& targetGuid)
     if (targetGuid.IsEmpty())
         return;
 
-    WriteGuard Guard(GetLock());
+    WriteGuard Guard(GetLock(MAP_LOCK_TYPE_DEFAULT));
     AttackersMap::iterator itr = m_attackersMap.find(targetGuid);
     if (itr != m_attackersMap.end())
     {
@@ -2475,7 +2476,7 @@ void Map::RemoveAllAttackersFor(ObjectGuid const& targetGuid)
 
 GuidSet& Map::GetAttackersFor(ObjectGuid const& targetGuid)
 {
-    ReadGuard Guard(GetLock());
+    ReadGuard Guard(GetLock(MAP_LOCK_TYPE_DEFAULT));
     return m_attackersMap[targetGuid];
 }
 
