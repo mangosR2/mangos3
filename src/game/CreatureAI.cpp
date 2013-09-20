@@ -186,7 +186,7 @@ void CreatureAI::HandleMovementOnAttackStart(Unit* victim)
 //                                      Event system
 // ////////////////////////////////////////////////////////////////////////////////////////////////
 
-void CreatureAI::SendAIEvent(AIEventType eventType, Unit* pInvoker, uint32 uiDelay, float fRadius, uint32 miscValue /*=0*/) const
+void CreatureAI::SendAIEventAround(AIEventType eventType, Unit* pInvoker, uint32 uiDelay, float fRadius, uint32 miscValue /*=0*/) const
 {
     if (fRadius > 0)
     {
