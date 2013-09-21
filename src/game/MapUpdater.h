@@ -49,7 +49,7 @@ class MapUpdater : public ObjectUpdateTaskBase<class Map>
 {
     public:
 
-        MapUpdater() : ObjectUpdateTaskBase()
+        MapUpdater() : ObjectUpdateTaskBase<class Map>()
         {}
 
         virtual ~MapUpdater() {};

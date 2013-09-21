@@ -28,6 +28,8 @@
 #include "Common.h"
 #include "Timer.h"
 
+#define MAX_PARENT_THREADS 255
+
 template <class T> class ObjectUpdateRequest : public ACE_Method_Request
 {
 
@@ -180,7 +182,7 @@ template <class T> class ObjectUpdateTaskBase : protected ACE_Task_Base
                 return -1;
             }
 
-            ACE_thread_t threads[num_threads];
+            ACE_thread_t threads[MAX_PARENT_THREADS];
             thr_mgr()->thread_list(this, threads, num_threads);
 
             m_threadsMap.clear();
