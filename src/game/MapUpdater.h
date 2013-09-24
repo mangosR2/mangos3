@@ -25,25 +25,47 @@
 
 class Map;
 
-struct MapBrokenData
+struct MapStatisticData
 {
-    explicit MapBrokenData()
+    explicit MapStatisticData()
     {
-        Reset();
+        BreaksReset();
+        CleanStatistic();
     }
 
-    void Reset()
+    void BreaksReset()
     {
-        count = 1;
+        breaksCount = 0;
         lastErrorTime = WorldTimer::getMSTime();
     };
 
-    void IncreaseCount() { ++count; lastErrorTime = WorldTimer::getMSTime();};
-    uint32 count;
+    void IncreaseBreaksCount() { ++breaksCount; ++summBreaksCount; lastErrorTime = WorldTimer::getMSTime(); };
+
+    void CleanStatistic() 
+    {
+        updatesCount = 0;
+        maxUpdateTime = 0;
+        minUpdateTime = 0;
+        averageUpdateTime = 0;
+        lifeTime = 0;
+        summBreaksCount = 0;
+    };
+
+    // Freeze detection/statistic
+    uint32 breaksCount;
     uint32 lastErrorTime;
+
+    // common statistic
+    //
+    uint32 updatesCount;
+    uint32 maxUpdateTime;
+    uint32 minUpdateTime;
+    uint32 averageUpdateTime;
+    uint32 lifeTime;
+    uint32 summBreaksCount;
 };
 
-typedef std::map<Map*,MapBrokenData> MapBrokenDataMap;
+typedef UNORDERED_MAP<Map*, MapStatisticData> MapStatisticDataMap;
 
 class MapUpdater : public ObjectUpdateTaskBase<class Map>
 {
@@ -56,12 +78,13 @@ class MapUpdater : public ObjectUpdateTaskBase<class Map>
 
         Map* GetMapByThreadId(ACE_thread_t const threadId);
         void FreezeDetect();
-
         void MapBrokenEvent(Map* map);
-        MapBrokenData const* GetMapBrokenData(Map* map);
+
+        MapStatisticData const* GetMapStatisticData(Map* map);
+        void MapStatisticDataRemove(Map* map);
 
     private:
-        MapBrokenDataMap   m_brokendata;
+        MapStatisticDataMap   m_mapStatData;
 };
 
 #endif //_MAP_UPDATER_H_INCLUDED

@@ -57,6 +57,8 @@ Map::~Map()
         i_data = NULL;
     }
 
+    sMapMgr.GetMapUpdater()->MapStatisticDataRemove(this);
+
     // unload instance specific navigation data
     MMAP::MMapFactory::createOrGetMMapManager()->unloadMapInstance(m_TerrainData->GetMapId(), GetInstanceId());
 

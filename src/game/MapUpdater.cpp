@@ -26,6 +26,9 @@
 
 void MapUpdater::FreezeDetect()
 {
+    if (sWorld.getConfig(CONFIG_UINT32_VMSS_FREEZEDETECTTIME) == 0 ||  getActiveThreadsCount() == 0)
+        return;
+
     // FIXME - Need rewrite on base timed mutexes
     ACE_Write_Guard<ACE_RW_Thread_Mutex> guardRW(m_rwmutex);
     for (ThreadsMap::const_iterator itr = m_threadsMap.begin(); itr != m_threadsMap.end(); ++itr)
@@ -34,13 +37,16 @@ void MapUpdater::FreezeDetect()
         if (!rq)
             continue;
 
-        if (WorldTimer::getMSTime() - rq->getStartTime() > sWorld.getConfig(CONFIG_UINT32_VMSS_FREEZEDETECTTIME))
+        if (WorldTimer::getMSTime() - rq->getStartTime() > (sWorld.getConfig(CONFIG_UINT32_VMSS_FREEZEDETECTTIME) + sWorld.getConfig(CONFIG_UINT32_VMSS_FREEZECHECKPERIOD)))
         {
             if (Map* map = rq->getObject())
             {
+                DEBUG_LOG("VMSS::MapUpdater::FreezeDetect thread "I64FMT" possible freezed (is update map %u instance %u).",itr->first, map->GetId(), map->GetInstanceId());
+
+                /*FIXME - currently no action here*/
+                /*
                 if (sWorld.getConfig(CONFIG_BOOL_VMSS_CONTINENTS_SKIP) && map->IsContinent())
                     continue;
-
                 bool b_needKill = false;
                 if (map->IsBroken())
                 {
@@ -52,9 +58,9 @@ void MapUpdater::FreezeDetect()
 
                 if (b_needKill)
                 {
-                    DEBUG_LOG("VMSS::MapUpdater::FreezeDetect thread "I64FMT" possible freezed (is update map %u instance %u). Killing.",itr->first,map->GetId(), map->GetInstanceId());
                     kill_thread(itr->first, true);
                 }
+                */
             }
         }
     }
@@ -62,28 +68,30 @@ void MapUpdater::FreezeDetect()
 
 void MapUpdater::MapBrokenEvent(Map* map)
 {
-    if (!m_brokendata.empty())
+    MapStatisticDataMap::iterator itr =  m_mapStatData.find(map);
+    if (itr == m_mapStatData.end())
+        m_mapStatData.insert(std::make_pair(map, MapStatisticData()));
+
+    if ((WorldTimer::getMSTime() - itr->second.lastErrorTime) > sWorld.getConfig(CONFIG_UINT32_VMSS_TBREMTIME))
     {
-        MapBrokenDataMap::iterator itr =  m_brokendata.find(map);
-        if (itr != m_brokendata.end())
-        {
-            if ((WorldTimer::getMSTime() - itr->second.lastErrorTime) > sWorld.getConfig(CONFIG_UINT32_VMSS_TBREMTIME))
-                itr->second.Reset();
-            else
-                itr->second.IncreaseCount();
-            return;
-        }
+        itr->second.BreaksReset();
+        itr->second.IncreaseBreaksCount();
     }
-    m_brokendata.insert(std::make_pair(map, MapBrokenData()));
+    else
+        itr->second.IncreaseBreaksCount();
 }
 
-MapBrokenData const* MapUpdater::GetMapBrokenData(Map* map)
+MapStatisticData const* MapUpdater::GetMapStatisticData(Map* map)
 {
-    if (!m_brokendata.empty())
+    return &m_mapStatData[map];
+}
+
+void MapUpdater::MapStatisticDataRemove(Map* map)
+{
+    if (!m_mapStatData.empty())
     {
-        MapBrokenDataMap::const_iterator itr =  m_brokendata.find(map);
-        if (itr != m_brokendata.end())
-            return &itr->second;
+        MapStatisticDataMap::const_iterator itr =  m_mapStatData.find(map);
+        if (itr != m_mapStatData.end())
+            m_mapStatData.erase(itr);
     }
-    return NULL;
 }

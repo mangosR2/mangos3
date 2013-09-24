@@ -611,8 +611,8 @@ void Master::_OnSignal(int s)
                 std::string StackTrace = _StackTrace.c_str();
                 if (Map* map = sMapMgr.GetMapUpdater()->getObject(threadId))
                 {
-                    MapBrokenData const* pMBData = sMapMgr.GetMapUpdater()->GetMapBrokenData(map);
-                    uint32 counter = pMBData ? pMBData->count : 0;
+                    MapStatisticData const* pMBData = sMapMgr.GetMapUpdater()->GetMapStatisticData(map);
+                    uint32 counter = pMBData ? pMBData->breaksCount : 0;
 
                     sLog.outError("VMSS:: crushed thread is update map %u, instance %u, counter %u",map->GetId(), map->GetInstanceId(), counter);
                     sLog.outError("VMSS:: BackTrace for map %u: ",map->GetId());
@@ -649,7 +649,7 @@ void Master::_OnSignal(int s)
                         }
                         else
                         {
-                            sLog.outError("VMSS:: Restarting virtual map server (map %u instance %u). Count of restarts: %u",map->GetId(), map->GetInstanceId(), sMapMgr.GetMapUpdater()->GetMapBrokenData(map)->count);
+                            sLog.outError("VMSS:: Restarting virtual map server (map %u instance %u). Count of restarts: %u",map->GetId(), map->GetInstanceId(), sMapMgr.GetMapUpdater()->GetMapStatisticData(map)->breaksCount);
                             sMapMgr.GetMapUpdater()->kill_thread(threadId, false);
                             ACE_OS::thr_exit();
                         }

@@ -2253,6 +2253,7 @@ PlayerbotAI.SellGarbage = 0
 #    VMSS.MapFreezeDetectTime
 #        Time period (in milliseconds) for detect freeze in map thread
 #        Default: 1000 (1 sec)
+#        if setted to 0 - don't check!
 #
 #    VMSS.TrySkipFirstThreadBreak
 #        Try skip first thread break (crush), and restore his update cycle fully - 
@@ -2275,7 +2276,7 @@ VMSS.MaxThreadBreaks = 3
 VMSS.ThreadBreakRememberTime = 600
 VMSS.MapFreeMethod = 1
 VMSS.FreezeCheckPeriod = 1000
-VMSS.MapFreezeDetectTime = 2000
+VMSS.MapFreezeDetectTime = 1000
 VMSS.TrySkipFirstThreadBreak = 1
 VMSS.ForceUnloadDelay = 3000
 VMSS.ContinentsSkip = 1

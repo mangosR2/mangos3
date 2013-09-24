@@ -66,7 +66,7 @@ template <class T> class ObjectUpdateTaskBase : protected ACE_Task_Base
     public:
 
         ObjectUpdateTaskBase()
-            : m_mutex(), m_condition(m_mutex), m_rwmutex(),  m_pendingRequests(0), m_statisticBegin(false)
+            : m_mutex(), m_condition(m_mutex), m_rwmutex(),  m_pendingRequests(0)
         {
             if (activated())
                 deactivate();
@@ -90,7 +90,6 @@ template <class T> class ObjectUpdateTaskBase : protected ACE_Task_Base
             {
                 if (m_queue.is_empty())
                     m_condition.broadcast();
-
                 if (ACE_Method_Request* rq = m_queue.dequeue())
                 {
                     T* obj = ((ObjectUpdateRequest<T>*)rq)->getObject();
@@ -112,6 +111,8 @@ template <class T> class ObjectUpdateTaskBase : protected ACE_Task_Base
                     ACE_DEBUG((LM_ERROR, ACE_TEXT("(%t) \n"), ACE_TEXT("Failed to get sheduled object from queue")));
                     break;
                 }
+                if (m_queue.is_empty())
+                    m_condition.broadcast();
             }
             m_condition.broadcast();
             return 0;
@@ -123,7 +124,7 @@ template <class T> class ObjectUpdateTaskBase : protected ACE_Task_Base
             return itr == m_threadsMap.end() ?  NULL : itr->second->getObject();
         }
 
-        virtual int schedule_update(T& obj, ACE_UINT32 diff)
+        virtual int schedule_update(T& obj, uint32 diff)
         {
             if (execute(new ObjectUpdateRequest<T>(obj, diff)) == -1)
             {
@@ -137,9 +138,6 @@ template <class T> class ObjectUpdateTaskBase : protected ACE_Task_Base
         {
             if (new_req == NULL)
                 return -1;
-
-            if (!m_statisticBegin)
-                m_statisticBegin = true;
 
             while (m_queue.is_full())
                 m_condition.wait();
@@ -156,17 +154,29 @@ template <class T> class ObjectUpdateTaskBase : protected ACE_Task_Base
             return 0;
         }
 
-        int queue_wait()
+        int queue_wait(uint32 maxDelay = 0 /*msec*/)
         {
             ACE_Guard<ACE_Thread_Mutex> guard(m_mutex);
-
             statistic_hook_round_barrier();
-            while (m_currentThreadsCount > 0 && getPendingRequestsCount() > 0)
-                m_condition.wait();
+            ACE_Time_Value absTime = ACE_OS::gettimeofday() + ACE_Time_Value(0, maxDelay * 1000);
+            int result = 0;
 
+            while (m_currentThreadsCount > 0 && getPendingRequestsCount() > 0)
+            {
+                int res = m_condition.wait((maxDelay == 0) ? 0 : &absTime);
+                if (res == -1)
+                {
+                    if (freeze_hook() == 1 ||
+                        (getActiveThreadsCount() == 0 && m_queue.is_empty()))
+                    {
+                        result = getPendingRequestsCount();
+                        break;
+                    }
+                }
+            }
             statistic_hook_round_end();
-            m_statisticBegin = false;
-            return 0;
+            setPendingRequestsCount(0);
+            return result;
         }
 
         int activate(size_t num_threads)
@@ -190,6 +200,7 @@ template <class T> class ObjectUpdateTaskBase : protected ACE_Task_Base
                 m_threadsMap[threads[i]] = NULL;
 
             m_currentThreadsCount = num_threads;
+            m_currentActiveThreadsCount = 0;
 
             return 1;
         }
@@ -212,9 +223,7 @@ template <class T> class ObjectUpdateTaskBase : protected ACE_Task_Base
         void reactivate(uint32 threads)
         {
             statistic_hook_round_begin();
-
-            m_statisticBegin = true;
-
+            setPendingRequestsCount(0);
             if (m_currentThreadsCount == threads && activated())
                 return;
 
@@ -231,10 +240,12 @@ template <class T> class ObjectUpdateTaskBase : protected ACE_Task_Base
         {
             if (needKill)
             {
+                ACE_Write_Guard<ACE_RW_Thread_Mutex> guardRW(m_rwmutex);
                 //thr_mgr()->kill(threadId, SIGABRT);
                 thr_mgr()->cancel(threadId, 0);
+                m_threadsMap.erase(threadId);
+                --m_currentActiveThreadsCount;
             }
-            m_threadsMap.erase(threadId);
             decreasePendingRequestsCount();
             m_condition.broadcast();
         }
@@ -242,13 +253,13 @@ template <class T> class ObjectUpdateTaskBase : protected ACE_Task_Base
         void setPendingRequestsCount(size_t num)
         {
             ACE_Write_Guard<ACE_RW_Thread_Mutex> guardRW(m_rwmutex);
-            m_pendingRequests = num;
+            m_pendingRequests = (num >=0) ? num : 0;
         }
 
         size_t decreasePendingRequestsCount()
         {
             ACE_Write_Guard<ACE_RW_Thread_Mutex> guardRW(m_rwmutex);
-            return --m_pendingRequests;
+            return m_pendingRequests == 0 ? 0 : --m_pendingRequests;
         }
 
         size_t getPendingRequestsCount()
@@ -262,6 +273,16 @@ template <class T> class ObjectUpdateTaskBase : protected ACE_Task_Base
         {
             ACE_Write_Guard<ACE_RW_Thread_Mutex> guardRW(m_rwmutex);
             m_threadsMap[ACE_OS::thr_self()] = rq;
+            if (rq)
+                ++m_currentActiveThreadsCount;
+            else
+                --m_currentActiveThreadsCount;
+        }
+
+        size_t getActiveThreadsCount()
+        {
+            ACE_Read_Guard<ACE_RW_Thread_Mutex> guardRW(m_rwmutex);
+            return m_currentActiveThreadsCount;
         }
 
         ObjectUpdateRequest<T>* getThreadInfo(ACE_thread_t threadId)
@@ -270,6 +291,9 @@ template <class T> class ObjectUpdateTaskBase : protected ACE_Task_Base
             typename ThreadsMap::iterator itr = m_threadsMap.find(threadId);
             return itr == m_threadsMap.end() ? NULL : itr->second;
         }
+
+        // Freeze reaction hook
+        virtual int freeze_hook()                   { return 0; } /* 0 - no reaction, 1 - force end waiting*/
 
         // Statistic block (for load analyze)
         virtual void statistic_hook_begin(T* obj)   {}
@@ -287,7 +311,7 @@ template <class T> class ObjectUpdateTaskBase : protected ACE_Task_Base
         ThreadsMap                 m_threadsMap;
         size_t                     m_pendingRequests;
         size_t                     m_currentThreadsCount;
-        bool                       m_statisticBegin;
+        size_t                     m_currentActiveThreadsCount;
 };
 
 #endif //_OBJECT_UPDATE_TASK_BASE_H_INCLUDED
