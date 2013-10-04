@@ -506,15 +506,9 @@ void WorldSession::LogoutPlayer(bool Save)
         }
 
         ///- If the player is in a guild, update the guild roster and broadcast a logout message to other guild members
-        Guild* guild = sGuildMgr.GetGuildById(GetPlayer()->GetGuildId());
-        if (guild)
+        if (Guild* guild = sGuildMgr.GetGuildById(GetPlayer()->GetGuildId()))
         {
-            if (MemberSlot* slot = guild->GetMemberSlot(GetPlayer()->GetObjectGuid()))
-            {
-                slot->SetMemberStats(GetPlayer());
-                slot->UpdateLogoutTime();
-            }
-
+            guild->OnMemberLogout(GetPlayer());
             guild->BroadcastEvent(GE_SIGNED_OFF, GetPlayer()->GetObjectGuid(), GetPlayer()->GetName());
         }
 
