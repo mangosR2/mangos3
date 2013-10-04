@@ -92,7 +92,7 @@ WorldSession::WorldSession(uint32 id, WorldSocket *sock, AccountTypes sec, uint8
 m_muteTime(mute_time), _player(NULL), m_Socket(sock),_security(sec), _accountId(id), m_expansion(expansion), _logoutTime(0),
 m_inQueue(false), m_playerLoading(false), m_playerLogout(false), m_playerRecentlyLogout(false), m_playerSave(false),
 m_sessionDbcLocale(sWorld.GetAvailableDbcLocale(locale)), m_sessionDbLocaleIndex(sObjectMgr.GetIndexForLocale(locale)),
-m_latency(0), m_tutorialState(TUTORIALDATA_UNCHANGED), m_Warden(NULL)
+m_latency(0), m_clientTimeDelay(0), m_tutorialState(TUTORIALDATA_UNCHANGED), m_Warden(NULL)
 {
     if (sock)
     {
@@ -333,7 +333,7 @@ bool WorldSession::Update(PacketFilter& updater)
     // we need to process all master's bot's packets.
     if (!sWorld.getConfig(CONFIG_BOOL_PLAYERBOT_DISABLE))
     {
-        if (GetPlayer() && GetPlayer()->GetPlayerbotMgr()) 
+        if (GetPlayer() && GetPlayer()->GetPlayerbotMgr())
         {
             for (PlayerBotMap::const_iterator itr = GetPlayer()->GetPlayerbotMgr()->GetPlayerBotsBegin();
                     itr != GetPlayer()->GetPlayerbotMgr()->GetPlayerBotsEnd(); ++itr)
