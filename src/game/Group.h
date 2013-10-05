@@ -257,6 +257,8 @@ class MANGOS_DLL_SPEC Group
         bool   AddMember(ObjectGuid guid, const char* name);
         uint32 RemoveMember(ObjectGuid guid, uint8 method); // method: 0=just remove, 1=kick
         void   ChangeLeader(ObjectGuid guid);
+        void CheckLeader(ObjectGuid const& guid, bool isLogout);
+        bool ChangeLeaderToFirstSuitableMember(bool onlySet = false);
         void   SetLootMethod(LootMethod method) { m_lootMethod = method; }
         void   SetLooterGuid(ObjectGuid guid) { m_looterGuid = guid; }
         void   UpdateLooterGuid(WorldObject* pSource, bool ifneed = false);
@@ -304,6 +306,7 @@ class MANGOS_DLL_SPEC Group
         bool IsMainAssistant(ObjectGuid const& guid) const { return IsGroupRole(guid, GROUP_MAIN_ASSISTANT); }
         bool IsMainTank(ObjectGuid const& guid) const { return IsGroupRole(guid, GROUP_MAIN_TANK); }
         bool IsAssistant(ObjectGuid const& guid) const { return IsGroupRole(guid, GROUP_ASSISTANT); }
+        Player* GetMemberWithRole(GroupFlagMask role);
 
         Player* GetInvited(ObjectGuid guid) const;
         Player* GetInvited(const std::string& name) const;
@@ -354,6 +357,7 @@ class MANGOS_DLL_SPEC Group
 
         void SendTargetIconList(WorldSession *session);
         void SendUpdate();
+        void Update(uint32 diff);
         void UpdatePlayerOutOfRange(Player* pPlayer);
                                                             // ignore: GUID of player that will be ignored
         void BroadcastPacket(WorldPacket *packet, bool ignorePlayersInBGRaid, int group=-1, ObjectGuid ignore = ObjectGuid());
@@ -479,5 +483,7 @@ class MANGOS_DLL_SPEC Group
         BoundInstancesMap   m_boundInstances[MAX_DIFFICULTY];
         uint8*              m_subGroupsCounts;
         LFGGroupState       m_LFGState;
+
+        time_t              m_leaderLogoutTime;
 };
 #endif

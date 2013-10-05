@@ -83,7 +83,7 @@ RollVoteMask Roll::GetVoteMaskFor(Player* player) const
 Group::Group(GroupType type) : m_Guid(ObjectGuid()), m_groupType(type),
     m_Difficulty(0), m_bgGroup(NULL), m_lootMethod(FREE_FOR_ALL),
     m_lootThreshold(ITEM_QUALITY_UNCOMMON), m_subGroupsCounts(NULL),
-    m_LFGState(LFGGroupState(this))
+    m_LFGState(LFGGroupState(this)), m_leaderLogoutTime(0)
 {
 }
 
@@ -527,6 +527,86 @@ void Group::ChangeLeader(ObjectGuid guid)
     data << slot->name;
     BroadcastPacket(&data, true);
     SendUpdate();
+}
+
+void Group::CheckLeader(ObjectGuid const& guid, bool isLogout)
+{
+    if (IsLeader(guid))
+    {
+        if (isLogout)
+            m_leaderLogoutTime = time(NULL);
+        else
+            m_leaderLogoutTime = 0;
+    }
+    else
+    {
+        if (!isLogout && !m_leaderLogoutTime) // normal member logins
+        {
+            Player* leader = NULL;
+
+            // find the leader from group members
+            for (GroupReference* itr = GetFirstMember(); itr != NULL; itr = itr->next())
+            {
+                if (itr->getSource()->GetObjectGuid() == m_leaderGuid)
+                {
+                    leader = itr->getSource();
+                    break;
+                }
+            }
+
+            if (!leader || !leader->IsInWorld())
+                m_leaderLogoutTime = time(NULL);
+        }
+    }
+}
+
+Player* Group::GetMemberWithRole(GroupFlagMask role)
+{
+    for (GroupReference* itr = GetFirstMember(); itr != NULL; itr = itr->next())
+    {
+        Player* player = itr->getSource();
+        if (player && player->IsInWorld() &&
+            player->GetObjectGuid() != m_leaderGuid &&
+            IsGroupRole(player->GetObjectGuid(), role) &&
+            !player->GetPlayerbotAI() /* don't give leader to bots */)
+        {
+            return player;
+        }
+    }
+    return NULL;
+}
+
+bool Group::ChangeLeaderToFirstSuitableMember(bool onlySet/*= false*/)
+{
+    Player* newLeader = NULL;
+
+    // first find asistants
+    if (isRaidGroup())
+    {
+        // Assistant
+        newLeader = GetMemberWithRole(GROUP_ASSISTANT);
+        // Main Tank
+        if (!newLeader)
+            newLeader = GetMemberWithRole(GROUP_MAIN_TANK);
+        // Main Assistant
+        if (!newLeader)
+            newLeader = GetMemberWithRole(GROUP_MAIN_ASSISTANT);
+    }
+
+    // then any member
+    if (!newLeader)
+        newLeader = GetMemberWithRole(GROUP_MEMBER);
+
+    if (newLeader)
+    {
+        if (onlySet)
+            _setLeader(newLeader->GetObjectGuid());
+        else
+            ChangeLeader(newLeader->GetObjectGuid());
+        return true;
+    }
+
+    return false;
 }
 
 void Group::Disband(bool hideDestroy)
@@ -1189,9 +1269,10 @@ void Group::SendUpdate()
         {
             if (citr->guid == citr2->guid)
                 continue;
+
             Player* member = sObjectMgr.GetPlayer(citr2->guid);
-            uint8 onlineState = (member) ? MEMBER_STATUS_ONLINE : MEMBER_STATUS_OFFLINE;
-            onlineState = onlineState | ((isBGGroup()) ? MEMBER_STATUS_PVP : 0);
+            uint8 onlineState = (member && !member->GetSession()->PlayerLogout()) ? MEMBER_STATUS_ONLINE : MEMBER_STATUS_OFFLINE;
+            onlineState |= isBGGroup() ? MEMBER_STATUS_PVP : 0;
 
             data << citr2->name;
             data << citr2->guid;
@@ -1212,6 +1293,27 @@ void Group::SendUpdate()
             data << uint8(0);                               // 3.3, dynamic difficulty?
         }
         player->GetSession()->SendPacket(&data);
+
+        // when player is loading we need a stats update
+        if (player->GetSession()->PlayerLoading())
+        {
+            player->SetGroupUpdateFlag(GROUP_UPDATE_FLAG_MAX_HP | GROUP_UPDATE_FLAG_MAX_POWER | GROUP_UPDATE_FLAG_LEVEL);
+            UpdatePlayerOutOfRange(player);
+        }
+    }
+}
+
+void Group::Update(uint32 /*diff*/)
+{
+    if (!m_leaderLogoutTime)
+        return;
+
+    time_t nowTime = time(NULL);
+
+    if (nowTime >= m_leaderLogoutTime + sWorld.getConfig(CONFIG_UINT32_GROUPLEADER_RECONNECT_PERIOD))
+    {
+        ChangeLeaderToFirstSuitableMember();
+        m_leaderLogoutTime = 0;
     }
 }
 
@@ -1416,7 +1518,7 @@ bool Group::_removeMember(ObjectGuid guid)
     if (m_leaderGuid == guid)                               // leader was removed
     {
         if (GetMembersCount() > 0)
-            _setLeader(m_memberSlots.front().guid);
+            ChangeLeaderToFirstSuitableMember(true);
         return true;
     }
 
