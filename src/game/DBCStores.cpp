@@ -247,6 +247,7 @@ DBCStorage <VehicleEntry> sVehicleStore(VehicleEntryfmt);
 DBCStorage <VehicleSeatEntry> sVehicleSeatStore(VehicleSeatEntryfmt);
 DBCStorage <WMOAreaTableEntry>  sWMOAreaTableStore(WMOAreaTableEntryfmt);
 DBCStorage <WorldMapAreaEntry>  sWorldMapAreaStore(WorldMapAreaEntryfmt);
+WorldMapAreaMap sWorldMapAreaMap;
 DBCStorage <WorldMapOverlayEntry> sWorldMapOverlayStore(WorldMapOverlayEntryfmt);
 DBCStorage <WorldSafeLocsEntry> sWorldSafeLocsStore(WorldSafeLocsEntryfmt);
 DBCStorage <WorldStateEntry> sWorldStateStore(WorldStateEntryfmt);
@@ -867,9 +868,17 @@ void LoadDBCStores(const std::string& dataPath)
 
     LoadDBC(availableDbcLocales,bar,bad_dbc_files,sVehicleStore,             dbcPath,"Vehicle.dbc");
     LoadDBC(availableDbcLocales,bar,bad_dbc_files,sVehicleSeatStore,         dbcPath,"VehicleSeat.dbc");
-    LoadDBC(availableDbcLocales,bar,bad_dbc_files,sWorldMapAreaStore,        dbcPath,"WorldMapArea.dbc");
+    LoadDBC(availableDbcLocales, bar, bad_dbc_files, sWorldMapAreaStore,        dbcPath, "WorldMapArea.dbc");
+    for (uint32 i = 0; i < sWorldMapAreaStore.GetNumRows(); ++i)
+    {
+        if (WorldMapAreaEntry const* entry = sWorldMapAreaStore.LookupEntry(i))
+        {
+            if (entry->zone_id != 0) // Strip overall continent definition
+                sWorldMapAreaMap.insert(WorldMapAreaMap::value_type(entry->zone_id, entry));
+        }
+    }
     LoadDBC(availableDbcLocales,bar,bad_dbc_files,sWMOAreaTableStore,        dbcPath,"WMOAreaTable.dbc");
-    for(uint32 i = 0; i < sWMOAreaTableStore.GetNumRows(); ++i)
+    for (uint32 i = 0; i < sWMOAreaTableStore.GetNumRows(); ++i)
     {
         if(WMOAreaTableEntry const* entry = sWMOAreaTableStore.LookupEntry(i))
         {
@@ -1011,11 +1020,9 @@ uint32 GetAreaFlagByMapId(uint32 mapid)
 
 uint32 GetVirtualMapForMapAndZone(uint32 mapid, uint32 zoneId)
 {
-    if (mapid != 530 && mapid != 571 && mapid != 732)            // speed for most cases
-        return mapid;
-
-    if(WorldMapAreaEntry const* wma = sWorldMapAreaStore.LookupEntry(zoneId))
-        return wma->virtual_map_id >= 0 ? wma->virtual_map_id : wma->map_id;
+    WorldMapAreaMap::const_iterator itr = sWorldMapAreaMap.find(zoneId);
+    if (itr != sWorldMapAreaMap.end())
+        return itr->second->virtual_map_id >= 0 ? itr->second->virtual_map_id : itr->second->map_id;
 
     return mapid;
 }
@@ -1033,6 +1040,56 @@ ContentLevels GetContentLevelsForMap(uint32 mapid)
         case 2:  return CONTENT_71_80;
         case 3:  return CONTENT_81_85;
     }
+}
+
+WorldMapAreaEntry const* GetWorldMapAreaByAreaID(uint32 area_id)
+{
+    int32 areaflag = GetAreaFlagByAreaID(area_id);
+
+    if (areaflag < 0)
+        return NULL;
+
+    AreaTableEntry const* entry = sAreaStore.LookupEntry(areaflag);
+
+    if (!entry)
+        return NULL;
+
+    WorldMapAreaMap::const_iterator itr = sWorldMapAreaMap.find((entry->zone == 0) ? entry->ID : entry->zone);
+    if (itr != sWorldMapAreaMap.end())
+        return itr->second;
+
+    return NULL;
+}
+
+WorldMapAreaEntry const* GetWorldMapAreaByMapID(uint32 map_id)
+{
+    MapEntry const* targetMapEntry = sMapStore.LookupEntry(map_id);
+    if (!targetMapEntry)
+        return NULL;
+
+    for (uint32 i = 0; i < sWorldMapAreaStore.GetNumRows(); ++i)
+    {
+        if (WorldMapAreaEntry const* entry = sWorldMapAreaStore.LookupEntry(i))
+        {
+            if (entry->map_id == map_id && (!targetMapEntry->IsContinent() || (entry->zone_id == 0)))
+                return entry;
+        }
+    }
+    return NULL;
+}
+
+std::set<uint32> GetWorldMapAreaSetByMapID(uint32 map_id)
+{
+    std::set<uint32> maps;
+    for (uint32 i = 0; i < sWorldMapAreaStore.GetNumRows(); ++i)
+    {
+        if (WorldMapAreaEntry const* entry = sWorldMapAreaStore.LookupEntry(i))
+        {
+            if (entry->map_id == map_id && !(entry->zone_id == 0)) // scip continents main area
+                maps.insert(entry->zone_id);
+        }
+    }
+    return maps;
 }
 
 ChatChannelsEntry const* GetChannelEntryFor(uint32 channel_id)

@@ -16,9 +16,7 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 
-project(MangosR2)
-set(MANGOS_VERSION 0.19.2)
-set(CLIENT_VERSION 15595)
+project(MangosR2v3)
 
 # CMake policies
 cmake_minimum_required(VERSION 2.8)
@@ -403,7 +401,7 @@ if(XCODE)
   endif()
 endif()
 
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/config.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/config.h)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/config.h.cmake ${CMAKE_CURRENT_SOURCE_DIR}/config.h)
 
 add_subdirectory(dep) # TODO: add vmap extractor build support
 
@@ -411,9 +409,7 @@ add_subdirectory(dep) # TODO: add vmap extractor build support
 # Don't place this above 'dep' subdirectory! Because of defines build will crash.
 set(DEFINITIONS
   DO_MYSQL
-  HAVE_CONFIG_H
-  VERSION="${MANGOS_VERSION}"
-  SYSCONFDIR="${CONF_DIR}/"
+  SYSCONFDIR="../etc/"
 )
 set(DEFINITIONS_RELEASE NDEBUG)
 set(DEFINITIONS_DEBUG _DEBUG MANGOS_DEBUG)

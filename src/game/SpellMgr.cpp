@@ -863,6 +863,8 @@ bool IsPositiveEffect(SpellEntry const* spellproto, SpellEffectIndex effIndex)
             switch (spellproto->Id)
             {
                 case 46650:                                 // Open Brutallus Back Door
+                case 62488:                                 // Activate Construct
+                case 64503:                                 // Water
                     return true;
                 default:
                     break;
@@ -942,6 +944,7 @@ bool IsPositiveEffect(SpellEntry const* spellproto, SpellEffectIndex effIndex)
                         case 27202:
                         case 27203:
                         case 47669:
+                        case 64996:                         // Reorigination
                             return true;
                         default:
                             break;
@@ -2434,6 +2437,18 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
                 if (spellInfo_2->GetSpellFamilyFlags().test<CF_PALADIN_BLESSING_OF_KINGS>())
                     return true;
             }
+            // Black Hole (damage) and Black Hole (phase) 
+            if (MatchedSpellIdPair(62169, 62168))
+                return false; 
+
+            // Black Hole (damage) and Worm Hole (phase) 
+            if (MatchedSpellIdPair(62169, 65250))
+                return false; 
+
+            // Black Hole (damage) and Phase Punch (phase) 
+            if (MatchedSpellIdPair(62169, 64417))
+                return false;
+
             break;
         }
         case SPELLFAMILY_WARLOCK:
@@ -2852,6 +2867,9 @@ uint32 SpellMgr::GetSpellMaxTargetsWithCustom(SpellEntry const* spellInfo, Unit 
                 case 62374:                                 // Pursued (Ulduar, Flame Leviathan)
                 case 62400:                                 // Missile Barrage (Ulduar, Flame Leviathan)
                 case 62488:                                 // Activate Construct (Ulduar, Ignis)
+                case 62577:                                 // Blizzard (Ulduar, Thorim) 
+                case 62603:                                 // Blizzard (h) (Ulduar, Thorim)
+                case 62797:                                 // Storm Cloud (Ulduar, Hodir)
                 case 63018:                                 // Searing Light
                 case 63024:                                 // Gravity Bomb (Ulduar, XT-002)
                 case 63342:                                 // Focused Eyebeam Summon Trigger (Ulduar, Kologarn)
@@ -2863,6 +2881,7 @@ uint32 SpellMgr::GetSpellMaxTargetsWithCustom(SpellEntry const* spellInfo, Unit 
                 case 64234:                                 // Gravity Bomb (h) (Ulduar, XT-002)
                 case 64425:                                 // Summon Scrap Bot Trigger (Ulduar, Mimiron) use for Assault Bots, hits npc 33856
                 case 64531:                                 // Rapid Burst (h)
+                case 64543:                                 // Melt Ice (Ulduar, Hodir)
                 case 64562:                                 // Summon Flames Spread Trigger (Ulduar, Mimiron)
                 case 64623:                                 // Frost Bomb (Ulduar, Mimiron)
                 case 65121:                                 // Searing Light (h)
@@ -2954,7 +2973,7 @@ uint32 SpellMgr::GetSpellMaxTargetsWithCustom(SpellEntry const* spellInfo, Unit 
                 case 41303:                                 // Soul Drain (BT, Reliquary of Souls)
                 case 41376:                                 // Spite (BT, Reliquary of Souls)
                 case 51904:                                 // Limiting the count of Summoned Ghouls
-                case 54522:
+                case 54522:                                 // Summon Ghouls On Scarlet Crusade
                 case 60936:                                 // Surge of Power (h) (Malygos)
                 case 61693:                                 // Arcane Storm (Malygos)
                 case 62477:                                 // Icicle (Hodir 25man)
@@ -3086,6 +3105,9 @@ float SpellMgr::GetSpellRadiusWithCustom(SpellEntry const* spellInfo, Unit const
                     break;
                 case 67732:                                 // Destroy all Frost Patches (Trial of the Crusader, Anub'arak)
                     radius = 9.0f;
+                    break;
+                case 74086:                                 // Destroy Soul (Lich King)
+                    radius = 100.0f;
                     break;
                 case 69075:                                 // Bone Storm
                 case 69832:                                 // Unstable Ooze Explosion (Rotface)

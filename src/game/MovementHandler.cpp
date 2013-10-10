@@ -352,6 +352,13 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
     if (plMover)
         plMover->UpdateFallInformationIfNeed(movementInfo, opcode);
 
+    // some movement packet fixes, taking into account client/server connection lag.
+    if (!m_clientTimeDelay)
+        m_clientTimeDelay = WorldTimer::getMSTime() - movementInfo.GetTime();
+
+    if (m_clientTimeDelay)
+        movementInfo.UpdateTime(movementInfo.GetTime() + m_clientTimeDelay);
+
     WorldPacket data(SMSG_PLAYER_MOVE, recv_data.size());
     data << movementInfo;
     mover->SendMessageToSetExcept(&data, _player);

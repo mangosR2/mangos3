@@ -49,7 +49,6 @@ void WorldStateMgr::Update()
 {
     {
         // Update part 1 - calculating (and mark for cleanup)
-        ReadGuard guard(GetLock());
         for (WorldStateMap::iterator itr = m_worldState.begin(); itr != m_worldState.end(); ++itr)
         {
             WorldState* state = &itr->second;
@@ -111,7 +110,6 @@ void WorldStateMgr::Update()
 
     {
         // Update part 2 - remove states with WORLD_STATE_FLAG_DELETED flag
-        WriteGuard guard(GetLock());
         for (WorldStateMap::iterator itr = m_worldState.begin(); itr != m_worldState.end();)
         {
             if (itr->second.HasFlag(WORLD_STATE_FLAG_DELETED))
@@ -596,8 +594,6 @@ void WorldStateMgr::SaveToDB()
 
 void WorldStateMgr::Save(WorldState const* state)
 {
-    ReadGuard guard(GetLock());
-
     static SqlStatementID wsDel;
     SqlStatement stmt = CharacterDatabase.CreateStatement(wsDel, "DELETE FROM `worldstate_data` WHERE `state_id` = ? AND `instance` = ?");
     stmt.PExecute(state->GetId(), state->GetInstance());
@@ -629,7 +625,6 @@ void WorldStateMgr::DeleteWorldState(WorldState* state)
     SqlStatement stmt = CharacterDatabase.CreateStatement(wsDel, "DELETE FROM `worldstate_data` WHERE `state_id` = ? AND `instance` = ?");
     stmt.PExecute(state->GetId(), state->GetInstance());
 
-    WriteGuard guard(GetLock());
     for (WorldStateMap::iterator iter = m_worldState.begin(); iter != m_worldState.end();)
     {
         if (&iter->second == state)
@@ -647,8 +642,6 @@ void WorldStateMgr::DeleteWorldState(WorldState* state)
 
 WorldStateTemplate const* WorldStateMgr::FindTemplate(uint32 stateId, uint32 type, uint32 condition, uint32 linkedId)
 {
-    ReadGuard guard(GetLock());
-
     if (type == WORLD_STATE_TYPE_MAX && condition == 0 && linkedId == 0 && ((int)m_worldStateTemplates.count(stateId) > 1))
     {
         sLog.outError("WorldStateMgr::FindTemplate tru find template with simple rules, but in DB not one template Id %u!", stateId);
@@ -746,7 +739,6 @@ WorldStateSet* WorldStateMgr::GetWorldStatesFor(Player* player, uint32 flags)
 
     bool bFull = player ? !player->IsInWorld() : true;
 
-    ReadGuard guard(GetLock());
     for (WorldStateMap::iterator itr = m_worldState.begin(); itr != m_worldState.end(); ++itr)
     {
         WorldState* state = &itr->second;
@@ -765,8 +757,6 @@ WorldStateSet* WorldStateMgr::GetWorldStatesFor(Player* player, uint32 flags)
 WorldStateSet* WorldStateMgr::GetUpdatedWorldStatesFor(Player* player, time_t updateTime)
 {
     WorldStateSet* stateSet = NULL;
-
-    ReadGuard guard(GetLock());
 
     for (WorldStateMap::iterator itr = m_worldState.begin(); itr != m_worldState.end(); ++itr)
     {
@@ -952,7 +942,6 @@ bool WorldStateMgr::IsFitToCondition(uint32 mapId, uint32 instanceId, uint32 zon
 
 uint32 WorldStateMgr::GetWorldStateValue(uint32 stateId)
 {
-    ReadGuard guard(GetLock());
     WorldStateBounds bounds = m_worldState.equal_range(stateId);
 
     if (bounds.first == bounds.second)
@@ -966,7 +955,6 @@ uint32 WorldStateMgr::GetWorldStateValueFor(Player* player, uint32 stateId)
     if (!player)
         return UINT32_MAX;
 
-    ReadGuard guard(GetLock());
     WorldStateBounds bounds = m_worldState.equal_range(stateId);
     if (bounds.first == bounds.second)
         return UINT32_MAX;
@@ -984,7 +972,6 @@ uint32 WorldStateMgr::GetWorldStateValueFor(Map* map, uint32 stateId)
     if (!map)
         return UINT32_MAX;
 
-    ReadGuard guard(GetLock());
     WorldStateBounds bounds = m_worldState.equal_range(stateId);
     if (bounds.first == bounds.second)
         return UINT32_MAX;
@@ -999,7 +986,6 @@ uint32 WorldStateMgr::GetWorldStateValueFor(Map* map, uint32 stateId)
 
 uint32 WorldStateMgr::GetWorldStateValueFor(uint32 mapId, uint32 instanceId, uint32 zoneId, uint32 areaId, uint32 stateId)
 {
-    ReadGuard guard(GetLock());
     WorldStateBounds bounds = m_worldState.equal_range(stateId);
     if (bounds.first == bounds.second)
         return UINT32_MAX;
@@ -1025,7 +1011,6 @@ uint32 WorldStateMgr::GetWorldStateValueFor(WorldObject* object, uint32 stateId)
     if (!goInfo || goInfo->type != GAMEOBJECT_TYPE_CAPTURE_POINT)
         return GetWorldStateValueFor(object->GetMap(), stateId);
 
-    ReadGuard guard(GetLock());
     WorldStateBounds bounds = m_worldState.equal_range(stateId);
 
     if (bounds.first != bounds.second)
@@ -1198,7 +1183,6 @@ WorldState const* WorldStateMgr::CreateWorldState(WorldStateTemplate const* tmpl
 
     // Store the state data
     {
-        WriteGuard guard(GetLock());
         m_worldState.insert(WorldStateMap::value_type(tmpl->m_stateId, WorldState(tmpl, instanceId)));
     }
     WorldState* _state  = const_cast<WorldState*>(GetWorldState(tmpl, instanceId));
@@ -1222,7 +1206,6 @@ WorldState const* WorldStateMgr::CreateWorldState(WorldStateTemplate const* tmpl
 
 WorldState const* WorldStateMgr::GetWorldState(uint32 stateId, uint32 instanceId, WorldStateType type, uint32 condition)
 {
-    ReadGuard guard(GetLock());
     WorldStateBounds bounds = m_worldState.equal_range(stateId);
     if (bounds.first == bounds.second)
         return NULL;
@@ -1239,7 +1222,6 @@ WorldState const* WorldStateMgr::GetWorldState(uint32 stateId, uint32 instanceId
 
 WorldState const* WorldStateMgr::GetWorldState(uint32 stateId, uint32 instanceId, Player* player)
 {
-    ReadGuard guard(GetLock());
     WorldStateBounds bounds = m_worldState.equal_range(stateId);
     if (bounds.first == bounds.second)
         return NULL;
@@ -1258,7 +1240,6 @@ WorldState const* WorldStateMgr::GetWorldState(WorldStateTemplate const* tmpl, u
     if (!tmpl)
         return NULL;
 
-    ReadGuard guard(GetLock());
     WorldStateBounds bounds = m_worldState.equal_range(tmpl->m_stateId);
     if (bounds.first == bounds.second)
         return NULL;
@@ -1409,7 +1390,6 @@ WorldStateSet* WorldStateMgr::GetInstanceStates(uint32 mapId, uint32 instanceId,
 {
     WorldStateSet* stateSet = NULL;
 
-    ReadGuard guard(GetLock());
     for (WorldStateMap::iterator itr = m_worldState.begin(); itr != m_worldState.end(); ++itr)
     {
         WorldState* state = &itr->second;
@@ -1439,7 +1419,6 @@ WorldStateSet* WorldStateMgr::GetInitWorldStates(uint32 mapId, uint32 instanceId
 {
     WorldStateSet* stateSet = NULL;
 
-    ReadGuard guard(GetLock());
     for (WorldStateMap::const_iterator itr = m_worldState.begin(); itr != m_worldState.end(); ++itr)
     {
         WorldState const* state = &itr->second;

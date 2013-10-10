@@ -332,8 +332,7 @@ void WorldSession::HandleGuildRosterOpcode(WorldPacket& recvPacket)
     DEBUG_LOG("WORLD: Received CMSG_GUILD_ROSTER, guid1: %s raw: " UI64FMTD ", guid2: %s raw: " UI64FMTD "",
         guid1.GetString().c_str(), guid1.GetRawValue(), guid2.GetString().c_str(), guid2.GetRawValue());
 
-    Guild* guild = sGuildMgr.GetGuildById(_player->GetGuildId());
-    if (guild)
+    if (Guild* guild = sGuildMgr.GetGuildById(_player->GetGuildId()))
         guild->Roster(this);
 }
 
@@ -987,8 +986,7 @@ void WorldSession::HandleGuildEventLogQueryOpcode(WorldPacket& /* recvPacket */)
 
     if (uint32 GuildId = GetPlayer()->GetGuildId())
     {
-        Guild* pGuild = sGuildMgr.GetGuildById(GuildId);
-        if (pGuild)
+        if (Guild* pGuild = sGuildMgr.GetGuildById(GuildId))
             pGuild->DisplayGuildEventLog(this);
     }
 }
@@ -1001,8 +999,7 @@ void WorldSession::HandleGuildBankMoneyWithdrawn(WorldPacket& /* recv_data */)
 
     if (uint32 GuildId = GetPlayer()->GetGuildId())
     {
-        Guild* pGuild = sGuildMgr.GetGuildById(GuildId);
-        if (pGuild)
+        if (Guild* pGuild = sGuildMgr.GetGuildById(GuildId))
             pGuild->SendMoneyInfo(this, GetPlayer()->GetGUIDLow());
     }
 }
@@ -1013,8 +1010,7 @@ void WorldSession::HandleGuildPermissions(WorldPacket& /* recv_data */)
 
     if (uint32 GuildId = GetPlayer()->GetGuildId())
     {
-        Guild* pGuild = sGuildMgr.GetGuildById(GuildId);
-        if (pGuild)
+        if (Guild* pGuild = sGuildMgr.GetGuildById(GuildId))
         {
             uint32 rankId = GetPlayer()->GetRank();
 
@@ -1051,8 +1047,7 @@ void WorldSession::HandleGuildBankerActivate(WorldPacket& recv_data)
 
     if (uint32 GuildId = GetPlayer()->GetGuildId())
     {
-        Guild* pGuild = sGuildMgr.GetGuildById(GuildId);
-        if (pGuild)
+        if (Guild* pGuild = sGuildMgr.GetGuildById(GuildId))
         {
             pGuild->DisplayGuildBankTabsInfo(this);         // this also will load guild bank if not yet
             return;
@@ -1082,7 +1077,7 @@ void WorldSession::HandleGuildBankQueryTab(WorldPacket& recv_data)
     if (!pGuild)
         return;
 
-    if (TabId >= pGuild->GetPurchasedTabs())
+    if (!pGuild->IsGuildBankLoaded() || TabId >= pGuild->GetPurchasedTabs())
         return;
 
     pGuild->DisplayGuildBankContent(this, TabId);
@@ -1111,6 +1106,9 @@ void WorldSession::HandleGuildBankDepositMoney(WorldPacket& recv_data)
 
     Guild* pGuild = sGuildMgr.GetGuildById(GuildId);
     if (!pGuild)
+        return;
+
+    if (!pGuild->IsGuildBankLoaded() || !pGuild->GetPurchasedTabs())
         return;
 
     CharacterDatabase.BeginTransaction();
@@ -1156,6 +1154,9 @@ void WorldSession::HandleGuildBankWithdrawMoney(WorldPacket& recv_data)
 
     Guild* pGuild = sGuildMgr.GetGuildById(GuildId);
     if (!pGuild)
+        return;
+
+    if (!pGuild->IsGuildBankLoaded() || !pGuild->GetPurchasedTabs())
         return;
 
     if (pGuild->GetGuildBankMoney() < money)                // not enough money in bank
@@ -1212,7 +1213,7 @@ void WorldSession::HandleGuildBankSwapItems(WorldPacket& recv_data)
     }
 
     Guild* pGuild = sGuildMgr.GetGuildById(GuildId);
-    if (!pGuild)
+    if (!pGuild || !pGuild->IsGuildBankLoaded())
     {
         recv_data.rfinish();                                // prevent additional spam at rejected packet
         return;
@@ -1314,8 +1315,7 @@ void WorldSession::HandleGuildBankBuyTab(WorldPacket& recv_data)
         return;
 
     // m_PurchasedTabs = 0 when buying Tab 0, that is why this check can be made
-    // also don't allow buy tabs that are obtained through guild perks
-    if (TabId != pGuild->GetPurchasedTabs() || TabId >= GUILD_BANK_MAX_BOUGHT_TABS)
+    if (!pGuild->IsGuildBankLoaded() || TabId != pGuild->GetPurchasedTabs())
         return;
 
     uint64 TabCost = GetGuildBankTabPrice(TabId) * GOLD;
@@ -1364,7 +1364,7 @@ void WorldSession::HandleGuildBankUpdateTab(WorldPacket& recv_data)
     if (!pGuild)
         return;
 
-    if (TabId >= pGuild->GetPurchasedTabs())
+    if (!pGuild->IsGuildBankLoaded() || TabId >= pGuild->GetPurchasedTabs())
         return;
 
     if (!pGuild->HasRankRight(GetPlayer()->GetRank(), GR_RIGHT_MODIFY_BANK_TABS))
@@ -1390,6 +1390,9 @@ void WorldSession::HandleGuildBankLogQuery(WorldPacket& recv_data)
     if (!pGuild)
         return;
 
+    if (!pGuild->IsGuildBankLoaded())
+        return;
+
     // GUILD_BANK_MAX_TABS send by client for money log
     if (TabId >= pGuild->GetPurchasedTabs() && TabId != GUILD_BANK_MAX_TABS)
         return;
@@ -1412,7 +1415,7 @@ void WorldSession::HandleQueryGuildBankTabText(WorldPacket& recv_data)
     if (!pGuild)
         return;
 
-    if (TabId >= pGuild->GetPurchasedTabs())
+    if (!pGuild->IsGuildBankLoaded() || TabId >= pGuild->GetPurchasedTabs())
         return;
 
     pGuild->SendGuildBankTabText(this, TabId);
@@ -1436,7 +1439,7 @@ void WorldSession::HandleSetGuildBankTabText(WorldPacket& recv_data)
     if (!pGuild)
         return;
 
-    if (TabId >= pGuild->GetPurchasedTabs())
+    if (!pGuild->IsGuildBankLoaded() || TabId >= pGuild->GetPurchasedTabs())
         return;
 
     pGuild->SetGuildBankTabText(TabId, Text);

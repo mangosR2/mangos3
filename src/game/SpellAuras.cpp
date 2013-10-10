@@ -740,38 +740,38 @@ void Aura::AreaAuraUpdate(uint32 diff)
                 owner = caster;
 
             GuidSet targets;
-            targets.clear();
-
             Spell::UnitList _targets;
 
-            switch(m_areaAuraType)
+            switch (m_areaAuraType)
             {
                 case AREA_AURA_PARTY:
                 {
-                    Group *pGroup = NULL;
+                    Group* pGroup = NULL;
 
                     if (owner->GetTypeId() == TYPEID_PLAYER)
                         pGroup = ((Player*)owner)->GetGroup();
 
-                    if ( pGroup)
+                    if (pGroup)
                     {
                         uint8 subgroup = ((Player*)owner)->GetSubGroup();
-                        for(GroupReference *itr = pGroup->GetFirstMember(); itr != NULL; itr = itr->next())
+                        for (GroupReference* itr = pGroup->GetFirstMember(); itr != NULL; itr = itr->next())
                         {
                             Player* Target = itr->getSource();
-                            if (Target && Target->IsInWorld() && Target->isAlive() && Target->GetSubGroup()==subgroup && caster->IsInWorld() && caster->IsFriendlyTo(Target))
+                            if (Target && Target->IsInWorld() && Target->isAlive() && caster->IsInWorld() && Target->GetSubGroup() == subgroup && caster->IsFriendlyTo(Target))
                             {
                                 if (caster->IsWithinDistInMap(Target, m_radius))
                                     targets.insert(Target->GetObjectGuid());
-                                if (Target->GetPet())
+
+                                GuidSet const& groupPets = Target->GetPets();
+                                if (!groupPets.empty())
                                 {
-                                    GroupPetList m_groupPets = Target->GetPets();
-                                    if (!m_groupPets.empty())
+                                    for (GuidSet::const_iterator itr = groupPets.begin(); itr != groupPets.end(); ++itr)
                                     {
-                                        for (GroupPetList::const_iterator itr = m_groupPets.begin(); itr != m_groupPets.end(); ++itr)
-                                            if (Pet* _pet = Target->GetMap()->GetPet(*itr))
-                                                if (_pet && _pet->IsInWorld() && _pet->isAlive() && caster->IsWithinDistInMap(_pet, m_radius))
-                                                    targets.insert(_pet->GetObjectGuid());
+                                        if (Pet* pPet = Target->GetMap()->GetPet(*itr))
+                                        {
+                                            if (pPet->IsInWorld() && pPet->isAlive() && caster->IsWithinDistInMap(pPet, m_radius))
+                                                targets.insert(pPet->GetObjectGuid());
+                                        }
                                     }
                                 }
                             }
@@ -780,18 +780,20 @@ void Aura::AreaAuraUpdate(uint32 diff)
                     else
                     {
                         // add owner
-                        if ( owner != caster && caster->IsWithinDistInMap(owner, m_radius) )
+                        if (owner != caster && caster->IsWithinDistInMap(owner, m_radius))
                             targets.insert(owner->GetObjectGuid());
-                        // add caster's pet
-                        if (caster->GetPet())
+
+                        // add caster's pets
+                        GuidSet const& groupPets = caster->GetPets();
+                        if (!groupPets.empty())
                         {
-                            GroupPetList m_groupPets = caster->GetPets();
-                            if (!m_groupPets.empty())
+                            for (GuidSet::const_iterator itr = groupPets.begin(); itr != groupPets.end(); ++itr)
                             {
-                                for (GroupPetList::const_iterator itr = m_groupPets.begin(); itr != m_groupPets.end(); ++itr)
-                                    if (Pet* _pet = caster->GetMap()->GetPet(*itr))
-                                        if (_pet && _pet->IsInWorld() && caster->IsWithinDistInMap(_pet, m_radius))
-                                            targets.insert(_pet->GetObjectGuid());
+                                if (Pet* pPet = caster->GetMap()->GetPet(*itr))
+                                {
+                                    if (pPet->IsInWorld() && caster->IsWithinDistInMap(pPet, m_radius))
+                                        targets.insert(pPet->GetObjectGuid());
+                                }
                             }
                         }
                     }
@@ -799,29 +801,31 @@ void Aura::AreaAuraUpdate(uint32 diff)
                 }
                 case AREA_AURA_RAID:
                 {
-                    Group *pGroup = NULL;
+                    Group* pGroup = NULL;
 
                     if (owner->GetTypeId() == TYPEID_PLAYER)
                         pGroup = ((Player*)owner)->GetGroup();
 
-                    if ( pGroup)
+                    if (pGroup)
                     {
-                        for(GroupReference *itr = pGroup->GetFirstMember(); itr != NULL; itr = itr->next())
+                        for (GroupReference* itr = pGroup->GetFirstMember(); itr != NULL; itr = itr->next())
                         {
                             Player* Target = itr->getSource();
                             if (Target && Target->IsInWorld() && Target->isAlive() && caster->IsInWorld() && caster->IsFriendlyTo(Target))
                             {
                                 if (caster->IsWithinDistInMap(Target, m_radius))
                                     targets.insert(Target->GetObjectGuid());
-                                if (Target->GetPet())
+
+                                GuidSet const& groupPets = Target->GetPets();
+                                if (!groupPets.empty())
                                 {
-                                    GroupPetList m_groupPets = Target->GetPets();
-                                    if (!m_groupPets.empty())
+                                    for (GuidSet::const_iterator itr = groupPets.begin(); itr != groupPets.end(); ++itr)
                                     {
-                                        for (GroupPetList::const_iterator itr = m_groupPets.begin(); itr != m_groupPets.end(); ++itr)
-                                            if (Pet* _pet = caster->GetMap()->GetPet(*itr))
-                                                if (_pet && _pet->IsInWorld() && caster->IsWithinDistInMap(_pet, m_radius))
-                                                    targets.insert(_pet->GetObjectGuid());
+                                        if (Pet* pPet = caster->GetMap()->GetPet(*itr))
+                                        {
+                                            if (pPet->IsInWorld() && caster->IsWithinDistInMap(pPet, m_radius))
+                                                targets.insert(pPet->GetObjectGuid());
+                                        }
                                     }
                                 }
                             }
@@ -830,18 +834,20 @@ void Aura::AreaAuraUpdate(uint32 diff)
                     else
                     {
                         // add owner
-                        if ( owner != caster && caster->IsWithinDistInMap(owner, m_radius) )
+                        if (owner != caster && caster->IsWithinDistInMap(owner, m_radius))
                             targets.insert(owner->GetObjectGuid());
-                        // add caster's pet
-                        if (caster->GetPet())
+
+                        // add caster's pets
+                        GuidSet const& groupPets = caster->GetPets();
+                        if (!groupPets.empty())
                         {
-                            GroupPetList m_groupPets = caster->GetPets();
-                            if (!m_groupPets.empty())
+                            for (GuidSet::const_iterator itr = groupPets.begin(); itr != groupPets.end(); ++itr)
                             {
-                                for (GroupPetList::const_iterator itr = m_groupPets.begin(); itr != m_groupPets.end(); ++itr)
-                                    if (Pet* _pet = caster->GetMap()->GetPet(*itr))
-                                        if (_pet && _pet->IsInWorld() && caster->IsWithinDistInMap(_pet, m_radius))
-                                            targets.insert(_pet->GetObjectGuid());
+                                if (Pet* pPet = caster->GetMap()->GetPet(*itr))
+                                {
+                                    if (pPet->IsInWorld() && caster->IsWithinDistInMap(pPet, m_radius))
+                                        targets.insert(pPet->GetObjectGuid());
+                                }
                             }
                         }
                     }
@@ -2061,8 +2067,9 @@ void Aura::TriggerSpell()
 //                    // Shield Level 3
 //                    case 63132: break;
 //                    // Food
-//                    case 64345: break;
-//                    // Remove Player from Phase
+                    case 64345:                             // Remove Player from Phase
+                        target->RemoveSpellsCausingAura(SPELL_AURA_PHASE);
+                        return;
 //                    case 64445: break;
 //                    // Food
 //                    case 65418: break;
@@ -2789,25 +2796,23 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                     case 58589:                                 // Stoneclaw Totem VIII
                         target->CastSpell(target, 58583, true);
                         return;
-                    case 58600:                             // Restricted Flight Area
-                        target->MonsterWhisper(LANG_NO_FLY_ZONE, target, true);
-                        return;
                     case 58590:                                 // Stoneclaw Totem IX
                         target->CastSpell(target, 58584, true);
                         return;
                     case 58591:                                 // Stoneclaw Totem X
                         target->CastSpell(target, 58585, true);
                         return;
+                    case 58600:                             // Restricted Flight Area
+                    {
+                        if (!target || target->GetTypeId() != TYPEID_PLAYER)
+                            return;
+                        const char* text = sObjectMgr.GetMangosString(LANG_NO_FLY_ZONE, ((Player*)target)->GetSession()->GetSessionDbLocaleIndex());
+                        target->MonsterWhisper(text, target, true);
+                        return;
+                    }
                     case 58983:                                 // Big Blizzard Bear
                         Spell::SelectMountByAreaAndSkill(target, GetSpellProto(), 58997, 58999, 0, 0, 0);
                         return;
-                    case 61187:                                 // Twilight Shift
-                        target->CastSpell(target, 61885, true);
-                        if (target->HasAura(57620))
-                            target->RemoveAurasDueToSpell(57620);
-                        if (target->HasAura(57874))
-                            target->RemoveAurasDueToSpell(57874);
-                        break;
                     case 54729:                             // Winged Steed of the Ebon Blade
                         Spell::SelectMountByAreaAndSkill(target, GetSpellProto(), 0, 0, 54726, 54727, 0);
                         return;
@@ -2818,6 +2823,12 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                             target->CastSpell(target, spell_id + urand(0, 7), true);
                             return;
                         }
+                        break;
+                    case 61187:                             // Twilight Shift (single target)
+                    case 61190:                             // Twilight Shift (many targets)
+                        target->RemoveAurasDueToSpell(57620);
+                        target->CastSpell(target, 61885, true, NULL, this);
+                        return;
                     case 62061:                             // Festive Holiday Mount
                         if (target->HasAuraType(SPELL_AURA_MOUNTED))
                             // Reindeer Transformation
@@ -9273,7 +9284,7 @@ void Aura::PeriodicTick()
             {
                 gain_multiplier = m_spellEffect->EffectMultipleValue;
 
-                if (Player *modOwner = pCaster->GetSpellModOwner())
+                if (Player* modOwner = pCaster->GetSpellModOwner())
                     modOwner->ApplySpellMod(GetId(), SPELLMOD_MULTIPLE_VALUE, gain_multiplier);
             }
 
@@ -9290,19 +9301,25 @@ void Aura::PeriodicTick()
                             pCaster->CastCustomSpell(pCaster, 32554, &pet_gain, NULL, NULL, true);
 
                 target->AddThreat(pCaster, float(gain) * 0.5f, pInfo.critical, GetSpellSchoolMask(spellProto), spellProto);
+
                 if (pCaster->GetTypeId() == TYPEID_PLAYER && spellProto->Id == 5138 && pCaster->HasSpell(30326))
+                {
                     if (pCaster->GetPet())
                     {
-                        GroupPetList m_groupPets = pCaster->GetPets();
-                        if (!m_groupPets.empty())
+                        GuidSet groupPetsCopy = pCaster->GetPets();
+                        if (!groupPetsCopy.empty())
                         {
-                            for (GroupPetList::const_iterator itr = m_groupPets.begin(); itr != m_groupPets.end(); ++itr)
-                                if (Pet* _pet = pCaster->GetMap()->GetPet(*itr))
-                                    if (_pet && _pet->isAlive())
-                                        pCaster->CastCustomSpell(_pet, 32554, &gain_amount, NULL, NULL, true, NULL, NULL, pCaster->GetObjectGuid());
+                            for (GuidSet::const_iterator itr = groupPetsCopy.begin(); itr != groupPetsCopy.end(); ++itr)
+                            {
+                                if (Pet* pPet = pCaster->GetMap()->GetPet(*itr))
+                                {
+                                    if (pPet->isAlive())
+                                        pCaster->CastCustomSpell(pPet, 32554, &gain_amount, NULL, NULL, true, NULL, NULL, pCaster->GetObjectGuid());
+                                }
+                            }
                         }
                     }
-
+                }
             }
 
             // Some special cases
@@ -9842,14 +9859,6 @@ void Aura::PeriodicDummyTick()
                     target->CastSpell(target, 53521, true, NULL, this);
                     target->CastSpell(target, 53521, true, NULL, this);
                     return;
-                case 55592:                                 // Clean
-                    switch(urand(0,2))
-                    {
-                        case 0: target->CastSpell(target, 55731, true); break;
-                        case 1: target->CastSpell(target, 55738, true); break;
-                        case 2: target->CastSpell(target, 55739, true); break;
-                    }
-                    return;
                 case 54798: // FLAMING Arrow Triggered Effect
                 {
                     Unit* caster = GetCaster();
@@ -9889,50 +9898,50 @@ void Aura::PeriodicDummyTick()
 
                     break;
                 }
+                case 55592:                                 // Clean
+                {
+                    switch(urand(0,2))
+                    {
+                        case 0: target->CastSpell(target, 55731, true); break;
+                        case 1: target->CastSpell(target, 55738, true); break;
+                        case 2: target->CastSpell(target, 55739, true); break;
+                    }
+                    return;
+                }
+                case 61968:                                 // Flash Freeze 
+                { 
+                    if (GetAuraTicks() == 1 && !target->HasAura(62464))
+                        target->CastSpell(target, 61970, true, NULL, this);
+                    return;
+                }
+                case 62018:                                 // Collapse
+                {
+                    // lose 1% of health every second
+                    target->DealDamage(target, target->GetMaxHealth() * .01, NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NONE, NULL, false);
+                    return;
+                }
                 case 62019:                                 // Rune of Summoning
                 {
                     target->CastSpell(target, 62020, true, NULL, this);
                     return;
                 }
-                case 62038: // Biting Cold (Ulduar: Hodir)
-                {
+                case 62038:                                 // Biting Cold 
+                { 
                     if (target->GetTypeId() != TYPEID_PLAYER)
-                        return;
+                        return; 
 
-                    Unit* caster = GetCaster();
-                    if (!caster)
-                        return;
-
-                    if (!target->HasAura(62821))     // Toasty Fire
-                    {
-                        // dmg dealing every second
-                        target->CastSpell(target, 62188, true, 0, 0, caster->GetObjectGuid());
-                    }
-
-                    // aura stack increase every 3 (data in m_miscvalue) seconds and decrease every 1s
-                    // Reset reapply counter at move and decrease stack amount by 1
-                    if (((Player*)target)->isMoving() || target->HasAura(62821))
-                    {
-                        if (SpellAuraHolderPtr holder = target->GetSpellAuraHolder(62039))
-                        {
-                            if (holder->ModStackAmount(-1))
-                                target->RemoveSpellAuraHolder(holder);
-                        }
-                        m_modifier.m_miscvalue = 3;
-                        return;
-                    }
-                    // We are standing at the moment, countdown
-                    if (m_modifier.m_miscvalue > 0)
-                    {
-                        --m_modifier.m_miscvalue;
-                        return;
-                    }
-
-                    target->CastSpell(target, 62039, true);
-
-                    // recast every ~3 seconds
-                    m_modifier.m_miscvalue = 3;
+                    // if player is moving remove one aura stack
+                    if (((Player*)target)->isMoving())
+                        target->RemoveAuraHolderFromStack(62039);
+                    // otherwise add one aura stack each 3 seconds
+                    else if (GetAuraTicks() % 3 && !target->HasAura(62821))
+                        target->CastSpell(target, 62039, true, NULL, this);
                     return;
+                }
+                case 62039:                                 // Biting Cold 
+                { 
+                    target->CastSpell(target, 62188, true); 
+                    return; 
                 }
                 case 62566:                                 // Healthy Spore Summon Periodic
                 {
@@ -9942,13 +9951,13 @@ void Aura::PeriodicDummyTick()
                     target->CastSpell(target, 62593, true);
                     return;
                 }
-                case 62717:                                 // Slag Pot (periodic dmg)
-                case 63477:
+                case 62717:                                 // Slag Pot
                 {
-                    Unit *caster = GetCaster();
+                    target->CastSpell(target, 65722, true, NULL, this);
 
-                    if (caster && target)
-                        caster->CastSpell(target, (spell->Id == 62717) ? 65722 : 65723, true, 0, this, this->GetCasterGuid(), this->GetSpellProto());
+                    // cast Slag Imbued if the target survives up to the last tick
+                    if (GetAuraTicks() == 10)
+                        target->CastSpell(target, 63536, true, NULL, this);
                     return;
                 }
                 case 63276:                                   // Mark of the Faceless (General Vezax - Ulduar)
@@ -9960,12 +9969,55 @@ void Aura::PeriodicDummyTick()
                         caster->CastCustomSpell(target, 63278, 0, &(spell->GetSpellEffect(EFFECT_INDEX_0)->EffectBasePoints), 0, false, 0, 0, caster->GetObjectGuid() , spell);
                     return;
                 }
-                case 69008:                                 // Soulstorm (OOC aura)
-                case 68870:                                 // Soulstorm
+                case 63477:                                 // Slag Pot (H)
                 {
-                    uint32 triggerSpells[8] = {68898, 68904, 68886, 68905, 68896, 68906, 68897, 68907};
-                    target->CastSpell(target, triggerSpells[GetAuraTicks() % 8], true);
+                    target->CastSpell(target, 65723, true, NULL, this);
+
+                    // cast Slag Imbued if the target survives up to the last tick
+                    if (GetAuraTicks() == 10)
+                        target->CastSpell(target, 62836, true, NULL, this);
                     return;
+                }
+                case 64217:                                 // Overcharged
+                {
+                    Unit *caster = GetCaster();
+
+                    if (caster && target)
+                        caster->CastSpell(target, (spell->Id == 62717) ? 65722 : 65723, true, 0, this, this->GetCasterGuid(), this->GetSpellProto());
+                    return;
+                }
+                case 64412:                                 // Phase Punch
+                {
+                    if (SpellAuraHolderPtr phaseAura = target->GetSpellAuraHolder(64412))
+                    {
+                        uint32 uiAuraId = 0;
+                        switch (phaseAura->GetStackAmount())
+                        {
+                            case 1: uiAuraId = 64435; break;
+                            case 2: uiAuraId = 64434; break;
+                            case 3: uiAuraId = 64428; break;
+                            case 4: uiAuraId = 64421; break;
+                            case 5: uiAuraId = 64417; break;
+                        }
+
+                        if (uiAuraId && !target->HasAura(uiAuraId))
+                        {
+                            target->CastSpell(target, uiAuraId, true, NULL, this);
+
+                            // remove original aura if phased
+                            if (uiAuraId == 64417)
+                            {
+                                target->RemoveAurasDueToSpell(64412);
+                                target->CastSpell(target, 62169, true, NULL, this);
+                            }
+                        }
+                    }
+                    return;
+                }
+                case 65272:                                 // Shatter Chest 
+                { 
+                    target->CastSpell(target, 62501, true, NULL, this); 
+                    return; 
                 }
                 case 67574:                                // Trial Of Crusader (Spike Aggro Aura - Anub'arak)
                 {
@@ -10017,6 +10069,13 @@ void Aura::PeriodicDummyTick()
                     // Leeching swarm heal
                     target->CastCustomSpell(caster, 66125, &lifeLeeched, NULL, NULL, true, NULL, this);
 
+                    return;
+                }
+                case 68870:                                 // Soulstorm
+                case 69008:                                 // Soulstorm (OOC aura)
+                {
+                    uint32 triggerSpells[8] = {68898, 68904, 68886, 68905, 68896, 68906, 68897, 68907};
+                    target->CastSpell(target, triggerSpells[GetAuraTicks() % 8], true);
                     return;
                 }
                 case 68875:                                 // Wailing Souls

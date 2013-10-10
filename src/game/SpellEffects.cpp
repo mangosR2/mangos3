@@ -3723,6 +3723,14 @@ void Spell::EffectDummy(SpellEffectEntry const* effect)
                     unitTarget->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE);
                     return;
                 }
+                case 62278:                                 // Lightning Orb Charger 
+                { 
+                    if (!unitTarget) 
+                        return; 
+                    unitTarget->CastSpell(m_caster, 62466, true); 
+                    unitTarget->CastSpell(unitTarget, 62279, true); 
+                    return; 
+                }
                 case 62301:                                 // Cosmic Smash (Ulduar - Algalon)
                 case 64598:
                 {
@@ -3731,6 +3739,38 @@ void Spell::EffectDummy(SpellEffectEntry const* effect)
 
                   unitTarget->CastSpell(unitTarget, 62295, true);
                   return;
+                }
+                case 62797:                                 // Storm Cloud 
+                { 
+                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER) 
+                        return; 
+
+                    m_caster->CastSpell(unitTarget, m_caster->GetMap()->IsRegularDifficulty() ? 65123 : 65133, true); 
+                    return; 
+                }
+                case 62907:                                 // Freya's Ward
+                {
+                    if (!unitTarget)
+                        return;
+
+                    for (uint8 i = 0; i < 5; ++i)
+                        m_caster->CastSpell(unitTarget, effect->CalculateSimpleValue(), true);
+                    return;
+                }
+                case 63499:                                 // Dispel Magic 
+                { 
+                    if (!unitTarget) 
+                        return; 
+ 
+                    unitTarget->RemoveAurasDueToSpell(effect->CalculateSimpleValue());
+                    return; 
+                } 
+                case 63545:                                 // Icicle 
+                { 
+                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER) 
+                        return; 
+ 
+                    m_caster->CastSpell(unitTarget, effect->CalculateSimpleValue(), true); 
                 }
                 case 63820:                                 // Summon Scrap Bot Trigger (Ulduar - Mimiron) for Scrap Bots
                 case 64425:                                 // Summon Scrap Bot Trigger (Ulduar - Mimiron) for Assault Bots
@@ -3773,6 +3813,31 @@ void Spell::EffectDummy(SpellEffectEntry const* effect)
                 case 64385:                                 // Spinning (from Unusual Compass)
                 {
                     m_caster->SetFacingTo(frand(0, M_PI_F*2));
+                    return;
+                }
+                case 64489:                                 // Feral Rush
+                {
+                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
+                        return;
+
+                    m_caster->CastSpell(unitTarget, 64496, true);
+                    return;
+                }
+                case 64543:                                 // Melt Ice 
+                { 
+                    if (!unitTarget) 
+                        return; 
+
+                    m_caster->CastSpell(unitTarget, effect->CalculateSimpleValue(), true); 
+                    m_caster->CastSpell(m_caster, 64540, true); 
+                    return; 
+                }
+                case 64673:                                 // Feral Rush (h)
+                {
+                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
+                        return;
+
+                    m_caster->CastSpell(unitTarget, 64674, true);
                     return;
                 }
                 case 64981:                                 // Summon Random Vanquished Tentacle
@@ -7403,9 +7468,7 @@ void Spell::DoSummonGuardian(SpellEffectEntry const* effect, uint32 forceFaction
 
         spawnCreature->SetCreateSpellID(originalSpellID);
         spawnCreature->SetDuration(m_duration);
-
-        GroupPetList guardians = m_caster->GetGuardians();
-        spawnCreature->SetPetCounter(guardians.size());
+        spawnCreature->SetPetCounter(m_caster->GetGuardians().size());
 
         // If dest location present. FIXME - need correct summon pos from pet number
         CreatureCreatePos pos = CreatureCreatePos(m_caster->GetMap(), center);
@@ -8481,7 +8544,10 @@ void Spell::EffectScriptEffect(SpellEffectEntry const* effect)
                 case 2270:                                          // Spells 73142 , 73143 , 73144 , 73145
                 {
                     if (unitTarget)
-                        unitTarget->CastSpell(unitTarget, 69062, true); // enter vehicle
+                    {
+                        unitTarget->CastSpell(unitTarget, 72670, true); // enter vehicle - Possible 69062, 72669 !
+                        unitTarget->CastSpell(unitTarget, m_spellInfo->CalculateSimpleValue(EFFECT_INDEX_1), true, 0, 0, m_caster->GetObjectGuid(), m_spellInfo);
+                    }
                     return;
                 }
                 case 1988:                                          // Pungent Blight (Festergut) - Spells 69195 , 71219 , 73031 , 73032
@@ -8874,8 +8940,8 @@ void Spell::EffectScriptEffect(SpellEffectEntry const* effect)
                     float angle = unitTarget->GetOrientation();
                     for (uint8 i = 0; i < 4; ++i)
                     {
-                        unitTarget->GetNearPoint(unitTarget, x, y, z, unitTarget->GetObjectBoundingRadius(), 5.0f, angle + i*M_PI_F/2);
-                        unitTarget->SummonCreature(16119, x, y, z, angle, TEMPSUMMON_TIMED_OR_DEAD_DESPAWN, 10*MINUTE*IN_MILLISECONDS);
+                        unitTarget->GetNearPoint(unitTarget, x, y, z, unitTarget->GetObjectBoundingRadius(), INTERACTION_DISTANCE, angle + i * M_PI_F / 2);
+                        unitTarget->SummonCreature(16119, x, y, z, angle, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 10 * MINUTE * IN_MILLISECONDS);
                     }
                     return;
                 }
@@ -9072,8 +9138,8 @@ void Spell::EffectScriptEffect(SpellEffectEntry const* effect)
                     float x, y, z;
                     for (uint8 i = 0; i < 4; ++i)
                     {
-                        m_caster->GetNearPoint(m_caster, x, y, z, 0, 5.0f, M_PI_F*.5f*i + M_PI_F*.25f);
-                        m_caster->SummonCreature(21002, x, y, z, 0, TEMPSUMMON_TIMED_OR_DEAD_DESPAWN, 30000);
+                        m_caster->GetNearPoint(m_caster, x, y, z, 0.0f, INTERACTION_DISTANCE, M_PI_F * .5f * i + M_PI_F * .25f);
+                        m_caster->SummonCreature(21002, x, y, z, 0, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 30000);
                     }
                     return;
                 }
@@ -10411,6 +10477,24 @@ void Spell::EffectScriptEffect(SpellEffectEntry const* effect)
                     }
                     return;
                 }
+                case 62042:                                 // Stormhammer 
+                { 
+                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER) 
+                        return; 
+ 
+                    unitTarget->CastSpell(unitTarget, 62470, true); 
+                    unitTarget->CastSpell(m_caster, 64909, true); 
+                    return; 
+                }
+                case 62381:                                 // Chill
+                {
+                    if (!unitTarget)
+                        return;
+
+                    unitTarget->RemoveAurasDueToSpell(62373);
+                    unitTarget->CastSpell(unitTarget, 62382, true);
+                    return;
+                }
                 case 62428:                                 // Load into Catapult
                 {
                     if (!unitTarget)
@@ -10418,6 +10502,19 @@ void Spell::EffectScriptEffect(SpellEffectEntry const* effect)
 
                     unitTarget->CastSpell(unitTarget, effect->CalculateSimpleValue(), true);
                     m_caster->CastSpell(m_caster, 62340, true);
+                    return;
+                }
+                case 62488:                                 // Activate Construct
+                {
+                    if (!unitTarget || !unitTarget->HasAura(62468))
+                        return;
+
+                    unitTarget->RemoveAurasDueToSpell(62468);
+                    unitTarget->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                    unitTarget->CastSpell(unitTarget, 64474, true);
+
+                    if (m_caster->getVictim())
+                        ((Creature*)unitTarget)->AI()->AttackStart(m_caster->getVictim());
                     return;
                 }
                 case 62524:                                 // Attuned to Nature 2 Dose Reduction
@@ -10728,15 +10825,6 @@ void Spell::EffectScriptEffect(SpellEffectEntry const* effect)
                     unitTarget->CastSpell(unitTarget, spellid, true);
                     break;
                 }
-                case 64475:                                 // Ignis Strength of the Creator stack decreasing
-                {
-                    if (!unitTarget)
-                        return;
-                    if (SpellAuraHolderPtr holder = unitTarget->GetSpellAuraHolder(64473))
-                        if (holder->ModStackAmount(-1))
-                            unitTarget->RemoveSpellAuraHolder(holder);
-                    break;
-                }
                 case 65238:                                 // Shattered Illusion (Ulduar - Yogg Saron)
                 {
                     if (!unitTarget)
@@ -10819,6 +10907,37 @@ void Spell::EffectScriptEffect(SpellEffectEntry const* effect)
                     uint32 spellId = effect->CalculateSimpleValue();
                     unitTarget->RemoveAuraHolderFromStack(spellId);
                     return;
+                }
+                case 64475:                                 // Strength of the Creator
+                {
+                    if (!unitTarget)
+                        return;
+
+                    unitTarget->RemoveAuraHolderFromStack(64473);
+                    return;
+                }
+                case 64503:                                 // Water
+                {
+                    if (!unitTarget || unitTarget->GetTypeId() == TYPEID_PLAYER || !unitTarget->HasAura(62373))
+                        return;
+
+                    unitTarget->CastSpell(unitTarget, 62381, true);
+                    return;
+                }
+                case 64767:                                 // Stormhammer 
+                { 
+                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_UNIT) 
+                        return; 
+ 
+                    if (Creature* target = (Creature*)unitTarget) 
+                    { 
+                        target->AI()->EnterEvadeMode(); 
+                        target->CastSpell(target, 62470, true); 
+                        target->CastSpell(m_caster, 64909, true); 
+                        target->CastSpell(target, 64778, true); 
+                        target->ForcedDespawn(10000); 
+                    } 
+                    return; 
                 }
                 case 66477:                                 // Bountiful Feast
                 {
@@ -13028,7 +13147,7 @@ void Spell::EffectTransmitted(SpellEffectEntry const* effect)
             // calculate angle variation for roughly equal dimensions of target area
             float max_angle = (max_dis - min_dis)/(max_dis + m_caster->GetObjectBoundingRadius());
             float angle_offset = max_angle * (rand_norm_f() - 0.5f);
-            m_caster->GetNearPoint2D(loc.x, loc.y, dis, m_caster->GetOrientation() + angle_offset);
+            m_caster->GetNearPoint2D(loc.x, loc.y, dis + m_caster->GetObjectBoundingRadius(), m_caster->GetOrientation() + angle_offset);
 
             if (!m_caster->GetTerrain()->IsAboveWater(loc.x, loc.y, m_caster->GetPositionZ() + 1.5f, &loc.z))
             {

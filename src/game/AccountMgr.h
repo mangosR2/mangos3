@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2005-2012 MaNGOS <http://getmangos.com/>
+ * Copyright (C) 2011-2013 MangosR2 <http://github.com/MangosR2>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -51,7 +52,7 @@ typedef std::map<ObjectGuid, PlayerDataCache> PlayerDataCacheMap;
 typedef std::vector<uint32> RafLinkedList;
 typedef std::map<std::pair<uint32, bool>, RafLinkedList > RafLinkedMap;
 
-class AccountMgr
+class AccountMgr : public MaNGOS::Singleton<AccountMgr, MaNGOS::ClassLevelLockable<AccountMgr, ACE_Thread_Mutex> >
 {
     public:
         AccountMgr();
@@ -92,14 +93,7 @@ class AccountMgr
 
         static bool normalizeString(std::string& utf8str);
 
-        // multithread locking
-        typedef   MANGOSR2_MUTEX_MODEL         LockType;
-        typedef   ACE_Read_Guard<LockType>     ReadGuard;
-        typedef   ACE_Write_Guard<LockType>    WriteGuard;
-        LockType& GetLock() { return i_lock; }
-
-        private:
-        LockType            i_lock;
+    private:
         PlayerDataCacheMap  mPlayerDataCacheMap;
         RafLinkedMap        mRAFLinkedMap;
 };

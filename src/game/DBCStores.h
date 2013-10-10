@@ -68,6 +68,15 @@ bool Map2ZoneCoordinates(float& x,float& y,uint32 zone);
 typedef std::map<uint32/*pair32(map,diff)*/,MapDifficultyEntry const*> MapDifficultyMap;
 MapDifficultyEntry const* GetMapDifficultyData(uint32 mapId, Difficulty difficulty);
 
+typedef std::map<uint32 /*zone_id*/, WorldMapAreaEntry const*> WorldMapAreaMap;
+WorldMapAreaEntry const* GetWorldMapAreaByAreaId(uint32 area_id);
+
+// returns main WorldMapArea for all maps, overall WorldMapArea (zone_id = 0) for continents
+WorldMapAreaEntry const* GetWorldMapAreaByMapID(uint32 map_id);
+
+// returns set of all zones in given map (1 zone mostly)
+std::set<uint32> GetWorldMapAreaSetByMapID(uint32 map_id);
+
 // natural order for difficulties up-down iteration
 // difficulties for dungeons/battleground ordered in normal way
 // and if more high version not exist must be used lesser version

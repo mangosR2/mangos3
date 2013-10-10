@@ -169,9 +169,6 @@ void GuildMgr::LoadGuilds()
             continue;
         }
 
-        newGuild->LoadGuildEventLogFromDB();
-        newGuild->LoadGuildBankEventLogFromDB();
-        newGuild->LoadGuildBankFromDB();
         AddGuild(newGuild);
     }
     while (result->NextRow());

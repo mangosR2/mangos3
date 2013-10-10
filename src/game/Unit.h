@@ -430,7 +430,7 @@ enum UnitState
     UNIT_STAT_NO_COMBAT_MOVEMENT    = 0x01000000,           // Combat Movement for MoveChase stopped
     UNIT_STAT_RUNNING               = 0x02000000,           // SetRun for waypoints and such
     UNIT_STAT_WAYPOINT_PAUSED       = 0x04000000,           // Waypoint-Movement paused genericly (ie by script)
-
+    UNIT_STAT_DELAYED_EVADE         = 0x08000000,           // Creature in delayed evade event
     UNIT_STAT_IGNORE_PATHFINDING    = 0x10000000,           // do not use pathfinding in any MovementGenerator
 
     // masks (only for check)
@@ -781,6 +781,7 @@ class MovementInfo
         }
         void ClearTransportData()
         {
+            moveFlags2 = MOVEFLAG2_NONE;
             t_guid = ObjectGuid();
             t_pos.x = 0.0f;
             t_pos.y = 0.0f;
@@ -789,17 +790,20 @@ class MovementInfo
             t_time = 0;
             t_seat = -1;
             t_seatInfo = NULL;
-            moveFlags2 = MOVEFLAG2_NONE;
         }
         ObjectGuid const& GetGuid() const { return guid; }
         ObjectGuid const& GetTransportGuid() const { return t_guid; }
         Position const* GetTransportPos() const { return &t_pos; }
         int8 GetTransportSeat() const { return t_seat; }
+
         uint32 GetTransportDBCSeat() const { return t_seatInfo ? t_seatInfo->m_ID : 0; }
         uint32 GetVehicleSeatFlags() const { return t_seatInfo ? t_seatInfo->m_flags : 0; }
+
+        uint32 GetTime() const { return time; }
         uint32 GetTransportTime() const { return t_time; }
         uint32 GetTransportTime2() const { return t_time2; }
         uint32 GetFallTime() const { return fallTime; }
+
         void ChangeOrientation(float o) { pos.o = o; }
         void ChangePosition(float x, float y, float z, float o) { pos.x = x; pos.y = y; pos.z = z; pos.o = o; }
         void ChangeTransportPosition(float x, float y, float z, float o) { t_pos.x = x; t_pos.y = y; t_pos.z = z; t_pos.o = o; }
@@ -814,7 +818,7 @@ class MovementInfo
         struct JumpInfo
         {
             JumpInfo() : velocity(0.f), sinAngle(0.f), cosAngle(0.f), xyspeed(0.f) {}
-            float   velocity, sinAngle, cosAngle, xyspeed;
+            float velocity, sinAngle, cosAngle, xyspeed;
         };
 
         // used only for SMSG_PLAYER_MOVE currently
@@ -836,12 +840,12 @@ class MovementInfo
 
         JumpInfo const& GetJumpInfo() const { return jump; }
 
-        MovementInfo& operator=(const MovementInfo &targetInfo)
+        MovementInfo& operator = (const MovementInfo& targetInfo)
         {
             uint32 moveFlagsTmp = targetInfo.moveFlags;
 
             moveFlags  = moveFlagsTmp;
-            splineElevation     = targetInfo.splineElevation;
+            splineElevation = targetInfo.splineElevation;
             time       = targetInfo.time;
             pos        = targetInfo.pos;
             s_pitch    = targetInfo.s_pitch;
@@ -1315,9 +1319,6 @@ struct SpellCooldown
 
 typedef std::map<uint32, SpellCooldown> SpellCooldowns;
 
-typedef GuidSet GuardianPetList;
-typedef GuidSet GroupPetList;
-
 // delay time next attack to prevent client attack animation problems
 #define ATTACK_DISPLAY_DELAY 200
 #define MAX_PLAYER_STEALTH_DETECT_RANGE 45.0f               // max distance for detection targets by player
@@ -1763,19 +1764,19 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
 
         void AddPetToList(Pet* pet);
         void RemovePetFromList(Pet* pet);
-        GroupPetList const& GetPets() { return m_groupPets; }
+        GuidSet const& GetPets() const { return m_groupPets; }
 
         void AddGuardian(Pet* pet);
         void RemoveGuardian(Pet* pet);
         void RemoveGuardians();
         Pet* FindGuardianWithEntry(uint32 entry);
-        GuardianPetList const& GetGuardians() const { return m_guardianPets; }
+        GuidSet const& GetGuardians() const { return m_guardianPets; }
         Pet* GetProtectorPet();                             // expected single case in guardian list
 
         bool isCharmed() const { return !GetCharmerGuid().IsEmpty(); }
 
         CharmInfo* GetCharmInfo() { return m_charmInfo; }
-        uint8  GetCharmState(CharmStateType type) const { return m_charmInfo ? m_charmInfo->GetState(type) : 0; };
+        uint8 GetCharmState(CharmStateType type) const { return m_charmInfo ? m_charmInfo->GetState(type) : 0; }
         CharmInfo* InitCharmInfo(Unit* charm);
 
         void SendCharmState();
@@ -2414,8 +2415,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
 
         uint32 m_originalFaction;
 
-        GroupPetList m_groupPets;
-
+        GuidSet m_groupPets;
         GuidSet m_guardianPets;
 
         ObjectGuid m_TotemSlot[MAX_TOTEM_SLOT];
@@ -2453,8 +2453,8 @@ void Unit::CallForAllControlledUnits(Func const& func, uint32 controlledMask)
     {
         if (!m_groupPets.empty())
         {
-            GroupPetList m_groupPetsTmp = GetPets();  // Original list may be modified in this function
-            for (GroupPetList::const_iterator itr = m_groupPetsTmp.begin(); itr != m_groupPetsTmp.end(); ++itr)
+            GuidSet groupPetsCopy = GetPets();  // Original list may be modified in this function
+            for (GuidSet::const_iterator itr = groupPetsCopy.begin(); itr != groupPetsCopy.end(); ++itr)
             {
                 if (Pet* pet = _GetPet(*itr))
                     func(pet);
@@ -2463,8 +2463,10 @@ void Unit::CallForAllControlledUnits(Func const& func, uint32 controlledMask)
     }
 
     if (controlledMask & CONTROLLED_MINIPET)
+    {
         if (Unit* mini = GetMiniPet())
             func(mini);
+    }
 
     if (controlledMask & CONTROLLED_GUARDIANS)
     {
@@ -2473,32 +2475,40 @@ void Unit::CallForAllControlledUnits(Func const& func, uint32 controlledMask)
                 func(guardian);
     }
 
+    if (controlledMask & CONTROLLED_CHARM)
+    {
+        if (Unit* charm = GetCharm())
+            func(charm);
+    }
+
     if (controlledMask & CONTROLLED_TOTEMS)
     {
         for (int i = 0; i < MAX_TOTEM_SLOT; ++i)
             if (Unit *totem = _GetTotem(TotemSlot(i)))
                 func(totem);
     }
-
-    if (controlledMask & CONTROLLED_CHARM)
-        if (Unit* charm = GetCharm())
-            func(charm);
-
 }
 
 template<typename Func>
 bool Unit::CheckAllControlledUnits(Func const& func, uint32 controlledMask) const
 {
     if (controlledMask & CONTROLLED_PET)
-        for (GroupPetList::const_iterator itr = m_groupPets.begin(); itr != m_groupPets.end();)
-           if (Pet const* pet = _GetPet(*(itr++)))
-               if (func(pet))
-                   return true;
+    {
+        if (!m_groupPets.empty())
+        {
+            for (GuidSet::const_iterator itr = m_groupPets.begin(); itr != m_groupPets.end();)
+                if (Pet const* pet = _GetPet(*(itr++)))
+                    if (func(pet))
+                        return true;
+        }
+    }
 
     if (controlledMask & CONTROLLED_MINIPET)
+    {
         if (Unit const* mini = GetMiniPet())
             if (func(mini))
                 return true;
+    }
 
     if (controlledMask & CONTROLLED_GUARDIANS)
     {
@@ -2506,7 +2516,13 @@ bool Unit::CheckAllControlledUnits(Func const& func, uint32 controlledMask) cons
             if (Pet const* guardian = _GetPet(*(itr++)))
                 if (func(guardian))
                     return true;
+    }
 
+    if (controlledMask & CONTROLLED_CHARM)
+    {
+        if (Unit const* charm = GetCharm())
+            if (func(charm))
+                return true;
     }
 
     if (controlledMask & CONTROLLED_TOTEMS)
@@ -2516,11 +2532,6 @@ bool Unit::CheckAllControlledUnits(Func const& func, uint32 controlledMask) cons
                 if (func(totem))
                     return true;
     }
-
-    if (controlledMask & CONTROLLED_CHARM)
-        if (Unit const* charm = GetCharm())
-            if (func(charm))
-                return true;
 
     return false;
 }
