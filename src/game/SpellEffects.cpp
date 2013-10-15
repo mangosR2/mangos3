@@ -3717,10 +3717,18 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                   unitTarget->CastSpell(unitTarget, 62295, true);
                   return;
                 }
-                case 62797:                                 // Storm Cloud 
-                { 
-                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER) 
-                        return; 
+                case 62652:                                 // Tidal Wave
+                {
+                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
+                        return;
+
+                    m_caster->CastSpell(unitTarget, m_caster->GetMap()->IsRegularDifficulty() ? 62653 : 62935, true);
+                    return;
+                }
+                case 62797:                                 // Storm Cloud
+                {
+                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
+                        return;
 
                     m_caster->CastSpell(unitTarget, m_caster->GetMap()->IsRegularDifficulty() ? 65123 : 65133, true); 
                     return; 
@@ -10465,6 +10473,31 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     unitTarget->CastSpell(m_caster, 64909, true); 
                     return; 
                 }
+                case 62217:                                 // Unstable Energy
+                case 62922:                                 // Unstable Energy (h)
+                {
+                    if (!unitTarget)
+                        return;
+
+                    unitTarget->RemoveAurasDueToSpell(m_spellInfo->CalculateSimpleValue(eff_idx));
+                    return;
+                }
+                case 62262:                                 // Brightleaf Flux
+                {
+                    if (!unitTarget)
+                        return;
+
+                    if (unitTarget->HasAura(62239))
+                        unitTarget->RemoveAurasDueToSpell(62239);
+                    else
+                    {
+                        uint32 stackAmount = urand(1, GetSpellStore()->LookupEntry(62239)->StackAmount);
+
+                        for (uint8 i = 0; i < stackAmount; ++i)
+                            unitTarget->CastSpell(unitTarget, 62239, true);
+                    }
+                    return;
+                }
                 case 62282:                                 // Iron Roots
                 case 62440:                                 // Strengthened Iron Roots
                 case 63598:                                 // Iron Roots (h)
@@ -10644,28 +10677,6 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     }
 
                     unitTarget->EjectVehiclePassenger(seatId);
-                    return;
-                }
-                case 62217:                                 // Unstable Energy (Ulduar: Freya's elder)
-                {
-                    uint32 spellId = m_spellInfo->CalculateSimpleValue(eff_idx);
-                    if (unitTarget && unitTarget->HasAura(spellId))
-                        unitTarget->RemoveAurasDueToSpell(spellId);
-                    return;
-                }
-                case 62262:                                 // Brightleaf Flux (Ulduar: Freya's elder)
-                {
-                    uint32 buffId = roll_chance_i(50) ? 62251 : 62252;
-
-                    m_caster->CastSpell(m_caster, buffId, true);
-                    if (buffId == 62252)
-                    {
-                        if (SpellAuraHolderPtr holder = m_caster->GetSpellAuraHolder(62239))
-                            if (holder->ModStackAmount(-1))
-                                m_caster->RemoveSpellAuraHolder(holder);
-                    }
-                    else
-                        m_caster->CastSpell(m_caster, 62239, true);
                     return;
                 }
                 case 61263:                                 //Intravenous Healing Potion
