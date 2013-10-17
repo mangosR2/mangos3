@@ -30,6 +30,7 @@
 #include "movement/MoveSplineInit.h"
 #include "movement/MoveSpline.h"
 
+// Transport - base class for regular Transport && MOTransport class
 Transport::Transport() : GameObject(), m_transportKit(NULL)
 {
     m_updateFlag = UPDATEFLAG_TRANSPORT | UPDATEFLAG_HAS_POSITION | UPDATEFLAG_ROTATION;
@@ -38,17 +39,61 @@ Transport::Transport() : GameObject(), m_transportKit(NULL)
 
 Transport::~Transport()
 {
-    if (IsInWorld())
-    {
-        if (GetMap())
-            GetMap()->Remove((GameObject*)this, true);
-    }
-
     if (m_transportKit)
         delete m_transportKit;
 }
 
-bool Transport::Create(uint32 guidlow, uint32 mapid, float x, float y, float z, float ang, uint8 animprogress, uint16 dynamicLowValue)
+bool Transport::AddPassenger(WorldObject* passenger, Position const& transportPos)
+{
+    GetTransportKit()->AddPassenger(passenger, transportPos);
+    if (passenger->isType(TYPEMASK_UNIT))
+    {
+        GuidSet const& groupPets = ((Unit*)passenger)->GetPets();
+        if (!groupPets.empty())
+        {
+            for (GuidSet::const_iterator itr = groupPets.begin(); itr != groupPets.end(); ++itr)
+                if (Pet* pPet = GetMap()->GetPet(*itr))
+                    if (pPet && pPet->IsInWorld())
+                        GetTransportKit()->AddPassenger(pPet, transportPos);
+        }
+    }
+    return true;
+}
+
+bool Transport::RemovePassenger(WorldObject* passenger)
+{
+    GetTransportKit()->RemovePassenger(passenger);
+    if (passenger->isType(TYPEMASK_UNIT))
+    {
+        GuidSet groupPetsCopy = ((Unit*)passenger)->GetPets();
+        if (!groupPetsCopy.empty())
+        {
+            for (GuidSet::const_iterator itr = groupPetsCopy.begin(); itr != groupPetsCopy.end(); ++itr)
+                if (Pet* pPet = GetMap()->GetPet(*itr))
+                    if (pPet && pPet->IsInWorld())
+                        GetTransportKit()->RemovePassenger(pPet);
+        }
+    }
+    return true;
+}
+
+void Transport::Update(uint32 update_diff, uint32 p_time)
+{
+    GameObject::Update(update_diff, p_time);
+}
+
+// MOTransport - work class for MO_TRANSPORT GO type
+MOTransport::MOTransport() : Transport()
+{
+}
+
+MOTransport::~MOTransport()
+{
+    if (GetMap())
+        GetMap()->Remove((GameObject*)this, true);
+}
+
+bool MOTransport::Create(uint32 guidlow, uint32 mapid, float x, float y, float z, float ang, uint8 animprogress, uint16 dynamicLowValue)
 {
     Relocate(WorldLocation(mapid, x, y, z, ang));
     // FIXME - instance id and phaseMask isn't set to values different from std.
@@ -77,7 +122,7 @@ bool Transport::Create(uint32 guidlow, uint32 mapid, float x, float y, float z, 
     SetUInt32Value(GAMEOBJECT_FACTION, goinfo->faction);
     //SetUInt32Value(GAMEOBJECT_FLAGS, goinfo->flags);
     SetUInt32Value(GAMEOBJECT_FLAGS, (GO_FLAG_TRANSPORT | GO_FLAG_NODESPAWN));
-    SetUInt32Value(GAMEOBJECT_LEVEL, m_period);
+    SetUInt32Value(GAMEOBJECT_LEVEL, GetPeriod(true));
     SetEntry(goinfo->id);
 
     SetDisplayId(goinfo->displayId);
@@ -115,7 +160,7 @@ struct keyFrame
     float tFrom, tTo;
 };
 
-bool Transport::GenerateWaypoints(uint32 pathid, std::set<uint32> &mapids)
+bool MOTransport::GenerateWaypoints(uint32 pathid, std::set<uint32>& mapids)
 {
     if (pathid >= sTaxiPathNodesByPath.size())
         return false;
@@ -335,7 +380,7 @@ bool Transport::GenerateWaypoints(uint32 pathid, std::set<uint32> &mapids)
     return true;
 }
 
-void Transport::MoveToNextWayPoint()
+void MOTransport::MoveToNextWayPoint()
 {
     m_curr = m_next;
 
@@ -343,41 +388,9 @@ void Transport::MoveToNextWayPoint()
     if (m_next == m_WayPoints.end())
         m_next = m_WayPoints.begin();
 }
-bool Transport::AddPassenger(WorldObject* passenger, Position const& transportPos)
-{
-    GetTransportKit()->AddPassenger(passenger, transportPos);
-    if (passenger->isType(TYPEMASK_UNIT))
-    {
-        GuidSet const& groupPets = ((Unit*)passenger)->GetPets();
-        if (!groupPets.empty())
-        {
-            for (GuidSet::const_iterator itr = groupPets.begin(); itr != groupPets.end(); ++itr)
-                if (Pet* pPet = GetMap()->GetPet(*itr))
-                    if (pPet && pPet->IsInWorld())
-                        GetTransportKit()->AddPassenger(pPet, transportPos);
-        }
-    }
-    return true;
-}
 
-bool Transport::RemovePassenger(WorldObject* passenger)
-{
-    GetTransportKit()->RemovePassenger(passenger);
-    if (passenger->isType(TYPEMASK_UNIT))
-    {
-        GuidSet groupPetsCopy = ((Unit*)passenger)->GetPets();
-        if (!groupPetsCopy.empty())
-        {
-            for (GuidSet::const_iterator itr = groupPetsCopy.begin(); itr != groupPetsCopy.end(); ++itr)
-                if (Pet* pPet = GetMap()->GetPet(*itr))
-                    if (pPet && pPet->IsInWorld())
-                        GetTransportKit()->RemovePassenger(pPet);
-        }
-    }
-    return true;
-}
 
-void Transport::Update(uint32 update_diff, uint32 p_time)
+void MOTransport::Update(uint32 update_diff, uint32 p_time)
 {
     UpdateSplineMovement(p_time);
 
@@ -405,7 +418,7 @@ void Transport::Update(uint32 update_diff, uint32 p_time)
         }
     }
 
-    m_timer = WorldTimer::getMSTime() % m_period;
+    m_timer = WorldTimer::getMSTime() % GetPeriod(true);
     while (((m_timer - m_curr->first) % m_pathTime) > ((m_next->first - m_curr->first) % m_pathTime))
     {
 
@@ -450,7 +463,7 @@ void Transport::Update(uint32 update_diff, uint32 p_time)
     }
 }
 
-void Transport::DoEventIfAny(WayPointMap::value_type const& node, bool departure)
+void MOTransport::DoEventIfAny(WayPointMap::value_type const& node, bool departure)
 {
     if (uint32 eventid = departure ? node.second.departureEventID : node.second.arrivalEventID)
     {
@@ -461,19 +474,7 @@ void Transport::DoEventIfAny(WayPointMap::value_type const& node, bool departure
     }
 }
 
-void Transport::BuildStartMovePacket(Map const* targetMap)
-{
-    SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_IN_USE);
-    SetGoState(GO_STATE_ACTIVE);
-}
-
-void Transport::BuildStopMovePacket(Map const* targetMap)
-{
-    RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_IN_USE);
-    SetGoState(GO_STATE_READY);
-}
-
-uint32 Transport::GetPossibleMapByEntry(uint32 entry, bool start)
+uint32 MOTransport::GetPossibleMapByEntry(uint32 entry, bool start)
 {
     GameObjectInfo const* goinfo = ObjectMgr::GetGameObjectInfo(entry);
     if (!goinfo || goinfo->type != GAMEOBJECT_TYPE_MO_TRANSPORT)
@@ -497,7 +498,7 @@ uint32 Transport::GetPossibleMapByEntry(uint32 entry, bool start)
     return path[0].mapid;
 }
 
-bool Transport::IsSpawnedAtDifficulty(uint32 entry, Difficulty difficulty)
+bool MOTransport::IsSpawnedAtDifficulty(uint32 entry, Difficulty difficulty)
 {
     GameObjectInfo const* goinfo = ObjectMgr::GetGameObjectInfo(entry);
     if (!goinfo || goinfo->type != GAMEOBJECT_TYPE_MO_TRANSPORT)
@@ -507,7 +508,7 @@ bool Transport::IsSpawnedAtDifficulty(uint32 entry, Difficulty difficulty)
     return goinfo->moTransport.difficultyMask & uint32( 1 << difficulty);
 }
 
-void Transport::Start()
+void MOTransport::Start()
 {
     DETAIL_FILTER_LOG(LOG_FILTER_TRANSPORT_MOVES, "Transport::StartMovement %s (%s) start moves, period %u/%u",
         GetObjectGuid().GetString().c_str(),
@@ -516,10 +517,12 @@ void Transport::Start()
         GetPeriod()
         );
     SetActiveObjectState(true);
-    BuildStartMovePacket(GetMap());
+    SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_IN_USE);
+    SetGoState(GO_STATE_ACTIVE);
+    SetLootState(GO_ACTIVATED);
 }
 
-void Transport::Stop()
+void MOTransport::Stop()
 {
     DETAIL_FILTER_LOG(LOG_FILTER_TRANSPORT_MOVES, "Transport::StartMovement %s (%s) stop moves, period %u/%u",
         GetObjectGuid().GetString().c_str(),
@@ -528,11 +531,13 @@ void Transport::Stop()
         GetPeriod()
         );
     SetActiveObjectState(false);
-    BuildStopMovePacket(GetMap());
+    RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_IN_USE);
+    SetGoState(GO_STATE_READY);
+    SetLootState(GO_JUST_DEACTIVATED);
 }
 
 // Return true, only if transport has correct position!
-bool Transport::SetPosition(WorldLocation const& loc, bool teleport)
+bool MOTransport::SetPosition(WorldLocation const& loc, bool teleport)
 {
     // prevent crash when a bad coord is sent by the client
     if (!MaNGOS::IsValidMapCoord(loc.x, loc.y, loc.z, loc.orientation))

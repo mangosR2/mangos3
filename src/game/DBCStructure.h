@@ -2768,7 +2768,7 @@ struct TransportAnimationEntry
     float     x;                                            // 3       transport offset X
     float     y;                                            // 4       transport offset Y
     float     z;                                            // 5       transport offset Z
-    //uint32    animId;                                     // 6       animation ID
+    uint32    animId;                                       // 6       animation ID
 };
 
 struct TransportRotationEntry

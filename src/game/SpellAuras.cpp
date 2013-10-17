@@ -2882,6 +2882,13 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                         return;
                     case 69154:                             // Gaseous Blight (Festergut)
                         target->RemoveAurasDueToSpell(69152); // previous gas state
+                    case 70623:                             // Jaina's Call
+                        if (target->GetTypeId() == TYPEID_PLAYER)
+                            target->CastSpell(target, 70525, true, NULL, this);
+                        return;
+                    case 70638:                             // Call of Sylvanas
+                        if (target->GetTypeId() == TYPEID_PLAYER)
+                            target->CastSpell(target, 70639, true, NULL, this);
                         return;
                     case 71342:                             // Big Love Rocket
                         Spell::SelectMountByAreaAndSkill(target, GetSpellProto(), 71344, 71345, 71346, 71347, 0);
@@ -3555,6 +3562,20 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
 
                 return;
             }
+            case 62483:                                     // Stonebark's Essence Channel
+            case 62484:                                     // Ironbranch's Essence Channel
+            case 62485:                                     // Brightleaf's Essence Channel
+            case 65587:                                     // Brightleaf's Essence Channel (h)
+            case 65588:                                     // Ironbranch's Essence Channel (h)
+            case 65589:                                     // Stonebark's Essence Channel (h)
+            {
+                if (Unit* caster = GetCaster())
+                {
+                    if (m_removeMode == AURA_REMOVE_BY_EXPIRE)
+                        caster->CastSpell(caster, 62467, true);
+                }
+                return;
+            }
             case 64398:                                     // Summon Scrap Bot (Ulduar, Mimiron) - for Scrap Bots
             case 64426:                                     // Summon Scrap Bot (Ulduar, Mimiron) - for Assault Bots
             case 64621:                                     // Summon Fire Bot (Ulduar, Mimiron)
@@ -3590,20 +3611,11 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
             case 70308:                                     // Mutated Transformation (Putricide)
             {
                 uint32 entry = 37672;
-
-                if (target->GetMap()->GetDifficulty() == RAID_DIFFICULTY_25MAN_NORMAL ||
-                    target->GetMap()->GetDifficulty() == RAID_DIFFICULTY_25MAN_HEROIC)
-                {
-                    entry = 38285;
-                }
-
-                if (Creature *pAbomination = target->SummonCreature(entry, target->GetPositionX(), target->GetPositionY(), target->GetPositionZ(), target->GetOrientation(), TEMPSUMMON_DEAD_DESPAWN, 0))
+                if (Creature* pAbomination = target->SummonCreature(entry, target->GetPositionX(), target->GetPositionY(), target->GetPositionZ(), target->GetOrientation(), TEMPSUMMON_DEAD_DESPAWN, 0))
                 {
                     pAbomination->setFaction(target->getFaction());
                     target->CastSpell(pAbomination, 46598, true);
-                    pAbomination->CastSpell(pAbomination, 70405, true);
                 }
-
                 return;
             }
             case 70955:                                     // Unbound Plague Bounce Protection (Putricide)
@@ -11761,6 +11773,12 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
                 case 70157:                                 // Ice Tomb (Sindragosa)
                 {
                     spellId1 = 69700;
+                    break;
+                }
+                case 72868:                                 // Slime Puddle (ICC - Professor Putricide) Heroic
+                case 72869:
+                {
+                    m_target->_AddAura(GetId() == 72868 ? 70346 : 72456, 2000);
                     break;
                 }
                 case 70867:                                 // Soul of Blood Qween

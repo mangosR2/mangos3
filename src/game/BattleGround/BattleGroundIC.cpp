@@ -215,7 +215,7 @@ void BattleGroundIC::Update(uint32 diff)
 
                 // gunship starting
                 if (node == BG_IC_NODE_HANGAR)
-                    (teamIndex == TEAM_INDEX_ALLIANCE ? gunshipAlliance : gunshipHorde)->BuildStartMovePacket(GetBgMap());
+                    (teamIndex == TEAM_INDEX_ALLIANCE ? gunshipAlliance : gunshipHorde)->Start();
             }
         }
     }
@@ -595,7 +595,7 @@ void BattleGroundIC::EventPlayerClickedOnFlag(Player *source, GameObject* target
         sound = (teamIndex == TEAM_INDEX_ALLIANCE) ? BG_IC_SOUND_NODE_ASSAULTED_ALLIANCE : BG_IC_SOUND_NODE_ASSAULTED_HORDE;
 
         if (node == BG_IC_NODE_HANGAR)
-            (teamIndex == TEAM_INDEX_ALLIANCE ? gunshipHorde : gunshipAlliance)->BuildStopMovePacket(GetBgMap());
+            (teamIndex == TEAM_INDEX_ALLIANCE ? gunshipHorde : gunshipAlliance)->Stop();
     }
     PlaySoundToAll(sound);
 }
@@ -786,7 +786,8 @@ WorldSafeLocsEntry const* BattleGroundIC::GetClosestGraveYard(Player* player)
 
 Transport* BattleGroundIC::CreateTransport(uint32 goEntry, uint32 period)
 {
-    Transport* t = new Transport;
+    // FIXME - remove this method always...
+    MOTransport* t = new MOTransport;
 
     const GameObjectInfo* goinfo = sObjectMgr.GetGameObjectInfo(goEntry);
 
@@ -798,7 +799,7 @@ Transport* BattleGroundIC::CreateTransport(uint32 goEntry, uint32 period)
     }
 
     std::set<uint32> mapsUsed;
-    t->m_period = period;
+    t->SetDBPeriod(period);
 
     if (!t->GenerateWaypoints(goinfo->moTransport.taxiPathId, mapsUsed))
         // skip transports with empty waypoints list
@@ -808,7 +809,7 @@ Transport* BattleGroundIC::CreateTransport(uint32 goEntry, uint32 period)
         return NULL;
     }
 
-    WorldLocation const& loc = t->m_WayPoints[0].loc;
+    WorldLocation const& loc = t->GetWayPoint(0).loc;
 
     // creates the Gameobject
     if (!t->Create(goEntry, loc.GetMapId(), loc.x, loc.y, loc.z, loc.o, GO_ANIMPROGRESS_DEFAULT, 0))

@@ -607,7 +607,10 @@ Player::~Player ()
 
     // Clear chache need only if player true loaded, not in broken state
     if (m_uint32Values && !GetObjectGuid().IsEmpty())
+    {
         sAccountMgr.ClearPlayerDataCache(GetObjectGuid());
+        sMapPersistentStateMgr.AddToUnbindQueue(GetObjectGuid());
+    }
 
     // Note: buy back item already deleted from DB when player was saved
     for (int i = 0; i < PLAYER_SLOTS_COUNT; ++i)
@@ -640,13 +643,6 @@ Player::~Player ()
 
     for (size_t x = 0; x < ItemSetEff.size(); ++x)
             delete ItemSetEff[x];
-
-    // clean up player-instance binds, may unload some instance saves
-    for (uint8 i = 0; i < MAX_DIFFICULTY; ++i)
-    {
-        for (BoundInstancesMap::iterator itr = m_boundInstances[i].begin(); itr != m_boundInstances[i].end(); ++itr)
-            itr->second.state->RemoveFromUnbindList(GetObjectGuid());
-    }
 
     delete m_declinedname;
     delete m_runes;
@@ -17288,7 +17284,7 @@ void Player::UnbindInstance(BoundInstancesMap::iterator &itr, Difficulty difficu
 
         sCalendarMgr.SendCalendarRaidLockoutRemove(GetObjectGuid(), itr->second.state);
 
-        itr->second.state->RemoveFromUnbindList(GetObjectGuid());  // state can become invalid
+        itr->second.state->RemoveFromBindList(GetObjectGuid());  // state can become invalid
         m_boundInstances[difficulty].erase(itr++);
     }
 }
@@ -17317,9 +17313,9 @@ InstancePlayerBind* Player::BindToInstance(DungeonPersistentState *state, bool p
         if (bind.state != state)
         {
             if (bind.state)
-                bind.state->RemoveFromUnbindList(GetObjectGuid());
+                bind.state->RemoveFromBindList(GetObjectGuid());
 
-            state->AddToUnbindList(GetObjectGuid());
+            state->AddToBindList(GetObjectGuid());
         }
 
         if (permanent)
@@ -17830,15 +17826,15 @@ void Player::_SaveAuras()
 
     MAPLOCK_READ(this,MAP_LOCK_TYPE_AURAS);
 
-    SqlStatement stmt = CharacterDatabase.CreateStatement(deleteAuras, "DELETE FROM character_aura WHERE guid = ?");
-    stmt.PExecute(GetGUIDLow());
+    SqlStatement stmt0 = CharacterDatabase.CreateStatement(deleteAuras, "DELETE FROM character_aura WHERE guid = ?");
+    stmt0.PExecute(GetGUIDLow());
 
     SpellAuraHolderMap const& auraHolders = GetSpellAuraHolderMap();
 
     if (auraHolders.empty())
         return;
 
-    stmt = CharacterDatabase.CreateStatement(insertAuras, "INSERT INTO character_aura (guid, caster_guid, item_guid, spell, stackcount, remaincharges, "
+    SqlStatement stmt = CharacterDatabase.CreateStatement(insertAuras, "INSERT INTO character_aura (guid, caster_guid, item_guid, spell, stackcount, remaincharges, "
         "basepoints0, basepoints1, basepoints2, periodictime0, periodictime1, periodictime2, maxduration, remaintime, effIndexMask) "
         "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
 
@@ -18679,7 +18675,7 @@ void Player::ResetInstances(InstanceResetMethod method, bool isRaid)
         m_boundInstances[diff].erase(itr++);
 
         // the following should remove the instance save from the manager and delete it as well
-        state->RemoveFromUnbindList(GetObjectGuid());
+        state->RemoveFromBindList(GetObjectGuid());
     }
 }
 
