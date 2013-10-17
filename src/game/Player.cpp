@@ -1992,6 +1992,8 @@ bool Player::TeleportTo(WorldLocation const& loc, uint32 options)
             if (oldmap)
                 oldmap->Remove(this, false);
 
+            SkipUpdate(true);
+
             // new final coordinates
             WorldLocation final = loc;
             if (IsOnTransport())
