@@ -1074,6 +1074,11 @@ LexicsCutterNoActionOnGM = 1
 #        Default: 0 - disabled (don't add additional resistance points)
 #                 1 - enabled  (add to target 5 resistance points on each target over level)
 #
+#    PlayerCommands
+#        Should player chat be parsed for GM commands.
+#        Default: 1 (parse commands)
+#                 0 (ignore commands)
+#
 ###################################################################################################################
 
 GameType = 1
@@ -1163,6 +1168,7 @@ BlinkAnimationType = 0
 FactiomAndRaceChangeWithoutRenaming = 0
 Resistance.CalculationMethod = 1
 Resistance.AddByOverLevel = 0
+PlayerCommands = 1
 
 ###################################################################################################################
 # PLAYER INTERACTION
