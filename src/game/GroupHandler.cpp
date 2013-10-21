@@ -175,7 +175,6 @@ void WorldSession::HandleGroupInviteOpcode(WorldPacket& recv_data)
             delete group;
             return;
         }
-        sObjectMgr.AddGroup(group);
     }
     else
     {
