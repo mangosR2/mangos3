@@ -140,7 +140,8 @@ bool Group::Create(ObjectGuid guid, const char* name)
     SetDungeonDifficulty(DUNGEON_DIFFICULTY_NORMAL);
     SetRaidDifficulty(RAID_DIFFICULTY_10MAN_NORMAL);
 
-    m_Guid = ObjectGuid(HIGHGUID_GROUP, sObjectMgr.GenerateGroupLowGuid());
+    if (!GetObjectGuid())
+        m_Guid = ObjectGuid(HIGHGUID_GROUP, sObjectMgr.GenerateGroupLowGuid());
 
     if (!isBGGroup())
     {
@@ -297,7 +298,7 @@ bool Group::AddInvite(Player* player)
 
     m_invitees.insert(player);
 
-    player->SetGroupInvite(this);
+    player->SetGroupInvite(GetObjectGuid());
 
     return true;
 }
@@ -306,6 +307,10 @@ bool Group::AddLeaderInvite(Player* player)
 {
     if (!AddInvite(player))
         return false;
+
+    // Group may be added without Create() call - need make ObjectGuid manually
+    if (!GetObjectGuid())
+        m_Guid = ObjectGuid(HIGHGUID_GROUP, sObjectMgr.GenerateGroupLowGuid());
 
     m_leaderGuid = player->GetObjectGuid();
     m_leaderName = player->GetName();
@@ -316,14 +321,14 @@ uint32 Group::RemoveInvite(Player *player)
 {
     m_invitees.erase(player);
 
-    player->SetGroupInvite(NULL);
+    player->SetGroupInvite(ObjectGuid());
     return GetMembersCount();
 }
 
 void Group::RemoveAllInvites()
 {
     for (InvitesList::iterator itr = m_invitees.begin(); itr!=m_invitees.end(); ++itr)
-        (*itr)->SetGroupInvite(NULL);
+        (*itr)->SetGroupInvite(ObjectGuid());
 
     m_invitees.clear();
 }
@@ -405,8 +410,8 @@ bool Group::AddMember(ObjectGuid guid, const char* name)
         // Broadcast group members' fields to player
         for (GroupReference* itr = GetFirstMember(); itr != NULL; itr = itr->next())
         {
-            if (itr->getSource() == player)
-                continue;
+//            if (itr->getSource() == player)
+//                continue;
 
             if (Player* member = itr->getSource())
             {
@@ -448,6 +453,8 @@ uint32 Group::RemoveMember(ObjectGuid guid, uint8 method)
     // Frozen Mod
     BroadcastGroupUpdate();
     // Frozen Mod
+
+    RemoveGroupBuffsOnMemberRemove(guid);
 
     if (!sWorld.getConfig(CONFIG_BOOL_PLAYERBOT_DISABLE))
     {
@@ -508,6 +515,29 @@ uint32 Group::RemoveMember(ObjectGuid guid, uint8 method)
         Disband(true);
 
     return m_memberSlots.size();
+}
+
+void Group::RemoveGroupBuffsOnMemberRemove(ObjectGuid guid)
+{
+    // Attention! player may be NULL (offline)
+    Player* pLeaver = sObjectMgr.GetPlayer(guid);
+
+    for (GroupReference* itr = GetFirstMember(); itr != NULL; itr = itr->next())
+    {
+        if (Player* pGroupGuy = itr->getSource())
+        {
+            // dont remove my auras from myself, also skip offlined
+            if (pGroupGuy->GetObjectGuid() == guid)
+                continue;
+
+            // remove all buffs cast by me from group members before leaving
+            pGroupGuy->RemoveAllGroupBuffsFromCaster(guid);
+
+            // remove from me all buffs cast by group members
+            if (pLeaver)
+                pLeaver->RemoveAllGroupBuffsFromCaster(pGroupGuy->GetObjectGuid());
+        }
+    }
 }
 
 void Group::ChangeLeader(ObjectGuid guid)
@@ -1434,7 +1464,7 @@ bool Group::_addMember(ObjectGuid guid, const char* name, uint8 group, GroupFlag
 
     if (player)
     {
-        player->SetGroupInvite(NULL);
+        player->SetGroupInvite(ObjectGuid());
         //if player is in group and he is being added to BG raid group, then call SetBattleGroundRaid()
         if (player->GetGroup() && isBGGroup())
             player->SetBattleGroundRaid(GetObjectGuid(), group);

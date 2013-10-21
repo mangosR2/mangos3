@@ -194,7 +194,7 @@ void WorldSession::HandleGroupAcceptOpcode(WorldPacket& recv_data)
     if (!GetPlayer()->GetPlayerbotAI())
         recv_data.read_skip<uint32>();                          // roles mask?
 
-    Group* group = GetPlayer()->GetGroupInvite();
+    Group* group = sObjectMgr.GetGroup(GetPlayer()->GetGroupInvite());
     if (!group)
         return;
 
@@ -225,7 +225,9 @@ void WorldSession::HandleGroupAcceptOpcode(WorldPacket& recv_data)
     {
         if (leader)
             group->RemoveInvite(leader);
+
         if (group->Create(group->GetLeaderGuid(), group->GetLeaderName()))
+            // Double add. not a problem
             sObjectMgr.AddGroup(group);
         else
             return;
@@ -242,9 +244,12 @@ void WorldSession::HandleGroupAcceptOpcode(WorldPacket& recv_data)
 
 void WorldSession::HandleGroupDeclineOpcode(WorldPacket& /*recv_data*/ )
 {
-    Group  *group  = GetPlayer()->GetGroupInvite();
+    Group* group  = sObjectMgr.GetGroup(GetPlayer()->GetGroupInvite());
     if (!group)
+    {
+        GetPlayer()->SetGroupInvite(ObjectGuid());
         return;
+    }
 
     // remember leader if online
     Player* leader = sObjectMgr.GetPlayer(group->GetLeaderGuid());
@@ -295,7 +300,7 @@ void WorldSession::HandleGroupUninviteGuidOpcode(WorldPacket & recv_data)
 
     if (grp->IsMember(guid))
     {
-        Player::RemoveFromGroup(grp, guid);
+        grp->RemoveMember(guid, 0);
         return;
     }
 
@@ -345,7 +350,7 @@ void WorldSession::HandleGroupUninviteOpcode(WorldPacket & recv_data)
 
     if (!guid.IsEmpty())
     {
-        Player::RemoveFromGroup(grp, guid);
+        grp->RemoveMember(guid, 0);
         return;
     }
 
@@ -381,7 +386,7 @@ void WorldSession::HandleGroupSetLeaderOpcode(WorldPacket& recv_data)
 
 void WorldSession::HandleGroupDisbandOpcode(WorldPacket& /*recv_data*/)
 {
-    if (!GetPlayer()->GetGroup())
+    if (!GetPlayer()->GetGroupGuid())
         return;
 
     if (_player->InBattleGround())
@@ -390,8 +395,7 @@ void WorldSession::HandleGroupDisbandOpcode(WorldPacket& /*recv_data*/)
         return;
     }
 
-    /** error handling **/
-    /********************/
+    DEBUG_LOG("WorldSession::HandleGroupDisbandOpcode: %s tried to disband group",GetPlayer()->GetObjectGuid().GetString().c_str());
 
     // everything is fine, do it
     SendPartyResult(PARTY_OP_LEAVE, GetPlayer()->GetName(), ERR_PARTY_RESULT_OK);
