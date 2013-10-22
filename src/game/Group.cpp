@@ -465,7 +465,7 @@ uint32 Group::RemoveMember(ObjectGuid guid, uint8 method, bool logout /*=false*/
 
     // wait to leader reconnect
     if (logout && IsLeader(guid))
-        return;
+        return m_memberSlots.size();
 
     // remove member and change leader (if need) only if strong more 2 members _before_ member remove
     if (GetMembersCount() > uint32(isBGGroup() ? 1 : 2))    // in BG group case allow 1 members group
