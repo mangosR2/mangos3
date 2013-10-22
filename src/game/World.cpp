@@ -1792,8 +1792,12 @@ void World::Update(uint32 diff)
     UpdateSessions(diff);
 
     /// <li> Update groups
-    for (ObjectMgr::GroupMap::iterator itr = sObjectMgr.GetGroupMapBegin(); itr != sObjectMgr.GetGroupMapEnd(); ++itr)
+    ObjectMgr::GroupMap::iterator i_next;
+    for (ObjectMgr::GroupMap::iterator itr = sObjectMgr.GetGroupMapBegin(); itr != sObjectMgr.GetGroupMapEnd(); itr = i_next)
     {
+        i_next = itr;
+        ++i_next;
+
         if (Group* group = itr->second)
             group->Update(diff);
     }
