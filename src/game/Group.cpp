@@ -463,8 +463,8 @@ uint32 Group::RemoveMember(ObjectGuid guid, uint8 method, bool logout /*=false*/
             player->GetPlayerbotMgr()->RemoveAllBotsFromGroup();
     }
 
-    // wait to reconnect
-    if (logout)
+    // wait to leader reconnect
+    if (logout && IsLeader(guid))
         return;
 
     // remove member and change leader (if need) only if strong more 2 members _before_ member remove

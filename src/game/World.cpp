@@ -1617,6 +1617,7 @@ void World::SetInitialWorldSettings()
     m_timers[WUPDATE_AUTOBROADCAST].SetInterval(abtimer);
     m_timers[WUPDATE_WORLDSTATE].SetInterval(1*MINUTE*IN_MILLISECONDS);
     m_timers[WUPDATE_CALENDAR].SetInterval(30*IN_MILLISECONDS);
+    m_timers[WUPDATE_GROUPS].SetInterval(1*IN_MILLISECONDS);
 
     // for AhBot
     m_timers[WUPDATE_AHBOT].SetInterval(20*IN_MILLISECONDS); // every 20 sec
@@ -1794,14 +1795,17 @@ void World::Update(uint32 diff)
     UpdateSessions(diff);
 
     /// <li> Update groups
-    ObjectMgr::GroupMap::iterator i_next;
-    for (ObjectMgr::GroupMap::iterator itr = sObjectMgr.GetGroupMapBegin(); itr != sObjectMgr.GetGroupMapEnd(); itr = i_next)
+    if (m_timers[WUPDATE_GROUPS].Passed())
     {
-        i_next = itr;
-        ++i_next;
-
-        if (Group* group = itr->second)
-            group->Update(diff);
+        ObjectMgr::GroupMap::iterator i_next;
+        for (ObjectMgr::GroupMap::iterator itr = sObjectMgr.GetGroupMapBegin(); itr != sObjectMgr.GetGroupMapEnd(); itr = i_next)
+        {
+            i_next = itr;
+            ++i_next;
+            if (Group* group = itr->second)
+                group->Update(m_timers[WUPDATE_GROUPS].GetInterval());
+        }
+        m_timers[WUPDATE_GROUPS].Reset();
     }
 
     /// <li> Handle weather updates when the timer has passed
