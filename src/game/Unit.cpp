@@ -7154,6 +7154,10 @@ bool Unit::Attack(Unit *victim, bool meleeAttack)
         }
     }
 
+    // not attack pacified targets
+    if (HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PACIFIED))
+        return false;
+
     // nobody can attack GM in GM-mode
     if (victim->GetTypeId()==TYPEID_PLAYER)
     {
