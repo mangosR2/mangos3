@@ -2594,7 +2594,14 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                         return;
                     }
                     case 43873:                             // Headless Horseman Laugh
+                    case 43881:
+                        target->PlayDistanceSound(11975);
+                        return;
+                    case 43885:                             // Headless Horseman - Horseman Laugh, Maniacal
                         target->PlayDistanceSound(11965);
+                        return;
+                    case 43894:                             // Headless Horseman - Horseman Laugh, Low Key
+                        target->PlayDistanceSound(11976);
                         return;
                     case 45963:                             // Call Alliance Deserter
                     {
