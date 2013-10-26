@@ -561,7 +561,7 @@ Player::Player(WorldSession* session): Unit(), m_mover(this), m_camera(NULL), m_
     // Honor System
     m_lastHonorUpdateTime = time(NULL);
 
-    m_IsBGRandomWinner = false;
+    m_isRandomBGWinner = false;
 
     // Player summoning
     m_summon_expire = 0;
@@ -23909,10 +23909,11 @@ void Player::SetRestType(RestType n_r_type, uint32 areaTriggerId /*= 0*/)
     }
 }
 
-void Player::SetRandomWinner(bool isWinner)
+void Player::SetRandomBGWinner(bool winner)
 {
-    m_IsBGRandomWinner = isWinner;
-    if (m_IsBGRandomWinner)
+    m_isRandomBGWinner = winner;
+
+    if (m_isRandomBGWinner)
     {
         static SqlStatementID insGuid;
         CharacterDatabase.CreateStatement(insGuid, "INSERT INTO character_battleground_random (guid) VALUES (?)")
@@ -23923,10 +23924,9 @@ void Player::SetRandomWinner(bool isWinner)
 void Player::_LoadRandomBGStatus(QueryResult* result)
 {
     // QueryResult* result = CharacterDatabase.PQuery("SELECT guid FROM character_battleground_random WHERE guid = '%u'", GetGUIDLow());
-
     if (result)
     {
-        m_IsBGRandomWinner = true;
+        m_isRandomBGWinner = true;
         delete result;
     }
 }
