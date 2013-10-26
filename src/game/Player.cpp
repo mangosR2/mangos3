@@ -23553,53 +23553,56 @@ void Player::ActivateSpec(uint8 specNum)
         // remove any talent rank if talent not listed in temp spec
         if (iterTempSpec == tempSpec.end() || iterTempSpec->second.state == PLAYERSPELL_REMOVED)
         {
-            TalentEntry const *talentInfo = talent.talentEntry;
+            TalentEntry const* talentInfo = talent.talentEntry;
 
             for (int r = 0; r < MAX_TALENT_RANK; ++r)
+            {
                 if (talentInfo->RankID[r])
                 {
                     removeSpell(talentInfo->RankID[r],!IsPassiveSpell(talentInfo->RankID[r]),false);
 
                     SpellEntry const* spellInfo = sSpellStore.LookupEntry(talentInfo->RankID[r]);
                     for (int k = 0; k < MAX_EFFECT_INDEX; ++k)
+                    {
                         if (spellInfo->EffectTriggerSpell[k])
                             removeSpell(spellInfo->EffectTriggerSpell[k]);
+                    }
 
-                    // if spell is a buff, remove it from group members
-                    // TODO: this should affect all players, not only group members?
-                    if (SpellEntry const *spellInfo = sSpellStore.LookupEntry(talentInfo->RankID[r]))
+                    if (Group* group = GetGroup())
                     {
-                        bool bRemoveAura = false;
-                        for (int i = 0; i < MAX_EFFECT_INDEX; ++i)
+                        // if spell is a buff, remove it from group members
+                        if (SpellEntry const* spellInfo = sSpellStore.LookupEntry(talentInfo->RankID[r]))
                         {
-                            if ((spellInfo->Effect[i] == SPELL_EFFECT_APPLY_AURA ||
-                                spellInfo->Effect[i] == SPELL_EFFECT_APPLY_AREA_AURA_RAID) &&
-                                IsPositiveEffect(spellInfo, SpellEffectIndex(i)))
+                            bool bRemoveAura = false;
+                            for (int i = 0; i < MAX_EFFECT_INDEX; ++i)
                             {
-                                bRemoveAura = true;
-                                break;
-                            }
-                        }
-
-                        Group *group = GetGroup();
-
-                        if (bRemoveAura && group)
-                        {
-                            for (GroupReference *itr = group->GetFirstMember(); itr != NULL; itr = itr->next())
-                            {
-                                if (Player *pGroupGuy = itr->getSource())
+                                if ((spellInfo->Effect[i] == SPELL_EFFECT_APPLY_AURA ||
+                                    spellInfo->Effect[i] == SPELL_EFFECT_APPLY_AREA_AURA_RAID) &&
+                                    IsPositiveEffect(spellInfo, SpellEffectIndex(i)))
                                 {
-                                    if (pGroupGuy->GetObjectGuid() == GetObjectGuid())
-                                        continue;
+                                    bRemoveAura = true;
+                                    break;
+                                }
+                            }
 
-                                    if (SpellAuraHolderPtr holder = pGroupGuy->GetSpellAuraHolder(talentInfo->RankID[r], GetObjectGuid()))
-                                        pGroupGuy->RemoveSpellAuraHolder(holder);
+                            if (bRemoveAura)
+                            {
+                                for(GroupReference* itr = group->GetFirstMember(); itr != NULL; itr = itr->next())
+                                {
+                                    if (Player* pGroupGuy = itr->getSource())
+                                    {
+                                        if (pGroupGuy->GetObjectGuid() == GetObjectGuid())
+                                            continue;
+
+                                        if (SpellAuraHolderPtr holder = pGroupGuy->GetSpellAuraHolder(talentInfo->RankID[r], GetObjectGuid()))
+                                            pGroupGuy->RemoveSpellAuraHolder(holder);
+                                    }
                                 }
                             }
                         }
                     }
                 }
-
+            }
             specIter = m_talents[m_activeSpec].begin();
         }
         else
@@ -23668,6 +23671,7 @@ void Player::ActivateSpec(uint8 specNum)
         ++itr;
     }
 
+    AutoUnequipOffhandIfNeed();
     ResummonPetTemporaryUnSummonedIfAny();
 
     ApplyGlyphs(true);
