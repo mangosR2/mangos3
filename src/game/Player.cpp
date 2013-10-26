@@ -676,21 +676,21 @@ bool Player::Create(uint32 guidlow, const std::string& name, uint8 race, uint8 c
     PlayerInfo const* info = sObjectMgr.GetPlayerInfo(race, class_);
     if (!info)
     {
-        sLog.outError("Player have incorrect race/class pair. Can't be loaded.");
+        sLog.outError("Player::Create: %s have incorrect race (%u) / class (%u) pair. Can't be loaded.", GetGuidStr().c_str(), race, class_);
         return false;
     }
 
     ChrClassesEntry const* cEntry = sChrClassesStore.LookupEntry(class_);
     if (!cEntry)
     {
-        sLog.outError("Class %u not found in DBC (Wrong DBC files?)",class_);
+        sLog.outError("Player::Create: %s has class %u not found in DBC (Wrong DBC files?)", GetGuidStr().c_str(), class_);
         return false;
     }
 
     // player store gender in single bit
     if (gender != uint8(GENDER_MALE) && gender != uint8(GENDER_FEMALE))
     {
-        sLog.outError("Invalid gender %u at player creating", uint32(gender));
+        sLog.outError("Player::Create: %s has invalid gender %u at player creating", GetGuidStr().c_str(), uint32(gender));
         return false;
     }
 
@@ -930,7 +930,7 @@ bool Player::StoreNewItemInBestSlots(uint32 titem_id, uint32 titem_amount)
     }
 
     // item can't be added
-    sLog.outError("STORAGE: Can't equip or store initial item %u for race %u class %u , error msg = %u",titem_id,getRace(),getClass(),msg);
+    sLog.outError("STORAGE: %s can't equip or store initial item %u for race %u class %u , error msg = %u", GetGuidStr().c_str(), titem_id, getRace(), getClass(), msg);
     return false;
 }
 
@@ -1411,7 +1411,7 @@ void Player::Update(uint32 update_diff, uint32 p_time)
         {
             // m_nextSave reseted in SaveToDB call
             SaveToDB();
-            DETAIL_LOG("Player '%s' (GUID: %u) saved", GetName(), GetGUIDLow());
+            DETAIL_LOG("%s saved", GetGuidStr().c_str());
         }
         else
             m_nextSave -= update_diff;
@@ -1579,7 +1579,7 @@ bool Player::BuildEnumData(QueryResult* result, WorldPacket* p_data)
     PlayerInfo const* info = sObjectMgr.GetPlayerInfo(pRace, pClass);
     if (!info)
     {
-        sLog.outError("Player %u has incorrect race/class pair. Don't build enum.", guid);
+        sLog.outError("Player::BuildEnumData: Player %s (Guid: %u) has incorrect race (%u) / class (%u) pair. Don't build enum.", fields[1].GetString(), guid, pRace, pClass);
         return false;
     }
 
@@ -1750,7 +1750,7 @@ bool Player::TeleportTo(WorldLocation const& loc, uint32 options)
 {
     if (!MapManager::IsValidMapCoord(loc))
     {
-        sLog.outError("TeleportTo: invalid map %d or absent instance template.", loc.GetMapId());
+        sLog.outError("Player::TeleportTo: %s has invalid map %d or absent instance template.", GetGuidStr().c_str(), loc.GetMapId());
         return false;
     }
 
@@ -3171,11 +3171,11 @@ bool Player::addSpell(uint32 spell_id, bool active, bool learning, bool dependen
         // do character spell book cleanup (all characters)
         if (!IsInWorld() && !learning)                       // spell load case
         {
-            sLog.outError("Player::addSpell: nonexistent in SpellStore spell #%u request, deleting for all characters in `character_spell`.",spell_id);
-            CharacterDatabase.PExecute("DELETE FROM character_spell WHERE spell = '%u'",spell_id);
+            sLog.outError("Player::addSpell: %s has nonexistent in SpellStore spell (id: %u) request, deleting for all characters in `character_spell`.", GetGuidStr().c_str(), spell_id);
+            CharacterDatabase.PExecute("DELETE FROM character_spell WHERE spell = %u", spell_id);
         }
         else
-            sLog.outError("Player::addSpell: nonexistent in SpellStore spell #%u request.",spell_id);
+            sLog.outError("Player::addSpell: %s has nonexistent in SpellStore spell (id: %u) request.", GetGuidStr().c_str(), spell_id);
 
         return false;
     }
@@ -3185,11 +3185,11 @@ bool Player::addSpell(uint32 spell_id, bool active, bool learning, bool dependen
         // do character spell book cleanup (all characters)
         if (!IsInWorld() && !learning)                       // spell load case
         {
-            sLog.outError("Player::addSpell: Broken spell #%u learning not allowed, deleting for all characters in `character_spell`.",spell_id);
-            CharacterDatabase.PExecute("DELETE FROM character_spell WHERE spell = '%u'",spell_id);
+            sLog.outError("Player::addSpell: %s has broken spell (id: %u) learning not allowed, deleting for all characters in `character_spell`.", GetGuidStr().c_str(), spell_id);
+            CharacterDatabase.PExecute("DELETE FROM character_spell WHERE spell = %u", spell_id);
         }
         else
-            sLog.outError("Player::addSpell: Broken spell #%u learning not allowed.",spell_id);
+            sLog.outError("Player::addSpell: %s has broken spell (id: %u) learning not allowed.", GetGuidStr().c_str(), spell_id);
 
         return false;
     }
@@ -3646,7 +3646,7 @@ void Player::removeSpell(uint32 spell_id, bool disabled, bool learn_low_rank, bo
                 m_talents[m_activeSpec].erase(iter);
         }
         else
-            sLog.outError("removeSpell: Player (GUID: %u) has talent spell (id: %u) but doesn't have talent",GetGUIDLow(), spell_id);
+            sLog.outError("Player::removeSpell: %s has talent spell (Id: %u) but doesn't have talent.", GetGuidStr().c_str(), spell_id);
 
         // free talent points
         uint32 talentCosts = GetTalentSpellCost(talentPos);
@@ -3853,7 +3853,7 @@ void Player::_LoadSpellCooldowns(QueryResult *result)
 
             if (!sSpellStore.LookupEntry(spell_id))
             {
-                sLog.outError("Player %u has unknown spell %u in `character_spell_cooldown`, skipping.",GetGUIDLow(),spell_id);
+                sLog.outError("Player::_LoadSpellCooldowns: %s has unknown spell %u in `character_spell_cooldown`, skipping.", GetGuidStr().c_str(), spell_id);
                 continue;
             }
 
@@ -4518,15 +4518,16 @@ void Player::BuildPlayerRepop()
     // the player cannot have a corpse already, only bones which are not returned by GetCorpse
     if (GetCorpse())
     {
-        sLog.outError("BuildPlayerRepop: player %s(%d) already has a corpse", GetName(), GetGUIDLow());
-        MANGOS_ASSERT(false);
+        sLog.outError("Player::BuildPlayerRepop: %s already has a corpse", GetGuidStr().c_str());
+        sLog.outError("Removing %s corpse from DB", GetGuidStr().c_str());
+        CharacterDatabase.PExecute("DELETE FROM corpse WHERE player = %u", GetGUIDLow());
     }
 
     // create a corpse and place it at the player's location
     Corpse *corpse = CreateCorpse();
     if (!corpse)
     {
-        sLog.outError("Error creating corpse for Player %s [%u]", GetName(), GetGUIDLow());
+        sLog.outError("Player::BuildPlayerRepop: Error creating corpse for %s", GetGuidStr().c_str());
         return;
     }
     GetMap()->Add(corpse);
@@ -5955,7 +5956,7 @@ void Player::SetSkill(uint16 id, uint16 currVal, uint16 maxVal, uint16 step /*=0
                 SkillLineEntry const* pSkill = sSkillLineStore.LookupEntry(id);
                 if (!pSkill)
                 {
-                    sLog.outError("Skill not found in SkillLineStore: skill #%u", id);
+                    sLog.outError("Player::SetSkill: %s has skill not found in SkillLineStore: skill (id: %u)", GetGuidStr().c_str(), id);
                     return;
                 }
 
@@ -6150,7 +6151,7 @@ bool Player::IsActionButtonDataValid(uint8 button, uint32 action, uint8 type, Pl
         if (msg)
         {
             if (player)
-                sLog.outError("Action %u not added into button %u for player %s: button must be < %u", action, button, player->GetName(), MAX_ACTION_BUTTONS);
+                sLog.outError("Action %u not added into button %u for %s: button must be < %u", action, button, player->GetGuidStr().c_str(), MAX_ACTION_BUTTONS);
             else
                 sLog.outError("Table `playercreateinfo_action` have action %u into button %u : button must be < %u", action, button, MAX_ACTION_BUTTONS);
 
@@ -6163,7 +6164,7 @@ bool Player::IsActionButtonDataValid(uint8 button, uint32 action, uint8 type, Pl
         if (msg)
         {
             if (player)
-                sLog.outError("Action %u not added into button %u for player %s: action must be < %u", action, button, player->GetName(), MAX_ACTION_BUTTON_ACTION_VALUE);
+                sLog.outError("Action %u not added into button %u for %s: action must be < %u", action, button, player->GetGuidStr().c_str(), MAX_ACTION_BUTTON_ACTION_VALUE);
             else
                 sLog.outError("Table `playercreateinfo_action` have action %u into button %u : action must be < %u", action, button, MAX_ACTION_BUTTON_ACTION_VALUE);
         }
@@ -6180,7 +6181,7 @@ bool Player::IsActionButtonDataValid(uint8 button, uint32 action, uint8 type, Pl
                 if (msg)
                 {
                     if (player)
-                        sLog.outError("Spell action %u not added into button %u for player %s: spell not exist", action, button, player->GetName());
+                        sLog.outError("Spell action %u not added into button %u for %s: spell not exist", action, button, player->GetGuidStr().c_str());
                     else
                         sLog.outError("Table `playercreateinfo_action` have spell action %u into button %u: spell not exist", action, button);
                 }
@@ -6192,13 +6193,13 @@ bool Player::IsActionButtonDataValid(uint8 button, uint32 action, uint8 type, Pl
                 if (!player->HasSpell(spellProto->Id))
                 {
                     if (msg)
-                        sLog.outError("Spell action %u not added into button %u for player %s: player don't known this spell", action, button, player->GetName());
+                        sLog.outError("Spell action %u not added into button %u for %s: player don't known this spell", action, button, player->GetGuidStr().c_str());
                     return false;
                 }
                 else if (IsPassiveSpell(spellProto))
                 {
                     if (msg)
-                        sLog.outError("Spell action %u not added into button %u for player %s: spell is passive", action, button, player->GetName());
+                        sLog.outError("Spell action %u not added into button %u for %s: spell is passive", action, button, player->GetGuidStr().c_str());
                     return false;
                 }
                 // current range for button of totem bar is from ACTION_BUTTON_SHAMAN_TOTEMS_BAR to (but not including) ACTION_BUTTON_SHAMAN_TOTEMS_BAR + 12
@@ -6206,7 +6207,7 @@ bool Player::IsActionButtonDataValid(uint8 button, uint32 action, uint8 type, Pl
                     && !spellProto->HasAttribute(SPELL_ATTR_EX7_TOTEM_SPELL))
                 {
                     if (msg)
-                        sLog.outError("Spell action %u not added into button %u for player %s: attempt to add non totem spell to totem bar", action, button, player->GetName());
+                        sLog.outError("Spell action %u not added into button %u for %s: attempt to add non totem spell to totem bar", action, button, player->GetGuidStr().c_str());
                     return false;
                 }
             }
@@ -6219,7 +6220,7 @@ bool Player::IsActionButtonDataValid(uint8 button, uint32 action, uint8 type, Pl
                 if (msg)
                 {
                     if (player)
-                        sLog.outError("Item action %u not added into button %u for player %s: item not exist", action, button, player->GetName());
+                        sLog.outError("Item action %u not added into button %u for %s: item not exist", action, button, player->GetGuidStr().c_str());
                     else
                         sLog.outError("Table `playercreateinfo_action` have item action %u into button %u: item not exist", action, button);
                 }
@@ -6388,7 +6389,7 @@ void Player::CheckAreaExploreAndOutdoor()
 
     if (offset >= PLAYER_EXPLORED_ZONES_SIZE)
     {
-        sLog.outError("Wrong area flag %u in map data for (X: %f Y: %f) point to field PLAYER_EXPLORED_ZONES_1 + %u (%u must be < %u).",areaFlag,GetPositionX(),GetPositionY(),offset,offset, PLAYER_EXPLORED_ZONES_SIZE);
+        sLog.outError("Wrong area flag %u in map data for (X: %f Y: %f) point to field PLAYER_EXPLORED_ZONES_1 + %u (%u must be < %u).", areaFlag, GetPositionX(), GetPositionY(), offset, offset, PLAYER_EXPLORED_ZONES_SIZE);
         return;
     }
 
@@ -6404,7 +6405,7 @@ void Player::CheckAreaExploreAndOutdoor()
         AreaTableEntry const* p = GetAreaEntryByAreaFlagAndMap(areaFlag, GetMapId());
         if (!p)
         {
-            sLog.outError("PLAYER: Player %u discovered unknown area (x: %f y: %f map: %u", GetGUIDLow(), GetPositionX(),GetPositionY(),GetMapId());
+            sLog.outError("Player::CheckAreaExploreAndOutdoor: %s discovered unknown area (x: %f y: %f map: %u", GetGuidStr().c_str(), GetPositionX(), GetPositionY(), GetMapId());
         }
         else if (p->area_level > 0)
         {
@@ -8024,7 +8025,7 @@ void Player::CastItemCombatSpell(Unit* Target, WeaponAttackType attType)
             SpellEntry const* spellInfo = sSpellStore.LookupEntry(proc_spell_id);
             if (!spellInfo)
             {
-                sLog.outError("Player::CastItemCombatSpell Enchant %i, cast unknown spell %i", pEnchant->ID, proc_spell_id);
+                sLog.outError("Player::CastItemCombatSpell: %s enchant (id: %i), cast unknown spell (id: %i)", GetGuidStr().c_str(), pEnchant->ID, proc_spell_id);
                 continue;
             }
 
@@ -15820,7 +15821,7 @@ bool Player::LoadFromDB(ObjectGuid guid, SqlQueryHolder* holder)
         // client without expansion support
         GetSession()->Expansion() < mapEntry->Expansion())
     {
-        sLog.outError("Player::LoadFromDB player %s have invalid coordinates (map: %u X: %f Y: %f Z: %f O: %f). Teleport to default race/class locations.",
+        sLog.outError("Player::LoadFromDB: %s have invalid coordinates (map: %u X: %f Y: %f Z: %f O: %f). Teleport to default race/class locations.",
             guid.GetString().c_str(),
             savedLocation.GetMapId(),
             savedLocation.x,
@@ -17423,8 +17424,8 @@ InstancePlayerBind* Player::BindToInstance(DungeonPersistentState* state, bool p
         bind.extend = extend;
 
         if (!load)
-            DEBUG_LOG("Player::BindToInstance: %s(%d) is now bound to map %d, instance %d, difficulty %d",
-                GetName(), GetGUIDLow(), state->GetMapId(), state->GetInstanceId(), state->GetDifficulty());
+            DEBUG_LOG("Player::BindToInstance: %s is now bound to map %d, instance %d, difficulty %d", GetGuidStr().c_str(), state->GetMapId(), state->GetInstanceId(), state->GetDifficulty());
+
         return &bind;
     }
     else
@@ -18063,12 +18064,12 @@ void Player::_SaveInventory()
 
         if (test == NULL)
         {
-            sLog.outError("Player(GUID: %u Name: %s)::_SaveInventory - the bag(%d) and slot(%d) values for the item with guid %d are incorrect, the player doesn't have an item at that position!", GetGUIDLow(), GetName(), item->GetBagSlot(), item->GetSlot(), item->GetGUIDLow());
+            sLog.outError("Player::_SaveInventory: %s - the bag (%d) and slot (%d) values for the %s are incorrect, the player doesn't have an item at that position!", GetGuidStr().c_str(), item->GetBagSlot(), item->GetSlot(), item->GetGuidStr().c_str());
             error = true;
         }
         else if (test != item)
         {
-            sLog.outError("Player(GUID: %u Name: %s)::_SaveInventory - the bag(%d) and slot(%d) values for the item with guid %d are incorrect, the item with guid %d is there instead!", GetGUIDLow(), GetName(), item->GetBagSlot(), item->GetSlot(), item->GetGUIDLow(), test->GetGUIDLow());
+            sLog.outError("Player::_SaveInventory: %s - the bag (%d) and slot (%d) values for the %s are incorrect, the %s is there instead!", GetGuidStr().c_str(), item->GetBagSlot(), item->GetSlot(), item->GetGuidStr().c_str(), test->GetGuidStr().c_str());
             error = true;
         }
     }
@@ -22509,7 +22510,7 @@ void Player::_LoadSkills(QueryResult* result)
             SkillLineEntry const* pSkill = sSkillLineStore.LookupEntry(skill);
             if (!pSkill)
             {
-                sLog.outError("Character %u has skill %u that does not exist.", GetGUIDLow(), skill);
+                sLog.outError("Player::_LoadSkills: %s has skill (id: %u) that does not exist.", GetGuidStr().c_str(), skill);
                 continue;
             }
 
@@ -22528,7 +22529,7 @@ void Player::_LoadSkills(QueryResult* result)
 
             if (value == 0)
             {
-                sLog.outError("Character %u has skill %u with value 0. Will be deleted.", GetGUIDLow(), skill);
+                sLog.outError("Player::_LoadSkills: %s has skill (id: %u) with value 0. Will be deleted.", GetGuidStr().c_str(), skill);
                 CharacterDatabase.PExecute("DELETE FROM character_skills WHERE guid = %u AND skill = %u", GetGUIDLow(), skill);
                 continue;
             }
@@ -22545,7 +22546,7 @@ void Player::_LoadSkills(QueryResult* result)
 
             if (count >= PLAYER_MAX_SKILLS)                      // client limit
             {
-                sLog.outError("Character %u has more than %u skills.", GetGUIDLow(), PLAYER_MAX_SKILLS);
+                sLog.outError("Player::_LoadSkills: %s has more than %u skills.", GetGuidStr().c_str(), PLAYER_MAX_SKILLS);
                 break;
             }
         }
@@ -24797,7 +24798,7 @@ void Player::UpdateItemsWithTimeCheck()
         }
         else
         {
-            sLog.outError("Player::UpdateItemsWithTimeCheck: Can't find item (GUID: %u) but is in update storage for %s! Removing.", *itr, GetGuidStr().c_str());
+            sLog.outError("Player::UpdateItemsWithTimeCheck: Can't find item (Guid: %u) but is in update storage for %s. Removing.", *itr, GetGuidStr().c_str());
             erase = true;
         }
 
