@@ -1524,7 +1524,7 @@ void Player::SetDeathState(DeathState s)
 
         if (Pet* pet = GetPet())
         {
-            if (pet->isControlled())
+            if (pet->getPetType() == HUNTER_PET)
                 SetTemporaryUnsummonedPetNumber(pet->GetCharmInfo()->GetPetNumber());
 
             // FIXME: is pet dismissed at dying or releasing spirit? if second, add SetDeathState(DEAD) to HandleRepopRequestOpcode and define pet unsummon here with (s == DEAD)
@@ -1828,8 +1828,8 @@ bool Player::TeleportTo(WorldLocation const& loc, uint32 options)
             DuelComplete(DUEL_FLED);
 
     // reset movement flags at teleport, because player will continue move with these flags after teleport
-    m_movementInfo.SetMovementFlags(MOVEFLAG_NONE);
     DisableSpline();
+    m_movementInfo.SetMovementFlags(MOVEFLAG_NONE);
 
     if (GetMap() && GetMapId() == loc.GetMapId() && !IsOnTransport())
     {
@@ -2814,6 +2814,9 @@ void Player::GiveLevel(uint32 level)
         WorldPacket packet = WorldPacket();
         GetSession()->HandleQuestgiverStatusMultipleQuery(packet);
     }
+
+    if (m_playerbotAI)
+        m_playerbotAI->GiveLevel(level);
 }
 
 void Player::UpdateFreeTalentPoints(bool resetIfNeed)
@@ -2906,6 +2909,8 @@ void Player::InitStatsForLevel(bool reapplyMods)
         SetUInt32Value(index, 0);
 
     SetUInt32Value(PLAYER_FIELD_MOD_HEALING_DONE_POS, 0);
+    SetFloatValue(PLAYER_FIELD_MOD_HEALING_PCT, 1.0f);
+    SetFloatValue(PLAYER_FIELD_MOD_HEALING_DONE_PCT, 1.0f);
     for (int i = 0; i < MAX_SPELL_SCHOOL; ++i)
     {
         SetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_NEG + i, 0);
@@ -4610,7 +4615,14 @@ void Player::ResurrectPlayer(float restore_percent, bool applySickness)
     UpdateObjectVisibility();
 
     if (!applySickness)
+    {
+        if (Map* map = GetMap())
+        {
+            if (!map->Instanceable())
+                CastSpell(this, SPELL_ID_HONORLESS_TARGET, true);
+        }
         return;
+    }
 
     // Characters from level 1-10 are not affected by resurrection sickness.
     // Characters from level 11-19 will suffer from one minute of sickness
@@ -4981,7 +4993,7 @@ void Player::RepopAtGraveyard()
     // and don't show spirit healer location
     if (ClosestGrave)
     {
-        bool updateVisibility = IsInWorld() && GetMapId() == ClosestGrave->map_id;
+        bool updateVisibility = IsInWorld() && GetMap() && GetMapId() == ClosestGrave->map_id;
         TeleportTo(ClosestGrave->map_id, ClosestGrave->x, ClosestGrave->y, ClosestGrave->z, GetOrientation());
         if (isDead())                                       // not send if alive, because it used in TeleportTo()
         {
@@ -5602,7 +5614,7 @@ bool Player::UpdateFishingSkill()
 
     uint32 SkillValue = GetPureSkillValue(SKILL_FISHING);
 
-    int32 chance = SkillValue < 75 ? 100 : 2500/(SkillValue-50);
+    int32 chance = SkillValue < 90 ? 100 : 3000 / (SkillValue - 60);
 
     uint32 gathering_skill_gain = sWorld.getConfig(CONFIG_UINT32_SKILL_GAIN_GATHERING);
 
@@ -5738,7 +5750,10 @@ void Player::UpdateCombatSkills(Unit* pVictim, WeaponAttackType attType, bool de
 
     float chance = float(3 * lvldif * skilldif) / plevel;
     if (!defence)
-        chance *= 0.1f * GetStat(STAT_INTELLECT);
+    {
+        if (getClass() == CLASS_WARRIOR || getClass() == CLASS_ROGUE)
+            chance *= 0.1f * GetStat(STAT_INTELLECT);
+    }
 
     chance = chance < 1.0f ? 1.0f : chance;                 // minimum chance to increase skill is 1%
 
@@ -6289,12 +6304,18 @@ bool Player::SetPosition(Position const& pos, bool teleport)
     if (!Unit::SetPosition(pos, teleport))
         return false;
 
-    if (GetTrader() && !IsWithinDistInMap(GetTrader(), INTERACTION_DISTANCE))
-        GetSession()->SendCancelTrade();   // will close both side trade windows
-
-    if (m_positionStatusUpdateTimer)                        // Update position's state only on interval
+    // Update position's state only on interval
+    if (m_positionStatusUpdateTimer)
         return true;
     m_positionStatusUpdateTimer = 100;
+
+    // will close both side trade windows
+    if (GetTrader() && !IsWithinDistInMap(GetTrader(), INTERACTION_DISTANCE))
+        GetSession()->SendCancelTrade();
+
+    // movement should cancel looting
+    if (ObjectGuid lootGuid = GetLootGuid())
+        SendLootRelease(lootGuid);
 
     // group update
     if (groupUpdate)
@@ -6774,6 +6795,10 @@ void Player::UpdateHonorFields()
 /// An exact honor value can also be given (overriding the calcs)
 bool Player::RewardHonor(Unit* uVictim, uint32 groupsize, float honor)
 {
+    // Do not reward honor to player marked as afk in Battlegrounds
+    if (HasAura(43681))
+        return false;
+
     // do not reward honor in arenas, but enable onkill spellproc
     if (InArena())
     {
@@ -12275,10 +12300,16 @@ void Player::SwapItem(uint16 src, uint16 dst)
         else
             return;
 
+        if (pSrcItem->GetCount() > pSrcItem->GetProto()->GetMaxStackSize() || pDstItem->GetCount() > pDstItem->GetProto()->GetMaxStackSize())
+        {
+            SendEquipError(EQUIP_ERR_TRIED_TO_SPLIT_MORE_THAN_COUNT, pSrcItem, NULL);
+            return;
+        }
+
         // can be merge/fill
         if (msg == EQUIP_ERR_OK)
         {
-            if (pSrcItem->GetCount() + pDstItem->GetCount() <= pSrcItem->GetProto()->GetMaxStackSize())
+            if (pSrcItem->GetCount() + pDstItem->GetCount() <= pSrcItem->GetProto()->GetMaxStackSize() && pSrcItem->GetCount() + pDstItem->GetCount() <= pDstItem->GetProto()->GetMaxStackSize())
             {
                 RemoveItem(srcbag, srcslot, true);
 
@@ -18428,11 +18459,8 @@ void Player::_SaveSpells()
     SqlStatement stmtDel = CharacterDatabase.CreateStatement(delSpells, "DELETE FROM character_spell WHERE guid = ? and spell = ?");
     SqlStatement stmtIns = CharacterDatabase.CreateStatement(insSpells, "INSERT INTO character_spell (guid,spell,active,disabled) VALUES (?, ?, ?, ?)");
 
-    PlayerSpellMap::iterator itr, next;
-    for (itr = m_spells.begin(); itr != m_spells.end(); itr = next)
+    for (PlayerSpellMap::iterator itr = m_spells.begin(), next = m_spells.begin(); itr != m_spells.end();)
     {
-        next = itr;
-        ++next;
         uint32 talentCosts = GetTalentSpellCost(itr->first);
 
         if (!talentCosts)
@@ -18446,10 +18474,11 @@ void Player::_SaveSpells()
         }
 
         if (itr->second.state == PLAYERSPELL_REMOVED)
-            m_spells.erase(itr);
+            itr = m_spells.erase(itr);
         else
         {
             itr->second.state = PLAYERSPELL_UNCHANGED;
+            ++itr;
         }
     }
 }
@@ -20074,9 +20103,9 @@ void Player::UpdateHomebindTime(uint32 time)
     }
 }
 
-void Player::UpdatePvP(bool state, bool ovrride)
+void Player::UpdatePvP(bool state, bool bOverride)
 {
-    if (!state || ovrride)
+    if (!state || bOverride)
     {
         SetPvP(state);
         pvpInfo.endTimer = 0;
@@ -20908,7 +20937,8 @@ void Player::learnQuestRewardedSpells(Quest const* quest)
     {
         // not have first rank learned (unlearned prof?)
         uint32 first_spell = sSpellMgr.GetFirstSpellInChain(learned_0);
-        if (!HasSpell(first_spell))
+        uint32 prev_spell = sSpellMgr.GetPrevSpellInChain(learned_0);
+        if (!HasSpell(first_spell) || !HasSpell(prev_spell))
             return;
 
         SpellEntry const *learnedInfo = sSpellStore.LookupEntry(learned_0);
@@ -21586,10 +21616,10 @@ bool Player::isHonorOrXPTarget(Unit* pVictim) const
 
     if (pVictim->GetTypeId() == TYPEID_UNIT)
     {
-        if (((Creature*)pVictim)->IsTotem() ||
-            ((Creature*)pVictim)->IsPet() ||
-            (((Creature*)pVictim)->GetCreatureInfo()->flags_extra & CREATURE_FLAG_EXTRA_NO_XP_AT_KILL))
-                return false;
+        Creature* pCre = (Creature*)pVictim;
+        if (pCre->IsTotem() || pCre->IsPet() ||
+            (pCre->GetCreatureInfo()->flags_extra & CREATURE_FLAG_EXTRA_NO_XP_AT_KILL))
+            return false;
     }
     return true;
 }
