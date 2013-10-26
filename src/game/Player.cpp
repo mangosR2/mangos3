@@ -257,8 +257,12 @@ std::string PlayerTaxi::SaveTaxiDestinationsToString()
 
     std::ostringstream ss;
 
+    bool needDelimiter = false;
     for (size_t i = 0; i < m_TaxiDestinations.size(); ++i)
-        ss << m_TaxiDestinations[i] << " ";
+    {
+        needDelimiter ? ss << ' ' : needDelimiter = true;
+        ss << m_TaxiDestinations[i];
+    }
 
     return ss.str();
 }
@@ -278,8 +282,12 @@ uint32 PlayerTaxi::GetCurrentTaxiPath() const
 
 std::ostringstream& operator << (std::ostringstream& ss, PlayerTaxi const& taxi)
 {
-    for (int i = 0; i < TaxiMaskSize; ++i)
-        ss << taxi.m_taximask[i] << " ";
+    bool needDelimiter = false;
+    for (uint8 i = 0; i < TaxiMaskSize; ++i)
+    {
+        needDelimiter ? ss << ' ' : needDelimiter = true;
+        ss << taxi.m_taximask[i];
+    }
     return ss;
 }
 
@@ -17806,23 +17814,29 @@ void Player::SaveToDB()
     uberInsert.addUInt32(uint32(m_specsCount));
     uberInsert.addUInt32(uint32(m_activeSpec));
 
-    for (uint32 i = 0; i < PLAYER_EXPLORED_ZONES_SIZE; ++i)         //string
+    bool needDelimiter = false;
+    for (uint32 i = 0; i < PLAYER_EXPLORED_ZONES_SIZE; ++i) // string
     {
-        ss << GetUInt32Value(PLAYER_EXPLORED_ZONES_1 + i) << " ";
+        needDelimiter ? ss << ' ' : needDelimiter = true;
+        ss << GetUInt32Value(PLAYER_EXPLORED_ZONES_1 + i);
     }
     uberInsert.addString(ss);
 
-    for (uint32 i = 0; i < EQUIPMENT_SLOT_END * 2; ++i)             //string
+    needDelimiter = false;
+    for (uint32 i = 0; i < EQUIPMENT_SLOT_END * 2; ++i)     // string
     {
-        ss << GetUInt32Value(PLAYER_VISIBLE_ITEM_1_ENTRYID + i) << " ";
+        needDelimiter ? ss << ' ' : needDelimiter = true;
+        ss << GetUInt32Value(PLAYER_VISIBLE_ITEM_1_ENTRYID + i);
     }
     uberInsert.addString(ss);
 
     uberInsert.addUInt32(GetUInt32Value(PLAYER_AMMO_ID));
 
-    for (uint32 i = 0; i < KNOWN_TITLES_SIZE*2; ++i)                //string
+    needDelimiter = false;
+    for (uint32 i = 0; i < KNOWN_TITLES_SIZE * 2; ++i)      // string
     {
-        ss << GetUInt32Value(PLAYER__FIELD_KNOWN_TITLES + i) << " ";
+        needDelimiter ? ss << ' ' : needDelimiter = true;
+        ss << GetUInt32Value(PLAYER__FIELD_KNOWN_TITLES + i);
     }
     uberInsert.addString(ss);
 
