@@ -240,7 +240,7 @@ public:
         u.RemoveFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_DISABLE_MOVE | UNIT_FLAG_TAXI_FLIGHT);
         u.getHostileRefManager().setOnlineOfflineState(true);
         if(u.pvpInfo.inHostileArea)
-            u.CastSpell(&u, 2479, true);
+            u.CastSpell(&u, SPELL_ID_HONORLESS_TARGET, true);
 
         _Finalize(u);
 

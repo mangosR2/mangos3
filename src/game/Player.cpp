@@ -2815,8 +2815,8 @@ void Player::GiveLevel(uint32 level)
         GetSession()->HandleQuestgiverStatusMultipleQuery(packet);
     }
 
-    if (m_playerbotAI)
-        m_playerbotAI->GiveLevel(level);
+    //if (m_playerbotAI)
+    //    m_playerbotAI->GiveLevel(level);
 }
 
 void Player::UpdateFreeTalentPoints(bool resetIfNeed)
@@ -18526,7 +18526,7 @@ void Player::_SaveStats()
         .PExecute(GetGUIDLow());
 
     static SqlStatementID insertStats;
-    stmt = CharacterDatabase.CreateStatement(insertStats, "INSERT INTO character_stats (guid, maxhealth, maxpower1, maxpower2, maxpower3, maxpower4, maxpower5, maxpower6, maxpower7, "
+    SqlStatement stmt = CharacterDatabase.CreateStatement(insertStats, "INSERT INTO character_stats (guid, maxhealth, maxpower1, maxpower2, maxpower3, maxpower4, maxpower5, maxpower6, maxpower7, "
         "strength, agility, stamina, intellect, spirit, armor, resHoly, resFire, resNature, resFrost, resShadow, resArcane, "
         "blockPct, dodgePct, parryPct, critPct, rangedCritPct, spellCritPct, attackPower, rangedAttackPower, spellPower, "
         "apmelee, ranged, blockrating, defrating, dodgerating, parryrating, resilience, manaregen, "
