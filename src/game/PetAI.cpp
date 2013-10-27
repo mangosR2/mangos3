@@ -537,24 +537,27 @@ void PetAI::UpdateAI(const uint32 diff)
     {
         AttackStart(target);
     }
-    else if (owner && owner->IsInCombat())
+    else if (owner)
     {
         switch (m_creature->GetCharmState(CHARM_STATE_REACT))
         {
             case REACT_DEFENSIVE:
             {
-                if (!pVictim || !pVictim->isAlive() ||
-                    (!m_primaryTargetGuid && owner->getVictim() != pVictim && owner->getVictim()->isAlive()))
-                    AttackStart(owner->getAttackerForHelper());
+                if (!m_primaryTargetGuid)
+                {
+                    Unit* ownerVictim = owner->getVictim();
+                    if (ownerVictim && ownerVictim->isAlive())
+                        AttackStart(ownerVictim);
+                }
                 break;
             }
             case REACT_AGGRESSIVE:
             {
-                if (!pVictim || !pVictim->isAlive())
-                    AttackStart(owner->getAttackerForHelper());
+                if (Unit* pTarget = owner->getAttackerForHelper())
+                    AttackStart(pTarget);
                 break;
             }
-            case REACT_PASSIVE:
+            // case REACT_PASSIVE:
             default:
                 break;
         }
