@@ -3469,8 +3469,8 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
 
                     if (m_caster->GetEntry() == 15930 && unitTarget->GetEntry() == 15929)
                     {
-                        Unit *pFeugenVictim = m_caster->getVictim();
-                        Unit *pStalaggVictim = unitTarget->getVictim();
+                        Unit* pFeugenVictim = m_caster->getVictim();
+                        Unit* pStalaggVictim = unitTarget->getVictim();
 
                         if (pFeugenVictim && pStalaggVictim)
                         {
@@ -5479,8 +5479,8 @@ void Spell::EffectJump(SpellEffectIndex eff_idx)
             // some spell at client send caster
             if (m_targets.getUnitTarget() && m_targets.getUnitTarget() != m_caster)
                 pTarget = m_targets.getUnitTarget();
-            else if (unitTarget->getVictim())
-                pTarget = m_caster->getVictim();
+            else if (Unit* pVictim = m_caster->getVictim())
+                pTarget = pVictim;
             else if (m_caster->GetTypeId() == TYPEID_PLAYER)
                 pTarget = m_caster->GetMap()->GetUnit(((Player*)m_caster)->GetSelectionGuid());
 
@@ -5601,8 +5601,8 @@ void Spell::EffectTeleportUnits(SpellEffectIndex eff_idx)   // TODO - Use target
             // some spell at client send caster
             if (m_targets.getUnitTarget() && m_targets.getUnitTarget()!=unitTarget)
                 pTarget = m_targets.getUnitTarget();
-            else if (unitTarget->getVictim())
-                pTarget = unitTarget->getVictim();
+            else if (Unit* pVictim = unitTarget->getVictim())
+                pTarget = pVictim;
             else if (unitTarget->GetTypeId() == TYPEID_PLAYER)
                 pTarget = unitTarget->GetMap()->GetUnit(((Player*)unitTarget)->GetSelectionGuid());
 
@@ -9236,10 +9236,10 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     if (!unitTarget)
                         return;
 
-                    if (unitTarget->getVictim())
+                    if (Unit* pVictim = unitTarget->getVictim())
                     {
                         // Cast Zap damage spell
-                        unitTarget->CastSpell(unitTarget->getVictim(), 43137, true);
+                        unitTarget->CastSpell(pVictim, 43137, true);
 
                         // Attack a new target
                         if (unitTarget->GetTypeId() == TYPEID_UNIT)
@@ -10547,8 +10547,8 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     unitTarget->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
                     unitTarget->CastSpell(unitTarget, 64474, true);
 
-                    if (m_caster->getVictim())
-                        ((Creature*)unitTarget)->AI()->AttackStart(m_caster->getVictim());
+                    if (Unit* pVictim = m_caster->getVictim())
+                        ((Creature*)unitTarget)->AI()->AttackStart(pVictim);
                     return;
                 }
                 case 62524:                                 // Attuned to Nature 2 Dose Reduction
@@ -13827,8 +13827,8 @@ void Spell::EffectServerSide(SpellEffectIndex eff_idx)
                         if ( holder->GetStackAmount() + 1 > uint32(triggerSpell->EffectBasePoints[EFFECT_INDEX_0] ))
                         {
                             unitTarget->RemoveAurasDueToSpell(triggerID == 67712 ? 67713 : 67759);
-                            if (unitTarget->getVictim())
-                                unitTarget->CastSpell(unitTarget->getVictim(), (triggerID == 67712 ? 67714 : 67760), true);
+                            if (Unit* pVictim = unitTarget->getVictim())
+                                unitTarget->CastSpell(pVictim, (triggerID == 67712 ? 67714 : 67760), true);
                             return;
                         }
                     }

@@ -418,7 +418,7 @@ void Unit::Update(uint32 update_diff, uint32 p_time)
 
 bool Unit::UpdateMeleeAttackingState()
 {
-    Unit *victim = getVictim();
+    Unit* victim = getVictim();
     if (!victim || IsNonMeleeSpellCasted(false))
         return false;
 
@@ -1083,11 +1083,11 @@ uint32 Unit::DealDamage(DamageInfo* damageInfo)
 
         if (damageInfo->damageType != DOT)
         {
-            if(!getVictim())
+            if (!getVictim())
             {
                 // if not have main target then attack state with target (including AI call)
                 //start melee attacks only after melee hit
-                Attack(pVictim, (damageInfo->damageType == DIRECT_DAMAGE));
+                Attack(pVictim, damageInfo->damageType == DIRECT_DAMAGE);
             }
 
             // if damage pVictim call AI reaction
@@ -6856,6 +6856,9 @@ FactionTemplateEntry const* Unit::getFactionTemplateEntry() const
 
 bool Unit::IsHostileTo(Unit const* unit) const
 {
+    if (!unit || !unit->IsInWorld())
+        return false;
+
     // always non-hostile to self
     if (unit == this)
         return false;
@@ -6864,24 +6867,37 @@ bool Unit::IsHostileTo(Unit const* unit) const
     if (unit->GetTypeId() == TYPEID_PLAYER && ((Player const*)unit)->isGameMaster())
         return false;
 
+    Unit const* selfVictim = getVictim();
+    Unit const* unitVictim = unit->getVictim();
+
     // always hostile to enemy
-    if (getVictim() == unit || unit->getVictim() == this)
+    if (selfVictim == unit || unitVictim == this)
         return true;
 
     // test pet/charm masters instead pers/charmeds
     Unit const* testerOwner = GetCharmerOrOwner();
     Unit const* targetOwner = unit->GetCharmerOrOwner();
+    Unit* testerVictim;
+    Unit* targetVictim;
 
     // always hostile to owner's enemy
-    if (testerOwner && (testerOwner->getVictim() == unit || unit->getVictim() == testerOwner))
-        return true;
+    if (testerOwner)
+    {
+        testerVictim = testerOwner->getVictim();
+        if (testerVictim == unit || unitVictim == testerOwner)
+            return true;
+    }
 
     // always hostile to enemy owner
-    if (targetOwner && (getVictim() == targetOwner || targetOwner->getVictim() == this))
-        return true;
+    if (targetOwner)
+    {
+        targetVictim = targetOwner->getVictim();
+        if (selfVictim == targetOwner || targetVictim == this)
+            return true;
+    }
 
     // always hostile to owner of owner's enemy
-    if (testerOwner && targetOwner && (testerOwner->getVictim() == targetOwner || targetOwner->getVictim() == testerOwner))
+    if (testerOwner && targetOwner && (testerVictim == targetOwner || targetVictim == testerOwner))
         return true;
 
     Unit const* tester = testerOwner ? testerOwner : this;
@@ -6968,7 +6984,7 @@ bool Unit::IsHostileTo(Unit const* unit) const
 
 bool Unit::IsFriendlyTo(Unit const* unit) const
 {
-    if (!unit)
+    if (!unit || !unit->IsInWorld())
         return true;
 
     // always friendly to self
@@ -6979,24 +6995,37 @@ bool Unit::IsFriendlyTo(Unit const* unit) const
     if (unit->GetTypeId() == TYPEID_PLAYER && ((Player const*)unit)->isGameMaster())
         return true;
 
+    Unit const* selfVictim = getVictim();
+    Unit const* unitVictim = unit->getVictim();
+
     // always non-friendly to enemy
-    if (getVictim() == unit || unit->getVictim() == this)
+    if (selfVictim == unit || unitVictim == this)
         return false;
 
     // test pet/charm masters instead pers/charmeds
     Unit const* testerOwner = GetCharmerOrOwner();
     Unit const* targetOwner = unit->GetCharmerOrOwner();
+    Unit* testerVictim;
+    Unit* targetVictim;
 
     // always non-friendly to owner's enemy
-    if (testerOwner && (testerOwner->getVictim() == unit || unit->getVictim() == testerOwner))
-        return false;
+    if (testerOwner)
+    {
+        testerVictim = testerOwner->getVictim();
+        if (testerVictim == unit || unitVictim == testerOwner)
+            return false;
+    }
 
     // always non-friendly to enemy owner
-    if (targetOwner && (getVictim() == targetOwner || targetOwner->getVictim() == this))
-        return false;
+    if (targetOwner)
+    {
+        targetVictim = targetOwner->getVictim();
+        if (selfVictim == targetOwner || targetVictim == this)
+            return false;
+    }
 
     // always non-friendly to owner of owner's enemy
-    if (testerOwner && targetOwner && (testerOwner->getVictim() == targetOwner || targetOwner->getVictim() == testerOwner))
+    if (testerOwner && targetOwner && (testerVictim == targetOwner || targetVictim == testerOwner))
         return false;
 
     Unit const* tester = testerOwner ? testerOwner : this;
@@ -7038,8 +7067,8 @@ bool Unit::IsFriendlyTo(Unit const* unit) const
     }
 
     // faction base cases
-    FactionTemplateEntry const*tester_faction = tester->getFactionTemplateEntry();
-    FactionTemplateEntry const*target_faction = target->getFactionTemplateEntry();
+    FactionTemplateEntry const* tester_faction = tester->getFactionTemplateEntry();
+    FactionTemplateEntry const* target_faction = target->getFactionTemplateEntry();
     if (!tester_faction || !target_faction)
         return false;
 
@@ -7109,8 +7138,8 @@ bool Unit::IsNeutralToAll() const
 
 Unit* Unit::getAttackerForHelper()
 {
-    if (getVictim())
-        return getVictim();
+    if (Unit* pVictim = getVictim())
+        return pVictim;
 
     if (!IsInCombat())
         return NULL;
@@ -7118,12 +7147,12 @@ Unit* Unit::getAttackerForHelper()
     GuidSet& attackers = GetMap()->GetAttackersFor(GetObjectGuid());
     if (!attackers.empty())
     {
-        for(GuidSet::const_iterator itr = attackers.begin(); itr != attackers.end();)
+        for (GuidSet::const_iterator itr = attackers.begin(); itr != attackers.end();)
         {
             ObjectGuid guid = *itr++;
             Unit* attacker = GetMap()->GetUnit(guid);
             if (!attacker || !attacker->isAlive())
-                GetMap()->RemoveAttackerFor(GetObjectGuid(),guid);
+                GetMap()->RemoveAttackerFor(GetObjectGuid(), guid);
             else
                 return attacker;
         }
@@ -10655,8 +10684,7 @@ void Unit::TauntFadeOut(Unit *taunter)
     if (!CanHaveThreatList())
         return;
 
-    Unit *target = getVictim();
-
+    Unit* target = getVictim();
     if (!target || target != taunter)
         return;
 
@@ -11965,9 +11993,10 @@ void Unit::DoPetAction( Player* owner, uint8 flag, uint32 spellid, ObjectGuid pe
                     }
 
                     // This is true if pet has no target or has target but targets differs.
-                    if (getVictim() != TargetUnit)
+                    Unit* pVictim = getVictim();
+                    if (pVictim != TargetUnit)
                     {
-                        if (getVictim())
+                        if (pVictim)
                         {
                             if (IsNonMeleeSpellCasted(false))
                                 InterruptNonMeleeSpells(false);
@@ -12215,9 +12244,10 @@ void Unit::DoPetCastSpell(Player* owner, uint8 cast_count, SpellCastTargets* tar
         if (unit_target && owner && !owner->IsFriendlyTo(unit_target) && !HasAuraType(SPELL_AURA_MOD_POSSESS))
         {
             // This is true if pet has no target or has target but targets differs.
-            if (getVictim() != unit_target)
+            Unit* pVictim = getVictim();
+            if (pVictim != unit_target)
             {
-                if (getVictim())
+                if (pVictim)
                     AttackStop();
 
                 GetMotionMaster()->Clear();
@@ -12232,9 +12262,9 @@ void Unit::DoPetCastSpell(Player* owner, uint8 cast_count, SpellCastTargets* tar
     else if (pet)
     {
         if (owner)
-            Spell::SendCastResult(owner,spellInfo,0,result, true);
+            Spell::SendCastResult(owner, spellInfo, 0, result, true);
 
-        if (owner && !((Creature*)this)->HasSpellCooldown(spellInfo->Id) && !triggered)
+        if (owner && !HasSpellCooldown(spellInfo) && !triggered)
             owner->SendClearCooldown(spellInfo->Id, pet);
 
         spell->finish(false);

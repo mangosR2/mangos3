@@ -96,8 +96,8 @@ public:
         target->clearUnitState(UNIT_STAT_STUNNED);
         target->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED);
 
-        if(target->getVictim())
-            target->SetTargetGuid(target->getVictim()->GetObjectGuid());
+        if (Unit* pVictim = target->getVictim())
+            target->SetTargetGuid(pVictim->GetObjectGuid());
 
         target->SetRoot(false);
         target->m_movementInfo.RemoveMovementFlag(MOVEFLAG_ROOT);
@@ -122,8 +122,8 @@ public:
         target->addUnitState(UNIT_STAT_ROOT);
         target->SetTargetGuid(ObjectGuid());
         //Save last orientation
-        if(target->getVictim())
-            target->SetOrientation(target->GetAngle(target->getVictim()));
+        if (Unit* pVictim = target->getVictim())
+            target->SetOrientation(target->GetAngle(pVictim));
 
         //Clear unit movement flags
         target->m_movementInfo.RemoveMovementFlag(movementFlagsMask);
@@ -142,8 +142,8 @@ public:
         target->SetRoot(false);
         target->m_movementInfo.RemoveMovementFlag(MOVEFLAG_ROOT);
 
-        if(target->getVictim())
-            target->SetTargetGuid(target->getVictim()->GetObjectGuid());
+        if (Unit* pVictim = target->getVictim())
+            target->SetTargetGuid(pVictim->GetObjectGuid());
         target->AddEvent(new AttackResumeEvent(*target), ATTACK_DISPLAY_DELAY);
     }
 };

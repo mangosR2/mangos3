@@ -3728,8 +3728,11 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                     }
                     else
                     {
-                        if (target->getVictim() && target->isAlive())
-                            target->SetTargetGuid(target->getVictim()->GetObjectGuid());
+                        if (target->isAlive())
+                        {
+                            if (Unit* pVictim = target->getVictim())
+                                target->SetTargetGuid(pVictim->GetObjectGuid());
+                        }
                         target->clearUnitState(UNIT_STAT_STUNNED);
                         target->RemoveAurasDueToSpell(16245);
                     }
@@ -5381,8 +5384,11 @@ void Aura::HandleAuraModStun(bool apply, bool Real)
 
         if (!target->hasUnitState(UNIT_STAT_ROOT | UNIT_STAT_ON_VEHICLE))       // prevent allow move if have also root effect
         {
-            if (target->getVictim() && target->isAlive())
-                target->SetTargetGuid(target->getVictim()->GetObjectGuid());
+            if (target->isAlive())
+            {
+                if (Unit* pVictim = target->getVictim())
+                    target->SetTargetGuid(pVictim->GetObjectGuid());
+            }
 
             target->SetRoot(false);
         }
@@ -10004,7 +10010,7 @@ void Aura::PeriodicDummyTick()
             // Prey on the Weak
             if (spell->GetSpellIconID() == 2983)
             {
-                Unit *victim = target->getVictim();
+                Unit* victim = target->getVictim();
                 if (victim && (target->GetHealth() * 100 / target->GetMaxHealth() > victim->GetHealth() * 100 / victim->GetMaxHealth()))
                 {
                     if (!target->HasAura(58670))
