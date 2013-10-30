@@ -1695,20 +1695,25 @@ void Unit::CalculateSpellDamage(DamageInfo* damageInfo, float DamageMultiplier)
             return;
     }
 
-    // Resilience - reduce regular damage (full or reduced)
-    uint32 reduction_affected_damage = sWorld.getConfig(CONFIG_BOOL_RESILENCE_ALTERNATIVE_CALCULATION) ?
-                                       damageInfo->damage :
-                                       CalcNotIgnoreDamageReduction(damageInfo);
-    damageInfo->damage -= damageInfo->target->GetSpellDamageReduction(reduction_affected_damage);
-
     // damage mitigation
     if (damageInfo->damage > 0)
     {
         // physical damage => armor
-        if ((damageInfo->GetSchoolMask() & SPELL_SCHOOL_MASK_NORMAL) && !damageInfo->GetSpellProto()->HasAttribute(SPELL_ATTR_EX3_CANT_MISS))
+        if (!spellInfo->HasAttribute(SPELL_ATTR_EX3_CANT_MISS) && IsDamageReducedByArmor(damageInfo->GetSchoolMask(), spellInfo))
         {
             uint32 armor_affected_damage = CalcNotIgnoreDamageReduction(damageInfo);
             damageInfo->damage = damageInfo->damage - armor_affected_damage + CalcArmorReducedDamage(damageInfo->target, armor_affected_damage);
+        }
+
+        // only for players and their pets
+        if (damageInfo->damage > 0 && GetTypeId() == TYPEID_PLAYER || (GetObjectGuid().IsPet() && GetOwner() && GetOwner()->GetTypeId() == TYPEID_PLAYER))
+        {
+            // Resilience - reduce regular damage (full or reduced)
+            uint32 reduction_affected_damage = sWorld.getConfig(CONFIG_BOOL_RESILENCE_ALTERNATIVE_CALCULATION)
+                ? damageInfo->damage
+                : CalcNotIgnoreDamageReduction(damageInfo);
+
+            damageInfo->damage -= damageInfo->target->GetSpellDamageReduction(reduction_affected_damage);
         }
     }
     else
@@ -1799,10 +1804,13 @@ void Unit::CalculateMeleeDamage(DamageInfo* damageInfo)
     pVictim->MeleeDamageBonusTaken(damageInfo);
 
     // Calculate armor reduction
-    uint32 armor_affected_damage = CalcNotIgnoreDamageReduction(damageInfo);
-    uint32 armor_reduced_damage  = damageInfo->damage - armor_affected_damage + CalcArmorReducedDamage(damageInfo->target, armor_affected_damage);
-    damageInfo->cleanDamage     += damageInfo->damage - armor_reduced_damage;
-    damageInfo->damage           = armor_reduced_damage;
+    if (IsDamageReducedByArmor(damageInfo->GetSchoolMask()))
+    {
+        uint32 armor_affected_damage = CalcNotIgnoreDamageReduction(damageInfo);
+        uint32 armor_reduced_damage  = damageInfo->damage - armor_affected_damage + CalcArmorReducedDamage(damageInfo->target, armor_affected_damage);
+        damageInfo->cleanDamage     += damageInfo->damage - armor_reduced_damage;
+        damageInfo->damage           = armor_reduced_damage;
+    }
 
     damageInfo->hitOutCome = RollMeleeOutcomeAgainst(damageInfo->target, damageInfo->attackType);
 
@@ -2165,6 +2173,75 @@ uint32 Unit::CalcNotIgnoreDamageReduction(DamageInfo* damageInfo)
             absorb_affected_rate *= (100.0f - (*i)->GetModifier()->m_amount)/100.0f;
 
     return absorb_affected_rate <= M_NULL_F ? 0 : (absorb_affected_rate < 1.0f  ? floor((float)damageInfo->damage * absorb_affected_rate) : damageInfo->damage);
+}
+
+bool Unit::IsDamageReducedByArmor(SpellSchoolMask schoolMask, SpellEntry const* spellProto /*=NULL*/, SpellEffectIndex effIndex /*=MAX_EFFECT_INDEX*/)
+{
+    // only physical spells damage gets reduced by armor
+    if (!(schoolMask & SPELL_SCHOOL_MASK_NORMAL))
+        return false;
+
+    if (!spellProto)
+        return true;
+
+    // there are spells with no specific attribute but they have "ignores armor" in tooltip
+    switch (spellProto->Id)
+    {
+        case 18500: // Wing Buffet
+        case 33086: // Wild Bite
+        case 49749: // Piercing Blow
+        case 52890: // Penetrating Strike
+        case 53454: // Impale
+        case 59446: // Impale
+        case 62383: // Shatter
+        case 64777: // Machine Gun
+        case 65239: // Machine Gun
+        case 65919: // Impale
+        case 67858: // Impale
+        case 67859: // Impale
+        case 67860: // Impale
+        case 69293: // Wing Buffet
+        case 74439: // Machine Gun
+        case 63278: // Mark of the Faceless (General Vezax)
+        case 62544: // Thrust (Argent Tournament)
+        case 64588: // Thrust (Argent Tournament)
+        case 66479: // Thrust (Argent Tournament)
+        case 68505: // Thrust (Argent Tournament)
+        case 62709: // Counterattack! (Argent Tournament)
+        case 62626: // Break-Shield (Argent Tournament, Player)
+        case 64590: // Break-Shield (Argent Tournament, Player)
+        case 64342: // Break-Shield (Argent Tournament, NPC)
+        case 64686: // Break-Shield (Argent Tournament, NPC)
+        case 65147: // Break-Shield (Argent Tournament, NPC)
+        case 68504: // Break-Shield (Argent Tournament, NPC)
+        case 62874: // Charge (Argent Tournament, Player)
+        case 68498: // Charge (Argent Tournament, Player)
+        case 64591: // Charge (Argent Tournament, Player)
+        case 63003: // Charge (Argent Tournament, NPC)
+        case 63010: // Charge (Argent Tournament, NPC)
+        case 68321: // Charge (Argent Tournament, NPC)
+        case 72255: // Mark of the Fallen Champion (Deathbringer Saurfang)
+        case 72444: // Mark of the Fallen Champion (Deathbringer Saurfang)
+        case 72445: // Mark of the Fallen Champion (Deathbringer Saurfang)
+        case 72446: // Mark of the Fallen Champion (Deathbringer Saurfang)
+        case 64422: // Sonic Screech (Auriaya)
+            return false;
+        default:
+            break;
+    }
+
+    // bleeding effects are not reduced by armor
+    if (effIndex < MAX_EFFECT_INDEX)
+    {
+        if (spellProto->EffectApplyAuraName[effIndex] == SPELL_AURA_PERIODIC_DAMAGE ||
+            spellProto->Effect[effIndex] == SPELL_EFFECT_SCHOOL_DAMAGE)
+        {
+            if (GetEffectMechanic(spellProto, effIndex) == MECHANIC_BLEED)
+                return false;
+        }
+    }
+
+    return true;
 }
 
 uint32 Unit::CalcArmorReducedDamage(Unit* pVictim, const uint32 damage)
