@@ -2578,7 +2578,7 @@ void Creature::SetWalk(bool enable, bool asDefault)
     else
         m_movementInfo.RemoveMovementFlag(MOVEFLAG_WALK_MODE);
 
-    WorldPacket data(enable ? SMSG_SPLINE_MOVE_SET_WALK_MODE : SMSG_SPLINE_MOVE_SET_RUN_MODE, 9);
+    WorldPacket data(enable ? SMSG_SPLINE_MOVE_SET_WALK_MODE : SMSG_SPLINE_MOVE_SET_RUN_MODE, GetPackGUID().size());
     data << GetPackGUID();
     SendMessageToSet(&data, true);
 }
@@ -2596,7 +2596,7 @@ void Creature::SetLevitate(bool enable, float altitude)
         SetFloatValue(UNIT_FIELD_HOVERHEIGHT, 0.0f);
     }
 
-    WorldPacket data(enable ? SMSG_SPLINE_MOVE_GRAVITY_DISABLE : SMSG_SPLINE_MOVE_GRAVITY_ENABLE, 9);
+    WorldPacket data(enable ? SMSG_SPLINE_MOVE_GRAVITY_DISABLE : SMSG_SPLINE_MOVE_GRAVITY_ENABLE, GetPackGUID().size());
     data << GetPackGUID();
     SendMessageToSet(&data, true);
 }
@@ -2707,7 +2707,7 @@ void Creature::SetRoot(bool enable)
     else
         m_movementInfo.RemoveMovementFlag(MOVEFLAG_ROOT);
 
-    WorldPacket data(enable ? SMSG_SPLINE_MOVE_ROOT : SMSG_SPLINE_MOVE_UNROOT, 8);
+    WorldPacket data(enable ? SMSG_SPLINE_MOVE_ROOT : SMSG_SPLINE_MOVE_UNROOT, GetPackGUID().size());
     data << GetPackGUID();
     SendMessageToSet(&data, true);
 }
@@ -2719,7 +2719,7 @@ void Creature::SetWaterWalk(bool enable)
     else
         m_movementInfo.RemoveMovementFlag(MOVEFLAG_WATERWALKING);
 
-    WorldPacket data(enable ? SMSG_SPLINE_MOVE_WATER_WALK : SMSG_SPLINE_MOVE_LAND_WALK, 8);
+    WorldPacket data(enable ? SMSG_SPLINE_MOVE_WATER_WALK : SMSG_SPLINE_MOVE_LAND_WALK, GetPackGUID().size());
     data << GetPackGUID();
     SendMessageToSet(&data, true);
 }

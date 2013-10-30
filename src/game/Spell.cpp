@@ -4567,7 +4567,7 @@ void Spell::SendSpellStart()
 
     Unit *caster = m_triggeredByAuraSpell && IsChanneledSpell(m_triggeredByAuraSpell) ? GetAffectiveCaster() : m_caster;
 
-    WorldPacket data(SMSG_SPELL_START, (8+8+4+4+2));
+    WorldPacket data(SMSG_SPELL_START, 9 + caster->GetPackGUID().size() + 1 + 4 + 4 + 4 + 4 + 1 + 1 + 9 + 4 + 4 + 4);
     if (m_CastItem)
         data << m_CastItem->GetPackGUID();
     else
@@ -4852,7 +4852,7 @@ void Spell::SendLogExecute()
 
     Unit *target = m_targets.getUnitTarget() ? m_targets.getUnitTarget() : m_caster;
 
-    WorldPacket data(SMSG_SPELLLOGEXECUTE, (8+4+4+4+4+8));
+    WorldPacket data(SMSG_SPELLLOGEXECUTE, 9 + 4 + 4 + 4 + 4 + 8);
 
     if (m_caster->GetTypeId() == TYPEID_PLAYER)
         data << m_caster->GetPackGUID();
@@ -4970,7 +4970,7 @@ void Spell::SendInterrupted(uint8 result)
     if (!m_caster || !m_caster->IsInWorld())
         return;
 
-    WorldPacket data(SMSG_SPELL_FAILURE, 8 + 1 + 4 + 1);
+    WorldPacket data(SMSG_SPELL_FAILURE, m_caster->GetPackGUID().size() + 1 + 4 + 1);
     data << m_caster->GetPackGUID();
     data << uint8(m_cast_count);
     data << uint32(m_spellInfo->Id);
@@ -5038,7 +5038,7 @@ void Spell::SendChannelUpdate(uint32 time)
         m_caster->SetUInt32Value(UNIT_CHANNEL_SPELL, 0);
     }
 
-    WorldPacket data( MSG_CHANNEL_UPDATE, 8+4 );
+    WorldPacket data(MSG_CHANNEL_UPDATE, m_caster->GetPackGUID().size() + 4);
     data << m_caster->GetPackGUID();
     data << uint32(time);
     m_caster->SendMessageToSet(&data, true);
@@ -5076,7 +5076,7 @@ void Spell::SendChannelStart(uint32 duration)
         }
     }
 
-    WorldPacket data( MSG_CHANNEL_START, (8+4+4) );
+    WorldPacket data(MSG_CHANNEL_START, m_caster->GetPackGUID().size() + 4 + 4);
     data << m_caster->GetPackGUID();
     data << uint32(m_spellInfo->Id);
     data << uint32(duration);
@@ -8049,7 +8049,7 @@ void Spell::Delayed()
 
     DETAIL_FILTER_LOG(LOG_FILTER_SPELL_CAST, "Spell %u partially interrupted for (%d) ms at damage", m_spellInfo->Id, delaytime);
 
-    WorldPacket data(SMSG_SPELL_DELAYED, 8+4);
+    WorldPacket data(SMSG_SPELL_DELAYED, m_caster->GetPackGUID().size() + 4);
     data << m_caster->GetPackGUID();
     data << uint32(delaytime);
 

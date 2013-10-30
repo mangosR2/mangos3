@@ -7122,7 +7122,7 @@ void Spell::EffectDispel(SpellEffectIndex eff_idx)
         if (!success_list.empty())
         {
             int32 count = success_list.size();
-            WorldPacket data(SMSG_SPELLDISPELLOG, 8+8+4+1+4+count*5);
+            WorldPacket data(SMSG_SPELLDISPELLOG, unitTarget->GetPackGUID().size() + m_caster->GetPackGUID().size() + 4 + 1 + 4 + count * 5);
             data << unitTarget->GetPackGUID();              // Victim GUID
             data << m_caster->GetPackGUID();                // Caster GUID
             data << uint32(m_spellInfo->Id);                // Dispel spell id
@@ -13448,7 +13448,7 @@ void Spell::EffectStealBeneficialBuff(SpellEffectIndex eff_idx)
         if (!success_list.empty())
         {
             int32 count = success_list.size();
-            WorldPacket data(SMSG_SPELLSTEALLOG, 8+8+4+1+4+count*5);
+            WorldPacket data(SMSG_SPELLSTEALLOG, unitTarget->GetPackGUID().size() + m_caster->GetPackGUID().size() + 4 + 1 + 4 + count * 5);
             data << unitTarget->GetPackGUID();       // Victim GUID
             data << m_caster->GetPackGUID();         // Caster GUID
             data << uint32(m_spellInfo->Id);         // Dispell spell id

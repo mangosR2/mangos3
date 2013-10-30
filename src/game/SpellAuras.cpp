@@ -4055,11 +4055,7 @@ void Aura::HandleAuraFeatherFall(bool apply, bool Real)
     if (!apply && target->HasAuraType(SPELL_AURA_FEATHER_FALL))
         return;
 
-    WorldPacket data;
-    if (apply)
-        data.Initialize(SMSG_MOVE_FEATHER_FALL, 8+4);
-    else
-        data.Initialize(SMSG_MOVE_NORMAL_FALL, 8+4);
+    WorldPacket data(apply ? SMSG_MOVE_FEATHER_FALL : SMSG_MOVE_NORMAL_FALL, target->GetPackGUID().size() + 4);
     data << target->GetPackGUID();
     data << uint32(0);
     target->SendMessageToSet(&data, true);
@@ -4091,7 +4087,7 @@ void Aura::HandleAuraFeatherFall(bool apply, bool Real)
 void Aura::HandleAuraHover(bool apply, bool Real)
 {
     // only at real add/remove aura
-    if(!Real)
+    if (!Real)
         return;
 
     // do not remove unit flag if there are more than this auraEffect of that kind on unit on unit
@@ -4102,24 +4098,20 @@ void Aura::HandleAuraHover(bool apply, bool Real)
     if (apply)
     {
         GetTarget()->m_movementInfo.AddMovementFlag(MOVEFLAG_HOVER);
-        data.Initialize(GetTarget()->GetTypeId() == TYPEID_PLAYER ? SMSG_MOVE_SET_HOVER : SMSG_SPLINE_MOVE_SET_HOVER, 8+4);
+        data.Initialize(GetTarget()->GetTypeId() == TYPEID_PLAYER ? SMSG_MOVE_SET_HOVER : SMSG_SPLINE_MOVE_SET_HOVER, GetTarget()->GetPackGUID().size() + 4);
         data << GetTarget()->GetPackGUID();
         if (GetTarget()->GetTypeId() == TYPEID_PLAYER)
-        {
             data << uint32(0);
-        }
         else
             GetTarget()->SetByteValue(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_HOVER);
     }
     else
     {
         GetTarget()->m_movementInfo.RemoveMovementFlag(MOVEFLAG_HOVER);
-        data.Initialize(GetTarget()->GetTypeId() == TYPEID_PLAYER ? SMSG_MOVE_UNSET_HOVER : SMSG_SPLINE_MOVE_UNSET_HOVER, 8+4);
+        data.Initialize(GetTarget()->GetTypeId() == TYPEID_PLAYER ? SMSG_MOVE_UNSET_HOVER : SMSG_SPLINE_MOVE_UNSET_HOVER, GetTarget()->GetPackGUID().size() + 4);
         data << GetTarget()->GetPackGUID();
         if (GetTarget()->GetTypeId() == TYPEID_PLAYER)
-        {
             data << uint32(0);
-        }
         else
             GetTarget()->RemoveByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_HOVER);
     }

@@ -20635,7 +20635,7 @@ void Player::SendComboPoints(ObjectGuid targetGuid, uint8 combopoints)
     Unit* combotarget = GetMap()->GetUnit(targetGuid);
     if (combotarget)
     {
-        WorldPacket data(SMSG_UPDATE_COMBO_POINTS, combotarget->GetPackGUID().size()+1);
+        WorldPacket data(SMSG_UPDATE_COMBO_POINTS, combotarget->GetPackGUID().size() + 1);
         data << combotarget->GetPackGUID();
         data << uint8(combopoints);
         GetSession()->SendPacket(&data);
@@ -20654,7 +20654,7 @@ void Player::SendPetComboPoints(Unit* pet, ObjectGuid targetGuid, uint8 combopoi
     Unit* combotarget = pet ? pet->GetMap()->GetUnit(targetGuid) : NULL;
     if (pet && combotarget)
     {
-        WorldPacket data(SMSG_PET_UPDATE_COMBO_POINTS, combotarget->GetPackGUID().size() + pet->GetPackGUID().size() + 1);
+        WorldPacket data(SMSG_PET_UPDATE_COMBO_POINTS, pet->GetPackGUID().size() + combotarget->GetPackGUID().size() + 1);
         data << pet->GetPackGUID();
         data << combotarget->GetPackGUID();
         data << uint8(combopoints);
@@ -25051,7 +25051,7 @@ void Player::SetViewPoint(WorldObject* target, bool immediate, bool update_far_s
         {
             if (((Unit*)target)->IsLevitating() || (target->GetObjectGuid().IsPlayer() && ((Player*)target)->IsFlying()))
             {
-                WorldPacket data(SMSG_MOVE_SET_CAN_FLY, 8 + 4);
+                WorldPacket data(SMSG_MOVE_SET_CAN_FLY, target->GetPackGUID().size() + 4);
                 data << target->GetPackGUID();
                 data << uint32(0);
                 target->SendMessageToSet(&data, false);

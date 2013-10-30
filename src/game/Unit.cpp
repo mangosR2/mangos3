@@ -3335,7 +3335,7 @@ void Unit::SendMeleeAttackStart(Unit* pVictim)
 
 void Unit::SendMeleeAttackStop(Unit* victim)
 {
-    WorldPacket data(SMSG_ATTACKSTOP, (8+8+4));                                        // we guess size
+    WorldPacket data(SMSG_ATTACKSTOP, GetPackGUID().size() + 9 + 4);                                        // we guess size
     data << GetPackGUID();
     data << (victim ? victim->GetPackGUID() : PackedGuid());                           // can be 0x00...
     data << uint32(0);                                                                 // can be 0x1
@@ -6607,7 +6607,7 @@ void Unit::SendSpellNonMeleeDamageLog(DamageInfo *log)
     uint32 targetHealth = log->target->GetHealth();
     uint32 overkill = log->damage > targetHealth ? log->damage - targetHealth : 0;
 
-    WorldPacket data(SMSG_SPELLNONMELEEDAMAGELOG, (16+4+4+4+1+4+4+1+1+4+4+1)); // we guess size
+    WorldPacket data(SMSG_SPELLNONMELEEDAMAGELOG, (9+9+4+4+4+1+4+4+1+1+4+4+1)); // we guess size
     data << log->target->GetPackGUID();
     data << log->attacker->GetPackGUID();
     data << uint32(log->GetSpellId());
@@ -7889,10 +7889,10 @@ Unit* Unit::SelectMagnetTarget(Unit *victim, Spell* spell, SpellEffectIndex eff)
     return victim;
 }
 
-void Unit::SendHealSpellLog(Unit *pVictim, uint32 SpellID, uint32 Damage, uint32 OverHeal, bool critical, uint32 absorb)
+void Unit::SendHealSpellLog(Unit* pVictim, uint32 SpellID, uint32 Damage, uint32 OverHeal, bool critical, uint32 absorb)
 {
     // we guess size
-    WorldPacket data(SMSG_SPELLHEALLOG, (8+8+4+4+1));
+    WorldPacket data(SMSG_SPELLHEALLOG, pVictim->GetPackGUID().size() + GetPackGUID().size() + 4 + 4 + 4 + 4 + 1 + 1);
     data << pVictim->GetPackGUID();
     data << GetPackGUID();
     data << uint32(SpellID);
@@ -7904,9 +7904,9 @@ void Unit::SendHealSpellLog(Unit *pVictim, uint32 SpellID, uint32 Damage, uint32
     SendMessageToSet(&data, true);
 }
 
-void Unit::SendEnergizeSpellLog(Unit *pVictim, uint32 SpellID, uint32 Damage, Powers powertype)
+void Unit::SendEnergizeSpellLog(Unit* pVictim, uint32 SpellID, uint32 Damage, Powers powertype)
 {
-    WorldPacket data(SMSG_SPELLENERGIZELOG, (8+8+4+4+4+1));
+    WorldPacket data(SMSG_SPELLENERGIZELOG, pVictim->GetPackGUID().size() + GetPackGUID().size() + 4 + 4 + 4);
     data << pVictim->GetPackGUID();
     data << GetPackGUID();
     data << uint32(SpellID);
@@ -9766,7 +9766,7 @@ void Unit::Unmount(bool from_aura)
     // Called NOT by Taxi system / GM command
     if (from_aura)
     {
-        WorldPacket data(SMSG_DISMOUNT, 8);
+        WorldPacket data(SMSG_DISMOUNT, GetPackGUID().size());
         data << GetPackGUID();
         SendMessageToSet(&data, true);
     }
@@ -10483,7 +10483,7 @@ void Unit::SetSpeedRate(UnitMoveType mtype, float rate, bool forced)
             // and do it only for real sent packets and use run for run/mounted as client expected
             ++((Player*)this)->m_forced_speed_changes[mtype];
 
-            WorldPacket data(SetSpeed2Opc_table[mtype][1], 18);
+            WorldPacket data(SetSpeed2Opc_table[mtype][1], GetPackGUID().size() + 4 + 1 + 4);
             data << GetPackGUID();
             data << (uint32)0;                                  // moveEvent, NUM_PMOVE_EVTS = 0x39
             if (mtype == MOVE_RUN)
@@ -11489,7 +11489,7 @@ void Unit::SetPower(Powers power, uint32 val)
 
     SetStatInt32Value(UNIT_FIELD_POWER1 + power, val);
 
-    WorldPacket data(SMSG_POWER_UPDATE);
+    WorldPacket data(SMSG_POWER_UPDATE, GetPackGUID().size() + 1 + 4);
     data << GetPackGUID();
     data << uint8(power);
     data << uint32(val);
@@ -13592,7 +13592,7 @@ void Unit::_EnterVehicle(VehicleKitPtr vehicle, int8 seatId)
         WorldPacket data(SMSG_ON_CANCEL_EXPECTED_RIDE_VEHICLE_AURA);
         player->GetSession()->SendPacket(&data);
 
-        data.Initialize(SMSG_BREAK_TARGET, 8);
+        data.Initialize(SMSG_BREAK_TARGET, GetVehicle()->GetBase()->GetPackGUID().size());
         data << GetVehicle()->GetBase()->GetPackGUID();
         player->GetSession()->SendPacket(&data);
     }
@@ -13755,7 +13755,7 @@ void Unit::SendThreatUpdate()
     if (uint32 count = tlist.size())
     {
         DEBUG_FILTER_LOG(LOG_FILTER_COMBAT, "WORLD: Send SMSG_THREAT_UPDATE Message");
-        WorldPacket data(SMSG_THREAT_UPDATE, 8 + count * 8);
+        WorldPacket data(SMSG_THREAT_UPDATE, GetPackGUID().size() + count * 8);
         data << GetPackGUID();
         data << uint32(count);
         for (ThreatList::const_iterator itr = tlist.begin(); itr != tlist.end(); ++itr)
@@ -13773,7 +13773,7 @@ void Unit::SendHighestThreatUpdate(HostileReference* pHostilReference)
     if (uint32 count = tlist.size())
     {
         DEBUG_FILTER_LOG(LOG_FILTER_COMBAT, "WORLD: Send SMSG_HIGHEST_THREAT_UPDATE Message");
-        WorldPacket data(SMSG_HIGHEST_THREAT_UPDATE, 8 + 8 + count * 8);
+        WorldPacket data(SMSG_HIGHEST_THREAT_UPDATE, GetPackGUID().size() + 9 + 4 + count * 8);
         data << GetPackGUID();
         data << pHostilReference->getUnitGuid().WriteAsPacked();
         data << uint32(count);
@@ -13789,7 +13789,7 @@ void Unit::SendHighestThreatUpdate(HostileReference* pHostilReference)
 void Unit::SendThreatClear()
 {
     DEBUG_FILTER_LOG(LOG_FILTER_COMBAT, "WORLD: Send SMSG_THREAT_CLEAR Message");
-    WorldPacket data(SMSG_THREAT_CLEAR, 8);
+    WorldPacket data(SMSG_THREAT_CLEAR, GetPackGUID().size());
     data << GetPackGUID();
     SendMessageToSet(&data, false);
 }
@@ -13797,7 +13797,7 @@ void Unit::SendThreatClear()
 void Unit::SendThreatRemove(HostileReference* pHostileReference)
 {
     DEBUG_FILTER_LOG(LOG_FILTER_COMBAT, "WORLD: Send SMSG_THREAT_REMOVE Message");
-    WorldPacket data(SMSG_THREAT_REMOVE, 8 + 8);
+    WorldPacket data(SMSG_THREAT_REMOVE, GetPackGUID().size() + 8);
     data << GetPackGUID();
     data << pHostileReference->getUnitGuid().WriteAsPacked();
     SendMessageToSet(&data, false);
@@ -14053,7 +14053,7 @@ void Unit::SetVehicleId(uint32 entry)
 
     if (GetTypeId() == TYPEID_PLAYER)
     {
-        WorldPacket data(SMSG_SET_VEHICLE_REC_ID, 16);
+        WorldPacket data(SMSG_SET_VEHICLE_REC_ID, GetPackGUID().size() + 4);
         data << GetPackGUID();
         data << uint32(entry);
         SendMessageToSet(&data, true);
