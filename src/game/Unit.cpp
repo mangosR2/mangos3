@@ -1651,7 +1651,7 @@ void Unit::CalculateSpellDamage(DamageInfo* damageInfo, float DamageMultiplier)
                 if (applyResilience)
                 {
                     // Resilience - reduce crit damage (full or reduced)
-                    uint32 reduction_affected_damage = sWorld.getConfig(CONFIG_BOOL_RESILENCE_ALTERNATIVE_CALCULATION)
+                    uint32 reduction_affected_damage = sWorld.getConfig(CONFIG_BOOL_RESILIENCE_ALTERNATIVE_CALCULATION)
                         ? damageInfo->damage
                         : CalcNotIgnoreDamageReduction(damageInfo);
 
@@ -1683,7 +1683,7 @@ void Unit::CalculateSpellDamage(DamageInfo* damageInfo, float DamageMultiplier)
                 if (applyResilience)
                 {
                     // Resilience - reduce crit damage (full or reduced)
-                    uint32 reduction_affected_damage = sWorld.getConfig(CONFIG_BOOL_RESILENCE_ALTERNATIVE_CALCULATION)
+                    uint32 reduction_affected_damage = sWorld.getConfig(CONFIG_BOOL_RESILIENCE_ALTERNATIVE_CALCULATION)
                         ? damageInfo->damage
                         : CalcNotIgnoreDamageReduction(damageInfo);
 
@@ -1710,7 +1710,7 @@ void Unit::CalculateSpellDamage(DamageInfo* damageInfo, float DamageMultiplier)
         if (int32(damageInfo->damage) > 0 && applyResilience)
         {
             // Resilience - reduce regular damage (full or reduced)
-            uint32 reduction_affected_damage = sWorld.getConfig(CONFIG_BOOL_RESILENCE_ALTERNATIVE_CALCULATION)
+            uint32 reduction_affected_damage = sWorld.getConfig(CONFIG_BOOL_RESILIENCE_ALTERNATIVE_CALCULATION)
                 ? damageInfo->damage
                 : CalcNotIgnoreDamageReduction(damageInfo);
 
@@ -2001,7 +2001,7 @@ void Unit::CalculateMeleeDamage(DamageInfo* damageInfo)
     if (int32(damageInfo->damage) > 0 && IsCharmerOrOwnerPlayerOrPlayerItself())
     {
         // Resilience - reduce regular damage (full or reduced)
-        uint32 reduction_affected_damage = sWorld.getConfig(CONFIG_BOOL_RESILENCE_ALTERNATIVE_CALCULATION)
+        uint32 reduction_affected_damage = sWorld.getConfig(CONFIG_BOOL_RESILIENCE_ALTERNATIVE_CALCULATION)
             ? damageInfo->damage
             : CalcNotIgnoreDamageReduction(damageInfo);
 

@@ -1046,8 +1046,8 @@ LexicsCutterNoActionOnGM = 1
 #        min:     0.0  (default mangos method)
 #        max:     1.0  (full CrowdControl, auras like Fear not breaked by damage anyway)
 #
-#    ResilenceAlternativeCalculation
-#        enable/disable alternative resilence damage reduction calculation (for Avenger/Sanctified wrath mostly)
+#    ResilienceAlternativeCalculation
+#        enable/disable alternative resilience damage reduction calculation (for Avenger/Sanctified wrath mostly)
 #        Default: 0     (disable, default mangos style)
 #
 #    BlinkAnimationType
@@ -1158,7 +1158,7 @@ Motd = "Welcome to the Massive Network Game Object Server."
 Raid.MinLevel = 10
 CrowdControlHPBase = 0.1
 AllowTransferToCustomMap = 0
-ResilenceAlternativeCalculation = 0
+ResilienceAlternativeCalculation = 0
 BlinkAnimationType = 0
 FactiomAndRaceChangeWithoutRenaming = 0
 Resistance.CalculationMethod = 1
