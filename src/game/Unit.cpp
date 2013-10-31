@@ -1616,48 +1616,51 @@ uint32 Unit::SpellNonMeleeDamageLog(Unit* pVictim, uint32 spellID, uint32 damage
 
 void Unit::CalculateSpellDamage(DamageInfo* damageInfo, float DamageMultiplier)
 {
-    if (!damageInfo || damageInfo->damage < 0)
+    if (!damageInfo || int32(damageInfo->damage) < 0)
         return;
 
     if (!damageInfo->target || !isAlive() || !damageInfo->target->isAlive())
         return;
 
     // Check spell crit chance
-    bool crit = IsSpellCrit(damageInfo->target, damageInfo->GetSpellProto(), damageInfo->GetSchoolMask(), damageInfo->attackType);
+    bool isCrit = IsSpellCrit(damageInfo->target, damageInfo->GetSpellProto(), damageInfo->GetSchoolMask(), damageInfo->attackType);
+    isCrit ? damageInfo->HitInfo |= SPELL_HIT_TYPE_CRIT : damageInfo->HitInfo &= ~SPELL_HIT_TYPE_CRIT;
 
-    // damage bonus (per damage class)
+    // Only from players and their pets
+    bool applyResilience = IsCharmerOrOwnerPlayerOrPlayerItself();
+
+    // Damage bonus (per damage class)
     switch (damageInfo->GetSpellProto()->DmgClass)
     {
         // Melee and Ranged Spells
         case SPELL_DAMAGE_CLASS_RANGED:
         case SPELL_DAMAGE_CLASS_MELEE:
         {
-            //Calculate damage bonus
+            // Calculate damage bonus
             MeleeDamageBonusDone(damageInfo);
             if (fabs(DamageMultiplier - 1.0f) > M_NULL_F)
-                damageInfo->damage = floor((float)damageInfo->damage * DamageMultiplier);
+                damageInfo->damage = floor(float(damageInfo->damage) * DamageMultiplier);
 
             damageInfo->target->MeleeDamageBonusTaken(damageInfo);
 
-            // if crit add critical bonus
-            if (crit)
+            // If crit add critical bonus
+            if (isCrit)
             {
-                damageInfo->HitInfo |=  SPELL_HIT_TYPE_CRIT;
                 damageInfo->damage = SpellCriticalDamageBonus(damageInfo->GetSpellProto(), damageInfo->damage, damageInfo->target);
 
-                // Resilience - reduce crit damage (full or reduced)
-                uint32 reduction_affected_damage = sWorld.getConfig(CONFIG_BOOL_RESILENCE_ALTERNATIVE_CALCULATION) ?
-                                                   damageInfo->damage :
-                                                   CalcNotIgnoreDamageReduction(damageInfo);
-                uint32 damageCritReduction = (damageInfo->attackType != RANGED_ATTACK) ?
-                                                damageInfo->target->GetMeleeCritDamageReduction(reduction_affected_damage) :
-                                                damageInfo->target->GetRangedCritDamageReduction(reduction_affected_damage);
+                if (applyResilience)
+                {
+                    // Resilience - reduce crit damage (full or reduced)
+                    uint32 reduction_affected_damage = sWorld.getConfig(CONFIG_BOOL_RESILENCE_ALTERNATIVE_CALCULATION)
+                        ? damageInfo->damage
+                        : CalcNotIgnoreDamageReduction(damageInfo);
 
-                damageInfo->damage -= damageCritReduction;
-            }
-            else
-            {
-                damageInfo->HitInfo &= ~SPELL_HIT_TYPE_CRIT;
+                    uint32 damageCritReduction = (damageInfo->attackType != RANGED_ATTACK)
+                        ? damageInfo->target->GetMeleeCritDamageReduction(reduction_affected_damage)
+                        : damageInfo->target->GetRangedCritDamageReduction(reduction_affected_damage);
+
+                    damageInfo->damage -= damageCritReduction;
+                }
             }
             break;
         }
@@ -1668,35 +1671,34 @@ void Unit::CalculateSpellDamage(DamageInfo* damageInfo, float DamageMultiplier)
             // Calculate damage bonus
             SpellDamageBonusDone(damageInfo);
             if (fabs(DamageMultiplier - 1.0f) > M_NULL_F)
-                damageInfo->damage = floor((float)damageInfo->damage * DamageMultiplier);
+                damageInfo->damage = floor(float(damageInfo->damage) * DamageMultiplier);
+
             damageInfo->target->SpellDamageBonusTaken(damageInfo);
 
             // If crit add critical bonus
-            if (crit)
+            if (isCrit)
             {
-                damageInfo->HitInfo |= SPELL_HIT_TYPE_CRIT;
                 damageInfo->damage = SpellCriticalDamageBonus(damageInfo->GetSpellProto(), damageInfo->damage, damageInfo->target);
 
-                // Resilience - reduce crit damage (full or reduced)
-                uint32 reduction_affected_damage = sWorld.getConfig(CONFIG_BOOL_RESILENCE_ALTERNATIVE_CALCULATION) ?
-                                                   damageInfo->damage :
-                                                   CalcNotIgnoreDamageReduction(damageInfo);
+                if (applyResilience)
+                {
+                    // Resilience - reduce crit damage (full or reduced)
+                    uint32 reduction_affected_damage = sWorld.getConfig(CONFIG_BOOL_RESILENCE_ALTERNATIVE_CALCULATION)
+                        ? damageInfo->damage
+                        : CalcNotIgnoreDamageReduction(damageInfo);
 
-                damageInfo->damage -= damageInfo->target->GetSpellCritDamageReduction(reduction_affected_damage);
-            }
-            else
-            {
-                damageInfo->HitInfo &= ~SPELL_HIT_TYPE_CRIT;
+                    damageInfo->damage -= damageInfo->target->GetSpellCritDamageReduction(reduction_affected_damage);
+                }
             }
             break;
         }
         default:
-            sLog.outError("Unit::CalculateSpellDamage unknown damage class by caster: %s, spell %u", GetObjectGuid().GetString().c_str(), damageInfo->GetSpellProto()->Id);
+            sLog.outError("Unit::CalculateSpellDamage: Unknown damage class by caster: %s, spell %u", GetGuidStr().c_str(), damageInfo->GetSpellProto()->Id);
             return;
     }
 
     // damage mitigation
-    if (damageInfo->damage > 0)
+    if (int32(damageInfo->damage) > 0)
     {
         // physical damage => armor
         if (!damageInfo->GetSpellProto()->HasAttribute(SPELL_ATTR_EX3_CANT_MISS) && IsDamageReducedByArmor(damageInfo->GetSchoolMask(), damageInfo->GetSpellProto()))
@@ -1705,8 +1707,7 @@ void Unit::CalculateSpellDamage(DamageInfo* damageInfo, float DamageMultiplier)
             damageInfo->damage = damageInfo->damage - armor_affected_damage + CalcArmorReducedDamage(damageInfo->target, armor_affected_damage);
         }
 
-        // only for players and their pets
-        if (damageInfo->damage > 0 && GetTypeId() == TYPEID_PLAYER || (GetObjectGuid().IsPet() && GetOwner() && GetOwner()->GetTypeId() == TYPEID_PLAYER))
+        if (int32(damageInfo->damage) > 0 && applyResilience)
         {
             // Resilience - reduce regular damage (full or reduced)
             uint32 reduction_affected_damage = sWorld.getConfig(CONFIG_BOOL_RESILENCE_ALTERNATIVE_CALCULATION)
@@ -1716,7 +1717,9 @@ void Unit::CalculateSpellDamage(DamageInfo* damageInfo, float DamageMultiplier)
             damageInfo->damage -= damageInfo->target->GetSpellDamageReduction(reduction_affected_damage);
         }
     }
-    else
+
+    // Impossible get negative result but....
+    if (int32(damageInfo->damage) < 0)
         damageInfo->damage = 0;
 }
 
@@ -1994,15 +1997,16 @@ void Unit::CalculateMeleeDamage(DamageInfo* damageInfo)
             break;
     }
 
-    // only from players and their pets
-    if (damageInfo->damage > 0 && (GetTypeId() == TYPEID_PLAYER || (GetObjectGuid().IsPet() && GetOwner() && GetOwner()->GetTypeId() == TYPEID_PLAYER)))
+    // Only from players and their pets
+    if (int32(damageInfo->damage) > 0 && IsCharmerOrOwnerPlayerOrPlayerItself())
     {
+        // Resilience - reduce regular damage
         uint32 reduction_affected_damage = CalcNotIgnoreDamageReduction(damageInfo);
-        uint32 resilienceReduction;
-        if (damageInfo->attackType != RANGED_ATTACK)
-            resilienceReduction = pVictim->GetMeleeDamageReduction(reduction_affected_damage);
-        else
-            resilienceReduction = pVictim->GetRangedDamageReduction(reduction_affected_damage);
+
+        uint32 resilienceReduction = (damageInfo->attackType != RANGED_ATTACK)
+            ? pVictim->GetMeleeDamageReduction(reduction_affected_damage)
+            : pVictim->GetRangedDamageReduction(reduction_affected_damage);
+
         damageInfo->damage      -= resilienceReduction;
         damageInfo->cleanDamage += resilienceReduction;
     }
@@ -2015,9 +2019,10 @@ void Unit::CalculateMeleeDamage(DamageInfo* damageInfo)
 
         // Calculate absorb & resists
         damageInfo->target->CalculateDamageAbsorbAndResist(this, damageInfo, true);
-
     }
-    else // Umpossible get negative result but....
+
+    // Impossible get negative result but....
+    if (int32(damageInfo->damage) < 0)
         damageInfo->damage = 0;
 }
 
