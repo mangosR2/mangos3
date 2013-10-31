@@ -2000,8 +2000,10 @@ void Unit::CalculateMeleeDamage(DamageInfo* damageInfo)
     // Only from players and their pets
     if (int32(damageInfo->damage) > 0 && IsCharmerOrOwnerPlayerOrPlayerItself())
     {
-        // Resilience - reduce regular damage
-        uint32 reduction_affected_damage = CalcNotIgnoreDamageReduction(damageInfo);
+        // Resilience - reduce regular damage (full or reduced)
+        uint32 reduction_affected_damage = sWorld.getConfig(CONFIG_BOOL_RESILENCE_ALTERNATIVE_CALCULATION)
+            ? damageInfo->damage
+            : CalcNotIgnoreDamageReduction(damageInfo);
 
         uint32 resilienceReduction = (damageInfo->attackType != RANGED_ATTACK)
             ? pVictim->GetMeleeDamageReduction(reduction_affected_damage)
