@@ -92,9 +92,8 @@ inline void MaNGOS::ObjectUpdater::Visit(CreatureMapType& m)
             lastUpdateTime > minUpdateTime)
             continue;
 
-        WorldObject::UpdateHelper helper(iter->getSource());
+        WorldObject::UpdateHelper helper(*iter->getSource());
         helper.Update(diffTime);
-        iter->getSource()->SetLastUpdateTime();
         visitCount++;
         if (visitCount > sWorld.getConfig(CONFIG_UINT32_MAPUPDATE_MAXVISITS))
             break;
@@ -105,7 +104,7 @@ inline void MaNGOS::ObjectUpdater::Visit(GameObjectMapType& m)
 {
     for (GameObjectMapType::iterator iter = m.begin(); iter != m.end(); ++iter)
     {
-        WorldObject::UpdateHelper helper(iter->getSource());
+        WorldObject::UpdateHelper helper(*iter->getSource());
         helper.Update(i_timeDiff);
     }
 }

@@ -623,6 +623,10 @@ void Map::Update(const uint32 &t_diff)
         ObjectGuid guid = updateQueue.front();
         updateQueue.pop();
 
+        WorldObject* obj = GetWorldObject(guid);
+        if (!obj || !obj->IsInWorld())
+            continue;
+
         switch (guid.GetHigh())
         {
             case HIGHGUID_PLAYER:
@@ -630,7 +634,7 @@ void Map::Update(const uint32 &t_diff)
                 Player* plr = GetPlayer(guid);
                 if (plr && plr->IsInWorld())
                 {
-                    WorldObject::UpdateHelper helper(plr);
+                    WorldObject::UpdateHelper helper(*plr);
                     helper.Update(t_diff);
                 }
                 break;
@@ -641,7 +645,7 @@ void Map::Update(const uint32 &t_diff)
                 WorldObject* obj = GetWorldObject(guid);
                 if (obj && obj->IsInWorld() && obj->isActiveObject() && obj->IsPositionValid())
                 {
-                    WorldObject::UpdateHelper helper(obj);
+                    WorldObject::UpdateHelper helper(*obj);
                     helper.Update(t_diff);
                 }
                 break;
