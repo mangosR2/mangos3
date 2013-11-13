@@ -109,6 +109,7 @@ class MANGOS_DLL_DECL MapManager : public MaNGOS::Singleton<MapManager, MaNGOS::
 
         /* statistics */
         uint32 GetNumInstances();
+        std::string GetStrMaps();
         uint32 GetNumPlayersInInstances();
 
         //get list of all maps

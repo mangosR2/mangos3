@@ -129,6 +129,13 @@ bool ChatHandler::HandleServerInfoCommand(char* /*args*/)
     PSendSysMessage(LANG_UPTIME, str.c_str());
     PSendSysMessage("Update time diff: %u", updateTime);
 
+    if (!m_session || m_session->GetSecurity() > SEC_MODERATOR)
+    {
+        SendSysMessage("");
+        PSendSysMessage("Loaded maps: %u", sMapMgr.Maps().size());
+        PSendSysMessage("ActiveMaps: %s", sMapMgr.GetStrMaps().c_str());
+    }
+
     return true;
 }
 

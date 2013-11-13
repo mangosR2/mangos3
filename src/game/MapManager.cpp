@@ -270,6 +270,16 @@ uint32 MapManager::GetNumInstances()
     return ret;
 }
 
+std::string MapManager::GetStrMaps()
+{
+    std::ostringstream os;
+
+    for (MapMapType::const_iterator itr = m_maps.begin(); itr != m_maps.end(); ++itr)
+        os << "[" << itr->first.nMapId << ":" << itr->second->GetMapName() << "] ";
+
+    return os.str();
+}
+
 uint32 MapManager::GetNumPlayersInInstances()
 {
     uint32 ret = 0;
