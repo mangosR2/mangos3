@@ -287,6 +287,7 @@ class MANGOS_DLL_SPEC Map : public GridRefManager<NGridType>
         uint32 GetMaxResetDelay() const;                    // dependent from map difficulty
         MapDifficultyEntry const* GetMapDifficulty() const; // dependent from map difficulty
 
+        bool IsContinent() const { return i_mapEntry && i_mapEntry->IsContinent(); }
         bool Instanceable() const { return i_mapEntry && i_mapEntry->Instanceable(); }
         // NOTE: this duplicate of Instanceable(), but Instanceable() can be changed when BG also will be instanceable
         bool IsDungeon() const { return i_mapEntry && i_mapEntry->IsDungeon(); }

@@ -104,6 +104,14 @@ Map::Map(uint32 id, time_t expiry, uint32 InstanceId, uint8 SpawnMode)
     persistentState->SetUsedByMapState(this);
     SetBroken(false);
 
+    // start unload timer for non continent and BG/Arena maps
+    if (!IsContinent() && !IsBattleGroundOrArena())
+    {
+        // the timer is started by default, and stopped when the first player joins
+        // this make sure it gets unloaded if for some reason no player joins
+        m_unloadTimer = sWorld.getConfig(CONFIG_UINT32_INSTANCE_UNLOAD_DELAY);
+    }
+
     //if (GetInstanceId() && !sMapMgr.IsTransportMap(GetId()))
     //    sObjectMgr.LoadTransports(this);
 
@@ -397,6 +405,9 @@ void Map::ActivateGrid(NGridType* nGrid)
 
 bool Map::Add(Player* player)
 {
+    if (!IsContinent() && !IsBattleGroundOrArena())
+        m_unloadTimer = 0;
+
     player->GetMapRef().link(this, player);
     player->SetMap(this);
 
@@ -788,6 +799,13 @@ void Map::Remove(Player* player, bool remove)
         EraseObject(player->GetObjectGuid());
     else
         DeleteFromWorld(player);
+
+    // if last player - set unload timer
+    if (!IsContinent() && !IsBattleGroundOrArena())
+    {
+        if (!m_unloadTimer && !HavePlayers())
+            m_unloadTimer = sWorld.getConfig(CONFIG_UINT32_INSTANCE_UNLOAD_DELAY);
+    }
 }
 
 template<class T>
@@ -1537,10 +1555,6 @@ DungeonMap::DungeonMap(uint32 id, time_t expiry, uint32 InstanceId, uint8 SpawnM
 
     //lets initialize visibility distance for dungeons
     DungeonMap::InitVisibilityDistance();
-
-    // the timer is started by default, and stopped when the first player joins
-    // this make sure it gets unloaded if for some reason no player joins
-    m_unloadTimer = std::max(sWorld.getConfig(CONFIG_UINT32_INSTANCE_UNLOAD_DELAY), (uint32)MIN_UNLOAD_DELAY);
 }
 
 DungeonMap::~DungeonMap()
@@ -1687,7 +1701,6 @@ bool DungeonMap::Add(Player *player)
 
     DETAIL_LOG("MAP: Player '%s' is entering instance '%u' of map '%s'", player->GetName(), GetInstanceId(), GetMapName());
     // initialize unload state
-    m_unloadTimer = 0;
     m_resetAfterUnload = false;
     m_unloadWhenEmpty = false;
 
@@ -1706,11 +1719,11 @@ void DungeonMap::Remove(Player *player, bool remove)
 {
     DETAIL_LOG("MAP: Removing player '%s' from instance '%u' of map '%s' before relocating to other map", player->GetName(), GetInstanceId(), GetMapName());
 
-    //if last player set unload timer
-    if(!m_unloadTimer && m_mapRefManager.getSize() == 1)
-        m_unloadTimer = m_unloadWhenEmpty ? MIN_UNLOAD_DELAY : std::max(sWorld.getConfig(CONFIG_UINT32_INSTANCE_UNLOAD_DELAY), (uint32)MIN_UNLOAD_DELAY);
-
     Map::Remove(player, remove);
+
+    // if last player and unload when empty - unload immediately
+    if (m_unloadWhenEmpty && !HavePlayers())
+        m_unloadTimer = MIN_UNLOAD_DELAY;
 
     // for normal instances schedule the reset after all players have left
     SetResetSchedule(true);
