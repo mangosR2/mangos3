@@ -196,8 +196,6 @@ Player.cpp
 PlayerDump.cpp
 PlayerDump.h
 Player.h
-PointMovementGenerator.cpp
-PointMovementGenerator.h
 PoolManager.cpp
 PoolManager.h
 QueryHandler.cpp
@@ -358,6 +356,8 @@ movementGenerators/IdleMovementGenerator.h
 movementGenerators/MovementGenerator.cpp
 movementGenerators/MovementGenerator.h
 movementGenerators/MovementGeneratorImpl.h
+movementGenerators/PointMovementGenerator.cpp
+movementGenerators/PointMovementGenerator.h
 movementGenerators/RandomMovementGenerator.cpp
 movementGenerators/RandomMovementGenerator.h
 movementGenerators/TargetedMovementGenerator.cpp
