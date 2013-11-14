@@ -38,7 +38,7 @@
 #include "CreatureEventAI.h"
 #include "PetAI.h"
 #include "Formulas.h"
-#include "WaypointMovementGenerator.h"
+#include "movementGenerators/WaypointMovementGenerator.h"
 #include "InstanceData.h"
 #include "MapPersistentStateMgr.h"
 #include "BattleGround/BattleGroundMgr.h"
