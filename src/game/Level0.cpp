@@ -132,7 +132,7 @@ bool ChatHandler::HandleServerInfoCommand(char* /*args*/)
     if (!m_session || m_session->GetSecurity() > SEC_MODERATOR)
     {
         SendSysMessage("");
-        PSendSysMessage("Loaded maps (%u): %s", sMapMgr.Maps().size(), sMapMgr.GetStrMaps().c_str());
+        PSendSysMessage("Loaded maps [id:name:count:players] (%u):%s", sMapMgr.Maps().size(), sMapMgr.GetStrMaps().c_str());
     }
 
     return true;

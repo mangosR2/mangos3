@@ -272,10 +272,30 @@ uint32 MapManager::GetNumInstances()
 
 std::string MapManager::GetStrMaps()
 {
-    std::ostringstream os;
+    struct TMapInfo
+    {
+        TMapInfo() : m_mapName(NULL), m_mapCount(0), m_playerCount(0) {}
+        const char* m_mapName;
+        uint32 m_mapCount;
+        uint32 m_playerCount;
+    };
+
+    typedef std::map<uint32/*mapId*/, TMapInfo> TMapsInfo;
+
+    TMapsInfo mapsInfo;
 
     for (MapMapType::const_iterator itr = m_maps.begin(); itr != m_maps.end(); ++itr)
-        os << "[" << itr->first.nMapId << ":" << itr->second->GetMapName() << "] ";
+    {
+        TMapInfo& mapInfo = mapsInfo[itr->first.nMapId];
+        if (!mapInfo.m_mapName)
+            mapInfo.m_mapName = itr->second->GetMapName();
+        mapInfo.m_mapCount++;
+        mapInfo.m_playerCount += itr->second->GetPlayers().getSize();
+    }
+
+    std::ostringstream os; // [id:name:count:players]
+    for (TMapsInfo::const_iterator itr = mapsInfo.begin(); itr != mapsInfo.end(); ++itr)
+        os << " [" << itr->first << ":" << itr->second.m_mapName << ":" << itr->second.m_mapCount << ":" << itr->second.m_playerCount << "]";
 
     return os.str();
 }
