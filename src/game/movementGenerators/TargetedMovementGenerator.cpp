@@ -163,13 +163,9 @@ bool TargetedMovementGeneratorMedium<T, D>::Update(T& owner, const uint32& time_
     }
 
     // prevent movement while casting spells with cast time or channel time
-    if (owner.IsNonMeleeSpellCasted(false, false, true))
+    if (owner.IsNonMeleeSpellCasted(false, false, true) && !IsAbleMoveWhenCast(owner.GetEntry()))
     {
-        if (!owner.IsStopped())
-        {
-            if (!IsAbleMoveWhenCast(owner.GetEntry()))
-                owner.StopMoving();
-        }
+        owner.StopMoving();
         return true;
     }
 
@@ -213,7 +209,7 @@ bool TargetedMovementGeneratorMedium<T, D>::Update(T& owner, const uint32& time_
                     !m_target->m_movementInfo.HasMovementFlag(MOVEFLAG_PENDINGSTOP))
                 {
                     if (m_waitTargetTimer < TARGET_NOT_ACCESSIBLE_MAX_TIMER)
-                        m_waitTargetTimer += time_diff;
+                        m_waitTargetTimer += m_recheckDistanceTimer.GetExpiry();
                     else
                         return false;
                 }
