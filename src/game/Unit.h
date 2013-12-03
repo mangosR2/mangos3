@@ -1356,7 +1356,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         }
 
         float GetCombatReach(Unit const* pVictim, bool forMeleeRange = true, float flat_mod = 0.0f) const;
-        float GetCombatDistance(Unit const* pVictim, bool forMeleeRange) const;
+        float GetCombatDistance(Unit const* pVictim, bool forMeleeRange = true) const;
         bool CanReachWithMeleeAttack(Unit const* pVictim, float flat_mod = 0.0f) const;
 
         uint32 m_extraAttacks;
