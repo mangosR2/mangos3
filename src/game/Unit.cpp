@@ -544,12 +544,12 @@ void Unit::resetAttackTimer(WeaponAttackType type)
 
 float Unit::GetCombatReach(Unit const* pVictim, bool forMeleeRange /*=true*/, float flat_mod /*=0.0f*/) const
 {
-    if (!pVictim || !pVictim->IsInWorld())
-        return ATTACK_DISTANCE;
+    float victimReach = (pVictim && pVictim->IsInWorld())
+        ? pVictim->GetFloatValue(UNIT_FIELD_COMBATREACH)
+        : 0.0f;
 
-    // The measured values show BASE_MELEE_OFFSET in (1.3224, 1.342)
-    float reach = GetFloatValue(UNIT_FIELD_COMBATREACH) + pVictim->GetFloatValue(UNIT_FIELD_COMBATREACH) +
-        BASE_MELEERANGE_OFFSET + flat_mod;
+    float reach = GetFloatValue(UNIT_FIELD_COMBATREACH) + victimReach +
+        BASE_MELEERANGE_OFFSET + flat_mod; // The measured values show BASE_MELEE_OFFSET in (1.3224, 1.342)
 
     if (forMeleeRange && reach < ATTACK_DISTANCE)
         reach = ATTACK_DISTANCE;
