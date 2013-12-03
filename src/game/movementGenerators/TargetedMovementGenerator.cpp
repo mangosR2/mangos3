@@ -116,6 +116,7 @@ void TargetedMovementGeneratorMedium<T, D>::_setTargetLocation(T& owner, bool up
         owner.StopMoving();
         return;
     }
+
     if (i_path->getPathType() & PATHFIND_NOPATH)
     {
         DEBUG_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS,"TargetedMovementGeneratorMedium::  unit %s cannot find path to %s (%f, %f, %f),  gained PATHFIND_NOPATH! Owerride used.",
@@ -308,6 +309,19 @@ float ChaseMovementGenerator<T>::GetDynamicTargetDistance(T& owner, bool forRang
 }
 
 //-----------------------------------------------//
+
+template<class T>
+void FollowMovementGenerator<T>::_reachTarget(T& u)
+{
+    if (u.GetTypeId() == TYPEID_PLAYER)
+        return;
+
+    if (Unit* pOwner = u.GetOwner())
+    {
+        if (fabs(pOwner->GetOrientation() - u.GetOrientation()) > M_PI_F / 8.0f)
+            u.SetFacingTo(pOwner->GetOrientation());
+    }
+}
 
 template<>
 bool FollowMovementGenerator<Creature>::EnableWalking() const
