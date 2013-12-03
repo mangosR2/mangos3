@@ -196,7 +196,7 @@ bool TargetedMovementGeneratorMedium<T, D>::Update(T& owner, const uint32& time_
         float allowed_dist = 0.0f;
 
         if (targetIsVictim)
-            allowed_dist = owner.GetMeleeAttackDistance(pVictim) + owner.GetObjectBoundingRadius();
+            allowed_dist = owner.GetCombatDistance(target, false) + owner.GetObjectBoundingRadius();
         else
             allowed_dist = i_target->GetObjectBoundingRadius() + owner.GetObjectBoundingRadius() + sWorld.getConfig(CONFIG_FLOAT_RATE_TARGET_POS_RECALCULATION_RANGE);
 

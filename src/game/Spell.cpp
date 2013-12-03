@@ -7360,8 +7360,7 @@ SpellCastResult Spell::CheckRange(bool strict, WorldObject* checkTarget)
                     (m_spellInfo->FacingCasterFlags & SPELL_FACING_FLAG_INFRONT) && !m_caster->HasInArc(M_PI_F, target))
                     return SPELL_FAILED_UNIT_NOT_INFRONT;
 
-                float combat_range = m_caster->GetMeleeAttackDistance(target);
-
+                float combat_range = m_caster->GetCombatDistance(target, true);
                 float range_mod = combat_range + add_range;
 
                 if (Player* modOwner = m_caster->GetSpellModOwner())
@@ -7386,7 +7385,7 @@ SpellCastResult Spell::CheckRange(bool strict, WorldObject* checkTarget)
     if (target && target != m_caster)
     {
         // distance from target in checks
-        float dist = m_caster->GetCombatDistance(target);
+        float dist = m_caster->GetCombatDistance(target, m_spellInfo->rangeIndex == SPELL_RANGE_IDX_COMBAT);
 
         if(dist > max_range)
             return SPELL_FAILED_OUT_OF_RANGE;
