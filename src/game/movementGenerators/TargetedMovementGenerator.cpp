@@ -118,12 +118,12 @@ void TargetedMovementGeneratorMedium<T, D>::_setTargetLocation(T& owner, bool up
         return;
     }
 
-    if (i_path->getPathType() & PATHFIND_NOPATH)
+    if (m_path->getPathType() & PATHFIND_NOPATH)
     {
         DEBUG_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS,"TargetedMovementGeneratorMedium::  unit %s cannot find path to %s (%f, %f, %f),  gained PATHFIND_NOPATH! Owerride used.",
-            owner.GetObjectGuid().GetString().c_str(),
-            i_target.isValid() ? i_target->GetObjectGuid().GetString().c_str() : "<none>",
-            x,y,z);
+            owner.GetGuidStr().c_str(),
+            m_target.isValid() ? m_target->GetObjectGuid().GetString().c_str() : "<none>",
+            x, y, z);
         //return;
     }
 
@@ -251,8 +251,8 @@ bool TargetedMovementGeneratorMedium<T, D>::RequiresNewPosition(T& owner, float 
 template<class T>
 void ChaseMovementGenerator<T>::_reachTarget(T& owner)
 {
-    if (owner.CanReachWithMeleeAttack(m_target.getTarget()))
-        owner.Attack(m_target.getTarget(), true);
+    if (owner.CanReachWithMeleeAttack(this->m_target.getTarget()))
+        owner.Attack(this->m_target.getTarget(), true);
 }
 
 template<>
@@ -300,9 +300,9 @@ template<class T>
 float ChaseMovementGenerator<T>::GetDynamicTargetDistance(T& owner, bool forRangeCheck) const
 {
     if (forRangeCheck)
-        return CHASE_RECHASE_RANGE_FACTOR * m_target->GetCombatReach(&owner) - m_target->GetObjectBoundingRadius();
+        return CHASE_RECHASE_RANGE_FACTOR * this->m_target->GetCombatReach(&owner) - this->m_target->GetObjectBoundingRadius();
     else
-        return CHASE_DEFAULT_RANGE_FACTOR * m_target->GetCombatReach(&owner) + m_offset;
+        return CHASE_DEFAULT_RANGE_FACTOR * this->m_target->GetCombatReach(&owner) + this->m_offset;
 }
 
 //-----------------------------------------------//
@@ -388,9 +388,9 @@ float FollowMovementGenerator<T>::GetDynamicTargetDistance(T& owner, bool forRan
 {
     float addRange = forRangeCheck
         ? sWorld.getConfig(CONFIG_FLOAT_RATE_TARGET_POS_RECALCULATION_RANGE)
-        : m_offset;
+        : this->m_offset;
 
-    return owner.GetObjectBoundingRadius() + m_target->GetObjectBoundingRadius() + addRange;
+    return owner.GetObjectBoundingRadius() + this->m_target->GetObjectBoundingRadius() + addRange;
 }
 
 //-----------------------------------------------//
