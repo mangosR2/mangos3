@@ -79,7 +79,7 @@ void TargetedMovementGeneratorMedium<T, D>::_setTargetLocation(T& owner, bool up
             float absAngle;
 
             // Chase Movement and angle == 0 case: Chase to current angle
-            if (GetMovementGeneratorType() == CHASE_MOTION_TYPE && m_angle == 0.0f)
+            if (this->GetMovementGeneratorType() == CHASE_MOTION_TYPE && m_angle == 0.0f)
                 absAngle = m_target->GetAngle(&owner);
             // Targeted movement to at m_offset distance from target and m_angle from target facing
             else
@@ -191,7 +191,7 @@ bool TargetedMovementGeneratorMedium<T, D>::Update(T& owner, const uint32& time_
     m_recheckDistanceTimer.Update(time_diff);
     if (m_recheckDistanceTimer.Passed())
     {
-        m_recheckDistanceTimer.Reset(GetMovementGeneratorType() == FOLLOW_MOTION_TYPE
+        m_recheckDistanceTimer.Reset(this->GetMovementGeneratorType() == FOLLOW_MOTION_TYPE
             ? RECHECK_DISTANCE_TIMER_FOLLOW
             : RECHECK_DISTANCE_TIMER);
 
