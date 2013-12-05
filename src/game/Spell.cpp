@@ -7328,20 +7328,20 @@ SpellCastResult Spell::CanAutoCast(Unit* target)
     return result;                                           //target invalid
 }
 
-SpellCastResult Spell::CheckRange(bool strict, WorldObject* checkTarget)
+SpellCastResult Spell::CheckRange(bool strict, WorldObject* checkTarget /*=NULL*/)
 {
-    Unit* target = (checkTarget && checkTarget->GetObjectGuid().IsUnit()) ? (Unit*)checkTarget : m_targets.getUnitTarget();
+    Unit* pTarget = (checkTarget && checkTarget->GetObjectGuid().IsUnit()) ? (Unit*)checkTarget : m_targets.getUnitTarget();
     GameObject* pGoTarget = (checkTarget && checkTarget->GetObjectGuid().IsGameObject()) ? (GameObject*)checkTarget : m_targets.getGOTarget();
 
     SpellRangeEntry const* srange = sSpellRangeStore.LookupEntry(m_spellInfo->GetRangeIndex());
 
-    bool friendly = target ? target->IsFriendlyTo(m_caster) : false;
+    bool friendly = pTarget ? pTarget->IsFriendlyTo(m_caster) : false;
     float max_range = GetSpellMaxRange(srange, friendly);
     float min_range = GetSpellMinRange(srange, friendly);
     float add_range = bool(checkTarget) ? checkTarget->GetObjectBoundingRadius() : (strict ? 1.25f : 6.25f);
 
     // special range cases
-    switch(m_spellInfo->GetRangeIndex())
+    switch (m_spellInfo->GetRangeIndex())
     {
         // self cast doesn't need range checking -- also for Starshards fix
         // spells that can be cast anywhere also need no check
@@ -7351,16 +7351,16 @@ SpellCastResult Spell::CheckRange(bool strict, WorldObject* checkTarget)
         // combat range spells are treated differently
         case SPELL_RANGE_IDX_COMBAT:
         {
-            if (target)
+            if (pTarget)
             {
-                if (target == m_caster)
+                if (pTarget == m_caster)
                     return SPELL_CAST_OK;
 
                 if (m_caster->GetTypeId() == TYPEID_PLAYER &&
-                    (m_spellInfo->FacingCasterFlags & SPELL_FACING_FLAG_INFRONT) && !m_caster->HasInArc(M_PI_F, target))
+                    (m_spellInfo->FacingCasterFlags & SPELL_FACING_FLAG_INFRONT) && !m_caster->HasInArc(M_PI_F, pTarget))
                     return SPELL_FAILED_UNIT_NOT_INFRONT;
 
-                float combat_range = m_caster->GetCombatDistance(target, true);
+                float combat_range = m_caster->GetCombatDistance(pTarget, true);
                 float range_mod = combat_range + add_range;
 
                 if (Player* modOwner = m_caster->GetSpellModOwner())
@@ -7368,13 +7368,13 @@ SpellCastResult Spell::CheckRange(bool strict, WorldObject* checkTarget)
 
                 float range_delta = range_mod - combat_range;
 
-                // with additional 5 dist for non stricted case (some melee spells have delay in apply
-                return m_caster->CanReachWithMeleeAttack(target, range_delta) ? SPELL_CAST_OK : SPELL_FAILED_OUT_OF_RANGE;
+                // with additional 5 dist for non stricted case (some melee spells have delay in apply)
+                return m_caster->CanReachWithMeleeAttack(pTarget, range_delta) ? SPELL_CAST_OK : SPELL_FAILED_OUT_OF_RANGE;
             }
             break;                                          // let continue in generic way for no target
         }
         default:
-            //add radius of caster and ~5 yds "give" for non stricred (landing) check
+            // add radius of caster and ~5 yds "give" for non stricred (landing) check
             max_range += add_range;
             break;
     }
@@ -7382,17 +7382,17 @@ SpellCastResult Spell::CheckRange(bool strict, WorldObject* checkTarget)
     if (Player* modOwner = m_caster->GetSpellModOwner())
         modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_RANGE, max_range);
 
-    if (target && target != m_caster)
+    if (pTarget && pTarget != m_caster)
     {
         // distance from target in checks
-        float dist = m_caster->GetCombatDistance(target, m_spellInfo->rangeIndex == SPELL_RANGE_IDX_COMBAT);
+        float dist = m_caster->GetCombatDistance(pTarget, m_spellInfo->GetRangeIndex() == SPELL_RANGE_IDX_COMBAT);
 
-        if(dist > max_range)
+        if (dist > max_range)
             return SPELL_FAILED_OUT_OF_RANGE;
-        if(min_range && dist < min_range)
+        if (min_range && dist < min_range)
             return SPELL_FAILED_TOO_CLOSE;
-        if ( m_caster->GetTypeId() == TYPEID_PLAYER &&
-            (m_spellInfo->FacingCasterFlags & SPELL_FACING_FLAG_INFRONT) && !m_caster->HasInArc( M_PI_F, target ) )
+        if (m_caster->GetTypeId() == TYPEID_PLAYER &&
+            (m_spellInfo->FacingCasterFlags & SPELL_FACING_FLAG_INFRONT) && !m_caster->HasInArc(M_PI_F, pTarget))
             return SPELL_FAILED_UNIT_NOT_INFRONT;
     }
 
@@ -7405,17 +7405,19 @@ SpellCastResult Spell::CheckRange(bool strict, WorldObject* checkTarget)
             return SPELL_FAILED_OUT_OF_RANGE;
         if (min_range && dist < min_range)
             return SPELL_FAILED_TOO_CLOSE;
-        if ( m_caster->GetTypeId() == TYPEID_PLAYER &&
-            (m_spellInfo->FacingCasterFlags & SPELL_FACING_FLAG_INFRONT) && !m_caster->HasInArc( M_PI_F, pGoTarget ) )
+        if (m_caster->GetTypeId() == TYPEID_PLAYER &&
+            (m_spellInfo->FacingCasterFlags & SPELL_FACING_FLAG_INFRONT) && !m_caster->HasInArc(M_PI_F, pGoTarget))
             return SPELL_FAILED_NOT_INFRONT;
     }
 
     // TODO verify that such spells really use bounding radius
-    if (m_targets.HasLocation())
+    if ((max_range || min_range) && m_targets.HasLocation())
     {
-        if (max_range && !m_caster->IsWithinDist3d(m_targets.getDestination(), max_range))
+        WorldLocation const& loc = m_targets.GetLocation();
+
+        if (max_range && !m_caster->IsWithinDist3d(loc, max_range))
             return SPELL_FAILED_OUT_OF_RANGE;
-        if (min_range && m_caster->IsWithinDist3d(m_targets.getDestination(), min_range))
+        if (min_range && m_caster->IsWithinDist3d(loc, min_range))
             return SPELL_FAILED_TOO_CLOSE;
     }
 
