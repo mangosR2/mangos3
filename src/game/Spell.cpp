@@ -9585,10 +9585,10 @@ bool Spell::FillCustomTargetMap(SpellEffectIndex i, UnitList& targetUnitMap, uin
         }
         case 74960:                                     // Infrigidate
         {
-            UnitList tempTargetUnitMap;
-            FillAreaTargets(tempTargetUnitMap, 20.0f, PUSH_SELF_CENTER, SPELL_TARGETS_FRIENDLY);
-            tempTargetUnitMap.remove(m_caster);
-            if (!tempTargetUnitMap.empty())
+            FillAreaTargets(targetUnitMap, 20.0f, PUSH_SELF_CENTER, SPELL_TARGETS_FRIENDLY);
+            targetUnitMap.remove(m_caster);
+
+            if (!targetUnitMap.empty())
                 unMaxTargets = 1;
             else
                 return false;
@@ -9599,28 +9599,27 @@ bool Spell::FillCustomTargetMap(SpellEffectIndex i, UnitList& targetUnitMap, uin
             return false;
     }
 
-    // random targets
-    if (unMaxTargets)
-    {
-        if (!targetUnitMap.empty())
-        {
-            // remove random units from the map
-            while (targetUnitMap.size() > unMaxTargets)
-            {
-                uint32 poz = urand(0, targetUnitMap.size()-1);
-                for (UnitList::iterator itr = targetUnitMap.begin(); itr != targetUnitMap.end(); ++itr, --poz)
-                {
-                    if (!*itr)
-                        continue;
+    if (targetUnitMap.empty())
+        return true;
 
-                    if (!poz)
-                    {
-                        targetUnitMap.erase(itr);
-                        break;
-                    }
-                }
-            }
-        }
+    // remove NULL targets (weird, but...)
+    for (UnitList::iterator itr = targetUnitMap.begin(); itr != targetUnitMap.end();)
+    {
+        if (!*itr)
+            itr = targetUnitMap.erase(itr);
+        else
+            ++itr;
+    }
+
+    if (!unMaxTargets)
+        return true;
+
+    // random targets
+    while (targetUnitMap.size() > unMaxTargets)
+    {
+        UnitList::iterator itr = targetUnitMap.begin();
+        std::advance(itr, urand(0, targetUnitMap.size() - 1));
+        targetUnitMap.erase(itr);
     }
 
     return true;
