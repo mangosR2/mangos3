@@ -9566,7 +9566,15 @@ void Aura::PeriodicDummyTick()
 //              // Holiday - Midsummer, Ribbon Pole Periodic Visual
 //              case 45406: break;
 //              // Parachute
-//              case 45472: break;
+                case 45472:
+                {
+                    if (target->GetTypeId() != TYPEID_PLAYER || !((Player*)target)->IsFalling())
+                        return;
+
+                    target->RemoveAurasDueToSpell(45472);
+                    target->CastSpell(target, 44795, true);
+                    return;
+                }
 //              // Alliance Flag, Extra Damage Debuff
 //              case 45898: break;
 //              // Horde Flag, Extra Damage Debuff
