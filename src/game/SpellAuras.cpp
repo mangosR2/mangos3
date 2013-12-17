@@ -5801,9 +5801,11 @@ void Aura::HandleAuraModIncreaseMountedSpeed(bool apply, bool Real)
     target->UpdateSpeed(MOVE_RUN, true);
 
     // Festive Holiday Mount
-    if (apply && GetSpellProto()->GetSpellIconID() != 1794 && target->HasAura(62061))
-        // Reindeer Transformation
-        target->CastSpell(target, 25860, true, NULL, this);
+    if (!apply && target->HasAura(62061, EFFECT_INDEX_0))
+    {
+        target->Unmount(true);
+        target->RemoveSpellsCausingAura(SPELL_AURA_MOUNTED);
+    }
 }
 
 void Aura::HandleAuraModIncreaseFlightSpeed(bool apply, bool Real)
@@ -5836,9 +5838,11 @@ void Aura::HandleAuraModIncreaseFlightSpeed(bool apply, bool Real)
             target->SetUInt32Value(UNIT_FIELD_MOUNTDISPLAYID,16314);
 
         // Festive Holiday Mount
-        if (apply && GetSpellProto()->GetSpellIconID() != 1794 && target->HasAura(62061))
-            // Reindeer Transformation
-            target->CastSpell(target, 25860, true, NULL, this);
+        if (!apply && target->HasAura(62061, EFFECT_INDEX_0))
+        {
+            target->Unmount(true);
+            target->RemoveSpellsCausingAura(SPELL_AURA_MOUNTED);
+        }
     }
 
     // Swift Flight Form check for higher speed flying mounts

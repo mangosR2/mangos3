@@ -3919,6 +3919,24 @@ void Spell::cast(bool skipCheck)
             break;
     }
 
+    for (uint8 i = 0; i < MAX_EFFECT_INDEX; ++i)
+    {
+        // Do not check in case of junk in DBC
+        if (!IsAuraApplyEffect(m_spellInfo, SpellEffectIndex(i)))
+            continue;
+
+        switch (m_spellInfo->EffectApplyAuraName[i])
+        {
+            case SPELL_AURA_MOUNTED:
+            {
+                // Festive Holiday Mount
+                if (m_spellInfo->SpellIconID != 1794 && m_caster->HasAura(62061, EFFECT_INDEX_0))
+                    AddTriggeredSpell(25860); // Reindeer Transformation
+                break;
+            }
+        }
+    }
+
     // Linked spells (precast chain)
     SpellLinkedSet linkedSet = sSpellMgr.GetSpellLinked(m_spellInfo->Id, SPELL_LINKED_TYPE_PRECAST);
     if (linkedSet.size() > 0)
@@ -5565,6 +5583,10 @@ Unit* Spell::GetPrefilledUnitTargetOrUnitTarget(SpellEffectIndex effIndex) const
 
 SpellCastResult Spell::CheckCast(bool strict)
 {
+    // Festive Holiday Mount
+    if (m_spellInfo->Id == 62061 && m_caster->HasAura(62061, EFFECT_INDEX_0))
+        return SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW;
+
     // check cooldowns to prevent cheating (ignore passive spells, that client side visual only)
     if (!m_spellInfo->HasAttribute(SPELL_ATTR_PASSIVE) && m_caster->HasSpellCooldown(m_spellInfo))
     {
