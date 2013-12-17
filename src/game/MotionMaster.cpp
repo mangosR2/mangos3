@@ -35,7 +35,7 @@
 
 #include <cassert>
 
-inline bool isStatic(MovementGenerator *mv)
+inline bool isStatic(MovementGenerator* mv)
 {
     return (mv == &si_idleMovement);
 }
@@ -207,7 +207,8 @@ void MotionMaster::MoveSeekAssistanceDistract(uint32 time)
 
 void MotionMaster::MoveFleeing(Unit* enemy, uint32 time)
 {
-    if (!enemy)
+    // ignore movement request if enemy not exist or owner has disable move flag
+    if (!enemy || enemy == m_owner || m_owner->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE))
         return;
 
     DEBUG_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS, "MotionMaster: %s flee from %s", m_owner->GetGuidStr().c_str(), enemy->GetGuidStr().c_str());
@@ -419,4 +420,3 @@ void MotionMaster::MoveFlyOrLand(uint32 id, float x, float y, float z, bool lift
     DEBUG_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS, "%s targeted point for %s (Id: %u X: %f Y: %f Z: %f)", m_owner->GetGuidStr().c_str(), liftOff ? "liftoff" : "landing", id, x, y, z);
     Mutate(new FlyOrLandMovementGenerator(id, x, y, z, liftOff), UNIT_ACTION_EFFECT);
 }
-
