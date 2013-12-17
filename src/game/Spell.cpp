@@ -3711,15 +3711,13 @@ void Spell::cast(bool skipCheck)
             const_cast<SpellEntry*>(spellInfo)->AuraInterruptFlags = 0;
 
     // different triggered (for caster and main target after main cast) and pre-cast (casted before apply effect to each target) cases
-    switch(m_spellInfo->SpellFamilyName)
+    switch (m_spellInfo->SpellFamilyName)
     {
         case SPELLFAMILY_GENERIC:
         {
-            // Stoneskin
-            if (m_spellInfo->Id == 20594)
-                AddTriggeredSpell(65116);                   // Stoneskin - armor 10% for 8 sec
-            // Chaos Bane strength buff
-            else if (m_spellInfo->Id == 71904)
+            if (m_spellInfo->Id == 20594)                  // Stoneskin
+                AddTriggeredSpell(65116);                  // Stoneskin - armor 10% for 8 sec
+            else if (m_spellInfo->Id == 71904)             // Chaos Bane strength buff
                 AddTriggeredSpell(73422);
             else if (m_spellInfo->Id == 74607)
                 AddTriggeredSpell(74610);                  // Fiery combustion
@@ -3734,7 +3732,13 @@ void Spell::cast(bool skipCheck)
             else if (m_spellInfo->Id == 71265)             // Swarming Shadows DoT (Queen Lana'thel ICC)
                 AddPrecastSpell(71277);
             else if (m_spellInfo->Id == 70923)             // Uncontrollable Frenzy (Queen Lana'thel ICC)
-                AddTriggeredSpell(70924); // health buff etc.
+                AddTriggeredSpell(70924);                  // health buff etc.
+            else if (m_spellInfo->Mechanic == MECHANIC_MOUNT)
+            {
+               // Festive Holiday Mount
+               if (m_spellInfo->GetSpellIconID() != 1794 && m_caster->HasAura(62061, EFFECT_INDEX_0))
+                   AddTriggeredSpell(25860);               // Reindeer Transformation
+            }
             break;
         }
         case SPELLFAMILY_MAGE:
@@ -3917,24 +3921,6 @@ void Spell::cast(bool skipCheck)
         }
         default:
             break;
-    }
-
-    for (uint8 i = 0; i < MAX_EFFECT_INDEX; ++i)
-    {
-        // Do not check in case of junk in DBC
-        if (!IsAuraApplyEffect(m_spellInfo, SpellEffectIndex(i)))
-            continue;
-
-        switch (m_spellInfo->EffectApplyAuraName[i])
-        {
-            case SPELL_AURA_MOUNTED:
-            {
-                // Festive Holiday Mount
-                if (m_spellInfo->SpellIconID != 1794 && m_caster->HasAura(62061, EFFECT_INDEX_0))
-                    AddTriggeredSpell(25860); // Reindeer Transformation
-                break;
-            }
-        }
     }
 
     // Linked spells (precast chain)
