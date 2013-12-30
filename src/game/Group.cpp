@@ -340,6 +340,8 @@ bool Group::AddLeaderInvite(Player* player)
     if (!GetObjectGuid())
         m_Guid = ObjectGuid(HIGHGUID_GROUP, sObjectMgr.GenerateGroupLowGuid());
 
+    sObjectMgr.AddGroup(this);
+
     m_leaderGuid = player->GetObjectGuid();
     m_leaderName = player->GetName();
     return true;
