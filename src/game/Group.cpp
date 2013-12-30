@@ -166,6 +166,8 @@ bool Group::Create(ObjectGuid guid, const char* name)
     if (!GetObjectGuid())
         m_Guid = ObjectGuid(HIGHGUID_GROUP, sObjectMgr.GenerateGroupLowGuid());
 
+    sObjectMgr.AddGroup(this);
+
     if (!isBGGroup())
     {
         Player* leader = sObjectMgr.GetPlayer(guid);

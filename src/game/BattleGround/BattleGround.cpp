@@ -1482,7 +1482,6 @@ void BattleGround::AddOrSetPlayerToCorrectBgGroup(Player* plr, ObjectGuid plr_gu
 
         if (group->Create(plr_guid, plr->GetName()))
         {
-            sObjectMgr.AddGroup(group);
             SetBgRaid(team, group);
         }
         else
