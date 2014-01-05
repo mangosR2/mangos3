@@ -2129,7 +2129,7 @@ void World::SendZoneMessage(uint32 zone, WorldPacket* packet, WorldSession* self
 void World::SendZoneText(uint32 zone, const char* text, WorldSession* self /*= NULL*/, Team team /*= TEAM_NONE*/)
 {
     WorldPacket data;
-    ChatHandler::FillMessageData(&data, NULL, CHAT_MSG_SYSTEM, LANG_UNIVERSAL, text);
+    ChatHandler::BuildChatPacket(data, CHAT_MSG_SYSTEM, text, LANG_UNIVERSAL);
     SendZoneMessage(zone, &data, self, team);
 }
 
