@@ -54,7 +54,7 @@ void TargetedMovementGeneratorMedium<T, D>::_setTargetLocation(T& owner, bool up
     if (owner.hasUnitState(UNIT_STAT_NOT_MOVE))
         return;
 
-    if (owner.IsNonMeleeSpellCasted(false) && !IsAbleMoveWhenCast(owner.GetEntry()))
+    if (!IsAbleMoveWhenCast(owner.GetEntry()) && owner.IsNonMeleeSpellCasted(false))
         return;
 
     if (!m_target->isInAccessablePlaceFor(&owner))
@@ -111,10 +111,12 @@ void TargetedMovementGeneratorMedium<T, D>::_setTargetLocation(T& owner, bool up
 
     m_path->calculate(x, y, z, forceDest);
 
+    m_speedChanged = false;
+
     // don't move if path points equivalent
     if (m_path->getStartPosition() == m_path->getEndPosition())
     {
-        owner.StopMoving();
+        owner.StopMoving(true);
         return;
     }
 
@@ -129,7 +131,6 @@ void TargetedMovementGeneratorMedium<T, D>::_setTargetLocation(T& owner, bool up
 
     D::_addUnitStateMove(owner);
     m_targetReached = false;
-    m_speedChanged = false;
 
     Movement::MoveSplineInit<Unit*> init(owner);
     init.MovebyPath(m_path->getPath());
@@ -164,7 +165,7 @@ bool TargetedMovementGeneratorMedium<T, D>::Update(T& owner, const uint32& time_
     }
 
     // prevent movement while casting spells with cast time or channel time
-    if (owner.IsNonMeleeSpellCasted(false, false, true) && !IsAbleMoveWhenCast(owner.GetEntry()))
+    if (!IsAbleMoveWhenCast(owner.GetEntry()) && owner.IsNonMeleeSpellCasted(false, false, true))
     {
         owner.StopMoving();
         return true;
@@ -299,10 +300,14 @@ void ChaseMovementGenerator<T>::Reset(T& owner)
 template<class T>
 float ChaseMovementGenerator<T>::GetDynamicTargetDistance(T& owner, bool forRangeCheck) const
 {
+    float dist;
+
     if (forRangeCheck)
-        return CHASE_RECHASE_RANGE_FACTOR * this->m_target->GetCombatReach(&owner) - this->m_target->GetObjectBoundingRadius();
+        dist = CHASE_RECHASE_RANGE_FACTOR * this->m_target->GetCombatReach(&owner) - this->m_target->GetObjectBoundingRadius();
     else
-        return CHASE_DEFAULT_RANGE_FACTOR * this->m_target->GetCombatReach(&owner) + this->m_offset;
+        dist = CHASE_DEFAULT_RANGE_FACTOR * this->m_target->GetCombatReach(&owner);
+
+    return dist + this->m_offset;
 }
 
 //-----------------------------------------------//
