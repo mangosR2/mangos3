@@ -110,7 +110,7 @@ void CreatureCreatePos::SelectFinalPoint(Creature* cr, bool checkLOS)
         }
         else if (checkLOS)
         {
-            m_closeObject->GetClosePoint(m_pos.x, m_pos.y, m_pos.z, 0.0f, m_dist + m_closeObject->GetObjectBoundingRadius(), m_angle);
+            m_closeObject->GetClosePoint(m_pos.x, m_pos.y, m_pos.z, cr->GetObjectBoundingRadius(), m_dist, m_angle);
             float ox, oy, oz;
             m_closeObject->GetPosition(ox, oy, oz);
             m_closeObject->UpdateAllowedPositionZ(ox, oy, oz);
@@ -118,6 +118,7 @@ void CreatureCreatePos::SelectFinalPoint(Creature* cr, bool checkLOS)
         }
         else
             m_closeObject->GetClosePoint(m_pos.x, m_pos.y, m_pos.z, cr->GetObjectBoundingRadius(), m_dist, m_angle);
+
         m_closeObject->UpdateAllowedPositionZ(m_pos.x, m_pos.y, m_pos.z);
     }
 }
