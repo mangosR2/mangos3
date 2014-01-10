@@ -90,7 +90,7 @@ class MANGOS_DLL_SPEC VehicleKit : public TransportBase
         SeatId GetSeatId(Unit* passenger);
         SeatId GetSeatId(ObjectGuid const& guid);
         void SetDestination(float x, float y, float z, float o, float speed, float elevation);
-        void SetDestination() { m_dst_x = 0.0f; m_dst_y = 0.0f; m_dst_z  = 0.0f; m_dst_o  = 0.0f; m_dst_speed  = 0.0f; m_dst_elevation  = 0.0f; b_dstSet = false;};
+        void SetDestination() { m_dst_x = 0.0f; m_dst_y = 0.0f; m_dst_z = 0.0f; m_dst_o = 0.0f; m_dst_speed = 0.0f; m_dst_elevation = 0.0f; m_dstSet = false; }
         void DisableDismount(Unit* passenger);
 
         Unit* GetBase() const { return (Unit*)GetOwner(); }
@@ -107,14 +107,14 @@ class MANGOS_DLL_SPEC VehicleKit : public TransportBase
         void InstallAllAccessories(uint32 entry);
 
         void Dismount(Unit* passenger, VehicleSeatEntry const* pSeatInfo = NULL);
+        void DismountFromFlyingVehicle(Unit* passenger);
 
         VehicleEntry const* m_vehicleEntry;
         SeatMap m_Seats;
         uint32  m_uiNumFreeSeats;
-        bool    b_dstSet:1;
-        bool    m_isInitialized:1;                               // Internal use to store if the accessory is initialized
         float   m_dst_x, m_dst_y, m_dst_z, m_dst_o, m_dst_speed, m_dst_elevation;
-
+        bool    m_isInitialized:1;                               // Internal use to store if the accessory is initialized
+        bool    m_dstSet:1;
 };
 
 #endif
