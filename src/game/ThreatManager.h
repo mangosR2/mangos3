@@ -41,14 +41,14 @@ struct SpellEntry;
 class ThreatCalcHelper
 {
     public:
-        static float CalcThreat(Unit* pHatedUnit, Unit* pHatingUnit, float threat, bool crit, SpellSchoolMask schoolMask, SpellEntry const *threatSpell);
+        static float CalcThreat(Unit* pHatedUnit, Unit* pHatingUnit, float threat, bool crit, SpellSchoolMask schoolMask, SpellEntry const* threatSpell);
 };
 
 //==============================================================
 class MANGOS_DLL_SPEC HostileReference : public Reference<Unit, ThreatManager>
 {
     public:
-        HostileReference(Unit* pUnit, ThreatManager *pThreatManager, float pThreat);
+        HostileReference(Unit* pUnit, ThreatManager* pThreatManager, float pThreat);
 
         //=================================================
         void addThreat(float pMod);
@@ -71,11 +71,11 @@ class MANGOS_DLL_SPEC HostileReference : public Reference<Unit, ThreatManager>
 
         // used for temporary setting a threat and reducting it later again.
         // the threat modification is stored
-        void setTempThreat(float pThreat) { iTempThreatModifyer = pThreat - getThreat(); if(fabs(iTempThreatModifyer) > M_NULL_F) addThreat(iTempThreatModifyer);  }
+        void setTempThreat(float pThreat) { iTempThreatModifyer = pThreat - getThreat(); if (fabs(iTempThreatModifyer) > M_NULL_F) addThreat(iTempThreatModifyer);  }
 
         void resetTempThreat()
         {
-            if(fabs(iTempThreatModifyer) > M_NULL_F)
+            if (fabs(iTempThreatModifyer) > M_NULL_F)
             {
                 addThreat(-iTempThreatModifyer);  iTempThreatModifyer = 0.0f;
             }
@@ -105,7 +105,7 @@ class MANGOS_DLL_SPEC HostileReference : public Reference<Unit, ThreatManager>
 
         //=================================================
 
-        HostileReference* next() { return ((HostileReference* ) Reference<Unit, ThreatManager>::next()); }
+        HostileReference* next() { return ((HostileReference*) Reference<Unit, ThreatManager>::next()); }
 
         //=================================================
 
@@ -156,9 +156,9 @@ class MANGOS_DLL_SPEC ThreatContainer
 
         void modifyThreatPercent(Unit *pVictim, int32 percent);
 
-        bool IsSecondChoiceTarget(Creature* pAttacker, Unit* pTarget, bool bCheckThreatArea, bool bCheckMeleeRange);
+//        bool IsSecondChoiceTarget(Creature* pAttacker, Unit* pTarget, bool bCheckThreatArea, bool bCheckMeleeRange);
 
-        HostileReference* selectNextVictim(Unit* pAttacker, HostileReference* pCurrentVictim);
+        HostileReference* selectNextVictim(Unit* pUnitAttacker, HostileReference* pCurrentVictim);
 
         void setDirty(bool pDirty) { iDirty = pDirty; }
 
@@ -180,7 +180,7 @@ class MANGOS_DLL_SPEC ThreatManager
     public:
         friend class HostileReference;
 
-        explicit ThreatManager(Unit& owner);
+        explicit ThreatManager(Unit& aOwner);
 
         ~ThreatManager() { clearReferences(); }
 
