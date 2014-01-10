@@ -105,7 +105,7 @@ namespace VMAP
 
 #ifdef MMAP_GENERATOR
         public:
-            void getInstanceMapTree(InstanceTreeMap &instanceMapTree);
+            void getInstanceMapTree(InstanceTreeMap& instanceMapTree);
 #endif
     };
 }

@@ -143,7 +143,7 @@ namespace VMAP
         if (instanceTree != iInstanceMapTrees.end())
         {
             // Don't calculate hit position, if wrong src/dest points provided!
-            if (!VMAP::CheckPosition(x1,y1,z1) || !VMAP::CheckPosition(x2,y2,z2))
+            if (!VMAP::CheckPosition(x1, y1, z1) || !VMAP::CheckPosition(x2, y2, z2))
                 return false;
 
             Vector3 pos1 = convertPositionToInternalRep(x1, y1, z1);
@@ -169,7 +169,7 @@ namespace VMAP
         if (isLineOfSightCalcEnabled())
         {
             // Don't calculate hit position, if wrong src/dest points provided!
-            if (!VMAP::CheckPosition(x1,y1,z1) || !VMAP::CheckPosition(x2,y2,z2))
+            if (!VMAP::CheckPosition(x1, y1, z1) || !VMAP::CheckPosition(x2, y2, z2))
                 return false;
 
             InstanceTreeMap::iterator instanceTree = iInstanceMapTrees.find(pMapId);
@@ -179,7 +179,7 @@ namespace VMAP
                 Vector3 pos2 = convertPositionToInternalRep(x2, y2, z2);
                 Vector3 resultPos;
                 result = instanceTree->second->getObjectHitPos(pos1, pos2, resultPos, pModifyDist);
-                resultPos = convertPositionToInternalRep(resultPos.x,resultPos.y,resultPos.z);
+                resultPos = convertPositionToInternalRep(resultPos.x, resultPos.y, resultPos.z);
                 rx = resultPos.x;
                 ry = resultPos.y;
                 rz = resultPos.z;
@@ -234,7 +234,7 @@ namespace VMAP
         if (instanceTree != iInstanceMapTrees.end())
         {
             // Don't calculate hit position, if wrong src/dest points provided!
-            if (!VMAP::CheckPosition(x,y,z))
+            if (!VMAP::CheckPosition(x, y, z))
                 return false;
 
             LocationInfo info;
@@ -242,7 +242,7 @@ namespace VMAP
             if (instanceTree->second->GetLocationInfo(pos, info))
             {
                 floor = info.ground_Z;
-                type = info.hitModel->GetLiquidType();
+                type = info.hitModel->GetLiquidType();  // entry from LiquidType.dbc
                 if (ReqLiquidType && !(type & ReqLiquidType))
                     return false;
                 if (info.hitInstance->GetLiquidLevel(pos, info, level))
