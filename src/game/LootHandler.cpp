@@ -435,7 +435,7 @@ void WorldSession::DoLootRelease(ObjectGuid lguid)
 
             switch (pItem->loot.loot_type)
             {
-                    // temporary loot in stacking items, clear loot state, no auto loot move
+                // temporary loot in stacking items, clear loot state, no auto loot move
                 case LOOT_MILLING:
                 case LOOT_PROSPECTING:
                 {
@@ -529,10 +529,16 @@ void WorldSession::HandleLootMasterGiveOpcode(WorldPacket& recv_data)
     if (!target)
         return;
 
-    DEBUG_LOG("WorldSession::HandleLootMasterGiveOpcode (CMSG_LOOT_MASTER_GIVE, 0x02A3) Target = %s [%s].", target_playerguid.GetString().c_str(), target->GetName());
+    DEBUG_LOG("WorldSession::HandleLootMasterGiveOpcode (CMSG_LOOT_MASTER_GIVE, 0x02A3) Target = %s.", target->GetGuidStr().c_str());
 
     if (_player->GetLootGuid() != lootguid)
         return;
+
+    if (!_player->IsInSameRaidWith(target) || !_player->IsInMap(target))
+    {
+        sLog.outString("WorldSession::HandleLootMasterGiveOpcode: %s tried to give an item to ineligible %s!", _player->GetGuidStr().c_str(), target->GetGuidStr().c_str());
+        return;
+    }
 
     Loot* pLoot = NULL;
 
@@ -557,7 +563,7 @@ void WorldSession::HandleLootMasterGiveOpcode(WorldPacket& recv_data)
 
     if (slotid > pLoot->items.size())
     {
-        DEBUG_LOG("AutoLootItem: Player %s might be using a hack! (slot %d, size " SIZEFMTD ")", GetPlayer()->GetName(), slotid, pLoot->items.size());
+        DEBUG_LOG("AutoLootItem: %s might be using a hack! (slot %d, size " SIZEFMTD ")", GetPlayer()->GetGuidStr().c_str(), slotid, pLoot->items.size());
         return;
     }
 
