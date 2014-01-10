@@ -738,7 +738,7 @@ Aura* VehicleKit::GetControlAura(Unit* passenger)
     Unit::AuraList& auras = GetBase()->GetAurasByType(SPELL_AURA_CONTROL_VEHICLE);
     for (Unit::AuraList::iterator itr = auras.begin(); itr != auras.end(); ++itr)
     {
-        if (!itr->IsEmpty && (*itr)->GetCasterGuid() == casterGuid)
+        if (!itr->IsEmpty() && (*itr)->GetCasterGuid() == casterGuid)
             return (*itr)();
     }
 
