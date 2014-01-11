@@ -53,6 +53,12 @@ void WorldSession::HandleGuildCreateOpcode(WorldPacket& recvPacket)
     std::string gname;
     recvPacket >> gname;
 
+    if (!GetPlayer()->isGameMaster())
+    {
+        sLog.outError("WorldSession::HandleGuildCreateOpcode Possible hacking-attempt: %s tried to create a guild [Name: %s] using cheats!", GetPlayer()->GetObjectGuid().GetString().c_str(), gname.c_str());
+        return;
+    }
+
     if (GetPlayer()->GetGuildId())                          // already in guild
         return;
 
