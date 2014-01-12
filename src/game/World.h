@@ -287,6 +287,7 @@ enum eConfigFloatValues
     CONFIG_FLOAT_RATE_CREATURE_ELITE_WORLDBOSS_SPELLDAMAGE,
     CONFIG_FLOAT_RATE_CREATURE_ELITE_RARE_SPELLDAMAGE,
     CONFIG_FLOAT_RATE_CREATURE_AGGRO,
+    CONFIG_FLOAT_RATE_CREATURE_AGGRO_IN_INSTANCE,
     CONFIG_FLOAT_RATE_REST_INGAME,
     CONFIG_FLOAT_RATE_REST_OFFLINE_IN_TAVERN_OR_CITY,
     CONFIG_FLOAT_RATE_REST_OFFLINE_IN_WILDERNESS,
@@ -658,6 +659,8 @@ class World
         void KickAllLess(AccountTypes sec);
         BanReturn BanAccount(BanMode mode, std::string nameOrIP, uint32 duration_secs, std::string reason, std::string author);
         bool RemoveBanAccount(BanMode mode, std::string nameOrIP);
+
+        float GetCreatureAggroRate(Unit const* unit) const;
 
         // for max speed access
         static float GetMaxVisibleDistanceOnContinents()    { return m_MaxVisibleDistanceOnContinents; }

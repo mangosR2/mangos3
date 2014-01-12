@@ -1244,6 +1244,7 @@ AutoBroadcast.Center = 0
 #        Default: 100 yards
 #
 #    Rate.Creature.Aggro
+#    Rate.Creature.Aggro.Instance
 #        Aggro radius percent or off.
 #        Default: 1   - 100%
 #                 1.5 - 150%
@@ -1345,6 +1346,7 @@ AutoBroadcast.Center = 0
 
 ThreatRadius = 100
 Rate.Creature.Aggro = 1
+Rate.Creature.Aggro.Instance = 1.0
 CreatureRespawnAggroDelay = 5000
 CreatureFamilyFleeAssistanceRadius = 30
 CreatureFamilyAssistanceRadius = 10

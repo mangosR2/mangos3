@@ -1483,42 +1483,42 @@ void Creature::DeleteFromDB(uint32 lowguid, CreatureData const* data)
     WorldDatabase.CommitTransaction();
 }
 
-float Creature::GetAttackDistance(Unit const* pl) const
+float Creature::GetAttackDistance(Unit const* pPlayer) const
 {
-    float aggroRate = sWorld.getConfig(CONFIG_FLOAT_RATE_CREATURE_AGGRO);
-    if (aggroRate == 0)
+    float aggroRate = sWorld.GetCreatureAggroRate(this);
+    if (aggroRate < M_NULL_F)
         return 0.0f;
 
-    uint32 playerlevel   = pl->GetLevelForTarget(this);
-    uint32 creaturelevel = GetLevelForTarget(pl);
+    uint32 playerLevel = pPlayer->GetLevelForTarget(this);
+    uint32 creatureLevel = GetLevelForTarget(pPlayer);
+    int32 levelDiff = int32(playerLevel) - int32(creatureLevel);
 
-    int32 leveldif       = int32(playerlevel) - int32(creaturelevel);
-
-    // "The maximum Aggro Radius has a cap of 25 levels under. Example: A level 30 char has the same Aggro Radius of a level 5 char on a level 60 mob."
-    if (leveldif < -25)
-        leveldif = -25;
+    // "The maximum Aggro Radius has a cap of 25 levels under. 
+    // Example: A level 30 char has the same Aggro Radius of a level 5 char on a level 60 mob."
+    if (levelDiff < -25)
+        levelDiff = -25;
 
     // "The aggro radius of a mob having the same level as the player is roughly 20 yards"
-    float RetDistance = 20;
+    float retDistance = 20.0f;
 
     // "Aggro Radius varies with level difference at a rate of roughly 1 yard/level"
-    // radius grow if playlevel < creaturelevel
-    RetDistance -= (float)leveldif;
+    // radius grow if playerLevel < creatureLevel
+    retDistance -= float(levelDiff);
 
-    if (creaturelevel + 5 <= sWorld.getConfig(CONFIG_UINT32_MAX_PLAYER_LEVEL))
+    if (creatureLevel + 5 <= sWorld.getConfig(CONFIG_UINT32_MAX_PLAYER_LEVEL))
     {
         // detect range auras
-        RetDistance += GetTotalAuraModifier(SPELL_AURA_MOD_DETECT_RANGE);
+        retDistance += GetTotalAuraModifier(SPELL_AURA_MOD_DETECT_RANGE);
 
         // detected range auras
-        RetDistance += pl->GetTotalAuraModifier(SPELL_AURA_MOD_DETECTED_RANGE);
+        retDistance += pPlayer->GetTotalAuraModifier(SPELL_AURA_MOD_DETECTED_RANGE);
     }
 
     // "Minimum Aggro Radius for a mob seems to be combat range (5 yards)"
-    if (RetDistance < 5)
-        RetDistance = 5;
+    if (retDistance < 5.0f)
+        retDistance = 5.0f;
 
-    return (RetDistance * aggroRate);
+    return (retDistance * aggroRate);
 }
 
 float Creature::GetReachDistance(Unit const* unit) const
@@ -1786,11 +1786,10 @@ bool Creature::IsVisibleInGridForPlayer(Player* pl) const
     // Dead player see live creatures near own corpse
     if (isAlive())
     {
-        Corpse* corpse = pl->GetCorpse();
-        if (corpse)
+        if (Corpse* corpse = pl->GetCorpse())
         {
             // 20 - aggro distance for same level, 25 - max additional distance if player level less that creature level
-            if (corpse->IsWithinDistInMap(this, (20 + 25)*sWorld.getConfig(CONFIG_FLOAT_RATE_CREATURE_AGGRO)))
+            if (corpse->IsWithinDistInMap(this, (20.0f + 25.0f) * sWorld.GetCreatureAggroRate(this)))
                 return true;
         }
     }
@@ -1893,7 +1892,7 @@ bool Creature::CanInitiateAttack()
     if (isPassiveToHostile())
         return false;
 
-    if (m_aggroDelay != 0)
+    if (m_aggroDelay)
         return false;
 
     return true;

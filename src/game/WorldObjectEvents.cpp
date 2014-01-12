@@ -249,16 +249,16 @@ RelocationNotifyEvent::RelocationNotifyEvent(Unit& owner) : BasicEvent(WORLDOBJE
 
 bool RelocationNotifyEvent::Execute(uint64 /*e_time*/, uint32 /*p_time*/)
 {
-    float radius = MAX_CREATURE_ATTACK_RADIUS * sWorld.getConfig(CONFIG_FLOAT_RATE_CREATURE_AGGRO);
+    float radius = MAX_CREATURE_ATTACK_RADIUS * sWorld.GetCreatureAggroRate(&m_owner);
     if (m_owner.GetTypeId() == TYPEID_PLAYER)
     {
         MaNGOS::PlayerRelocationNotifier notify((Player&)m_owner);
-        Cell::VisitAllObjects(&m_owner,notify,radius);
+        Cell::VisitAllObjects(&m_owner, notify, radius);
     }
     else //if(m_owner.GetTypeId() == TYPEID_UNIT)
     {
         MaNGOS::CreatureRelocationNotifier notify((Creature&)m_owner);
-        Cell::VisitAllObjects(&m_owner,notify,radius);
+        Cell::VisitAllObjects(&m_owner, notify, radius);
     }
     m_owner._SetAINotifyScheduled(false);
     return true;
