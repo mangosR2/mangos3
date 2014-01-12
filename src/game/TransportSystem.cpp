@@ -217,7 +217,7 @@ void TransportInfo::SetLocalPosition(Position const& pos)
     m_transport.UpdateGlobalPositionOf(m_owner.GetObjectGuid(), pos);
 }
 
-WorldObject* TransportInfo::GetTransport() const 
+WorldObject* TransportInfo::GetTransport() const
 {
     return m_transport.GetOwner();
 }
@@ -253,7 +253,7 @@ void NotifyMapChangeBegin::operator() (WorldObject* obj) const
             if (!plr)
                 return;
             if (plr->isDead() && !plr->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_GHOST))
-                plr->ResurrectPlayer(1.0);
+                plr->ResurrectPlayer(100);
             if (plr->GetSession() && m_oldloc.GetMapId() != m_loc.GetMapId())
             {
                 WorldPacket data(SMSG_NEW_WORLD, 4);
@@ -294,7 +294,7 @@ void NotifyMapChangeEnd::operator() (WorldObject* obj) const
 
 void SendCurrentTransportDataWithHelper::operator() (WorldObject* object) const
 {
-    if (!object || 
+    if (!object ||
         object->GetObjectGuid() == m_player->GetObjectGuid() ||
         !m_player->HaveAtClient(object->GetObjectGuid()))
         return;

@@ -2067,7 +2067,7 @@ void Player::ProcessDelayedOperations()
 
     if (m_DelayedOperations & DELAYED_RESURRECT_PLAYER)
     {
-        ResurrectPlayer(0.0f, false);
+        ResurrectPlayer(0, false);
 
         if (GetMaxHealth() > m_resurrectHealth)
             SetHealth(m_resurrectHealth);
@@ -4568,9 +4568,9 @@ void Player::BuildPlayerRepop()
     SetByteValue(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_ALWAYS_STAND);
 }
 
-void Player::ResurrectPlayer(float restore_percent, bool applySickness)
+void Player::ResurrectPlayer(float restorePercent, bool applySickness)
 {
-    WorldPacket data(SMSG_DEATH_RELEASE_LOC, 4*4);          // remove spirit healer position
+    WorldPacket data(SMSG_DEATH_RELEASE_LOC, 4 * 4);        // remove spirit healer position
     data << uint32(-1);
     data << float(0);
     data << float(0);
@@ -4597,13 +4597,16 @@ void Player::ResurrectPlayer(float restore_percent, bool applySickness)
 
     m_deathTimer = 0;
 
+    if (restorePercent > 100)
+        restorePercent = 100;
+
     // set health/powers (0- will be set in caller)
-    if (restore_percent > 0.0f)
+    if (restorePercent > 0)
     {
-        SetHealth(uint32(GetMaxHealth()*restore_percent));
-        SetPower(POWER_MANA, uint32(GetMaxPower(POWER_MANA)*restore_percent));
+        SetHealth(GetMaxHealth() * restorePercent / 100);
+        SetPower(POWER_MANA, GetMaxPower(POWER_MANA) * restorePercent / 100);
         SetPower(POWER_RAGE, 0);
-        SetPower(POWER_ENERGY, uint32(GetMaxPower(POWER_ENERGY)*restore_percent));
+        SetPower(POWER_ENERGY, GetMaxPower(POWER_ENERGY) * restorePercent / 100);
     }
 
     // trigger update zone for alive state zone updates
@@ -4976,7 +4979,7 @@ void Player::RepopAtGraveyard()
     // Such zones are considered unreachable as a ghost and the player must be automatically revived
     if ((!isAlive() && zone && (zone->flags & AREA_FLAG_NEED_FLY)) || IsOnTransport() || GetPositionZ() < -500.0f)
     {
-        ResurrectPlayer(0.5f);
+        ResurrectPlayer(50);
         SpawnCorpseBones();
     }
 
@@ -16573,7 +16576,7 @@ void Player::LoadCorpse()
         else
         {
             // Prevent Dead Player login without corpse
-            ResurrectPlayer(0.5f);
+            ResurrectPlayer(50);
         }
     }
 }
@@ -21747,7 +21750,7 @@ void Player::ResurectUsingRequestData()
         return;
     }
 
-    ResurrectPlayer(0.0f, false);
+    ResurrectPlayer(0, false);
 
     if (GetMaxHealth() > m_resurrectHealth)
         SetHealth(m_resurrectHealth);
@@ -24305,7 +24308,7 @@ bool Player::CheckTransferPossibility(AreaTrigger const*& at, bool b_onlyMainReq
             }
 
             // now we can resurrect player, and then check teleport requirements
-            ResurrectPlayer(0.5f);
+            ResurrectPlayer(50);
             SpawnCorpseBones();
         }
     }

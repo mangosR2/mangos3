@@ -166,7 +166,7 @@ namespace MaNGOS
                 {
                     guid = i_source->GetObjectGuid();
                     pName = i_source->GetName();
-                } 
+                }
                 ChatHandler::BuildChatPacket(data, i_msgtype, str, LANG_UNIVERSAL, CHAT_TAG_NONE, ObjectGuid(), NULL, guid, pName);
             }
         private:
@@ -866,7 +866,7 @@ void BattleGround::EndBattleGround(Team winner)
 
         if (!plr->isAlive())
         {
-            plr->ResurrectPlayer(1.0f);
+            plr->ResurrectPlayer(100);
             plr->SpawnCorpseBones();
         }
         else
@@ -1150,7 +1150,7 @@ void BattleGround::RemovePlayerAtLeave(ObjectGuid guid, bool Transport, bool Sen
 
         if (!plr->isAlive())                                // resurrect on exit
         {
-            plr->ResurrectPlayer(1.0f);
+            plr->ResurrectPlayer(100);
             plr->SpawnCorpseBones();
         }
     }

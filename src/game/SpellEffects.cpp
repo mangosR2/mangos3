@@ -12783,7 +12783,7 @@ void Spell::EffectSelfResurrect(SpellEffectIndex eff_idx)
     }
 
     Player *plr = ((Player*)unitTarget);
-    plr->ResurrectPlayer(0.0f);
+    plr->ResurrectPlayer(0);
 
     plr->SetHealth( health );
     plr->SetPower(POWER_MANA, mana );
@@ -13387,7 +13387,7 @@ void Spell::EffectSpiritHeal(SpellEffectIndex /*eff_idx*/)
     if (m_spellInfo->Id == 22012 && !unitTarget->HasAura(2584))
         return;
 
-    ((Player*)unitTarget)->ResurrectPlayer(1.0f);
+    ((Player*)unitTarget)->ResurrectPlayer(100);
     ((Player*)unitTarget)->SpawnCorpseBones();
 
     ((Player*)unitTarget)->CastSpell(unitTarget, 6962, true);
