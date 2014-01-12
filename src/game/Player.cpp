@@ -15728,6 +15728,15 @@ bool Player::LoadFromDB(ObjectGuid guid, SqlQueryHolder* holder)
         return false;
     }
 
+    m_atLoginFlags = fields[33].GetUInt32();
+
+    if (HasAtLoginFlag(AT_LOGIN_RENAME))
+    {
+        delete result;
+        sLog.outError("Player::LoadFromDB: %s tried to login while forced to rename, can't load.", GetGuidStr().c_str());
+        return false;
+    }
+
     // overwrite possible wrong/corrupted guid
     SetGuidValue(OBJECT_FIELD_GUID, guid);
 
@@ -16078,8 +16087,6 @@ bool Player::LoadFromDB(ObjectGuid guid, SqlQueryHolder* holder)
         sLog.outError("Player can have not more %u stable slots, but have in DB %u", MAX_PET_STABLES, uint32(m_stableSlots));
         m_stableSlots = MAX_PET_STABLES;
     }
-
-    m_atLoginFlags = fields[33].GetUInt32();
 
     // Honor system
     // Update Honor kills data
