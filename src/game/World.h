@@ -695,6 +695,8 @@ class World
         void setDisabledMapIdForDungeonFinder(const char* areas);
         bool IsDungeonMapIdDisable(uint32 mapId);
 
+        void InvalidatePlayer(ObjectGuid const& guid);
+
     protected:
         void _UpdateGameTime();
 
