@@ -286,6 +286,8 @@ class PetAura;
 class Totem;
 class VehicleInfo;
 
+typedef int8 SeatId;
+
 struct SpellImmune
 {
     uint32 type;
@@ -771,7 +773,7 @@ class MovementInfo
 
         // Position manipulations
         Position const* GetPos() const { return &pos; }
-        void SetTransportData(ObjectGuid guid, Position const& pos, uint32 time, int8 seat, VehicleSeatEntry const* seatInfo = NULL)
+        void SetTransportData(ObjectGuid guid, Position const& pos, uint32 time, SeatId seat, VehicleSeatEntry const* seatInfo = NULL)
         {
             t_guid = guid;
             t_pos = pos;
@@ -794,7 +796,7 @@ class MovementInfo
         ObjectGuid const& GetGuid() const { return guid; }
         ObjectGuid const& GetTransportGuid() const { return t_guid; }
         Position const* GetTransportPos() const { return &t_pos; }
-        int8 GetTransportSeat() const { return t_seat; }
+        SeatId GetTransportSeat() const { return t_seat; }
 
         uint32 GetTransportDBCSeat() const { return t_seatInfo ? t_seatInfo->m_ID : 0; }
         uint32 GetVehicleSeatFlags() const { return t_seatInfo ? t_seatInfo->m_flags : 0; }
@@ -880,7 +882,7 @@ class MovementInfo
         ObjectGuid t_guid;
         Position t_pos;
         uint32   t_time;
-        int8     t_seat;
+        SeatId     t_seat;
         VehicleSeatEntry const* t_seatInfo;
         uint32   t_time2;
         // swimming and flying

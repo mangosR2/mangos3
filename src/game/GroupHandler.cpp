@@ -205,6 +205,8 @@ void WorldSession::HandleGroupInviteOpcode(WorldPacket& recv_data)
             delete group;
             return;
         }
+        sObjectMgr.AddGroup(group);
+        DEBUG_LOG("WorldSession::HandleGroupInviteOpcode %s send invite to %s, try create %s.",GetPlayer()->GetObjectGuid().GetString().c_str(), player->GetObjectGuid().GetString().c_str(),group->GetObjectGuid().GetString().c_str());
     }
     else
     {
@@ -213,6 +215,7 @@ void WorldSession::HandleGroupInviteOpcode(WorldPacket& recv_data)
         {
             return;
         }
+        DEBUG_LOG("WorldSession::HandleGroupInviteOpcode %s send invite to %s",GetPlayer()->GetObjectGuid().GetString().c_str(), player->GetObjectGuid().GetString().c_str());
     }
 
     player->GetSession()->SendGroupInvite(_player);
@@ -226,7 +229,7 @@ void WorldSession::HandleGroupInviteResponseOpcode(WorldPacket& recv_data)
     if (unk)
         recv_data.read_skip<uint32>();
 
-    Group* group = GetPlayer()->GetGroupInvite();
+    Group* group = sObjectMgr.GetGroup(GetPlayer()->GetGroupInvite());
     if (!group)
         return;
 
@@ -268,20 +271,7 @@ void WorldSession::HandleGroupInviteResponseOpcode(WorldPacket& recv_data)
 
     }
     else
-    {
-        // uninvite, group can be deleted
-        GetPlayer()->UninviteFromGroup();
-
-        // remember leader if online
-        Player* leader = sObjectMgr.GetPlayer(group->GetLeaderGuid());
-        if (!leader || !leader->GetSession())
-            return;
-
-        // report
-        WorldPacket data(SMSG_GROUP_DECLINE, 10);             // guess size
-        data << GetPlayer()->GetName();
-        leader->GetSession()->SendPacket(&data);
-    }
+        DEBUG_LOG("WorldSession::HandleGroupAcceptOpcode %s accept %s invite.",GetPlayer()->GetObjectGuid().GetString().c_str(), group->GetObjectGuid().GetString().c_str());
 
     // Frozen Mod
     group->BroadcastGroupUpdate();
@@ -307,6 +297,8 @@ void WorldSession::HandleGroupUninviteGuidOpcode(WorldPacket & recv_data)
     if (!grp)
         return;
 
+    DEBUG_LOG("WorldSession::HandleGroupUninviteGuidOpcode %s tried to be uninvited from  %s",guid.GetString().c_str(), grp->GetObjectGuid().GetString().c_str());
+
     if (grp->IsMember(guid) && grp->isLFGGroup())
     {
         sLFGMgr.InitBoot(GetPlayer(), guid, reason);
@@ -322,7 +314,7 @@ void WorldSession::HandleGroupUninviteGuidOpcode(WorldPacket & recv_data)
 
     if (grp->IsMember(guid))
     {
-        Player::RemoveFromGroup(grp, guid);
+        grp->RemoveMember(guid, 0);
         return;
     }
 
@@ -351,11 +343,14 @@ void WorldSession::HandleGroupUninviteOpcode(WorldPacket & recv_data)
         return;
     }
 
+
     Group* grp = GetPlayer()->GetGroup();
     if (!grp)
         return;
 
     ObjectGuid guid = grp->GetMemberGuid(membername);
+
+    DEBUG_LOG("WorldSession::HandleGroupUninviteOpcode %s tried to be uninvited from  %s",guid.GetString().c_str(), grp->GetObjectGuid().GetString().c_str());
 
     if (grp->IsMember(guid) && grp->isLFGGroup())
     {
@@ -372,7 +367,7 @@ void WorldSession::HandleGroupUninviteOpcode(WorldPacket & recv_data)
 
     if (!guid.IsEmpty())
     {
-        Player::RemoveFromGroup(grp, guid);
+        grp->RemoveMember(guid, 0);
         return;
     }
 
@@ -394,7 +389,9 @@ void WorldSession::HandleGroupSetLeaderOpcode(WorldPacket& recv_data)
     if (!group)
         return;
 
-    Player *player = sObjectMgr.GetPlayer(guid);
+    Player* player = sObjectMgr.GetPlayer(guid);
+
+    DEBUG_LOG("WorldSession::HandleGroupSetLeaderOpcode: %s tried to be setted as leader of %s",guid.GetString().c_str(), group->GetObjectGuid().GetString().c_str());
 
     /** error handling **/
     if (!player || !group->IsLeader(GetPlayer()->GetObjectGuid()) || player->GetGroup() != group)
@@ -408,7 +405,7 @@ void WorldSession::HandleGroupSetLeaderOpcode(WorldPacket& recv_data)
 
 void WorldSession::HandleGroupDisbandOpcode(WorldPacket& /*recv_data*/)
 {
-    if (!GetPlayer()->GetGroup())
+    if (!GetPlayer()->GetGroupGuid())
         return;
 
     if (_player->InBattleGround())
@@ -417,8 +414,7 @@ void WorldSession::HandleGroupDisbandOpcode(WorldPacket& /*recv_data*/)
         return;
     }
 
-    /** error handling **/
-    /********************/
+    DEBUG_LOG("WorldSession::HandleGroupDisbandOpcode: %s tried to disband group",GetPlayer()->GetObjectGuid().GetString().c_str());
 
     // everything is fine, do it
     SendPartyResult(PARTY_OP_LEAVE, GetPlayer()->GetName(), ERR_PARTY_RESULT_OK);

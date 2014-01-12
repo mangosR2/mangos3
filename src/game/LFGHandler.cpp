@@ -232,10 +232,10 @@ void WorldSession::HandleLfgPlayerLockInfoRequestOpcode(WorldPacket& recv_data)
     }
     else
     {
-        uint8 done = 0;
         data << uint8(rsize);                               // Random Dungeon count
         for (LFGDungeonSet::const_iterator itr = randomlist.begin(); itr != randomlist.end(); ++itr)
         {
+            uint8 done = 0;
             data << uint32((*itr)->Entry());                     // Entry
             LFGReward const* reward = sLFGMgr.GetRandomDungeonReward(*itr,GetPlayer());
             Quest const* quest = NULL;

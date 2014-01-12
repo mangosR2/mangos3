@@ -350,4 +350,12 @@ enum FieldFormat
 
 #define MAX_CLIENT_STAT_VALUE INT16_MAX
 
+#if defined (WIN32) || defined (WIN64)
+    #define MANGOSR2_ATOMIC_LOCK_BEGIN(lockHolder) while (InterlockedExchange<bool>(&lockHolder, true)) SwitchToThread()
+    #define MANGOSR2_ATOMIC_LOCK_END(lockHolder) InterlockedExchange<bool>(&lockHolder, false)
+#else
+    #define MANGOSR2_ATOMIC_LOCK_BEGIN(lockHolder) while (__sync_bool_compare_and_swap(&lockHolder, false, true)) sched_yield()
+    #define MANGOSR2_ATOMIC_LOCK_END(lockHolder) __sync_bool_compare_and_swap(&lockHolder, true, false)
+#endif
+
 #endif
