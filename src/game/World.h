@@ -28,6 +28,7 @@
 #include "Timer.h"
 #include "Policies/Singleton.h"
 #include "SharedDefines.h"
+#include "ObjectGuid.h"
 #include "ObjectLock.h"
 #include "Util.h"
 
@@ -36,9 +37,10 @@
 #include <list>
 
 class Object;
+class Unit;
+class Player;
 class WorldPacket;
 class WorldSession;
-class Player;
 class Weather;
 class SqlResultQueue;
 class QueryResult;
