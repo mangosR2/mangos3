@@ -5511,7 +5511,7 @@ void Aura::HandleModStealth(bool apply, bool Real)
 
 void Aura::HandleInvisibility(bool apply, bool Real)
 {
-    Unit *target = GetTarget();
+    Unit* target = GetTarget();
 
     if (apply)
     {
@@ -5519,11 +5519,16 @@ void Aura::HandleInvisibility(bool apply, bool Real)
 
         target->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_IMMUNE_OR_LOST_SELECTION);
 
-        if (Real && target->GetTypeId()==TYPEID_PLAYER)
+        if (Real && target->GetTypeId() == TYPEID_PLAYER)
         {
-            // apply glow vision
-            target->SetByteFlag(PLAYER_FIELD_BYTES2, 3, PLAYER_FIELD_BYTE2_INVISIBILITY_GLOW);
-
+            Player* pPlayer = (Player*)target;
+            // do not apply during arena preparation
+            // glow vision shouldn't be active during arena preparation
+            if (!pPlayer->GetMap()->IsBattleArena() || (!pPlayer->GetBattleGround() || !(pPlayer->GetBattleGround()->GetStatus() == STATUS_WAIT_JOIN)))
+            {
+                // apply glow vision
+                target->SetByteFlag(PLAYER_FIELD_BYTES2, 3, PLAYER_FIELD_BYTE2_INVISIBILITY_GLOW);
+            }
         }
 
         // apply only if not in GM invisibility and not stealth
@@ -5539,7 +5544,7 @@ void Aura::HandleInvisibility(bool apply, bool Real)
         // recalculate value at modifier remove (current aura already removed)
         target->m_invisibilityMask = 0;
         Unit::AuraList const& auras = target->GetAurasByType(SPELL_AURA_MOD_INVISIBILITY);
-        for(Unit::AuraList::const_iterator itr = auras.begin(); itr != auras.end(); ++itr)
+        for (Unit::AuraList::const_iterator itr = auras.begin(); itr != auras.end(); ++itr)
             target->m_invisibilityMask |= (1 << (*itr)->GetModifier()->m_miscvalue);
 
         // only at real aura remove and if not have different invisibility auras.
