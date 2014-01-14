@@ -14,7 +14,7 @@ class BIHWrap
         RayCallback& cb;
         const T *const* objects;
 
-        MDLCallback(RayCallback& callback, const T * const* objects_array ) : cb(callback), objects(objects_array){}
+        MDLCallback(RayCallback& callback, const T * const* objects_array) : cb(callback), objects(objects_array){}
 
         bool operator() (const Ray& r, uint32 Idx, float &MaxDist, bool /*stopAtFirst*/)
         {

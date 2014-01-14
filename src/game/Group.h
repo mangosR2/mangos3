@@ -206,9 +206,9 @@ class Roll : public LootValidatorRef
             : lootedTargetGUID(_lootedTragetGuid), itemid(li.itemid), itemRandomPropId(li.randomPropertyId), itemRandomSuffix(li.randomSuffix),
             itemCount(li.count), totalPlayersRolling(0), totalNeed(0), totalGreed(0), totalPass(0), itemSlot(0),
             m_method(method), m_commonVoteMask(ROLL_VOTE_MASK_ALL) {}
-        ~Roll() { }
+        ~Roll() {}
         void setLoot(Loot *pLoot) { link(pLoot, this); }
-        Loot *getLoot() { return getTarget(); }
+        Loot* getLoot() { return getTarget(); }
         void targetObjectBuildLink() override;
 
         void CalculateCommonVoteMask(uint32 max_enchanting_skill);
@@ -259,11 +259,11 @@ class MANGOS_DLL_SPEC Group
         typedef MemberSlotList::const_iterator member_citerator;
         typedef MemberSlotList::iterator       member_witerator;
 
-        typedef UNORDERED_MAP< uint32 /*mapId*/, InstanceGroupBind> BoundInstancesMap;
+        typedef UNORDERED_MAP<uint32 /*mapId*/, InstanceGroupBind> BoundInstancesMap;
 
     protected:
         typedef UNORDERED_SET<Player*> InvitesList;
-        typedef std::vector<Roll*> Rolls;
+        typedef std::vector<Roll*> TRolls;
 
     public:
         Group(GroupType type);
@@ -417,7 +417,6 @@ class MANGOS_DLL_SPEC Group
         BoundInstancesMap& GetBoundInstances(Difficulty difficulty) { return m_boundInstances[difficulty]; }
 
         // LFG
-        LFGGroupState* GetLFGGroupState() { return &m_LFGState; };
         bool ConvertToLFG(LFGType type);
         bool isLFDGroup()  const { return m_groupType & GROUPTYPE_LFD; }
         bool isLFGGroup()  const { return ((m_groupType & GROUPTYPE_LFD) && !(m_groupType & GROUPTYPE_RAID)) ; }
@@ -485,8 +484,8 @@ class MANGOS_DLL_SPEC Group
 
         uint32 GetMaxSkillValueForGroup(SkillType skill);
 
-        void CountTheRoll(Rolls::iterator& roll);           // iterator update to next, in CountRollVote if true
-        bool CountRollVote(ObjectGuid const& playerGUID, Rolls::iterator& roll, RollVote vote);
+        void CountTheRoll(TRolls::iterator& roll);                    // iterator update to next, in CountRollVote if true
+        bool CountRollVote(ObjectGuid const& playerGUID, TRolls::iterator& roll, RollVote vote);
 
         ObjectGuid          m_Guid;
         MemberSlotList      m_memberSlots;
@@ -503,11 +502,10 @@ class MANGOS_DLL_SPEC Group
         LootMethod          m_lootMethod;
         ItemQualities       m_lootThreshold;
         ObjectGuid          m_looterGuid;
-        Rolls               RollId;
+        TRolls*             m_rollIds;
         BoundInstancesMap   m_boundInstances[MAX_DIFFICULTY];
         uint8*              m_subGroupsCounts;
-        LFGGroupState       m_LFGState;
-
         uint32              m_waitLeaderTimer;
+
 };
 #endif

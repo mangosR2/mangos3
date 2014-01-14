@@ -45,10 +45,6 @@ namespace VMAP
         {
             delete i->second;
         }
-        for (ModelFileMap::iterator i = iLoadedModelFiles.begin(); i != iLoadedModelFiles.end(); ++i)
-        {
-            delete i->second.getModel();
-        }
     }
 
     //=========================================================
@@ -147,7 +143,7 @@ namespace VMAP
         if (instanceTree != iInstanceMapTrees.end())
         {
             // Don't calculate hit position, if wrong src/dest points provided!
-            if (!VMAP::CheckPosition(x1,y1,z1) || !VMAP::CheckPosition(x2,y2,z2))
+            if (!VMAP::CheckPosition(x1, y1, z1) || !VMAP::CheckPosition(x2, y2, z2))
                 return false;
 
             Vector3 pos1 = convertPositionToInternalRep(x1, y1, z1);
@@ -173,7 +169,7 @@ namespace VMAP
         if (isLineOfSightCalcEnabled())
         {
             // Don't calculate hit position, if wrong src/dest points provided!
-            if (!VMAP::CheckPosition(x1,y1,z1) || !VMAP::CheckPosition(x2,y2,z2))
+            if (!VMAP::CheckPosition(x1, y1, z1) || !VMAP::CheckPosition(x2, y2, z2))
                 return false;
 
             InstanceTreeMap::iterator instanceTree = iInstanceMapTrees.find(pMapId);
@@ -183,7 +179,7 @@ namespace VMAP
                 Vector3 pos2 = convertPositionToInternalRep(x2, y2, z2);
                 Vector3 resultPos;
                 result = instanceTree->second->getObjectHitPos(pos1, pos2, resultPos, pModifyDist);
-                resultPos = convertPositionToInternalRep(resultPos.x,resultPos.y,resultPos.z);
+                resultPos = convertPositionToInternalRep(resultPos.x, resultPos.y, resultPos.z);
                 rx = resultPos.x;
                 ry = resultPos.y;
                 rz = resultPos.z;
@@ -238,7 +234,7 @@ namespace VMAP
         if (instanceTree != iInstanceMapTrees.end())
         {
             // Don't calculate hit position, if wrong src/dest points provided!
-            if (!VMAP::CheckPosition(x,y,z))
+            if (!VMAP::CheckPosition(x, y, z))
                 return false;
 
             LocationInfo info;
@@ -246,7 +242,7 @@ namespace VMAP
             if (instanceTree->second->GetLocationInfo(pos, info))
             {
                 floor = info.ground_Z;
-                type = info.hitModel->GetLiquidType();
+                type = info.hitModel->GetLiquidType();  // entry from LiquidType.dbc
                 if (ReqLiquidType && !(type & ReqLiquidType))
                     return false;
                 if (info.hitInstance->GetLiquidLevel(pos, info, level))
@@ -258,41 +254,47 @@ namespace VMAP
 
     //=========================================================
 
-    WorldModel* VMapManager2::acquireModelInstance(const std::string& basepath, const std::string& filename)
+    WorldModelPtr VMapManager2::acquireModelInstance(std::string const& basepath, std::string const& filename)
     {
-        ModelFileMap::iterator model = iLoadedModelFiles.find(filename);
+        ModelFileMap::iterator model = getModelInstance(filename);
         if (model == iLoadedModelFiles.end())
         {
-            WorldModel* worldmodel = new WorldModel();
+            WorldModelPtr worldmodel = WorldModelPtr(new WorldModel());
             if (!worldmodel->readFile(basepath + filename + ".vmo"))
             {
-                ERROR_LOG("VMapManager2: could not load '%s%s.vmo'!", basepath.c_str(), filename.c_str());
-                delete worldmodel;
-                return NULL;
+                ERROR_LOG("VMapManager2::acquireModelInstance could not load '%s%s.vmo'!", basepath.c_str(), filename.c_str());
+                return WorldModelPtr();
             }
-            DEBUG_FILTER_LOG(LOG_FILTER_MAP_LOADING, "VMapManager2: loading file '%s%s'.", basepath.c_str(), filename.c_str());
-            model = iLoadedModelFiles.insert(std::pair<std::string, ManagedModel>(filename, ManagedModel())).first;
-            model->second.setModel(worldmodel);
+            DEBUG_FILTER_LOG(LOG_FILTER_MAP_LOADING, "VMapManager2::acquireModelInstance loading file '%s%s'.", basepath.c_str(), filename.c_str());
+            WriteGuard Guard(GetLock());
+            model = (iLoadedModelFiles.insert(ModelFileMap::value_type(filename, worldmodel))).first;
         }
-        model->second.incRefCount();
-        return model->second.getModel();
+        return model->second;
     }
 
-    void VMapManager2::releaseModelInstance(const std::string& filename)
+    void VMapManager2::releaseModelInstance(std::string const& filename)
     {
-        ModelFileMap::iterator model = iLoadedModelFiles.find(filename);
+        ModelFileMap::iterator model = getModelInstance(filename);
         if (model == iLoadedModelFiles.end())
         {
-            ERROR_LOG("VMapManager2: trying to unload non-loaded file '%s'!", filename.c_str());
+            DEBUG_FILTER_LOG(LOG_FILTER_MAP_LOADING,"VMapManager2::releaseModelInstance concurrent unloading file %s", filename.c_str());
             return;
         }
-        if (model->second.decRefCount() == 0)
+        if (model->second.count() == 0)
         {
-            DEBUG_FILTER_LOG(LOG_FILTER_MAP_LOADING, "VMapManager2: unloading file '%s'", filename.c_str());
-            delete model->second.getModel();
+            DEBUG_FILTER_LOG(LOG_FILTER_MAP_LOADING, "VMapManager2::releaseModelInstance unloading file '%s'", filename.c_str());
+            WriteGuard Guard(GetLock());
             iLoadedModelFiles.erase(model);
+            // model be auto-erased after method finish
         }
     }
+
+    ModelFileMap::iterator VMapManager2::getModelInstance(std::string const& filename)
+    {
+        ReadGuard Guard(GetLock());
+        return iLoadedModelFiles.find(filename);
+    }
+
     //=========================================================
 
     bool VMapManager2::existsMap(const char* pBasePath, unsigned int pMapId, int x, int y)

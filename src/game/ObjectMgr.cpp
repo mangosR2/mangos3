@@ -8147,7 +8147,7 @@ bool ObjectMgr::LoadMangosStrings(DatabaseType& db, char const* table, int32 min
         {
             data.SoundId     = fields[10].GetUInt32();
             data.Type        = fields[11].GetUInt32();
-            data.Language    = fields[12].GetUInt32();
+            data.LanguageId    = Language(fields[12].GetUInt32());
             data.Emote       = fields[13].GetUInt32();
 
             if (data.SoundId && !sSoundEntriesStore.LookupEntry(data.SoundId))
@@ -8156,13 +8156,13 @@ bool ObjectMgr::LoadMangosStrings(DatabaseType& db, char const* table, int32 min
                 data.SoundId = 0;
             }
 
-            if (!GetLanguageDescByID(data.Language))
+            if (!GetLanguageDescByID(data.LanguageId))
             {
-                _DoStringError(entry, "Entry %i in table `%s` using Language %u but Language does not exist.", entry, table, data.Language);
-                data.Language = LANG_UNIVERSAL;
+                _DoStringError(entry, "Entry %i in table `%s` using Language %u but Language does not exist.", entry, table, uint32(data.LanguageId));
+                data.LanguageId = LANG_UNIVERSAL;
             }
 
-            if (data.Type > CHAT_TYPE_ZONE_YELL)
+            if (data.Type >= CHAT_TYPE_MAX)
             {
                 _DoStringError(entry, "Entry %i in table `%s` has Type %u but this Chat Type does not exist.", entry, table, data.Type);
                 data.Type = CHAT_TYPE_SAY;
@@ -9239,25 +9239,46 @@ void ObjectMgr::LoadGameTele()
     sLog.outString(">> Loaded %u GameTeleports", count);
 }
 
-GameTele const* ObjectMgr::GetGameTele(const std::string& name) const
+GameTele const* ObjectMgr::GetGameTele(std::string const& name) const
 {
     // explicit name case
     std::wstring wname;
-    if(!Utf8toWStr(name,wname))
+    if (!Utf8toWStr(name, wname))
         return NULL;
 
     // converting string that we try to find to lower case
-    wstrToLower( wname );
+    wstrToLower(wname);
 
     // Alternative first GameTele what contains wnameLow as substring in case no GameTele location found
     const GameTele* alt = NULL;
-    for(GameTeleMap::const_iterator itr = m_GameTeleMap.begin(); itr != m_GameTeleMap.end(); ++itr)
-        if(itr->second.wnameLow == wname)
+    for (GameTeleMap::const_iterator itr = m_GameTeleMap.begin(); itr != m_GameTeleMap.end(); ++itr)
+    {
+        if (itr->second.wnameLow == wname)
             return &itr->second;
         else if (alt == NULL && itr->second.wnameLow.find(wname) != std::wstring::npos)
             alt = &itr->second;
+    }
 
     return alt;
+}
+
+GameTele const* ObjectMgr::GetGameTeleExactName(std::string const& name) const
+{
+    // explicit name case
+    std::wstring wname;
+    if (!Utf8toWStr(name, wname))
+        return NULL;
+
+    // converting string that we try to find to lower case
+    wstrToLower(wname);
+
+    for (GameTeleMap::const_iterator itr = m_GameTeleMap.begin(); itr != m_GameTeleMap.end(); ++itr)
+    {
+        if (itr->second.wnameLow == wname)
+            return &itr->second;
+    }
+
+    return NULL;
 }
 
 bool ObjectMgr::AddGameTele(GameTele& tele)
@@ -9265,8 +9286,10 @@ bool ObjectMgr::AddGameTele(GameTele& tele)
     // find max id
     uint32 new_id = 0;
     for (GameTeleMap::const_iterator itr = m_GameTeleMap.begin(); itr != m_GameTeleMap.end(); ++itr)
+    {
         if (itr->first > new_id)
             new_id = itr->first;
+    }
 
     // use next
     ++new_id;
@@ -9277,6 +9300,7 @@ bool ObjectMgr::AddGameTele(GameTele& tele)
     wstrToLower(tele.wnameLow);
 
     m_GameTeleMap[new_id] = tele;
+
     std::string safeName(tele.name);
     WorldDatabase.escape_string(safeName);
 
@@ -9284,24 +9308,24 @@ bool ObjectMgr::AddGameTele(GameTele& tele)
         "(id,position_x,position_y,position_z,orientation,map,name) "
         "VALUES (%u,%f,%f,%f,%f,%u,'%s')",
         new_id, tele.loc.x, tele.loc.y, tele.loc.z,
-        tele.loc.orientation, tele.loc.GetMapId(), safeName.c_str());
+        tele.loc.o, tele.loc.GetMapId(), safeName.c_str());
 }
 
 bool ObjectMgr::DeleteGameTele(const std::string& name)
 {
     // explicit name case
     std::wstring wname;
-    if(!Utf8toWStr(name,wname))
+    if (!Utf8toWStr(name, wname))
         return false;
 
     // converting string that we try to find to lower case
-    wstrToLower( wname );
+    wstrToLower(wname);
 
-    for(GameTeleMap::iterator itr = m_GameTeleMap.begin(); itr != m_GameTeleMap.end(); ++itr)
+    for (GameTeleMap::iterator itr = m_GameTeleMap.begin(); itr != m_GameTeleMap.end(); ++itr)
     {
-        if(itr->second.wnameLow == wname)
+        if (itr->second.wnameLow == wname)
         {
-            WorldDatabase.PExecuteLog("DELETE FROM game_tele WHERE name = '%s'",itr->second.name.c_str());
+            WorldDatabase.PExecuteLog("DELETE FROM game_tele WHERE name = '%s'", itr->second.name.c_str());
             m_GameTeleMap.erase(itr);
             return true;
         }

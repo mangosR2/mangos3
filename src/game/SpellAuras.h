@@ -427,22 +427,22 @@ class MANGOS_DLL_SPEC Aura
         ObjectGuid const& GetAffectiveCasterGuid() const;
         Unit* GetAffectiveCaster() const { return ( GetHolder() ? GetHolder()->GetAffectiveCaster() : NULL); }
 
-        SpellEffectIndex GetEffIndex() const{ return m_effIndex; }
+        SpellEffectIndex GetEffIndex() const { return m_effIndex; }
         int32 GetBasePoints() const { return m_currentBasePoints; }
 
-        int32 GetAuraMaxDuration() const { return GetHolder()->GetAuraMaxDuration(); }
-        int32 GetAuraDuration() const { return GetHolder()->GetAuraDuration(); }
+        int32 GetAuraMaxDuration() const { return GetHolder() ? GetHolder()->GetAuraMaxDuration() : 0; }
+        int32 GetAuraDuration() const { return GetHolder() ? GetHolder()->GetAuraDuration() : 0; }
         time_t GetAuraApplyTime() const { return m_applyTime; }
         uint32 GetAuraTicks() const { return m_periodicTick; }
         uint32 GetAuraMaxTicks() const
         {
             int32 maxDuration = GetAuraMaxDuration();
-            return maxDuration > 0 && m_modifier.periodictime > 0 ? maxDuration / m_modifier.periodictime : 0;
+            return (maxDuration > 0 && m_modifier.periodictime > 0) ? maxDuration / m_modifier.periodictime : 0;
         }
 
         void SetAuraPeriodicTimer(int32 timer) { m_modifier.periodictime = timer;}
 
-        uint32 GetStackAmount() const { return GetHolder()->GetStackAmount(); }
+        uint32 GetStackAmount() const { return GetHolder() ? GetHolder()->GetStackAmount() : 0; }
         void SetLoadedState(int32 damage, uint32 periodicTime)
         {
             m_modifier.m_amount = damage;
@@ -489,9 +489,8 @@ class MANGOS_DLL_SPEC Aura
         bool isAffectedOnSpell(SpellEntry const *spell) const;
         bool CanProcFrom(SpellEntry const *spell, uint32 procFlag, uint32 EventProcEx, uint32 procEx, bool active, bool useClassMask) const;
 
-        //SpellAuraHolder const* GetHolder() const { return m_spellHolder; }
         SpellAuraHolderPtr GetHolder() { return m_spellAuraHolder; }
-        SpellAuraHolderPtr const GetHolder() const { return m_spellAuraHolder; }
+        SpellAuraHolderPtr GetHolder() const { return m_spellAuraHolder; }
         AuraClassType const GetAuraClassType() const { return m_classType; }
 
         bool IsLastAuraOnHolder();

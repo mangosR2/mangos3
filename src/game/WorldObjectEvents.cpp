@@ -36,6 +36,7 @@
 WorldObjectEventProcessor::WorldObjectEventProcessor()
 {
     //m_time = WorldTimer::getMSTime();
+    WriteGuard Guard(GetLock());
     m_events.clear();
 }
 
@@ -44,15 +45,19 @@ void WorldObjectEventProcessor::Update(uint32 p_time, bool force)
     if (force)
         RenewEvents();
 
+    ReadGuard Guard(GetLock());
     EventProcessor::Update(p_time);
 }
 
 void WorldObjectEventProcessor::KillAllEvents(bool force)
 {
     if (force)
+    {
         RenewEvents();
-
-    EventProcessor::KillAllEvents(force);
+        EventProcessor::KillAllEvents(force);
+    }
+    else
+        SetNeedKill(true);
 }
 
 void WorldObjectEventProcessor::AddEvent(BasicEvent* Event, uint64 e_time, bool set_addtime)
@@ -67,6 +72,14 @@ void WorldObjectEventProcessor::AddEvent(BasicEvent* Event, uint64 e_time, bool 
 void WorldObjectEventProcessor::RenewEvents()
 {
     bool needInsert;
+    WriteGuard Guard(GetLock());
+
+    if (IsNeedKill())
+    {
+        EventProcessor::KillAllEvents(false);
+        SetNeedKill(false);
+    }
+
     while (!m_queue.empty())
     {
         if (m_queue.front().second)
@@ -105,8 +118,7 @@ void WorldObjectEventProcessor::RenewEvents()
 
 void WorldObjectEventProcessor::CleanupEventList()
 {
-    KillAllEvents(true);
-    m_aborting = false;
+    KillAllEvents(false);
 }
 
 // Spell events
@@ -237,16 +249,16 @@ RelocationNotifyEvent::RelocationNotifyEvent(Unit& owner) : BasicEvent(WORLDOBJE
 
 bool RelocationNotifyEvent::Execute(uint64 /*e_time*/, uint32 /*p_time*/)
 {
-    float radius = MAX_CREATURE_ATTACK_RADIUS * sWorld.getConfig(CONFIG_FLOAT_RATE_CREATURE_AGGRO);
+    float radius = MAX_CREATURE_ATTACK_RADIUS * sWorld.GetCreatureAggroRate(&m_owner);
     if (m_owner.GetTypeId() == TYPEID_PLAYER)
     {
         MaNGOS::PlayerRelocationNotifier notify((Player&)m_owner);
-        Cell::VisitAllObjects(&m_owner,notify,radius);
+        Cell::VisitAllObjects(&m_owner, notify, radius);
     }
     else //if(m_owner.GetTypeId() == TYPEID_UNIT)
     {
         MaNGOS::CreatureRelocationNotifier notify((Creature&)m_owner);
-        Cell::VisitAllObjects(&m_owner,notify,radius);
+        Cell::VisitAllObjects(&m_owner, notify, radius);
     }
     m_owner._SetAINotifyScheduled(false);
     return true;
@@ -517,8 +529,8 @@ bool BGQueueInviteEvent::Execute(uint64 /*e_time*/, uint32 /*p_time*/)
         if (bgQueue.IsPlayerInvited(m_PlayerGuid, m_BgInstanceGUID, m_RemoveTime))
         {
             WorldPacket data;
-            // we must send remaining time in queue
-            sBattleGroundMgr.BuildBattleGroundStatusPacket(&data, bg, plr, queueSlot, STATUS_WAIT_JOIN, INVITE_ACCEPT_WAIT_TIME - INVITATION_REMIND_TIME, 0, m_ArenaType);
+            //we must send remaining time in queue
+            sBattleGroundMgr.BuildBattleGroundStatusPacket(&data, bg, plr, queueSlot, STATUS_WAIT_JOIN, INVITE_ACCEPT_WAIT_TIME - INVITATION_REMIND_TIME, 0, m_ArenaType, TEAM_NONE);
             plr->GetSession()->SendPacket(&data);
         }
     }
@@ -571,7 +583,7 @@ bool BGQueueRemoveEvent::Execute(uint64 /*e_time*/, uint32 /*p_time*/)
                 sBattleGroundMgr.ScheduleQueueUpdate(0, ARENA_TYPE_NONE, m_BgQueueTypeId, m_BgTypeId, bg->GetBracketId());
 
             WorldPacket data;
-            sBattleGroundMgr.BuildBattleGroundStatusPacket(&data, bg, plr, queueSlot, STATUS_NONE, 0, 0, ARENA_TYPE_NONE);
+            sBattleGroundMgr.BuildBattleGroundStatusPacket(&data, bg, plr, queueSlot, STATUS_NONE, 0, 0, ARENA_TYPE_NONE, TEAM_NONE);
             plr->GetSession()->SendPacket(&data);
         }
     }

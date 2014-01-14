@@ -63,6 +63,7 @@ enum AchievementFlags
     ACHIEVEMENT_FLAG_BAR                    = 0x00000080,   // ACHIEVEMENT_FLAG_HAS_PROGRESS_BAR Show as progress bar (value / max vale) depend from other flag (by def use last criteria value)
     ACHIEVEMENT_FLAG_REALM_FIRST_REACH      = 0x00000100,   // ACHIEVEMENT_FLAG_SERVER_FIRST
     ACHIEVEMENT_FLAG_REALM_FIRST_KILL       = 0x00000200,   //
+    ACHIEVEMENT_FLAG_REALM_FIRST_RAID_REACH = 0x00000300,   // ACHIEVEMENT_FLAG_SERVER_FIRST_RAID
     ACHIEVEMENT_FLAG_UNK3                   = 0x00000400,   // ACHIEVEMENT_FLAG_HIDE_NAME_IN_TIE
     ACHIEVEMENT_FLAG_REALM_FIRST_GUILD      = 0x00000800,   // first guild on realm done something
     ACHIEVEMENT_FLAG_UNK4                   = 0x00001000,   // as guild group?

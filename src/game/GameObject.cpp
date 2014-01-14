@@ -583,12 +583,12 @@ void GameObject::UpdateSplineMovement(uint32 t_diff)
     {
         m_movesplineTimer.Reset(sWorld.getConfig(CONFIG_UINT32_POSITION_UPDATE_DELAY));
 
-        Position loc = movespline->ComputePosition();
+        Position pos = movespline->ComputePosition();
 
         if (IsBoarded())
-            GetTransportInfo()->SetLocalPosition(loc);
+            GetTransportInfo()->SetLocalPosition(pos);
         else
-            Relocate(loc);
+            GetMap()->Relocation(this, pos);
     }
 }
 
@@ -1881,7 +1881,7 @@ void GameObject::DealGameObjectDamage(uint32 damage, uint32 spellId, Unit* caste
     if (!damage)
         return;
 
-    WorldPacket data(SMSG_DESTRUCTIBLE_BUILDING_DAMAGE, 8+8+8+4+4);
+    WorldPacket data(SMSG_DESTRUCTIBLE_BUILDING_DAMAGE, GetPackGUID().size() + caster->GetPackGUID().size() + 9 + 4 + 4);
     data << GetPackGUID();
     data << caster->GetPackGUID();
     data << caster->GetCharmerOrOwnerOrSelf()->GetPackGUID();

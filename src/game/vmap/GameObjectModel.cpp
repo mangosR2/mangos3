@@ -41,7 +41,7 @@ ModelList model_list;
 
 void LoadGameObjectModelList()
 {
-    FILE * model_list_file = fopen((sWorld.GetDataPath() + "vmaps/" + VMAP::GAMEOBJECT_MODELS).c_str(), "rb");
+    FILE* model_list_file = fopen((sWorld.GetDataPath() + "vmaps/" + VMAP::GAMEOBJECT_MODELS).c_str(), "rb");
     if (!model_list_file)
         return;
 
@@ -49,8 +49,8 @@ void LoadGameObjectModelList()
     char buff[500];
     while (!feof(model_list_file))
     {
-        fread(&displayId,sizeof(uint32),1,model_list_file);
-        fread(&name_length,sizeof(uint32),1,model_list_file);
+        fread(&displayId, sizeof(uint32), 1, model_list_file);
+        fread(&name_length, sizeof(uint32), 1, model_list_file);
 
         if (name_length >= sizeof(buff))
         {
@@ -58,12 +58,12 @@ void LoadGameObjectModelList()
             break;
         }
 
-        fread(&buff,sizeof(char),name_length,model_list_file);
+        fread(&buff, sizeof(char), name_length, model_list_file);
         Vector3 v1, v2;
-        fread(&v1,sizeof(Vector3),1,model_list_file);
-        fread(&v2,sizeof(Vector3),1,model_list_file);
+        fread(&v1, sizeof(Vector3), 1, model_list_file);
+        fread(&v2, sizeof(Vector3), 1, model_list_file);
 
-        model_list.insert(ModelList::value_type( displayId, GameobjectModelData(std::string(buff,name_length),AABox(v1,v2)) ));
+        model_list.insert(ModelList::value_type(displayId, GameobjectModelData(std::string(buff, name_length), AABox(v1, v2))));
     }
     fclose(model_list_file);
 }
@@ -94,10 +94,10 @@ bool GameObjectModel::initialize(const GameObject* const pGo, const GameObjectDi
         return false;
 
     name = it->second.name;
-    iPos = Vector3(pGo->GetPositionX(),pGo->GetPositionY(),pGo->GetPositionZ());
+    iPos = Vector3(pGo->GetPositionX(), pGo->GetPositionY(), pGo->GetPositionZ());
     phasemask = pGo->GetPhaseMask();
     iScale = pGo->GetObjectScale();
-    iInvScale = 1.f/iScale;
+    iInvScale = 1.f / iScale;
 
     G3D::Matrix3 iRotation = G3D::Matrix3::fromEulerAnglesZYX(pGo->GetOrientation(), 0, 0);
     iInvRot = iRotation.inverse();
@@ -114,7 +114,7 @@ bool GameObjectModel::initialize(const GameObject* const pGo, const GameObjectDi
     for (int i = 0; i < 8; ++i)
     {
         Vector3 pos(iBound.corner(i));
-        if (Creature * c = const_cast<GameObject*>(pGo)->SummonCreature(24440, pos.x, pos.y, pos.z, 0, TEMPSUMMON_MANUAL_DESPAWN, 0))
+        if (Creature* c = const_cast<GameObject*>(pGo)->SummonCreature(24440, pos.x, pos.y, pos.z, 0.0f, TEMPSUMMON_MANUAL_DESPAWN, 0))
         {
             c->setFaction(35);
             c->SetObjectScale(0.1f);
@@ -146,6 +146,10 @@ bool GameObjectModel::intersectRay(const G3D::Ray& ray, float& MaxDist, bool Sto
     if (!(phasemask & ph_mask))
         return false;
 
+    WorldModelPtr tModel = iModel;
+    if (!tModel)
+        return false;
+
     float time = ray.intersectionTime(iBound);
     if (time == G3D::inf())
         return false;
@@ -155,7 +159,7 @@ bool GameObjectModel::intersectRay(const G3D::Ray& ray, float& MaxDist, bool Sto
     Ray modRay(p, iInvRot * ray.direction());
     float distance = MaxDist * iInvScale;
     bool hit = iModel->IntersectRay(modRay, distance, StopAtFirstHit);
-    if(hit)
+    if (hit)
     {
         distance *= iScale;
         MaxDist = distance;

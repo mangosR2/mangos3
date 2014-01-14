@@ -28,7 +28,7 @@
 #include "../GossipDef.h"
 #include "../Chat.h"
 #include "../Language.h"
-#include "../WaypointMovementGenerator.h"
+#include "../movementGenerators/WaypointMovementGenerator.h"
 #include "../Guild.h"
 #include "../World.h"
 
@@ -1138,7 +1138,7 @@ bool ChatHandler::HandlePlayerbotCommand(char* args)
     // end of gmconfig patch
     if (cmdStr == "add" || cmdStr == "login")
     {
-        if (mgr->GetPlayerBot(guid))
+        if (mgr->GetPlayerBot(guid) || sObjectMgr.GetPlayer(guid))
         {
             PSendSysMessage("Bot already exists in world.");
             SetSentErrorMessage(true);

@@ -26,22 +26,32 @@
 #endif
 
 #ifndef OBJECT_SAFE_HANDLER
-#  define OBJECT_SAFE_HANDLER(TYPE,NAME) typedef ACE_Refcounted_Auto_Ptr<TYPE,ACE_Thread_Mutex> NAME;
+#  define OBJECT_SAFE_HANDLER(TYPE,NAME) typedef ACE_Refcounted_Auto_Ptr<TYPE, MANGOSR2_MUTEX_MODEL_2> NAME;
 #endif
 
 class SpellAuraHolder;
 class UnitAction;
 class VehicleKit;
 class Map;
+class TerrainInfo;
+class GridMap;
+namespace VMAP { class WorldModel; };
 
 #ifndef NOTSAFE_SEMAPHORE_OVERHANDLING
+    OBJECT_SAFE_HANDLER(TerrainInfo,TerrainInfoPtr);
+    OBJECT_SAFE_HANDLER(GridMap,GridMapPtr);
     OBJECT_SAFE_HANDLER(SpellAuraHolder,SpellAuraHolderPtr);
+    OBJECT_SAFE_HANDLER(VMAP::WorldModel, WorldModelPtr);
+    OBJECT_SAFE_HANDLER(VehicleKit,VehicleKitPtr);
 #else
     OBJECT_HANDLER(SpellAuraHolder,SpellAuraHolderPtr);
+    OBJECT_HANDLER(TerrainInfo,TerrainInfoPtr);
+    OBJECT_HANDLER(GridMap,GridMapPtr);
+    OBJECT_HANDLER(VMAP::WorldModel, WorldModelPtr);
+    OBJECT_HANDLER(VehicleKit,VehicleKitPtr);
 #endif
 
 OBJECT_HANDLER(UnitAction,UnitActionPtr);
-OBJECT_HANDLER(VehicleKit,VehicleKitPtr);
 OBJECT_HANDLER(Map,MapPtr);
 
 #endif

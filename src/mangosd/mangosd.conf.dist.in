@@ -179,9 +179,6 @@ BindIP = "0.0.0.0"
 #        Disable mmap pathfinding on the listed maps.
 #        List of map ids with delimiter ','
 #
-#    UpdateUptimeInterval
-#        Update realm uptime period in minutes (for save data in 'uptime' table). Must be > 0
-#        Default: 10 (minutes)
 #
 #    MaxCoreStuckTime
 #        Periodically check if the process got freezed, if this is the case force crash after the specified
@@ -266,7 +263,6 @@ DetectPosCollision = 1
 TargetPosRecalculateRange = 1.5
 mmap.enabled = 1
 mmap.ignoreMapIds = ""
-UpdateUptimeInterval = 10
 MaxCoreStuckTime = 0
 AddonChannel = 1
 CleanCharacterDB = 1
@@ -1030,8 +1026,8 @@ LexicsCutterNoActionOnGM = 1
 #        min:     0.0  (default mangos method)
 #        max:     1.0  (full CrowdControl, auras like Fear not breaked by damage anyway)
 #
-#    ResilenceAlternativeCalculation
-#        enable/disable alternative resilence damage reduction calculation (for Avenger/Sanctified wrath mostly)
+#    ResilienceAlternativeCalculation
+#        enable/disable alternative resilience damage reduction calculation (for Avenger/Sanctified wrath mostly)
 #        Default: 0     (disable, default mangos style)
 #
 #    BlinkAnimationType
@@ -1060,6 +1056,11 @@ LexicsCutterNoActionOnGM = 1
 #        If the target level is greater than caster level, add to target additional resistance points.
 #        Default: 0 - disabled (don't add additional resistance points)
 #                 1 - enabled  (add to target 5 resistance points on each target over level)
+#
+#    PlayerCommands
+#        Should player chat be parsed for GM commands.
+#        Default: 1 (parse commands)
+#                 0 (ignore commands)
 #
 ###################################################################################################################
 
@@ -1141,12 +1142,13 @@ Motd = "Welcome to the Massive Network Game Object Server."
 Raid.MinLevel = 10
 CrowdControlHPBase = 0.1
 AllowTransferToCustomMap = 0
-ResilenceAlternativeCalculation = 0
+ResilienceAlternativeCalculation = 0
 BlinkAnimationType = 0
 FactiomAndRaceChangeWithoutRenaming = 0
 Realm.AlwaysMaxExpansion = 0
 Resistance.CalculationMethod = 1
 Resistance.AddByOverLevel = 0
+PlayerCommands = 1
 
 ###################################################################################################################
 # PLAYER INTERACTION
@@ -1212,14 +1214,10 @@ TalentsInspecting = 1
 #                 1 - notify
 #                 2 - both
 #
-#    AutoBroadcast.Timer
-#        Timer for auto broadcast
-#
 ###################################################################################################################
 
 AutoBroadcast.On = 0
 AutoBroadcast.Center = 0
-AutoBroadcast.Timer = 30000
 
 ###################################################################################################################
 # CREATURE AND GAMEOBJECT SETTINGS
@@ -1230,14 +1228,15 @@ AutoBroadcast.Timer = 30000
 #        Default: 100 yards
 #
 #    Rate.Creature.Aggro
+#    Rate.Creature.Aggro.Instance
 #        Aggro radius percent or off.
 #        Default: 1   - 100%
 #                 1.5 - 150%
 #                 0   - off (0%)
 #
 #    CreatureRespawnAggroDelay
-#        The delay in sec. between when a creature spawns and when it can be aggroed by nearby movement.
-#        Default: 5
+#        The delay between when a creature spawns and when it can be aggroed by nearby movement.
+#        Default: 5000 (5s)
 #
 #    CreatureFamilyFleeAssistanceRadius
 #        Radius which creature will use to seek for a near creature for assistance. Creature will flee to this creature.
@@ -1331,7 +1330,8 @@ AutoBroadcast.Timer = 30000
 
 ThreatRadius = 100
 Rate.Creature.Aggro = 1
-CreatureRespawnAggroDelay = 5
+Rate.Creature.Aggro.Instance = 1.0
+CreatureRespawnAggroDelay = 5000
 CreatureFamilyFleeAssistanceRadius = 30
 CreatureFamilyAssistanceRadius = 10
 CreatureFamilyAssistanceDelay = 1500
@@ -1604,6 +1604,7 @@ Visibility.AIRelocationNotifyDelay = 1000
 #         Default: 1
 #
 #    Rate.XP.Kill
+#    Rate.XP.PetKill
 #    Rate.XP.Quest
 #    Rate.XP.Explore
 #        XP rates
@@ -1749,6 +1750,7 @@ Rate.Drop.Money = 1
 Rate.Drop.Currency = 1
 Rate.Drop.Currency.Amount = 1
 Rate.XP.Kill    = 1
+Rate.XP.PetKill = 1
 Rate.XP.Quest   = 1
 Rate.XP.Explore = 1
 Rate.Rest.InGame = 1
@@ -2311,6 +2313,68 @@ VMSS.ContinentsSkip = 1
 ###################################################################################################################
 DuelReset.Enable = 0
 DuelReset.AreaIds = "12,14,4570"
+
+###################################################################################################################
+#    World timers
+#    Please, don't change defaults if not sure
+#
+#    Auctions.Timer (milliseconds)
+#        Timer for update auctions
+#        Default: 60000 (1 minute)
+#
+#    Weathers.Timer (milliseconds)
+#        Timer for update weaters in game
+#        Default: 60000 (1 minute)
+#
+#    UpdateUptimeInterval (minutes)
+#        Update realm uptime period in minutes (for save data in 'uptime' table). Must be > 0
+#        Default: 10 minutes
+#
+#    Corpse.Timer (minutes)
+#        Corpse delete timer
+#        Default: 20 minutes
+#
+#    CharDelete.Timer (hours)
+#        default interval for characters table cleanup from deleted chars
+#        Default: 8 hours
+#
+#    AHBot.Timer (milliseconds)
+#        Timer for update Auction bot
+#        Default: 20000 (20 seconds)
+#
+#    AutoBroadcast.Timer (milliseconds)
+#        Timer for auto broadcast
+#        Default: 30000 (30 seconds)
+#
+#    WorldState.Timer (milliseconds)
+#        Timer for update worldstates
+#        Default: 60000 (1 minute)
+#
+#    Calendar.Timer (milliseconds)
+#        Timer for update calendar events
+#        Default: 30000 (30 seconds)
+#
+#    Group.Timer (milliseconds)
+#        Timer for update group events
+#        Default: 1000 (1 second)
+#
+#    Terrain.Timer (milliseconds)
+#        Timer for cleanup terrains
+#        Default: 30000 (30 seconds)
+#
+###################################################################################################################
+
+Auctions.Timer       = 60000
+Weathers.Timer       = 60000
+UpdateUptimeInterval = 10
+Corpse.Timer         = 20
+CharDelete.Timer     = 8
+AHBot.Timer          = 20000
+AutoBroadcast.Timer  = 30000
+WorldState.Timer     = 60000
+Calendar.Timer       = 30000
+Groups.Timer         = 1000
+Terrain.Timer        = 30000
 
 ###################################################################################################################
 # CURRENCIES

@@ -330,14 +330,14 @@ class MANGOS_DLL_SPEC Map : public GridRefManager<NGridType>
         };
         bool ScriptsStart(ScriptMapMapName const& scripts, uint32 id, Object* source, Object* target, ScriptExecutionParam execParams = SCRIPT_EXEC_PARAM_NONE);
         void ScriptCommandStart(ScriptInfo const& script, uint32 delay, Object* source, Object* target);
+        ScriptAction* GetNextSheduledScript();
+        bool EraseScriptAction(ScriptAction* action);
 
         // must called with AddToWorld
         void AddToActive(WorldObject* obj);
         // must called with RemoveFromWorld
         void RemoveFromActive(WorldObject* obj);
-        GuidSet const& GetActiveObjects() const { return m_activeObjectsSafeCopy; };
-        void MakeActiveObjectsSafeCopy();
-
+        GuidQueue GetActiveObjects();
 
         Player* GetPlayer(ObjectGuid const& guid, bool globalSearch = false);
         Creature* GetCreature(ObjectGuid  const& guid);
@@ -362,19 +362,20 @@ class MANGOS_DLL_SPEC Map : public GridRefManager<NGridType>
         void AddUpdateObject(ObjectGuid const& guid);
         void RemoveUpdateObject(ObjectGuid const& guid);
         GuidSet const* GetObjectsUpdateQueue() { return &i_objectsToClientUpdate; };
+        ObjectGuid GetNextObjectFromUpdateQueue();
 
         // DynObjects currently
         uint32 GenerateLocalLowGuid(HighGuid guidhigh);
 
         //get corresponding TerrainData object for this particular map
-        const TerrainInfo * GetTerrain() const { return m_TerrainData; }
+        TerrainInfoPtr GetTerrain() const { return m_TerrainData; }
 
         void CreateInstanceData(bool load);
         InstanceData* GetInstanceData() const { return i_data; }
         uint32 GetScriptId() const { return i_script_id; }
 
-        void MonsterYellToMap(ObjectGuid guid, int32 textId, uint32 language, Unit const* target) const;
-        void MonsterYellToMap(CreatureInfo const* cinfo, int32 textId, uint32 language, Unit const* target, uint32 senderLowGuid = 0) const;
+        void MonsterYellToMap(ObjectGuid guid, int32 textId, Language language, Unit const* target) const;
+        void MonsterYellToMap(CreatureInfo const* cinfo, int32 textId, Language language, Unit const* target, uint32 senderLowGuid = 0) const;
         void PlayDirectSoundToMap(uint32 soundId, uint32 zoneId = 0) const;
 
         // Weather
@@ -491,7 +492,6 @@ class MANGOS_DLL_SPEC Map : public GridRefManager<NGridType>
         float m_VisibleDistance;
 
         MapRefManager m_mapRefManager;
-        MapRefManager::iterator m_mapRefIter;
 
         GuidSet m_activeObjects;
         GuidSet m_activeObjectsSafeCopy;
@@ -502,7 +502,7 @@ class MANGOS_DLL_SPEC Map : public GridRefManager<NGridType>
         NGridType* i_grids[MAX_NUMBER_OF_GRIDS][MAX_NUMBER_OF_GRIDS];
 
         //Shared geodata object with map coord info...
-        TerrainInfo* const m_TerrainData;
+        TerrainInfoPtr m_TerrainData;
         DynamicMapTree m_dyn_tree;
 
         bool m_bLoadedGrids[MAX_NUMBER_OF_GRIDS][MAX_NUMBER_OF_GRIDS];
@@ -605,19 +605,15 @@ class MANGOS_DLL_SPEC BattleGroundMap : public Map
 };
 
 template<class T, class CONTAINER>
-inline void
-Map::Visit(const Cell& cell, TypeContainerVisitor<T, CONTAINER> &visitor)
+inline void Map::Visit(Cell const& cell, TypeContainerVisitor<T, CONTAINER>& visitor)
 {
-    const uint32 x = cell.GridX();
-    const uint32 y = cell.GridY();
-    const uint32 cell_x = cell.CellX();
-    const uint32 cell_y = cell.CellY();
-
-    if (!cell.NoCreate() || loaded(GridPair(x,y)))
-    {
+    NGridType const* cgrid = getNGridWithoutLock(cell.GridX(), cell.GridY());
+    if (cell.NoCreate() && !IsGridObjectDataLoaded(cgrid))
+        return;
+    if (!IsGridObjectDataLoaded(cgrid))
         EnsureGridLoaded(cell);
-        getNGrid(x, y)->Visit(cell_x, cell_y, visitor);
-    }
+    NGridType& grid = *getNGrid(cell.GridX(), cell.GridY());
+    grid.Visit(cell.CellX(), cell.CellY(), visitor);
 }
 
 #endif

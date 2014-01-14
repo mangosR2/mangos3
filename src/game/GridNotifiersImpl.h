@@ -92,9 +92,8 @@ inline void MaNGOS::ObjectUpdater::Visit(CreatureMapType& m)
             lastUpdateTime > minUpdateTime)
             continue;
 
-        WorldObject::UpdateHelper helper(iter->getSource());
+        WorldObject::UpdateHelper helper(*iter->getSource());
         helper.Update(diffTime);
-        iter->getSource()->SetLastUpdateTime();
         visitCount++;
         if (visitCount > sWorld.getConfig(CONFIG_UINT32_MAPUPDATE_MAXVISITS))
             break;
@@ -105,7 +104,12 @@ inline void MaNGOS::ObjectUpdater::Visit(GameObjectMapType& m)
 {
     for (GameObjectMapType::iterator iter = m.begin(); iter != m.end(); ++iter)
     {
-        WorldObject::UpdateHelper helper(iter->getSource());
+        uint32 diffTime = WorldTimer::getMSTimeDiff(iter->getSource()->GetLastUpdateTime(), WorldTimer::getMSTime());
+        if (diffTime < sWorld.getConfig(CONFIG_UINT32_INTERVAL_MAPUPDATE)/2)
+            continue;
+
+        iter->getSource()->SetLastUpdateTime();
+        WorldObject::UpdateHelper helper(*iter->getSource());
         helper.Update(i_timeDiff);
     }
 }
@@ -628,7 +632,7 @@ void MaNGOS::LocalizedPacketDo<Builder>::operator()(Player* p)
         if (i_data_cache.size() < cache_idx + 1)
             i_data_cache.resize(cache_idx + 1);
 
-        data = new WorldPacket(SMSG_MESSAGECHAT, 200);
+        data = new WorldPacket();
 
         i_builder(*data, loc_idx);
 

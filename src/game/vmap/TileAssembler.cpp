@@ -259,7 +259,7 @@ namespace VMAP
 
         AABox modelBound;
         bool boundEmpty = true;
-        for (uint32 g=0; g < groups; ++g) // should be only one for M2 files...
+        for (uint32 g = 0; g < groups; ++g) // should be only one for M2 files...
         {
             std::vector<Vector3>& vertices = raw_model.groupsArray[g].vertexArray;
 
@@ -316,7 +316,7 @@ namespace VMAP
             for (uint32 g = 0; g < groups; ++g)
             {
                 GroupModel_Raw& raw_group = raw_model.groupsArray[g];
-                groupsArray.push_back(GroupModel(raw_group.mogpflags, raw_group.GroupWMOID, raw_group.bounds ));
+                groupsArray.push_back(GroupModel(raw_group.mogpflags, raw_group.GroupWMOID, raw_group.bounds));
                 groupsArray.back().setMeshData(raw_group.vertexArray, raw_group.triangles);
                 groupsArray.back().setLiquidData(raw_group.liquid);
             }
@@ -347,20 +347,20 @@ namespace VMAP
         char buff[500];
         while (!feof(model_list))
         {
-            fread(&displayId,sizeof(uint32),1,model_list);
-            fread(&name_length,sizeof(uint32),1,model_list);
+            fread(&displayId, sizeof(uint32), 1, model_list);
+            fread(&name_length, sizeof(uint32), 1, model_list);
 
             if (name_length >= sizeof(buff))
             {
-                std::cout << "\nFile 'temp_gameobject_models' seems to be corrupted" << std::endl;
+                std::cout << "\nFile '" << GAMEOBJECT_MODELS << "' seems to be corrupted" << std::endl;
                 break;
             }
 
-            fread(&buff,sizeof(char),name_length,model_list);
+            fread(&buff, sizeof(char), name_length, model_list);
             std::string model_name(buff, name_length);
 
             WorldModel_Raw raw_model;
-            if ( !raw_model.Read((iSrcDir + "/" + model_name).c_str()) )
+            if (!raw_model.Read((iSrcDir + "/" + model_name).c_str()))
                 continue;
 
             spawnedModelFiles.insert(model_name);
@@ -382,23 +382,23 @@ namespace VMAP
                 }
             }
 
-            fwrite(&displayId,sizeof(uint32),1,model_list_copy);
-            fwrite(&name_length,sizeof(uint32),1,model_list_copy);
-            fwrite(&buff,sizeof(char),name_length,model_list_copy);
-            fwrite(&bounds.low(),sizeof(Vector3),1,model_list_copy);
-            fwrite(&bounds.high(),sizeof(Vector3),1,model_list_copy);
+            fwrite(&displayId, sizeof(uint32), 1, model_list_copy);
+            fwrite(&name_length, sizeof(uint32), 1, model_list_copy);
+            fwrite(&buff, sizeof(char), name_length, model_list_copy);
+            fwrite(&bounds.low(), sizeof(Vector3), 1, model_list_copy);
+            fwrite(&bounds.high(), sizeof(Vector3), 1, model_list_copy);
         }
         fclose(model_list);
         fclose(model_list_copy);
     }
 
     // temporary use defines to simplify read/check code (close file and return at fail)
-    #define READ_OR_RETURN(V,S) if(fread((V), (S), 1, rf) != 1) { \
+    #define READ_OR_RETURN(V,S) if (fread((V), (S), 1, rf) != 1) { \
                                     fclose(rf); printf("readfail, op = %i\n", readOperation); return(false); }
-    #define CMP_OR_RETURN(V,S)  if(strcmp((V),(S)) != 0)        { \
-                                    fclose(rf); printf("cmpfail, %s!=%s\n", V, S);return(false); }
+    #define CMP_OR_RETURN(V,S)  if (strcmp((V),(S)) != 0)        { \
+                                    fclose(rf); printf("cmpfail, %s!=%s\n", V, S); return(false); }
 
-bool GroupModel_Raw::Read(FILE * rf)
+bool GroupModel_Raw::Read(FILE* rf)
     {
         char blockId[5];
         blockId[4] = 0;
@@ -421,7 +421,7 @@ bool GroupModel_Raw::Read(FILE * rf)
         CMP_OR_RETURN(blockId, "GRP ");
         READ_OR_RETURN(&blocksize, sizeof(int));
         READ_OR_RETURN(&branches, sizeof(uint32));
-        for (uint32 b=0; b<branches; ++b)
+        for (uint32 b = 0; b < branches; ++b)
         {
             uint32 indexes;
             // indexes for each branch (not used jet)
@@ -437,17 +437,17 @@ bool GroupModel_Raw::Read(FILE * rf)
         if (nindexes > 0)
         {
             uint16* indexarray = new uint16[nindexes];
-            if (fread(indexarray, nindexes*sizeof(uint16), 1, rf) != 1) 
+            if (fread(indexarray, nindexes * sizeof(uint16), 1, rf) != 1)
             {
-                fclose(rf); 
+                fclose(rf);
                 delete[] indexarray;
-                printf("readfail, op = %i\n", readOperation); 
+                printf("readfail, op = %i\n", readOperation);
                 return false;
             }
             triangles.reserve(nindexes / 3);
-            for (uint32 i=0; i<nindexes; i+=3)
+            for (uint32 i = 0; i < nindexes; i += 3)
             {
-                triangles.push_back(MeshTriangle(indexarray[i], indexarray[i+1], indexarray[i+2]));
+                triangles.push_back(MeshTriangle(indexarray[i], indexarray[i + 1], indexarray[i + 2]));
             }
             delete[] indexarray;
         }
@@ -459,27 +459,27 @@ bool GroupModel_Raw::Read(FILE * rf)
         uint32 nvectors;
         READ_OR_RETURN(&nvectors, sizeof(uint32));
 
-        if (nvectors >0)
+        if (nvectors > 0)
         {
-            float* vectorarray = new float[nvectors*3];
-            if (fread(vectorarray, nvectors*sizeof(float)*3, 1, rf) != 1) 
+            float* vectorarray = new float[nvectors * 3];
+            if (fread(vectorarray, nvectors * sizeof(float) * 3, 1, rf) != 1)
             {
-                fclose(rf); 
+                fclose(rf);
                 delete[] vectorarray;
-                printf("readfail, op = %i\n", readOperation); 
+                printf("readfail, op = %i\n", readOperation);
                 return false;
             }
 
-            for (uint32 i=0; i < nvectors; ++i)
+            for (uint32 i = 0; i < nvectors; ++i)
             {
-                vertexArray.push_back( Vector3(vectorarray + 3*i) );
+                vertexArray.push_back(Vector3(vectorarray + 3 * i));
             }
             delete[] vectorarray;
         }
 
         // ----- liquid
         liquid = 0;
-        if (liquidflags& 1)
+        if (liquidflags & 1)
         {
             WMOLiquidHeader hlq;
             READ_OR_RETURN(&blockId, 4);
@@ -487,9 +487,9 @@ bool GroupModel_Raw::Read(FILE * rf)
             READ_OR_RETURN(&blocksize, sizeof(int));
             READ_OR_RETURN(&hlq, sizeof(WMOLiquidHeader));
             liquid = new WmoLiquid(hlq.xtiles, hlq.ytiles, Vector3(hlq.pos_x, hlq.pos_y, hlq.pos_z), hlq.type);
-            uint32 size = hlq.xverts*hlq.yverts;
-            READ_OR_RETURN(liquid->GetHeightStorage(), size*sizeof(float));
-            size = hlq.xtiles*hlq.ytiles;
+            uint32 size = hlq.xverts * hlq.yverts;
+            READ_OR_RETURN(liquid->GetHeightStorage(), size * sizeof(float));
+            size = hlq.xtiles * hlq.ytiles;
             READ_OR_RETURN(liquid->GetFlagsStorage(), size);
         }
         return true;
@@ -500,16 +500,17 @@ bool GroupModel_Raw::Read(FILE * rf)
         delete liquid;
     }
 
-    bool WorldModel_Raw::Read(const char * path)
+    bool WorldModel_Raw::Read(const char* path)
     {
-        FILE *rf = fopen(path, "rb");
+        FILE* rf = fopen(path, "rb");
         if (!rf)
         {
             printf("ERROR: Can't open raw model file: %s\n", path);
             return false;
         }
 
-        char ident[8];
+        char ident[9];
+        ident[8] = 0;
         int readOperation = 0;
 
         READ_OR_RETURN(&ident, 8);

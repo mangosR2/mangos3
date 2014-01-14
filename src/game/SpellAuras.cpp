@@ -3580,20 +3580,6 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                 }
                 return;
             }
-            case 64398:                                     // Summon Scrap Bot (Ulduar, Mimiron) - for Scrap Bots
-            case 64426:                                     // Summon Scrap Bot (Ulduar, Mimiron) - for Assault Bots
-            case 64621:                                     // Summon Fire Bot (Ulduar, Mimiron)
-            {
-                uint32 triggerSpell = 0;
-                switch (GetId())
-                {
-                    case 64398: triggerSpell = 63819; break;
-                    case 64426: triggerSpell = 64427; break;
-                    case 64621: triggerSpell = 64622; break;
-                }
-                target->CastSpell(target, triggerSpell, false);
-                return;
-            }
             case 68839:                                     // Corrupt Soul
             {
                 // Knockdown Stun
@@ -3878,6 +3864,20 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                     else
                         target->m_AuraFlags &= ~UNIT_AURAFLAG_ALIVE_INVISIBLE;
                     return;
+                case 70733:                                 // Stoneform (ICC))
+                {
+                    target->ApplyModFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_OOC_NOT_ATTACKABLE, apply);
+                    target->SetUInt32Value(UNIT_NPC_EMOTESTATE, apply ? EMOTE_STATE_CUSTOM_SPELL_02 : 0);
+                    return;
+                }
+                case 73077:                                 // Rocket Pack (ICC, Gunship Battle)
+                {
+                    if (apply)
+                        target->CastSpell(target, 69188, true);
+                    else
+                        target->RemoveAurasDueToSpell(69188);
+                    return;
+                }
             }
             break;
         }
@@ -4196,8 +4196,9 @@ void Aura::HandleAuraFeatherFall(bool apply, bool Real)
     if (!apply && target->HasAuraType(SPELL_AURA_FEATHER_FALL))
         return;
 
-    WorldPacket data;
-    target->BuildMoveFeatherFallPacket(&data, apply, 0);
+    WorldPacket data(apply ? SMSG_MOVE_FEATHER_FALL : SMSG_MOVE_NORMAL_FALL, target->GetPackGUID().size() + 4);
+    data << target->GetPackGUID();
+    data << uint32(0);
     target->SendMessageToSet(&data, true);
 
     // start fall from current height
@@ -4227,7 +4228,7 @@ void Aura::HandleAuraFeatherFall(bool apply, bool Real)
 void Aura::HandleAuraHover(bool apply, bool Real)
 {
     // only at real add/remove aura
-    if(!Real)
+    if (!Real)
         return;
 
     // do not remove unit flag if there are more than this auraEffect of that kind on unit on unit
@@ -4238,6 +4239,8 @@ void Aura::HandleAuraHover(bool apply, bool Real)
     if (apply)
     {
         GetTarget()->m_movementInfo.AddMovementFlag(MOVEFLAG_HOVER);
+        data.Initialize(GetTarget()->GetTypeId() == TYPEID_PLAYER ? SMSG_MOVE_SET_HOVER : SMSG_SPLINE_MOVE_SET_HOVER, GetTarget()->GetPackGUID().size() + 4);
+        data << GetTarget()->GetPackGUID();
         if (GetTarget()->GetTypeId() == TYPEID_PLAYER)
         {
             data.Initialize(SMSG_MOVE_SET_HOVER, 8 + 4 + 1);
@@ -4256,7 +4259,7 @@ void Aura::HandleAuraHover(bool apply, bool Real)
     else
     {
         GetTarget()->m_movementInfo.RemoveMovementFlag(MOVEFLAG_HOVER);
-        data.Initialize(GetTarget()->GetTypeId() == TYPEID_PLAYER ? SMSG_MOVE_UNSET_HOVER : SMSG_SPLINE_MOVE_UNSET_HOVER, 8+4);
+        data.Initialize(GetTarget()->GetTypeId() == TYPEID_PLAYER ? SMSG_MOVE_UNSET_HOVER : SMSG_SPLINE_MOVE_UNSET_HOVER, GetTarget()->GetPackGUID().size() + 4);
         if (GetTarget()->GetTypeId() == TYPEID_PLAYER)
         {
             data.Initialize(SMSG_MOVE_UNSET_HOVER, 8 + 4 + 1);
@@ -5941,15 +5944,16 @@ void Aura::HandleAuraFakeInebriation(bool apply, bool Real)
 /*********************************************************/
 /***                  MODIFY SPEED                     ***/
 /*********************************************************/
+
 void Aura::HandleAuraModIncreaseSpeed(bool apply, bool Real)
 {
     // all applied/removed only at real aura add/remove
-    if(!Real)
+    if (!Real)
         return;
 
-    Unit *target = GetTarget();
+    Unit* target = GetTarget();
 
-    GetTarget()->UpdateSpeed(MOVE_RUN, true);
+    target->UpdateSpeed(MOVE_RUN, true);
 
     if (apply && GetSpellProto()->Id == 58875)
         target->CastSpell(target, 58876, true);
@@ -5958,46 +5962,45 @@ void Aura::HandleAuraModIncreaseSpeed(bool apply, bool Real)
 void Aura::HandleAuraModIncreaseMountedSpeed(bool apply, bool Real)
 {
     // all applied/removed only at real aura add/remove
-    if(!Real)
+    if (!Real)
         return;
 
-    Unit *target = GetTarget();
+    Unit* target = GetTarget();
 
     target->UpdateSpeed(MOVE_RUN, true);
 
     // Festive Holiday Mount
-    if (apply && GetSpellProto()->GetSpellIconID() != 1794 && target->HasAura(62061))
-        // Reindeer Transformation
-        target->CastSpell(target, 25860, true, NULL, this);
+    if (!apply && target->HasAura(62061, EFFECT_INDEX_0))
+        target->RemoveSpellsCausingAura(SPELL_AURA_MOUNTED);
 }
 
 void Aura::HandleAuraModIncreaseFlightSpeed(bool apply, bool Real)
 {
     // all applied/removed only at real aura add/remove
-    if(!Real)
+    if (!Real)
         return;
 
-    Unit *target = GetTarget();
+    Unit* target = GetTarget();
 
     // Enable Fly mode for flying mounts
     if (m_modifier.m_auraname == SPELL_AURA_MOD_FLIGHT_SPEED_MOUNTED)
     {
-        WorldPacket data;
-        target->BuildMoveSetCanFlyPacket(&data, apply, 0);
+        WorldPacket data(apply ? SMSG_MOVE_SET_CAN_FLY : SMSG_MOVE_UNSET_CAN_FLY, 8 + 4);
+        data << target->GetPackGUID();
+        data << uint32(0);                                      // unknown
         target->SendMessageToSet(&data, true);
 
-        //Players on flying mounts must be immune to polymorph
-        if (target->GetTypeId()==TYPEID_PLAYER)
-            target->ApplySpellImmune(GetId(),IMMUNITY_MECHANIC,MECHANIC_POLYMORPH,apply);
+        // Players on flying mounts must be immune to polymorph
+        if (target->GetTypeId() == TYPEID_PLAYER)
+            target->ApplySpellImmune(GetId(), IMMUNITY_MECHANIC, MECHANIC_POLYMORPH, apply);
 
         // Dragonmaw Illusion (overwrite mount model, mounted aura already applied)
         if (apply && target->HasAura(42016, EFFECT_INDEX_0) && target->GetMountID())
-            target->SetUInt32Value(UNIT_FIELD_MOUNTDISPLAYID,16314);
+            target->SetUInt32Value(UNIT_FIELD_MOUNTDISPLAYID, 16314);
 
         // Festive Holiday Mount
-        if (apply && GetSpellProto()->GetSpellIconID() != 1794 && target->HasAura(62061))
-            // Reindeer Transformation
-            target->CastSpell(target, 25860, true, NULL, this);
+        if (!apply && target->HasAura(62061, EFFECT_INDEX_0))
+            target->RemoveSpellsCausingAura(SPELL_AURA_MOUNTED);
     }
 
     // Swift Flight Form check for higher speed flying mounts
@@ -8947,9 +8950,7 @@ void Aura::PeriodicTick()
             }
 
             // Calculate armor mitigation if it is a physical spell
-            // But not for bleed mechanic spells
-            if ((GetSpellSchoolMask(spellProto) & SPELL_SCHOOL_MASK_NORMAL) &&
-                GetEffectMechanic(spellProto, m_effIndex) != MECHANIC_BLEED)
+            if (Unit::IsDamageReducedByArmor(GetSpellSchoolMask(spellProto), spellProto, GetEffIndex()))
             {
                 uint32 pdamageReductedArmor = pCaster->CalcArmorReducedDamage(target, damageInfo.damage);
                 damageInfo.cleanDamage += damageInfo.damage - pdamageReductedArmor;
@@ -9057,8 +9058,8 @@ void Aura::PeriodicTick()
 
             damageInfo.damage = m_modifier.m_amount > 0 ? m_modifier.m_amount : 0;
 
-            //Calculate armor mitigation if it is a physical spell
-            if (GetSpellSchoolMask(spellProto) & SPELL_SCHOOL_MASK_NORMAL)
+            // Calculate armor mitigation if it is a physical spell
+            if (Unit::IsDamageReducedByArmor(GetSpellSchoolMask(spellProto), spellProto, GetEffIndex()))
             {
                 uint32 pdamageReductedArmor = pCaster->CalcArmorReducedDamage(target, damageInfo.damage);
                 damageInfo.cleanDamage += damageInfo.damage - pdamageReductedArmor;
@@ -9740,7 +9741,15 @@ void Aura::PeriodicDummyTick()
 //              // Holiday - Midsummer, Ribbon Pole Periodic Visual
 //              case 45406: break;
 //              // Parachute
-//              case 45472: break;
+                case 45472:
+                {
+                    if (target->GetTypeId() != TYPEID_PLAYER || !((Player*)target)->IsFalling())
+                        return;
+
+                    target->RemoveAurasDueToSpell(45472);
+                    target->CastSpell(target, 44795, true);
+                    return;
+                }
 //              // Alliance Flag, Extra Damage Debuff
 //              case 45898: break;
 //              // Horde Flag, Extra Damage Debuff
@@ -10004,6 +10013,14 @@ void Aura::PeriodicDummyTick()
                     // cast Slag Imbued if the target survives up to the last tick
                     if (GetAuraTicks() == 10)
                         target->CastSpell(target, 62836, true, NULL, this);
+                    return;
+                }
+                case 63382:                                 // Rapid Burst
+                {
+                    if (GetAuraTicks() % 2)
+                        target->CastSpell(target, target->GetMap()->IsRegularDifficulty() ? 64019 : 64532, true);
+                    else
+                        target->CastSpell(target, target->GetMap()->IsRegularDifficulty() ? 63387 : 64531, true);
                     return;
                 }
                 case 64217:                                 // Overcharged

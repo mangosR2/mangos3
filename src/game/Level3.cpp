@@ -40,10 +40,10 @@
 #include "GridNotifiersImpl.h"
 #include "CellImpl.h"
 #include "Weather.h"
-#include "PointMovementGenerator.h"
 #include "PathFinder.h"
-#include "TargetedMovementGenerator.h"
-#include "HomeMovementGenerator.h"
+#include "movementGenerators/PointMovementGenerator.h"
+#include "movementGenerators/TargetedMovementGenerator.h"
+#include "movementGenerators/HomeMovementGenerator.h"
 #include "SystemConfig.h"
 #include "Config/Config.h"
 #include "Mail.h"
@@ -4140,7 +4140,7 @@ bool ChatHandler::HandleReviveCommand(char* args)
 
     if (target)
     {
-        target->ResurrectPlayer(1.0f);
+        target->ResurrectPlayer(100);
         target->SpawnCorpseBones();
     }
     else
@@ -4968,7 +4968,7 @@ bool ChatHandler::HandleTeleAddCommand(char* args)
 
     std::string name = args;
 
-    if (sObjectMgr.GetGameTele(name))
+    if (sObjectMgr.GetGameTeleExactName(name))
     {
         SendSysMessage(LANG_COMMAND_TP_ALREADYEXIST);
         SetSentErrorMessage(true);
@@ -4976,8 +4976,8 @@ bool ChatHandler::HandleTeleAddCommand(char* args)
     }
 
     GameTele tele;
-    tele.loc         = player->GetPosition();
-    tele.name        = name;
+    tele.loc  = player->GetPosition();
+    tele.name = name;
 
     if (sObjectMgr.AddGameTele(tele))
     {
@@ -7548,7 +7548,7 @@ bool ChatHandler::HandleTransportListCommand(char* args)
             continue;
 
         PSendSysMessage("Transport: %s on map %u (%s), %s, passengers "SIZEFMTD", current coords %f %f %f",
-            transport->GetObjectGuid().GetString().c_str(), 
+            transport->GetObjectGuid().GetString().c_str(),
             mapID,
             name.c_str(),
             transport->isActiveObject() ? "active" : "passive",
@@ -7610,7 +7610,7 @@ bool ChatHandler::HandleTransportCurrentCommand(char* args)
         return true;
     }
 
-    PSendSysMessage(LANG_GAMEOBJECT_DETAIL, 
+    PSendSysMessage(LANG_GAMEOBJECT_DETAIL,
         guid.GetCounter(),
         goInfo->name,
         guid.GetCounter(),
@@ -7681,7 +7681,7 @@ bool ChatHandler::HandleTransportPathCommand(char* args)
     if (transport->IsMOTransport())
     {
         PSendSysMessage("Transport: %s on map %u (%s), %s, passengers "SIZEFMTD", current time %u (map %u xyz %f %f %f)",
-            transport->GetObjectGuid().GetString().c_str(), 
+            transport->GetObjectGuid().GetString().c_str(),
             map->GetId(),
             ((MOTransport*)transport)->GetName(),
             transport->isActiveObject() ? "active" : "passive",
@@ -7693,7 +7693,7 @@ bool ChatHandler::HandleTransportPathCommand(char* args)
             ((MOTransport*)transport)->GetCurrent()->second.loc.getZ()
         );
         PSendSysMessage("Transport: %s on map %u (%s), %s, passengers "SIZEFMTD", next time %u (map %u xyz %f %f %f)",
-            transport->GetObjectGuid().GetString().c_str(), 
+            transport->GetObjectGuid().GetString().c_str(),
             map->GetId(),
             ((MOTransport*)transport)->GetName(),
             transport->isActiveObject() ? "active" : "passive",
@@ -7708,7 +7708,7 @@ bool ChatHandler::HandleTransportPathCommand(char* args)
     else
     {
         PSendSysMessage("Transport: %s on map %u, %s, passengers "SIZEFMTD"",
-            transport->GetObjectGuid().GetString().c_str(), 
+            transport->GetObjectGuid().GetString().c_str(),
             map->GetId(),
             transport->isActiveObject() ? "active" : "passive",
             transport->GetTransportKit()->GetPassengers().size()
@@ -7758,7 +7758,7 @@ bool ChatHandler::HandleTransportCommand(char* args)
     }
 
     PSendSysMessage("Transport: %s on map %u (%s), %s, passengers "SIZEFMTD", current coords %f %f %f",
-            transport->GetObjectGuid().GetString().c_str(), 
+            transport->GetObjectGuid().GetString().c_str(),
             map->GetId(),
             transport->GetName(),
             transport->isActiveObject() ? "active" : "passive",

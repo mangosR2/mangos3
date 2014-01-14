@@ -826,7 +826,7 @@ void Pet::GivePetXP(uint32 xp)
 
     uint32 nextLvlXP = GetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP);
     uint32 curXP = GetUInt32Value(UNIT_FIELD_PETEXPERIENCE);
-    uint32 newXP = curXP + xp;
+    uint32 newXP = curXP + xp * sWorld.getConfig(CONFIG_FLOAT_RATE_XP_PETKILL);
 
     while (newXP >= nextLvlXP && level < maxlevel)
     {
@@ -1441,7 +1441,7 @@ void Pet::_SaveAuras()
 
         // skip all holders from spells that are passive or channeled
         // do not save single target holders (unless they were cast by the player)
-        if (save && !itr->second->IsPassive() && !IsChanneledSpell(itr->second->GetSpellProto()) 
+        if (save && !itr->second->IsPassive() && !IsChanneledSpell(itr->second->GetSpellProto())
             && (itr->second->GetCasterGuid() == GetObjectGuid() || itr->second->GetTrackedAuraType() != TRACK_AURA_TYPE_NOT_TRACKED))
         {
             int32  damage[MAX_EFFECT_INDEX];
@@ -3331,7 +3331,7 @@ Unit* Pet::SelectPreferredTargetForSpell(SpellEntry const* spellInfo)
     if (target && target != this)
     {
         if (spellInfo->GetRangeIndex() == SPELL_RANGE_IDX_COMBAT)
-            max_range_unfriendly = GetMeleeAttackDistance(target);
+            max_range_unfriendly = GetCombatDistance(target, true);
 
         bool friendly = IsFriendlyTo(target);
         float dist = GetDistance(target);

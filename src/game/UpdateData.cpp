@@ -35,18 +35,18 @@ void UpdateData::AddOutOfRangeGuids(GuidSet& guids)
     m_outOfRangeGuids.insert(guids.begin(), guids.end());
 }
 
-void UpdateData::AddOutOfRangeGuid(ObjectGuid const &guid)
+void UpdateData::AddOutOfRangeGuid(ObjectGuid const& guid)
 {
     m_outOfRangeGuids.insert(guid);
 }
 
-void UpdateData::AddUpdateBlock(const ByteBuffer &block)
+void UpdateData::AddUpdateBlock(ByteBuffer const& block)
 {
     m_data.append(block);
     ++m_blockCount;
 }
 
-void UpdateData::Compress(void* dst, uint32 *dst_size, void* src, int src_size)
+void UpdateData::Compress(void* dst, uint32* dst_size, void* src, int src_size)
 {
     z_stream c_stream;
 
@@ -102,7 +102,7 @@ void UpdateData::Compress(void* dst, uint32 *dst_size, void* src, int src_size)
     *dst_size = c_stream.total_out;
 }
 
-bool UpdateData::BuildPacket(WorldPacket *packet)
+bool UpdateData::BuildPacket(WorldPacket* packet)
 {
     MANGOS_ASSERT(packet->empty());                         // shouldn't happen
 
@@ -116,13 +116,13 @@ bool UpdateData::BuildPacket(WorldPacket *packet)
         buf << uint8(UPDATETYPE_OUT_OF_RANGE_OBJECTS);
         buf << uint32(m_outOfRangeGuids.size());
 
-        for (GuidSet::const_iterator i = m_outOfRangeGuids.begin(); i != m_outOfRangeGuids.end(); ++i)
-            buf << i->WriteAsPacked();
+        for (GuidSet::const_iterator itr = m_outOfRangeGuids.begin(); itr != m_outOfRangeGuids.end(); ++itr)
+            buf << itr->WriteAsPacked();
     }
 
     buf.append(m_data);
 
-    size_t pSize = buf.wpos();                              // use real used data size
+    size_t pktSize = buf.wpos(); // use real used data size
 
     //if (pSize > 100)                                        // compress large packets
     //{
@@ -139,6 +139,7 @@ bool UpdateData::BuildPacket(WorldPacket *packet)
     //}
     //else                                                    // send small packets without compression
     {
+        packet->clear(); // clear before append buf. in WorldSocket::SendPacket used pct.size(), not pct.wpos()
         packet->append(buf);
         packet->SetOpcode(SMSG_UPDATE_OBJECT);
     }

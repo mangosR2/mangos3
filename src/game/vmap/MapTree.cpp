@@ -30,7 +30,6 @@ using G3D::Vector3;
 
 namespace VMAP
 {
-
     class MapRayCallback
     {
         public:
@@ -271,7 +270,7 @@ namespace VMAP
 
     bool StaticMapTree::InitMap(const std::string& fname, VMapManager2* vm)
     {
-        DEBUG_LOG("Initializing StaticMapTree '%s'", fname.c_str());
+        DEBUG_FILTER_LOG(LOG_FILTER_MAP_LOADING, "Initializing StaticMapTree '%s'", fname.c_str());
         bool success = true;
         std::string fullname = iBasePath + fname;
         FILE* rf = fopen(fullname.c_str(), "rb");
@@ -282,7 +281,7 @@ namespace VMAP
             char chunk[8];
             // general info
             if (!readChunk(rf, chunk, VMAP_MAGIC, 8)) success = false;
-            char tiled;
+            char tiled = 0;
             if (success && fread(&tiled, sizeof(char), 1, rf) != 1) success = false;
             iIsTiled = bool(tiled);
             // Nodes
@@ -303,8 +302,8 @@ namespace VMAP
 #endif
             if (!iIsTiled && ModelSpawn::readFromFile(rf, spawn))
             {
-                WorldModel* model = vm->acquireModelInstance(iBasePath, spawn.name);
-                DEBUG_LOG("StaticMapTree::InitMap(): loading %s", spawn.name.c_str());
+                WorldModelPtr model = vm->acquireModelInstance(iBasePath, spawn.name);
+                DEBUG_FILTER_LOG(LOG_FILTER_MAP_LOADING,"StaticMapTree::InitMap(): loading %s", spawn.name.c_str());
                 if (model)
                 {
                     // assume that global model always is the first and only tree value (could be improved...)
@@ -362,7 +361,7 @@ namespace VMAP
             char chunk[8];
             if (!readChunk(tf, chunk, VMAP_MAGIC, 8))
                 result = false;
-            uint32 numSpawns;
+            uint32 numSpawns = 0;
             if (result && fread(&numSpawns, sizeof(uint32), 1, tf) != 1)
                 result = false;
             for (uint32 i = 0; i < numSpawns && result; ++i)
@@ -373,7 +372,7 @@ namespace VMAP
                 if (result)
                 {
                     // acquire model instance
-                    WorldModel* model = vm->acquireModelInstance(iBasePath, spawn.name);
+                    WorldModelPtr model = vm->acquireModelInstance(iBasePath, spawn.name);
                     if (!model)
                         ERROR_LOG("StaticMapTree::LoadMapTile() could not acquire WorldModel pointer for '%s'!", spawn.name.c_str());
 

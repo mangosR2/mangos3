@@ -75,9 +75,9 @@
 
 INSTANTIATE_SINGLETON_1( World );
 
-ACE_Atomic_Op<ACE_Thread_Mutex, bool> World::m_stopEvent = false;
+ACE_Atomic_Op<MANGOSR2_MUTEX_MODEL_2, bool> World::m_stopEvent = false;
 uint8 World::m_ExitCode = SHUTDOWN_EXIT_CODE;
-ACE_Atomic_Op<ACE_Thread_Mutex, uint32> World::m_worldLoopCounter = 0;
+ACE_Atomic_Op<MANGOSR2_MUTEX_MODEL_2, uint32> World::m_worldLoopCounter = 0;
 
 float World::m_MaxVisibleDistanceOnContinents = DEFAULT_VISIBILITY_DISTANCE;
 float World::m_MaxVisibleDistanceInInstances  = DEFAULT_VISIBILITY_INSTANCE;
@@ -521,6 +521,7 @@ void World::LoadConfigSettings(bool reload)
     setConfigPos(CONFIG_FLOAT_RATE_DROP_CURRENCY,        "Rate.Drop.Currency", 1.0f);
     setConfigPos(CONFIG_FLOAT_RATE_DROP_CURRENCY_AMOUNT, "Rate.Drop.Currency.Amount", 1.0f);
     setConfig(CONFIG_FLOAT_RATE_XP_KILL,    "Rate.XP.Kill",    1.0f);
+    setConfig(CONFIG_FLOAT_RATE_XP_PETKILL, "Rate.XP.PetKill", 1.0f);
     setConfig(CONFIG_FLOAT_RATE_XP_QUEST,   "Rate.XP.Quest",   1.0f);
     setConfig(CONFIG_FLOAT_RATE_XP_EXPLORE, "Rate.XP.Explore", 1.0f);
     setConfig(CONFIG_FLOAT_RATE_REPUTATION_GAIN,           "Rate.Reputation.Gain", 1.0f);
@@ -542,6 +543,7 @@ void World::LoadConfigSettings(bool reload)
     setConfigPos(CONFIG_FLOAT_RATE_CREATURE_ELITE_WORLDBOSS_SPELLDAMAGE, "Rate.Creature.Elite.WORLDBOSS.SpellDamage", 1.0f);
     setConfigPos(CONFIG_FLOAT_RATE_CREATURE_ELITE_RARE_SPELLDAMAGE,      "Rate.Creature.Elite.RARE.SpellDamage", 1.0f);
     setConfigPos(CONFIG_FLOAT_RATE_CREATURE_AGGRO, "Rate.Creature.Aggro", 1.0f);
+    setConfigPos(CONFIG_FLOAT_RATE_CREATURE_AGGRO_IN_INSTANCE, "Rate.Creature.Aggro.Instance", 1.0f);
     setConfig(CONFIG_FLOAT_RATE_REST_INGAME,                    "Rate.Rest.InGame", 1.0f);
     setConfig(CONFIG_FLOAT_RATE_REST_OFFLINE_IN_TAVERN_OR_CITY, "Rate.Rest.Offline.InTavernOrCity", 1.0f);
     setConfig(CONFIG_FLOAT_RATE_REST_OFFLINE_IN_WILDERNESS,     "Rate.Rest.Offline.InWilderness", 1.0f);
@@ -709,7 +711,7 @@ void World::LoadConfigSettings(bool reload)
 
     setConfigMinMax(CONFIG_FLOAT_CROWDCONTROL_HP_BASE, "CrowdControlHPBase", 0.1f, 0.0f, 1.0f);
 
-    setConfig(CONFIG_BOOL_RESILENCE_ALTERNATIVE_CALCULATION, "ResilenceAlternativeCalculation", false);
+    setConfig(CONFIG_BOOL_RESILIENCE_ALTERNATIVE_CALCULATION, "ResilienceAlternativeCalculation", false);
 
     setConfig(CONFIG_BOOL_BLINK_ANIMATION_TYPE, "BlinkAnimationType", false);
 
@@ -747,7 +749,7 @@ void World::LoadConfigSettings(bool reload)
     setConfig(CONFIG_UINT32_RABBIT_DAY, "RabbitDay", 0);
 
     setConfig(CONFIG_UINT32_INSTANCE_RESET_TIME_HOUR, "Instance.ResetTimeHour", 4);
-    setConfig(CONFIG_UINT32_INSTANCE_UNLOAD_DELAY,    "Instance.UnloadDelay", 30 * MINUTE * IN_MILLISECONDS);
+    setConfigMin(CONFIG_UINT32_INSTANCE_UNLOAD_DELAY, "Instance.UnloadDelay", 30 * MINUTE * IN_MILLISECONDS, 1);
 
     setConfig(CONFIG_UINT32_WORLD_STATE_EXPIRETIME,    "WorldState.ExpireTime", WEEK);
 
@@ -783,13 +785,6 @@ void World::LoadConfigSettings(bool reload)
     setConfig(CONFIG_UINT32_MAIL_DELIVERY_DELAY, "MailDeliveryDelay", HOUR);
 
     setConfigMin(CONFIG_UINT32_MASS_MAILER_SEND_PER_TICK, "MassMailer.SendPerTick", 10, 1);
-
-    setConfig(CONFIG_UINT32_UPTIME_UPDATE, "UpdateUptimeInterval", 10);
-    if (reload)
-    {
-        m_timers[WUPDATE_UPTIME].SetInterval(getConfig(CONFIG_UINT32_UPTIME_UPDATE)*MINUTE*IN_MILLISECONDS);
-        m_timers[WUPDATE_UPTIME].Reset();
-    }
 
     setConfig(CONFIG_UINT32_SKILL_CHANCE_ORANGE, "SkillChance.Orange", 100);
     setConfig(CONFIG_UINT32_SKILL_CHANCE_YELLOW, "SkillChance.Yellow", 75);
@@ -827,6 +822,9 @@ void World::LoadConfigSettings(bool reload)
     setConfig(CONFIG_UINT32_CHATFLOOD_MUTE_TIME,     "ChatFlood.MuteTime", 10);
 
     setConfig(CONFIG_BOOL_EVENT_ANNOUNCE, "Event.Announce", false);
+
+    setConfig(CONFIG_BOOL_AUTOBROADCAST, "AutoBroadcast.On", false);
+    setConfigMinMax(CONFIG_UINT32_AUTOBROADCAST_CENTER, "AutoBroadcast.Center", 0, 0, 2);
 
     setConfig(CONFIG_UINT32_CREATURE_FAMILY_ASSISTANCE_DELAY, "CreatureFamilyAssistanceDelay", 1500);
     setConfig(CONFIG_UINT32_CREATURE_FAMILY_FLEE_DELAY,       "CreatureFamilyFleeDelay",       7000);
@@ -872,6 +870,7 @@ void World::LoadConfigSettings(bool reload)
     setConfigMinMax(CONFIG_FLOAT_GHOST_RUN_SPEED_BG,      "Death.Ghost.RunSpeed.Battleground", 1.0f, 0.1f, 10.0f);
 
     setConfig(CONFIG_FLOAT_THREAT_RADIUS, "ThreatRadius", 100.0f);
+    setConfigMin(CONFIG_UINT32_CREATURE_RESPAWN_AGGRO_DELAY, "CreatureRespawnAggroDelay", 5000, 0);
 
     // always use declined names in the russian client
     if (getConfig(CONFIG_UINT32_REALM_ZONE) == REALM_ZONE_RUSSIAN)
@@ -910,6 +909,8 @@ void World::LoadConfigSettings(bool reload)
     setConfig(CONFIG_BOOL_OFFHAND_CHECK_AT_TALENTS_RESET, "OffhandCheckAtTalentsReset", false);
 
     setConfig(CONFIG_BOOL_KICK_PLAYER_ON_BAD_PACKET, "Network.KickOnBadPacket", false);
+
+    setConfig(CONFIG_BOOL_PLAYER_COMMANDS, "PlayerCommands", true);
 
     if (int clientCacheId = sConfig.GetIntDefault("ClientCacheVersion", 0))
     {
@@ -970,49 +971,49 @@ void World::LoadConfigSettings(bool reload)
         m_VisibleObjectGreyDistance = MAX_VISIBILITY_DISTANCE;
     }
 
-    //visibility on continents
-    m_MaxVisibleDistanceOnContinents      = sConfig.GetFloatDefault("Visibility.Distance.Continents",     DEFAULT_VISIBILITY_DISTANCE);
-    if (m_MaxVisibleDistanceOnContinents < 45*getConfig(CONFIG_FLOAT_RATE_CREATURE_AGGRO))
+    // visibility on continents
+    m_MaxVisibleDistanceOnContinents = sConfig.GetFloatDefault("Visibility.Distance.Continents", DEFAULT_VISIBILITY_DISTANCE);
+    if (m_MaxVisibleDistanceOnContinents < 45 * getConfig(CONFIG_FLOAT_RATE_CREATURE_AGGRO))
     {
-        sLog.outError("Visibility.Distance.Continents can't be less max aggro radius %f", 45*getConfig(CONFIG_FLOAT_RATE_CREATURE_AGGRO));
-        m_MaxVisibleDistanceOnContinents = 45*getConfig(CONFIG_FLOAT_RATE_CREATURE_AGGRO);
+        sLog.outError("Visibility.Distance.Continents can't be less max aggro radius %f", 45 * getConfig(CONFIG_FLOAT_RATE_CREATURE_AGGRO));
+        m_MaxVisibleDistanceOnContinents = 45 * getConfig(CONFIG_FLOAT_RATE_CREATURE_AGGRO);
     }
     else if (m_MaxVisibleDistanceOnContinents + m_VisibleUnitGreyDistance >  MAX_VISIBILITY_DISTANCE)
     {
-        sLog.outError("Visibility.Distance.Continents can't be greater %f",MAX_VISIBILITY_DISTANCE - m_VisibleUnitGreyDistance);
+        sLog.outError("Visibility.Distance.Continents can't be greater %f", MAX_VISIBILITY_DISTANCE - m_VisibleUnitGreyDistance);
         m_MaxVisibleDistanceOnContinents = MAX_VISIBILITY_DISTANCE - m_VisibleUnitGreyDistance;
     }
 
-    //visibility in instances
-    m_MaxVisibleDistanceInInstances        = sConfig.GetFloatDefault("Visibility.Distance.Instances",       DEFAULT_VISIBILITY_INSTANCE);
-    if (m_MaxVisibleDistanceInInstances < 45*getConfig(CONFIG_FLOAT_RATE_CREATURE_AGGRO))
+    // visibility in instances
+    m_MaxVisibleDistanceInInstances = sConfig.GetFloatDefault("Visibility.Distance.Instances", DEFAULT_VISIBILITY_INSTANCE);
+    if (m_MaxVisibleDistanceInInstances < 45 * getConfig(CONFIG_FLOAT_RATE_CREATURE_AGGRO_IN_INSTANCE))
     {
-        sLog.outError("Visibility.Distance.Instances can't be less max aggro radius %f",45*getConfig(CONFIG_FLOAT_RATE_CREATURE_AGGRO));
-        m_MaxVisibleDistanceInInstances = 45*getConfig(CONFIG_FLOAT_RATE_CREATURE_AGGRO);
+        sLog.outError("Visibility.Distance.Instances can't be less max aggro radius %f", 45 * getConfig(CONFIG_FLOAT_RATE_CREATURE_AGGRO_IN_INSTANCE));
+        m_MaxVisibleDistanceInInstances = 45 * getConfig(CONFIG_FLOAT_RATE_CREATURE_AGGRO_IN_INSTANCE);
     }
     else if (m_MaxVisibleDistanceInInstances + m_VisibleUnitGreyDistance >  MAX_VISIBILITY_DISTANCE)
     {
-        sLog.outError("Visibility.Distance.Instances can't be greater %f",MAX_VISIBILITY_DISTANCE - m_VisibleUnitGreyDistance);
+        sLog.outError("Visibility.Distance.Instances can't be greater %f", MAX_VISIBILITY_DISTANCE - m_VisibleUnitGreyDistance);
         m_MaxVisibleDistanceInInstances = MAX_VISIBILITY_DISTANCE - m_VisibleUnitGreyDistance;
     }
 
-    //visibility in BG/Arenas
-    m_MaxVisibleDistanceInBGArenas        = sConfig.GetFloatDefault("Visibility.Distance.BGArenas",       DEFAULT_VISIBILITY_BGARENAS);
-    if (m_MaxVisibleDistanceInBGArenas < 45*getConfig(CONFIG_FLOAT_RATE_CREATURE_AGGRO))
+    // visibility in BG/Arenas
+    m_MaxVisibleDistanceInBGArenas = sConfig.GetFloatDefault("Visibility.Distance.BGArenas", DEFAULT_VISIBILITY_BGARENAS);
+    if (m_MaxVisibleDistanceInBGArenas < 45 * getConfig(CONFIG_FLOAT_RATE_CREATURE_AGGRO))
     {
-        sLog.outError("Visibility.Distance.BGArenas can't be less max aggro radius %f",45*getConfig(CONFIG_FLOAT_RATE_CREATURE_AGGRO));
-        m_MaxVisibleDistanceInBGArenas = 45*getConfig(CONFIG_FLOAT_RATE_CREATURE_AGGRO);
+        sLog.outError("Visibility.Distance.BGArenas can't be less max aggro radius %f", 45 * getConfig(CONFIG_FLOAT_RATE_CREATURE_AGGRO));
+        m_MaxVisibleDistanceInBGArenas = 45 * getConfig(CONFIG_FLOAT_RATE_CREATURE_AGGRO);
     }
-    else if (m_MaxVisibleDistanceInBGArenas + m_VisibleUnitGreyDistance >  MAX_VISIBILITY_DISTANCE)
+    else if (m_MaxVisibleDistanceInBGArenas + m_VisibleUnitGreyDistance > MAX_VISIBILITY_DISTANCE)
     {
         sLog.outError("Visibility.Distance.BGArenas can't be greater %f",MAX_VISIBILITY_DISTANCE - m_VisibleUnitGreyDistance);
         m_MaxVisibleDistanceInBGArenas = MAX_VISIBILITY_DISTANCE - m_VisibleUnitGreyDistance;
     }
 
-    m_MaxVisibleDistanceInFlight    = sConfig.GetFloatDefault("Visibility.Distance.InFlight",      DEFAULT_VISIBILITY_DISTANCE);
+    m_MaxVisibleDistanceInFlight = sConfig.GetFloatDefault("Visibility.Distance.InFlight", DEFAULT_VISIBILITY_DISTANCE);
     if (m_MaxVisibleDistanceInFlight + m_VisibleObjectGreyDistance > MAX_VISIBILITY_DISTANCE)
     {
-        sLog.outError("Visibility.Distance.InFlight can't be greater %f",MAX_VISIBILITY_DISTANCE-m_VisibleObjectGreyDistance);
+        sLog.outError("Visibility.Distance.InFlight can't be greater %f",MAX_VISIBILITY_DISTANCE - m_VisibleObjectGreyDistance);
         m_MaxVisibleDistanceInFlight = MAX_VISIBILITY_DISTANCE - m_VisibleObjectGreyDistance;
     }
 
@@ -1148,7 +1149,54 @@ void World::LoadConfigSettings(bool reload)
     // Anounce reset of instance to whole party
     setConfig(CONFIG_BOOL_INSTANCES_RESET_GROUP_ANNOUNCE,  "InstancesResetAnnounce", false);
 
-    setConfig(CONFIG_UINT32_CREATURE_RESPAWN_AGGRO_DELAY, "CreatureRespawnAggroDelay", 5/*sec.*/);
+    // Set  world timers
+    m_timers[WUPDATE_AUCTIONS].SetInterval(sConfig.GetIntDefault("Auctions.Timer", 60000));
+    m_timers[WUPDATE_AUCTIONS].Reset();
+
+    m_timers[WUPDATE_WEATHERS].SetInterval(sConfig.GetIntDefault("Weathers.Timer", 60000));
+    m_timers[WUPDATE_WEATHERS].Reset();
+
+    m_timers[WUPDATE_UPTIME].SetInterval(sConfig.GetIntDefault("UpdateUptimeInterval", 10) * MINUTE * IN_MILLISECONDS);
+    m_timers[WUPDATE_UPTIME].Reset();
+
+    m_timers[WUPDATE_CORPSES].SetInterval(sConfig.GetIntDefault("Corpse.Timer", 20) * MINUTE * IN_MILLISECONDS);
+    m_timers[WUPDATE_CORPSES].Reset();
+
+    // wupdate_events - VARIABLE INTERVAL, setted by GemeEvents
+
+    m_timers[WUPDATE_DELETECHARS].SetInterval(sConfig.GetIntDefault("CharDelete.Timer", 8) * HOUR * IN_MILLISECONDS);
+    m_timers[WUPDATE_DELETECHARS].Reset();
+
+    m_timers[WUPDATE_AHBOT].SetInterval(sConfig.GetIntDefault("AHBot.Timer", 20000));
+    m_timers[WUPDATE_AHBOT].Reset();
+
+    m_timers[WUPDATE_AUTOBROADCAST].SetInterval(sConfig.GetIntDefault("AutoBroadcast.Timer", 60000));
+    m_timers[WUPDATE_AUTOBROADCAST].Reset();
+
+    m_timers[WUPDATE_WORLDSTATE].SetInterval(sConfig.GetIntDefault("WorldState.Timer", 60000));
+    m_timers[WUPDATE_WORLDSTATE].Reset();
+
+    m_timers[WUPDATE_CALENDAR].SetInterval(sConfig.GetIntDefault("Calendar.Timer", 30000));
+    m_timers[WUPDATE_CALENDAR].Reset();
+
+    m_timers[WUPDATE_GROUPS].SetInterval(sConfig.GetIntDefault("Groups.Timer", 1000));
+    m_timers[WUPDATE_GROUPS].Reset();
+
+    m_timers[WUPDATE_TERRAIN].SetInterval(sConfig.GetIntDefault("Terrain.Timer", 30000));
+    m_timers[WUPDATE_TERRAIN].Reset();
+
+    tm local;
+    time_t curr;
+    time(&curr);
+    local = *(localtime(&curr));
+
+    //to set mailtimer to return mails every day between 4 and 5 am
+    //mailtimer is increased when updating auctions
+    //one second is 1000 -(tested on win system)
+    mail_timer = uint32((((localtime( &m_gameTime )->tm_hour + 20) % 24)* HOUR * IN_MILLISECONDS) / m_timers[WUPDATE_AUCTIONS].GetInterval() );
+    mail_timer_expires = uint32( (DAY * IN_MILLISECONDS) / (m_timers[WUPDATE_AUCTIONS].GetInterval()));
+    sLog.outString("BOOT: Mail timer set to: %u, mail return is called every %u minutes", mail_timer, mail_timer_expires);
+
 }
 
 extern void LoadGameObjectModelList();
@@ -1641,30 +1689,6 @@ void World::SetInitialWorldSettings()
 
     LoginDatabase.PExecute("INSERT INTO uptime (realmid, starttime, startstring, uptime) VALUES('%u', " UI64FMTD ", '%s', 0)", getConfig(CONFIG_UINT32_REALMID), uint64(m_startTime), isoDate);
 
-    static uint32 abtimer = 0;
-    abtimer = sConfig.GetIntDefault("AutoBroadcast.Timer", 60000);
-
-    m_timers[WUPDATE_WEATHERS].SetInterval(1*MINUTE*IN_MILLISECONDS);
-    m_timers[WUPDATE_AUCTIONS].SetInterval(MINUTE*IN_MILLISECONDS);
-    m_timers[WUPDATE_UPTIME].SetInterval(getConfig(CONFIG_UINT32_UPTIME_UPDATE)*MINUTE*IN_MILLISECONDS);
-                                                            //Update "uptime" table based on configuration entry in minutes.
-    m_timers[WUPDATE_CORPSES].SetInterval(20*MINUTE*IN_MILLISECONDS);
-    m_timers[WUPDATE_DELETECHARS].SetInterval(DAY*IN_MILLISECONDS); // check for chars to delete every day
-    m_timers[WUPDATE_AUTOBROADCAST].SetInterval(abtimer);
-    m_timers[WUPDATE_WORLDSTATE].SetInterval(1*MINUTE*IN_MILLISECONDS);
-    m_timers[WUPDATE_CALENDAR].SetInterval(30*IN_MILLISECONDS);
-    m_timers[WUPDATE_GROUPS].SetInterval(1*IN_MILLISECONDS);
-
-    // for AhBot
-    m_timers[WUPDATE_AHBOT].SetInterval(20*IN_MILLISECONDS); // every 20 sec
-
-    //to set mailtimer to return mails every day between 4 and 5 am
-    //mailtimer is increased when updating auctions
-    //one second is 1000 -(tested on win system)
-    mail_timer = uint32((((localtime( &m_gameTime )->tm_hour + 20) % 24)* HOUR * IN_MILLISECONDS) / m_timers[WUPDATE_AUCTIONS].GetInterval() );
-                                                            //1440
-    mail_timer_expires = uint32( (DAY * IN_MILLISECONDS) / (m_timers[WUPDATE_AUCTIONS].GetInterval()));
-    DEBUG_LOG("Mail timer set to: %u, mail return is called every %u minutes", mail_timer, mail_timer_expires);
 
     ///- Initialize static helper structures
     AIRegistry::Initialize();
@@ -1780,13 +1804,15 @@ void World::Update(uint32 diff)
     m_updateTime = diff;
 
     ///- Update the different timers
-    for(int i = 0; i < WUPDATE_COUNT; ++i)
+    for (uint8 i = 0; i < WUPDATE_COUNT; ++i)
     {
-        if (m_timers[i].GetCurrent()>=0)
+        if (m_timers[i].GetCurrent() >= 0 )
             m_timers[i].Update(diff);
         else
             m_timers[i].SetCurrent(0);
     }
+
+    bool bSingletonUpdate = false;
 
     ///- Update the game time and check for shutdown time
     _UpdateGameTime();
@@ -1814,7 +1840,7 @@ void World::Update(uint32 diff)
         ResetCurrencyWeekCounts();
 
     /// <ul><li> Handle auctions when the timer has passed
-    if (m_timers[WUPDATE_AUCTIONS].Passed())
+    if (!bSingletonUpdate && m_timers[WUPDATE_AUCTIONS].Passed())
     {
         m_timers[WUPDATE_AUCTIONS].Reset();
 
@@ -1828,20 +1854,22 @@ void World::Update(uint32 diff)
 
         ///- Handle expired auctions
         sAuctionMgr.Update();
+        bSingletonUpdate = true;
     }
 
     /// <li> Handle AHBot operations
-    if (m_timers[WUPDATE_AHBOT].Passed())
+    if (!bSingletonUpdate && m_timers[WUPDATE_AHBOT].Passed())
     {
         sAuctionBot.Update();
         m_timers[WUPDATE_AHBOT].Reset();
+        bSingletonUpdate = true;
     }
 
     /// <li> Handle session updates
     UpdateSessions(diff);
 
     /// <li> Update groups
-    if (m_timers[WUPDATE_GROUPS].Passed())
+    if (!bSingletonUpdate && m_timers[WUPDATE_GROUPS].Passed())
     {
         ObjectMgr::GroupMap::iterator i_next;
         for (ObjectMgr::GroupMap::iterator itr = sObjectMgr.GetGroupMapBegin(); itr != sObjectMgr.GetGroupMapEnd(); itr = i_next)
@@ -1852,10 +1880,11 @@ void World::Update(uint32 diff)
                 group->Update(m_timers[WUPDATE_GROUPS].GetInterval());
         }
         m_timers[WUPDATE_GROUPS].Reset();
+        bSingletonUpdate = true;
     }
 
     /// <li> Handle weather updates when the timer has passed
-    if (m_timers[WUPDATE_WEATHERS].Passed())
+    if (!bSingletonUpdate && m_timers[WUPDATE_WEATHERS].Passed())
     {
         ///- Send an update signal to Weather objects
         for (WeatherMap::iterator itr = m_weathers.begin(); itr != m_weathers.end(); )
@@ -1870,17 +1899,18 @@ void World::Update(uint32 diff)
             else
                 ++itr;
         }
-
         m_timers[WUPDATE_WEATHERS].SetCurrent(0);
+        bSingletonUpdate = true;
     }
     /// <li> Update uptime table
-    if (m_timers[WUPDATE_UPTIME].Passed())
+    if (!bSingletonUpdate && m_timers[WUPDATE_UPTIME].Passed())
     {
         uint32 tmpDiff = uint32(m_gameTime - m_startTime);
         uint32 maxClientsNum = GetMaxActiveSessionCount();
 
         m_timers[WUPDATE_UPTIME].Reset();
         LoginDatabase.PExecute("UPDATE uptime SET uptime = %u, maxplayers = %u WHERE realmid = %u AND starttime = " UI64FMTD, tmpDiff, maxClientsNum, getConfig(CONFIG_UINT32_REALMID), uint64(m_startTime));
+        bSingletonUpdate = true;
     }
 
     /// <li> Handle all other objects
@@ -1890,24 +1920,27 @@ void World::Update(uint32 diff)
     sOutdoorPvPMgr.Update(diff);
 
     ///- Delete all characters which have been deleted X days before
-    if (m_timers[WUPDATE_DELETECHARS].Passed())
+    if (!bSingletonUpdate && m_timers[WUPDATE_DELETECHARS].Passed())
     {
         m_timers[WUPDATE_DELETECHARS].Reset();
         Player::DeleteOldCharacters();
+        bSingletonUpdate = true;
     }
 
     // Update WorldStates (cleanup and save)
-    if (m_timers[WUPDATE_WORLDSTATE].Passed())
+    if (!bSingletonUpdate && m_timers[WUPDATE_WORLDSTATE].Passed())
     {
         m_timers[WUPDATE_WORLDSTATE].Reset();
         sWorldStateMgr.Update();
+        bSingletonUpdate = true;
     }
 
     // Update Calendar (cleanup and save)
-    if (m_timers[WUPDATE_CALENDAR].Passed())
+    if (!bSingletonUpdate && m_timers[WUPDATE_CALENDAR].Passed())
     {
         m_timers[WUPDATE_CALENDAR].Reset();
         sCalendarMgr.Update();
+        bSingletonUpdate = true;
     }
 
     // Check if any group can be created by dungeon finder
@@ -1917,29 +1950,29 @@ void World::Update(uint32 diff)
     UpdateResultQueue();
 
     ///- Erase corpses once every 20 minutes
-    if (m_timers[WUPDATE_CORPSES].Passed())
+    if (!bSingletonUpdate && m_timers[WUPDATE_CORPSES].Passed())
     {
         m_timers[WUPDATE_CORPSES].Reset();
-
         sObjectAccessor.RemoveOldCorpses();
+        bSingletonUpdate = true;
     }
 
     ///- Process Game events when necessary
-    if (m_timers[WUPDATE_EVENTS].Passed())
+    if (!bSingletonUpdate && m_timers[WUPDATE_EVENTS].Passed())
     {
         m_timers[WUPDATE_EVENTS].Reset();                   // to give time for Update() to be processed
         uint32 nextGameEvent = sGameEventMgr.Update();
         m_timers[WUPDATE_EVENTS].SetInterval(nextGameEvent);
         m_timers[WUPDATE_EVENTS].Reset();
+        bSingletonUpdate = true;
     }
-    static uint32 autobroadcaston = 0;
-    autobroadcaston = sConfig.GetIntDefault("AutoBroadcast.On", 0);
-    if (autobroadcaston == 1)
+    if (getConfig(CONFIG_BOOL_AUTOBROADCAST))
     {
-        if (m_timers[WUPDATE_AUTOBROADCAST].Passed())
+        if (!bSingletonUpdate && m_timers[WUPDATE_AUTOBROADCAST].Passed())
         {
             m_timers[WUPDATE_AUTOBROADCAST].Reset();
             SendBroadcast();
+            bSingletonUpdate = true;
         }
     }
 
@@ -1954,7 +1987,12 @@ void World::Update(uint32 diff)
     ProcessCliCommands();
 
     //cleanup unused GridMap objects as well as VMaps
-    sTerrainMgr.Update(diff);
+    if (!bSingletonUpdate && m_timers[WUPDATE_TERRAIN].Passed())
+    {
+        m_timers[WUPDATE_TERRAIN].Reset();
+        sTerrainMgr.Update(diff);
+        bSingletonUpdate = true;
+    }
 }
 
 /// Send a packet to all players (except self if mentioned)
@@ -2010,19 +2048,7 @@ namespace MaNGOS
                 while(char* line = lineFromMessage(pos))
                 {
                     WorldPacket* data = new WorldPacket();
-
-                    uint32 lineLength = (line ? strlen(line) : 0) + 1;
-
-                    data->Initialize(SMSG_MESSAGECHAT, 100);                // guess size
-                    *data << uint8(CHAT_MSG_SYSTEM);
-                    *data << uint32(LANG_UNIVERSAL);
-                    *data << uint64(0);
-                    *data << uint32(0);                                     // can be chat msg group or something
-                    *data << uint64(0);
-                    *data << uint32(lineLength);
-                    *data << line;
-                    *data << uint8(0);
-
+                    ChatHandler::BuildChatPacket(*data, CHAT_MSG_SYSTEM, line);
                     data_list.push_back(data);
                 }
             }
@@ -2380,7 +2406,7 @@ void World::SendBroadcast()
     std::string msg;
     static int nextid;
 
-    QueryResult *result;
+    QueryResult* result;
     if (nextid != 0)
     {
         result = CharacterDatabase.PQuery("SELECT `text`, `next` FROM `autobroadcast` WHERE `id` = %u", nextid);
@@ -2393,36 +2419,39 @@ void World::SendBroadcast()
     if(!result)
         return;
 
-    Field *fields = result->Fetch();
+    Field* fields = result->Fetch();
     nextid  = fields[1].GetUInt32();
     msg = fields[0].GetString();
     delete result;
 
-    static uint32 abcenter = 0;
-    abcenter = sConfig.GetIntDefault("AutoBroadcast.Center", 0);
-    if (abcenter == 0)
+    switch (getConfig(CONFIG_UINT32_AUTOBROADCAST_CENTER))
     {
-        sWorld.SendWorldText(LANG_AUTO_BROADCAST, msg.c_str());
-
-        sLog.outString("AutoBroadcast: '%s'",msg.c_str());
-    }
-    if (abcenter == 1)
-    {
-        WorldPacket data(SMSG_NOTIFICATION, (msg.size()+1));
-        data << msg;
-        sWorld.SendGlobalMessage(&data);
-
-        sLog.outString("AutoBroadcast: '%s'",msg.c_str());
-    }
-    if (abcenter == 2)
-    {
-        sWorld.SendWorldText(LANG_AUTO_BROADCAST, msg.c_str());
-
-        WorldPacket data(SMSG_NOTIFICATION, (msg.size()+1));
-        data << msg;
-        sWorld.SendGlobalMessage(&data);
-
-        sLog.outString("AutoBroadcast: '%s'",msg.c_str());
+        case 0:
+        {
+            sWorld.SendWorldText(LANG_AUTO_BROADCAST, msg.c_str());
+            sLog.outString("AutoBroadcast: '%s'",msg.c_str());
+            break;
+        }
+        case 1:
+        {
+            WorldPacket data(SMSG_NOTIFICATION, (msg.size()+1));
+            data << msg;
+            sWorld.SendGlobalMessage(&data);
+            sLog.outString("AutoBroadcast: '%s'",msg.c_str());
+            break;
+        }
+        case 2:
+        {
+            sWorld.SendWorldText(LANG_AUTO_BROADCAST, msg.c_str());
+            WorldPacket data(SMSG_NOTIFICATION, (msg.size()+1));
+            data << msg;
+            sWorld.SendGlobalMessage(&data);
+            sLog.outString("AutoBroadcast: '%s'",msg.c_str());
+            break;
+        }
+        default:
+            //sLog.outString("AutoBroadcast:ERROR '%s'",msg.c_str());
+            break;
    }
 }
 
@@ -2922,4 +2951,19 @@ void World::setDisabledMapIdForDungeonFinder(const char* mapIds)
 bool World::IsDungeonMapIdDisable(uint32 mapId)
 {
     return disabledMapIdForDungeonFinder.find(mapId) != disabledMapIdForDungeonFinder.end();
+}
+
+void World::InvalidatePlayer(ObjectGuid const& guid)
+{
+    WorldPacket data(SMSG_INVALIDATE_PLAYER, 8);
+    data << guid;
+    SendGlobalMessage(&data);
+}
+
+float World::GetCreatureAggroRate(Unit const* unit) const
+{
+    if (unit && unit->GetMap() && unit->GetMap()->IsDungeon())
+        return getConfig(CONFIG_FLOAT_RATE_CREATURE_AGGRO_IN_INSTANCE);
+    else
+        return getConfig(CONFIG_FLOAT_RATE_CREATURE_AGGRO);
 }

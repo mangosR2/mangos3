@@ -26,15 +26,18 @@
 #include "VMapDefinitions.h"
 #include "../World.h"
 
-template<> struct HashTrait< GameObjectModel>{
+template<> struct HashTrait< GameObjectModel>
+{
     static size_t hashCode(const GameObjectModel& g) { return (size_t)(void*)&g; }
 };
 
-template<> struct PositionTrait< GameObjectModel> {
+template<> struct PositionTrait< GameObjectModel>
+{
     static void getPosition(const GameObjectModel& g, Vector3& p) { p = g.getPosition(); }
 };
 
-template<> struct BoundsTrait< GameObjectModel> {
+template<> struct BoundsTrait< GameObjectModel>
+{
     static void getBounds(const GameObjectModel& g, G3D::AABox& out) { out = g.getBounds();}
     static void getBounds2(const GameObjectModel* g, G3D::AABox& out) { out = g->getBounds();}
 };
@@ -190,11 +193,12 @@ bool DynamicMapTree::getIntersectionTime(const uint32 phasemask, const G3D::Ray&
 }
 //=========================================================
 
-bool DynamicMapTree::getObjectHitPos(uint32 phasemask, float x1, float y1, float z1, float x2, float y2, float z2, float& rx, float& ry, float& rz,float pModifyDist) const
+bool DynamicMapTree::getObjectHitPos(uint32 phasemask, float x1, float y1, float z1, float x2, float y2, float z2, float& rx, float& ry, float& rz, float pModifyDist) const
 {
     // Don't calculate hit position, if wrong src/dest points provided!
-    if (!VMAP::CheckPosition(x1,y1,z1) || !VMAP::CheckPosition(x2,y2,z2))
+    if (!VMAP::CheckPosition(x1, y1, z1) || !VMAP::CheckPosition(x2, y2, z2))
         return false;
+
     Vector3 pos1 = Vector3(x1, y1, z1);
     Vector3 pos2 = Vector3(x2, y2, z2);
     Vector3 resultPos;
@@ -222,7 +226,7 @@ bool DynamicMapTree::getObjectHitPos(const uint32 phasemask, const Vector3& pPos
         pResultHitPos = pPos2;
         return false;
     }
-    Vector3 dir = (pPos2 - pPos1)/maxDist;              // direction with length of 1
+    Vector3 dir = (pPos2 - pPos1) / maxDist;            // direction with length of 1
     G3D::Ray ray(pPos1, dir);
     float dist = maxDist;
     if (getIntersectionTime(phasemask, ray, pPos2, dist))
@@ -232,7 +236,7 @@ bool DynamicMapTree::getObjectHitPos(const uint32 phasemask, const Vector3& pPos
         {
             if ((pResultHitPos - pPos1).magnitude() > -pModifyDist)
             {
-                pResultHitPos = pResultHitPos + dir*pModifyDist;
+                pResultHitPos = pResultHitPos + dir * pModifyDist;
             }
             else
             {
@@ -241,7 +245,7 @@ bool DynamicMapTree::getObjectHitPos(const uint32 phasemask, const Vector3& pPos
         }
         else
         {
-            pResultHitPos = pResultHitPos + dir*pModifyDist;
+            pResultHitPos = pResultHitPos + dir * pModifyDist;
         }
         result = true;
     }
@@ -256,17 +260,17 @@ bool DynamicMapTree::getObjectHitPos(const uint32 phasemask, const Vector3& pPos
 bool DynamicMapTree::isInLineOfSight(float x1, float y1, float z1, float x2, float y2, float z2, uint32 phasemask) const
 {
     // Don't calculate hit position, if wrong src/dest points provided!
-    if (!VMAP::CheckPosition(x1,y1,z1) || !VMAP::CheckPosition(x2,y2,z2))
+    if (!VMAP::CheckPosition(x1, y1, z1) || !VMAP::CheckPosition(x2, y2, z2))
         return false;
 
-    Vector3 v1(x1,y1,z1), v2(x2,y2,z2);
+    Vector3 v1(x1, y1, z1), v2(x2, y2, z2);
 
     float maxDist = (v2 - v1).magnitude();
 
-    if (!G3D::fuzzyGt(maxDist, M_NULL_F))
+    if (!G3D::fuzzyGt(maxDist, 0))
         return true;
 
-    G3D::Ray r(v1, (v2-v1) / maxDist);
+    G3D::Ray r(v1, (v2 - v1) / maxDist);
     DynamicTreeIntersectionCallback callback(phasemask);
     impl.intersectRay(r, callback, maxDist, v2);
 
@@ -287,17 +291,21 @@ bool DynamicMapTree::isInLineOfSight(float x1, float y1, float z1, float x2, flo
 
 float DynamicMapTree::getHeight(float x, float y, float z, float maxSearchDist, uint32 phasemask) const
 {
-    // Don't calculate hit position, if wrong src/dest points provided!
-    if (!VMAP::CheckPosition(x,y,z))
+    if (!size())
         return -G3D::inf();
 
-    Vector3 v(x,y,z);
-    G3D::Ray r(v, Vector3(0,0,-1));
+    // Don't calculate hit position, if wrong src/dest points provided!
+    if (!VMAP::CheckPosition(x, y, z))
+        return -G3D::inf();
+
+    Vector3 v(x, y, z);
+    G3D::Ray r(v, Vector3(0, 0, -1));
+
     DynamicTreeIntersectionCallback callback(phasemask);
     impl.intersectZAllignedRay(r, callback, maxSearchDist);
 
     if (callback.didHit())
         return v.z - maxSearchDist;
-    else
-        return -G3D::inf();
+
+    return -G3D::inf();
 }

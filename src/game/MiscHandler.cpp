@@ -647,7 +647,7 @@ void WorldSession::HandleReclaimCorpseOpcode(WorldPacket &recv_data)
         return;
 
     // resurrect
-    GetPlayer()->ResurrectPlayer(GetPlayer()->InBattleGround() ? 1.0f : 0.5f);
+    GetPlayer()->ResurrectPlayer(GetPlayer()->InBattleGround() ? 100 : 50);
 
     // spawn bones
     GetPlayer()->SpawnCorpseBones();
@@ -1517,7 +1517,7 @@ void WorldSession::HandleGrantLevel(WorldPacket& recv_data)
 
     target->AccessGrantableLevel(_player->GetObjectGuid());
 
-    WorldPacket data(SMSG_PROPOSE_LEVEL_GRANT, 8);
+    WorldPacket data(SMSG_PROPOSE_LEVEL_GRANT, _player->GetPackGUID().size());
     data << _player->GetPackGUID();
     target->GetSession()->SendPacket(&data);
 }

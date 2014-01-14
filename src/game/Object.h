@@ -90,9 +90,9 @@ class WorldUpdateCounter
     public:
         WorldUpdateCounter() : m_tmStart(0) {}
 
-        time_t timeElapsed()
+        uint32 timeElapsed()
         {
-            if(!m_tmStart)
+            if (!m_tmStart)
                 m_tmStart = WorldTimer::tickPrevTime();
 
             return WorldTimer::getMSTimeDiff(m_tmStart, WorldTimer::tickTime());
@@ -450,25 +450,16 @@ class MANGOS_DLL_SPEC WorldObject : public Object
         class MANGOS_DLL_SPEC UpdateHelper
         {
             public:
-                explicit UpdateHelper(WorldObject * obj) : m_obj(obj) {}
+                explicit UpdateHelper(WorldObject& obj) : m_obj(obj) {}
                 ~UpdateHelper() {}
 
-                void Update(uint32 time_diff)
-                {
-                    if (m_obj->SkipUpdate())
-                    {
-                        m_obj->SkipUpdate(false);
-                        return;
-                    }
-                    m_obj->Update(m_obj->m_updateTracker.timeElapsed(), time_diff);
-                    m_obj->m_updateTracker.Reset();
-                }
+                void Update(uint32 time_diff);
 
             private:
                 UpdateHelper( const UpdateHelper& );
                 UpdateHelper& operator=( const UpdateHelper& );
 
-                WorldObject * const m_obj;
+                WorldObject& m_obj;
         };
 
         virtual ~WorldObject();
@@ -640,7 +631,6 @@ class MANGOS_DLL_SPEC WorldObject : public Object
         void MonsterTextEmote(const char* text, Unit const* target, bool IsBossEmote = false) const;
         void MonsterWhisper(const char* text, Unit const* target, bool IsBossWhisper = false) const;
         void MonsterText(MangosStringLocale const* textData, Unit const* target) const;
-        static void BuildMonsterChat(WorldPacket* data, ObjectGuid senderGuid, uint8 msgtype, char const* text, uint32 language, char const* name, ObjectGuid targetGuid, char const* targetName);
 
         void PlayDistanceSound(uint32 sound_id, Player const* target = NULL) const;
         void PlayDirectSound(uint32 sound_id, Player const* target = NULL) const;
@@ -673,7 +663,7 @@ class MANGOS_DLL_SPEC WorldObject : public Object
         ObjectLockType& GetLock(MapLockType _locktype = MAP_LOCK_TYPE_DEFAULT);
 
         //obtain terrain data for map where this object belong...
-        TerrainInfo const* GetTerrain() const;
+        TerrainInfoPtr GetTerrain() const;
 
         void AddToClientUpdateList() override;
         void RemoveFromClientUpdateList() override;

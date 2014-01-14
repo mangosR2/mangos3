@@ -277,23 +277,28 @@ enum FieldFormat
 #if defined WIN64
 #     define  NOTSAFE_SEMAPHORE_OVERHANDLING "Win64"
 #     define  MANGOSR2_MUTEX_MODEL ACE_Null_Mutex
+#     define  MANGOSR2_MUTEX_MODEL_2 MangosR2_Mutex
 #     define  MANGOSR2_SINGLE_THREAD "Win64"
 #elif defined WIN32
 #     define  NOTSAFE_SEMAPHORE_OVERHANDLING "Win32"
 #     define  MANGOSR2_MUTEX_MODEL ACE_Null_Mutex
+#     define  MANGOSR2_MUTEX_MODEL_2 MangosR2_Mutex
 #     define  MANGOSR2_SINGLE_THREAD "Win32"
 #elif defined (__FreeBSD__)
 #     define  NOTSAFE_SEMAPHORE_OVERHANDLING "FreeBSD"
 #     define  MANGOSR2_MUTEX_MODEL ACE_RW_Thread_Mutex
+#     define  MANGOSR2_MUTEX_MODEL_2 MangosR2_Mutex
 #     undef   MANGOSR2_SINGLE_THREAD
 #elif defined (__APPLE__)
 #     define  NOTSAFE_SEMAPHORE_OVERHANDLING "MacOS"
 #     define  MANGOSR2_MUTEX_MODEL ACE_RW_Thread_Mutex
+#     define  MANGOSR2_MUTEX_MODEL_2 MangosR2_Mutex
 #     undef   MANGOSR2_SINGLE_THREAD
 // All other possibility - linux, android  and some other, has all needed methods
 #else
 #     undef   NOTSAFE_SEMAPHORE_OVERHANDLING
 #     define  MANGOSR2_MUTEX_MODEL ACE_RW_Thread_Mutex
+#     define  MANGOSR2_MUTEX_MODEL_2 MangosR2_Mutex
 #     undef   MANGOSR2_SINGLE_THREAD
 #endif
 
@@ -350,12 +355,6 @@ enum FieldFormat
 
 #define MAX_CLIENT_STAT_VALUE INT16_MAX
 
-#if defined (WIN32) || defined (WIN64)
-    #define MANGOSR2_ATOMIC_LOCK_BEGIN(lockHolder) while (InterlockedExchange<bool>(&lockHolder, true)) SwitchToThread()
-    #define MANGOSR2_ATOMIC_LOCK_END(lockHolder) InterlockedExchange<bool>(&lockHolder, false)
-#else
-    #define MANGOSR2_ATOMIC_LOCK_BEGIN(lockHolder) while (__sync_bool_compare_and_swap(&lockHolder, false, true)) sched_yield()
-    #define MANGOSR2_ATOMIC_LOCK_END(lockHolder) __sync_bool_compare_and_swap(&lockHolder, true, false)
-#endif
+#include "MangosR2MembarMutex.h"
 
 #endif

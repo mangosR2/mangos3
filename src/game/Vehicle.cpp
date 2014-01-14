@@ -49,16 +49,15 @@
 #include "movement/MoveSpline.h"
 #include "SQLStorages.h"
 
-VehicleKit::VehicleKit(Unit* base, VehicleEntry const* entry)
-    : TransportBase(base), m_vehicleEntry(entry), m_uiNumFreeSeats(0), m_isInitialized(false)
+VehicleKit::VehicleKit(Unit* base, VehicleEntry const* entry) :
+    TransportBase(base), m_vehicleEntry(entry), m_uiNumFreeSeats(0), m_isInitialized(false),
+    m_dstSet(false)
 {
     for (uint32 i = 0; i < MAX_VEHICLE_SEAT; ++i)
     {
         uint32 seatId = GetEntry()->m_seatID[i];
-
         if (!seatId)
             continue;
-
 
         if (VehicleSeatEntry const* seatInfo = sVehicleSeatStore.LookupEntry(seatId))
         {
@@ -278,6 +277,7 @@ bool VehicleKit::AddPassenger(Unit* passenger, SeatId seatId)
             GetBase()->GetMotionMaster()->Clear();
             GetBase()->CombatStop(true);
         }
+
         GetBase()->DeleteThreatList();
         GetBase()->getHostileRefManager().deleteReferences();
         GetBase()->SetCharmerGuid(passenger->GetObjectGuid());
@@ -288,7 +288,7 @@ bool VehicleKit::AddPassenger(Unit* passenger, SeatId seatId)
         if (GetBase()->HasAuraType(SPELL_AURA_FLY) || GetBase()->HasAuraType(SPELL_AURA_MOD_FLIGHT_SPEED) ||
             (GetBase()->GetTypeId() == TYPEID_UNIT && ((Creature*)GetBase())->CanFly()))
         {
-            WorldPacket data(SMSG_MOVE_SET_CAN_FLY, 8 + 4);
+            WorldPacket data(SMSG_MOVE_SET_CAN_FLY, GetBase()->GetPackGUID().size() + 4);
             data << GetBase()->GetPackGUID();
             data << uint32(0);
             GetBase()->SendMessageToSet(&data, false);
@@ -300,7 +300,7 @@ bool VehicleKit::AddPassenger(Unit* passenger, SeatId seatId)
 
             if (CharmInfo* charmInfo = GetBase()->InitCharmInfo(GetBase()))
             {
-                charmInfo->SetState(CHARM_STATE_ACTION,ACTIONS_DISABLE);
+                charmInfo->SetState(CHARM_STATE_ACTION, ACTIONS_DISABLE);
                 charmInfo->InitVehicleCreateSpells(seat->first);
             }
 
@@ -315,9 +315,8 @@ bool VehicleKit::AddPassenger(Unit* passenger, SeatId seatId)
             ((Creature*)GetBase())->AIM_Initialize();
 
         if (GetBase()->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE))
-        {
             GetBase()->SetRoot(true);
-        }
+
         // Set owner's speedrate to vehicle at board.
         else if (passenger->IsWalking() && !GetBase()->IsWalking())
             ((Creature*)GetBase())->SetWalk(true, true);
@@ -355,10 +354,9 @@ bool VehicleKit::AddPassenger(Unit* passenger, SeatId seatId)
         // Not entirely sure how this must be handled in relation to CONTROL
         // But in any way this at least would require some changes in the movement system most likely
         passenger->GetMotionMaster()->Clear(false, true);
-        passenger->GetMotionMaster()->MoveIdle();
     }
 
-    if (b_dstSet && (seatInfo->m_flagsB & VEHICLE_SEAT_FLAG_B_EJECTABLE_FORCED))
+    if (m_dstSet && (seatInfo->m_flagsB & VEHICLE_SEAT_FLAG_B_EJECTABLE_FORCED))
     {
         uint32 delay = seatInfo->m_exitMaxDuration * IN_MILLISECONDS;
         GetBase()->AddEvent(new PassengerEjectEvent(seatId, *GetBase()), delay);
@@ -436,7 +434,7 @@ void VehicleKit::RemovePassenger(Unit* passenger, bool dismount /*false*/)
             (GetBase()->GetTypeId() == TYPEID_UNIT && ((Creature*)GetBase())->CanFly())) &&
             (!player->HasAuraType(SPELL_AURA_FLY) && !player->HasAuraType(SPELL_AURA_MOD_FLIGHT_SPEED)))
         {
-            WorldPacket dataCF(SMSG_MOVE_UNSET_CAN_FLY, 8 + 4);
+            WorldPacket dataCF(SMSG_MOVE_UNSET_CAN_FLY, player->GetPackGUID().size() + 4);
             dataCF << player->GetPackGUID();
             dataCF << uint32(0);
             GetBase()->SendMessageToSet(&dataCF, false);
@@ -473,7 +471,6 @@ void VehicleKit::RemovePassenger(Unit* passenger, bool dismount /*false*/)
         if (GetBase()->m_movementInfo.HasMovementFlag(MOVEFLAG_FLYING))
             GetBase()->CastSpell(passenger, 45472, true);    // Parachute
     }
-
 }
 
 void VehicleKit::Reset()
@@ -601,7 +598,7 @@ SeatId VehicleKit::GetSeatId(Unit* passenger)
 
 SeatId VehicleKit::GetSeatId(ObjectGuid const& guid)
 {
-    for (SeatMap::iterator itr = m_Seats.begin(); itr != m_Seats.end(); ++itr)
+    for (SeatMap::const_iterator itr = m_Seats.begin(); itr != m_Seats.end(); ++itr)
     {
         if (guid == itr->second.passenger)
             return itr->first;
@@ -622,6 +619,13 @@ void VehicleKit::Dismount(Unit* passenger, VehicleSeatEntry const* seatInfo)
     if (tRadius < 1.0f || tRadius > 10.0f)
         tRadius = 1.0f;
 
+    // Force update passenger position to base position
+    if (passenger->GetTypeId() == TYPEID_PLAYER)
+    {
+        passenger->SetPosition(pos);
+        ((Player*)passenger)->SetFallInformation(0, pos.z + 0.5f);
+    }
+
     // FIXME temp method for unmount on transport
     if (GetBase()->IsOnTransport())
     {
@@ -633,7 +637,7 @@ void VehicleKit::Dismount(Unit* passenger, VehicleSeatEntry const* seatInfo)
     {
         passenger->Relocate(pos);
     }
-    else if (b_dstSet)
+    else if (m_dstSet)
     {
         // parabolic traectory (catapults, explode, other effects). mostly set destination in DummyEffect.
         // destination Z not checked in this case! only limited on 8.0 delta. requred full correct set in spelleffects.
@@ -648,8 +652,10 @@ void VehicleKit::Dismount(Unit* passenger, VehicleSeatEntry const* seatInfo)
         {
             passenger->Relocate(pos);
         }
-        else
+        else if (!GetBase()->m_movementInfo.HasMovementFlag(MOVEFLAG_FLYING))
             passenger->GetMotionMaster()->MoveSkyDiving(m_dst_x, m_dst_y, m_dst_z, passenger->GetOrientation(), horisontalSpeed, max_height, true);
+        else
+            DismountFromFlyingVehicle(passenger);
     }
     else if (seatInfo)
     {
@@ -668,8 +674,10 @@ void VehicleKit::Dismount(Unit* passenger, VehicleSeatEntry const* seatInfo)
         {
             passenger->Relocate(pos);
         }
-        else
+        else if (!GetBase()->m_movementInfo.HasMovementFlag(MOVEFLAG_FLYING))
             passenger->GetMotionMaster()->MoveSkyDiving(m_dst_x, m_dst_y, m_dst_z + 0.1f, passenger->GetOrientation(), horisontalSpeed, 0.0f);
+        else
+            DismountFromFlyingVehicle(passenger);
     }
     else
     {
@@ -683,8 +691,10 @@ void VehicleKit::Dismount(Unit* passenger, VehicleSeatEntry const* seatInfo)
         {
             passenger->Relocate(pos);
         }
-        else
+        else if (!GetBase()->m_movementInfo.HasMovementFlag(MOVEFLAG_FLYING))
             passenger->GetMotionMaster()->MoveSkyDiving(m_dst_x, m_dst_y, m_dst_z + 0.1f, passenger->GetOrientation(), BASE_CHARGE_SPEED, 0.0f);
+        else
+            DismountFromFlyingVehicle(passenger);
     }
 
     DEBUG_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS, "VehicleKit::Dismount %s from %s (%f %f %f), destination point is %f %f %f",
@@ -693,6 +703,17 @@ void VehicleKit::Dismount(Unit* passenger, VehicleSeatEntry const* seatInfo)
         pos.x, pos.y, pos.z,
         m_dst_x, m_dst_y, m_dst_z);
     SetDestination();
+}
+
+void VehicleKit::DismountFromFlyingVehicle(Unit* passenger)
+{
+    passenger->clearUnitState(UNIT_STAT_ON_VEHICLE);
+    passenger->m_movementInfo.ClearTransportData();
+
+    if (passenger->GetTypeId() == TYPEID_PLAYER)
+        ((Player*)passenger)->SetMover(passenger);
+
+    passenger->m_movementInfo.SetMovementFlags(MOVEFLAG_NONE);
 }
 
 void VehicleKit::SetDestination(float x, float y, float z, float o, float speed, float elevation)
@@ -711,7 +732,7 @@ void VehicleKit::SetDestination(float x, float y, float z, float o, float speed,
         fabs(m_dst_o) > 0.001 ||
         fabs(m_dst_speed) > 0.001 ||
         fabs(m_dst_elevation) > 0.001)
-        b_dstSet = true;
+        m_dstSet = true;
 };
 
 bool VehicleSeat::IsProtectPassenger() const

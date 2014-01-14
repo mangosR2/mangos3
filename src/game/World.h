@@ -28,6 +28,7 @@
 #include "Timer.h"
 #include "Policies/Singleton.h"
 #include "SharedDefines.h"
+#include "ObjectGuid.h"
 #include "ObjectLock.h"
 #include "Util.h"
 
@@ -36,9 +37,10 @@
 #include <list>
 
 class Object;
+class Unit;
+class Player;
 class WorldPacket;
 class WorldSession;
-class Player;
 class Weather;
 class SqlResultQueue;
 class QueryResult;
@@ -74,18 +76,19 @@ enum ShutdownExitCode
 /// Timers for different object refresh rates
 enum WorldTimers
 {
-    WUPDATE_AUCTIONS      = 0,
-    WUPDATE_WEATHERS      = 1,
-    WUPDATE_UPTIME        = 2,
-    WUPDATE_CORPSES       = 3,
-    WUPDATE_EVENTS        = 4,
-    WUPDATE_DELETECHARS   = 5,
-    WUPDATE_AHBOT         = 6,
-    WUPDATE_AUTOBROADCAST = 7,
-    WUPDATE_WORLDSTATE    = 8,
-    WUPDATE_CALENDAR      = 9,
-    WUPDATE_GROUPS        = 10,
-    WUPDATE_COUNT
+    WUPDATE_AUCTIONS = 0,
+    WUPDATE_WEATHERS,
+    WUPDATE_UPTIME,
+    WUPDATE_CORPSES,
+    WUPDATE_EVENTS,
+    WUPDATE_DELETECHARS,
+    WUPDATE_AHBOT,
+    WUPDATE_AUTOBROADCAST,
+    WUPDATE_WORLDSTATE,
+    WUPDATE_CALENDAR,
+    WUPDATE_GROUPS,
+    WUPDATE_TERRAIN,
+    WUPDATE_COUNT,
 };
 
 /// Configuration elements
@@ -147,7 +150,6 @@ enum eConfigUInt32Values
     CONFIG_UINT32_GROUP_VISIBILITY,
     CONFIG_UINT32_MAIL_DELIVERY_DELAY,
     CONFIG_UINT32_MASS_MAILER_SEND_PER_TICK,
-    CONFIG_UINT32_UPTIME_UPDATE,
     CONFIG_UINT32_AUCTION_DEPOSIT_MIN,
     CONFIG_UINT32_SKILL_CHANCE_ORANGE,
     CONFIG_UINT32_SKILL_CHANCE_YELLOW,
@@ -197,6 +199,7 @@ enum eConfigUInt32Values
     CONFIG_UINT32_CHARDELETE_KEEP_DAYS,
     CONFIG_UINT32_CHARDELETE_METHOD,
     CONFIG_UINT32_CHARDELETE_MIN_LEVEL,
+    CONFIG_UINT32_AUTOBROADCAST_CENTER,
     CONFIG_UINT32_GUID_RESERVE_SIZE_CREATURE,
     CONFIG_UINT32_GUID_RESERVE_SIZE_GAMEOBJECT,
     CONFIG_UINT32_ANTICHEAT_GMLEVEL,
@@ -266,6 +269,7 @@ enum eConfigFloatValues
     CONFIG_FLOAT_RATE_DROP_CURRENCY,
     CONFIG_FLOAT_RATE_DROP_CURRENCY_AMOUNT,
     CONFIG_FLOAT_RATE_XP_KILL,
+    CONFIG_FLOAT_RATE_XP_PETKILL,
     CONFIG_FLOAT_RATE_XP_QUEST,
     CONFIG_FLOAT_RATE_XP_EXPLORE,
     CONFIG_FLOAT_RATE_RAF_XP,
@@ -289,6 +293,7 @@ enum eConfigFloatValues
     CONFIG_FLOAT_RATE_CREATURE_ELITE_WORLDBOSS_SPELLDAMAGE,
     CONFIG_FLOAT_RATE_CREATURE_ELITE_RARE_SPELLDAMAGE,
     CONFIG_FLOAT_RATE_CREATURE_AGGRO,
+    CONFIG_FLOAT_RATE_CREATURE_AGGRO_IN_INSTANCE,
     CONFIG_FLOAT_RATE_REST_INGAME,
     CONFIG_FLOAT_RATE_REST_OFFLINE_IN_TAVERN_OR_CITY,
     CONFIG_FLOAT_RATE_REST_OFFLINE_IN_WILDERNESS,
@@ -352,6 +357,7 @@ enum eConfigBoolValues
     CONFIG_BOOL_SKILL_PROSPECTING,
     CONFIG_BOOL_WEATHER,
     CONFIG_BOOL_EVENT_ANNOUNCE,
+    CONFIG_BOOL_AUTOBROADCAST,
     CONFIG_BOOL_QUEST_IGNORE_RAID,
     CONFIG_BOOL_DETECT_POS_COLLISION,
     CONFIG_BOOL_RESTRICTED_LFG_CHANNEL,
@@ -422,7 +428,7 @@ enum eConfigBoolValues
     CONFIG_BOOL_RESET_DUEL_AREA_ENABLED,
     CONFIG_BOOL_PET_ADVANCED_AI,
     CONFIG_BOOL_PET_ADVANCED_AI_SLACKER,
-    CONFIG_BOOL_RESILENCE_ALTERNATIVE_CALCULATION,
+    CONFIG_BOOL_RESILIENCE_ALTERNATIVE_CALCULATION,
     CONFIG_BOOL_BLINK_ANIMATION_TYPE,
     CONFIG_BOOL_FACTION_AND_RACE_CHANGE_WITHOUT_RENAMING,
     CONFIG_BOOL_GUILD_LEVELING_ENABLED,
@@ -430,6 +436,7 @@ enum eConfigBoolValues
     CONFIG_BOOL_RESIST_ADD_BY_OVER_LEVEL,
     CONFIG_BOOL_DYNAMIC_VMAP_DOUBLE_CHECK,
     CONFIG_BOOL_INSTANCES_RESET_GROUP_ANNOUNCE,
+    CONFIG_BOOL_PLAYER_COMMANDS,
     CONFIG_BOOL_VALUE_COUNT
 };
 
@@ -531,7 +538,7 @@ struct CliCommandHolder
 class World
 {
     public:
-        static ACE_Atomic_Op<ACE_Thread_Mutex, uint32> m_worldLoopCounter;
+        static ACE_Atomic_Op<MANGOSR2_MUTEX_MODEL_2, uint32> m_worldLoopCounter;
 
         World();
         ~World();
@@ -659,6 +666,8 @@ class World
         BanReturn BanAccount(BanMode mode, std::string nameOrIP, uint32 duration_secs, std::string reason, std::string author);
         bool RemoveBanAccount(BanMode mode, std::string nameOrIP);
 
+        float GetCreatureAggroRate(Unit const* unit) const;
+
         // for max speed access
         static float GetMaxVisibleDistanceOnContinents()    { return m_MaxVisibleDistanceOnContinents; }
         static float GetMaxVisibleDistanceInInstances()     { return m_MaxVisibleDistanceInInstances;  }
@@ -695,6 +704,8 @@ class World
         void setDisabledMapIdForDungeonFinder(const char* areas);
         bool IsDungeonMapIdDisable(uint32 mapId);
 
+        void InvalidatePlayer(ObjectGuid const& guid);
+
     protected:
         void _UpdateGameTime();
 
@@ -727,7 +738,7 @@ class World
         bool configNoReload(bool reload, eConfigFloatValues index, char const* fieldname, float defvalue);
         bool configNoReload(bool reload, eConfigBoolValues index, char const* fieldname, bool defvalue);
 
-        static ACE_Atomic_Op<ACE_Thread_Mutex, bool> m_stopEvent;
+        static ACE_Atomic_Op<MANGOSR2_MUTEX_MODEL_2, bool> m_stopEvent;
         static uint8 m_ExitCode;
         uint32 m_ShutdownTimer;
         uint32 m_ShutdownMask;
@@ -772,7 +783,7 @@ class World
         static uint32 m_relocation_ai_notify_delay;
 
         // CLI command holder to be thread safe
-        ACE_Based::LockedQueue<CliCommandHolder*,ACE_Thread_Mutex> cliCmdQueue;
+        ACE_Based::LockedQueue<CliCommandHolder*, MANGOSR2_MUTEX_MODEL_2> cliCmdQueue;
 
         // scheduled reset times
         time_t m_NextCurrencyReset;
@@ -786,7 +797,7 @@ class World
 
         //sessions that are added async
         void AddSession_(WorldSession* s);
-        ACE_Based::LockedQueue<WorldSession*, ACE_Thread_Mutex> addSessQueue;
+        ACE_Based::LockedQueue<WorldSession*, MANGOSR2_MUTEX_MODEL_2> addSessQueue;
 
         //used versions
         std::string m_DBVersion;

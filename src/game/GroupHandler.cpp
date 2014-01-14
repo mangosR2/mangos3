@@ -205,7 +205,6 @@ void WorldSession::HandleGroupInviteOpcode(WorldPacket& recv_data)
             delete group;
             return;
         }
-        sObjectMgr.AddGroup(group);
         DEBUG_LOG("WorldSession::HandleGroupInviteOpcode %s send invite to %s, try create %s.",GetPlayer()->GetObjectGuid().GetString().c_str(), player->GetObjectGuid().GetString().c_str(),group->GetObjectGuid().GetString().c_str());
     }
     else
@@ -240,8 +239,8 @@ void WorldSession::HandleGroupInviteResponseOpcode(WorldPacket& recv_data)
 
         if (group->GetLeaderGuid() == GetPlayer()->GetObjectGuid())
         {
-                sLog.outError("HandleGroupInviteResponseOpcode: %s tried to accept an invite to his own group",
-                GetPlayer()->GetGuidStr().c_str());
+            sLog.outError("HandleGroupInviteResponseOpcode: %s tried to accept an invite to his own group",
+            GetPlayer()->GetGuidStr().c_str());
             return;
         }
 
@@ -259,19 +258,13 @@ void WorldSession::HandleGroupInviteResponseOpcode(WorldPacket& recv_data)
         {
             if (leader)
                 group->RemoveInvite(leader);
-            if (group->Create(group->GetLeaderGuid(), group->GetLeaderName()))
-                sObjectMgr.AddGroup(group);
-            else
+
+            if (!group->Create(group->GetLeaderGuid(), group->GetLeaderName()))
                 return;
         }
-
-        // everything is fine, do it, PLAYER'S GROUP IS SET IN ADDMEMBER!!!
-        if (!group->AddMember(GetPlayer()->GetObjectGuid(), GetPlayer()->GetName()))
-            return;
-
+        else
+            DEBUG_LOG("WorldSession::HandleGroupAcceptOpcode %s accept %s invite.",GetPlayer()->GetObjectGuid().GetString().c_str(), group->GetObjectGuid().GetString().c_str());
     }
-    else
-        DEBUG_LOG("WorldSession::HandleGroupAcceptOpcode %s accept %s invite.",GetPlayer()->GetObjectGuid().GetString().c_str(), group->GetObjectGuid().GetString().c_str());
 
     // Frozen Mod
     group->BroadcastGroupUpdate();
@@ -399,7 +392,7 @@ void WorldSession::HandleGroupSetLeaderOpcode(WorldPacket& recv_data)
     /********************/
 
     // everything is fine, do it
-    GetPlayer()->GetLFGPlayerState()->RemoveRole(ROLE_LEADER);
+    sLFGMgr.GetLFGPlayerState(GetPlayer()->GetObjectGuid())->RemoveRole(ROLE_LEADER);
     group->ChangeLeader(guid);
 }
 
@@ -728,7 +721,7 @@ void WorldSession::BuildPartyMemberStatsChangedPacket(Player* player, WorldPacke
             byteCount += GroupUpdateLength[i];
     }
 
-    data->Initialize(SMSG_PARTY_MEMBER_STATS, 8 + 4 + byteCount);
+    data->Initialize(SMSG_PARTY_MEMBER_STATS, player->GetPackGUID().size() + 4 + byteCount);
     *data << player->GetPackGUID();
     *data << uint32(mask);
 
