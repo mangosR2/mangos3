@@ -252,7 +252,7 @@ void WorldSession::HandleMoveWorldportAckOpcode()
 
     // honorless target
     if(GetPlayer()->pvpInfo.inHostileArea)
-        GetPlayer()->CastSpell(GetPlayer(), 2479, true);
+        GetPlayer()->CastSpell(GetPlayer(), SPELL_ID_HONORLESS_TARGET, true);
 
     // resummon pet
     GetPlayer()->ResummonPetTemporaryUnSummonedIfAny();
@@ -304,7 +304,7 @@ void WorldSession::HandleMoveTeleportAckOpcode(WorldPacket& recv_data)
     {
         // honorless target
         if(plMover->pvpInfo.inHostileArea)
-            plMover->CastSpell(plMover, 2479, true);
+            plMover->CastSpell(plMover, SPELL_ID_HONORLESS_TARGET, true);
     }
 
     // resummon pet

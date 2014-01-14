@@ -245,7 +245,7 @@ void Object::BuildCreateUpdateBlockForPlayer(UpdateData *data, Player *target) c
 
         if (isType(TYPEMASK_UNIT))
         {
-            if(((Unit*)this)->getVictim())
+            if (((Unit*)this)->getVictim())
                 updateFlags |= UPDATEFLAG_HAS_ATTACKING_TARGET;
         }
     }
@@ -1615,8 +1615,7 @@ void WorldObject::UpdateAllowedPositionZ(float x, float y, float &z) const
     {
         case TYPEID_UNIT:
         {
-            Unit* pVictim = ((Creature const*)this)->getVictim();
-            if (pVictim)
+            if (Unit* pVictim = ((Creature const*)this)->getVictim())
             {
                 // anyway creature move to victim for thinly Z distance (shun some VMAP wrong ground calculating)
                 if (fabs(GetPositionZ() - pVictim->GetPositionZ()) < 5.0f)

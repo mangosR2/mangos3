@@ -928,9 +928,9 @@ void BattleGround::EndBattleGround(Team winner)
             }
         }
 
-        uint32 win_kills = plr->GetRandomWinner() ? BG_REWARD_WINNER_HONOR_LAST : BG_REWARD_WINNER_HONOR_FIRST;
-        uint32 loos_kills = plr->GetRandomWinner() ? BG_REWARD_LOOSER_HONOR_LAST : BG_REWARD_LOOSER_HONOR_FIRST;
-        uint32 win_arena = plr->GetRandomWinner() ? BG_REWARD_WINNER_CONQUEST_LAST : BG_REWARD_WINNER_CONQUEST_FIRST;
+        uint32 win_kills = plr->IsRandomBGWinner() ? BG_REWARD_WINNER_HONOR_LAST : BG_REWARD_WINNER_HONOR_FIRST;
+        uint32 loos_kills = plr->IsRandomBGWinner() ? BG_REWARD_LOOSER_HONOR_LAST : BG_REWARD_LOOSER_HONOR_FIRST;
+        uint32 win_arena = plr->IsRandomBGWinner() ? BG_REWARD_WINNER_CONQUEST_LAST : BG_REWARD_WINNER_CONQUEST_FIRST;
 
         if (team == winner)
         {
@@ -941,11 +941,11 @@ void BattleGround::EndBattleGround(Team winner)
             {
                 UpdatePlayerScore(plr, SCORE_BONUS_HONOR, GetBonusHonorFromKill(win_kills*4));
 //                plr->ModifyArenaPoints(win_arena);
-                if(!plr->GetRandomWinner())
+                if (!plr->IsRandomBGWinner())
                 {
                     // 100cp awarded for the first random battleground won each day
                     plr->ModifyCurrencyCount(CURRENCY_CONQUEST_BG_META, win_arena * GetCurrencyPrecision(CURRENCY_CONQUEST_BG_META));
-                    plr->SetRandomWinner(true);
+                    plr->SetRandomBGWinner(true);
                 }
             }
             else // 50cp awarded for each non-rated battleground won
