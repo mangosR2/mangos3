@@ -4568,7 +4568,7 @@ void Player::BuildPlayerRepop()
     SetByteValue(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_ALWAYS_STAND);
 }
 
-void Player::ResurrectPlayer(float restorePercent, bool applySickness)
+void Player::ResurrectPlayer(uint32 restorePercent, bool applySickness)
 {
     WorldPacket data(SMSG_DEATH_RELEASE_LOC, 4 * 4);        // remove spirit healer position
     data << uint32(-1);
