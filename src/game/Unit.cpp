@@ -9882,7 +9882,7 @@ void Unit::Unmount(bool from_aura)
 void Unit::SetInCombatWith(Unit* enemy)
 {
     Unit* eOwner = enemy->GetCharmerOrOwnerOrSelf();
-    if (eOwner->IsPvP())
+    if (eOwner->IsPvP() || eOwner->IsFFAPvP())
     {
         SetInCombatState(true, enemy);
         return;
