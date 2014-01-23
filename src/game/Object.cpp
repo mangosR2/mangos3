@@ -580,11 +580,10 @@ void Object::BuildMovementUpdate(ByteBuffer * data, uint16 updateFlags) const
 
     if (updateFlags & UPDATEFLAG_HAS_POSITION)
     {
-        *data << uint32(((Unit*)this)->GetVehicleInfo()->m_ID); // vehicle id
-        if (((WorldObject*)this)->IsOnTransport())
-            *data << float(((WorldObject*)this)->GetTransOffsetO());
-        else
-            *data << float(((WorldObject*)this)->GetOrientation());
+        *data << float(NormalizeOrientation(((WorldObject*)this)->GetOrientation()));
+        *data << float(((WorldObject*)this)->GetPositionX());
+        *data << float(((WorldObject*)this)->GetPositionY());
+        *data << float(((WorldObject*)this)->GetPositionZ());
     }
 
     if (updateFlags & UPDATEFLAG_HAS_ATTACKING_TARGET)
