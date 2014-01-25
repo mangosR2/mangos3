@@ -39,6 +39,7 @@
 #include "ObjectMgr.h"
 #include "CreatureEventAIMgr.h"
 #include "GuildMgr.h"
+#include "GuildFinderMgr.h"
 #include "SpellMgr.h"
 #include "Chat.h"
 #include "DBCStores.h"
@@ -1591,6 +1592,12 @@ void World::SetInitialWorldSettings()
 
     sLog.outString( "Loading Guilds..." );
     sGuildMgr.LoadGuilds();
+
+    sLog.outString( "Loading Guild Finder guild-related settings..." );
+    sGuildFinderMgr.LoadGuildSettings();
+
+    sLog.outString( "Loading Guild Finder membership requests..." );
+    sGuildFinderMgr.LoadMembershipRequests();
 
     sLog.outString( "Loading ArenaTeams..." );
     sObjectMgr.LoadArenaTeams();

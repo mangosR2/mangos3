@@ -118,6 +118,9 @@ GuardAI.cpp
 GuardAI.h
 Guild.cpp
 Guild.h
+GuildFinderHandler.cpp
+GuildFinderMgr.cpp
+GuildFinderMgr.h
 GuildHandler.cpp
 GuildMgr.cpp
 GuildMgr.h

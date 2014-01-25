@@ -583,6 +583,13 @@ void InitializeOpcodes()
     //OPCODE(SMSG_RWHOIS,                                  STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
     OPCODE(SMSG_LFG_PLAYER_REWARD,                       STATUS_LOGGEDIN, PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
     OPCODE(SMSG_LFG_TELEPORT_DENIED,                     STATUS_LOGGEDIN, PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
+    OPCODE(SMSG_LF_GUILD_APPLICANT_LIST_UPDATED,         STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
+    OPCODE(SMSG_LF_GUILD_APPLICATIONS_LIST_CHANGED,      STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
+    OPCODE(SMSG_LF_GUILD_BROWSE_UPDATED,                 STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
+    OPCODE(SMSG_LF_GUILD_COMMAND_RESULT,                 STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
+    OPCODE(SMSG_LF_GUILD_MEMBERSHIP_LIST_UPDATED,        STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
+    OPCODE(SMSG_LF_GUILD_POST_UPDATED,                   STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
+    OPCODE(SMSG_LF_GUILD_RECRUIT_LIST_UPDATED,           STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
     //OPCODE(CMSG_UNLEARN_SPELL,                           STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     );
     OPCODE(CMSG_UNLEARN_SKILL,                           STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleUnlearnSkillOpcode        );
     OPCODE(SMSG_REMOVED_SPELL,                           STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
@@ -2015,6 +2022,16 @@ void InitializeOpcodes()
     OPCODE(CMSG_LFG_SET_COMMENT,                         STATUS_LOGGEDIN, PROCESS_INPLACE,      &WorldSession::HandleSetLfgCommentOpcode       );
     OPCODE(CMSG_LFG_SET_ROLES,                           STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleLfgSetRolesOpcode         );
     OPCODE(CMSG_LFG_TELEPORT,                            STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleLfgTeleportOpcode         );
+
+    OPCODE(CMSG_LF_GUILD_ADD_RECRUIT,                    STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleGuildFinderAddRecruitOpcode     );
+    OPCODE(CMSG_LF_GUILD_BROWSE,                         STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleGuildFinderBrowseOpcode         );
+    OPCODE(CMSG_LF_GUILD_DECLINE_RECRUIT,                STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleGuildFinderDeclineRecruitOpcode );
+    OPCODE(CMSG_LF_GUILD_GET_APPLICATIONS,               STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleGuildFinderGetApplicationsOpcode);
+    OPCODE(CMSG_LF_GUILD_GET_RECRUITS,                   STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleGuildFinderGetRecruitsOpcode    );
+    OPCODE(CMSG_LF_GUILD_POST_REQUEST,                   STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleGuildFinderPostRequestOpcode    );
+    OPCODE(CMSG_LF_GUILD_REMOVE_RECRUIT,                 STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleGuildFinderRemoveRecruitOpcode  );
+    OPCODE(CMSG_LF_GUILD_SET_GUILD_POST,                 STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleGuildFinderSetGuildPostOpcode   );
+
     OPCODE(CMSG_SEARCH_LFG_JOIN,                         STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleLfrSearchOpcode           );
     OPCODE(CMSG_SEARCH_LFG_LEAVE,                        STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleLfrLeaveOpcode            );
 
