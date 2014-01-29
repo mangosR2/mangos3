@@ -400,11 +400,71 @@ uint32 AccountMgr::GetPlayerAccountIdByGUID(ObjectGuid guid)
     return 0;
 }
 
+std::string AccountMgr::GetPlayerNameByGuid(ObjectGuid guid)
+{
+    if (!guid.IsPlayer())
+        return "";
+
+    PlayerDataCache const* cache = GetPlayerDataCache(guid);
+    if (cache)
+        return cache->name;
+
+    return "";
+}
+
 uint32 AccountMgr::GetPlayerAccountIdByPlayerName(const std::string& name)
 {
     PlayerDataCache const* cache = GetPlayerDataCache(name);
     if (cache)
         return cache->account;
+
+    return 0;
+}
+
+uint8 AccountMgr::GetPlayerRaceByGuid(ObjectGuid guid)
+{
+    if (!guid.IsPlayer())
+        return 0;
+
+    PlayerDataCache const* cache = GetPlayerDataCache(guid);
+    if (cache)
+        return cache->race;
+
+    return 0;
+}
+
+uint8 AccountMgr::GetPlayerClassByGuid(ObjectGuid guid)
+{
+    if (!guid.IsPlayer())
+        return 0;
+
+    PlayerDataCache const* cache = GetPlayerDataCache(guid);
+    if (cache)
+        return cache->p_class;
+
+    return 0;
+}
+
+uint8 AccountMgr::GetPlayerGenderByGuid(ObjectGuid guid)
+{
+    if (!guid.IsPlayer())
+        return 0;
+
+    PlayerDataCache const* cache = GetPlayerDataCache(guid);
+    if (cache)
+        return cache->gender;
+
+    return 0;
+}
+
+uint8 AccountMgr::GetPlayerLevelByGuid(ObjectGuid guid)
+{
+    if (!guid.IsPlayer())
+        return 0;
+
+    PlayerDataCache const* cache = GetPlayerDataCache(guid);
+    if (cache)
+        return cache->level;
 
     return 0;
 }
@@ -442,9 +502,12 @@ void AccountMgr::MakePlayerDataCache(Player* player)
     ObjectGuid guid = player->GetObjectGuid();
 
     PlayerDataCache cache;
-    cache.account  = player->GetSession()->GetAccountId();;
+    cache.account  = player->GetSession()->GetAccountId();
     cache.lowguid  = guid.GetCounter();
     cache.race     = player->getRace();
+    cache.p_class  = player->getClass();
+    cache.gender   = player->getGender();
+    cache.level    = player->getLevel();
     cache.name     = player->GetName();
 
     mPlayerDataCacheMap.insert(PlayerDataCacheMap::value_type(guid, cache));
@@ -468,7 +531,7 @@ PlayerDataCache const* AccountMgr::GetPlayerDataCache(ObjectGuid guid, bool forc
     }
     else
     {
-        QueryResult* result = CharacterDatabase.PQuery("SELECT account, name, race FROM characters WHERE guid = '%u'", guid.GetCounter());
+        QueryResult* result = CharacterDatabase.PQuery("SELECT account, name, race, class, gender, level FROM characters WHERE guid = '%u'", guid.GetCounter());
         if (result)
         {
             PlayerDataCache cache;
@@ -476,6 +539,9 @@ PlayerDataCache const* AccountMgr::GetPlayerDataCache(ObjectGuid guid, bool forc
             cache.lowguid = guid.GetCounter();
             cache.name    = (*result)[1].GetCppString();
             cache.race    = (*result)[2].GetUInt8();
+            cache.p_class = (*result)[3].GetUInt8();
+            cache.gender  = (*result)[4].GetUInt8();
+            cache.level   = (*result)[5].GetUInt8();
 
             mPlayerDataCacheMap.insert(PlayerDataCacheMap::value_type(guid, cache));
             delete result;
@@ -501,13 +567,16 @@ PlayerDataCache const* AccountMgr::GetPlayerDataCache(const std::string& name)
 
     ObjectGuid guid;
 
-    QueryResult* result = CharacterDatabase.PQuery("SELECT account, guid, race FROM characters WHERE name = '%s'", name.c_str());
+    QueryResult* result = CharacterDatabase.PQuery("SELECT account, guid, race, class, gender, level FROM characters WHERE name = '%s'", name.c_str());
     if (result)
     {
         PlayerDataCache cache;
         cache.account  = (*result)[0].GetUInt32();
         cache.lowguid  = (*result)[1].GetUInt32();
         cache.race     = (*result)[2].GetUInt8();
+        cache.p_class  = (*result)[3].GetUInt8();
+        cache.gender   = (*result)[4].GetUInt8();
+        cache.level    = (*result)[5].GetUInt8();
         cache.name     = name;
 
         guid = ObjectGuid(HIGHGUID_PLAYER, cache.lowguid);

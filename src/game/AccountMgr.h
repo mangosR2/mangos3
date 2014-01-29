@@ -44,6 +44,9 @@ struct PlayerDataCache
     uint32      account;
     std::string name;
     uint8       race;
+    uint8       p_class;
+    uint8       gender;
+    uint8       level;
 };
 
 #define MAX_ACCOUNT_STR 16
@@ -81,9 +84,14 @@ class AccountMgr : public MaNGOS::Singleton<AccountMgr, MaNGOS::ClassLevelLockab
 
         ObjectGuid GetPlayerGuidByName(std::string name);
         bool GetPlayerNameByGUID(ObjectGuid guid, std::string &name);
+        std::string GetPlayerNameByGuid(ObjectGuid guid);
         Team GetPlayerTeamByGUID(ObjectGuid guid);
         uint32 GetPlayerAccountIdByGUID(ObjectGuid guid);
         uint32 GetPlayerAccountIdByPlayerName(const std::string& name);
+        uint8 GetPlayerRaceByGuid(ObjectGuid guid);
+        uint8 GetPlayerClassByGuid(ObjectGuid guid);
+        uint8 GetPlayerGenderByGuid(ObjectGuid guid);
+        uint8 GetPlayerLevelByGuid(ObjectGuid guid);
 
         uint32 GetCharactersCount(uint32 acc_id, bool full);
         void UpdateCharactersCount(uint32 acc_id, uint32 realm_id);
