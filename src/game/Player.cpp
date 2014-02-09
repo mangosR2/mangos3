@@ -17315,6 +17315,9 @@ void Player::_LoadGroup(QueryResult* result)
         Group* group = sObjectMgr.GetGroup(groupGuid);
         if (group)
         {
+            if (group->IsLeader(GetObjectGuid()))
+                SetFlag(PLAYER_FLAGS, PLAYER_FLAGS_GROUP_LEADER);
+
             uint8 subgroup = group->GetMemberGroup(GetObjectGuid());
             SetGroup(groupGuid, subgroup);
             if (getLevel() >= LEVELREQUIREMENT_HEROIC)
@@ -17327,6 +17330,9 @@ void Player::_LoadGroup(QueryResult* result)
                 sLFGMgr.LoadLFDGroupPropertiesForPlayer(this);
         }
     }
+
+    if (!GetGroup() || !GetGroup()->IsLeader(GetObjectGuid()))
+        RemoveFlag(PLAYER_FLAGS, PLAYER_FLAGS_GROUP_LEADER);
 }
 
 void Player::_LoadBoundInstances(QueryResult* result)
