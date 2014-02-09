@@ -1,8 +1,11 @@
 #ifndef _WHEATYEXCEPTIONREPORT_
 #define _WHEATYEXCEPTIONREPORT_
 
+#ifdef _WIN32
+
 #include <dbghelp.h>
 
+#include <set>
 #if _MSC_VER < 1400
 #   define countof(array)   (sizeof(array) / sizeof(array[0]))
 #else
@@ -68,6 +71,26 @@ const char* const rgBaseType[] =
     " HRESULT "                                             // btHresult = 31
 };
 
+struct SymbolPair
+{
+    SymbolPair(DWORD type, DWORD_PTR offset)
+    {
+        _type = type;
+        _offset = offset;
+    }
+
+    bool operator<(const SymbolPair& other) const
+    {
+        return _offset < other._offset || 
+              (_offset == other._offset && _type < other._type);
+    }
+
+    DWORD _type;
+    DWORD_PTR _offset;
+};
+
+typedef std::set<SymbolPair> SymbolPairs;
+
 class WheatyExceptionReport
 {
     public:
@@ -79,7 +102,7 @@ class WheatyExceptionReport
         static LONG WINAPI WheatyUnhandledExceptionFilter(
             PEXCEPTION_POINTERS pExceptionInfo );
 
-        static void printTracesForAllThreads();
+        static void printTracesForAllThreads(bool);
     private:
         // where report info is extracted and generated
         static void GenerateExceptionReport( PEXCEPTION_POINTERS pExceptionInfo );
@@ -96,9 +119,9 @@ class WheatyExceptionReport
 
         static BOOL CALLBACK EnumerateSymbolsCallback(PSYMBOL_INFO,ULONG, PVOID);
 
-        static bool FormatSymbolValue( PSYMBOL_INFO, STACKFRAME *, char * pszBuffer, unsigned cbBuffer );
+        static bool FormatSymbolValue( PSYMBOL_INFO, STACKFRAME64 *, char * pszBuffer, unsigned cbBuffer );
 
-        static char * DumpTypeIndex( char *, DWORD64, DWORD, unsigned, DWORD_PTR, bool & , char*);
+        static char * DumpTypeIndex( char *, DWORD64, DWORD, unsigned, DWORD_PTR, bool & , char*, char*);
 
         static char * FormatOutputValue( char * pszCurrBuffer, BasicType basicType, DWORD64 length, PVOID pAddress );
 
@@ -106,12 +129,17 @@ class WheatyExceptionReport
 
         static int __cdecl _tprintf(const TCHAR * format, ...);
 
+        static bool StoreSymbol(DWORD type , DWORD_PTR offset);
+        static void ClearSymbols();
+
         // Variables used by the class
         static TCHAR m_szLogFileName[MAX_PATH];
         static LPTOP_LEVEL_EXCEPTION_FILTER m_previousFilter;
         static HANDLE m_hReportFile;
         static HANDLE m_hProcess;
+        static SymbolPairs symbols;
 };
 
 extern WheatyExceptionReport g_WheatyExceptionReport;       //  global instance of class
-#endif                                                      //WheatyExceptionReport
+#endif                                                      // WIN32
+#endif                                                      // WheatyExceptionReport
