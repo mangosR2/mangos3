@@ -19899,6 +19899,15 @@ bool Player::BuyItemFromVendorSlot(ObjectGuid vendorGuid, uint32 vendorslot, uin
         return false;
     }
 
+    if (!(pProto->AllowableClass & getClassMask()) && pProto->Bonding == BIND_WHEN_PICKED_UP && !IsGameMaster())
+    {
+        SendBuyError(BUY_ERR_CANT_FIND_ITEM, NULL, item, 0);
+        return false;
+    }
+
+    if (!IsGameMaster() && ((pProto->Flags2 & ITEM_FLAG2_HORDE_ONLY && GetTeam() == ALLIANCE) || (pProto->Flags2 == ITEM_FLAG2_ALLIANCE_ONLY && GetTeam() == HORDE)))
+        return false;
+
     Creature* pVendor = GetNPCIfCanInteractWith(vendorGuid, UNIT_NPC_FLAG_VENDOR);
     if (!pVendor)
     {
