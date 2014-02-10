@@ -253,6 +253,11 @@ class ByteBuffer
             return _rpos;
         }
 
+        void rfinish()
+        {
+            _rpos = wpos();
+        }
+
         size_t wpos() const { return _wpos; }
 
         size_t wpos(size_t wpos_)
