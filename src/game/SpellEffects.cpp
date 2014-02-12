@@ -4990,6 +4990,46 @@ void Spell::EffectDummy(SpellEffectEntry const* effect)
                 totem->CastSpell(totem, 19823, true, NULL, NULL, m_caster->GetObjectGuid());
                 return;
             }
+            // Spirit Link
+            if (m_spellInfo->Id == 98020)
+            {
+                if (!unitTarget)
+                    return;
+
+                if (m_UniqueTargetInfo.size() < 2)
+                    return;
+
+                if (m_currentBasePoints[1] == 0)
+                {
+                    int32 sumHealth = 0;
+                    int32 sumMaxHealth = 0;
+                    for (TargetList::const_iterator itr = m_UniqueTargetInfo.begin(); itr != m_UniqueTargetInfo.end(); ++itr)
+                    {
+                        if (Unit* unit = m_caster->GetMap()->GetUnit(itr->targetGUID))
+                        {
+                            if (unit->isDead())
+                                continue;
+
+                            sumHealth += unit->GetHealth();
+                            sumMaxHealth += unit->GetMaxHealth();
+                        }
+                    }
+
+                    m_currentBasePoints[1] = int32(float(sumHealth) / sumMaxHealth * 10000);
+                }
+
+                int32 diff = int32(unitTarget->GetHealth() - unitTarget->GetMaxHealth() / 100.0f * m_currentBasePoints[1] / 100.0f);
+                // need damage
+                if (diff > 0)
+                    m_caster->CastCustomSpell(unitTarget, 98021, &diff, NULL, NULL, true);
+                // need heal
+                else if (diff < 0)
+                {
+                    diff *= -1;
+                    m_caster->CastCustomSpell(unitTarget, 98021, NULL, &diff, NULL, true);
+                }
+                return;
+            }
             break;
         }
         case SPELLFAMILY_DEATHKNIGHT:

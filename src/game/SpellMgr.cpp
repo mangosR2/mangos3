@@ -2519,6 +2519,18 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
                 if (spellInfo_1->IsFitToFamily<SPELLFAMILY_MAGE, CF_MAGE_D_A_MAGIC>() &&
                     spellInfo_2->IsFitToFamily<SPELLFAMILY_MAGE, CF_MAGE_D_A_MAGIC>())
                     return true;
+
+                // Spirit Link multiple checks
+                if (spellInfo_1->SpellIconID == 3062 && spellInfo_2->SpellIconID == 3062)
+                    return false;
+
+                // Spirit Link multiple checks
+                if (spellInfo_1->SpellIconID == 3062 && spellInfo_2->SpellIconID == 3062)
+                    return false;
+
+                // Spirit Link multiple checks
+                if (spellInfo_1->SpellIconID == 3062 && spellInfo_2->SpellIconID == 3062)
+                    return false;
             }
             break;
         case SPELLFAMILY_PRIEST:

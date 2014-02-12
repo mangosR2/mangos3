@@ -4027,10 +4027,9 @@ void Spell::cast(bool skipCheck)
             // Spirit Walk
             else if (m_spellInfo->Id == 58875)
                 AddPrecastSpell(58876);
-            // Totem of Wrath
-            else if (spellEffect && spellEffect->Effect==SPELL_EFFECT_APPLY_AREA_AURA_RAID && classOpt && classOpt->SpellFamilyFlags & UI64LIT(0x0000000004000000))
-                // only for main totem spell cast
-                AddTriggeredSpell(30708);                   // Totem of Wrath
+            // Spirit Link Totem
+            else if (m_spellInfo->Id == 98007)
+                AddTriggeredSpell(98017);
             break;
         }
         case SPELLFAMILY_DEATHKNIGHT:
