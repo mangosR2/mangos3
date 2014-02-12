@@ -3060,11 +3060,11 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, DamageInfo* damageI
                     return SPELL_AURA_PROC_OK;
                 }
             }
-            // Storm, Earth and Fire
-            if (dummySpell->GetSpellIconID() == 3063)
+            // Earth's Grasp
+            if (dummySpell->SpellIconID == 20)
             {
                 // Earthbind Totem summon only
-                if (procSpell->Id != 2484)
+                if (!procSpell || procSpell->Id != 2484)
                     return SPELL_AURA_PROC_FAILED;
 
                 if (!roll_chance_i(triggerAmount))
