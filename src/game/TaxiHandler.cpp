@@ -167,7 +167,7 @@ void WorldSession::HandleActivateTaxiExpressOpcode(WorldPacket& recv_data)
 
     recv_data >> guid >> node_count;
 
-    if (!GetPlayer()->m_taxi.IsTaximaskNodeKnown(node) && !GetPlayer()->isTaxiCheater())
+    if (!GetPlayer()->m_taxi.IsTaximaskNodeKnown(nodes) && !GetPlayer()->isTaxiCheater())
     {
         SendActivateTaxiReply(ERR_TAXINOTVISITED);
         recv_data.rfinish();
