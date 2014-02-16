@@ -30,6 +30,7 @@ class Player;
 class GameObject;
 class Unit;
 class Creature;
+class Map;
 
 enum CapturePointArtKits
 {
@@ -47,12 +48,12 @@ enum CapturePointAnimations
 
 typedef std::map<ObjectGuid /*playerGuid*/, bool /*isMainZone*/> GuidZoneMap;
 
-class OutdoorPvP
+class MANGOS_DLL_SPEC OutdoorPvP
 {
     friend class OutdoorPvPMgr;
 
     public:
-        OutdoorPvP() {}
+        OutdoorPvP(uint32 _id) : m_id(_id), m_isBattleField(false) {}
         virtual ~OutdoorPvP() {}
 
         // called when the zone is initialized
@@ -94,6 +95,24 @@ class OutdoorPvP
 
         // Damage GO - for WG mostly
         virtual void EventPlayerDamageGO(Player* /*player*/, GameObject* /*target_obj*/, uint32 /*eventId*/, uint32 /*bySpellId*/) {}
+        
+        // send world state update to all players present
+        void SendUpdateWorldStateForMap(uint32 field, uint32 value, Map* map);
+        void SendUpdateWorldState(uint32 field, uint32 value);
+
+        // set banner visual
+        void SetBannerVisual(const WorldObject* objRef, ObjectGuid goGuid, uint32 artKit, uint32 animId);
+        void SetBannerVisual(GameObject* go, uint32 artKit, uint32 animId);
+
+        // applies buff to a team inside the specific zone
+        void BuffTeam(Team team, uint32 spellId, bool remove = false, bool onlyMembers = true, uint32 area = 0);
+
+        uint32 GetId() const { return m_id; }
+        bool IsBattleField() const { return m_isBattleField; }
+
+        virtual bool IsMember(ObjectGuid guid) { return true; }
+
+        virtual bool InitOutdoorPvPArea() { return true; }
 
     protected:
 
@@ -107,24 +126,18 @@ class OutdoorPvP
         // handle npc/player kill
         virtual void HandlePlayerKillInsideArea(Player* /*killer*/) {}
 
-        // send world state update to all players present
-        void SendUpdateWorldState(uint32 field, uint32 value);
-
-        // applies buff to a team inside the specific zone
-        void BuffTeam(Team team, uint32 spellId, bool remove = false);
-
         // get banner artkit based on controlling team
         uint32 GetBannerArtKit(Team team, uint32 artKitAlliance = CAPTURE_ARTKIT_ALLIANCE, uint32 artKitHorde = CAPTURE_ARTKIT_HORDE, uint32 artKitNeutral = CAPTURE_ARTKIT_NEUTRAL);
-
-        // set banner visual
-        void SetBannerVisual(const WorldObject* objRef, ObjectGuid goGuid, uint32 artKit, uint32 animId);
-        void SetBannerVisual(GameObject* go, uint32 artKit, uint32 animId);
 
         // Handle gameobject spawn / despawn
         void RespawnGO(const WorldObject* objRef, ObjectGuid goGuid, bool respawn);
 
         // store the players inside the area
         GuidZoneMap m_zonePlayers;
+
+        // outdoor pvp type id
+        uint32 m_id;
+        bool m_isBattleField;
 };
 
 #endif

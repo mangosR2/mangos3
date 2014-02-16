@@ -66,6 +66,24 @@ void OutdoorPvP::SendUpdateWorldState(uint32 field, uint32 value)
 }
 
 /**
+   Function that updates world state for all the players in an outdoor pvp map
+
+   @param world state it to update
+   @param value which should update the world state
+ */
+void OutdoorPvP::SendUpdateWorldStateForMap(uint32 uiField, uint32 uiValue, Map* map)
+{
+    Map::PlayerList const& pList = map->GetPlayers();
+    for (Map::PlayerList::const_iterator itr = pList.begin(); itr != pList.end(); ++itr)
+    {
+        if (!itr->getSource() || !itr->getSource()->IsInWorld())
+            continue;
+
+        itr->getSource()->SendUpdateWorldState(uiField, uiValue);
+    }
+}
+
+/**
    Function that handles player kills in the main outdoor pvp zones
 
    @param   player who killed another player
@@ -101,17 +119,23 @@ void OutdoorPvP::HandlePlayerKill(Player* killer, Player* victim)
 }
 
 // apply a team buff for the main and affected zones
-void OutdoorPvP::BuffTeam(Team team, uint32 spellId, bool remove /*= false*/)
+void OutdoorPvP::BuffTeam(Team team, uint32 spellId, bool remove /*= false*/, bool onlyMembers /*= true*/, uint32 area /*= 0*/)
 {
     for (GuidZoneMap::iterator itr = m_zonePlayers.begin(); itr != m_zonePlayers.end(); ++itr)
     {
         Player* player = sObjectMgr.GetPlayer(itr->first);
-        if (player && player->GetTeam() == team)
+        if (!player)
+            continue;
+
+        if (player && (team == TEAM_NONE || player->GetTeam() == team) && (!onlyMembers || IsMember(player->GetObjectGuid())))
         {
-            if (remove)
-                player->RemoveAurasDueToSpell(spellId);
-            else
-                player->CastSpell(player, spellId, true);
+            if (!area || area == player->GetAreaId())
+            {
+                if (remove)
+                    player->RemoveAurasDueToSpell(spellId);
+                else
+                    player->CastSpell(player, spellId, true);
+            }
         }
     }
 }

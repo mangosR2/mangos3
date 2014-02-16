@@ -227,7 +227,7 @@ static const uint32 plaguelandsBanners[MAX_EP_TOWERS] = {GO_TOWER_BANNER_NORTHPA
 class OutdoorPvPEP : public OutdoorPvP
 {
     public:
-        OutdoorPvPEP();
+        OutdoorPvPEP(uint32 id);
 
         void HandlePlayerEnterZone(Player* player, bool isMainZone) override;
         void HandlePlayerLeaveZone(Player* player, bool isMainZone) override;

@@ -25,7 +25,7 @@
 #include "../GameObject.h"
 #include "../Player.h"
 
-OutdoorPvPNA::OutdoorPvPNA() : OutdoorPvP(),
+OutdoorPvPNA::OutdoorPvPNA(uint32 id) : OutdoorPvP(id),
     m_zoneOwner(TEAM_NONE),
     m_soldiersRespawnTimer(0),
     m_zoneWorldState(0),

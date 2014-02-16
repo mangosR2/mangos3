@@ -22,7 +22,7 @@
 #include "../Creature.h"
 #include "../GameObject.h"
 
-OutdoorPvPGH::OutdoorPvPGH() : OutdoorPvP(),
+OutdoorPvPGH::OutdoorPvPGH(uint32 id) : OutdoorPvP(id),
     m_zoneOwner(TEAM_NONE)
 {
 }

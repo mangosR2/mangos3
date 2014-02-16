@@ -278,6 +278,9 @@ WorldStateMgr.h
 AuctionHouseBot/AuctionHouseBot.cpp
 AuctionHouseBot/AuctionHouseBot.h
 
+BattleField/BattleField.cpp
+BattleField/BattleField.h
+
 BattleGround/BattleGroundAA.cpp
 BattleGround/BattleGroundAA.h
 BattleGround/BattleGroundAB.cpp

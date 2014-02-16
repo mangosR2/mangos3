@@ -24,7 +24,7 @@
 #include "../GameObject.h"
 #include "../Player.h"
 
-OutdoorPvPHP::OutdoorPvPHP() : OutdoorPvP(),
+OutdoorPvPHP::OutdoorPvPHP(uint32 id) : OutdoorPvP(id),
     m_towersAlliance(0),
     m_towersHorde(0)
 {

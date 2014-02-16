@@ -34,6 +34,8 @@
 #include "GuildMgr.h"
 #include "World.h"
 #include "BattleGround/BattleGroundMgr.h"
+#include "OutdoorPvP/OutdoorPvPMgr.h"
+#include "BattleField/BattleField.h"
 #include "MapManager.h"
 #include "SocialMgr.h"
 #include "LFGMgr.h"
@@ -1099,4 +1101,123 @@ void WorldSession::SendPlaySpellVisual(ObjectGuid guid, uint32 spellArtKit)
     data << guid;
     data << spellArtKit;                                    // index from SpellVisualKit.dbc
     SendPacket(&data);
+}
+
+// This send to player to invite him to teleport to battlefield
+// Param1: battlefield guid
+// Param2: zone id of battlefield (4197 for wg)
+// Param3: time for player to accept in seconds
+void WorldSession::SendBfInvitePlayerToWar(ObjectGuid battlefieldGuid, uint32 uiZoneId, uint32 uiTimeToAccept)
+{
+    WorldPacket data(SMSG_BATTLEFIELD_MANAGER_ENTRY_INVITE, 12);
+    data << uint32(battlefieldGuid);
+    data << uint32(uiZoneId);
+    data << uint32(time(NULL) + uiTimeToAccept);
+    SendPacket(&data);
+}
+
+// This is send to invite player to join the queue when he is in battlefield zone and it is about to start or by battlemaster
+// Param1: battlefield guid
+void WorldSession::SendBfInvitePlayerToQueue(ObjectGuid battlefieldGuid)
+{
+    bool warmup = true;
+    
+    WorldPacket data(SMSG_BATTLEFIELD_MANAGER_QUEUE_INVITE, 5);
+    data << uint32(battlefieldGuid);
+    data << uint8(warmup); // warmup ? used ?
+    SendPacket(&data);
+}
+
+// This packet is in response to inform player that he joins queue
+// Param1: battlefield guid
+// Param2: battlefield queue guid
+// Param3: zone id of battlefield (4197 for wg)
+// Param4: if players are able to queue
+// Param5: if battlefield is full
+void WorldSession::SendBfQueueInviteResponse(ObjectGuid battlefieldGuid, ObjectGuid queueGuid, uint32 uiZoneId, bool bCanQueue, bool bFull)
+{
+    WorldPacket data(SMSG_BATTLEFIELD_MANAGER_QUEUE_REQUEST_RESPONSE, 11);
+    data << uint32(battlefieldGuid);
+    data << uint32(uiZoneId);
+    data << uint8(bCanQueue ? 1 : 0); // Accepted // 0 you cannot queue wg // 1 you are queued
+    data << uint8(bFull ? 0 : 1); // Logging In // 0 wg full // 1 queue for upcoming
+    data << uint8(1); // Warmup
+    SendPacket(&data);
+}
+
+// This is called when player accepts invitation to battlefield
+// Param1: battlefield guid
+void WorldSession::SendBfEntered(ObjectGuid battlefieldGuid)
+{
+    WorldPacket data(SMSG_BATTLEFIELD_MANAGER_ENTERING, 7);
+    data << uint32(battlefieldGuid);
+    data << uint8(1); // unk
+    data << uint8(1); // unk
+    data << uint8(_player->isAFK() ? 1 : 0); // Clear AFK
+    SendPacket(&data);
+}
+
+void WorldSession::SendBfLeaveMessage(ObjectGuid battlefieldGuid, BattlefieldLeaveReason reason)
+{
+    WorldPacket data(SMSG_BATTLEFIELD_MANAGER_EJECTED, 7);
+    data << uint32(battlefieldGuid);
+    data << uint8(reason); // byte Reason
+    data << uint8(2); // byte BattleStatus
+    data << uint8(0); // bool Relocated
+    SendPacket(&data);
+}
+
+// Send by client when he click on accept for queue
+void WorldSession::HandleBfQueueInviteResponse(WorldPacket& recv_data)
+{
+    ObjectGuid battlefieldGuid;
+    bool bAccepted;
+
+    recv_data >> battlefieldGuid >> bAccepted;
+
+    DEBUG_LOG("HandleQueueInviteResponse: battlefieldGuid: " UI64FMTD " bAccepted: %u", battlefieldGuid.GetRawValue(), bAccepted);
+
+    if (BattleField* opvp = sOutdoorPvPMgr.GetBattlefieldByGuid(battlefieldGuid))
+        opvp->OnPlayerInviteResponse(_player, bAccepted);
+}
+
+void WorldSession::HandleBfQueueRequest(WorldPacket& recv_data)
+{
+    DEBUG_LOG("WORLD: Received CMSG_BATTLEFIELD_MANAGER_QUEUE_REQUEST");
+
+    ObjectGuid battlefieldGuid;
+    bool bAccepted;
+
+    recv_data >> battlefieldGuid >> bAccepted;
+
+    DEBUG_LOG("HandleBfQueueInviteResponse: battlefieldGuid: " UI64FMTD " bAccepted: %u", battlefieldGuid.GetRawValue(), bAccepted);
+
+    if (BattleField* opvp = sOutdoorPvPMgr.GetBattlefieldByGuid(battlefieldGuid))
+        opvp->OnPlayerInviteResponse(_player, true);
+}
+
+// Send by client when he clicks accept or denies invitation
+void WorldSession::HandleBfEntryInviteResponse(WorldPacket& recv_data)
+{
+    ObjectGuid battlefieldGuid;
+    bool bAccepted;
+
+    recv_data >> battlefieldGuid >> bAccepted;
+
+    DEBUG_LOG("HandleBattlefieldInviteResponse: battlefieldGuid: " UI64FMTD " bAccepted: %u", battlefieldGuid.GetRawValue(), bAccepted);
+
+    if (BattleField* opvp = sOutdoorPvPMgr.GetBattlefieldByGuid(battlefieldGuid))
+        opvp->OnPlayerPortResponse(GetPlayer(), bAccepted);
+}
+
+void WorldSession::HandleBfExitRequest(WorldPacket& recv_data)
+{
+    ObjectGuid battlefieldGuid;
+
+    recv_data >> battlefieldGuid;
+
+    DEBUG_LOG("HandleBfExitRequest: battlefieldGuid: " UI64FMTD " ", battlefieldGuid.GetRawValue());
+
+    if (BattleField* opvp = sOutdoorPvPMgr.GetBattlefieldByGuid(battlefieldGuid))
+        opvp->OnPlayerQueueExitRequest(_player);
 }

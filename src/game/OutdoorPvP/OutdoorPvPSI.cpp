@@ -25,7 +25,7 @@
 #include "../GameObject.h"
 #include "../Player.h"
 
-OutdoorPvPSI::OutdoorPvPSI() : OutdoorPvP(),
+OutdoorPvPSI::OutdoorPvPSI(uint32 id) : OutdoorPvP(id),
     m_resourcesAlliance(0),
     m_resourcesHorde(0),
     m_zoneOwner(TEAM_NONE)

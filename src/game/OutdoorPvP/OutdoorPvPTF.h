@@ -158,7 +158,7 @@ class OutdoorPvPTF : public OutdoorPvP
     friend class OutdoorPvPMgr;
 
     public:
-        OutdoorPvPTF();
+        OutdoorPvPTF(uint32 id);
 
         void HandlePlayerEnterZone(Player* player, bool isMainZone) override;
         void HandlePlayerLeaveZone(Player* player, bool isMainZone) override;

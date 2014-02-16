@@ -25,7 +25,7 @@
 #include "../GameObject.h"
 #include "../Player.h"
 
-OutdoorPvPTF::OutdoorPvPTF() : OutdoorPvP(),
+OutdoorPvPTF::OutdoorPvPTF(uint32 id) : OutdoorPvP(id),
     m_zoneWorldState(WORLD_STATE_TF_TOWERS_CONTROLLED),
     m_zoneOwner(TEAM_NONE),
     //m_zoneUpdateTimer(TIMER_TF_UPDATE_TIME),

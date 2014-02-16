@@ -132,7 +132,7 @@ static const uint32 zangarmarshTowers[MAX_ZM_TOWERS] = {GO_ZANGA_BANNER_EAST, GO
 class OutdoorPvPZM : public OutdoorPvP
 {
     public:
-        OutdoorPvPZM();
+        OutdoorPvPZM(uint32 id);
 
         void HandlePlayerEnterZone(Player* player, bool isMainZone) override;
         void HandlePlayerLeaveZone(Player* player, bool isMainZone) override;
