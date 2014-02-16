@@ -329,8 +329,6 @@ OutdoorPvP/OutdoorPvPSI.cpp
 OutdoorPvP/OutdoorPvPSI.h
 OutdoorPvP/OutdoorPvPTF.cpp
 OutdoorPvP/OutdoorPvPTF.h
-OutdoorPvP/OutdoorPvPWG.cpp
-OutdoorPvP/OutdoorPvPWG.h
 OutdoorPvP/OutdoorPvPZM.cpp
 OutdoorPvP/OutdoorPvPZM.h
 
