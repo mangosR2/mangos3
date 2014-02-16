@@ -167,13 +167,6 @@ void WorldSession::HandleActivateTaxiExpressOpcode(WorldPacket& recv_data)
 
     recv_data >> guid >> node_count;
 
-    if (!GetPlayer()->m_taxi.IsTaximaskNodeKnown(nodes) && !GetPlayer()->isTaxiCheater())
-    {
-        SendActivateTaxiReply(ERR_TAXINOTVISITED);
-        recv_data.rfinish();
-        return;
-    }
-
     Creature *npc = GetPlayer()->GetNPCIfCanInteractWith(guid, UNIT_NPC_FLAG_FLIGHTMASTER);
     if (!npc)
     {
@@ -186,6 +179,14 @@ void WorldSession::HandleActivateTaxiExpressOpcode(WorldPacket& recv_data)
     {
         uint32 node;
         recv_data >> node;
+
+        if (!GetPlayer()->m_taxi.IsTaximaskNodeKnown(node) && !GetPlayer()->isTaxiCheater())
+        {
+            SendActivateTaxiReply(ERR_TAXINOTVISITED);
+            recv_data.rfinish();
+            return;
+        }
+
         nodes.push_back(node);
     }
 
