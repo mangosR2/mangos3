@@ -1608,6 +1608,7 @@ void AchievementMgr<T>::UpdateAchievementCriteria(AchievementCriteriaTypes type,
                 }
 
                 change = 1;
+                break;
             }
             case ACHIEVEMENT_CRITERIA_TYPE_CURRENCY_EARNED:
             {
