@@ -2038,6 +2038,7 @@ void InitializeOpcodes()
     OPCODE(SMSG_GUILD_ACHIEVEMENT_DATA,                  STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
     OPCODE(SMSG_GUILD_ACHIEVEMENT_DELETED,               STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
     OPCODE(SMSG_GUILD_ACHIEVEMENT_EARNED,                STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
+    OPCODE(CMSG_GUILD_ACHIEVEMENT_PROGRESS_QUERY,        STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleGuildAchievementProgressQuery);
     OPCODE(SMSG_GUILD_CRITERIA_DATA,                     STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
     OPCODE(SMSG_GUILD_CRITERIA_DELETED,                  STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
     OPCODE(CMSG_GUILD_REQUEST_PARTY_STATE,               STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleGuildRequestPartyState    );

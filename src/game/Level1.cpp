@@ -35,6 +35,7 @@
 #include "Transports.h"
 #include "Util.h"
 #include "SpellMgr.h"
+#include "GuildMgr.h"
 #ifdef _DEBUG_VMAPS
 #include "VMapFactory.h"
 #endif
@@ -1863,6 +1864,7 @@ bool ChatHandler::HandleWhispersCommand(char* args)
 bool ChatHandler::HandleSaveAllCommand(char* /*args*/)
 {
     sObjectAccessor.SaveAllPlayers();
+    sGuildMgr.SaveGuilds();
     SendSysMessage(LANG_PLAYERS_SAVED);
     return true;
 }
