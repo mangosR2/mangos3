@@ -56,6 +56,7 @@ enum TypeMask
 
     // used combinations in Player::GetObjectByTypeMask (TYPEMASK_UNIT case ignore players in call)
     TYPEMASK_CREATURE_OR_GAMEOBJECT = TYPEMASK_UNIT | TYPEMASK_GAMEOBJECT,
+    TYPEMASK_CREATURE_OR_PLAYER = TYPEMASK_UNIT | TYPEMASK_PLAYER,
     TYPEMASK_CREATURE_GAMEOBJECT_OR_ITEM = TYPEMASK_UNIT | TYPEMASK_GAMEOBJECT | TYPEMASK_ITEM,
     TYPEMASK_CREATURE_GAMEOBJECT_PLAYER_OR_ITEM = TYPEMASK_UNIT | TYPEMASK_GAMEOBJECT | TYPEMASK_ITEM | TYPEMASK_PLAYER,
 
@@ -133,7 +134,13 @@ class MANGOS_DLL_SPEC ObjectGuid
             return HighGuid(IsLargeHigh(high) ? high :
                 (m_guid >> 52) & 0xFFF);
         }
-        uint32   GetEntry() const { return HasEntry() ? uint32((m_guid >> 32) & UI64LIT(0xFFFF)) : 0; }
+        uint32   GetEntry() const
+        {
+            if (!HasEntry())
+                return 0;
+
+            return uint32((m_guid >> 32) & (IsLargeHigh() ? UI64LIT(0xFFFF) : UI64LIT(0xFFFFF)));
+        }
         uint32   GetCounter()  const
         {
             return HasEntry()
@@ -290,6 +297,7 @@ class MANGOS_DLL_SPEC ObjectGuid
             switch(high)
             {
                 case HIGHGUID_GUILD:
+                case HIGHGUID_CORPSE:
                     return true;
                 default:
                     return false;
@@ -357,8 +365,8 @@ class ObjectGuidGenerator
         uint32 m_nextGuid;
 };
 
-ByteBuffer& operator<< (ByteBuffer& buf, ObjectGuid const& guid);
-ByteBuffer& operator>> (ByteBuffer& buf, ObjectGuid&       guid);
+MANGOS_DLL_SPEC ByteBuffer& operator<< (ByteBuffer& buf, ObjectGuid const& guid);
+MANGOS_DLL_SPEC ByteBuffer& operator>> (ByteBuffer& buf, ObjectGuid&       guid);
 
 ByteBuffer& operator<< (ByteBuffer& buf, PackedGuid const& guid);
 ByteBuffer& operator>> (ByteBuffer& buf, PackedGuidReader const& guid);
