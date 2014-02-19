@@ -87,10 +87,11 @@ struct AchievementCriteriaEntry
         {
             uint32  bgMapID;                                // 3
             uint32  winCount;                               // 4
-            uint32  additionalRequirement1_type;            // 5
-            uint32  additionalRequirement1_value;           // 6
-            uint32  additionalRequirement2_type;            // 7
-            uint32  additionalRequirement2_value;           // 8
+            uint32  unk5;                                   // 5
+            uint32  additionalRequirement1_type;            // 6
+            uint32  additionalRequirement1_value;           // 7
+            uint32  additionalRequirement2_type;            // 8
+            uint32  map;                                    // 9
         } win_bg;
 
         // ACHIEVEMENT_CRITERIA_TYPE_REACH_LEVEL            = 5
@@ -248,6 +249,16 @@ struct AchievementCriteriaEntry
             uint32  spellID;                                // 3 Reference to Map.dbc
         } learn_spell;
 
+        // ACHIEVEMENT_CRITERIA_TYPE_HONORABLE_KILL         = 35
+        struct
+        {
+            uint32  unused;                                 // 3
+            uint32  killCount;                              // 4
+            uint32  unk5;                                   // 5
+            uint32  unkn1;                                  // 6
+            uint32  unkn2;                                  // 7
+        } honorable_kill_scripted;
+
         // ACHIEVEMENT_CRITERIA_TYPE_OWN_ITEM               = 36
         struct
         {
@@ -260,7 +271,8 @@ struct AchievementCriteriaEntry
         {
             uint32  unused;                                 // 3
             uint32  count;                                  // 4
-            uint32  flag;                                   // 5 4=in a row
+            uint32  unk5;                                   // 5
+            uint32  flag;                                   // 6 4=in a row
         } win_rated_arena;
 
         // ACHIEVEMENT_CRITERIA_TYPE_HIGHEST_TEAM_RATING    = 38
@@ -507,10 +519,11 @@ struct AchievementCriteriaEntry
         {
             uint32  value;                                  // 3        m_asset_id
             uint32  count;                                  // 4        m_quantity
-            uint32  additionalRequirement1_type;            // 5        m_start_event
-            uint32  additionalRequirement1_value;           // 6        m_start_asset
-            uint32  additionalRequirement2_type;            // 7        m_fail_event
-            uint32  additionalRequirement2_value;           // 8        m_fail_asset
+            uint32  unk5;                                   // 5
+            uint32  additionalRequirement1_type;            // 6        m_start_event
+            uint32  additionalRequirement1_value;           // 7        m_start_asset
+            uint32  additionalRequirement2_type;            // 8        m_fail_event
+            uint32  additionalRequirement2_value;           // 9        m_fail_asset
         } raw;
     };
     DBCString name;                                         // 9        m_description_lang

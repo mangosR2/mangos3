@@ -4328,10 +4328,15 @@ void AchievementGlobalMgr::LoadAchievementCriteriaList()
 
         AchievementEntry const* achievement = sAchievementStore.LookupEntry(criteria->referredAchievement);
         if (achievement && (achievement->flags & ACHIEVEMENT_FLAG_GUILD))
-            ++guildCriterias, m_GuildAchievementCriteriasByType[criteria->requiredType].push_back(criteria);
+        {
+            ++guildCriterias;
+            m_GuildAchievementCriteriasByType[criteria->requiredType].push_back(criteria);
+        }
         else
-            ++criterias, m_AchievementCriteriasByType[criteria->requiredType].push_back(criteria);
-
+        {
+            ++criterias;
+            m_AchievementCriteriasByType[criteria->requiredType].push_back(criteria);
+        }
 
         m_AchievementCriteriaListByAchievement[criteria->referredAchievement].push_back(criteria);
     }
