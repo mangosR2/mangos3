@@ -29,6 +29,7 @@
 #include "OutdoorPvPSI.h"
 #include "OutdoorPvPTF.h"
 #include "OutdoorPvPZM.h"
+#include "BattleField/BattleField.h"
 
 INSTANTIATE_SINGLETON_1(OutdoorPvPMgr);
 
@@ -48,8 +49,27 @@ OutdoorPvPMgr::~OutdoorPvPMgr()
 #define LOAD_OPVP_ZONE(a)                                           \
     if (sWorld.getConfig(CONFIG_BOOL_OUTDOORPVP_##a##_ENABLED))     \
     {                                                               \
-        m_scripts[OPVP_ID_##a] = new OutdoorPvP##a();               \
-        ++counter;                                                  \
+        m_scripts[OPVP_ID_##a] = new OutdoorPvP##a(OPVP_ID_##a);    \
+        if (!m_scripts[OPVP_ID_##a]->InitOutdoorPvPArea())          \
+        {                                                           \
+            delete m_scripts[OPVP_ID_##a];                          \
+            m_scripts[OPVP_ID_##a] = NULL;                          \
+        }                                                           \
+        else                                                        \
+            ++counter;                                              \
+    }
+
+#define LOAD_BATTLEFIELD(a)                                         \
+    if (sWorld.getConfig(CONFIG_BOOL_BATTLEFIELD_##a##_ENABLED))    \
+    {                                                               \
+        m_scripts[OPVP_ID_##a] = new BattleField##a(OPVP_ID_##a);   \
+        if (!m_scripts[OPVP_ID_##a]->InitOutdoorPvPArea())          \
+        {                                                           \
+            delete m_scripts[OPVP_ID_##a];                          \
+            m_scripts[OPVP_ID_##a] = NULL;                          \
+        }                                                           \
+        else                                                        \
+            ++counter;                                              \
     }
 /**
    Function which loads all outdoor pvp scripts
@@ -171,7 +191,7 @@ void OutdoorPvPMgr::Update(uint32 diff)
         if (m_scripts[i])
             m_scripts[i]->Update(m_updateTimer.GetCurrent());
 
-    m_updateTimer.Reset();
+    m_updateTimer.SetCurrent(0);
 }
 
 /**
@@ -226,4 +246,19 @@ uint32 OutdoorPvPMgr::GetZoneOfAffectedScript(OutdoorPvP const* script) const
         default:
             return ZONE_ID_ERROR;
     }
+}
+
+BattleField* OutdoorPvPMgr::GetBattlefieldByGuid(ObjectGuid guid)
+{
+    return GetBattlefieldById(guid.GetCounter() & 0xFFFF);
+}
+
+BattleField* OutdoorPvPMgr::GetBattlefieldById(uint32 id)
+{
+    for (uint8 i = 0; i < MAX_OPVP_ID; ++i)
+        if (OutdoorPvP* opvp = m_scripts[i])
+            if (opvp->IsBattleField() && ((BattleField*)opvp)->GetBattlefieldId() == id)
+                return (BattleField*)opvp;
+
+    return NULL;
 }

@@ -740,7 +740,7 @@ void WorldSession::BuildPartyMemberStatsChangedPacket(Player* player, WorldPacke
                 playerStatus |= MEMBER_STATUS_DEAD;
         }
 
-        if (player->HasByteFlag(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_FFA_PVP))
+        if (player->IsFFAPvP())
             playerStatus |= MEMBER_STATUS_PVP_FFA;
 
         if (player->isAFK())
@@ -946,7 +946,7 @@ void WorldSession::HandleRequestPartyMemberStatsOpcode(WorldPacket& recv_data)
             playerStatus |= MEMBER_STATUS_DEAD;
     }
 
-    if (player->HasByteFlag(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_FFA_PVP))
+    if (player->IsFFAPvP())
         playerStatus |= MEMBER_STATUS_PVP_FFA;
 
     if (player->isAFK())

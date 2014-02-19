@@ -136,6 +136,15 @@ enum PartyResult
     ERR_PARTY_LFG_TELEPORT_IN_COMBAT    = 30
 };
 
+enum BattlefieldLeaveReason
+{
+    BATTLEFIELD_LEAVE_REASON_CLOSE     = 0x00000001,
+    //BATTLEFIELD_LEAVE_REASON_UNK1    = 0x00000002, (not used)
+    //BATTLEFIELD_LEAVE_REASON_UNK2    = 0x00000004, (not used)
+    BATTLEFIELD_LEAVE_REASON_EXITED    = 0x00000008,
+    BATTLEFIELD_LEAVE_REASON_LOW_LEVEL = 0x00000010,
+};
+
 enum ChatRestrictionType
 {
     ERR_CHAT_RESTRICTED = 0,
@@ -912,6 +921,17 @@ class MANGOS_DLL_SPEC WorldSession
         // send data
         void SendLfgUpdateList(uint32 dungeonID);
         void SendLfgDisabled();
+
+        // BattleField system
+        void SendBfInvitePlayerToWar(ObjectGuid battlefieldGuid, uint32 uiZoneId, uint32 uiTimeToAccept);
+        void SendBfInvitePlayerToQueue(ObjectGuid battlefieldGuid);
+        void SendBfQueueInviteResponse(ObjectGuid battlefieldGuid, ObjectGuid queueGuid, uint32 uiZoneId, bool bCanQueue, bool bFull);
+        void SendBfEntered(ObjectGuid battlefieldGuid);
+        void SendBfLeaveMessage(ObjectGuid battlefieldGuid, BattlefieldLeaveReason reason);
+        void HandleBfQueueInviteResponse(WorldPacket& recv_data);
+        void HandleBfQueueRequest(WorldPacket& recv_data);
+        void HandleBfEntryInviteResponse(WorldPacket& recv_data);
+        void HandleBfExitRequest(WorldPacket& recv_data);
 
         void HandleSetCurrencyFlagsOpcode(WorldPacket& recv_data);
         void HandleRequestHotfix(WorldPacket& recv_data);

@@ -204,6 +204,9 @@ uint32 WardenBase::BuildChecksum(const uint8* data, uint32 dataLen)
 
 void WorldSession::HandleWardenDataOpcode(WorldPacket & recv_data)
 {
+    if (!m_Warden)
+        return;
+
     m_Warden->DecryptData(const_cast<uint8*>(recv_data.contents()), recv_data.size());
     uint8 Opcode;
     recv_data >> Opcode;

@@ -794,9 +794,6 @@ bool Creature::Create(uint32 guidlow, CreatureCreatePos& cPos, CreatureInfo cons
     if (!CreateFromProto(guidlow, cinfo, team, data, eventData))
         return false;
 
-    if (IsLevitating())
-        cPos.m_pos.z += GetFloatValue(UNIT_FIELD_HOVERHEIGHT);
-
     cPos.SelectFinalPoint(this);
 
     if (!cPos.Relocate(this))

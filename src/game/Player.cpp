@@ -17187,6 +17187,9 @@ void Player::_LoadGroup(QueryResult* result)
         Group* group = sObjectMgr.GetGroup(groupGuid);
         if (group)
         {
+            if (group->IsLeader(GetObjectGuid()))
+                SetFlag(PLAYER_FLAGS, PLAYER_FLAGS_GROUP_LEADER);
+
             uint8 subgroup = group->GetMemberGroup(GetObjectGuid());
             SetGroup(groupGuid, subgroup);
             if (getLevel() >= LEVELREQUIREMENT_HEROIC)
@@ -17199,6 +17202,9 @@ void Player::_LoadGroup(QueryResult* result)
                 sLFGMgr.LoadLFDGroupPropertiesForPlayer(this);
         }
     }
+
+    if (!GetGroup() || !GetGroup()->IsLeader(GetObjectGuid()))
+        RemoveFlag(PLAYER_FLAGS, PLAYER_FLAGS_GROUP_LEADER);
 }
 
 void Player::_LoadBoundInstances(QueryResult* result)
@@ -19718,6 +19724,15 @@ bool Player::BuyItemFromVendorSlot(ObjectGuid vendorGuid, uint32 vendorslot, uin
         SendBuyError(BUY_ERR_CANT_FIND_ITEM, NULL, item, 0);
         return false;
     }
+
+    if (!(pProto->AllowableClass & getClassMask()) && pProto->Bonding == BIND_WHEN_PICKED_UP && !isGameMaster())
+    {
+        SendBuyError(BUY_ERR_CANT_FIND_ITEM, NULL, item, 0);
+        return false;
+    }
+
+    if (!isGameMaster() && ((pProto->Flags2 & ITEM_FLAG2_HORDE_ONLY && GetTeam() == ALLIANCE) || (pProto->Flags2 == ITEM_FLAG2_ALLIANCE_ONLY && GetTeam() == HORDE)))
+        return false;
 
     Creature* pCreature = GetNPCIfCanInteractWith(vendorGuid, UNIT_NPC_FLAG_VENDOR);
     if (!pCreature)

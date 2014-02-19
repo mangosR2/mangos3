@@ -42,6 +42,12 @@ enum OutdoorPvPTypes
     MAX_OPVP_ID
 };
 
+enum BattlefieldTypes
+{
+    BATTLEFIELD_WG = 1,
+    BATTLEFIELD_TB = 21,
+};
+
 enum OutdoorPvPZones
 {
     ZONE_ID_SILITHUS                = 1377,
@@ -81,12 +87,14 @@ enum OutdoorPvPZones
     ZONE_ID_ERROR                   = 0,
 };
 
+class BattleField;
 class Player;
 class GameObject;
 class Creature;
 class OutdoorPvP;
+class ObjectGuid;
 
-class OutdoorPvPMgr
+class MANGOS_DLL_SPEC OutdoorPvPMgr
 {
     public:
         OutdoorPvPMgr();
@@ -112,6 +120,9 @@ class OutdoorPvPMgr
         void SetCapturePointSlider(uint32 entry, int8 value) { m_capturePointSlider[entry] = value; }
 
         uint32 GetZoneOfAffectedScript(OutdoorPvP const* script) const;
+
+        BattleField* GetBattlefieldByGuid(ObjectGuid guid);
+        BattleField* GetBattlefieldById(uint32 id);
 
     private:
         // return assigned outdoor pvp script

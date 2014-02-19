@@ -285,6 +285,9 @@ WorldStateMgr.h
 AuctionHouseBot/AuctionHouseBot.cpp
 AuctionHouseBot/AuctionHouseBot.h
 
+BattleField/BattleField.cpp
+BattleField/BattleField.h
+
 BattleGround/BattleGroundAA.cpp
 BattleGround/BattleGroundAA.h
 BattleGround/BattleGroundAB.cpp
@@ -335,8 +338,6 @@ OutdoorPvP/OutdoorPvPSI.cpp
 OutdoorPvP/OutdoorPvPSI.h
 OutdoorPvP/OutdoorPvPTF.cpp
 OutdoorPvP/OutdoorPvPTF.h
-OutdoorPvP/OutdoorPvPWG.cpp
-OutdoorPvP/OutdoorPvPWG.h
 OutdoorPvP/OutdoorPvPZM.cpp
 OutdoorPvP/OutdoorPvPZM.h
 
