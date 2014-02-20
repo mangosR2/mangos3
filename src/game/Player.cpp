@@ -4407,6 +4407,7 @@ void Player::DeleteFromDB(ObjectGuid playerguid, uint32 accountId, bool updateRe
             CharacterDatabase.PExecute("DELETE FROM character_action WHERE guid = %u", lowGuid);
             CharacterDatabase.PExecute("DELETE FROM character_aura WHERE guid = %u", lowGuid);
             CharacterDatabase.PExecute("DELETE FROM character_battleground_data WHERE guid = %u", lowGuid);
+            CharacterDatabase.PExecute("DELETE FROM character_battleground_random WHERE guid = %u", lowGuid);
             CharacterDatabase.PExecute("DELETE FROM character_gifts WHERE guid = %u", lowGuid);
             CharacterDatabase.PExecute("DELETE FROM character_glyphs WHERE guid = %u", lowGuid);
             CharacterDatabase.PExecute("DELETE FROM character_homebind WHERE guid = %u", lowGuid);
@@ -4423,6 +4424,7 @@ void Player::DeleteFromDB(ObjectGuid playerguid, uint32 accountId, bool updateRe
             CharacterDatabase.PExecute("DELETE FROM character_skills WHERE guid = %u", lowGuid);
             CharacterDatabase.PExecute("DELETE FROM character_spell WHERE guid = %u", lowGuid);
             CharacterDatabase.PExecute("DELETE FROM character_spell_cooldown WHERE guid = %u", lowGuid);
+            CharacterDatabase.PExecute("DELETE FROM character_stats WHERE guid = %u", lowGuid);
             CharacterDatabase.PExecute("DELETE FROM character_talent WHERE guid = %u", lowGuid);
             CharacterDatabase.PExecute("DELETE FROM character_ticket WHERE guid = %u", lowGuid);
             CharacterDatabase.PExecute("DELETE FROM item_instance WHERE owner_guid = %u", lowGuid);
@@ -4436,6 +4438,11 @@ void Player::DeleteFromDB(ObjectGuid playerguid, uint32 accountId, bool updateRe
             CharacterDatabase.PExecute("DELETE FROM character_equipmentsets WHERE guid = %u", lowGuid);
             CharacterDatabase.PExecute("DELETE FROM guild_eventlog WHERE PlayerGuid1 = %u OR PlayerGuid2 = %u", lowGuid, lowGuid);
             CharacterDatabase.PExecute("DELETE FROM guild_bank_eventlog WHERE PlayerGuid = %u", lowGuid);
+            CharacterDatabase.PExecute("DELETE FROM hidden_rating WHERE guid = %u", lowGuid);
+            CharacterDatabase.PExecute("DELETE FROM item_refund_instance WHERE playerGuid = %u", lowGuid);
+            CharacterDatabase.PExecute("DELETE FROM calendar_invites WHERE inviteeGuid = %u", lowGuid);
+            CharacterDatabase.PExecute("DELETE FROM calendar_invites WHERE senderGuid = %u", lowGuid);
+
             CharacterDatabase.CommitTransaction();
             break;
         }
