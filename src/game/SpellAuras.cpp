@@ -2713,11 +2713,6 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                             target->CastSpell(target, 45957, true);
                         return;
                     }
-                    case 46699:                             // Requires No Ammo
-                        if (target->GetTypeId() == TYPEID_PLAYER)
-                            // not use ammo and not allow use
-                            ((Player*)target)->RemoveAmmo();
-                        return;
                     case 47190:                             // Toalu'u's Spiritual Incense
                         target->CastSpell(target, 47189, true, NULL, this);
                         // allow script to process further (text)
@@ -13084,6 +13079,9 @@ void Aura::HandleAuraSetVehicle(bool apply, bool real)
         return;
 
     uint32 vehicleId = GetMiscValue();
+
+    if (target->GetTypeId() != TYPEID_PLAYER)
+        return;
 
     target->SetVehicleId(apply ? vehicleId : 0);
 
