@@ -389,8 +389,17 @@ bool AntiCheat::CheckNeeded(AntiCheatCheck checktype)
             if (   GetPlayer()->IsOnTransport()
                 || GetPlayer()->HasMovementFlag(MOVEFLAG_ONTRANSPORT)
                 || GetPlayer()->IsInUnitState(UNIT_ACTION_CONFUSED)
-                || GetPlayer()->IsTaxiFlying())
+                || GetPlayer()->IsTaxiFlying()
+                || GetPlayer()->GetMapId() == 607    // Strand of the Ancients ships bug
+                || GetPlayer()->GetMapId() == 369    // Metro
+                || GetPlayer()->GetZoneId() == 4395) // Dalaran
                 return false;
+
+            // Ranger: dont check if player is passenger
+            if (VehicleKitPtr pVehicle = GetPlayer()->GetVehicle())
+                if (pVehicle->GetBase() && pVehicle->GetBase()->GetTypeId() == TYPEID_PLAYER)
+                    if (pVehicle->GetBase()->GetCharmerOrOwnerGuid() != GetPlayer()->GetObjectGuid())
+                        return false;
             break;
         case CHECK_SPELL:
             break;
