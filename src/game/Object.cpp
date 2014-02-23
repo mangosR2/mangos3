@@ -243,12 +243,12 @@ void Object::BuildCreateUpdateBlockForPlayer(UpdateData *data, Player *target) c
                     break;
             }
         }
+    }
 
-        if (isType(TYPEMASK_UNIT))
-        {
-            if (((Unit*)this)->getVictim())
-                updateFlags |= UPDATEFLAG_HAS_ATTACKING_TARGET;
-        }
+    if (isType(TYPEMASK_UNIT))
+    {
+        if (((Unit*)this)->getVictim())
+            updateFlags |= UPDATEFLAG_HAS_ATTACKING_TARGET;
     }
 
     //DEBUG_LOG("BuildCreateUpdate: update-type: %u, object-type: %u got updateFlags: %X", updatetype, m_objectTypeId, updateFlags);
@@ -340,11 +340,16 @@ void Object::BuildMovementUpdate(ByteBuffer * data, uint16 updateFlags) const
         hasTransportTime2 = false,
         hasTransportTime3 = false;
 
+    uint32 moveFlags = 0;
+    uint32 moveFlags2 = 0;
+
     if (isType(TYPEMASK_UNIT))
     {
         Unit const* unit = (Unit const*)this;
         hasTransport = !unit->m_movementInfo.GetTransportGuid().IsEmpty();
         isSplineEnabled = unit->IsSplineEnabled();
+        moveFlags = unit->m_movementInfo.GetMovementFlags();
+        moveFlags2 = unit->m_movementInfo.GetMovementFlags2();
 
         if (GetTypeId() == TYPEID_PLAYER)
         {
@@ -352,7 +357,10 @@ void Object::BuildMovementUpdate(ByteBuffer * data, uint16 updateFlags) const
             hasPitch = unit->m_movementInfo.GetStatusInfo().hasPitch;
             hasFallData = unit->m_movementInfo.GetStatusInfo().hasFallData;
             hasFallDirection = unit->m_movementInfo.GetStatusInfo().hasFallDirection;
-            hasElevation = unit->m_movementInfo.GetStatusInfo().hasSplineElevation;
+            if (hasElevation = unit->m_movementInfo.GetStatusInfo().hasSplineElevation)
+                moveFlags |= MOVEFLAG_SPLINE_ELEVATION;
+            else
+                moveFlags &= ~MOVEFLAG_SPLINE_ELEVATION;
             hasTransportTime2 = unit->m_movementInfo.GetStatusInfo().hasTransportTime2;
             hasTransportTime3 = unit->m_movementInfo.GetStatusInfo().hasTransportTime3;
         }
@@ -363,6 +371,8 @@ void Object::BuildMovementUpdate(ByteBuffer * data, uint16 updateFlags) const
             hasFallData = unit->m_movementInfo.HasMovementFlag2(MOVEFLAG2_INTERP_TURNING);
             hasFallDirection = unit->m_movementInfo.HasMovementFlag(MOVEFLAG_FALLING);
             hasElevation = unit->m_movementInfo.HasMovementFlag(MOVEFLAG_SPLINE_ELEVATION);
+
+            moveFlags &= MOVEFLAG_MASK_CREATURE_ALLOWED;
         }
     }
 
@@ -370,12 +380,12 @@ void Object::BuildMovementUpdate(ByteBuffer * data, uint16 updateFlags) const
     {
         Unit const* unit = (Unit const*)this;
 
-        data->WriteBit(!unit->m_movementInfo.GetMovementFlags());
+        data->WriteBit(!moveFlags);
         data->WriteBit(!hasOrientation);
         data->WriteGuidMask<7, 3, 2>(Guid);
 
-        if (unit->m_movementInfo.GetMovementFlags())
-            data->WriteBits(unit->m_movementInfo.GetMovementFlags(), 30);
+        if (moveFlags)
+            data->WriteBits(moveFlags, 30);
 
         data->WriteBit(false);
         data->WriteBit(!hasPitch);
@@ -409,10 +419,10 @@ void Object::BuildMovementUpdate(ByteBuffer * data, uint16 updateFlags) const
 
         data->WriteGuidMask<0, 1>(Guid);
         data->WriteBit(false);    // Unknown 4.3.3
-        data->WriteBit(!unit->m_movementInfo.GetMovementFlags2());
+        data->WriteBit(!moveFlags2);
 
         if (unit->m_movementInfo.GetMovementFlags2())
-            data->WriteBits(unit->m_movementInfo.GetMovementFlags2(), 12);
+            data->WriteBits(moveFlags2, 12);
     }
 
     // used only with GO's, placeholder

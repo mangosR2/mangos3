@@ -11608,6 +11608,21 @@ void SpellAuraHolder::BuildUpdatePacket(WorldPacket& data) const
     data << uint32(GetId());
 
     uint8 auraFlags = GetAuraFlags();
+    // recheck effect amount
+    if ((auraFlags & AFLAG_EFFECT_AMOUNT_SEND) == 0)
+    {
+        for (int i = 0; i < MAX_EFFECT_INDEX; ++i)
+        {
+            if (Aura const* aura = GetAura(SpellEffectIndex(i)))
+            {
+                if ((auraFlags & (1 << i)) && aura->GetModifier()->m_amount)
+                {
+                    auraFlags |= AFLAG_EFFECT_AMOUNT_SEND;
+                    break;
+                }
+            }
+        }
+    }
     data << uint16(auraFlags);
     data << uint8(GetAuraLevel());
 
