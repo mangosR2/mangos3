@@ -361,6 +361,10 @@ void Object::BuildMovementUpdate(ByteBuffer * data, uint16 updateFlags) const
                 moveFlags |= MOVEFLAG_SPLINE_ELEVATION;
             else
                 moveFlags &= ~MOVEFLAG_SPLINE_ELEVATION;
+
+            if (moveFlags & (MOVEFLAG_FLYING | MOVEFLAG_CAN_FLY))
+                moveFlags &= ~(MOVEFLAG_FALLING | MOVEFLAG_FALLINGFAR | MOVEFLAG_SAFE_FALL);
+
             hasTransportTime2 = unit->m_movementInfo.GetStatusInfo().hasTransportTime2;
             hasTransportTime3 = unit->m_movementInfo.GetStatusInfo().hasTransportTime3;
         }
