@@ -18,3 +18,13 @@ DELETE FROM `spell_proc_event` WHERE `entry` IN (59887, 59888);
 INSERT INTO `spell_proc_event` (`entry`, `SchoolMask`) VALUES
 (59887, 127),
 (59888, 127);
+
+-- Sin and Punishment
+DELETE FROM `spell_proc_event` WHERE `entry` = 87099;
+INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyMaskC0`, `procEx`) VALUES
+(87099, 64, 2);
+
+-- Masochism
+DELETE FROM `spell_proc_event` WHERE `entry` = 88994;
+INSERT INTO `spell_proc_event` (`entry`, `SchoolMask`) VALUES
+(88994, 127);
