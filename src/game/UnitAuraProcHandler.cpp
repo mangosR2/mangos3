@@ -5217,24 +5217,30 @@ SpellAuraProcResult Unit::HandleAddFlatModifierAuraProc(Unit* pVictim, DamageInf
 {
     SpellEntry const *spellInfo = triggeredByAura->GetSpellProto();
 
-    switch (spellInfo->Id)
+    switch (spellInfo->GetSpellFamilyName())
     {
-                                                // Remove only single aura from stack
-        case 53257:                             // Cobra strike
-        case 55166:                             // Tidal Force
+        case SPELLFAMILY_HUNTER:
         {
-                SpellAuraHolderPtr holder = triggeredByAura->GetHolder();
-                if (!holder || holder->IsDeleted())
-                    return SPELL_AURA_PROC_FAILED;
-
-                if (holder->ModStackAmount(-1))
+            switch (spellInfo->Id)
+            {
+                case 53257:                             // Cobra strike
+                case 55166:                             // Tidal Force
                 {
-                    RemoveSpellAuraHolder(holder);
-                    return SPELL_AURA_PROC_OK;
+                    SpellAuraHolderPtr holder = triggeredByAura->GetHolder();
+                    if (!holder || holder->IsDeleted())
+                        return SPELL_AURA_PROC_FAILED;
+
+                    if (holder->ModStackAmount(-1))
+                    {
+                        RemoveSpellAuraHolder(holder);
+                        return SPELL_AURA_PROC_OK;
+                    }
+                    else
+                        return SPELL_AURA_PROC_CANT_TRIGGER;
+                    break;
                 }
-                else
-                    return SPELL_AURA_PROC_CANT_TRIGGER;
-                break;
+            }
+            break;
         }
         case SPELLFAMILY_PRIEST:
         {
