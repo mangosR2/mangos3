@@ -5246,16 +5246,6 @@ SpellAuraProcResult Unit::HandleAddPctModifierAuraProc(Unit* /*pVictim*/, Damage
             }
             break;
         }
-        case SPELLFAMILY_PRIEST:
-        {
-            // Serendipity
-            if (spellInfo->GetSpellIconID() == 2900)
-            {
-                RemoveAurasDueToSpell(spellInfo->Id);
-                return SPELL_AURA_PROC_OK;
-            }
-            break;
-        }
         case SPELLFAMILY_PALADIN:
         {
             // Glyph of Divinity
