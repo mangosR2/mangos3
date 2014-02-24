@@ -11535,6 +11535,21 @@ int32 Unit::CalculateSpellDamage(Unit const* target, SpellEntry const* spellProt
             if (MountCapabilityEntry const* mountCapability = GetMountCapability(uint32(spellEffect->EffectMiscValueB)))
                 return int32(mountCapability->Id);
             break;
+        case SPELL_AURA_MOD_INCREASE_MOUNTED_SPEED:
+        {
+            if (spellProto->Id == 68768 || spellProto->Id == 68769) // Little White Stallion & Little Ivory Raptor
+            {
+                if (!target || target->GetTypeId() != TYPEID_PLAYER)
+                    break;
+
+                uint16 skillval = ((Player*)target)->GetSkillValue(SKILL_RIDING);
+                if (!skillval)
+                    break;
+
+                return skillval >= 150 ? 100 : 60;
+            }
+            break;
+        }
         case SPELL_AURA_OVERRIDE_ACTIONBAR_SPELLS:
         case SPELL_AURA_OVERRIDE_ACTIONBAR_SPELLS_2:
         {
