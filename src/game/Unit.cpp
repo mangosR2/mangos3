@@ -9008,18 +9008,11 @@ bool Unit::IsSpellCrit(Unit *pVictim, SpellEntry const *spellProto, SpellSchoolM
                         // Flash Heal
                         if (spellProto->GetSpellFamilyFlags().test<CF_PRIEST_FLASH_HEAL>())
                         {
-                            if (pVictim->GetHealth() > pVictim->GetMaxHealth()/2)
-                                break;
-                            AuraList const& mDummyAuras = GetAurasByType(SPELL_AURA_DUMMY);
-                            for(AuraList::const_iterator i = mDummyAuras.begin(); i!= mDummyAuras.end(); ++i)
+                            // Glyph of Flash Heal
+                            if (Aura* glyph = GetAura(55679, EFFECT_INDEX_0))
                             {
-                                // Improved Flash Heal
-                                if ((*i)->GetSpellProto()->GetSpellFamilyName() == SPELLFAMILY_PRIEST &&
-                                    (*i)->GetSpellProto()->GetSpellIconID() == 2542)
-                                {
-                                    crit_chance+=(*i)->GetModifier()->m_amount;
-                                    break;
-                                }
+                                if (pVictim->GetHealthPercent() < glyph->GetSpellProto()->CalculateSimpleValue(EFFECT_INDEX_1))
+                                    crit_chance += glyph->GetModifier()->m_amount;
                             }
                         }
                         break;
