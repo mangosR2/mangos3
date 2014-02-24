@@ -1796,6 +1796,10 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, DamageInfo* damageI
                     if (!pVictim || !pVictim->isAlive())
                         return SPELL_AURA_PROC_FAILED;
 
+                    // Heal should be crit if it's not Prayer of Healing
+                    if ((!procSpell || procSpell->Id != 596) && (procEx & PROC_EX_CRITICAL_HIT) == 0)
+                        return SPELL_AURA_PROC_FAILED;
+
                     // find Divine Aegis on the target and get absorb amount
                     Aura* DivineAegis = pVictim->GetAura(47753,EFFECT_INDEX_0);
                     if (DivineAegis)

@@ -33,3 +33,8 @@ INSERT INTO `spell_proc_event` (`entry`, `SchoolMask`) VALUES
 DELETE FROM `spell_proc_event` WHERE `entry` = 89488;
 INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`) VALUES
 (89488, 6, 2048+4096+1024); 
+
+-- Divine Aegis
+DELETE FROM `spell_proc_event` WHERE `entry` = 47509;
+INSERT INTO `spell_proc_event` (`entry`, `SchoolMask`) VALUES
+(47509, 127);
