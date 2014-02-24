@@ -6283,15 +6283,6 @@ void Aura::HandleAuraProcTriggerSpell(bool apply, bool Real)
             if (apply)
                 GetHolder()->SetAuraCharges(6);
             break;
-        case 50720:                                         // Vigilance (threat transfering)
-            if (apply)
-            {
-                if (Unit* caster = GetCaster())
-                    target->CastSpell(caster, 59665, true);
-            }
-            else
-                target->getHostileRefManager().ResetThreatRedirection();
-            break;
         case 72059:                                         // Unstable (Kinetic Bomb - Blood Council encounter)
             if (!apply)
             {
@@ -11815,11 +11806,6 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
                     }
                     else
                         return;
-                    break;
-                }
-                case 50720:                                 // Vigilance (warrior spell but not have warrior family)
-                {
-                    spellId1 = 68066;                       // Damage Reduction
                     break;
                 }
                 case 55001:                                 // Parachute

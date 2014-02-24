@@ -10327,7 +10327,7 @@ void Spell::EffectScriptEffect(SpellEffectEntry const* effect)
                 case 50725:                                 // Vigilance - remove cooldown on Taunt
                 {
                     Unit* caster = GetAffectiveCaster();
-                    if (!caster)
+                    if (!caster || !caster->IsInWorld() || caster->GetTypeId() != TYPEID_PLAYER)
                         return;
 
                     caster->RemoveSpellCategoryCooldown(82, true);
@@ -14095,10 +14095,6 @@ void Spell::EffectRedirectThreat(SpellEffectEntry const* effect)
 {
     if (!unitTarget)
         return;
-
-    if (m_spellInfo->Id == 59665)                           // Vigilance
-        if (Aura const* glyph = unitTarget->GetDummyAura(63326))  // Glyph of Vigilance
-            damage += glyph->GetModifier()->m_amount;
 
     m_caster->getHostileRefManager().SetThreatRedirection(unitTarget->GetObjectGuid(), uint32(damage));
 }
