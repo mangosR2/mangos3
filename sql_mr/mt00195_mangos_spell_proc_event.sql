@@ -7,3 +7,8 @@ DELETE FROM `spell_proc_event` WHERE `entry` = 77487;
 DELETE FROM `spell_proc_event` WHERE `entry` = 81659;
 INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`, `SpellFamilyMaskC0`) VALUES
 (81659, 6, 1048704, 1088);
+
+-- Inner Focus
+DELETE FROM `spell_proc_event` WHERE `entry` = 89485;
+INSERT INTO `spell_proc_event` (`entry`, `procFlags`, `procEx`, `CustomChance`) VALUES
+(89485, 16384, 524288, 100);
