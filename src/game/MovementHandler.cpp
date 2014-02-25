@@ -615,7 +615,10 @@ void WorldSession::HandleMoverRelocation(MovementInfo& movementInfo)
             }
         }
         else if (plMover->IsOnTransport())               // if we were on a transport, leave
+        {
             plMover->GetTransport()->RemovePassenger(plMover);
+            return;
+        }
 
         if (movementInfo.HasMovementFlag(MOVEFLAG_SWIMMING) != plMover->IsInWater())
         {
