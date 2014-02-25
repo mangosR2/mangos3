@@ -5194,14 +5194,6 @@ float Unit::GetTotalAuraScriptedMultiplierForDamageTaken(SpellEntry const* spell
         {
             switch ((*itr)->GetId())
             {
-                case 20911:                                     // Blessing of Sanctuary
-                case 25899:                                     // Greater Blessing of Sanctuary
-                {
-                                                                // don't stack with Vigilance dmg reduction effect
-                    if (!HasAura(68066))
-                        multiplier *= ((float)(*itr)->GetModifier()->m_amount + 100.0f) / 100.0f;
-                    break;
-                }
                 case 45182:                                     // Cheating Death
                 {
                     if ((*itr)->GetModifier()->m_miscvalue & GetSpellSchoolMask(spellProto))
