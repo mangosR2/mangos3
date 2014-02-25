@@ -2492,11 +2492,18 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, DamageInfo* damageI
                 break;
             }
             // Sheath of Light
-            if (dummySpell->GetSpellIconID() == 3030)
+            else if (dummySpell->GetSpellIconID() == 3030)
             {
                 triggered_spell_id = 54203;
                 basepoints[0] = triggerAmount * damage / 100 / GetSpellAuraMaxTicks(triggered_spell_id);
                 break;
+            }
+            // Tower of Radiance, Rank 3
+            else if (dummySpell->GetSpellIconID() == 3402)
+            {
+                // Must be target of Beacon of Light
+                if (!pVictim || !pVictim->GetSpellAuraHolder(53563, GetObjectGuid()))
+                    return SPELL_AURA_PROC_FAILED;
             }
 
             switch(dummySpell->Id)
@@ -2674,10 +2681,7 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, DamageInfo* damageI
 
                     // beacon
                     Unit* beacon = triggeredByAura->GetCaster();
-                    if (!beacon)
-                        return SPELL_AURA_PROC_FAILED;
-
-                    if (procSpell->Id == 20267)
+                    if (!beacon || !procSpell || procSpell->Id == 20267)
                         return SPELL_AURA_PROC_FAILED;
 
                     // find caster main aura at beacon
@@ -2705,10 +2709,13 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, DamageInfo* damageI
                         !beacon->IsWithinLOSInMap(pVictim))
                         return SPELL_AURA_PROC_FAILED;
 
-                    basepoints[0] = triggeredByAura->GetModifier()->m_amount*damage/100;
+                    basepoints[0] = triggeredByAura->GetModifier()->m_amount * damage / 100;
+                    // Holy Light heals for 100%
+                    if (procSpell && procSpell->Id == 635)
+                        basepoints[0] *= 2;
 
                     // cast with original caster set but beacon to beacon for apply caster mods and avoid LoS check
-                    beacon->CastCustomSpell(beacon,triggered_spell_id,&basepoints[0],NULL,NULL,true,castItem,triggeredByAura,pVictim->GetObjectGuid());
+                    beacon->CastCustomSpell(beacon, triggered_spell_id, &basepoints[0], NULL, NULL, true, castItem, triggeredByAura, pVictim->GetObjectGuid());
                     return SPELL_AURA_PROC_OK;
                 }
                 // Glyph of Holy Light
@@ -4393,22 +4400,13 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(Unit *pVictim, DamageIn
         }
         case SPELLFAMILY_PALADIN:
         {
-            /*
-            // Blessed Life
-            if (auraSpellInfo->GetSpellIconID() == 2137)
+            // Tower of Radiance, Ranks 1-2
+            if (auraSpellInfo->GetSpellIconID() == 3402)
             {
-                switch (auraSpellInfo->Id)
-                {
-                    case 31828:                         // Rank 1
-                    case 31829:                         // Rank 2
-                    case 31830:                         // Rank 3
-                        break;
-                    default:
-                        sLog.outError("Unit::HandleProcTriggerSpellAuraProc: Spell %u miss posibly Blessed Life", auraSpellInfo->Id);
-                        return SPELL_AURA_PROC_FAILED;
-                }
+                // Must be target of Beacon of Light
+                if (!pVictim || !pVictim->GetSpellAuraHolder(53563, GetObjectGuid()))
+                    return SPELL_AURA_PROC_FAILED;
             }
-            */
             // Protector of the Innocent
             if (auraSpellInfo->SpellIconID == 5014)
             {

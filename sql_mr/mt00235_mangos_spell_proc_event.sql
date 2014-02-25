@@ -118,3 +118,8 @@ INSERT INTO `spell_proc_event` (`entry`, `procEx`) VALUES
 DELETE FROM `spell_proc_event` WHERE `entry` = 88820;
 INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`, `SpellFamilyMaskC0`) VALUE
 (88820, 10, 3221225472, 1024);
+
+-- Tower of Radiance
+DELETE FROM `spell_proc_event` WHERE `entry` = 84800;
+INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`, `SpellFamilyMaskC0`, `procFlags`, `CustomChance`) VALUE
+(84800, 10, 1073741824, 1024, 16384, 100);
