@@ -1321,16 +1321,23 @@ void Spell::EffectSchoolDMG(SpellEffectEntry const* effect)
                     int32 count = m_caster->CalculateSpellDamage(unitTarget, m_spellInfo, EFFECT_INDEX_2);
                     damage += count * int32(average * IN_MILLISECONDS) / m_caster->GetAttackTime(BASE_ATTACK);
                 }
-/*
-                // Shield of Righteousness
-                else if (classOptions && classOptions->SpellFamilyFlags & UI64LIT(0x0010000000000000))
+                // Shield of the Righteous
+                else if (m_spellInfo->Id == 53600)
                 {
-                    // limited max cap of Block Value
-                    int32 iCurrentBlockValue = m_caster->GetShieldBlockValue();
-                    int32 iCurrentBlockValueCap = int32(34.5f * m_caster->getLevel());
-                    damage += (iCurrentBlockValue > iCurrentBlockValueCap ? iCurrentBlockValueCap : iCurrentBlockValue);
+                    switch (m_usedHolyPower)
+                    {
+                        case 1:
+                            damage -= 1;
+                            break;
+                        case 2:
+                            damage = damage * 3 - 3;
+                            break;
+                        case 3:
+                            damage = damage * 6 - 6;
+                            break;
+                    }
+                    break;
                 }
-*/
                 // Judgement
                 else if (m_spellInfo->Id == 54158)
                 {

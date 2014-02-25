@@ -8282,6 +8282,18 @@ int32 Unit::SpellBonusWithCoeffs(SpellEntry const *spellProto, int32 total, int3
         {
             float ap_bonus = damagetype == DOT ? bonus->ap_dot_bonus : bonus->ap_bonus;
 
+            // Shield of the Righteousness
+            if (spellProto->Id == 53600)
+            {
+                if (Spell const* spell = GetCurrentSpell(CURRENT_GENERIC_SPELL))
+                    if (spell->m_spellInfo->Id == spellProto->Id)
+                        switch (spell->GetUsedHolyPower())
+                        {
+                            case 2: ap_bonus *= 3; break;
+                            case 3: ap_bonus *= 6; break;
+                        }
+            }
+
             // Impurity
             if (GetTypeId() == TYPEID_PLAYER && spellProto->GetSpellFamilyName() == SPELLFAMILY_DEATHKNIGHT)
             {
