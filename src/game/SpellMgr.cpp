@@ -3119,6 +3119,18 @@ uint32 SpellMgr::GetSpellMaxTargetsWithCustom(SpellEntry const* spellInfo, Unit 
                 unMaxTargets = 2;
             break;
         }
+        case SPELLFAMILY_PALADIN:
+        {
+            // Light of Dawn
+            if (spellInfo->Id == 85222)
+            {
+                unMaxTargets = 6;
+                // Glyph of Light of Dawn
+                if (Aura const* aura = caster->GetDummyAura(54940))
+                    unMaxTargets -= aura->GetModifier()->m_amount;
+            }
+            break;
+        }
         case SPELLFAMILY_DEATHKNIGHT:
         {
             if (spellInfo->GetSpellIconID() == 1737)           // Corpse Explosion // TODO - spell 50445?
