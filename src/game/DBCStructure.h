@@ -2796,7 +2796,7 @@ struct TalentTabEntry
     uint32  tabpage;                                        // 5        m_orderIndex
     //char* internalname;                                   // 6        m_backgroundFile
     //char* description;                                    // 7
-    uint32 rolesMask;                                       // 8 4.0.0
+    uint32 rolesMask;                                       // 8        4.0.0
     uint32 masterySpells[MAX_MASTERY_SPELLS];               // 9-10     passive mastery bonus spells
 };
 
