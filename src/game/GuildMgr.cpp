@@ -274,6 +274,7 @@ void GuildMgr::LoadGuildXpForLevel()
         }
     }
 
+    sLog.outString();
     sLog.outString(">> Loaded %u xp for guild level definitions.", count);
 }
 
@@ -323,5 +324,6 @@ void GuildMgr::LoadGuildRewards()
     } while (result->NextRow());
     delete result;
 
+    sLog.outString();
     sLog.outString(">> Loaded %u guild reward definitions", count);
 }

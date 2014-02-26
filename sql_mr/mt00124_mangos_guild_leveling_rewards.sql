@@ -30,8 +30,7 @@ INSERT INTO `guild_xp_for_level` VALUES
 (21,49750000),
 (22,51410000),
 (23,53060000),
-(24,54730000),
-(25,56390000);
+(24,54730000);
 
 -- Guild Rewards
 DROP TABLE IF EXISTS `guild_rewards`;
