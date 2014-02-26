@@ -2738,7 +2738,7 @@ struct SpellItemEnchantmentEntry
     uint32      requiredSkill;                              // 19       m_requiredSkillID
     uint32      requiredSkillValue;                         // 20       m_requiredSkillRank
     uint32      requiredLevel;                              // 21       new in 3.1
-                                                            // 22       new in 3.1
+    //uint32      minItemLevel;                             // 22       new in 3.1
 };
 
 struct SpellItemEnchantmentConditionEntry
