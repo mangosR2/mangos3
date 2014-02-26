@@ -1036,12 +1036,12 @@ int WorldSocket::HandleAuthSession (WorldPacket& recvPacket)
 
 int WorldSocket::HandlePing(WorldPacket& recvPacket)
 {
-    uint32 ping;
     uint32 latency;
+    uint32 ping;
 
     // Get the ping packet content
-    recvPacket >> ping;
     recvPacket >> latency;
+    recvPacket >> ping;
 
     if (m_LastPingTime == ACE_Time_Value::zero)
         m_LastPingTime = ACE_OS::gettimeofday();            // for 1st ping
