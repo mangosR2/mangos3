@@ -43,28 +43,28 @@ typedef char const* const* DBCString;                       //char* DBCStrings[M
 
 struct AchievementEntry
 {
-    uint32    ID;                                           // 0        m_ID
-    uint32    factionFlag;                                  // 1        m_faction -1=all, 0=horde, 1=alliance
-    uint32    mapID;                                        // 2        m_instance_id -1=none
-    //uint32 parentAchievement;                             // 3        m_supercedes its Achievement parent (can`t start while parent uncomplete, use its Criteria if don`t have own, use its progress on begin)
-    DBCString name;                                         // 4        m_title_lang
-    //char *description;                                    // 5        m_description_lang
-    uint32    categoryId;                                   // 6        m_category
-    uint32    points;                                       // 7        m_points
-    //uint32 OrderInCategory;                               // 8        m_ui_order
-    uint32    flags;                                        // 9        m_flags
-    //uint32    icon;                                       // 10       m_iconID
-    //char *titleReward;                                    // 11       m_reward_lang
-    uint32 count;                                           // 12       m_minimum_criteria - need this count of completed criterias (own or referenced achievement criterias)
-    uint32 refAchievement;                                  // 13       m_shares_criteria - referenced achievement (counting of all completed criterias)
+    uint32      ID;                                         // 0        m_ID
+    uint32      factionFlag;                                // 1        m_faction -1=all, 0=horde, 1=alliance
+    uint32      mapID;                                      // 2        m_instance_id -1=none
+    uint32      parentAchievement;                          // 3        m_supercedes its Achievement parent (can`t start while parent uncomplete, use its Criteria if don`t have own, use its progress on begin)
+    DBCString   name;                                       // 4        m_title_lang
+    DBCString   description;                                // 5        m_description_lang
+    uint32      categoryId;                                 // 6        m_category
+    uint32      points;                                     // 7        m_points
+    uint32      OrderInCategory;                            // 8        m_ui_order
+    uint32      flags;                                      // 9        m_flags
+    uint32      icon;                                       // 10       m_iconID
+    DBCString   titleReward;                                // 11       m_reward_lang
+    uint32      count;                                      // 12       m_minimum_criteria - need this count of completed criterias (own or referenced achievement criterias)
+    uint32      refAchievement;                             // 13       m_shares_criteria - referenced achievement (counting of all completed criterias)
 };
 
 struct AchievementCategoryEntry
 {
     uint32    ID;                                           // 0        m_ID
     uint32    parentCategory;                               // 1        m_parent -1 for main category
-    //char *name;                                           // 2        m_name_lang
-    //uint32    sortOrder;                                  // 3        m_ui_order
+    DBCString name;                                         // 2        m_name_lang
+    uint32    sortOrder;                                    // 3        m_ui_order
 };
 
 struct AchievementCriteriaEntry
@@ -533,9 +533,9 @@ struct AchievementCriteriaEntry
             uint32  additionalRequirement2_value;           // 9        m_fail_asset
         } raw;
     };
-    DBCString name;                                         // 9        m_description_lang
-    uint32  completionFlag;                                 // 10       m_flags
-    uint32  timedCriteriaStartType;                         // 11       m_timer_start_event Only appears with timed achievements, seems to be the type of starting a timed Achievement, only type 1 and some of type 6 need manual starting
+    DBCString name;                                         // 10       m_description_lang
+    uint32  completionFlag;                                 // 11       m_flags
+    uint32  timedCriteriaStartType;                         // 12       m_timer_start_event Only appears with timed achievements, seems to be the type of starting a timed Achievement, only type 1 and some of type 6 need manual starting
                                                             //              1: ByEventId(?) (serverside IDs),    2: ByQuestId,   5: ByCastSpellId(?)
                                                             //              6: BySpellIdTarget(some of these are unknown spells, some not, some maybe spells)
                                                             //              7: ByKillNpcId,  9: ByUseItemId
