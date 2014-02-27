@@ -149,3 +149,9 @@ INSERT INTO `spell_proc_event` (`entry`, `procFlags`, `procEx`, `CustomChance`) 
 DELETE FROM `spell_proc_event` WHERE `entry` = 75806;
 INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskB0`) VALUE
 (75806, 10, 262144+32768);
+
+-- Eye for an Eye
+DELETE FROM `spell_proc_event` WHERE `entry` = 25988;
+DELETE FROM `spell_proc_event` WHERE `entry` = 9799;
+INSERT INTO `spell_proc_event` (`entry`, `SchoolMask`, `CustomChance`) VALUE
+(9799, 126, 0);

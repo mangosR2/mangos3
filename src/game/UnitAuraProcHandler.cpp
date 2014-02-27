@@ -694,14 +694,13 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, DamageInfo* damageI
         {
             switch (dummySpell->Id)
             {
-                // Eye for an Eye
+                // Eye for an Eye, Rank 1
                 case 9799:
-                case 25988:
                 {
                     // return damage % to attacker but < 50% own total health
-                    basepoints[0] = triggerAmount*int32(damage)/100;
-                    if (basepoints[0] > (int32)GetMaxHealth()/2)
-                        basepoints[0] = (int32)GetMaxHealth()/2;
+                    basepoints[0] = triggerAmount * int32(damage) / 100;
+                    if (basepoints[0] > int32(GetMaxHealth() / 2))
+                        basepoints[0] = int32(GetMaxHealth() / 2);
 
                     triggered_spell_id = 25997;
                     break;
@@ -3842,6 +3841,16 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(Unit *pVictim, DamageIn
                 case 23780:                                 // Aegis of Preservation (Aegis of Preservation trinket)
                     trigger_spell_id = 23781;
                     break;
+                case 25988:                                 // Eye for an Eye, Rank 2
+                {
+                    // return damage % to attacker but < 50% own total health
+                    basepoints[0] = triggerAmount * int32(damage) / 100;
+                    if (basepoints[0] > int32(GetMaxHealth() / 2))
+                        basepoints[0] = int32(GetMaxHealth() / 2);
+
+                    trigger_spell_id = 25997;
+                    break;
+                }
                 //case 24949: break;                        // Defensive State 2 (DND)
                 case 27522:                                 // Mana Drain Trigger
                 case 40336:                                 // Mana Drain Trigger
