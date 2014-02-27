@@ -6748,7 +6748,9 @@ void Aura::HandleAuraPeriodicDummy(bool apply, bool Real)
         {
             switch (GetSpellProto()->Id)
             {
+                // Demonic Circle: Summon
                 case 48018:
+                {
                     if (apply)
                         target->CastSpell(target, 62388, true);
                     else
@@ -6757,6 +6759,7 @@ void Aura::HandleAuraPeriodicDummy(bool apply, bool Real)
                         target->RemoveAurasDueToSpell(62388);
                     }
                 break;
+                }
             }
             break;
         }
@@ -10415,21 +10418,27 @@ void Aura::PeriodicDummyTick()
         case SPELLFAMILY_WARLOCK:
             switch (spell->Id)
             {
+                // Demonic Circle: Summon 
                 case 48018:
                 {
                     GameObject* obj = target->GetGameObject(spell->Id);
                     if (!obj)
-                    {
-                         target->RemoveAurasDueToSpell(spell->Id);
-                         target->RemoveAurasDueToSpell(62388);
                          return;
-                    }
+
                     // We must take a range of teleport spell, not summon.
-                    const SpellEntry* goToCircleSpell = sSpellStore.LookupEntry(48020);
-                    if (target->IsWithinDist(obj,GetSpellMaxRange(sSpellRangeStore.LookupEntry(goToCircleSpell->GetRangeIndex()))))
-                        target->CastSpell(target, 62388, true);
+                    SpellEntry const* goToCircleSpell = sSpellStore.LookupEntry(48020);
+                    if (target->IsWithinDist(obj, GetSpellMaxRange(sSpellRangeStore.LookupEntry(goToCircleSpell->GetRangeIndex()))))
+                        GetHolder()->SendFakeAuraUpdate(62388, false);
                     else
-                        target->RemoveAurasDueToSpell(62388);
+                        GetHolder()->SendFakeAuraUpdate(62388, true);
+                    break;
+                }
+                // Soul Harvest
+                case 79268:
+                {
+                    // Gain soul shard every 3rd tick
+                    if (m_periodicTick % 3 == 0)
+                        target->CastSpell(target, 101977, true);
                     break;
                 }
                 default:
@@ -11815,6 +11824,51 @@ void SpellAuraHolder::SendAuraUpdate(bool remove) const
         BuildUpdatePacket(data);
 
     m_target->SendMessageToSet(&data, true);
+}
+
+void SpellAuraHolder::SendFakeAuraUpdate(uint32 auraId, bool remove) const
+{
+    if (!GetTarget())
+        return;
+
+    WorldPacket data(SMSG_AURA_UPDATE);
+    data << GetTarget()->GetPackGUID();
+    data << uint8(MAX_AURAS);
+    data << uint32(remove ? 0 : auraId);
+
+    if(remove)
+    {
+        GetTarget()->SendMessageToSet(&data, true);
+        return;
+    }
+
+    uint8 auraFlags = GetAuraFlags();
+    data << uint16(auraFlags);
+    data << uint8(GetAuraLevel());
+    data << uint8(GetStackAmount() > 1 ? GetStackAmount() : (GetAuraCharges()) ? GetAuraCharges() : 1);
+
+    if (!(auraFlags & AFLAG_NOT_CASTER))
+    {
+        data << GetCasterGuid().WriteAsPacked();
+    }
+
+    if (auraFlags & AFLAG_DURATION)
+    {
+        data << uint32(GetAuraMaxDuration());
+        data << uint32(GetAuraDuration());
+    }
+
+    if (auraFlags & AFLAG_EFFECT_AMOUNT_SEND)
+    {
+        for (uint8 i = 0; i < MAX_EFFECT_INDEX; ++i)
+            if (auraFlags & (1 << i))
+                if (Aura const* aura = GetAura(SpellEffectIndex(i)))
+                    data << int32(aura->GetModifier()->m_amount);
+                else
+                    data << int32(0);
+    }
+
+    GetTarget()->SendMessageToSet(&data, true);
 }
 
 void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)

@@ -82,6 +82,7 @@ class MANGOS_DLL_SPEC SpellAuraHolder
         void _RemoveSpellAuraHolder();
         void BuildUpdatePacket(WorldPacket& data) const;
         void SendAuraUpdate(bool remove) const;
+        void SendFakeAuraUpdate(uint32 auraId, bool remove) const;
         void HandleSpellSpecificBoosts(bool apply);
         void HandleSpellSpecificBoostsForward(bool apply);
         void CleanupTriggeredSpells();
