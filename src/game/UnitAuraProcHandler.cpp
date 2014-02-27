@@ -4100,6 +4100,13 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(Unit *pVictim, DamageIn
                 trigger_spell_id = 37706;
                 target = this;
             }
+            // Glyph of Seal of Command
+            else if (auraSpellInfo->Id == 54925)
+            {
+                 if (procSpell && procSpell->Id != 20467)   // Check Seal of Command (prevent double proccing and non-seal of command proccing)
+                     return SPELL_AURA_PROC_FAILED;
+                 break;
+            }
             // Soul Preserver
             if (auraSpellInfo->Id==60510)
             {
