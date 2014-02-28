@@ -543,6 +543,7 @@ SpellSpecific GetSpellSpecific(uint32 spellId)
                 default:
                     break;
             }
+
             // only warlock curses have this
             if (spellInfo->GetDispel() == DISPEL_CURSE)
                 return SPELL_CURSE;

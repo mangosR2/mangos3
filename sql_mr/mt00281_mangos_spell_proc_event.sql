@@ -250,3 +250,9 @@ INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`)
 DELETE FROM `spell_proc_event` WHERE `entry` = 47283;
 INSERT INTO `spell_proc_event` (`entry`, `procFlags`, `procEx`, `CustomChance`) VALUE
 (47283, 65536, 524288, 100);
+
+-- Bane of Havoc
+DELETE FROM `spell_proc_event` WHERE `entry` IN (85466, 85468);
+INSERT INTO `spell_proc_event` (`entry`, `SchoolMask`, `procFlags`) VALUE
+(85466, 127, 332116),
+(85468, 127, 332116);
