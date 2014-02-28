@@ -224,3 +224,8 @@ DELETE FROM `spell_proc_event` WHERE `entry` IN (18119, 18120);
 INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskB0`, `procFlags`, `CustomChance`) VALUE
 (18119, 5, 128, 65536, 100),
 (18120, 5, 128, 65536, 100);
+
+-- Burning Embers
+DELETE FROM `spell_proc_event` WHERE `entry` = 91986;
+INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`, `SpellFamilyMaskB0`) VALUE
+(91986, 5, 4096, 128);
