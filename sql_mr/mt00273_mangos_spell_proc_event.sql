@@ -213,3 +213,14 @@ INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskB0`,
 DELETE FROM `spell_proc_event` WHERE `entry` = 85113;
 INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`, `SpellFamilyMaskB0`, `procFlags`) VALUE
 (85113, 5, 32, 8388608, 4096+65536);
+
+-- Soul Fire!
+DELETE FROM `spell_proc_event` WHERE `entry` = 61189;
+INSERT INTO `spell_proc_event` (`entry`, `procEx`) VALUES
+(61189, 524288);
+
+-- Improved Soul Fire
+DELETE FROM `spell_proc_event` WHERE `entry` IN (18119, 18120);
+INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskB0`, `procFlags`, `CustomChance`) VALUE
+(18119, 5, 128, 65536, 100),
+(18120, 5, 128, 65536, 100);
