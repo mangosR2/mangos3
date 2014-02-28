@@ -4370,6 +4370,27 @@ void Spell::EffectDummy(SpellEffectEntry const* effect)
                         m_caster->CastSpell(unitTarget, 38203, true);
                     return;
                 }
+                case 42955: // Conjure refreshment dummy
+                {
+                    if (m_caster->GetTypeId() != TYPEID_PLAYER)
+                        return;
+
+                    if (m_caster->getLevel() > 84)
+                        m_caster->CastSpell(unitTarget, 92727, true); // conjure refreshment, rank 7
+                    else if (m_caster->getLevel() > 79)
+                        m_caster->CastSpell(unitTarget, 42956, true); // conjure refreshment, rank 6
+                    else if (m_caster->getLevel() > 74)
+                        m_caster->CastSpell(unitTarget, 74625, true); // conjure refreshment, rank 5
+                    else if (m_caster->getLevel() > 64)
+                        m_caster->CastSpell(unitTarget, 92805, true); // conjure refreshment, rank 4
+                    else if (m_caster->getLevel() > 54)
+                        m_caster->CastSpell(unitTarget, 92802, true); // conjure refreshment, rank 3
+                    else if (m_caster->getLevel() > 44)
+                        m_caster->CastSpell(unitTarget, 92799, true); // conjure refreshment, rank 2
+                    else if (m_caster->getLevel() > 38)
+                        m_caster->CastSpell(unitTarget, 92739, true); // conjure refreshment, rank 1
+                    return;
+                }
             }
 
             // Conjure Mana Gem
