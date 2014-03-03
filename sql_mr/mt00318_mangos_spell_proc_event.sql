@@ -1,5 +1,7 @@
 -- 4.3.4 15595 spell_proc_event
 
+### Shaman ###
+
 -- Shadow Orb
 DELETE FROM `spell_proc_event` WHERE `entry` = 77487;
 
@@ -79,6 +81,8 @@ DELETE FROM `spell_proc_event` WHERE `entry` = 77485;
 INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`, `CustomChance`) VALUES
 (77485, 0, 0, 0);
 
+### Priest ###
+
 -- Vengeance
 DELETE FROM `spell_proc_event` WHERE `entry` = 84839;
 INSERT INTO `spell_proc_event` (`entry`, `SchoolMask`) VALUE
@@ -88,11 +92,6 @@ INSERT INTO `spell_proc_event` (`entry`, `SchoolMask`) VALUE
 DELETE FROM `spell_proc_event` WHERE `entry` = 93098;
 INSERT INTO `spell_proc_event` (`entry`, `SchoolMask`) VALUE
 (93098, 127);
-
--- Vigilance
-DELETE FROM `spell_proc_event` WHERE `entry` = 50720;
-INSERT INTO `spell_proc_event` (`entry`, `SchoolMask`) VALUE
-(50720, 127);
 
 -- Sanctuary
 DELETE FROM `spell_proc_event` WHERE `entry` = 20911;
@@ -176,16 +175,6 @@ DELETE FROM `spell_proc_event` WHERE `entry` = 20164;
 INSERT INTO `spell_proc_event` (`entry`, `SchoolMask`, `ppmRate`, `procFlags`) VALUE
 (20164, 127, 0, 4); -- no ppm rate in cata?
 
--- Seal of Truth
-DELETE FROM `spell_proc_event` WHERE `entry` = 31801;
-INSERT INTO `spell_proc_event` (`entry`, `SchoolMask`) VALUE
-(31801, 1);
-
--- Seal of Insight
-DELETE FROM `spell_proc_event` WHERE `entry` = 20165;
-INSERT INTO `spell_proc_event` (`entry`, `SchoolMask`, `ppmRate`) VALUE
-(20165, 127, 20);
-
 -- Sacred Shield
 DELETE FROM `spell_proc_event` WHERE `entry` = 85285;
 INSERT INTO `spell_proc_event` (`entry`, `Cooldown`) VALUE
@@ -206,8 +195,24 @@ DELETE FROM `spell_proc_event` WHERE `entry` = 76672;
 INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskB0`, `SpellFamilyMaskC0`, `procFlags`) VALUE
 (76672, 10, 131072+32768, 8192, 16+4096);
 
+### Paladin ###
+
+-- Seal of Truth
+DELETE FROM `spell_proc_event` WHERE `entry` = 31801;
+INSERT INTO `spell_proc_event` (`entry`, `SchoolMask`) VALUE
+(31801, 1);
+
+-- Seal of Insight
+DELETE FROM `spell_proc_event` WHERE `entry` = 20165;
+INSERT INTO `spell_proc_event` (`entry`, `SchoolMask`, `ppmRate`) VALUE
+(20165, 127, 20);
 
 ### WARLOCK ###
+
+-- Vigilance
+DELETE FROM `spell_proc_event` WHERE `entry` = 50720;
+INSERT INTO `spell_proc_event` (`entry`, `SchoolMask`) VALUE
+(50720, 127);
 
 -- Aftermath
 DELETE FROM `spell_proc_event` WHERE `entry` = 85113;
@@ -267,15 +272,14 @@ DELETE FROM `spell_proc_event` WHERE `entry` = 47201;
 INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`, `SpellFamilyMaskB0`) VALUE
 (47201, 5, 16384+8, 262144);
 
+-- Siphon Life
+DELETE FROM `spell_proc_event` WHERE `entry` = 63108;
+INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`) VALUE
+(63108, 5, 2);
+
 ### Mage ###
 
 -- Ring of Frost
 DELETE FROM `creature_template_addon` WHERE `entry` = 44199;
 INSERT INTO `creature_template_addon` (`entry`, `b2_0_sheath`, `auras`) VALUE
 (44199, 1, '91264');
-
--- Siphon Life
-DELETE FROM `spell_proc_event` WHERE `entry` = 63108;
-INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`) VALUE
-(63108, 5, 2);
-
