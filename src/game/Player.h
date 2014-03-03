@@ -1269,6 +1269,8 @@ class MANGOS_DLL_SPEC Player : public Unit
         void RemoveSummonUnit(uint32 spellid);
         void RemoveSummonUnit(Unit* summon); 
         Unit* GetSummonUnit(uint32 spellId) const;
+        uint32 GetSummonUnitCount() const;
+        uint32 GetSummonUnitCountBySpell(uint32 spellId) const;
 
         uint32 GetBarberShopCost(uint8 newhairstyle, uint8 newhaircolor, uint8 newfacialhair, uint32 newskintone);
 
