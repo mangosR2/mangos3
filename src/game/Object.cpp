@@ -2211,7 +2211,7 @@ GameObject* WorldObject::GetClosestGameObjectWithEntry(const WorldObject* pSourc
     return pGameObject;
 }
 
-void WorldObject::GetGameObjectListWithEntryInGrid(std::list<GameObject*>& lList, uint32 uiEntry, float fMaxSearchRange)
+void WorldObject::GetGameObjectListWithEntryInGrid(std::list<GameObject*>& lList, uint32 uiEntry, float fMaxSearchRange) const
 {
     CellPair pair(MaNGOS::ComputeCellPair(this->GetPositionX(), this->GetPositionY()));
     Cell cell(pair);
@@ -2516,4 +2516,17 @@ void WorldObject::UpdateHelper::Update(uint32 time_diff)
     m_obj.m_updateTracker.Reset();
     m_obj.Update(realDiff, time_diff);
     m_obj.SetLastUpdateTime();
+}
+
+void WorldObject::GetCreatureListWithEntryInGrid(std::list<Creature*>& creatureList, uint32 uiEntry, float fMaxSearchRange) const
+{
+    CellPair pair(MaNGOS::ComputeCellPair(this->GetPositionX(), this->GetPositionY()));
+    Cell cell(pair);
+    cell.SetNoCreate();
+
+    MaNGOS::AllCreaturesOfEntryInRangeCheck check(this, uiEntry, fMaxSearchRange);
+    MaNGOS::CreatureListSearcher<MaNGOS::AllCreaturesOfEntryInRangeCheck> searcher(creatureList, check);
+    TypeContainerVisitor<MaNGOS::CreatureListSearcher<MaNGOS::AllCreaturesOfEntryInRangeCheck>, GridTypeMapContainer> visitor(searcher);
+
+    cell.Visit(pair, visitor, *(this->GetMap()), *this, fMaxSearchRange);
 }

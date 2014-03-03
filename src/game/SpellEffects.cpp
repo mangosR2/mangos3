@@ -4706,6 +4706,49 @@ void Spell::EffectDummy(SpellEffectEntry const* effect)
                     m_caster->CastSpell(unitTarget, 82365, true);
                     return;
                 }
+                // Wild Mushroom : Detonate
+                case 88751:
+                {
+                    if (m_caster->GetTypeId() != TYPEID_PLAYER)
+                        return;
+
+                    uint32 fungal = NULL;
+                    if (m_caster->HasAura(78788)) // Fungal Growth Rank 1
+                        fungal = 81291;
+                    else if (m_caster->HasAura(78789)) // Fungal Growth Rank 2
+                        fungal = 81283;
+
+                    std::list<Creature*> list;
+                    std::list<TemporarySummon*> summonList;
+                    float spellRange = GetSpellMaxRange(sSpellRangeStore.LookupEntry(m_spellInfo->rangeIndex), true);
+                    m_caster->GetCreatureListWithEntryInGrid(list, 47649, spellRange);
+    
+                    for (std::list<Creature*>::const_iterator i = list.begin(); i != list.end(); ++i)
+                    {
+                        if ((*i)->IsTemporarySummon() && (*i)->GetCreator() == m_caster)
+                        {
+                            summonList.push_back((TemporarySummon*)(*i));
+                            if (summonList.size() == 3) // max 3 mushroom
+                                break;
+                            continue;
+                        }
+                    }
+
+                    std::list<TemporarySummon*> mushroomList;
+                    mushroomList = summonList;
+
+                    for (std::list<TemporarySummon*>::const_iterator i = mushroomList.begin(); i != mushroomList.end(); ++i)
+                    {
+                        if (!m_caster->IsWithinDist3d((*i)->GetPositionX(), (*i)->GetPositionY(), (*i)->GetPositionZ(), spellRange))
+                            continue;
+
+                        (*i)->CastSpell((*i), 92853, true); // Explosion visual and suicide
+                        m_caster->CastSpell((*i)->GetPositionX(), (*i)->GetPositionY(), (*i)->GetPositionZ(), 78777, true); // damage
+
+                        if (fungal)
+                            m_caster->CastSpell((*i)->GetPositionX(), (*i)->GetPositionY(), (*i)->GetPositionZ(), fungal, true); // Summoning fungal growth
+                    }
+                }
             }
 
             break;

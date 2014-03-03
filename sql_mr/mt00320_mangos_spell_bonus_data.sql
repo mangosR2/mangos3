@@ -27,3 +27,7 @@ REPLACE INTO `spell_bonus_data` (`entry`, `direct_bonus`, `dot_bonus`, `ap_bonus
 (29722, 0.676, 0, 0, 0, 'Warlock - Incinerate'),
 (77799, 0.302, 0, 0, 0, 'Warlock - Fel Flame'),
 (91711, 0, 0, 0, 0, 'Warlock - Nether Ward');
+
+-- Druid
+REPLACE INTO `spell_bonus_data` (`entry`, `direct_bonus`, `dot_bonus`, `ap_bonus`, `ap_dot_bonus`, `comments`) VALUES
+(78777, 0.6032, 0, 0, 0, 'Druid - Wild Mushroom: Detonate');
