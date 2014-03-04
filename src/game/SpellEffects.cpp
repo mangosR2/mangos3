@@ -12139,6 +12139,26 @@ void Spell::EffectScriptEffect(SpellEffectEntry const* effect)
 
                     return;
                 }
+                case 77801:                                 // Demon Soul
+                {
+                    if (!unitTarget)
+                        return;
+
+                    uint32 entry = unitTarget->GetEntry();
+                    uint32 spellID;
+                    switch (entry)
+                    {
+                        case   416: spellID = 79459; break; // imp
+                        case   417: spellID = 79460; break; // fellhunter
+                        case  1860: spellID = 79464; break; // void
+                        case  1863: spellID = 79463; break; // succubus
+                        case 17252: spellID = 79462; break; // fellguard
+                        default:
+                            return;
+                    }
+                    m_caster->CastSpell(m_caster, spellID, true);
+                    return;
+                }
                 case 89603:                                 // Cremation
                 {
                     if (!unitTarget)

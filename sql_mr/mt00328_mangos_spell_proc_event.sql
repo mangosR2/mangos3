@@ -298,6 +298,11 @@ DELETE FROM `spell_proc_event` WHERE `entry` = 85103;
 INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`) VALUE
 (85103, 5, 2097152);
 
+-- Demonic Soul
+DELETE FROM `spell_proc_event` WHERE `entry` = 61595;
+INSERT INTO `spell_proc_event` (`entry`, `procEx`) VALUES
+(61595, 524288);
+
 ### Mage ###
 
 -- Ring of Frost
