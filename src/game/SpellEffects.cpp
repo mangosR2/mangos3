@@ -4769,6 +4769,9 @@ void Spell::EffectDummy(SpellEffectEntry const* effect)
                 case 80964:
                 case 80965:
                 {
+                    if (!unitTarget)
+                        return;
+
                     m_caster->CastSpell(unitTarget, 93983, true);
                     m_caster->CastSpell(unitTarget, 93985, true);
                     m_caster->CastSpell(unitTarget, 82365, true);
