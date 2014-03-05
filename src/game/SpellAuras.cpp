@@ -9331,7 +9331,14 @@ void Aura::PeriodicTick()
             if (spellProto->Id == 16488 || spellProto->Id == 16490 || spellProto->Id == 16491)
                 damageInfo.damage /= 10;
 
-            damageInfo.damage = target->SpellHealingBonusTaken(pCaster, spellProto, damageInfo.damage, DOT, GetStackAmount());
+            // Lifebloom special case
+            if (GetSpellProto()->IsFitToFamily(SPELLFAMILY_DRUID, UI64LIT(0x1000000000)))
+            {
+                uint32 stackAmount = (GetStackAmount() > 0 ? GetStackAmount() : 1);
+                damageInfo.damage = target->SpellHealingBonusTaken(pCaster, spellProto, damageInfo.damage / stackAmount, DOT) * stackAmount;
+            }
+            else
+                damageInfo.damage = target->SpellHealingBonusTaken(pCaster, spellProto, damageInfo.damage, DOT, GetStackAmount());
 
             // This method can modify pdamage
             bool isCrit = IsCritFromAbilityAura(pCaster, &damageInfo);
