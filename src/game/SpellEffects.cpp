@@ -7928,6 +7928,9 @@ void Spell::DoSummonWild(SpellEffectEntry const* effect, uint32 forceFaction)
             if (m_originalCaster && m_originalCaster != m_caster && m_originalCaster->GetTypeId() == TYPEID_UNIT && ((Creature*)m_originalCaster)->AI())
                 ((Creature*)m_originalCaster)->AI()->JustSummoned(summon);
 
+            if (m_spellInfo->Id == 73332)
+                summon->PlayDistanceSound(10896); // Lament of the Highbourne
+
             SendEffectLogExecute(effect, summon->GetObjectGuid());
 
             DEBUG_LOG("DoSummonWild: summoned npc %u from spell %u at %f %f %f map %u summonType %u duration %i",
