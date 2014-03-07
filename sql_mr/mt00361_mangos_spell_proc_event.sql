@@ -365,3 +365,8 @@ INSERT INTO `spell_proc_event` (`entry`, `SchoolMask`, `procEx`) VALUE
 DELETE FROM `spell_proc_event` WHERE `entry` = 12317;
 INSERT INTO `spell_proc_event` (`entry`, `SchoolMask`) VALUE
 (12317, 127);
+
+-- Die By The Sword
+DELETE FROM `spell_proc_event` WHERE `entry` = 81913;
+INSERT INTO `spell_proc_event` (`entry`, `SchoolMask`, `Cooldown`) VALUE
+(81913, 127, 120);

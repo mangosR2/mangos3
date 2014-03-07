@@ -4194,6 +4194,12 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(Unit *pVictim, DamageIn
                 if (!damage)
                     return SPELL_AURA_PROC_FAILED;
             }
+            else if (auraSpellInfo->GetSpellIconID() == 4660)    // Die by the Sword
+            {
+                if (!HasAuraState(AURA_STATE_HEALTHLESS_20_PERCENT))
+                    return SPELL_AURA_PROC_FAILED;
+                break;
+            }
             else if (auraSpellInfo->GetSpellIconID() == 4978)    // Lambs to the Slaughter
             {
                 if (pVictim)
