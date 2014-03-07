@@ -4553,13 +4553,7 @@ void Spell::EffectDummy(SpellEffectEntry const* effect)
                     return;
 
                 // dummy cast itself ignored by client in logs
-                m_caster->CastCustomSpell(unitTarget,50782,&damage,NULL,NULL,true);
-                return;
-            }
-            // Concussion Blow
-            if (warClassOptions && warClassOptions->SpellFamilyFlags & UI64LIT(0x0000000004000000))
-            {
-                m_damage+= uint32(damage * m_caster->GetTotalAttackPowerValue(BASE_ATTACK) / 100);
+                m_caster->CastCustomSpell(unitTarget, 50782, &damage, NULL, NULL, true);
                 return;
             }
 
