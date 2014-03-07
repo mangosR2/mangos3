@@ -4895,21 +4895,35 @@ void Spell::EffectDummy(SpellEffectEntry const* effect)
                 }
                 case 14185:                                 // Preparation
                 {
-                    bool glyph = m_caster->HasAura(56819);
-                    //immediately finishes the cooldown on certain Rogue abilities
-                    SpellCooldowns const* cm = m_caster->GetSpellCooldownMap();
-                    SpellCooldowns::const_iterator itr, next;
-                    for (SpellCooldowns::const_iterator itr = cm->begin(); itr != cm->end();itr = next)
-                    {
-                        next = itr;
-                        ++next;
-                        SpellEntry const* spellInfo = sSpellStore.LookupEntry(itr->first);
+                    if (m_caster->GetTypeId() != TYPEID_PLAYER)
+                        return;
 
-                        if (spellInfo->GetSpellFamilyName() == SPELLFAMILY_ROGUE && spellInfo->GetSpellFamilyFlags().test<CF_ROGUE_EVASION, CF_ROGUE_SPRINT, CF_ROGUE_VANISH, CF_ROGUE_COLD_BLOOD, CF_ROGUE_SHADOWSTEP>())
-                            m_caster->RemoveSpellCooldown(itr->first,true);
-                        // Glyph of Preparation
-                        else if (glyph && (spellInfo->GetSpellFamilyName() == SPELLFAMILY_ROGUE && (spellInfo->GetSpellFamilyFlags().test<CF_ROGUE_KICK, CF_ROGUE_MISC>() || spellInfo->Id == 51722)))
-                            m_caster->RemoveSpellCooldown(itr->first,true);
+                    // immediately finishes the cooldown on certain Rogue abilities
+                    SpellCooldowns const* cm = m_caster->GetSpellCooldownMap();
+                    for (SpellCooldowns::const_iterator itr = cm->begin(); itr != cm->end(); )
+                    {
+                        switch (itr->first)
+                        {
+                            case 1856:  // Vanish
+                            case 2983:  // Sprint
+                            case 36554: // Shadowstep
+                                ((Player*)m_caster)->RemoveSpellCooldown((itr++)->first, true);
+                                break;
+                            case 1766:  // Kick
+                            case 51722: // Dismantle
+                            case 76577: // Smoke Bomb
+                            {
+                                // Glyph of Preparation
+                                Aura const* glyph = m_caster->GetDummyAura(56819);
+                                if (glyph)
+                                    ((Player*)m_caster)->RemoveSpellCooldown((itr++)->first, true);
+                                else
+                                    ++itr;
+                                break;
+                            }
+                            default:
+                                ++itr;
+                        }
                     }
                     return;
                 }
