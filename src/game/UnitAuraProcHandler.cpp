@@ -4205,8 +4205,8 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(Unit *pVictim, DamageIn
                 if (pVictim)
                 {
                     // Refresh Rend on target
-                    if (SpellAuraHolderPtr holder = pVictim->GetSpellAuraHolder(772, GetObjectGuid()))
-                        holder->RefreshHolder();
+                    if (SpellAuraHolderPtr rend = pVictim->GetSpellAuraHolder(94009, GetObjectGuid()))
+                        rend->RefreshHolder();
                 }
             }
             else if (auraSpellInfo->Id == 50421)            // Scent of Blood
