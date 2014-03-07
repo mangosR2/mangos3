@@ -14,3 +14,18 @@ INSERT IGNORE INTO `spell_dbc` (`Id`, `EffectBasePoints1`) VALUES
 DELETE FROM `spell_dbc` WHERE `Id` = 54833;
 INSERT IGNORE INTO `spell_dbc` (`Id`, `EffectApplyAuraName1`) VALUES
 (54833, 24);
+
+-- Enrage (Rank 1)
+DELETE FROM `spell_dbc` WHERE `Id` = 12880;
+INSERT IGNORE INTO `spell_dbc` (`Id`, `EffectBasePoints1`) VALUES
+(12880, 2);
+
+-- Enrage (Rank 2)
+DELETE FROM `spell_dbc` WHERE `Id` = 14201;
+INSERT IGNORE INTO `spell_dbc` (`Id`, `EffectBasePoints1`) VALUES
+(14201, 4);
+
+-- Enrage (Rank 3)
+DELETE FROM `spell_dbc` WHERE `Id` = 14202;
+INSERT IGNORE INTO `spell_dbc` (`Id`, `EffectBasePoints1`) VALUES
+(14202, 6);

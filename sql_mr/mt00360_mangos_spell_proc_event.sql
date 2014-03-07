@@ -360,3 +360,8 @@ INSERT INTO `spell_proc_event` (`entry`, `SchoolMask`) VALUE
 DELETE FROM `spell_proc_event` WHERE `entry` = 23885;
 INSERT INTO `spell_proc_event` (`entry`, `SchoolMask`, `procEx`) VALUE
 (23885, 127, 0x0080000);
+
+-- Enrage
+DELETE FROM `spell_proc_event` WHERE `entry` = 12317;
+INSERT INTO `spell_proc_event` (`entry`, `SchoolMask`) VALUE
+(12317, 127);
