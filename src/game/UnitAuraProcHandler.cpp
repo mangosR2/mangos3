@@ -5704,6 +5704,14 @@ SpellAuraProcResult Unit::HandleRemoveByDamageProc(Unit* pVictim, DamageInfo* da
         if (procSpell && procSpell->GetDispel() == DISPEL_DISEASE)
             return SPELL_AURA_PROC_FAILED;
     }
+    // Gouge vs. bleed effects
+    else if (triggeredByAura->GetId() == 1776 && pVictim && pVictim->GetTypeId() == TYPEID_PLAYER && procSpell && (GetAllSpellMechanicMask(procSpell) & (1 << (MECHANIC_BLEED - 1))))
+    {
+        // search Sanguinary Vein
+        if (SpellEntry const * spellInfo = ((Player*)pVictim)->GetKnownTalentRankById(6520))
+            if (roll_chance_i(spellInfo->CalculateSimpleValue(EFFECT_INDEX_1)))
+                return SPELL_AURA_PROC_FAILED;
+    }
 
     if (procSpell && triggeredByAura->GetModifier()->m_auraname == SPELL_AURA_MOD_STEALTH)
     {
