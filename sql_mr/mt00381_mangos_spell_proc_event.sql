@@ -393,6 +393,11 @@ INSERT INTO `spell_proc_event` (`entry`, `SchoolMask`, `procEx`) VALUE
 
 ### Rogue ###
 
+-- Waylay
+DELETE FROM `spell_proc_event` WHERE `entry` = 51692;
+INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`) VALUES
+(51692, 8, 516);
+
 -- Honor Among Thieves
 DELETE FROM `spell_proc_event` WHERE `entry` IN (51698, 51700, 51701);
 INSERT INTO `spell_proc_event` (`entry`, `SchoolMask`, `procEx`, `Cooldown`) VALUES
