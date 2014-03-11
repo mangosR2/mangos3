@@ -10757,11 +10757,9 @@ void Aura::PeriodicDummyTick()
             // Holy Word: Sanctuary
             if (spell->Id == 88685)
             {
-                if (Unit* caster = GetCaster())
-                {
-                    if (DynamicObject* dynObj = caster->GetDynObject(spell->Id))
-                        target->CastSpell(dynObj->GetPositionX(), dynObj->GetPositionY(), dynObj->GetPositionZ(), 88686, true, NULL, this, GetCasterGuid());
-                }
+                if (DynamicObject* dynObj = target->GetDynObject(spell->Id))
+                    target->CastSpell(dynObj->GetPositionX(), dynObj->GetPositionY(), dynObj->GetPositionZ(), 88686, true, NULL, this, GetCasterGuid());
+
                 return;
             }
             break;
