@@ -6239,6 +6239,8 @@ SpellAuraProcResult Unit::HandleVengeanceProc(Unit* pVictim, int32 damage, int32
 
         CastCustomSpell(this, triggered_spell_id, &bp, &bp, &basebp, true);
     }
+
+    return SPELL_AURA_PROC_OK;
 }
 
 SpellAuraProcResult Unit::HandleIncreaseSpeedAuraProc(Unit* /*pVictim*/, DamageInfo* /*damageInfo*/, Aura const* triggeredByAura, SpellEntry const *procSpell, uint32 /*procFlag*/, uint32 /*procEx*/, uint32 cooldown)
