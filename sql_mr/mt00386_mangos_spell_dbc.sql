@@ -29,3 +29,8 @@ INSERT IGNORE INTO `spell_dbc` (`Id`, `EffectBasePoints1`) VALUES
 DELETE FROM `spell_dbc` WHERE `Id` = 14202;
 INSERT IGNORE INTO `spell_dbc` (`Id`, `EffectBasePoints1`) VALUES
 (14202, 6);
+
+-- Rogue - Gouge
+-- DELETE FROM `spell_dbc` WHERE `Id` = 1776;
+-- INSERT IGNORE INTO `spell_dbc` (`Id`, `Attributes`) VALUES
+-- (1776, X); ToDo: Fixme: spell->Attributes &= ~SPELL_ATTR_UNK11;

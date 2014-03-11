@@ -48,6 +48,7 @@ REPLACE INTO `spell_bonus_data` (`entry`, `direct_bonus`, `dot_bonus`, `ap_bonus
 
 -- Rogue
 REPLACE INTO `spell_bonus_data` (`entry`, `direct_bonus`, `dot_bonus`, `ap_bonus`, `ap_dot_bonus`, `comments`) VALUES
+(1776, 0, 0, 0.21, 0, 'Rogue - Gouge'),
 (5374, 0, 0, 0.243, 0, 'Rogue - Mutilate'),
 (5940, 0, 0, 0.121, 0, 'Rogue - Shiv'),
 (8676, 0, 0, 0.171, 0, 'Rogue - Ambush'),
