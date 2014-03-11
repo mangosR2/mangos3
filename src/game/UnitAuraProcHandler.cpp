@@ -5769,6 +5769,9 @@ SpellAuraProcResult Unit::HandleRemoveByDamageProc(Unit* pVictim, DamageInfo* da
             if (roll_chance_i(spellInfo->CalculateSimpleValue(EFFECT_INDEX_1)))
                 return SPELL_AURA_PROC_FAILED;
     }
+    // Repentance vs. Censure
+    else if (triggeredByAura->GetId() == 20066 && procSpell && procSpell->Id == 31803)
+        return SPELL_AURA_PROC_FAILED;
 
     if (procSpell && triggeredByAura->GetModifier()->m_auraname == SPELL_AURA_MOD_STEALTH)
     {
