@@ -429,3 +429,13 @@ INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`,
 DELETE FROM `spell_proc_event` WHERE `entry` = 74001;
 INSERT INTO `spell_proc_event` (`entry`, `SchoolMask`) VALUES
 (74001, 127);
+
+-- Combat Potency
+DELETE FROM `spell_proc_event` WHERE `entry` = 35541;
+INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskC0`) VALUES
+(35541, 8, 2);
+
+-- Blade Twisting
+DELETE FROM `spell_proc_event` WHERE `entry` = 31124;
+INSERT INTO `spell_proc_event` (`entry`, `SchoolMask`) VALUES
+(31124, 127);
