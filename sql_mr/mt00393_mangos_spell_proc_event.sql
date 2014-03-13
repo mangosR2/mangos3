@@ -398,6 +398,11 @@ DELETE FROM `spell_proc_event` WHERE `entry` = 51692;
 INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`) VALUES
 (51692, 8, 516);
 
+-- Find Weakness
+DELETE FROM `spell_proc_event` WHERE `entry` = 51632;
+INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`) VALUES
+(51632, 8, 0x700);
+
 -- Honor Among Thieves
 DELETE FROM `spell_proc_event` WHERE `entry` IN (51698, 51700, 51701);
 INSERT INTO `spell_proc_event` (`entry`, `SchoolMask`, `procEx`, `Cooldown`) VALUES
