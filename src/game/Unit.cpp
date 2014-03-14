@@ -1331,7 +1331,7 @@ void Unit::JustKilledCreature(Creature* victim, Player* responsiblePlayer)
         {
             if (m->IsRaidOrHeroicDungeon())
             {
-                if (victim->GetCreatureInfo()->flags_extra & CREATURE_FLAG_EXTRA_INSTANCE_BIND)
+                if (victim->GetCreatureInfo()->ExtraFlags & CREATURE_FLAG_EXTRA_INSTANCE_BIND)
                     ((DungeonMap*)m)->PermBindAllPlayers(creditedPlayer);
             }
             else
@@ -3268,7 +3268,7 @@ MeleeHitOutcome Unit::RollMeleeOutcomeAgainst (const Unit *pVictim, WeaponAttack
         else
             parry_chance -= GetTotalAuraModifier(SPELL_AURA_MOD_EXPERTISE)*25;
 
-        if (parry_chance > 0 && (pVictim->GetTypeId()==TYPEID_PLAYER || !(((Creature*)pVictim)->GetCreatureInfo()->flags_extra & CREATURE_FLAG_EXTRA_NO_PARRY)))
+        if (parry_chance > 0 && (pVictim->GetTypeId() == TYPEID_PLAYER || !(((Creature*)pVictim)->GetCreatureInfo()->ExtraFlags & CREATURE_FLAG_EXTRA_NO_PARRY)))
         {
             parry_chance -= skillBonus;
 
@@ -3308,7 +3308,7 @@ MeleeHitOutcome Unit::RollMeleeOutcomeAgainst (const Unit *pVictim, WeaponAttack
     // check if attack comes from behind, nobody can parry or block if attacker is behind
     if (!from_behind)
     {
-        if (pVictim->GetTypeId()==TYPEID_PLAYER || !(((Creature*)pVictim)->GetCreatureInfo()->flags_extra & CREATURE_FLAG_EXTRA_NO_BLOCK) )
+        if (pVictim->GetTypeId() == TYPEID_PLAYER || !(((Creature*)pVictim)->GetCreatureInfo()->ExtraFlags & CREATURE_FLAG_EXTRA_NO_BLOCK))
         {
             tmp = block_chance;
             if (   (tmp > 0)                                    // check if unit _can_ block
@@ -3332,10 +3332,10 @@ MeleeHitOutcome Unit::RollMeleeOutcomeAgainst (const Unit *pVictim, WeaponAttack
 
     // mobs can score crushing blows if they're 4 or more levels above victim
     if (GetLevelForTarget(pVictim) >= pVictim->GetLevelForTarget(this) + 4 &&
-        // can be from by creature (if can) or from controlled player that considered as creature
-        ((GetTypeId()!=TYPEID_PLAYER && !((Creature*)this)->IsPet() &&
-        !(((Creature*)this)->GetCreatureInfo()->flags_extra & CREATURE_FLAG_EXTRA_NO_CRUSH)) ||
-        (GetTypeId()==TYPEID_PLAYER && GetCharmerOrOwnerGuid())))
+            // can be from by creature (if can) or from controlled player that considered as creature
+            ((GetTypeId() != TYPEID_PLAYER && !((Creature*)this)->IsPet() &&
+              !(((Creature*)this)->GetCreatureInfo()->ExtraFlags & CREATURE_FLAG_EXTRA_NO_CRUSH)) ||
+             (GetTypeId() == TYPEID_PLAYER && GetCharmerOrOwnerGuid())))
     {
         // when their weapon skill is 15 or more above victim's defense skill
         tmp = victimDefenseSkill;
@@ -3476,7 +3476,7 @@ bool Unit::IsSpellBlocked(Unit *pCaster, SpellEntry const *spellEntry, WeaponAtt
     // Check creatures flags_extra for disable block
     if (GetTypeId() == TYPEID_UNIT)
     {
-        if (((Creature*)this)->GetCreatureInfo()->flags_extra & CREATURE_FLAG_EXTRA_NO_BLOCK)
+        if (((Creature*)this)->GetCreatureInfo()->ExtraFlags & CREATURE_FLAG_EXTRA_NO_BLOCK)
             return false;
     }
 
@@ -3615,7 +3615,7 @@ SpellMissInfo Unit::MeleeSpellHitResult(Unit* pVictim, SpellEntry const* spell)
     // Check creatures flags_extra for disable parry
     if (pVictim->GetTypeId()==TYPEID_UNIT)
     {
-        uint32 flagEx = ((Creature*)pVictim)->GetCreatureInfo()->flags_extra;
+        uint32 flagEx = ((Creature*)pVictim)->GetCreatureInfo()->ExtraFlags;
         if ( flagEx & CREATURE_FLAG_EXTRA_NO_PARRY )
             canParry = false;
     }
@@ -8112,7 +8112,7 @@ void Unit::SpellDamageBonusDone(DamageInfo* damageInfo, uint32 stack)
 
     // Creature damage
     if (GetTypeId() == TYPEID_UNIT && !((Creature*)this)->IsPet())
-        DoneTotalMod *= Creature::_GetSpellDamageMod(((Creature*)this)->GetCreatureInfo()->rank);
+        DoneTotalMod *= ((Creature*)this)->GetSpellDamageMod(((Creature*)this)->GetCreatureInfo()->Rank);
 
     float nonStackingPos = 0.0f;
     float nonStackingNeg = 0.0f;
@@ -9954,7 +9954,7 @@ void Unit::SetInCombatState(bool PvP, Unit* enemy)
             pCreature->AI()->EnterCombat(enemy);
 
         // Some bosses are set into combat with zone
-        if (GetMap()->IsDungeon() && (pCreature->GetCreatureInfo()->flags_extra & CREATURE_FLAG_EXTRA_AGGRO_ZONE) && enemy && enemy->IsControlledByPlayer())
+        if (GetMap()->IsDungeon() && (pCreature->GetCreatureInfo()->ExtraFlags & CREATURE_FLAG_EXTRA_AGGRO_ZONE) && enemy && enemy->IsControlledByPlayer())
             pCreature->SetInCombatWithZone();
 
         if (InstanceData* mapInstance = GetInstanceData())
@@ -9978,7 +9978,7 @@ void Unit::ClearInCombat()
         if (isCharmed() || cThis->IsPet())
             RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PET_IN_COMBAT);
 
-        if ((cThis->GetCreatureInfo()->unit_flags & UNIT_FLAG_OOC_NOT_ATTACKABLE) && !(cThis->GetTemporaryFactionFlags() & TEMPFACTION_TOGGLE_OOC_NOT_ATTACK))
+        if ((cThis->GetCreatureInfo()->UnitFlags & UNIT_FLAG_OOC_NOT_ATTACKABLE) && !(cThis->GetTemporaryFactionFlags() & TEMPFACTION_TOGGLE_OOC_NOT_ATTACK))
             SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE);
 
         clearUnitState(UNIT_STAT_ATTACK_PLAYER);
@@ -10525,10 +10525,10 @@ void Unit::UpdateSpeed(UnitMoveType mtype, bool forced, float ratio)
         switch(mtype)
         {
             case MOVE_RUN:
-                speed *= ((Creature*)this)->GetCreatureInfo()->speed_run;
+                speed *= ((Creature*)this)->GetCreatureInfo()->SpeedRun;
                 break;
             case MOVE_WALK:
-                speed *= ((Creature*)this)->GetCreatureInfo()->speed_walk;
+                speed *= ((Creature*)this)->GetCreatureInfo()->SpeedWalk;
                 break;
             default:
                 break;
@@ -11285,7 +11285,7 @@ uint32 Unit::GetCreatureType() const
             return CREATURE_TYPE_HUMANOID;
     }
     else
-        return ((Creature*)this)->GetCreatureInfo()->type;
+        return ((Creature*)this)->GetCreatureInfo()->CreatureType;
 }
 
 /*#######################################

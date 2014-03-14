@@ -6755,7 +6755,7 @@ void Spell::EffectSummonType(SpellEffectIndex eff_idx)
                                 return;
 
                             // FIXME: not all totems and similar cases selected by this check...
-                            if (cInfo->type == CREATURE_TYPE_TOTEM)
+                            if (cInfo->CreatureType == CREATURE_TYPE_TOTEM)
                                 DoSummonTotem(eff_idx);
                             else
                                 DoSummonGuardian(eff_idx, factionId);
@@ -9568,7 +9568,7 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     }
                     else
                     {
-                        m_caster->SetUInt32Value(UNIT_NPC_FLAGS, cTemplate->npcflag);
+                        m_caster->SetUInt32Value(UNIT_NPC_FLAGS, cTemplate->NpcFlags);
                         ((Creature*)m_caster)->SetVirtualItem(VIRTUAL_ITEM_SLOT_0, 0);
                         ((Creature*)m_caster)->SetVirtualItem(VIRTUAL_ITEM_SLOT_1, 0);
 

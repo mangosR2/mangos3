@@ -189,8 +189,7 @@ bool Pet::LoadPetFromDB(Player* owner, uint32 petentry, uint32 petnumber, bool c
 
     // reget for sure use real creature info selected for Pet at load/creating
     CreatureInfo const* cinfo = GetCreatureInfo();
-
-    if (cinfo->type == CREATURE_TYPE_CRITTER)
+    if (cinfo->CreatureType == CREATURE_TYPE_CRITTER)
     {
         LoadCreatureAddon(true);
         pos->GetMap()->Add((Creature*)this);
@@ -897,19 +896,19 @@ bool Pet::CreateBaseAtCreature(Creature* creature, Unit* owner)
     if (!Create(0, pos, cinfo, 0, owner))
         return false;
 
-    if (CreatureFamilyEntry const* cFamily = sCreatureFamilyStore.LookupEntry(cinfo->family))
+    if (CreatureFamilyEntry const* cFamily = sCreatureFamilyStore.LookupEntry(cinfo->Family))
         SetName(cFamily->Name[sWorld.GetDefaultDbcLocale()]);
     else
         SetName(creature->GetNameForLocaleIdx(sObjectMgr.GetDBCLocaleIndex()));
 
 
-    if (cinfo->type == CREATURE_TYPE_CRITTER)
+    if (cinfo->CreatureType == CREATURE_TYPE_CRITTER)
     {
         setPetType(MINI_PET);
         return true;
     }
 
-    if (cinfo->type == CREATURE_TYPE_BEAST)
+    if (cinfo->CreatureType == CREATURE_TYPE_BEAST)
     {
         SetUInt32Value(UNIT_MOD_CAST_SPEED, creature->GetUInt32Value(UNIT_MOD_CAST_SPEED));
     }
@@ -1127,7 +1126,7 @@ bool Pet::HaveInDiet(ItemPrototype const* item) const
     if (!cInfo)
         return false;
 
-    CreatureFamilyEntry const* cFamily = sCreatureFamilyStore.LookupEntry(cInfo->family);
+    CreatureFamilyEntry const* cFamily = sCreatureFamilyStore.LookupEntry(cInfo->Family);
     if (!cFamily)
         return false;
 
@@ -1636,7 +1635,7 @@ void Pet::InitLevelupSpellsForLevel()
 {
     uint32 level = getLevel();
 
-    if (PetLevelupSpellSet const* levelupSpells = GetCreatureInfo()->family ? sSpellMgr.GetPetLevelupSpellList(GetCreatureInfo()->family) : NULL)
+    if (PetLevelupSpellSet const* levelupSpells = GetCreatureInfo()->Family ? sSpellMgr.GetPetLevelupSpellList(GetCreatureInfo()->Family) : NULL)
     {
         // PetLevelupSpellSet ordered by levels, process in reversed order
         for (PetLevelupSpellSet::const_reverse_iterator itr = levelupSpells->rbegin(); itr != levelupSpells->rend(); ++itr)
@@ -1793,7 +1792,7 @@ bool Pet::resetTalents()
         return false;
 
     // Check pet talent type
-    CreatureFamilyEntry const* pet_family = sCreatureFamilyStore.LookupEntry(ci->family);
+    CreatureFamilyEntry const* pet_family = sCreatureFamilyStore.LookupEntry(ci->Family);
     if (!pet_family || pet_family->petTalentType < 0)
         return false;
 
@@ -2030,9 +2029,9 @@ bool Pet::IsPermanentPetFor(Player* owner)
                 // oddly enough, Mage's Water Elemental is still treated as temporary pet with Glyph of Eternal Water
                 // i.e. does not unsummon at mounting, gets dismissed at teleport etc.
                 case CLASS_WARLOCK:
-                    return GetCreatureInfo()->type == CREATURE_TYPE_DEMON;
+                    return GetCreatureInfo()->CreatureType == CREATURE_TYPE_DEMON;
                 case CLASS_DEATH_KNIGHT:
-                    return GetCreatureInfo()->type == CREATURE_TYPE_UNDEAD;
+                    return GetCreatureInfo()->CreatureType == CREATURE_TYPE_UNDEAD;
                 case CLASS_MAGE:
                     // both permanent and temporary water elementals should be in spellbook
                     return GetCreatureInfo()->Entry == (owner->HasAura(70937) ? 37994 : 510);
@@ -2126,7 +2125,7 @@ void Pet::LearnPetPassives()
     if (!cInfo)
         return;
 
-    CreatureFamilyEntry const* cFamily = sCreatureFamilyStore.LookupEntry(cInfo->family);
+    CreatureFamilyEntry const* cFamily = sCreatureFamilyStore.LookupEntry(cInfo->Family);
     if (!cFamily)
         return;
 
