@@ -34,3 +34,8 @@ INSERT IGNORE INTO `spell_dbc` (`Id`, `EffectBasePoints1`) VALUES
 -- DELETE FROM `spell_dbc` WHERE `Id` = 1776;
 -- INSERT IGNORE INTO `spell_dbc` (`Id`, `Attributes`) VALUES
 -- (1776, X); ToDo: Fixme: spell->Attributes &= ~SPELL_ATTR_UNK11;
+
+-- Smoke Bomb
+DELETE FROM `spell_dbc` WHERE `Id` = 88611;
+INSERT IGNORE INTO `spell_dbc` (`Id`, `EffectImplicitTargetA1`, `EffectImplicitTargetB1`) VALUES
+(88611, 8, 0);
