@@ -474,3 +474,15 @@ INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`,
 DELETE FROM `spell_proc_event` WHERE `entry` = 79133;
 INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA1`, CustomChance) VALUES
 (79133, 8, 0x00100100, 0);
+
+### Death Knight ###
+
+-- Dark Simulacrum
+DELETE FROM `spell_proc_event` WHERE `entry` = 77606;
+INSERT INTO `spell_proc_event` (`entry`, `SchoolMask`, `procEx`) VALUE
+(77606, 127, 65536);
+
+-- Dark Simulacrum (proc)
+DELETE FROM `spell_proc_event` WHERE `entry` = 77616;
+INSERT INTO `spell_proc_event` (`entry`, `SchoolMask`, `procEx`) VALUE
+(77616, 127, 65536);

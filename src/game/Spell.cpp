@@ -8911,6 +8911,11 @@ bool Spell::IsTriggeredSpellWithRedundentCastTime() const
     return m_IsTriggeredSpell && (m_spellInfo->GetManaCost() || m_spellInfo->GetManaCostPercentage());
 }
 
+bool Spell::IsTriggeredSpell() const
+{
+    return m_triggeredByAuraSpell || m_triggeredBySpellInfo || m_IsTriggeredSpell;
+}
+
 bool Spell::HaveTargetsForEffect(SpellEffectIndex effect) const
 {
     for(TargetList::const_iterator itr = m_UniqueTargetInfo.begin(); itr != m_UniqueTargetInfo.end(); ++itr)
