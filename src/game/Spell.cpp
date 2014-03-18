@@ -1108,6 +1108,11 @@ void Spell::prepareDataForTriggerSystem()
                 else if (m_spellInfo->Id == 31803)
                     m_canTrigger = true;
                 break;
+            case SPELLFAMILY_DEATHKNIGHT:
+                // Death Coil (damage)
+                if (m_spellInfo->Id == 47632)
+                    m_canTrigger = true;
+                break;
             case SPELLFAMILY_WARRIOR:
                 break;
             default:
@@ -6828,6 +6833,13 @@ SpellCastResult Spell::CheckCast(bool strict)
                     // hart version required facing
                     if (m_targets.getUnitTarget() && !m_caster->IsFriendlyTo(m_targets.getUnitTarget()) && !m_caster->HasInArc(M_PI_F, m_targets.getUnitTarget()))
                         return SPELL_FAILED_UNIT_NOT_INFRONT;
+                }
+                else if (m_spellInfo->Id == 47541)          // Death Coil
+                {
+                    if (m_targets.getUnitTarget() && (!SpellMgr::IsTargetMatchedWithCreatureType(m_spellInfo, m_targets.getUnitTarget()) || !m_caster->IsFriendlyTo(m_targets.getUnitTarget())))
+                        return SPELL_FAILED_BAD_TARGETS;
+
+                    break;
                 }
                 else if(m_spellInfo->Id == 49576)           // Death Grip
                 {
