@@ -451,10 +451,9 @@ class MANGOS_DLL_SPEC Aura
         uint32 GetStackAmount() const { return GetHolder() ? GetHolder()->GetStackAmount() : 0; }
         void ResetPeriodic(bool resetPeriodicTimer = false)
         {
-            // error: passing ‘const Aura’ as ‘this’ argument of ‘void Aura::ResetPeriodic(bool)’ discards qualifiers
-//             if (resetPeriodicTimer)
-//                 m_periodicTimer = m_modifier.periodictime;
-//             m_periodicTick = 0;
+             if (resetPeriodicTimer)
+                 m_periodicTimer = m_modifier.periodictime;
+             m_periodicTick = 0;
         }
 
         void SetLoadedState(int32 damage, uint32 periodicTime)

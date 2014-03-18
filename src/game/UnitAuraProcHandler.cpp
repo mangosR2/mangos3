@@ -5724,8 +5724,7 @@ SpellAuraProcResult Unit::HandlePeriodicDummyAuraProc(Unit* /*pVictim*/, DamageI
                         return SPELL_AURA_PROC_FAILED;
 
                     // Reset amplitude - set death rune remove timer to 30s
-                    // ToDo: error: passing ‘const Aura’ as ‘this’ argument of ‘void Aura::ResetPeriodic(bool)’ discards qualifiers
-                    // triggeredByAura->ResetPeriodic(true);
+                    const_cast<Aura*>(triggeredByAura)->ResetPeriodic(true);
 
                     uint32 runesLeft;
 
