@@ -11707,6 +11707,40 @@ int32 Unit::CalculateSpellDamage(Unit const* target, SpellEntry const* spellProt
                 return int32(GetTotalAttackPowerValue(BASE_ATTACK) * 0.7f);
             break;
         }
+        // crowd control auras
+        case SPELL_AURA_MOD_CONFUSE:
+        case SPELL_AURA_MOD_FEAR:
+        case SPELL_AURA_MOD_STUN:
+        case SPELL_AURA_MOD_ROOT:
+        case SPELL_AURA_TRANSFORM:
+        case SPELL_AURA_MOD_PACIFY_SILENCE:
+        {
+            if (!spellProto->GetProcFlags() || !target)
+                break;
+
+            if ((spellProto->GetAuraInterruptFlags() & (AURA_INTERRUPT_FLAG_DAMAGE | AURA_INTERRUPT_FLAG_DAMAGE)) == 0)
+                break;
+
+            if (spellProto->GetProcCharges())
+                return 1;
+
+            switch (spellEffect->EffectApplyAuraName)
+            {
+                case SPELL_AURA_MOD_CONFUSE:
+                case SPELL_AURA_TRANSFORM:
+                    return 1;
+                default:
+                    break;
+            }
+
+            int32 amount;
+            if (spellEffect->EffectApplyAuraName == SPELL_AURA_MOD_ROOT)
+                amount = target->GetMaxHealth() * 20.0f / 100;
+            else
+                amount = target->GetMaxHealth() * 10.0f / 100;
+
+            return amount;
+        }
     }
 
     Player* unitPlayer = (GetTypeId() == TYPEID_PLAYER) ? (Player*)this : NULL;
