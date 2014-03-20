@@ -11739,6 +11739,14 @@ int32 Unit::CalculateSpellDamage(Unit const* target, SpellEntry const* spellProt
             else
                 amount = target->GetMaxHealth() * 10.0f / 100;
 
+            // Glyph of Entangling Roots, Glyph of Fear, Glyph of Frost Nova and Glyph of Hex
+            AuraList const& mOverrideClassScript = GetAurasByType(SPELL_AURA_OVERRIDE_CLASS_SCRIPTS);
+            for(AuraList::const_iterator i = mOverrideClassScript.begin(); i != mOverrideClassScript.end(); ++i)
+            {
+                if ((*i)->GetModifier()->m_miscvalue == 7801 && (*i)->isAffectedOnSpell(spellProto))
+                    amount += (*i)->GetModifier()->m_amount * amount / 100;
+            }
+
             return amount;
         }
     }
