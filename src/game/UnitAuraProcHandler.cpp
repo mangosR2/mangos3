@@ -4868,6 +4868,13 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(Unit *pVictim, DamageIn
                         return SPELL_AURA_PROC_FAILED;
                 }
             }
+            // Might of the Frozen Wastes
+            else if (auraSpellInfo->GetSpellIconID() == 4444)
+            {
+                if (haveOffhandWeapon())
+                    return SPELL_AURA_PROC_FAILED;
+                break;
+            }
             // Glyph of Death's Embrace - proc only on "heal" Coil
             else if (auraSpellInfo->Id == 58677)
             {

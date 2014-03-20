@@ -515,3 +515,8 @@ INSERT INTO `spell_proc_event` (`entry`, `SchoolMask`, `Cooldown`) VALUE
 DELETE FROM `spell_proc_event` WHERE `entry` = 96171;
 INSERT INTO `spell_proc_event` (`entry`, `procEx`) VALUE
 (96171, 524288);
+
+-- Might of the Frozen Wastes
+DELETE FROM `spell_proc_event` WHERE `entry` = 81330;
+INSERT INTO `spell_proc_event` (`entry`, `SchoolMask`) VALUE
+(81330, 127);
