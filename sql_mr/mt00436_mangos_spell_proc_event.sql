@@ -520,3 +520,9 @@ INSERT INTO `spell_proc_event` (`entry`, `procEx`) VALUE
 DELETE FROM `spell_proc_event` WHERE `entry` = 81330;
 INSERT INTO `spell_proc_event` (`entry`, `SchoolMask`) VALUE
 (81330, 127);
+
+-- Crimson Scourge
+DELETE FROM `spell_proc_event` WHERE `entry` = 81135;
+INSERT INTO `spell_proc_event` (`entry`, `SchoolMask`) VALUE
+(81135, 127);
+

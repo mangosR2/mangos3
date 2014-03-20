@@ -4868,6 +4868,17 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(Unit *pVictim, DamageIn
                         return SPELL_AURA_PROC_FAILED;
                 }
             }
+            // Crimson Scourge
+            else if (auraSpellInfo->GetSpellIconID() ==  2725)
+            {
+                if (!pVictim || pVictim == this)
+                    return SPELL_AURA_PROC_FAILED;
+
+                // check Blood Plague present
+                if (!pVictim->HasAura(55078))
+                    return SPELL_AURA_PROC_FAILED;
+                break;
+            }
             // Might of the Frozen Wastes
             else if (auraSpellInfo->GetSpellIconID() == 4444)
             {
