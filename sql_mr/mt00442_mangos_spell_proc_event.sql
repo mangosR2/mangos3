@@ -526,3 +526,12 @@ DELETE FROM `spell_proc_event` WHERE `entry` = 81135;
 INSERT INTO `spell_proc_event` (`entry`, `SchoolMask`) VALUE
 (81135, 127);
 
+-- Rime
+DELETE FROM `spell_proc_event` WHERE `entry` = 49188;
+INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskB0`, `procEx`) VALUE
+(49188, 15, 131072, 0);
+
+-- Rime (buff)
+DELETE FROM `spell_proc_event` WHERE `entry` = 59052;
+INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`, `SpellFamilyMaskB0`) VALUE
+(59052, 15, 2, 2);
