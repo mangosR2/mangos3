@@ -13072,6 +13072,19 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
                         m_target->RemoveAurasDueToSpell(63621);
                     break;
                 }
+                // Pillar of Frost
+                case 51271:
+                {
+                    if (apply)
+                    {
+                        // Glyph of Pillar of Frost
+                        if (m_target->HasAura(58635))
+                            spellId1 = 90259;
+                    }
+                    else 
+                        spellId1 = 90259;
+                    break;
+                }
             }
 
             // Improved Blood Presence
