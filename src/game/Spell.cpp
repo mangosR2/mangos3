@@ -4202,6 +4202,9 @@ void Spell::cast(bool skipCheck)
             // Chains of Ice
             if (m_spellInfo->Id == 45524)
                 AddTriggeredSpell(55095);                   // Frost Fever
+            // Dancing Rune Weapon
+            else if (m_spellInfo->Id == 49028)              // Dancing Rune Weapon (parry)
+                AddTriggeredSpell(81256);
             break;
         }
         default:
