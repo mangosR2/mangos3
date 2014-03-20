@@ -5552,11 +5552,15 @@ void Spell::EffectDummy(SpellEffectEntry const* effect)
                     // Blood Shield
                     if (Aura const* bloodShield = m_caster->GetAura(77513, EFFECT_INDEX_0))
                     {
-                        int32 bp = int32(heal * bloodShield->GetModifier()->m_amount / 100.0f);
-                        if (Aura* oldShield = m_caster->GetAura(77535, EFFECT_INDEX_0))
-                            bp += oldShield->GetModifier()->m_amount;
+                        // only in Blood Presence
+                        if (m_caster->HasAura(48263))
+                        {
+                            int32 bp = int32(heal * bloodShield->GetModifier()->m_amount / 100.0f);
+                            if (Aura* oldShield = m_caster->GetAura(77535, EFFECT_INDEX_0))
+                                bp += oldShield->GetModifier()->m_amount;
 
-                        m_caster->CastCustomSpell(m_caster, 77535, &bp, NULL, NULL, true);
+                            m_caster->CastCustomSpell(m_caster, 77535, &bp, NULL, NULL, true);
+                        }
                     }
                     m_caster->CastCustomSpell(m_caster, 45470, &heal, NULL, NULL, true);
                 }
