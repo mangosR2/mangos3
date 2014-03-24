@@ -270,7 +270,6 @@ bool Pet::LoadPetFromDB(Player* owner, uint32 petentry, uint32 petnumber, bool c
     //load spells/cooldowns/auras
     _LoadAuras(timediff);
     _LoadSpells();
-    SynchronizeLevelWithOwner();
     InitLevelupSpellsForLevel();
     LearnPetPassives();
     _LoadSpellCooldowns();
@@ -312,9 +311,6 @@ bool Pet::LoadPetFromDB(Player* owner, uint32 petentry, uint32 petnumber, bool c
 
     AIM_Initialize();
 
-    DEBUG_LOG("Pet::LoadPetFromDB pet %s successfully loaded", GetGuidStr().c_str());
-    m_loading = false;
-
     if (owner->GetTypeId() == TYPEID_PLAYER)
     {
         CleanupActionBar();                                     // remove unknown spells from action bar after load
@@ -342,6 +338,15 @@ bool Pet::LoadPetFromDB(Player* owner, uint32 petentry, uint32 petnumber, bool c
             delete result;
         }
     }
+
+    DEBUG_LOG("Pet::LoadPetFromDB pet %s successfully loaded", GetGuidStr().c_str());
+    m_loading = false;
+
+    SynchronizeLevelWithOwner();
+
+    // Ghoul emote
+    if (GetEntry() == 24207 || GetEntry() == 26125 || GetEntry() == 28528)
+        HandleEmote(EMOTE_ONESHOT_EMERGE);
 
     return true;
 }
@@ -975,9 +980,18 @@ bool Pet::InitStatsForLevel(uint32 petlevel, Unit* owner)
     {
         case SUMMON_PET:
         {
-            SetByteValue(UNIT_FIELD_BYTES_0, 1, CLASS_MAGE);
             if (cinfo->family == CREATURE_FAMILY_GHOUL)
+            {
                 setPowerType(POWER_ENERGY);
+                SetByteValue(UNIT_FIELD_BYTES_0, 1, CLASS_ROGUE);
+            }
+            else
+            {
+                SetByteValue(UNIT_FIELD_BYTES_0, 1, CLASS_MAGE);
+            }
+
+            // this enables popup window (pet dismiss, cancel)
+            SetUInt32Value(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE);
             break;
         }
         case HUNTER_PET:
