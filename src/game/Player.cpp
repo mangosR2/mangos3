@@ -23009,16 +23009,6 @@ void Player::AddRunePower(uint8 index)
     GetSession()->SendPacket(&data);
 }
 
-static RuneType runeSlotTypes[MAX_RUNES] =
-{
-    /*0*/ RUNE_BLOOD,
-    /*1*/ RUNE_BLOOD,
-    /*2*/ RUNE_UNHOLY,
-    /*3*/ RUNE_UNHOLY,
-    /*4*/ RUNE_FROST,
-    /*5*/ RUNE_FROST
-};
-
 void Player::InitRunes()
 {
     if (getClass() != CLASS_DEATH_KNIGHT)

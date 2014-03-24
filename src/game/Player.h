@@ -448,6 +448,15 @@ enum RuneType
     NUM_RUNE_TYPES  = 4
 };
 
+static RuneType runeSlotTypes[MAX_RUNES] = {
+    /*0*/ RUNE_BLOOD,
+    /*1*/ RUNE_BLOOD,
+    /*2*/ RUNE_UNHOLY,
+    /*3*/ RUNE_UNHOLY,
+    /*4*/ RUNE_FROST,
+    /*5*/ RUNE_FROST
+};
+
 struct RuneInfo
 {
     uint8  BaseRune;

@@ -14488,11 +14488,11 @@ void Spell::EffectActivateRune(SpellEffectEntry const* effect)
     if (plr->getClass() != CLASS_DEATH_KNIGHT)
         return;
 
-    m_runesState = plr->GetRunesState();
-
     int32 count = damage;           // max amount of reset runes
     if (!count)
-        count = 1;
+        return;
+
+    m_runesState = plr->GetRunesState();
 
     for (uint32 j = 0; j < MAX_RUNES && count > 0; ++j)
     {
