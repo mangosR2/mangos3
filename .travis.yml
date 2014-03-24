@@ -6,13 +6,12 @@ branches:
 
 compiler:
   - gcc
-  - clang
 
 script:
-  - test -d _build || mkdir _build
-  - test -d _install || mkdir _install
-  - cd _build
-  - cmake -DCMAKE_INSTALL_PREFIX=../_install ..
+  - test -d build || mkdir build
+  - test -d install || mkdir install
+  - cd build
+  - cmake -DPCH=0 -DCMAKE_BUILD_TYPE=Release -DLIB_INSTALL_DIR="../install/lib" -DINCLUDE_INSTALL_DIR="../install/include" -DCMAKE_INSTALL_PREFIX=../install ..
   - make -j4
 
 notifications:
@@ -20,4 +19,4 @@ notifications:
     channels:
       - "irc.rizon.net#cmangos"
     on_success: never
-    on_failure: always
+    on_failure: never
