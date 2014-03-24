@@ -66,3 +66,7 @@ REPLACE INTO `spell_bonus_data` (`entry`, `direct_bonus`, `dot_bonus`, `ap_bonus
 (49998, 0, 0, 0.236, 0, 'Death Knight - Death Strike'),
 (52212, 0, 0, 0.064, 0, 'Death Knight - Death and Decay Triggered'),
 (55050, 0, 0, 0.236, 0, 'Death Knight - Heart Strike');
+
+-- Mague
+REPLACE INTO `spell_bonus_data` (`entry`, `direct_bonus`, `dot_bonus`, `ap_bonus`, `ap_dot_bonus`, `comments`) VALUES
+(543, 0.807, 0, 0, 0, 'Mage - Mage Ward');

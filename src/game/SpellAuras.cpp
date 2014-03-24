@@ -8992,6 +8992,10 @@ void Aura::HandleSchoolAbsorb(bool apply, bool Real)
                     else if (spellProto->GetSpellFamilyFlags().test<CF_MAGE_ICE_BARRIER>())
                         //+80.67% from +spell bonus
                         DoneActualBenefit = caster->SpellBaseDamageBonusDone(GetSpellSchoolMask(spellProto)) * 0.8067f;
+                    // Mage Ward
+                    else if (spellProto->Id == 543)
+                        // +80.7% from +spell bonus
+                        DoneActualBenefit = caster->SpellBaseDamageBonusDone(GetSpellSchoolMask(spellProto)) * 0.807f;
                     break;
                 case SPELLFAMILY_WARLOCK:
                     // Shadow Ward and Nether Ward
