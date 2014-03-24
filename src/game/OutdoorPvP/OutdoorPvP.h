@@ -97,6 +97,7 @@ class MANGOS_DLL_SPEC OutdoorPvP
         void FillInitialWorldState(uint32 zoneId, uint32 stateId, uint32 value);
 
         // Damage GO - for WG mostly
+        virtual bool CanDamageGO(GameObject* pGo, Player* invoker) { return true; }
         virtual void EventPlayerDamageGO(Player* /*player*/, GameObject* /*target_obj*/, uint32 /*eventId*/, uint32 /*bySpellId*/) {}
         
         // send world state update to all players present

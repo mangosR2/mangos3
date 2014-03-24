@@ -14677,6 +14677,39 @@ void Spell::EffectWMODamage(SpellEffectEntry const* effect)
 
     DEBUG_FILTER_LOG(LOG_FILTER_SPELL_CAST, "Spell::EffectWMODamage, spell ID %u, object %s, damage %u", m_spellInfo->Id,gameObjTarget->GetObjectGuid().GetString().c_str(),uint32(damage));
 
+    Player* pWho = NULL;
+    if (caster->GetTypeId() == TYPEID_PLAYER)
+        pWho = (Player*)caster;
+    else if (((Creature*)caster)->GetVehicleKit())
+        pWho = (Player*)caster->GetCharmerOrOwner();
+    
+    if (pWho)
+    {
+        if (BattleGround* bg = pWho->GetBattleGround())
+            if (!bg->CanDamageGO(gameObjTarget, pWho))
+                return;
+
+        if (OutdoorPvP* opvp = sOutdoorPvPMgr.GetScript(pWho->GetCachedZoneId()))
+            if (!opvp->CanDamageGO(gameObjTarget, pWho))
+                return;
+
+        float mod = 1.0f;
+        Unit::AuraList const& mModDamagePercentDone = pWho->GetAurasByType(SPELL_AURA_MOD_DAMAGE_PERCENT_DONE);
+        for (Unit::AuraList::const_iterator i = mModDamagePercentDone.begin(); i != mModDamagePercentDone.end(); ++i)
+        {
+            SpellEquippedItemsEntry const* spellEquip = (*i)->GetSpellProto()->GetSpellEquippedItems();
+            if (((*i)->GetModifier()->m_miscvalue & GetSpellSchoolMask(m_spellInfo)) &&
+                (!spellEquip || spellEquip->EquippedItemClass == -1 &&
+                                                                // -1 == any item class (not wand then)
+                spellEquip->EquippedItemInventoryTypeMask == 0))
+                                                                // 0 == any inventory type (not wand then)
+            {
+                mod *= ((*i)->GetModifier()->m_amount + 100.0f) / 100.0f;
+            }
+        }
+        damage *= mod;
+    }
+
     gameObjTarget->DamageTaken(caster, uint32(damage), m_spellInfo->Id);
 }
 
