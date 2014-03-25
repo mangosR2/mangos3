@@ -4288,6 +4288,17 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(Unit *pVictim, DamageIn
                 if (!roll_chance_i(triggerAmount))
                     return SPELL_AURA_PROC_FAILED;
             }
+            else if (auraSpellInfo->Id == 79684)            // Offensive State (DND)
+            {
+                // do not proc without Arcane Missiles learned
+                if (!HasSpell(5143))
+                    return SPELL_AURA_PROC_FAILED;
+
+                // do not proc from Arane Missiles themselves
+                if (!procSpell || procSpell->IsFitToFamily(SPELLFAMILY_MAGE, UI64LIT(0x200800)))
+                    return SPELL_AURA_PROC_FAILED;
+                break;
+            }
             break;
         case SPELLFAMILY_WARRIOR:
             // Deep Wounds (replace triggered spells to directly apply DoT), dot spell have familyflags

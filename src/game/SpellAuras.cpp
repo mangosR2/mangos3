@@ -12478,8 +12478,15 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
         }
         case SPELLFAMILY_MAGE:
         {
+            // Arcane Missiles!
+            if (m_spellProto->Id == 79683)
+            {
+                // Arcane Missiles Aurastate
+                spellId1 = 79808;
+                break;
+            }
             // Ice Barrier (non stacking from one caster)
-            if (m_spellProto->GetSpellIconID() == 32)
+            else if (m_spellProto->GetSpellIconID() == 32)
             {
                 if ((!apply && m_removeMode == AURA_REMOVE_BY_DISPEL) || m_removeMode == AURA_REMOVE_BY_SHIELD_BREAK)
                 {

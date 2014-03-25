@@ -577,3 +577,15 @@ INSERT INTO `spell_proc_event` (`entry`, `SchoolMask`, `ppmRate`) VALUE
 DELETE FROM `spell_proc_event` WHERE `entry` = 51099;
 INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`, `SpellFamilyMaskC0`) VALUE
 (51099, 15, 1+2+4, 4096);
+
+### Mague ###
+
+-- Offensive State (DND)
+DELETE FROM `spell_proc_event` WHERE `entry` = 79684;
+INSERT INTO `spell_proc_event` (`entry`, `SchoolMask`, `CustomChance`) VALUE
+(79684, 126, 40);
+
+-- Arcane Missiles
+DELETE FROM `spell_proc_event` WHERE `entry` = 79683;
+INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`, `procEx`) VALUE
+(79683, 3, 2048, 0x0080000);
