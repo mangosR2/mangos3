@@ -39,3 +39,11 @@ INSERT IGNORE INTO `spell_dbc` (`Id`, `EffectBasePoints1`) VALUES
 DELETE FROM `spell_dbc` WHERE `Id` = 88611;
 INSERT IGNORE INTO `spell_dbc` (`Id`, `EffectImplicitTargetA1`, `EffectImplicitTargetB1`) VALUES
 (88611, 8, 0);
+
+-- Unholy Blight
+DELETE FROM `spell_dbc` WHERE `Id` = 50536;
+--  case 50536:                         // Unholy Blight
+--  {
+--      spell->speed = 24.0f;
+--      break;
+--  }

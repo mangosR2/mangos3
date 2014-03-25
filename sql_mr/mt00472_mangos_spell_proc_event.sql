@@ -555,3 +555,8 @@ INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskB0`,
 DELETE FROM `spell_proc_event` WHERE `entry` = 48965;
 INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`, `SpellFamilyMaskC0`) VALUE
 (48965, 15, 2147483648, 1);
+
+-- Unholy Blight
+DELETE FROM `spell_proc_event` WHERE `entry` = 49194;
+INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskC0`) VALUE
+(49194, 15, 1);
