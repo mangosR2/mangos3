@@ -3047,11 +3047,22 @@ void Unit::CalculateDamageAbsorbAndResist(Unit* pCaster, DamageInfo* damageInfo,
                     // Anti-Magic Shell (on self)
                     if (spellProto->Id == 48707)
                     {
-                        // damage absorbed by Anti-Magic Shell energizes the DK with additional runic power.
-                        // This, if I'm not mistaken, shows that we get back ~2% of the absorbed damage as runic power.
                         int32 absorbed = RemainingDamage * currentAbsorb / 100;
-                        int32 regen = absorbed * 2 / 10;
-                        CastCustomSpell(this, 49088, &regen, NULL, NULL, true, NULL, (*i)());
+
+                        // Search Magic Suppression
+                        Unit::AuraList const& modAuras = GetAurasByType(SPELL_AURA_ADD_FLAT_MODIFIER);
+                        for (Unit::AuraList::const_iterator itr = modAuras.begin(); itr != modAuras.end(); ++itr)
+                        {
+                            if ((*itr)->GetSpellProto()->GetSpellIconID() == 99 && (*itr)->GetSpellProto()->GetSpellFamilyName() == SPELLFAMILY_DEATHKNIGHT)
+                            {
+                                // damage absorbed by Anti-Magic Shell energizes the DK with additional runic power.
+                                // This, if I'm not mistaken, shows that we get back ~2% of the absorbed damage as runic power.
+                                int32 regen = absorbed * 2 / 10;
+                                CastCustomSpell(this, 49088, &regen, NULL, NULL, true, NULL, (*i)());
+                                break;
+                            }
+                        }
+
                         RemainingDamage -= absorbed;
                         continue;
                     }
