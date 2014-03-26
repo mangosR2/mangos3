@@ -1,4 +1,6 @@
-MangosR2 README
+# MangosR2 (3.3.5 12340) [![Build Status](https://travis-ci.org/mangosR2/mangos.svg?branch=master)](https://travis-ci.org/mangosR2/mangos)
+
+## About MangosR2
 
 MangosR2 is a free, open source MMORPG Framework based mostly on C++.
 open source, and is community supported. It is derived from MaNGOS, 
@@ -24,9 +26,8 @@ in addition, the code of the original project practically not tested and
 may cause problems while real usage.
                                                                      /dev/rsa
 
-Copyright (C) 2011-2013 MangosR2               <http://github.com/MangosR2/>
-Copyright (C) 2006-2013 ScriptDev2             <https://github.com/scriptdev2>
-Copyright (C) 2012-2013 C(ontinued) MaNGOS     <http://github.com/cmangos/>
-Copyright (C) 2009-2011 /dev/rsa               <http://github.com/rsa/>
-Copyright (C) 2005-2012 MaNGOS project         <http://getmangos.com/>
-
+  Copyright (C) 2011-2014 MangosR2               <http://github.com/MangosR2/>
+  Copyright (C) 2006-2014 ScriptDev2             <http://github.com/scriptdev2>
+  Copyright (C) 2012-2014 C(ontinued) MaNGOS     <http://github.com/cmangos/>
+  Copyright (C) 2009-2014 /dev/rsa               <http://github.com/rsa/>
+  Copyright (C) 2005-2014 MaNGOS project         <http://getmangos.com/>
