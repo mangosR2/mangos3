@@ -6,7 +6,6 @@ branches:
 
 compiler:
   - gcc
-  - clang
 
 before_install:
   - sudo apt-get install libace-dev
@@ -16,7 +15,7 @@ script:
   - test -d build || mkdir build
   - test -d install || mkdir install
   - cd build
-  - cmake -DPCH=0 -DCMAKE_BUILD_TYPE=Release -DUSE_STD_MALLOC=1 -DACE_USE_EXTERNAL=1 -DLIB_INSTALL_DIR="../install/lib" -DINCLUDE_INSTALL_DIR="../install/include" -DCMAKE_INSTALL_PREFIX=../install ..
+  - cmake -DPCH=0 -DCMAKE_BUILD_TYPE=Release -DUSE_STD_MALLOC=1 -DACE_USE_EXTERNAL=1 -DCMAKE_INSTALL_PREFIX=../install ..
   - make -j4
 
 notifications:
