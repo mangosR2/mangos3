@@ -599,3 +599,15 @@ INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`)
 DELETE FROM `spell_proc_event` WHERE `entry` = 86262;
 INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `procFlags`, `SpellFamilyMaskC0`, `SpellFamilyMaskC1`) VALUE
 (86262, 3, 65536, 256, 256);
+
+-- Arcane Potency
+DELETE FROM `spell_proc_event` WHERE `entry` = 31571;
+INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskC0`, `procFlags`, `CustomChance`) VALUE
+(31571, 3, 8, 16384, 100);
+
+-- Arcane Potency
+DELETE FROM `spell_proc_event` WHERE `entry` = 57529;
+DELETE FROM `spell_proc_event` WHERE `entry` = 57531;
+INSERT INTO `spell_proc_event` (`entry`, `procEx`) VALUES
+(57529, 524288),
+(57531, 524288);
