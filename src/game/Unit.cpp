@@ -15077,7 +15077,6 @@ SpellAuraHolderPtr Unit::_AddAura(uint32 spellID, uint32 duration, Unit* caster)
 {
     SpellEntry const *spellInfo = sSpellStore.LookupEntry( spellID );
 
-    Aura const* aura = NULL;
     if (spellInfo)
     {
         if (IsSpellAppliesAura(spellInfo, (1 << EFFECT_INDEX_0) | (1 << EFFECT_INDEX_1) | (1 << EFFECT_INDEX_2)) || IsSpellHaveEffect(spellInfo, SPELL_EFFECT_PERSISTENT_AREA_AURA))
@@ -15097,7 +15096,7 @@ SpellAuraHolderPtr Unit::_AddAura(uint32 spellID, uint32 duration, Unit* caster)
                     spellEffect->Effect == SPELL_EFFECT_APPLY_AURA  ||
                     spellEffect->Effect == SPELL_EFFECT_PERSISTENT_AREA_AURA)
                 {
-                    aura = holder->CreateAura(spellInfo, SpellEffectIndex(i), NULL, holder, this, caster, NULL);
+                    holder->CreateAura(spellInfo, SpellEffectIndex(i), NULL, holder, this, caster, NULL);
                     holder->SetAuraDuration(duration);
                     DEBUG_FILTER_LOG(LOG_FILTER_SPELL_CAST, "Manually adding aura of spell %u, index %u, duration %u ms", spellID, i, duration);
                 }

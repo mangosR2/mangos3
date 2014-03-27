@@ -286,7 +286,6 @@ struct CustomSpellData
     int32 customDuration;
 };
 
-
 //i would like to remove this: (it is defined in item.h
 enum InventorySlot
 {
