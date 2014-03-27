@@ -842,9 +842,11 @@ void WorldSession::BuildListAuctionItems(std::vector<AuctionEntry*> const& aucti
                 {
                     if (SpellEntry const* spell = sSpellStore.LookupEntry(proto->Spells[0].SpellId))
                     {
-                        // ToDo: Fixme!
-                        //if (_player->HasSpell(spell->EffectTriggerSpell))
-                        //    continue;
+                        if(SpellEffectEntry const* spellEffect = spell->GetSpellEffect(EFFECT_INDEX_0))
+                        {
+                            if (_player->HasSpell(spellEffect->EffectTriggerSpell))
+                                continue;
+                        }
                     }
                 }
             }

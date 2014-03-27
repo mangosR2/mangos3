@@ -149,7 +149,7 @@ class BattleGroundTP : public BattleGround
         void SetDroppedFlagGuid(ObjectGuid guid, Team team)  { m_DroppedFlagGuid[GetTeamIndex(team)] = guid;}
         void ClearDroppedFlagGuid(Team team)  { m_DroppedFlagGuid[GetTeamIndex(team)].Clear();}
         ObjectGuid const& GetDroppedFlagGuid(Team team) const { return m_DroppedFlagGuid[GetTeamIndex(team)];}
-        virtual void FillInitialWorldStates(WorldPacket& data, uint32& count) override;
+        void FillInitialWorldStates(WorldPacket& data, uint32& count);
 
         /* Scorekeeping */
         uint32 GetTeamScore(Team team) const            { return m_TeamScores[GetTeamIndex(team)]; }

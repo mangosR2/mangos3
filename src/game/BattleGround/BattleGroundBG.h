@@ -228,7 +228,7 @@ class BattleGroundBG : public BattleGround
         void UpdateTeamScore(Team team);
         void EndBattleGround(Team winner) override;
         void UpdatePlayerScore(Player* source, uint32 type, uint32 value) override;
-        virtual void FillInitialWorldStates(WorldPacket& data, uint32& count) override;
+        void FillInitialWorldStates(WorldPacket& data, uint32& count);
 
         /* achievement req. */
         bool IsAllNodesControlledByTeam(Team team) const;
