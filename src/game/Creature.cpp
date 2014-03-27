@@ -492,6 +492,7 @@ void Creature::Update(uint32 update_diff, uint32 diff)
                 CreatureInfo const* cinfo = GetCreatureInfo();
 
                 SelectLevel(cinfo);
+                UpdateAllStats();  // to be sure stats is correct regarding level of the creature
                 SetUInt32Value(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_NONE);
                 if (m_isDeadByDefault)
                 {
@@ -1843,6 +1844,10 @@ void Creature::CallAssistance()
     if (Unit* pVictim = getVictim())
     {
         SetNoCallAssistance(true);
+
+        if (GetCreatureInfo()->flags_extra & CREATURE_FLAG_EXTRA_NO_CALL_ASSIST)
+            return;
+
         AI()->SendAIEventAround(AI_EVENT_CALL_ASSISTANCE, pVictim, sWorld.getConfig(CONFIG_UINT32_CREATURE_FAMILY_ASSISTANCE_DELAY), sWorld.getConfig(CONFIG_FLOAT_CREATURE_FAMILY_ASSISTANCE_RADIUS));
     }
 }

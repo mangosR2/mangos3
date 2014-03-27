@@ -218,7 +218,7 @@ void WorldSession::HandleBattlemasterJoinOpcode(WorldPacket& recv_data)
             WorldPacket data;
             sBattleGroundMgr.BuildBattleGroundStatusPacket(&data, bg, member, queueSlot, STATUS_WAIT_QUEUE, avgTime, 0, ginfo->arenaType, TEAM_NONE);
             member->GetSession()->SendPacket(&data);
-            DEBUG_LOG("Battleground: player joined queue for bg queue type %u bg type %u: GUID %u, NAME %s", bgQueueTypeId, bgTypeId, member->GetGUIDLow(), member->GetName(), member->GetBGTeam());
+            DEBUG_LOG("Battleground: player joined queue for bg queue type %u bg type %u: GUID %u, NAME %s", bgQueueTypeId, bgTypeId, member->GetGUIDLow(), member->GetName());
         }
         DEBUG_LOG("Battleground: group end");
     }
@@ -742,7 +742,7 @@ void WorldSession::HandleBattlemasterJoinArena(WorldPacket& recv_data)
             uint32 queueSlot = member->AddBattleGroundQueueId(bgQueueTypeId);
 
             // send status packet (in queue)
-        sBattleGroundMgr.BuildBattleGroundStatusPacket(&data, bg, member, queueSlot, STATUS_WAIT_QUEUE, avgTime, 0, arenatype, TEAM_NONE);
+            sBattleGroundMgr.BuildBattleGroundStatusPacket(&data, bg, member, queueSlot, STATUS_WAIT_QUEUE, avgTime, 0, arenatype, TEAM_NONE);
             member->GetSession()->SendPacket(&data);
             DEBUG_LOG("Battleground: player joined queue for arena as group bg queue type %u bg type %u: GUID %u, NAME %s", bgQueueTypeId, bgTypeId, member->GetGUIDLow(), member->GetName());
         }

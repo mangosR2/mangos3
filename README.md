@@ -19,8 +19,8 @@ R2 tries to take the best from MaNGOS, TrinityCore and other projects, while
 trying to preserve consistency and simplicity of MaNGOS code.
                                                                      /dev/rsa
 
-Copyright (C) 2011-2013 MangosR2               <http://github.com/MangosR2/>
-Copyright (C) 2006-2013 ScriptDev2             <https://github.com/scriptdev2>
-Copyright (C) 2012-2013 C(ontinued) MaNGOS     <http://github.com/cmangos/>
-Copyright (C) 2009-2011 /dev/rsa               <http://github.com/rsa/>
-Copyright (C) 2005-2012 MaNGOS project         <http://getmangos.com/>
+  Copyright (C) 2011-2014 MangosR2               <http://github.com/MangosR2/>
+  Copyright (C) 2006-2014 ScriptDev2             <http://github.com/scriptdev2>
+  Copyright (C) 2012-2014 C(ontinued) MaNGOS     <http://github.com/cmangos/>
+  Copyright (C) 2009-2014 /dev/rsa               <http://github.com/rsa/>
+  Copyright (C) 2005-2014 MaNGOS project         <http://getmangos.com/>

@@ -4509,7 +4509,7 @@ bool ChatHandler::HandleNpcInfoCommand(char* /*args*/)
     else if (target->HasAIName())
         PSendSysMessage("AI name: %s", target->GetAIName().c_str());
 
-    PSendSysMessage("Phasemask %u, has %u active events, "SIZEFMTD" SpellAuraHolders, "SIZEFMTD" unit states",
+    PSendSysMessage("Phasemask %u, has %u active events, " SIZEFMTD " SpellAuraHolders, " SIZEFMTD " unit states",
         phaseMask,
         target->GetEvents()->size(),
         target->GetSpellAuraHolderMap().size(),
@@ -7485,7 +7485,7 @@ bool ChatHandler::HandleAccountFriendListCommand(char* args)
 
     if (!referredAccounts->empty())
     {
-        PSendSysMessage("Account %u (%s) has "SIZEFMTD" referred accounts:",targetAccountId, account_name.c_str(), referredAccounts->size());
+        PSendSysMessage("Account %u (%s) has " SIZEFMTD " referred accounts:",targetAccountId, account_name.c_str(), referredAccounts->size());
         for (RafLinkedList::const_iterator itr = referredAccounts->begin(); itr != referredAccounts->end(); ++itr)
         {
             uint32 accId = *itr;
@@ -7496,7 +7496,7 @@ bool ChatHandler::HandleAccountFriendListCommand(char* args)
     }
     if (!referalAccounts->empty())
     {
-        PSendSysMessage("Account %u (%s) has "SIZEFMTD" referral accounts:",targetAccountId, account_name.c_str(), referalAccounts->size());
+        PSendSysMessage("Account %u (%s) has " SIZEFMTD " referral accounts:",targetAccountId, account_name.c_str(), referalAccounts->size());
         for (RafLinkedList::const_iterator itr = referalAccounts->begin(); itr != referalAccounts->end(); ++itr)
         {
             uint32 accId = *itr;
@@ -7565,7 +7565,7 @@ bool ChatHandler::HandleMmapTestArea(char* args)
 
     if (!creatureList.empty())
     {
-        PSendSysMessage("Found "SIZEFMTD" Creatures.", creatureList.size());
+        PSendSysMessage("Found " SIZEFMTD " Creatures.", creatureList.size());
 
         uint32 paths = 0;
         uint32 uStartTime = WorldTimer::getMSTime();
@@ -7622,7 +7622,7 @@ bool ChatHandler::HandleTransportListCommand(char* args)
         if (!gInfo)
             continue;
 
-        PSendSysMessage("Transport: %s on map %u (%s), %s, passengers "SIZEFMTD", current coords %f %f %f",
+        PSendSysMessage("Transport: %s on map %u (%s), %s, passengers " SIZEFMTD ", current coords %f %f %f",
             transport->GetObjectGuid().GetString().c_str(),
             mapID,
             name.c_str(),
@@ -7755,7 +7755,7 @@ bool ChatHandler::HandleTransportPathCommand(char* args)
     }
     if (transport->IsMOTransport())
     {
-        PSendSysMessage("Transport: %s on map %u (%s), %s, passengers "SIZEFMTD", current time %u (map %u xyz %f %f %f)",
+        PSendSysMessage("Transport: %s on map %u (%s), %s, passengers " SIZEFMTD ", current time %u (map %u xyz %f %f %f)",
             transport->GetObjectGuid().GetString().c_str(),
             map->GetId(),
             ((MOTransport*)transport)->GetName(),
@@ -7767,7 +7767,7 @@ bool ChatHandler::HandleTransportPathCommand(char* args)
             ((MOTransport*)transport)->GetCurrent()->second.loc.getY(),
             ((MOTransport*)transport)->GetCurrent()->second.loc.getZ()
         );
-        PSendSysMessage("Transport: %s on map %u (%s), %s, passengers "SIZEFMTD", next time %u (map %u xyz %f %f %f)",
+        PSendSysMessage("Transport: %s on map %u (%s), %s, passengers " SIZEFMTD ", next time %u (map %u xyz %f %f %f)",
             transport->GetObjectGuid().GetString().c_str(),
             map->GetId(),
             ((MOTransport*)transport)->GetName(),
@@ -7782,7 +7782,7 @@ bool ChatHandler::HandleTransportPathCommand(char* args)
     }
     else
     {
-        PSendSysMessage("Transport: %s on map %u, %s, passengers "SIZEFMTD"",
+        PSendSysMessage("Transport: %s on map %u, %s, passengers " SIZEFMTD "",
             transport->GetObjectGuid().GetString().c_str(),
             map->GetId(),
             transport->isActiveObject() ? "active" : "passive",
@@ -7832,7 +7832,7 @@ bool ChatHandler::HandleTransportCommand(char* args)
         }
     }
 
-    PSendSysMessage("Transport: %s on map %u (%s), %s, passengers "SIZEFMTD", current coords %f %f %f",
+    PSendSysMessage("Transport: %s on map %u (%s), %s, passengers " SIZEFMTD ", current coords %f %f %f",
             transport->GetObjectGuid().GetString().c_str(),
             map->GetId(),
             transport->GetName(),

@@ -51,6 +51,9 @@
 #  define COMPILER COMPILER_INTEL
 #elif defined( __GNUC__ )
 #  define COMPILER COMPILER_GNU
+#  ifdef  __clang__
+#      define CLANG 1
+#  endif
 #else
 #  pragma error "FATAL ERROR: Unknown compiler."
 #endif

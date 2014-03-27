@@ -2437,6 +2437,14 @@ void Spell::EffectDummy(SpellEffectEntry const* effect)
                     unitTarget->CastSpell(unitTarget, spell_id, true);
                     return;
                 }
+                case 41283:                                 // Abyssal Toss
+                {
+                    if (!unitTarget)
+                        return;
+
+                    m_caster->SummonCreature(23416, unitTarget->GetPositionX(), unitTarget->GetPositionY(), unitTarget->GetPositionZ(), 0, TEMPSUMMON_TIMED_OR_CORPSE_DESPAWN, 30000);
+                    return;
+                }
                 case 41333:                                 // Empyreal Equivalency
                 {
                     if (!unitTarget)
@@ -10295,16 +10303,6 @@ void Spell::EffectScriptEffect(SpellEffectEntry const* effect)
                     m_caster->CastSpell(m_caster, 50217, true);
                     return;
                 }
-                case 44364:                                 // Rock Falcon Primer
-                {
-                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
-                        return;
-
-                    // Are there anything special with this, a random chance or condition?
-                    // Feeding Rock Falcon
-                    unitTarget->CastSpell(unitTarget, effect->CalculateSimpleValue(), true, NULL, NULL, unitTarget->GetObjectGuid(), m_spellInfo);
-                    return;
-                }
                 case 43375:                                 // Mixing Vrykul Blood
                 case 43972:                                 // Mixing Blood for Quest 11306
                 {
@@ -10314,6 +10312,33 @@ void Spell::EffectScriptEffect(SpellEffectEntry const* effect)
                     uint32 triggeredSpell[] = {43376, 43378, 43970, 43377};
 
                     unitTarget->CastSpell(unitTarget, triggeredSpell[urand(0, 3)], true);
+                    return;
+                }
+                case 44323:                                 // Hawk Hunting
+                case 44407:                                 // Hawk Hunting
+                {
+                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_UNIT)
+                        return;
+
+                    // check target entry specific to each spell
+                    if (m_spellInfo->Id == 44323 && unitTarget->GetEntry() != 24746)
+                        return;
+                    if (m_spellInfo->Id == 44407 && unitTarget->GetEntry() != 24747)
+                        return;
+
+                    unitTarget->CastSpell(m_caster, effect->CalculateSimpleValue(), true);
+                    // despawn delay depends on the distance between caster and target
+                    ((Creature*)unitTarget)->ForcedDespawn(100 * unitTarget->GetDistance2d(m_caster));
+                    return;
+                }
+                case 44364:                                 // Rock Falcon Primer
+                {
+                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
+                        return;
+
+                    // Are there anything special with this, a random chance or condition?
+                    // Feeding Rock Falcon
+                    unitTarget->CastSpell(unitTarget, effect->CalculateSimpleValue(), true, NULL, NULL, unitTarget->GetObjectGuid(), m_spellInfo);
                     return;
                 }
                 case 44436:                                 // Tricky Treat

@@ -2542,7 +2542,7 @@ void Unit::CallForAllControlledUnits(Func const& func, uint32 controlledMask)
 
     if (controlledMask & CONTROLLED_MINIPET)
     {
-        if (Unit* mini = GetMiniPet())
+        if (Unit* mini = (Unit*)GetMiniPet())
             func(mini);
     }
 
@@ -2587,7 +2587,7 @@ bool Unit::CheckAllControlledUnits(Func const& func, uint32 controlledMask) cons
 
     if (controlledMask & CONTROLLED_MINIPET)
     {
-        if (Unit const* mini = GetMiniPet())
+        if (Unit* mini = (Unit*)GetMiniPet())
             if (func(mini))
                 return true;
     }

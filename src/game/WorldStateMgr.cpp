@@ -427,7 +427,7 @@ void WorldStateMgr::LoadFromDB()
     while (result->NextRow());
 
     sLog.outString();
-    sLog.outString(">> Loaded data for "SIZEFMTD" WorldStates", m_worldState.size());
+    sLog.outString(">> Loaded data for " SIZEFMTD " WorldStates", m_worldState.size());
     delete result;
 }
 

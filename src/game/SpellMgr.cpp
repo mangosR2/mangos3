@@ -884,6 +884,7 @@ bool IsPositiveEffect(SpellEntry const* spellproto, SpellEffectIndex effIndex)
                 case 18153:                                 // Kodo Kombobulator
                 case 32312:                                 // Move 1
                 case 37388:                                 // Move 2
+                case 45863:                                 // Cosmetic - Incinerate to Random Target
                 case 48021:                                 // support for quest 12173
                 case 49634:                                 // Sergeant's Flare
                 case 54530:                                 // Opening
@@ -2917,6 +2918,7 @@ uint32 SpellMgr::GetSpellMaxTargetsWithCustom(SpellEntry const* spellInfo, Unit 
                 case 44869:                                 // Spectral Blast
                 case 45391:                                 // Summon Demonic Vapor (SWP, Felmyst)
                 case 45785:                                 // Sinister Reflection Clone (SWP, Kil'jaeden)
+                case 45863:                                 // Cosmetic - Incinerate to Random Target (Borean Tundra)
                 case 45892:                                 // Sinister Reflection (SWP, Kil'jaeden)
                 case 45976:                                 // Open Portal
                 case 46293:                                 // Corrosive Poison
