@@ -63,7 +63,7 @@ int MapUpdater::freeze_hook()
                 map->SetBroken(true);
                 MapBrokenEvent(map);
                 ACE_thread_t threadId = itr->first;
-                sLog.outError("VMSS::MapUpdater::freeze_hook thread "I64FMT" possible freezed (is update map %u instance %u), killing his.", threadId, map->GetId(), map->GetInstanceId());
+                sLog.outError("VMSS::MapUpdater::freeze_hook thread " I64FMT " possible freezed (is update map %u instance %u), killing his.", threadId, map->GetId(), map->GetInstanceId());
                 guardRW.release();
                 kill_thread(threadId, true);
                 if (m_queue.is_empty() && getActiveThreadsCount() == 0)

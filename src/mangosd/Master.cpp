@@ -606,7 +606,7 @@ void Master::_OnSignal(int s)
             {
                 ACE_thread_t const threadId = ACE_OS::thr_self();
 
-                sLog.outError("VMSS:: Signal %.2u received from thread "I64FMT".\r\n",s,threadId);
+                sLog.outError("VMSS:: Signal %.2u received from thread " I64FMT ".\r\n",s,threadId);
                 ACE_Stack_Trace _StackTrace;
                 std::string StackTrace = _StackTrace.c_str();
                 if (Map* map = sMapMgr.GetMapUpdater().getObject(threadId))
@@ -630,7 +630,7 @@ void Master::_OnSignal(int s)
 
                     if (sWorld.getConfig(CONFIG_BOOL_VMSS_CONTINENTS_SKIP) && map->IsContinent())
                     {
-                        sLog.outError("VMSS:: Thread "I64FMT" is virtual map server for continent, but continents processing disabled. Stopping world.",threadId);
+                        sLog.outError("VMSS:: Thread " I64FMT " is virtual map server for continent, but continents processing disabled. Stopping world.",threadId);
                         signal(s, SIG_DFL);
                         ACE_OS::kill(getpid(), s);
                     }
@@ -657,7 +657,7 @@ void Master::_OnSignal(int s)
                 }
                 else
                 {
-                    sLog.outError("VMSS:: Thread "I64FMT" is not virtual map server. Stopping world.",threadId);
+                    sLog.outError("VMSS:: Thread " I64FMT " is not virtual map server. Stopping world.",threadId);
                     sLog.outError("VMSS:: BackTrace: ");
                     size_t found = 0;
                     while (found < StackTrace.size())

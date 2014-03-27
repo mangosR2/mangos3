@@ -275,7 +275,7 @@ class MANGOS_DLL_SPEC Database
 
         //connection helper counters
         int m_nQueryConnPoolSize;                               //current size of query connection pool
-        ACE_Atomic_Op<ACE_Thread_Mutex, long> m_nQueryCounter;  //counter for connection selection
+        ACE_Atomic_Op<ACE_Thread_Mutex, uint32> m_nQueryCounter;  //counter for connection selection
 
         //lets use pool of connections for sync queries
         typedef std::vector< SqlConnection * > SqlConnectionContainer;
