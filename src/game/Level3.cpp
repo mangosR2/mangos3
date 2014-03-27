@@ -1160,7 +1160,14 @@ bool ChatHandler::HandleReloadAntiCheatCommand(char* /*arg*/)
     sObjectMgr.LoadAntiCheatConfig();
 
     SendGlobalSysMessage("Anticheat config reloaded.");
+    return true;
+}
 
+bool ChatHandler::HandleReloadCreaturesStatsCommand(char* /*args*/)
+{
+    sLog.outString("Re-Loading stats data...");
+    sObjectMgr.LoadCreatureClassLvlStats();
+    SendGlobalSysMessage("DB table `creature_template_classlevelstats` reloaded.");
     return true;
 }
 
