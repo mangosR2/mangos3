@@ -16,7 +16,7 @@ script:
   - test -d build || mkdir build
   - test -d install || mkdir install
   - cd build
-  - if ["$CC" == "gcc"]; then cmake -DPCH=0 -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_FLAGS_RELEASE:STRING="-march=native -ggdb -fno-strict-aliasing -frename-registers -finput-charset=utf-8 -fexec-charset=utf-8" -DCMAKE_CXX_FLAGS_RELEASE:STRING="-march=native -ggdb -fno-strict-aliasing -frename-registers -finput-charset=utf-8 -fexec-charset=utf-8" -DUSE_STD_MALLOC=1 -DACE_USE_EXTERNAL=1 -DCMAKE_INSTALL_PREFIX=../install .. ; else cmake -DPCH=0 -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_FLAGS_RELEASE:STRING="-std=c++11 -march=native -ggdb -fno-strict-aliasing -frename-registers -finput-charset=utf-8 -fexec-charset=utf-8" -DCMAKE_CXX_FLAGS_RELEASE:STRING="-std=c++11 -march=native -ggdb -fno-strict-aliasing -frename-registers -finput-charset=utf-8 -fexec-charset=utf-8" -DUSE_STD_MALLOC=1 -DACE_USE_EXTERNAL=1 -DCMAKE_INSTALL_PREFIX=../install .. ; fi
+  - cmake -DPCH=0 -DCMAKE_BUILD_TYPE=Release -DUSE_STD_MALLOC=1 -DACE_USE_EXTERNAL=1 -DCMAKE_INSTALL_PREFIX=../install ..
   - make -j4
 
 notifications:
