@@ -12746,6 +12746,9 @@ void Unit::SetFeared(bool apply, ObjectGuid casterGuid, uint32 spellID, uint32 t
 
         CastStop(GetObjectGuid() == casterGuid ? spellID : 0);
 
+        if (GetTypeId() == TYPEID_UNIT)
+            SetTargetGuid(ObjectGuid());                    // creature feared loose its target
+
         Unit* caster = IsInWorld() ?  GetMap()->GetUnit(casterGuid) : NULL;
 
         SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_FLEEING);
@@ -12761,6 +12764,9 @@ void Unit::SetFeared(bool apply, ObjectGuid casterGuid, uint32 spellID, uint32 t
         // attack caster if can
         if (GetTypeId() != TYPEID_PLAYER && isAlive())
         {
+            if (getVictim())
+                SetTargetGuid(getVictim()->GetObjectGuid());  // restore target
+
             if (Unit* caster = IsInWorld() ? GetMap()->GetUnit(casterGuid) : NULL)
                 AttackedBy(caster);
         }

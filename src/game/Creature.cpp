@@ -756,7 +756,10 @@ void Creature::DoFleeToGetAssistance()
         if (!pCreature)
             SetFeared(true, pVictim->GetObjectGuid(), 0, sWorld.getConfig(CONFIG_UINT32_CREATURE_FAMILY_FLEE_DELAY));
         else
+        {
+            SetTargetGuid(ObjectGuid());        // creature flee loose its target
             GetMotionMaster()->MoveSeekAssistance(pCreature->GetPositionX(), pCreature->GetPositionY(), pCreature->GetPositionZ());
+        }
     }
 }
 
