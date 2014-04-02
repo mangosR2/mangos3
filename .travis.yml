@@ -16,7 +16,8 @@ script:
   - test -d build || mkdir build
   - test -d install || mkdir install
   - cd build
-  - cmake -DPCH=0 -DCMAKE_BUILD_TYPE=Release -DUSE_STD_MALLOC=1 -DACE_USE_EXTERNAL=1 -DCMAKE_INSTALL_PREFIX=../install ..
+  - if [ "$CXX" == "g++" ]; then cmake -DPCH=0 -DCMAKE_BUILD_TYPE=Release -DUSE_STD_MALLOC=1 -DACE_USE_EXTERNAL=1 -DCMAKE_INSTALL_PREFIX=../install .. -DCMAKE_C_FLAGS_RELEASE:STRING="-march=native -O2 -DNDEBUG -finput-charset=utf-8 -fexec-charset=utf-8" -DCMAKE_CXX_FLAGS_RELEASE:STRING="-march=native -O2 -DNDEBUG -finput-charset=utf-8 -fexec-charset=utf-8"; fi
+  - if [ "$CXX" == "clang++" ]; then cmake -DPCH=0 -DCMAKE_BUILD_TYPE=Release -DUSE_STD_MALLOC=1 -DACE_USE_EXTERNAL=1 -DCMAKE_INSTALL_PREFIX=../install .. -DCMAKE_C_FLAGS_RELEASE:STRING="-march=native -O2 -DNDEBUG -finput-charset=utf-8 -fexec-charset=utf-8" -DCMAKE_CXX_FLAGS_RELEASE:STRING="-march=native -O2 -DNDEBUG -finput-charset=utf-8 -fexec-charset=utf-8 -std=c++11"; fi
   - make -j4
 
 notifications:
