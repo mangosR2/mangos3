@@ -2618,7 +2618,7 @@ void World::ResetDailyQuests()
             itr->second->GetPlayer()->ResetDailyQuestStatus();
 
     m_NextDailyQuestReset = time_t(m_NextDailyQuestReset + DAY);
-    CharacterDatabase.PExecute("UPDATE saved_variables SET NextDailyQuestResetTime = '"UI64FMTD"'", uint64(m_NextDailyQuestReset));
+    CharacterDatabase.PExecute("UPDATE saved_variables SET NextDailyQuestResetTime = '" UI64FMTD "'", uint64(m_NextDailyQuestReset));
 }
 
 void World::SetMonthlyQuestResetTime(bool initialize)
