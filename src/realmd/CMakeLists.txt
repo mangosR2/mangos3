@@ -28,6 +28,7 @@ set(EXECUTABLE_SRCS
     AuthSocket.h
     BufferedSocket.cpp
     BufferedSocket.h
+    IpList.h
     Main.cpp
     PatchHandler.cpp
     PatchHandler.h
