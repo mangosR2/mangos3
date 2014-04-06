@@ -4757,6 +4757,12 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(Unit *pVictim, DamageIn
                 if (HasAura(67544))
                     return SPELL_AURA_PROC_FAILED;
             }
+            // Tamed Pet Passive 07 (DND)
+            else if (auraSpellInfo->Id == 20784)
+            {
+                basepoints[0] = triggerAmount;
+                break;
+            }
             // Item - Hunter T9 4P Bonus
             else if (auraSpellInfo->Id == 67151)
             {
