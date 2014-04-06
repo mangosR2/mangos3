@@ -58,9 +58,22 @@ script:
 matrix:
   exclude:
     - compiler: clang 
-      env: CMAKE_CC=gcc
+      env: CMAKE_CC="gcc" CMAKE_CXX="g++" CMAKE_ARGS="-DCMAKE_BUILD_TYPE=Debug -DPCH=0 -DACE_USE_EXTERNAL=1"
+    - compiler: clang 
+      env: CMAKE_CC="gcc" CMAKE_CXX="g++" CMAKE_ARGS="-DCMAKE_BUILD_TYPE=Release -DPCH=0 -DACE_USE_EXTERNAL=1"
+    - compiler: clang 
+      env: CMAKE_CC="gcc" CMAKE_CXX="g++" CMAKE_ARGS="-DCMAKE_BUILD_TYPE=Debug -DPCH=1 -DACE_USE_EXTERNAL=1"
+    - compiler: clang 
+      env: CMAKE_CC="gcc" CMAKE_CXX="g++" CMAKE_ARGS="-DCMAKE_BUILD_TYPE=Release -DPCH=1 -DACE_USE_EXTERNAL=1"
+    # gcc builds with internal ACE
+    - compiler: clang 
+      env: CMAKE_CC="gcc" CMAKE_CXX="g++" CMAKE_ARGS="-DCMAKE_BUILD_TYPE=Debug -DPCH=1 -DACE_USE_EXTERNAL=0"
+    - compiler: clang 
+      env: CMAKE_CC="gcc" CMAKE_CXX="g++" CMAKE_ARGS="-DCMAKE_BUILD_TYPE=Release -DPCH=1 -DACE_USE_EXTERNAL=0"
     - compiler: gcc
-      env: CMAKE_CC=clang
+      env: CMAKE_CC="clang" CMAKE_CXX="clang++" CMAKE_ARGS="-DCMAKE_BUILD_TYPE=Debug -DPCH=0 -DACE_USE_EXTERNAL=1" CXX_EXTRA_STRING="-std=c++11"
+    - compiler: gcc
+      env: CMAKE_CC="clang" CMAKE_CXX="clang++" CMAKE_ARGS="-DCMAKE_BUILD_TYPE=Release -DPCH=0 -DACE_USE_EXTERNAL=1" CXX_EXTRA_STRING="-std=c++11"
 #    - compiler: clang
 #      env: CMAKE_CC=i686-w64-mingw32-gcc
 #    - compiler: clang
