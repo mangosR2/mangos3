@@ -2646,6 +2646,18 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, DamageInfo* damageI
             else if (dummySpell->Id == 82661)               // Aspect of the Fox                                   
             {
                 basepoints[0] = triggerAmount;
+
+                // search One with Nature
+                Unit::AuraList const& mDummyAuras = GetAurasByType(SPELL_AURA_DUMMY);
+                for (Unit::AuraList::const_iterator itr = mDummyAuras.begin(); itr != mDummyAuras.end(); ++itr)
+                {
+                    if ((*itr)->GetSpellProto()->GetSpellIconID() == 5080 && (*itr)->GetSpellProto()->GetSpellFamilyName() == SPELLFAMILY_HUNTER)
+                    {
+                        basepoints[0] += (*itr)->GetModifier()->m_amount;
+                        break;
+                    }
+                }
+
                 triggered_spell_id = 99289;
                 break;
             }
