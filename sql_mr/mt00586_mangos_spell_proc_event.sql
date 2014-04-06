@@ -81,6 +81,11 @@ DELETE FROM `spell_proc_event` WHERE `entry` = 77485;
 INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`, `CustomChance`) VALUES
 (77485, 0, 0, 0);
 
+-- Resurgence
+DELETE FROM `spell_proc_event` WHERE `entry` = 16180;
+INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`, `SpellFamilyMaskC0`, `procEx`) VALUES
+(16180, 11, 448, 73683, 2);
+
 ### Priest ###
 
 -- Vengeance

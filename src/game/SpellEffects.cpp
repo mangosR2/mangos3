@@ -7210,6 +7210,34 @@ void Spell::EffectEnergize(SpellEffectEntry const* effect)
             }
             break;
         }
+        case 101033:                                        // Resurgence
+        {
+            // spell by wich Resurgence was procced is stored in unexistent effect
+            uint32 proccedBySpell = m_currentBasePoints[1];
+            if (!m_currentBasePoints[1])
+                break;
+
+            float mod = 1.0f;
+            switch (proccedBySpell)
+            {
+                case 331:   // Healing Wave
+                case 77472: // Greater Healing Wave
+                    mod = 1.0f;
+                    break;
+                case 8004:  // Healing Surge
+                case 61295: // Riptide
+                case 73685: // Unleash Life
+                    mod = 0.6f;
+                    break;
+                case 1064:  // Chain Heal
+                    mod = 0.333f;
+                    break;
+                default:
+                    break;
+            }
+            damage = int32(damage * mod);
+            break;
+        }
         default:
             break;
     }
