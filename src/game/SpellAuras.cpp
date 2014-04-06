@@ -13112,6 +13112,23 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
                     spellId1 = 80326;                       // Camouflage
                     break;
                 }
+                case 53257:                                 // Cobra strikes
+                {
+                    if (m_target->GetObjectGuid().IsPet())
+                    {
+                        if (!apply)
+                            if (Unit* owner = ((Pet*)m_target)->GetOwner())
+                                if (SpellAuraHolderPtr holder = owner->GetSpellAuraHolder(53257))
+                                    owner->RemoveSpellAuraHolder(holder);
+                    }
+                    else if (apply)
+                    {
+                        if (Pet* pet = m_target->GetPet())
+                            if (pet->isAlive())
+                                pet->CastSpell(pet, 53257, true);
+                    }
+                    return;
+                }
                 // Ancient Hysteria
                 case 90355:
                 {

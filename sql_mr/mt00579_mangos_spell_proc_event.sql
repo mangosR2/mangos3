@@ -815,3 +815,12 @@ INSERT INTO `spell_proc_event` (`entry`, `SchoolMask`) VALUE
 -- Improved Steady Shot
 DELETE FROM `spell_proc_event` WHERE `entry` = 53220;
 
+-- Cobra Strikes (proc)
+DELETE FROM `spell_proc_event` WHERE `entry` = 53257;
+INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `procFlags`, `procEx`) VALUES
+(53257, 9, 0x10, 0x0080000);
+
+-- Cobra Strikes
+DELETE FROM `spell_proc_event` WHERE `entry` = 53256;
+INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`) VALUES
+(53256, 9, 2048);
