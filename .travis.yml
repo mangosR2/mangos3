@@ -3,26 +3,72 @@ language: cpp
 branches:
   only:
     - master
+#    - testing
 
 compiler:
   - gcc
   - clang
 
+env:
+  global:
+    - C_RELEASE_STRING="-march=native -O2 -DNDEBUG -finput-charset=utf-8 -fexec-charset=utf-8"
+    - C_EXTRA_STRING=
+    - CXX_RELEASE_STRING="-march=native -O2 -DNDEBUG -finput-charset=utf-8 -fexec-charset=utf-8"
+    - CXX_EXTRA_STRING=
+    - CMAKE_COMMON_STRING="-DUSE_STD_MALLOC=1 -DCMAKE_INSTALL_PREFIX=../install"
+
+  matrix:
+    # gcc builds
+      - CMAKE_CC="gcc" CMAKE_CXX="g++" CMAKE_ARGS="-DCMAKE_BUILD_TYPE=Debug -DPCH=0 -DACE_USE_EXTERNAL=1"
+      - CMAKE_CC="gcc" CMAKE_CXX="g++" CMAKE_ARGS="-DCMAKE_BUILD_TYPE=Release -DPCH=0 -DACE_USE_EXTERNAL=1"
+    # gcc builds with PCH
+      - CMAKE_CC="gcc" CMAKE_CXX="g++" CMAKE_ARGS="-DCMAKE_BUILD_TYPE=Debug -DPCH=1 -DACE_USE_EXTERNAL=1"
+      - CMAKE_CC="gcc" CMAKE_CXX="g++" CMAKE_ARGS="-DCMAKE_BUILD_TYPE=Release -DPCH=1 -DACE_USE_EXTERNAL=1"
+    # gcc builds with internal ACE
+      - CMAKE_CC="gcc" CMAKE_CXX="g++" CMAKE_ARGS="-DCMAKE_BUILD_TYPE=Debug -DPCH=1 -DACE_USE_EXTERNAL=0"
+      - CMAKE_CC="gcc" CMAKE_CXX="g++" CMAKE_ARGS="-DCMAKE_BUILD_TYPE=Release -DPCH=1 -DACE_USE_EXTERNAL=0"
+    # clang builds
+      - CMAKE_CC="clang" CMAKE_CXX="clang++" CMAKE_ARGS="-DCMAKE_BUILD_TYPE=Debug -DPCH=0 -DACE_USE_EXTERNAL=1" CXX_EXTRA_STRING="-std=c++11"
+      - CMAKE_CC="clang" CMAKE_CXX="clang++" CMAKE_ARGS="-DCMAKE_BUILD_TYPE=Release -DPCH=0 -DACE_USE_EXTERNAL=1" CXX_EXTRA_STRING="-std=c++11"
+    # mingw builds
+    #  - CMAKE_CC="i686-w64-mingw32-gcc" CMAKE_CXX="i686-w64-mingw32-g++"
+    #  - CMAKE_CC="x86-64-w64-mingw32-gcc" CMAKE_CXX="x86-64-w64-mingw32-g++"
+
 before_install:
   - sudo apt-get install libace-dev
   - sudo apt-get update 
+#  - sudo apt-get install mingw-w64-i686 binutils-mingw-w64-i686 gcc-mingw-w64-i686 g++-mingw-w64-i686 mingw-w64-dev
+#  - sudo apt-get install mingw-w64-x86-64 binutils-mingw-w64-x86-64 gcc-mingw-w64-x86-64 g++-mingw-x86-64 mingw-w64-dev
 
-script:
+before_script:
   - test -d build || mkdir build
   - test -d install || mkdir install
   - cd build
-  - if [ "$CXX" == "g++" ]; then cmake -DPCH=0 -DCMAKE_BUILD_TYPE=Release -DUSE_STD_MALLOC=1 -DACE_USE_EXTERNAL=1 -DCMAKE_INSTALL_PREFIX=../install .. -DCMAKE_C_FLAGS_RELEASE:STRING="-march=native -O2 -DNDEBUG -finput-charset=utf-8 -fexec-charset=utf-8" -DCMAKE_CXX_FLAGS_RELEASE:STRING="-march=native -O2 -DNDEBUG -finput-charset=utf-8 -fexec-charset=utf-8"; fi
-  - if [ "$CXX" == "clang++" ]; then cmake -DPCH=0 -DCMAKE_BUILD_TYPE=Release -DUSE_STD_MALLOC=1 -DACE_USE_EXTERNAL=1 -DCMAKE_INSTALL_PREFIX=../install .. -DCMAKE_C_FLAGS_RELEASE:STRING="-march=native -O2 -DNDEBUG -finput-charset=utf-8 -fexec-charset=utf-8" -DCMAKE_CXX_FLAGS_RELEASE:STRING="-march=native -O2 -DNDEBUG -finput-charset=utf-8 -fexec-charset=utf-8 -std=c++11"; fi
+
+script:
+  - cmake -DCMAKE_C_COMPILER=$CMAKE_CC \
+          -DCMAKE_CXX_COMPILER=$CMAKE_CXX \
+          -DCMAKE_C_FLAGS_RELEASE:STRING=$C_RELEASE_STRING $C_EXTRA_STRING \
+          -DCMAKE_CXX_FLAGS_RELEASE:STRING=$CXX_RELEASE_STRING $CXX_EXTRA_STRING \
+          $CMAKE_ARGS \
+          $CMAKE_COMMON_STRING \
+          ..
   - make -j4
 
-notifications:
-  irc:
-    channels:
-      - "irc.rizon.net#mangosR2"
-    on_success: never
-    on_failure: never
+matrix:
+  exclude:
+    - compiler: clang 
+      env: CMAKE_CC=gcc
+    - compiler: gcc
+      env: CMAKE_CC=clang
+#    - compiler: clang
+#      env: CMAKE_CC=i686-w64-mingw32-gcc
+#    - compiler: clang
+#      env: CMAKE_CC=x86-64-w64-mingw32-gcc
+
+#notifications:
+#  irc:
+#    channels:
+#      - "irc.rizon.net#mangosR2"
+#        on_success: never
+#        on_failure: never
