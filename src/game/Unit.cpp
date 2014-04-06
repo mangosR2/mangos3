@@ -759,25 +759,6 @@ uint32 Unit::DealDamage(DamageInfo* damageInfo)
         }
     }
 
-    // no xp,health if type 8 /critters/
-    if (pVictim->GetTypeId() == TYPEID_UNIT && pVictim->GetCreatureType() == CREATURE_TYPE_CRITTER)
-    {
-        // TODO: fix this part
-        // Critter may not die of damage taken, instead expect it to run away (no fighting back)
-        // If (this) is TYPEID_PLAYER, (this) will enter combat w/victim, but after some time, automatically leave combat.
-        // It is unclear how it should work for other cases.
-
-        DEBUG_FILTER_LOG(LOG_FILTER_DAMAGE, "Unit::DealDamage %s strike critter, critter %s dies", GetObjectGuid().GetString().c_str(), pVictim->GetObjectGuid().GetString().c_str());
-
-        ((Creature*)pVictim)->SetLootRecipient(this);
-
-        JustKilledCreature((Creature*)pVictim, NULL);
-
-        pVictim->SetDeathState(JUST_DIED);
-        pVictim->SetHealth(0);
-
-        return damageInfo->damage;
-    }
 
     uint32 health = pVictim->GetHealth();
     DEBUG_FILTER_LOG(LOG_FILTER_DAMAGE,"Unit::DealDamage DealDamageStart, %s strike %s,  value %u, health %u",GetObjectGuid().GetString().c_str(), pVictim->GetObjectGuid().GetString().c_str(), damageInfo->damage, health);
@@ -818,28 +799,6 @@ uint32 Unit::DealDamage(DamageInfo* damageInfo)
         }
     }
 
-    // duel ends when player has 1 or less hp
-    bool duel_hasEnded = false;
-    if (pVictim->GetTypeId() == TYPEID_PLAYER && ((Player*)pVictim)->duel && damageInfo->damage >= (health-1))
-    {
-        // prevent kill only if killed in duel and killed by opponent or opponent controlled creature
-        if(((Player*)pVictim)->duel->opponent==this || ((Player*)pVictim)->duel->opponent->GetObjectGuid() == GetOwnerGuid())
-            damageInfo->damage = health-1;
-
-        duel_hasEnded = true;
-    }
-    //Get in CombatState
-    if (pVictim != this && damageInfo->damageType != DOT)
-    {
-        if (!spellProto || !spellProto->HasAttribute(SPELL_ATTR_EX_NO_THREAT))
-        {
-            SetInCombatWith(pVictim);
-            pVictim->SetInCombatWith(this);
-
-            if (Player* attackedPlayer = pVictim->GetCharmerOrOwnerPlayerOrPlayerItself())
-                SetContestedPvP(attackedPlayer);
-        }
-    }
 
     // Rage from Damage made (only from direct weapon damage)
     if (damageInfo->cleanDamage && damageInfo->damageType == DIRECT_DAMAGE && this != pVictim && GetTypeId() == TYPEID_PLAYER && (getPowerType() == POWER_RAGE))
@@ -873,6 +832,49 @@ uint32 Unit::DealDamage(DamageInfo* damageInfo)
             case RANGED_ATTACK:
             default:
                 break;
+        }
+    }
+
+    // no xp,health if type 8 /critters/
+    if (pVictim->GetTypeId() == TYPEID_UNIT && pVictim->GetCreatureType() == CREATURE_TYPE_CRITTER)
+    {
+        // TODO: fix this part
+        // Critter may not die of damage taken, instead expect it to run away (no fighting back)
+        // If (this) is TYPEID_PLAYER, (this) will enter combat w/victim, but after some time, automatically leave combat.
+        // It is unclear how it should work for other cases.
+
+        DEBUG_FILTER_LOG(LOG_FILTER_DAMAGE, "Unit::DealDamage %s strike critter, critter %s dies", GetObjectGuid().GetString().c_str(), pVictim->GetObjectGuid().GetString().c_str());
+
+        ((Creature*)pVictim)->SetLootRecipient(this);
+
+        JustKilledCreature((Creature*)pVictim, NULL);
+
+        pVictim->SetDeathState(JUST_DIED);
+        pVictim->SetHealth(0);
+
+        return damageInfo->damage;
+    }
+
+    // duel ends when player has 1 or less hp
+    bool duel_hasEnded = false;
+    if (pVictim->GetTypeId() == TYPEID_PLAYER && ((Player*)pVictim)->duel && damageInfo->damage >= (health-1))
+    {
+        // prevent kill only if killed in duel and killed by opponent or opponent controlled creature
+        if(((Player*)pVictim)->duel->opponent==this || ((Player*)pVictim)->duel->opponent->GetObjectGuid() == GetOwnerGuid())
+            damageInfo->damage = health-1;
+
+        duel_hasEnded = true;
+    }
+    //Get in CombatState
+    if (pVictim != this && damageInfo->damageType != DOT)
+    {
+        if (!spellProto || !spellProto->HasAttribute(SPELL_ATTR_EX_NO_THREAT))
+        {
+            SetInCombatWith(pVictim);
+            pVictim->SetInCombatWith(this);
+
+            if (Player* attackedPlayer = pVictim->GetCharmerOrOwnerPlayerOrPlayerItself())
+                SetContestedPvP(attackedPlayer);
         }
     }
 
