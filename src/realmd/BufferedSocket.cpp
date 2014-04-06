@@ -66,7 +66,7 @@ BufferedSocket::BufferedSocket(void):
         for (TIpList::iterator itr = sIpListStorage.begin(); itr != sIpListStorage.end();)
         {
             if (itr->second < currTime)
-                itr = sIpListStorage.erase(itr);
+                sIpListStorage.erase(itr++);
             else
                 ++itr;
         }
