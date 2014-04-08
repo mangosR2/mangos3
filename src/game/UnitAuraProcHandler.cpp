@@ -2702,7 +2702,12 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, DamageInfo* damageI
                 pet->CastCustomSpell(pet, 83359, &basepoints[0], NULL, NULL, true, NULL, triggeredByAura, GetObjectGuid());
                 return SPELL_AURA_PROC_OK;
             }
-
+            // Posthaste
+            else if (dummySpell->GetSpellIconID() == 5094)
+            {
+                basepoints[0] = triggerAmount;
+                triggered_spell_id = 83559;
+            }
             // Misdirection
             else if (dummySpell->Id == 34477)
             {

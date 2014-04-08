@@ -870,3 +870,8 @@ DELETE FROM `spell_proc_event` WHERE `entry` = 34485;
 INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskB0`) VALUES
 (34485, 9, 1);
 
+-- Posthaste
+DELETE FROM `spell_proc_event` WHERE `entry` = 83558;
+INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskB1`, `procFlags`, `CustomChance`) VALUES
+(83558, 9, 16384, 16384, 100);
+
