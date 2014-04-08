@@ -3213,6 +3213,16 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                     int32 bp = m_modifier.m_amount;
                     target->CastCustomSpell(target, 83468, &bp, NULL, NULL, true);
                 }
+                // Ready, Set, Aim...
+                else if (GetId() == 82925)
+                {
+                    if (GetStackAmount() >= GetSpellProto()->GetStackAmount())
+                    {
+                        target->CastSpell(target, 82926, true);
+                        target->RemoveAurasDueToSpell(GetId());
+                        return;
+                    }
+                }
                 break;
             }
             case SPELLFAMILY_SHAMAN:
