@@ -2630,6 +2630,15 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, DamageInfo* damageI
                 mod->m_amount = basepoints[0];
                 return SPELL_AURA_PROC_OK;
             }
+            // Marked for Death
+            else if (dummySpell->GetSpellIconID() == 3524)
+            {
+                if (!roll_chance_i(triggerAmount))
+                    return SPELL_AURA_PROC_FAILED;
+
+                triggered_spell_id = 88691;
+                break;
+            }
             // Rapid Recuperation
             else if (dummySpell->GetSpellIconID() == 3560)
             {

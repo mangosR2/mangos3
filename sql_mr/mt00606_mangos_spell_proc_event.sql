@@ -875,3 +875,7 @@ DELETE FROM `spell_proc_event` WHERE `entry` = 83558;
 INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskB1`, `procFlags`, `CustomChance`) VALUES
 (83558, 9, 16384, 16384, 100);
 
+-- Marked for Death
+DELETE FROM `spell_proc_event` WHERE `entry` = 53241;
+INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`, `SpellFamilyMaskC0`, `procFlags`, `CustomChance`) VALUES
+(53241, 9, 2048, 1, 256, 100);

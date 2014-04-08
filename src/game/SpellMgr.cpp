@@ -614,6 +614,10 @@ SpellSpecific GetSpellSpecific(uint32 spellId)
             if (spellInfo->GetSpellFamilyFlags().test<CF_HUNTER_ASPECT_OF_THE_MONKEY, CF_HUNTER_ASPECT_OF_THE_HAWK, CF_HUNTER_ASPECT_OF_THE_PACK, CF_HUNTER_ASPECT_OF_THE_VIPER, CF_HUNTER_ASPECT_OF_THE_WILD, CF_HUNTER_ASPECT_OF_THE_BEAST, CF_HUNTER_ASPECT_OF_THE_DRAGONHAWK>())
                 return SPELL_ASPECT;
 
+            // Hunter's Mark and Marked for Death
+            if (spellInfo->Id == 1130 || spellInfo->Id == 88691)
+                return SPELL_HUNTER_MARK;
+
             break;
         }
         case SPELLFAMILY_PALADIN:
@@ -688,6 +692,7 @@ bool IsSingleFromSpellSpecificPerTargetPerCaster(SpellSpecific spellSpec1,SpellS
         case SPELL_HAND:
         case SPELL_UA_IMMOLATE:
         case SPELL_WARLOCK_BANE:
+        case SPELL_HUNTER_MARK:
             return spellSpec1 == spellSpec2;
         default:
             return false;

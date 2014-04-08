@@ -78,7 +78,8 @@ enum SpellSpecific
     SPELL_MAGE_INTELLECT    = 25,
     SPELL_PRIEST_INNER      = 26,
     SPELL_PRIEST_CHAKRA     = 27,
-    SPELL_SCROLL            = 30
+    SPELL_SCROLL            = 30,
+    SPELL_HUNTER_MARK       = 31
 };
 
 SpellSpecific GetSpellSpecific(uint32 spellId);
