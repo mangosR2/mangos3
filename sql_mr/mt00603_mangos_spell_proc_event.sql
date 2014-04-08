@@ -864,3 +864,9 @@ INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`,
 DELETE FROM `spell_proc_event` WHERE `entry` = 76659;
 INSERT INTO `spell_proc_event` (`entry`, `SchoolMask`) VALUE
 (76659, 127);
+
+-- Master Marksman
+DELETE FROM `spell_proc_event` WHERE `entry` = 34485;
+INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskB0`) VALUES
+(34485, 9, 1);
+

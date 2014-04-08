@@ -119,6 +119,10 @@ int32 ApplyHasteToDuration(SpellEntry const* spellProto, Unit const* caster, int
 
 uint32 GetSpellCastTime(SpellEntry const* spellInfo, Spell const* spell)
 {
+    // Aimed Shot! (Master Marksman)
+    if (spellInfo->Id == 82928)
+        return 0;
+
     if (spell)
     {
         // some triggered spells have data only usable for client

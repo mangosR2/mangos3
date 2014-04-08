@@ -4809,8 +4809,14 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(Unit *pVictim, DamageIn
         }
         case SPELLFAMILY_HUNTER:
         {
+            // Master Marksman
+            if (auraSpellInfo->GetSpellIconID() == 2230)
+            {
+                basepoints[0] = triggerAmount;
+                break;
+            }
             // Piercing Shots
-            if (auraSpellInfo->GetSpellIconID() == 3247 && auraSpellInfo->GetSpellVisual() == 0)
+            else if (auraSpellInfo->GetSpellIconID() == 3247 && auraSpellInfo->GetSpellVisual() == 0)
             {
                 basepoints[0] = damage * triggerAmount / 100 / 8;
                 trigger_spell_id = 63468;
