@@ -12966,8 +12966,7 @@ void Spell::EffectScriptEffect(SpellEffectEntry const* effect)
                         if ((*i)->GetSpellProto()->GetSpellIconID() == 3487 && (*i)->GetSpellProto()->GetSpellFamilyName() == SPELLFAMILY_HUNTER)
                         {
                             int32 bp = (*i)->GetModifier()->m_amount;
-                            //no known conversion for argument 8 from ‘const AuraPair’ to ‘const Aura*’   *i
-                            //unitTarget->CastCustomSpell(unitTarget, 53398, &bp, NULL, NULL, true, NULL, *i, m_caster->GetObjectGuid());
+                            unitTarget->CastCustomSpell(unitTarget, 53398, &bp, NULL, NULL, true, NULL, (*i)(), m_caster->GetObjectGuid());
                             break;
                         }
                     }
