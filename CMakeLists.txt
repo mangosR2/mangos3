@@ -26,6 +26,78 @@ set(CMAKE_MODULE_PATH
   ${CMAKE_SOURCE_DIR}/cmake
 )
 
+# define all options here
+option(DEBUG                "Debug mode"                            OFF)
+option(TBB_USE_EXTERNAL     "Use external TBB"                      OFF)
+#option(USE_STD_MALLOC       "Use standard malloc instead of TBB"    OFF)
+#option(USE_TBB_MALLOC       "Use included TBB malloc"               OFF)
+option(ACE_USE_EXTERNAL     "Use external ACE"                      ON)
+
+if(WIN32)
+  if(PLATFORM MATCHES X86) # 32-bit
+    option(USE_FASTMM_MALLOC "Use included FastMM malloc (default for win*)" 1)
+    option(USE_STD_MALLOC "Use standard malloc instead of TBB" 0)
+  else() # 64-bit
+    option(USE_STD_MALLOC "Use standard malloc instead of TBB" 0)
+    option(USE_FASTMM_MALLOC "Use included FastMM malloc (default for win*)" 1)
+  endif()
+else()
+#Unix and other platforms
+  option(USE_STD_MALLOC "Use standard malloc instead of TBB" 1)
+endif()
+
+option(POSTGRESQL           "Use PostgreSQL"                        OFF)
+
+if(PCHSupport_FOUND AND WIN32) # TODO: why only enable it on windows by default?
+  option(PCH                "Use precompiled headers"               ON)
+else()
+  option(PCH                "Use precompiled headers"               OFF)
+endif()
+# TODO: options that should be checked/created:
+#option(CLI                  "With CLI"                              ON)
+#option(RA                   "With Remote Access"                    OFF)
+#option(SQL                  "Copy SQL files"                        OFF)
+#option(TOOLS                "Build tools"                           OFF)
+
+find_package(PCHSupport)
+
+# Add options for compile of mangos
+if(PCHSupport_FOUND)
+  if(WIN32)
+    option(PCH "Use precompiled headers" 1)
+  else()
+    option(PCH "Use precompiled headers" 0)
+  endif()
+endif()
+
+# FIXME: options that should be checked
+# option(SQL "Copy SQL files" 0)
+# option(TOOLS "Build tools" 0)
+
+# Output description of this script
+message("")
+message(
+  "This script builds the MangosR2 server.
+  Options that can be used in order to configure the process:
+    CMAKE_INSTALL_PREFIX    Path where the server should be installed to
+    PCH                     Use precompiled headers
+    DEBUG                   Debug mode
+    INCLUDE_BINDINGS_DIR    Include a script library in src/bindings/ with the
+                            defined name. the name must corespond to the name of
+                            the folder and the folder must contain a valid
+                            CMakeLists.txt
+    TBB_USE_EXTERNAL        Use external TBB
+    USE_STD_MALLOC          Use standard malloc (default for *NIX)
+    USE_TBB_MALLOC          Use TBB malloc (not recommended)
+    USE_FASTMM_MALLOC       Use included FastMM malloc (default for win*)
+    ACE_USE_EXTERNAL        Use external ACE (default. usage included ACE not recommended, possible only for win*)
+
+  To set an option simply type -D<OPTION>=<VALUE> after 'cmake <srcs>'.
+  Also, you can specify the generator with -G. see 'cmake --help' for more details
+  For example: cmake .. -DDEBUG=1 -DCMAKE_INSTALL_PREFIX=/opt/mangos"
+)
+message("")
+
 # Force out-of-source build
 string(COMPARE EQUAL "${CMAKE_SOURCE_DIR}" "${CMAKE_BINARY_DIR}" BUILDING_IN_SOURCE)
 if(BUILDING_IN_SOURCE)
@@ -96,41 +168,8 @@ endif()
 #   endif()
 # endif()
 
-option(DEBUG "Debug mode" 0)
-# option(CLI "With CLI" 1) # Not used by MaNGOS so far
-# option(RA "With Remote Access" 0) # TODO: support remote access
-option(TBB_USE_EXTERNAL "Use external TBB" 0)
-option(USE_STD_MALLOC "Use standard malloc instead of TBB" 0)
-option(USE_TBB_MALLOC "Use included TBB malloc" 0)
-option(ACE_USE_EXTERNAL "Use external ACE" 0)
 
-if(WIN32)
-  if(PLATFORM MATCHES X86) # 32-bit
-    option(USE_FASTMM_MALLOC "Use included FastMM malloc (default for win*)" 1)
-    option(USE_STD_MALLOC "Use standard malloc instead of TBB" 0)
-  else() # 64-bit
-    option(USE_STD_MALLOC "Use standard malloc instead of TBB" 0)
-    option(USE_FASTMM_MALLOC "Use included FastMM malloc (default for win*)" 1)
-  endif()
-else()
-#Unix and other platforms
-  option(USE_STD_MALLOC "Use standard malloc instead of TBB" 1)
-endif()
 
-find_package(PCHSupport)
-
-# Add options for compile of mangos
-if(PCHSupport_FOUND)
-  if(WIN32)
-    option(PCH "Use precompiled headers" 1)
-  else()
-    option(PCH "Use precompiled headers" 0)
-  endif()
-endif()
-
-# FIXME: options that should be checked
-# option(SQL "Copy SQL files" 0)
-# option(TOOLS "Build tools" 0)
 
 # TODO: remove this in the future! it has only been added to make the switch easier for end users
 if(PREFIX)
@@ -205,7 +244,17 @@ endif()
 
 # *nix-specific packages
 if(UNIX)
-  find_package(MySQL REQUIRED)
+  if(POSTGRESQL)
+    find_package(PostgreSQL REQUIRED)
+
+    if(POSTGRESQL_FOUND)
+      include_directories(${POSTGRESQL_INCLUDE_DIRS})
+    endif(POSTGRESQL_FOUND)
+
+  else()
+    find_package(MySQL REQUIRED)
+  endif()
+
   find_package(OpenSSL REQUIRED)
   find_package(ZLIB REQUIRED)
 endif()
@@ -413,12 +462,19 @@ else()
     set(DEFINITIONS DO_MYSQL SYSCONFDIR="../etc/")
 endif()
 
+if(POSTGRESQL)
+  set(DEFINITIONS ${DEFINITIONS} DO_POSTGRESQL)
+else()
+  set(DEFINITIONS ${DEFINITIONS} DO_MYSQL)
+endif()
+
 set(DEFINITIONS_RELEASE NDEBUG)
 set(DEFINITIONS_DEBUG _DEBUG MANGOS_DEBUG)
 if(WIN32)
   set(DEFINITIONS ${DEFINITIONS} WIN32 _WIN32)
   set(DEFINITIONS_RELEASE ${DEFINITIONS_RELEASE} _CRT_SECURE_NO_WARNINGS)
 endif()
+
 if(USE_STD_MALLOC)
   set(DEFINITIONS ${DEFINITIONS} USE_STANDARD_MALLOC)
 endif()
