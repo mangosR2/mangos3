@@ -5479,17 +5479,6 @@ void Spell::EffectDummy(SpellEffectEntry const* effect)
                             damage = int32(owner->SpellHealingBonusDone(unitTarget, m_triggeredBySpellInfo, damage, HEAL));
                             damage = int32(unitTarget->SpellHealingBonusTaken(owner, m_triggeredBySpellInfo, damage, HEAL));
                         }
-
-                        // Restorative Totems
-                        Unit::AuraList const& mDummyAuras = owner->GetAurasByType(SPELL_AURA_DUMMY);
-                        for(Unit::AuraList::const_iterator i = mDummyAuras.begin(); i != mDummyAuras.end(); ++i)
-                            // only its have dummy with specific icon
-                            if ((*i)->GetSpellProto()->GetSpellFamilyName() == SPELLFAMILY_SHAMAN && (*i)->GetSpellProto()->GetSpellIconID() == 338)
-                                damage += (*i)->GetModifier()->m_amount * damage / 100;
-
-                        // Glyph of Healing Stream Totem
-                        if (Aura const* dummy = owner->GetDummyAura(55456))
-                            damage += dummy->GetModifier()->m_amount * damage / 100;
                     }
                     m_caster->CastCustomSpell(unitTarget, 52042, &damage, NULL, NULL, true, 0, 0, m_originalCasterGuid);
                 }
