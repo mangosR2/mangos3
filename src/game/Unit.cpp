@@ -15502,6 +15502,24 @@ uint32 Unit::GetModelForForm(SpellShapeshiftFormEntry const* ssEntry) const
 uint32 Unit::GetModelForForm() const
 {
     ShapeshiftForm form = GetShapeshiftForm();
+    switch(form)
+    {
+        case FORM_CAT:
+        {
+            if (HasAura(99245))     // Fandral's Flameschyte.
+                return 38150;
+        }
+        case FORM_TREE:
+        {
+            if (HasAura(95212))     // Glyph of the Treant
+                return 9590;
+        }
+        case FORM_GHOSTWOLF:
+        {
+            if (HasAura(58135))     // Glyph of the Spectral Wolf
+                return 27312;
+        }
+    }
     SpellShapeshiftFormEntry const* ssEntry = sSpellShapeshiftFormStore.LookupEntry(form);
     return ssEntry ? GetModelForForm(ssEntry) : 0;
 }
