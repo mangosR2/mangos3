@@ -9265,7 +9265,7 @@ void Spell::EffectWeaponDmg(SpellEffectEntry const* effect)
                         // Searing Flames
                         if (SpellAuraHolderPtr flames = unitTarget->GetSpellAuraHolder(77661, m_caster->GetObjectGuid()))
                         {
-                            m_damage = int32(m_damage * (flames->GetStackAmount() * spellInfo->CalculateSimpleValue(EFFECT_INDEX_1) + 100.0f) / 100.0f);
+                            totalDamagePercentMod *= (flames->GetStackAmount() * spellInfo->CalculateSimpleValue(EFFECT_INDEX_1) + 100.0f) / 100.0f;
                             unitTarget->RemoveSpellAuraHolder(flames);
                         }
 
