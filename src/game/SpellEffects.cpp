@@ -1219,6 +1219,9 @@ void Spell::EffectSchoolDMG(SpellEffectEntry const* effect)
                 {
                     if (unitTarget->GetHealthPercent() <= 25.0f)
                     {
+                        // three times as much damage
+                        damage *= 3;
+
                         // Search Mind Melt
                         Unit::AuraList const& mindMelt = m_caster->GetAurasByType(SPELL_AURA_DUMMY);
                         for (Unit::AuraList::const_iterator i = mindMelt.begin(); i != mindMelt.end(); ++i)
