@@ -1334,36 +1334,10 @@ void WorldSession::HandleCharFactionOrRaceChangeOpcode(WorldPacket& recv_data)
     uint32 deletedGuild = 0;
 
     // Search old faction.
-    TeamIndex oldTeam = TEAM_INDEX_ALLIANCE;
-    switch (oldRace)
-    {
-        case RACE_ORC:
-        case RACE_TAUREN:
-        case RACE_UNDEAD:
-        case RACE_TROLL:
-        case RACE_BLOODELF:
-        // case RACE_GOBLIN: for cataclysm
-            oldTeam = TEAM_INDEX_HORDE;
-            break;
-        default:
-            break;
-    }
+    TeamIndex oldTeam = ((1 << (oldRace - 1)) & RACEMASK_ALLIANCE) ? TEAM_INDEX_ALLIANCE : TEAM_INDEX_HORDE;
 
     // Search each faction is targeted
-    TeamIndex newTeam = TEAM_INDEX_ALLIANCE;
-    switch (newRace)
-    {
-        case RACE_ORC:
-        case RACE_TAUREN:
-        case RACE_UNDEAD:
-        case RACE_TROLL:
-        case RACE_BLOODELF:
-        // case RACE_GOBLIN: for cataclysm
-            newTeam = TEAM_INDEX_HORDE;
-            break;
-        default:
-            break;
-    }
+    TeamIndex newTeam = ((1 << (newRace - 1)) & RACEMASK_ALLIANCE) ? TEAM_INDEX_ALLIANCE : TEAM_INDEX_HORDE;
 
     if (used_loginFlag == AT_LOGIN_CHANGE_FACTION && newTeam != oldTeam)
     {
