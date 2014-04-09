@@ -283,6 +283,13 @@ void Spell::EffectResurrectNew(SpellEffectEntry const* effect)
 
     uint32 health = damage;
     uint32 mana = effect->EffectMiscValue;
+
+    if (m_caster->GetTypeId() == TYPEID_PLAYER)
+    {
+        if (((Player*)m_caster)->GetGuildId() == pTarget->GetGuildId())
+            health = uint32(health * m_caster->GetTotalAuraMultiplier(SPELL_AURA_MOD_RESURRECTED_HEALTH_BY_GUILD_MEMBER));
+    }
+
     pTarget->setResurrectRequestData(m_caster->GetObjectGuid(), m_caster->GetMapId(), m_caster->GetPositionX(), m_caster->GetPositionY(), m_caster->GetPositionZ(), health, mana, 0);
     SendResurrectRequest(pTarget);
     SendEffectLogExecute(effect, pTarget->GetObjectGuid());
