@@ -1628,18 +1628,18 @@ bool Player::BuildEnumData(QueryResult* result, ByteBuffer* data, ByteBuffer* bu
     data->WriteGuidMask<0, 2, 6>(guid);
     data->WriteGuidMask<0>(guildGuid);
 
-        // show pet at selection character in character list only for non-ghost character
-        if (result && !(playerFlags & PLAYER_FLAGS_GHOST) && (pClass == CLASS_WARLOCK || pClass == CLASS_HUNTER || pClass == CLASS_DEATH_KNIGHT))
+    // show pet at selection character in character list only for non-ghost character
+    if (result && !(playerFlags & PLAYER_FLAGS_GHOST) && (pClass == CLASS_WARLOCK || pClass == CLASS_HUNTER || pClass == CLASS_DEATH_KNIGHT))
+    {
+        uint32 entry = fields[16].GetUInt32();
+        CreatureInfo const* cInfo = sCreatureStorage.LookupEntry<CreatureInfo>(entry);
+        if (cInfo)
         {
-            uint32 entry = fields[16].GetUInt32();
-            CreatureInfo const* cInfo = sCreatureStorage.LookupEntry<CreatureInfo>(entry);
-            if (cInfo)
-            {
-                petDisplayId = fields[17].GetUInt32();
-                petLevel     = fields[18].GetUInt32();
-                petFamily    = cInfo->family;
-            }
+            petDisplayId = fields[17].GetUInt32();
+            petLevel     = fields[18].GetUInt32();
+            petFamily    = cInfo->family;
         }
+    }
 
     if(playerFlags & PLAYER_FLAGS_HIDE_HELM)
         char_flags |= CHARACTER_FLAG_HIDE_HELM;
@@ -1715,8 +1715,15 @@ bool Player::BuildEnumData(QueryResult* result, ByteBuffer* data, ByteBuffer* bu
     *buffer << uint32(petLevel);                            // pet level
     buffer->WriteGuidBytes<3>(guid);
     *buffer << fields[11].GetFloat();                       // y
-    // character customize flags
-    *buffer << uint32(atLoginFlags & AT_LOGIN_CUSTOMIZE ? CHAR_CUSTOMIZE_FLAG_CUSTOMIZE : CHAR_CUSTOMIZE_FLAG_NONE);
+    // character customize/faction/race change flags
+    if (atLoginFlags & AT_LOGIN_CHANGE_FACTION)
+        *buffer << uint32(CHAR_CUSTOMIZE_FLAG_FACTION);
+    else if (atLoginFlags & AT_LOGIN_CHANGE_RACE)
+        *buffer << uint32(CHAR_CUSTOMIZE_FLAG_RACE);
+    else if (atLoginFlags & AT_LOGIN_CUSTOMIZE)
+        *buffer << uint32(CHAR_CUSTOMIZE_FLAG_CUSTOMIZE);
+    else
+        *buffer << uint32(CHAR_CUSTOMIZE_FLAG_NONE);
 
     uint32 playerBytes2 = fields[6].GetUInt32();
     *buffer << uint8(playerBytes2 & 0xFF);                  // facial hair
