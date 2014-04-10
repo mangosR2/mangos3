@@ -26920,8 +26920,7 @@ void Player::StoreLootItem(uint8 lootSlot, Loot* loot, Item* pItem)
     InventoryResult msg = CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, item->itemid, item->count);
     if (msg == EQUIP_ERR_OK)
     {
-        AllowedLooterSet* looters = item->IsEligibleForSoublountTrade(this) ? loot->GetAllowedLooters() : NULL;
-        Item* newitem = StoreNewItem( dest, item->itemid, true, item->randomPropertyId, looters);
+        Item* newitem = StoreNewItem( dest, item->itemid, true, item->randomPropertyId, item->GetAllowedLooters());
 
         if (qitem)
         {
@@ -26937,14 +26936,14 @@ void Player::StoreLootItem(uint8 lootSlot, Loot* loot, Item* pItem)
             if (ffaitem)
             {
                 // freeforall case, notify only one player of the removal
-                ffaitem->is_looted=true;
+                ffaitem->is_looted = true;
                 SendNotifyLootItemRemoved(lootSlot);
             }
             else
             {
                 // not freeforall, notify everyone
                 if (conditem)
-                    conditem->is_looted=true;
+                    conditem->is_looted = true;
                 loot->NotifyItemRemoved(lootSlot);
             }
         }
