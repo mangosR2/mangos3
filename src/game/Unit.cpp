@@ -15543,16 +15543,19 @@ uint32 Unit::GetModelForForm() const
         {
             if (HasAura(99245))     // Fandral's Flameschyte.
                 return 38150;
+            break;
         }
         case FORM_TREE:
         {
             if (HasAura(95212))     // Glyph of the Treant
                 return 9590;
+            break;
         }
         case FORM_GHOSTWOLF:
         {
             if (HasAura(58135))     // Glyph of the Spectral Wolf
                 return 27312;
+            break;
         }
     }
     SpellShapeshiftFormEntry const* ssEntry = sSpellShapeshiftFormStore.LookupEntry(form);
