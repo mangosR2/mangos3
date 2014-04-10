@@ -8111,8 +8111,8 @@ void Unit::SpellDamageBonusDone(DamageInfo* damageInfo, uint32 stack)
     MAPLOCK_READ(this,MAP_LOCK_TYPE_AURAS);
 
     // Creature damage
-    if ( GetTypeId() == TYPEID_UNIT && !((Creature*)this)->IsPet() )
-        DoneTotalMod *= ((Creature*)this)->GetSpellDamageMod(((Creature*)this)->GetCreatureInfo()->rank);
+    if (GetTypeId() == TYPEID_UNIT && !((Creature*)this)->IsPet())
+        DoneTotalMod *= Creature::_GetSpellDamageMod(((Creature*)this)->GetCreatureInfo()->rank);
 
     float nonStackingPos = 0.0f;
     float nonStackingNeg = 0.0f;
