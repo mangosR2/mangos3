@@ -23600,7 +23600,7 @@ bool Player::LearnTalent(uint32 talentId, uint32 talentRank)
         return false;
 
     // Check if it requires another talent
-    /*if (talentInfo->DependsOn > 0)
+    if (talentInfo->DependsOn > 0)
     {
         if (TalentEntry const *depTalentInfo = sTalentStore.LookupEntry(talentInfo->DependsOn))
         {
@@ -23616,7 +23616,7 @@ bool Player::LearnTalent(uint32 talentId, uint32 talentRank)
             if (!hasEnoughRank)
                 return false;
         }
-    }*/
+    }
 
     // Find out how many points we have in this field
     uint32 spentPoints = 0;
@@ -23630,11 +23630,11 @@ bool Player::LearnTalent(uint32 talentId, uint32 talentRank)
         for (uint32 i = 0; i < sTalentStore.GetNumRows(); i++)              // Loop through all talents.
         {
             if (TalentEntry const* tmpTalent = sTalentStore.LookupEntry(i)) // Someday, someone needs to revamp the way talents are tracked
-    {
+            {
                 for (uint8 rank = 0; rank < MAX_TALENT_RANK; rank++)
                 {
                     if (tmpTalent->RankID[rank] != 0)
-    {
+                    {
                         if (HasSpell(tmpTalent->RankID[rank]))
                         {
                             if (tmpTalent->TalentTab == tTab)
@@ -23677,8 +23677,8 @@ bool Player::LearnTalent(uint32 talentId, uint32 talentRank)
     {
         m_talentsPrimaryTree[m_activeSpec] = talentInfo->TalentTab;
         if (std::vector<uint32> const* specSpells = GetTalentTreeMasterySpells(talentInfo->TalentTab))
-                for (size_t i = 0; i < specSpells->size(); ++i)
-                    learnSpell(specSpells->at(i), false);
+            for (size_t i = 0; i < specSpells->size(); ++i)
+                learnSpell(specSpells->at(i), false);
 
         if (std::vector<uint32> const* specSpells = GetTalentTreePrimarySpells(talentInfo->TalentTab))
             for (size_t i = 0; i < specSpells->size(); ++i)
@@ -23756,7 +23756,7 @@ void Player::LearnPetTalent(ObjectGuid petGuid, uint32 talentId, uint32 talentRa
         return;
 
     // Check if it requires another talent
-    /*if (talentInfo->DependsOn > 0)
+    if (talentInfo->DependsOn > 0)
     {
         if (TalentEntry const *depTalentInfo = sTalentStore.LookupEntry(talentInfo->DependsOn))
         {
@@ -23770,7 +23770,7 @@ void Player::LearnPetTalent(ObjectGuid petGuid, uint32 talentId, uint32 talentRa
             if (!hasEnoughRank)
                 return;
         }
-    }*/
+    }
 
     // Find out how many points we have in this field
     uint32 spentPoints = 0;
