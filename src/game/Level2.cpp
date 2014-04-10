@@ -5863,7 +5863,7 @@ bool ChatHandler::HandleWorldStateListAllCommand(char* args)
         WorldState* ws = (*wsSet)[i];
         PSendSysMessage(LANG_WORLDSTATE_LIST_FULL, ws->GetId(), ws->GetType(), ws->GetCondition(), ws->GetInstance(), ws->GetValue());
     }
-
+    delete wsSet;
     return true;
 }
 
