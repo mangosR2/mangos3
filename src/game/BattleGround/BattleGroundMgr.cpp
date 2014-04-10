@@ -1375,10 +1375,13 @@ void BattleGroundMgr::BuildPvpLogDataPacket(WorldPacket* data, BattleGround* bg)
         data->WriteGuidMask<2>(memberGuid);
         data->WriteBit(!bg->isArena());
         data->WriteBit(0);                  // unk4
-        data->WriteBit(0);                  // unk5
+        data->WriteBit(bg->isRated());
         data->WriteBit(0);                  // unk6
         data->WriteGuidMask<3, 0, 5, 1, 6>(memberGuid);
-        data->WriteBit(player->GetBGTeam() == ALLIANCE);
+        Team team = bg->GetPlayerTeam(itr->first);
+        if (!team && player)
+            team = Team(player->GetTeam());
+        data->WriteBit(team == ALLIANCE);   // Team
         data->WriteGuidMask<7>(memberGuid);
 
         buffer << uint32(itr->second->HealingDone);         // healing done
@@ -1393,7 +1396,8 @@ void BattleGroundMgr::BuildPvpLogDataPacket(WorldPacket* data, BattleGround* bg)
 
         buffer.WriteGuidBytes<4>(memberGuid);
         buffer << uint32(itr->second->KillingBlows);
-        // if (unk5) << uint32() unk
+        if (bg->isRated())
+            buffer << int32(bg->GetArenaTeamRatingChangeForTeam(team));
         buffer.WriteGuidBytes<5>(memberGuid);
         // if (unk6) << uint32() unk
         // if (unk2) << uint32() unk
@@ -1401,7 +1405,7 @@ void BattleGroundMgr::BuildPvpLogDataPacket(WorldPacket* data, BattleGround* bg)
         // TODO: store this in player score
         if (player)
             buffer << uint32(player->GetPrimaryTalentTree(player->GetActiveSpec()));
-            else
+        else
             buffer << uint32(0);
 
         switch (bg->GetTypeID(true))                            // battleground specific things
@@ -1421,7 +1425,7 @@ void BattleGroundMgr::BuildPvpLogDataPacket(WorldPacket* data, BattleGround* bg)
                 break;
             case BATTLEGROUND_AB:
                 data->WriteBits(2, 24);                     // count of next fields
-                buffer << uint32(((BattleGroundABScore*)itr->second)->BasesAssaulted);      // bases asssulted
+                buffer << uint32(((BattleGroundABScore*)itr->second)->BasesAssaulted);      // bases assaulted
                 buffer << uint32(((BattleGroundABScore*)itr->second)->BasesDefended);       // bases defended
                 break;
             case BATTLEGROUND_EY:
@@ -1429,21 +1433,25 @@ void BattleGroundMgr::BuildPvpLogDataPacket(WorldPacket* data, BattleGround* bg)
                 buffer << uint32(((BattleGroundEYScore*)itr->second)->FlagCaptures);        // flag captures
                 break;
             case BATTLEGROUND_SA:                           // wotlk
-                *data << (uint32)0x00000002;                // count of next fields
-                *data << (uint32)((BattleGroundSAScore*)itr->second)->DemolishersDestroyed; // demolishers destroyed
-                *data << (uint32)((BattleGroundSAScore*)itr->second)->GatesDestroyed;       // gates destroyed
+                data->WriteBits(2, 24);                     // count of next fields
+                buffer << (uint32)((BattleGroundSAScore*)itr->second)->DemolishersDestroyed;// demolishers destroyed
+                buffer << (uint32)((BattleGroundSAScore*)itr->second)->GatesDestroyed;      // gates destroyed
                 break;
             case BATTLEGROUND_IC:                           // wotlk
-                *data << uint32(0x00000002);                // count of next fields
-                *data << uint32(((BattleGroundICScore*)itr->second)->BasesAssaulted);       // bases asssulted
-                *data << uint32(((BattleGroundICScore*)itr->second)->BasesDefended);        // bases defended
+                data->WriteBits(2, 24);                     // count of next fields
+                buffer << uint32(((BattleGroundICScore*)itr->second)->BasesAssaulted);       // bases asssulted
+                buffer << uint32(((BattleGroundICScore*)itr->second)->BasesDefended);        // bases defended
                 break;
             case BATTLEGROUND_TP:                           // cata
-                *data << (uint32)0x00000002;                // count of next fields
-                *data << (uint32)((BattleGroundTPScore*)itr->second)->FlagCaptures;         // flag captures
-                *data << (uint32)((BattleGroundTPScore*)itr->second)->FlagReturns;          // flag returns
-                break;
+                data->WriteBits(2, 24);                     // count of next fields
+                buffer << uint32(((BattleGroundTPScore*)itr->second)->FlagCaptures);         // flag captures
+                buffer << uint32(((BattleGroundTPScore*)itr->second)->FlagReturns);          // flag returns
+                break; 
             case BATTLEGROUND_BG:                           // cata
+                //data->WriteBits(2, 24);                     // count of next fields
+                //buffer << uint32(((BattleGroundBGScore*)itr->second)->BasesAssaulted);      // bases assaulted
+                //buffer << uint32(((BattleGroundBGScore*)itr->second)->BasesDefended);       // bases defended
+                break;  
             case BATTLEGROUND_NA:
             case BATTLEGROUND_BE:
             case BATTLEGROUND_AA:
@@ -1472,12 +1480,10 @@ void BattleGroundMgr::BuildPvpLogDataPacket(WorldPacket* data, BattleGround* bg)
     {
         for (int8 i = 0; i < PVP_TEAM_COUNT; ++i)
         {
-            uint32 pointsLost = bg->m_ArenaTeamRatingChanges[i] < 0 ? abs(bg->m_ArenaTeamRatingChanges[i]) : 0;
-            uint32 pointsGained = bg->m_ArenaTeamRatingChanges[i] > 0 ? bg->m_ArenaTeamRatingChanges[i] : 0;
-
+            // bg->GetArenaMatchmakerRatingByIndex(i)
             *data << uint32(0);                             // Matchmaking Value
-            *data << uint32(pointsLost);                    // Rating Lost
-            *data << uint32(pointsGained);                  // Rating gained
+            *data << uint32(0);                             // Rating Lost
+            *data << uint32(0);                             // Rating gained
             DEBUG_LOG("rating change: %d", bg->m_ArenaTeamRatingChanges[i]);
         }
     }
