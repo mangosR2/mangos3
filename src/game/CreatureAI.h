@@ -313,6 +313,12 @@ class MANGOS_DLL_SPEC CreatureAI
          */
         virtual void ReceiveAIEvent(AIEventType /*eventType*/, Creature* /*pSender*/, Unit* /*pInvoker*/, uint32 /*miscValue*/) {}
 
+        /// called when creature is about to despawn
+        virtual void BeforeDespawn() {}
+
+        /// method to pass actions between AI's
+        virtual void DoAction(int32 action) {}
+
     protected:
         void HandleMovementOnAttackStart(Unit* victim);
 
