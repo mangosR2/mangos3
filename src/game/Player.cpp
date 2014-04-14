@@ -21575,6 +21575,9 @@ void Player::SendAurasForTarget(Unit* target)
     if (!target)
         return;
 
+    if (!HaveAtClient(target->GetObjectGuid()) || !IsInWorld())
+        return;
+
     WorldPacket data(SMSG_AURA_UPDATE_ALL);
     data << target->GetPackGUID();
 
