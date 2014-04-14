@@ -11522,7 +11522,7 @@ void Unit::SetDeathState(DeathState s)
         UnsummonAllTotems();
 
         GetUnitStateMgr().InitDefaults(false);
-        StopMoving();
+        StopMoving(true);
 
         if (GetVehicleKit())
             GetVehicleKit()->RemoveAllPassengers();
