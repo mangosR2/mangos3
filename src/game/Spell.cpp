@@ -751,6 +751,10 @@ bool Spell::CheckTarget(Unit* target, SpellEffectIndex eff)
             if (m_caster->IsWithinDist(target, 10.0f, false))
                 return false;
             break;
+        case 82301:                                         // Burning Heart
+            if (target->GetEntry() != 40004)
+                return false;
+            break;
         default:
             break;
     }
