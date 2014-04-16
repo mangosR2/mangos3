@@ -8994,61 +8994,37 @@ void Aura::HandleSchoolAbsorb(bool apply, bool Real)
                     break;
                 case SPELLFAMILY_PRIEST:
                     // Power Word: Shield
-                    if (spellProto->GetSpellFamilyFlags().test<CF_PRIEST_POWER_WORD_SHIELD>())
+                    if (classOptions && classOptions->SpellFamilyFlags & UI64LIT(0x0000000000000001))
                     {
-                        //+80.68% from +spell bonus
-                        int32 spellPower = caster->SpellBaseHealingBonusDone(GetSpellSchoolMask(spellProto));
-                        float SpellBonus = spellPower * 0.8068f;
-                        //Borrowed Time
-                        Unit::AuraList const& borrowedTime = caster->GetAurasByType(SPELL_AURA_DUMMY);
-                        for(Unit::AuraList::const_iterator itr = borrowedTime.begin(); itr != borrowedTime.end(); ++itr)
+                        float baseAmt = caster->CalculateSpellDamage(target, spellProto, SpellEffectIndex(m_spellEffect->EffectIndex));
+                        float spd = caster->SpellBaseHealingBonusDone(GetSpellSchoolMask(spellProto));
+                        float spdBonus = 0.0f;
+                        if (SpellBonusEntry const* bonus = sSpellMgr.GetSpellBonusData(spellProto->Id))
+                            spdBonus = bonus->direct_damage;
+
+                        int32 IMP = 0;
+                        int32 SD = 0;
+
+                        Unit::AuraList const& ipwstd = caster->GetAurasByType(SPELL_AURA_DUMMY);
+                        for (Unit::AuraList::const_iterator itr = ipwstd.begin(); itr != ipwstd.end(); ++itr)
                         {
-                            SpellEntry const* i_spell = (*itr)->GetSpellProto();
-                            if (i_spell->GetSpellFamilyName() == SPELLFAMILY_PRIEST && i_spell->GetSpellIconID() == 2899 && (*itr)->GetSpellEffect()->EffectMiscValue == 24)
+                            switch ((*itr)->GetId())
                             {
-                                SpellBonus += spellPower * (*itr)->GetModifier()->m_amount / 100;
-                                break;
+                                case 14748:     // Improved Power Word: Shield
+                                case 14768:
+                                    if ((*itr)->GetEffIndex() == EFFECT_INDEX_0)
+                                        IMP = (*itr)->GetModifier()->m_amount;
+                                    break;
+                                case 77484:     // Shield Discipline
+                                    if ((*itr)->GetEffIndex() == EFFECT_INDEX_0)
+                                        SD = (*itr)->GetModifier()->m_amount;
+                                    break;
                             }
                         }
-                        // extra absorb from talents
-                        int32 BaseBonus = 0, PctAddMod = 0;
-                        Unit::AuraList const& pctModAuras = caster->GetAurasByType(SPELL_AURA_ADD_PCT_MODIFIER);
-                        for (Unit::AuraList::const_iterator itr = pctModAuras.begin(); itr != pctModAuras.end(); ++itr)
-                        {
-                            SpellEntry const* i_spell = (*itr)->GetSpellProto();
-                            if (i_spell->GetSpellFamilyName() != SPELLFAMILY_PRIEST || (*itr)->GetEffIndex() != EFFECT_INDEX_0)
-                                continue;
-                            // Twin Disciplines / Spiritual Healing
-                            if (i_spell->GetSpellIconID() == 2292 || i_spell->GetSpellIconID() == 46)
-                                PctAddMod += (*itr)->GetModifier()->m_amount;
-                            // Improved Power Word: Shield
-                            else if (i_spell->GetSpellIconID() == 566)
-                                SpellBonus *= (100.0f + (*itr)->GetModifier()->m_amount) / 100.0f;
-                            // Item - Priest T10 Healer 4P Bonus
-                            else if (i_spell->Id == 70798)
-                            {
-                                BaseBonus -= m_modifier.m_amount * (*itr)->GetModifier()->m_amount / 100;   // base bonus already added as SPELLMOD_ALL_EFFECTS
-                                PctAddMod += (*itr)->GetModifier()->m_amount;
-                            }
-                        }
-                        Unit::AuraList const& healingPctAuras = caster->GetAurasByType(SPELL_AURA_MOD_HEALING_DONE_PERCENT);
-                        for (Unit::AuraList::const_iterator itr = healingPctAuras.begin(); itr != healingPctAuras.end(); ++itr)
-                        {
-                            SpellEntry const* i_spell = (*itr)->GetSpellProto();
-                            // Focused Power
-                            if (i_spell->GetSpellFamilyName() == SPELLFAMILY_PRIEST && i_spell->GetSpellIconID() == 2210)
-                            {
-                                PctAddMod += (*itr)->GetModifier()->m_amount;
-                                break;
-                            }
-                        }
-                        if (PctAddMod)
-                        {
-                            BaseBonus += m_modifier.m_amount * PctAddMod / 100;
-                            SpellBonus *= (100.0f + PctAddMod) / 100.0f;
-                        }
-                        DoneActualBenefit = BaseBonus + SpellBonus;
+
+                        customModifier = (baseAmt + spdBonus * spd) * (100.0f + IMP) / 100.0f * (100.0f + SD) / 100.0f;
                     }
+                    break;
 
                     break;
                 case SPELLFAMILY_MAGE:
