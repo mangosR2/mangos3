@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2005-2012 MaNGOS <http://getmangos.com/>
+ * Copyright (c) 2014 by boxa for MangosR2 <http://github.com/mangosR2>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,6 +23,7 @@
 
 #include "Common.h"
 #include "BufferedSocket.h"
+#include "IpList.h"
 
 #include <ace/OS_NS_string.h>
 #include <ace/INET_Addr.h>
@@ -41,15 +43,43 @@ BufferedSocket::BufferedSocket(void):
 {
 }
 
-/*virtual*/ int BufferedSocket::open(void * arg)
+/*virtual*/ int BufferedSocket::open(void* arg)
 {
-    if(Base::open(arg) == -1)
+    if (Base::open(arg) == -1)
         return -1;
 
     ACE_INET_Addr addr;
 
-    if(peer().get_remote_addr(addr) == -1)
+    if (peer().get_remote_addr(addr) == -1)
         return -1;
+
+    // <anti DDoS>
+    uint32 uintAddr = addr.get_ip_address();
+    if (!uintAddr)
+        return -1;
+
+    time_t currTime = time(NULL);
+
+    if (!sIpListStorage.empty())
+    {
+        // first del expired records
+        for (TIpList::iterator itr = sIpListStorage.begin(); itr != sIpListStorage.end();)
+        {
+            if (itr->second < currTime)
+                sIpListStorage.erase(itr++);
+            else
+                ++itr;
+        }
+
+        // then search current connected ip
+        TIpList::const_iterator itr = sIpListStorage.find(uintAddr);
+        if (itr != sIpListStorage.end())
+            return -1;
+    }
+
+    // add new ip addr into ip list
+    sIpListStorage[uintAddr] = currTime;
+    // </anti DDoS>
 
     char address[1024];
 
@@ -74,7 +104,7 @@ size_t BufferedSocket::recv_len(void) const
 
 bool BufferedSocket::recv_soft(char *buf, size_t len)
 {
-    if(this->input_buffer_.length() < len)
+    if (this->input_buffer_.length() < len)
         return false;
 
     ACE_OS::memcpy(buf, this->input_buffer_.rd_ptr(), len);
@@ -86,7 +116,7 @@ bool BufferedSocket::recv(char *buf, size_t len)
 {
     bool ret = this->recv_soft(buf, len);
 
-    if(ret)
+    if (ret)
         this->recv_skip(len);
 
     return ret;
@@ -101,22 +131,22 @@ ssize_t BufferedSocket::noblk_send(ACE_Message_Block &message_block)
 {
     const size_t len = message_block.length();
 
-    if(len == 0)
+    if (len == 0)
         return -1;
 
     // Try to send the message directly.
     ssize_t n = this->peer().send(message_block.rd_ptr(), len, MSG_NOSIGNAL);
 
-    if(n < 0)
+    if (n < 0)
     {
-        if(errno == EWOULDBLOCK)
+        if (errno == EWOULDBLOCK)
             // Blocking signal
             return 0;
         else
             // Error
             return -1;
     }
-    else if(n == 0)
+    else if (n == 0)
     {
         // Can this happen ?
         return -1;
@@ -128,7 +158,7 @@ ssize_t BufferedSocket::noblk_send(ACE_Message_Block &message_block)
 
 bool BufferedSocket::send(const char *buf, size_t len)
 {
-    if(buf == NULL || len == 0)
+    if (buf == NULL || len == 0)
         return true;
 
     ACE_Data_Block db(
@@ -147,14 +177,14 @@ bool BufferedSocket::send(const char *buf, size_t len)
 
     message_block.wr_ptr(len);
 
-    if(this->msg_queue()->is_empty())
+    if (this->msg_queue()->is_empty())
     {
         // Try to send it directly.
         ssize_t n = this->noblk_send(message_block);
 
-        if(n < 0)
+        if (n < 0)
             return false;
-        else if(n == len)
+        else if (n == len)
             return true;
 
         // adjust how much bytes we sent
@@ -166,14 +196,14 @@ bool BufferedSocket::send(const char *buf, size_t len)
     // enqueue the message, note: clone is needed cause we cant enqueue stuff on the stack
     ACE_Message_Block *mb = message_block.clone();
 
-    if(this->msg_queue()->enqueue_tail(mb, (ACE_Time_Value *) &ACE_Time_Value::zero) == -1)
+    if (this->msg_queue()->enqueue_tail(mb, (ACE_Time_Value *) &ACE_Time_Value::zero) == -1)
     {
         mb->release();
         return false;
     }
 
     // tell reactor to call handle_output() when we can send more data
-    if(this->reactor()->schedule_wakeup(this, ACE_Event_Handler::WRITE_MASK) == -1)
+    if (this->reactor()->schedule_wakeup(this, ACE_Event_Handler::WRITE_MASK) == -1)
         return false;
 
     return true;
@@ -183,24 +213,24 @@ bool BufferedSocket::send(const char *buf, size_t len)
 {
     ACE_Message_Block *mb = 0;
 
-    if(this->msg_queue()->is_empty())
+    if (this->msg_queue()->is_empty())
     {
         // if no more data to send, then cancel notification
         this->reactor()->cancel_wakeup(this, ACE_Event_Handler::WRITE_MASK);
         return 0;
     }
 
-    if(this->msg_queue()->dequeue_head(mb, (ACE_Time_Value *) &ACE_Time_Value::zero) == -1)
+    if (this->msg_queue()->dequeue_head(mb, (ACE_Time_Value *) &ACE_Time_Value::zero) == -1)
         return -1;
 
     ssize_t n = this->noblk_send(*mb);
 
-    if(n < 0)
+    if (n < 0)
     {
         mb->release();
         return -1;
     }
-    else if(n == mb->length())
+    else if (n == mb->length())
     {
         mb->release();
         return 1;
@@ -209,7 +239,7 @@ bool BufferedSocket::send(const char *buf, size_t len)
     {
         mb->rd_ptr(n);
 
-        if(this->msg_queue()->enqueue_head(mb, (ACE_Time_Value *) &ACE_Time_Value::zero) == -1)
+        if (this->msg_queue()->enqueue_head(mb, (ACE_Time_Value *) &ACE_Time_Value::zero) == -1)
         {
             mb->release();
             return -1;
@@ -227,12 +257,12 @@ bool BufferedSocket::send(const char *buf, size_t len)
 
     ssize_t n = this->peer().recv(this->input_buffer_.wr_ptr(), space);
 
-    if(n < 0)
+    if (n < 0)
     {
         // blocking signal or error
         return errno == EWOULDBLOCK ? 0 : -1;
     }
-    else if(n == 0)
+    else if (n == 0)
     {
         // EOF
         return -1;
@@ -265,4 +295,3 @@ void BufferedSocket::close_connection(void)
 
     reactor()->remove_handler(this, ACE_Event_Handler::DONT_CALL | ACE_Event_Handler::ALL_EVENTS_MASK);
 }
-

@@ -23,11 +23,6 @@
 #include "Policies/Singleton.h"
 #include "Timer.h"
 
-enum
-{
-    TIMER_OPVP_MGR_UPDATE           = MINUTE * IN_MILLISECONDS // 1 minute is enough for us but this might change with wintergrasp support
-};
-
 enum OutdoorPvPTypes
 {
     OPVP_ID_SI = 0,

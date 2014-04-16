@@ -759,7 +759,10 @@ void Creature::DoFleeToGetAssistance()
         if (!pCreature)
             SetFeared(true, pVictim->GetObjectGuid(), 0, sWorld.getConfig(CONFIG_UINT32_CREATURE_FAMILY_FLEE_DELAY));
         else
+        {
+            SetTargetGuid(ObjectGuid());        // creature flee loose its target
             GetMotionMaster()->MoveSeekAssistance(pCreature->GetPositionX(), pCreature->GetPositionY(), pCreature->GetPositionZ());
+        }
     }
 }
 
@@ -1147,22 +1150,49 @@ void Creature::SaveToDB(uint32 mapid, uint8 spawnMask, uint32 phaseMask)
 
 void Creature::SelectLevel(const CreatureInfo* cinfo, float percentHealth, float percentMana)
 {
-    uint32 rank = IsPet() ? 0 : cinfo->rank;
+    uint32 rank = IsPet() ? 0 : cinfo->rank;    // TODO :: IsPet probably not needed here
 
     // level
     uint32 minlevel = std::min(cinfo->maxlevel, cinfo->minlevel);
     uint32 maxlevel = std::max(cinfo->maxlevel, cinfo->minlevel);
     uint32 level = minlevel == maxlevel ? minlevel : urand(minlevel, maxlevel);
-    SetLevel(level);
-
     float rellevel = maxlevel == minlevel ? 0 : (float(level - minlevel)) / (maxlevel - minlevel);
 
-    // health
-    float healthmod = _GetHealthMod(rank);
+    SetLevel(level);
 
-    uint32 minhealth = std::min(cinfo->maxhealth, cinfo->minhealth);
-    uint32 maxhealth = std::max(cinfo->maxhealth, cinfo->minhealth);
-    uint32 health = uint32(healthmod * (minhealth + uint32(rellevel * (maxhealth - minhealth))));
+    uint32 health = 0;
+    uint32 mana = 0;
+
+    // CreatureClassLvlStats const* cCLS = sObjectMgr.GetCreatureClassLvlStats(level, cinfo->UnitClass, cinfo->Expansion);
+    // FIXME - system currently disabled before check real usability.
+    CreatureClassLvlStats const* cCLS = NULL;
+    if (!cCLS)
+    {
+        // using old way to compute stats
+
+        // health
+        float healthmod = _GetHealthMod(rank);
+        uint32 minhealth = std::min(cinfo->maxhealth, cinfo->minhealth);
+        uint32 maxhealth = std::max(cinfo->maxhealth, cinfo->minhealth);
+        health = uint32(healthmod * (minhealth + uint32(rellevel * (maxhealth - minhealth))));
+
+        // mana
+        uint32 minmana = std::min(cinfo->maxmana, cinfo->minmana);
+        uint32 maxmana = std::max(cinfo->maxmana, cinfo->minmana);
+        mana = minmana + uint32(rellevel * (maxmana- minmana));
+    }
+    else
+    {
+        // using new way to compute stats
+        // health
+        // FIXME
+        /*
+        health = cCLS->BaseHealth * cinfo->HealthMultiplier;
+
+        // mana
+        mana = cCLS->BaseMana * cinfo->ManaMultiplier;
+        */
+    }
 
     SetCreateHealth(health);
     SetMaxHealth(health);
@@ -1181,10 +1211,7 @@ void Creature::SelectLevel(const CreatureInfo* cinfo, float percentHealth, float
     {
         case POWER_MANA:
         {
-            uint32 minmana = std::min(cinfo->maxmana, cinfo->minmana);
-            uint32 maxmana = std::max(cinfo->maxmana, cinfo->minmana);
-            maxPower = minmana + uint32(rellevel * (maxmana - minmana));
-
+            maxPower = mana;
             SetCreateMana(maxPower);
             break;
         }

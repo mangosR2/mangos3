@@ -4273,8 +4273,8 @@ void Spell::cast(bool skipCheck)
             // Hand of Reckoning
             else if (m_spellInfo->Id == 62124)
             {
-                if (m_targets.getUnitTarget() && m_targets.getUnitTarget()->getVictim() != m_caster)
-                    AddPrecastSpell(67485);                 // Hand of Reckoning
+                if (!m_targets.getUnitTarget() || m_targets.getUnitTarget()->GetTargetGuid() != m_caster->GetObjectGuid())
+                    AddPrecastSpell(67485);                 // Hand of Rekoning (no typos in name ;) )
             }
             // Divine Shield or Hand of Protection
             else if (m_spellInfo->GetSpellFamilyFlags().test<CF_PALADIN_HAND_OF_PROTECTION, CF_PALADIN_DIVINE_SHIELD>())

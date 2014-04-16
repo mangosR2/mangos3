@@ -365,4 +365,6 @@ struct select1st: public std::unary_function<T_PAIR, typename T_PAIR::first_type
     }
 };
 
+MANGOS_DLL_SPEC float GetExactDistance2d(float x1, float y1, float x2, float y2);
+
 #endif

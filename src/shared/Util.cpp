@@ -600,3 +600,10 @@ uint32 secsToTimeBitFields(time_t secs)
     tm* lt = localtime(&secs);
     return (lt->tm_year - 100) << 24 | lt->tm_mon  << 20 | (lt->tm_mday - 1) << 14 | lt->tm_wday << 11 | lt->tm_hour << 6 | lt->tm_min;
 }
+
+float GetExactDistance2d(float x1, float y1, float x2, float y2)
+{
+    float dx = x1 - x2;
+    float dy = y1 - y2;
+    return sqrt(dx * dx + dy * dy);
+}

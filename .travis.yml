@@ -11,6 +11,8 @@ compiler:
 before_install:
   - sudo apt-get install libace-dev
   - sudo apt-get update 
+#  - sudo apt-get install mingw-w64-i686 binutils-mingw-w64-i686 gcc-mingw-w64-i686 g++-mingw-w64-i686 mingw-w64-dev
+#  - sudo apt-get install mingw-w64-x86-64 binutils-mingw-w64-x86-64 gcc-mingw-w64-x86-64 g++-mingw-x86-64 mingw-w64-dev
 
 before_install:
   - sudo apt-get install libace-dev
@@ -24,9 +26,9 @@ script:
   - if [ "$CXX" == "clang++" ]; then cmake -DPCH=0 -DCMAKE_BUILD_TYPE=Release -DUSE_STD_MALLOC=1 -DACE_USE_EXTERNAL=1 -DLIB_INSTALL_DIR="../install/lib" -DINCLUDE_INSTALL_DIR="../install/include" -DCMAKE_INSTALL_PREFIX=../install .. -DCMAKE_C_FLAGS_RELEASE:STRING="-march=native -O2 -DNDEBUG -finput-charset=utf-8 -fexec-charset=utf-8" -DCMAKE_CXX_FLAGS_RELEASE:STRING="-march=native -O2 -DNDEBUG -finput-charset=utf-8 -fexec-charset=utf-8 -std=c++11"; fi
   - make -j4
 
-notifications:
-  irc:
-    channels:
-      - "irc.rizon.net#mangosR2"
-    on_success: never
-    on_failure: never
+#notifications:
+#  irc:
+#    channels:
+#      - "irc.rizon.net#mangosR2"
+#    on_success: never
+#    on_failure: never
