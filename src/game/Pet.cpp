@@ -3378,7 +3378,7 @@ Unit* Pet::SelectPreferredTargetForSpell(SpellEntry const* spellInfo)
     if (target && target != this)
     {
         if (spellInfo->GetRangeIndex() == SPELL_RANGE_IDX_COMBAT)
-            max_range_unfriendly = GetCombatDistance(target, true);
+            max_range_unfriendly = GetCombatReach(target, true);
 
         bool friendly = IsFriendlyTo(target);
         float dist = GetDistance(target);

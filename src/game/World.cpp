@@ -1123,6 +1123,8 @@ void World::LoadConfigSettings(bool reload)
     // Anounce reset of instance to whole party
     setConfig(CONFIG_BOOL_INSTANCES_RESET_GROUP_ANNOUNCE,  "InstancesResetAnnounce", false);
 
+    setConfigMinMax(CONFIG_FLOAT_MELEE_DIST_ADDITION, "Melee.Distance.Addition", 4.0f, 0.0f, 10.0f);
+
     // Set  world timers
     m_timers[WUPDATE_AUCTIONS].SetInterval(sConfig.GetIntDefault("Auctions.Timer", 60000));
     m_timers[WUPDATE_AUCTIONS].Reset();

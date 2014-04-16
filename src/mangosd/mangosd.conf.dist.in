@@ -1075,6 +1075,10 @@ LexicsCutterNoActionOnGM = 1
 #        Default: 1 (parse commands)
 #                 0 (ignore commands)
 #
+#    Melee.Distance.Addition
+#        Addition for check strict melee distance in CheckRange()
+#        Default: 4 (overall dist ~ 9)
+#
 ###################################################################################################################
 
 GameType = 1
@@ -1165,6 +1169,7 @@ FactiomAndRaceChangeWithoutRenaming = 0
 Resistance.CalculationMethod = 1
 Resistance.AddByOverLevel = 0
 PlayerCommands = 1
+Melee.Distance.Addition = 4
 
 ###################################################################################################################
 # PLAYER INTERACTION

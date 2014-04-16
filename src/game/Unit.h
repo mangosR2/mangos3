@@ -1343,7 +1343,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
             if (IsInFeralForm())
                 return false;
 
-            switch(attackType)
+            switch (attackType)
             {
                 default:
                 case BASE_ATTACK:
@@ -1355,9 +1355,10 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
             }
         }
 
-        float GetCombatReach(Unit const* pVictim, bool forMeleeRange = true, float flat_mod = 0.0f) const;
+        float GetCombatReach(bool forMeleeRange /*=true*/) const;
+        float GetCombatReach(Unit const* pVictim, bool forMeleeRange = true, float flatMod = 0.0f) const;
         float GetCombatDistance(Unit const* pVictim, bool forMeleeRange = true) const;
-        bool CanReachWithMeleeAttack(Unit const* pVictim, float flat_mod = 0.0f) const;
+        bool CanReachWithMeleeAttack(Unit const* pVictim, float flatMod = 0.0f) const;
 
         uint32 m_extraAttacks;
 
