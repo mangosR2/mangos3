@@ -907,14 +907,17 @@ class MANGOS_DLL_SPEC WorldSession
     private:
         // private trade methods
         void moveItems(Item* myItems[], Item* hisItems[]);
-        bool VerifyMovementInfo(MovementInfo const& movementInfo, ObjectGuid const& guid) const;
-        void HandleMoverRelocation(MovementInfo& movementInfo);
 
-        void ExecuteOpcode( OpcodeHandler const& opHandle, WorldPacket* packet );
+        // movement
+        bool VerifyMovementInfo(MovementInfo const& movementInfo, ObjectGuid const& guid) const;
+        void HandlePlayerRelocation(MovementInfo& movementInfo);
+        void UpdateMoverPosition(MovementInfo& movementInfo);
+
+        void ExecuteOpcode(OpcodeHandler const& opHandle, WorldPacket* packet);
 
         // logging helper
-        void LogUnexpectedOpcode(WorldPacket *packet, const char * reason);
-        void LogUnprocessedTail(WorldPacket *packet);
+        void LogUnexpectedOpcode(WorldPacket* packet, const char* reason);
+        void LogUnprocessedTail(WorldPacket* packet);
 
         uint32 m_GUIDLow;                                   // set logged or recently logout player (while m_playerRecentlyLogout set)
         Player *_player;
