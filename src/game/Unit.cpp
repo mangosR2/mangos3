@@ -838,37 +838,46 @@ void Unit::resetAttackTimer(WeaponAttackType type)
     m_attackTimer[type] = uint32(GetAttackTime(type) * m_modAttackSpeedPct[type]);
 }
 
-float Unit::GetCombatReach(Unit const* pVictim, bool forMeleeRange /*=true*/, float flat_mod /*=0.0f*/) const
+float Unit::GetCombatReach(bool forMeleeRange /*=true*/) const
+{
+    float reach = GetFloatValue(UNIT_FIELD_COMBATREACH);
+    return (forMeleeRange && reach < DEFAULT_COMBAT_REACH) ? DEFAULT_COMBAT_REACH : reach;
+}
+
+float Unit::GetCombatReach(Unit const* pVictim, bool forMeleeRange /*=true*/, float flatMod /*=0.0f*/) const
 {
     float victimReach = (pVictim && pVictim->IsInWorld())
-        ? pVictim->GetFloatValue(UNIT_FIELD_COMBATREACH)
+        ? pVictim->GetCombatReach(forMeleeRange)
         : 0.0f;
 
-    float reach = GetFloatValue(UNIT_FIELD_COMBATREACH) + victimReach +
-        BASE_MELEERANGE_OFFSET + flat_mod; // The measured values show BASE_MELEE_OFFSET in (1.3224, 1.342)
+    float reach = GetCombatReach(forMeleeRange) + victimReach + flatMod;
 
-    if (forMeleeRange && reach < ATTACK_DISTANCE)
-        reach = ATTACK_DISTANCE;
+    if (forMeleeRange)
+    {
+        reach += BASE_MELEERANGE_OFFSET;
+        if (reach < ATTACK_DISTANCE)
+            reach = ATTACK_DISTANCE;
+    }
 
     return reach;
 }
 
-float Unit::GetCombatDistance(Unit const* pVictim, bool forMeleeRange) const
+float Unit::GetCombatDistance(Unit const* pVictim, bool forMeleeRange /*=true*/) const
 {
     if (!pVictim)
         return 0.0f;
 
     float radius = GetCombatReach(pVictim, forMeleeRange);
     float dist = GetPosition().GetDistance(pVictim->GetPosition()) - radius;
-    return (dist > M_NULL_F ? dist : 0.0f);
+    return dist > M_NULL_F ? dist : 0.0f;
 }
 
-bool Unit::CanReachWithMeleeAttack(Unit const* pVictim, float flat_mod /*=0.0f*/) const
+bool Unit::CanReachWithMeleeAttack(Unit const* pVictim, float flatMod /*=0.0f*/) const
 {
     if (!pVictim || !pVictim->IsInWorld() || !InSamePhase(pVictim))
         return false;
 
-    float reach = GetCombatReach(pVictim, true, flat_mod);
+    float reach = GetCombatReach(pVictim, true, flatMod);
 
     // This check is not related to bounding radius of both units!
     return GetPosition().GetDistance(pVictim->GetPosition()) < reach;

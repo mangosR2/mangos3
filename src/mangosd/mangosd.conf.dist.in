@@ -1046,6 +1046,21 @@ LexicsCutterNoActionOnGM = 1
 #        Should player chat be parsed for GM commands.
 #        Default: 1 (parse commands)
 #                 0 (ignore commands)
+#    Melee.Distance.Addition
+#        Addition for check strict melee distance in CheckRange()
+#        Default: 4 (overall dist ~ 9)
+#
+#    Player.FixMovementPackets.Method
+#        Movement packet fixes, taking into account client<->server connection lag.
+#        WARNING! dont change on the running server, players seeing each other will be desynchronized (looks like twitching)
+#        Default: 0  (disabled)
+#                 1  (add delay server<->client in ping times)
+#                 2  (add fixed delay (Player.FixMovementPackets.AddTime below)
+#
+#    Player.FixMovementPackets.AddTime
+#        Add fixed time (in ms.) to movement packets.
+#        Default: 50
+#
 #
 #    Archaeology.Enabled
 #        Enable Archaeology Profession and its features.
@@ -1136,6 +1151,9 @@ Realm.AlwaysMaxExpansion = 0
 Resistance.CalculationMethod = 1
 Resistance.AddByOverLevel = 0
 PlayerCommands = 1
+Melee.Distance.Addition = 4
+Player.FixMovementPackets.Method = 0
+Player.FixMovementPackets.AddTime = 50
 Archaeology.Enabled = 0
 
 ###################################################################################################################

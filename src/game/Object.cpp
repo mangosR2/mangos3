@@ -1350,19 +1350,20 @@ InstanceData* WorldObject::GetInstanceData() const
     return GetMap()->GetInstanceData();
 }
 
-float WorldObject::GetDistance(const WorldObject* obj) const
+float WorldObject::GetDistance(WorldObject const* obj) const
 {
     if (!obj)
         return (MAX_VISIBILITY_DISTANCE + 1.0f);
 
-    float sizefactor = GetObjectBoundingRadius() + obj->GetObjectBoundingRadius();
+    float sizefactor = obj->GetObjectBoundingRadius();
     float dist = GetDistance(obj->GetPosition()) - sizefactor;
-    return ( dist > M_NULL_F ? dist : 0.0f);
+    return (dist > M_NULL_F ? dist : 0.0f);
 }
 
 float WorldObject::GetDistance(WorldLocation const& loc) const
 {
-    float dist = GetPosition().GetDistance(loc) - GetObjectBoundingRadius();
+    float sizefactor = GetObjectBoundingRadius();
+    float dist = GetPosition().GetDistance(loc) - sizefactor;
     return (dist > M_NULL_F ? dist : 0.0f);
 }
 
@@ -1370,29 +1371,35 @@ float WorldObject::GetDistance2d(float x, float y) const
 {
     float sizefactor = GetObjectBoundingRadius();
     float dist = GetPosition().GetDistance(Location(x, y, GetPositionZ())) - sizefactor;
-    return ( dist > M_NULL_F ? dist : 0.0f);
+    return (dist > M_NULL_F ? dist : 0.0f);
 }
 
 float WorldObject::GetDistance(float x, float y, float z) const
 {
     float sizefactor = GetObjectBoundingRadius();
     float dist = GetPosition().GetDistance(Location(x, y, z)) - sizefactor;
-    return ( dist > M_NULL_F ? dist : 0.0f);
+    return (dist > M_NULL_F ? dist : 0.0f);
 }
 
-float WorldObject::GetDistance2d(const WorldObject* obj) const
+float WorldObject::GetDistance2d(WorldObject const* obj) const
 {
+    if (!obj)
+        return (MAX_VISIBILITY_DISTANCE + 1.0f);
+
     float sizefactor = GetObjectBoundingRadius() + obj->GetObjectBoundingRadius();
     float dist = GetPosition().GetDistance(Location(obj->GetPositionX(), obj->GetPositionY(), GetPositionZ())) - sizefactor;
-    return ( dist > M_NULL_F ? dist : 0.0f);
+    return (dist > M_NULL_F ? dist : 0.0f);
 }
 
-float WorldObject::GetDistanceZ(const WorldObject* obj) const
+float WorldObject::GetDistanceZ(WorldObject const* obj) const
 {
+    if (!obj)
+        return (MAX_VISIBILITY_DISTANCE + 1.0f);
+
     float dz = fabs(GetPositionZ() - obj->GetPositionZ());
     float sizefactor = GetObjectBoundingRadius() + obj->GetObjectBoundingRadius();
     float dist = dz - sizefactor;
-    return ( dist > M_NULL_F ? dist : 0.0f);
+    return (dist > M_NULL_F ? dist : 0.0f);
 }
 
 bool WorldObject::IsWithinDist3d(float x, float y, float z, float dist2compare) const
@@ -1431,14 +1438,14 @@ bool WorldObject::_IsWithinDist(WorldObject const* obj, float dist2compare, bool
     return dist < maxdist;
 }
 
-bool WorldObject::IsWithinLOSInMap(const WorldObject* obj) const
+bool WorldObject::IsWithinLOSInMap(WorldObject const* obj) const
 {
     if (!IsInMap(obj))
         return false;
 
     float ox,oy,oz;
     obj->GetPosition(ox,oy,oz);
-    return IsWithinLOS(ox, oy, oz );
+    return IsWithinLOS(ox, oy, oz);
 }
 
 bool WorldObject::IsWithinLOS(float ox, float oy, float oz) const
@@ -1483,7 +1490,7 @@ bool WorldObject::IsInRange(WorldObject const* obj, float minRange, float maxRan
 
 bool WorldObject::IsInRange2d(float x, float y, float minRange, float maxRange) const
 {
-    float dist =  GetPosition().GetDistance(Location(x, y, GetPositionZ()));
+    float dist = GetPosition().GetDistance(Location(x, y, GetPositionZ()));
 
     float sizefactor = GetObjectBoundingRadius();
 
@@ -1517,7 +1524,7 @@ bool WorldObject::IsInRange3d(float x, float y, float z, float minRange, float m
     return dist < maxdist;
 }
 
-bool WorldObject::IsInBetween(const WorldObject *obj1, const WorldObject *obj2, float size) const
+bool WorldObject::IsInBetween(WorldObject const* obj1, WorldObject const* obj2, float size) const
 {
     if (GetPositionX() > std::max(obj1->GetPositionX(), obj2->GetPositionX())
         || GetPositionX() < std::min(obj1->GetPositionX(), obj2->GetPositionX())
@@ -1529,16 +1536,16 @@ bool WorldObject::IsInBetween(const WorldObject *obj1, const WorldObject *obj2, 
         size = GetObjectBoundingRadius() / 2;
 
     float angle = obj1->GetAngle(this) - obj1->GetAngle(obj2);
-    return abs(sin(angle)) * GetExactDist2d(obj1->GetPositionX(), obj1->GetPositionY()) < size;
+    return fabs(sin(angle)) * GetExactDist2d(obj1->GetPositionX(), obj1->GetPositionY()) < size;
 }
 
-float WorldObject::GetAngle(const WorldObject* obj) const
+float WorldObject::GetAngle(WorldObject const* obj) const
 {
     if (!obj)
         return 0.0f;
 
     // Rework the assert, when more cases where such a call can happen have been fixed
-    //MANGOS_ASSERT(obj != this || PrintEntryError("GetAngle (for self)"));
+    // MANGOS_ASSERT(obj != this || PrintEntryError("GetAngle (for self)"));
     if (obj == this)
     {
         sLog.outError("WorldObject::GetAngle INVALID CALL for GetAngle for %s", obj->GetGuidStr().c_str());
@@ -1548,17 +1555,17 @@ float WorldObject::GetAngle(const WorldObject* obj) const
 }
 
 // Return angle in range 0..2*pi
-float WorldObject::GetAngle(const float x, const float y) const
+float WorldObject::GetAngle(float const x, float const y) const
 {
     float dx = x - GetPositionX();
     float dy = y - GetPositionY();
 
     float ang = atan2(dy, dx);                              // returns value between -Pi..Pi
-    ang = (ang >= 0) ? ang : 2 * M_PI_F + ang;
+    ang = (ang >= 0.0f) ? ang : 2 * M_PI_F + ang;
     return MapManager::NormalizeOrientation(ang);
 }
 
-bool WorldObject::HasInArc(const float arcangle, const WorldObject* obj) const
+bool WorldObject::HasInArc(float const arcangle, WorldObject const* obj) const
 {
     // always have self in arc
     if (obj == this)
@@ -1575,11 +1582,11 @@ bool WorldObject::HasInArc(const float arcangle, const WorldObject* obj) const
     // move angle to range -pi ... +pi
     angle = NormalizeOrientation(angle);
     if (angle > M_PI_F)
-        angle -= 2.0f*M_PI_F;
+        angle -= 2.0f * M_PI_F;
 
-    float lborder =  -1 * (arc/2.0f);                       // in range -pi..0
-    float rborder = (arc/2.0f);                             // in range 0..pi
-    return (( angle >= lborder ) && ( angle <= rborder ));
+    float lborder =  -1.0f * (arc / 2.0f);                    // in range -pi..0
+    float rborder = (arc / 2.0f);                             // in range 0..pi
+    return ((angle >= lborder) && (angle <= rborder));
 }
 
 bool WorldObject::isInFrontInMap(WorldObject const* target, float distance,  float arc) const
@@ -1613,7 +1620,7 @@ void WorldObject::GetRandomPoint( float x, float y, float z, float distance, flo
     }
 
     // angle to face `obj` to `this`
-    float angle = rand_norm_f()*2*M_PI_F;
+    float angle = rand_norm_f() * 2.0f * M_PI_F;
     float new_dist = rand_norm_f()*distance;
 
     rand_x = x + new_dist * cos(angle);

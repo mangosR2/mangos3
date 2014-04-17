@@ -452,7 +452,8 @@ class Spell
         void _handle_finish_phase();
 
         SpellCastResult CheckItems();
-        SpellCastResult CheckRange(bool strict, WorldObject* target = NULL);
+        SpellCastResult CheckRange(bool strict) const;
+        SpellCastResult CheckRangeForChanneledSpells() const;
         SpellCastResult CheckPower();
         SpellCastResult CheckRunePower();
         void TakeRunePower(bool hit);

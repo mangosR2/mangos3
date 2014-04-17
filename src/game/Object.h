@@ -576,12 +576,12 @@ class MANGOS_DLL_SPEC WorldObject : public Object
 
         float GetDistance(WorldLocation const& loc) const;
 
-        float GetDistance( const WorldObject* obj ) const;
+        float GetDistance(WorldObject const* obj) const;
         float GetDistance(float x, float y, float z) const;
-        float GetDistance2d(const WorldObject* obj) const;
+        float GetDistance2d(WorldObject const* obj) const;
         float GetDistance2d(float x, float y) const;
-        float GetDistanceZ(const WorldObject* obj) const;
-        bool IsInMap(const WorldObject* obj) const
+        float GetDistanceZ(WorldObject const* obj) const;
+        bool IsInMap(WorldObject const* obj) const
         {
             return IsInWorld() && obj->IsInWorld() && (GetMap() == obj->GetMap()) && InSamePhase(obj);
         }
@@ -601,25 +601,25 @@ class MANGOS_DLL_SPEC WorldObject : public Object
             return obj && IsInMap(obj) && _IsWithinDist(obj,dist2compare,is3D);
         }
         bool IsWithinLOS(float x, float y, float z) const;
-        bool IsWithinLOSInMap(const WorldObject* obj) const;
+        bool IsWithinLOSInMap(WorldObject const* obj) const;
         bool GetDistanceOrder(WorldObject const* obj1, WorldObject const* obj2, bool is3D = true) const;
         bool IsInRange(WorldObject const* obj, float minRange, float maxRange, bool is3D = true) const;
         bool IsInRange2d(float x, float y, float minRange, float maxRange) const;
         bool IsInRange3d(float x, float y, float z, float minRange, float maxRange) const;
+        bool IsInBetween(WorldObject const* obj1, WorldObject const* obj2, float size = 0) const;
 
-        bool IsInBetween(const WorldObject *obj1, const WorldObject *obj2, float size = 0) const;
         float GetExactDist2dSq(float x, float y) const
         { float dx = m_position.x - x; float dy = m_position.y - y; return dx*dx + dy*dy; }
         float GetExactDist2d(const float x, const float y) const
         { return sqrt(GetExactDist2dSq(x, y)); }
 
-        float GetAngle( const WorldObject* obj ) const;
-        float GetAngle( const float x, const float y ) const;
-        bool HasInArc( const float arcangle, const WorldObject* obj ) const;
-        bool isInFrontInMap(WorldObject const* target,float distance, float arc = M_PI) const;
-        bool isInBackInMap(WorldObject const* target, float distance, float arc = M_PI) const;
-        bool isInFront(WorldObject const* target,float distance, float arc = M_PI) const;
-        bool isInBack(WorldObject const* target, float distance, float arc = M_PI) const;
+        float GetAngle(WorldObject const* obj) const;
+        float GetAngle(float const x, float const y) const;
+        bool HasInArc(float const arcangle, WorldObject const* obj) const;
+        bool isInFrontInMap(WorldObject const* target, float distance, float arc = M_PI_F) const;
+        bool isInBackInMap(WorldObject const* target, float distance, float arc = M_PI_F) const;
+        bool isInFront(WorldObject const* target, float distance, float arc = M_PI_F) const;
+        bool isInBack(WorldObject const* target, float distance, float arc = M_PI_F) const;
 
         virtual void CleanupsBeforeDelete();                   // used in destructor or explicitly before mass creature delete to remove cross-references to already deleted units
 
