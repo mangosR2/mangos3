@@ -7380,7 +7380,7 @@ SpellCastResult Spell::CheckRange(bool strict) const
     float min_range = GetSpellMinRange(srange, friendly);
 
     if (Player* modOwner = m_caster->GetSpellModOwner())
-        modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_RANGE, max_range, this);
+        modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_RANGE, max_range);
 
     if (pTarget && pTarget != m_caster)
     {
