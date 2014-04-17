@@ -620,7 +620,7 @@ void WorldSession::HandlePlayerRelocation(MovementInfo& movementInfo)
     if (movementInfo.HasMovementFlag(MOVEFLAG_SWIMMING) != plMover->IsInWater())
     {
         // now client not include swimming flag in case jumping under water
-	    Position const* pos = movementInfo.GetPos();
+        Position const* pos = movementInfo.GetPos();
         plMover->SetInWater(!plMover->IsInWater() || plMover->GetTerrain()->IsUnderWater(pos->x, pos->y, pos->z));
     }
 }
@@ -638,7 +638,7 @@ void WorldSession::UpdateMoverPosition(MovementInfo& movementInfo)
         if (plMover->IsOnTransport())
             plMover->SetTransportPosition(movementInfo.GetTransportPosition());
 
-        float z = pos->z;
+        float z = movementInfo.GetPos()->z;
         uint32 mapId = plMover->GetMapId();
 
         if ((z < -500.0f) || (mapId == 617 && z < 2.0f) || (mapId == 572 && z < 20.0f) ||
@@ -676,7 +676,7 @@ void WorldSession::UpdateMoverPosition(MovementInfo& movementInfo)
     {
         unitMover->m_movementInfo = movementInfo;
 
-        unitMover->SetPosition(Position(movementInfo.GetPosition(), mover->GetPosition().GetPhaseMask()));
+        unitMover->SetPosition(Position(movementInfo.GetPosition(), unitMover->GetPosition().GetPhaseMask()));
         if (unitMover->IsOnTransport())
             unitMover->SetTransportPosition(movementInfo.GetTransportPosition());
     }
