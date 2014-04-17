@@ -319,6 +319,9 @@ class MANGOS_DLL_SPEC CreatureAI
         /// method to pass actions between AI's
         virtual void DoAction(int32 action) {}
 
+        virtual void SetData(uint32 type, uint32 data) { }
+        virtual uint32 GetData (uint32 id) { return 0; }
+
     protected:
         void HandleMovementOnAttackStart(Unit* victim);
 
