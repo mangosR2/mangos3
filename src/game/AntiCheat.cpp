@@ -661,6 +661,9 @@ bool AntiCheat::CheckFly()
     if (GetMover()->GetTerrain()->IsUnderWater(m_currentmovementInfo->GetPosition().getX(), m_currentmovementInfo->GetPosition().getY(), m_currentmovementInfo->GetPosition().getZ() - 2.0f))
         return true;
 
+    if (GetMover()->HasAuraType(SPELL_AURA_FEATHER_FALL))
+        return true;
+
     float ground_z = GetMover()->GetMap()->GetHeight(GetPlayer()->GetPhaseMask(),GetPlayer()->GetPositionX(),GetPlayer()->GetPositionY(),MAX_HEIGHT);
     float floor_z  = GetMover()->GetMap()->GetHeight(GetPlayer()->GetPhaseMask(),GetPlayer()->GetPositionX(),GetPlayer()->GetPositionY(),GetPlayer()->GetPositionZ());
     float map_z    = ((floor_z <= (INVALID_HEIGHT+5.0f)) ? ground_z : floor_z);
