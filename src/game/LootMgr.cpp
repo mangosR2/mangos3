@@ -611,7 +611,10 @@ void Loot::FillNotNormalLootFor(Player* pl)
             item = &items[i];
         }
         else if (i - items.size() < questItemsCount)
-            item = &items[i - questItemsCount];
+        {
+            QuestItem const* qItem = &itr->second.at(i);
+            item = &m_questItems[qItem->index];
+        }
 
         if (!item->is_looted && (item->freeforall || item->currency) && item->AllowedForPlayer(pl, m_lootTarget))
         {
