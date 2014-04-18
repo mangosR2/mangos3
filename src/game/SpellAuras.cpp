@@ -12572,6 +12572,26 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
                     }
                     return;
                 }
+                case 97128:                                 // Molten Feather
+                {
+                    if (!apply)
+                    {
+                        GetTarget()->SetPower(POWER_ALTERNATIVE, 0);
+
+                        GetTarget()->RemoveAurasDueToSpell(98761);
+                        GetTarget()->RemoveAurasDueToSpell(98762);
+                        GetTarget()->RemoveAurasDueToSpell(98763);
+                        GetTarget()->RemoveAurasDueToSpell(98764);
+                        GetTarget()->RemoveAurasDueToSpell(98765);
+                        GetTarget()->RemoveAurasDueToSpell(98766);
+                        GetTarget()->RemoveAurasDueToSpell(98767);
+                        GetTarget()->RemoveAurasDueToSpell(98768);
+                        GetTarget()->RemoveAurasDueToSpell(98769);
+                        GetTarget()->RemoveAurasDueToSpell(98770);
+                        GetTarget()->RemoveAurasDueToSpell(98771);
+                    }
+                    return;
+                }
                 default:
                     return;
             }
