@@ -12592,6 +12592,18 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
                     }
                     return;
                 }
+                case 101223:                                // Fieroblast
+                case 101294:
+                case 101295:
+                case 101296:
+                {
+                    if (apply)
+                    {
+                        if (Unit* caster =GetCaster())
+                            caster->CastSpell(caster, 100093, true);
+                    }
+                    return;
+                }
                 default:
                     return;
             }
