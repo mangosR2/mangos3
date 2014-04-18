@@ -554,6 +554,19 @@ void LoadDBCStores(const std::string& dataPath)
 
     LoadDBC(availableDbcLocales,bar,bad_dbc_files,sFactionTemplateStore,     dbcPath,"FactionTemplate.dbc");
     LoadDBC(availableDbcLocales,bar,bad_dbc_files,sGameObjectDisplayInfoStore,dbcPath,"GameObjectDisplayInfo.dbc");
+    for (uint32 i = 0; i < sGameObjectDisplayInfoStore.GetNumRows(); ++i)
+    {
+        if (GameObjectDisplayInfoEntry *info = const_cast<GameObjectDisplayInfoEntry*>(sGameObjectDisplayInfoStore.LookupEntry(i)))
+        {
+            if (info->geoBoxMaxX < info->geoBoxMinX)
+                std::swap(info->geoBoxMaxX, info->geoBoxMinX);
+            if (info->geoBoxMaxY < info->geoBoxMinY)
+                std::swap(info->geoBoxMaxY, info->geoBoxMinY);
+            if (info->geoBoxMaxZ < info->geoBoxMinZ)
+                std::swap(info->geoBoxMaxZ, info->geoBoxMinZ);
+        }
+    }
+
     LoadDBC(availableDbcLocales,bar,bad_dbc_files,sGemPropertiesStore,       dbcPath,"GemProperties.dbc");
     LoadDBC(availableDbcLocales,bar,bad_dbc_files,sGlyphPropertiesStore,     dbcPath,"GlyphProperties.dbc");
     LoadDBC(availableDbcLocales,bar,bad_dbc_files,sGlyphSlotStore,           dbcPath,"GlyphSlot.dbc");

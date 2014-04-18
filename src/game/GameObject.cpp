@@ -1880,9 +1880,9 @@ bool GameObject::IsInRange(float x, float y, float z, float radius) const
     dx = dist * (cosA * cosB + sinA * sinB);
     dy = dist * (cosA * sinB - sinA * cosB);
 
-    return dx < info->maxX + radius && dx > info->minX - radius
-        && dy < info->maxY + radius && dy > info->minY - radius
-        && dz < info->maxZ + radius && dz > info->minZ - radius;
+    return dx < info->geoBoxMaxX + radius && dx > info->geoBoxMinX - radius
+        && dy < info->geoBoxMaxY + radius && dy > info->geoBoxMinY - radius
+        && dz < info->geoBoxMaxZ + radius && dz > info->geoBoxMinZ - radius;
 }
 
 // ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -2488,9 +2488,9 @@ float GameObject::GetDeterminativeSize(bool b_priorityZ) const
         return 0.0f;
 
     if (b_priorityZ)
-        return info->maxZ - info->minZ;
+        return info->geoBoxMaxZ - info->geoBoxMinZ;
 
-    return Location(info->maxX, info->maxY, info->maxZ).GetDistance(Location(info->minX, info->minY, info->minZ));
+    return Location(info->geoBoxMaxX, info->geoBoxMaxY, info->geoBoxMaxZ).GetDistance(Location(info->geoBoxMinX, info->geoBoxMinY, info->geoBoxMinZ));
 }
 
 void GameObject::SetCapturePointSlider(int8 value)
