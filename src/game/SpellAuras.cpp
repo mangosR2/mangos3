@@ -9288,6 +9288,19 @@ void Aura::PeriodicTick()
                 case 72443:
                     target->CastSpell(target, 72202, true); // Blood Link
                     break;
+                // Gushing Wound
+                case 100024:
+                case 100721:
+                case 100722:
+                case 100723:
+                {
+                    if (target->GetHealthPercent() < 50.0f)
+                    {
+                        target->RemoveAurasDueToSpell(GetId());
+                        return;
+                    }
+                    break;
+                }
                 default:
                     break;
             }
