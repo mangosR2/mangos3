@@ -1246,7 +1246,12 @@ void Spell::EffectSchoolDMG(SpellEffectEntry const* effect)
                     DamageInfo damageInfo = DamageInfo(m_caster, unitTarget, m_spellInfo, damage);
                     damageInfo.damageType = SPELL_DIRECT_DAMAGE;
                     m_caster->SpellDamageBonusDone(&damageInfo);
-                    m_caster->CastCustomSpell(m_caster, 32409, &damage, 0, 0, true);
+                    // Item - Priest T13 Shadow 2P Bonus (Shadow Word: Death)
+                    int32 back_damage = int32(damageInfo.damage);
+                    if (Aura* aura = m_caster->GetAura(105843, EFFECT_INDEX_1))
+                        back_damage = int32(damageInfo.damage * (100.0f - aura->GetModifier()->m_amount) / 100.0f);
+
+                    m_caster->CastCustomSpell(m_caster, 32409, &back_damage, 0, 0, true);
                 }
                 // Improved Mind Blast (Mind Blast in shadow form bonus)
                 else if (m_caster->GetShapeshiftForm() == FORM_SHADOW && (classOptions && classOptions->SpellFamilyFlags & UI64LIT(0x00002000)))
