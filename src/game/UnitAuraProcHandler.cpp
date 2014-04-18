@@ -2071,6 +2071,13 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, DamageInfo* damageI
                     basepoints[0] = int32(damage * triggerAmount / 100 / GetSpellAuraMaxTicks(triggered_spell_id));
                     break;
                 }
+                // Item - Priest T11 Healer 4P Bonus
+                case 89911:
+                {
+                    // Indulgence of the Penitent
+                    triggered_spell_id = 89913;
+                    break;
+                }
             }
             break;
         }

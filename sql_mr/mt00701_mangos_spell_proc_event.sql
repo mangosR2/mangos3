@@ -109,6 +109,11 @@ DELETE FROM `spell_proc_event` WHERE `entry` = 63237;
 INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskB0`, `procFlags`, `CustomChance`) VALUES
 (63237, 6, 2, 2, 100);
 
+-- Item - Priest T11 Healer 4P Bonus
+DELETE FROM `spell_proc_event` WHERE `entry` = 89911;
+INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskB0`, `procFlags`, `CustomChance`) VALUES
+(89911, 6, 65536, 16384, 100);
+
 ### Priest ###
 
 -- Vengeance
