@@ -3039,9 +3039,30 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
             }
             // Atonement
             else if (m_spellInfo->Id == 94472)
+            {
                 FillRaidOrPartyHealthPriorityTargets(targetUnitMap, m_caster, m_targets.getUnitTarget(), radius, 1, true, false, true);
+            }
+            // Cauterizing Flame
+            // Item - Priest T12 Healer 4P Bonus
+            else if (m_spellInfo->Id == 99152)
+            {
+                FillAreaTargets(targetUnitMap, radius, PUSH_DEST_CENTER, SPELL_TARGETS_FRIENDLY);
+
+                PrioritizeHealthUnitQueue healthQueue;
+                for(UnitList::const_iterator itr = targetUnitMap.begin(); itr != targetUnitMap.end(); ++itr)
+                    if (!(*itr)->isDead())
+                        healthQueue.push(PrioritizeHealthUnitWraper(*itr));
+
+                targetUnitMap.clear();
+                while(!healthQueue.empty() && targetUnitMap.size() < 1)
+                {
+                    targetUnitMap.push_back(healthQueue.top().getUnit());
+                    healthQueue.pop();
+                }
+            }
             else
                 FillAreaTargets(targetUnitMap, radius, PUSH_DEST_CENTER, SPELL_TARGETS_FRIENDLY);
+
             break;
         // TARGET_SINGLE_PARTY means that the spells can only be casted on a party member and not on the caster (some seals, fire shield from imp, etc..)
         case TARGET_SINGLE_PARTY:
