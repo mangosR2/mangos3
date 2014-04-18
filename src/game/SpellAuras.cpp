@@ -10937,6 +10937,12 @@ void Aura::PeriodicDummyTick()
                     GetHolder()->RefreshHolder();
                 return;
             }
+            // Smoldering Rune - Death Knight T12 DPS 2P Bonus
+            else if (GetId() == 98971)
+            {
+                target->CastSpell(target, 99055, true);
+                return;
+            }
             // Raise Dead
 //            if (spell->GetSpellFamilyFlags().test<CF_DEATHKNIGHT_RAISE_DEAD>())
 //                return;
