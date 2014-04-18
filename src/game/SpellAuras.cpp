@@ -2592,6 +2592,15 @@ void Aura::TriggerSpell()
                 }
                 break;
             }
+            // Molting
+            case 99464:
+            case 99504:
+            case 100698:
+            case 100699:
+            {
+                target->SummonCreature(53089,target->GetPositionX()-urand(5,30),target->GetPositionY()-urand(-5,-30),56.500f, target->GetOrientation(), TEMPSUMMON_MANUAL_DESPAWN, 0);
+                return;
+            }
             default:
                 break;
         }
