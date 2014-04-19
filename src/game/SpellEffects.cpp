@@ -1173,13 +1173,14 @@ void Spell::EffectSchoolDMG(SpellEffectEntry const* effect)
                                 Unit::SpellAuraHolderMap const& holders = unitTarget->GetSpellAuraHolderMap();
                                 for (Unit::SpellAuraHolderMap::const_iterator itr = holders.begin(); itr != holders.end(); ++itr)
                                 {
-                                    if (itr->second->IsPositive() ||
+                                    if (itr->second->IsDeleted() ||
+                                        itr->second->IsPositive() ||
                                         itr->second->IsPassive() ||
                                         itr->second->GetCasterGuid() != m_caster->GetObjectGuid())
                                         continue;
 
                                     bool isPeriodic = false;
-                                    for (uint32 i = 0; i < MAX_AURAS; ++i)
+                                    for (uint32 i = 0; i < MAX_EFFECT_INDEX; ++i)
                                     {
                                         if (Aura* aura = itr->second->GetAuraByEffectIndex(SpellEffectIndex(i)))
                                         {
