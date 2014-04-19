@@ -13595,6 +13595,20 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
                     return;
                 }
             }
+
+            if (apply)
+            {
+                Unit* caster = GetCaster();
+                if (!caster)
+                    return;
+
+                // Bloodlust
+                if (GetId() == 2825)
+                    caster->CastSpell(m_target, 57724, true);
+                // Heroism
+                else if (GetId() == 32182)
+                    caster->CastSpell(m_target, 57723, true);
+            }
             break;
         }
         case SPELLFAMILY_DEATHKNIGHT:
