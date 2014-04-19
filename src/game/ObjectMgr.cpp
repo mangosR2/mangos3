@@ -11307,7 +11307,7 @@ void ObjectMgr::LoadSpellPhaseInfo()
 
     if (!result)
     {
-        sLog.outString(">> Loaded 0 spell dbc infos. DB table `spell_phase` is empty.");
+        sLog.outString(">> Loaded 0 spell phase dbc infos. DB table `spell_phase` is empty.");
         return;
     }
 
@@ -11345,5 +11345,5 @@ void ObjectMgr::LoadSpellPhaseInfo()
 
     delete result;
 
-    sLog.outString(">> Loaded %u spell dbc infos in %u ms.", count);
+    sLog.outString(">> Loaded %u spell phase dbc infos.", count);
 }
