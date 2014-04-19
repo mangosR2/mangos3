@@ -2487,10 +2487,11 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
             {
                 if (Unit* pUnitTarget = m_caster->SelectMagnetTarget(m_targets.getUnitTarget(), this, effIndex))
                 {
-                    if (m_targets.getUnitTarget() && m_targets.getUnitTarget() != pUnitTarget)
+                    if (m_targets.getUnitTarget() != pUnitTarget)
+                    {
+                        m_targets.setUnitTarget(pUnitTarget);
                         m_spellFlags |= SPELL_FLAG_REDIRECTED;
-
-                    m_targets.setUnitTarget(pUnitTarget);
+                    }
                     targetUnitMap.push_back(pUnitTarget);
                 }
                 break;
@@ -3235,14 +3236,23 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
         case TARGET_SINGLE_ENEMY_2:
         case TARGET_SINGLE_ENEMY:
         {
-            if (Unit* pUnitTarget = m_caster->SelectMagnetTarget(m_targets.getUnitTarget(), this, effIndex))
+            Unit* target = m_targets.getUnitTarget();
+            if (!IsPositiveEffect(m_spellInfo, effIndex))
             {
-                if (m_targets.getUnitTarget() && m_targets.getUnitTarget() != pUnitTarget)
-                    m_spellFlags |= SPELL_FLAG_REDIRECTED;
-
-                m_targets.setUnitTarget(pUnitTarget);
-                targetUnitMap.push_back(pUnitTarget);
+                if (Unit* pUnitTarget = m_caster->SelectMagnetTarget(m_targets.getUnitTarget(), this, effIndex))
+                {
+                    if (target != pUnitTarget)
+                    {
+                        m_targets.setUnitTarget(pUnitTarget);
+                        m_spellFlags |= SPELL_FLAG_REDIRECTED;
+                    }
+                    targetUnitMap.push_back(pUnitTarget);
+                }
+                else if (target)
+                    targetUnitMap.push_back(target);
             }
+            else if (target)
+                targetUnitMap.push_back(target);
             break;
         }
         case TARGET_AREAEFFECT_PARTY:
