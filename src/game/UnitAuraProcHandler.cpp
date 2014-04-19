@@ -2907,6 +2907,18 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, DamageInfo* damageI
                     return SPELL_AURA_PROC_FAILED;
                 break;
             }
+            // Item - Paladin T12 Protection 2P Bonus
+            else if (dummySpell->Id == 99074)
+            {
+                triggered_spell_id = 99075;
+                basepoints[0] = triggerAmount * damage / 100;
+            }
+            // Item - Paladin T12 Retribution 2P Bonus
+            else if (dummySpell->Id == 99093)
+            {
+                triggered_spell_id = 99092;
+                basepoints[0] = triggerAmount * damage / 100;
+            }
 
             // Divine Purpose
             if (dummySpell->SpellIconID == 2170)

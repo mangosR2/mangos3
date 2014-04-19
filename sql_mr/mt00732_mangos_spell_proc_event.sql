@@ -250,6 +250,16 @@ DELETE FROM `spell_proc_event` WHERE `entry` = 99067;
 INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskB0`) VALUE
 (99067, 10, 65536);
 
+-- Item - Paladin T12 Protection 2P Bonus
+DELETE FROM `spell_proc_event` WHERE `entry` = 99074;
+INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskB0`) VALUE
+(99074, 10, 1048576);
+
+-- Item - Paladin T12 Retribution 2P Bonus
+DELETE FROM `spell_proc_event` WHERE `entry` = 99093;
+INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskB0`) VALUE
+(99093, 10, 32768);
+
 ### WARLOCK ###
 
 -- Vigilance

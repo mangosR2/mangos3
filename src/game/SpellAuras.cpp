@@ -13443,7 +13443,16 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
         }
         case SPELLFAMILY_PALADIN:
         {
-            if (m_spellProto->Id == 19746)                  // Aura Mastery (on Concentration Aura remove and apply)
+            if (m_spellProto->Id == 498)                    // Divine Protection
+            {
+                // Item - Paladin T12 Protection 4P Bonus
+                if (!apply && m_target->HasAura(99091))
+                {
+                    cast_at_remove = true;
+                    spellId1 = 99090;
+                }
+            }
+            else if (m_spellProto->Id == 19746)             // Aura Mastery (on Concentration Aura remove and apply)
             {
                 Unit *caster = GetCaster();
                 if (!caster)
