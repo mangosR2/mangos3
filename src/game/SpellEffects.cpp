@@ -5570,6 +5570,7 @@ void Spell::EffectDummy(SpellEffectEntry const* effect)
                 for (uint8 i = 0; i < 2; ++i)
                 {
                     if (Item* item = ((Player*)m_caster)->GetItemByPos(INVENTORY_SLOT_BAG_0, slots[i]))
+                    {
                         if (uint32 ench = item->GetEnchantmentId(TEMP_ENCHANTMENT_SLOT))
                         {
                             uint32 triggered_spell = 0;
@@ -5615,7 +5616,13 @@ void Spell::EffectDummy(SpellEffectEntry const* effect)
                                 default:
                                     break;
                             }
+                            if (triggered_spell)
+                            {
+                                m_caster->CastSpell(unitTarget, triggered_spell, true);
+                                break;
+                            }
                         }
+                    }
                 }
             }
             // Lava Lash
