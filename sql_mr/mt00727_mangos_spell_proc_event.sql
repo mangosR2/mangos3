@@ -916,6 +916,11 @@ DELETE FROM `spell_proc_event` WHERE `entry` = 90165;
 INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskB0`) VALUES
 (90165, 7, 1024);
 
+-- Item - Druid T12 Feral 2P Bonus
+DELETE FROM `spell_proc_event` WHERE `entry` = 99001;
+INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`, `SpellFamilyMaskB0`) VALUES
+(99001, 7, 2048+32768, 1024+64);
+
 ### Hunter ###
 
 -- Aspect of the Fox

@@ -2318,6 +2318,13 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, DamageInfo* damageI
                 // Vengeance
                 case 84840:
                     return HandleVengeanceProc(pVictim, damage, triggerAmount);
+                // Item - Druid T12 Feral 2P Bonus
+                case 99001:
+                {
+                    triggered_spell_id = 99002;
+                    basepoints[0] = int32(triggerAmount * (damage + damageInfo->absorb) / 100) / GetSpellAuraMaxTicks(triggered_spell_id);
+                    break;
+                }
             }
             // Nature's Ward
             if (dummySpell->GetSpellIconID() == 2250)
