@@ -3809,10 +3809,10 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, DamageInfo* damageI
                 CastCustomSpell(pVictim,triggered_spell_id,&basepoints[EFFECT_INDEX_0],NULL,NULL,true,castItem,triggeredByAura);
                 return SPELL_AURA_PROC_OK;
             }
-            // Lightning Overload
-            if (dummySpell->GetSpellIconID() == 2018)            // only this spell have SpellFamily Shaman SpellIconID == 2018 and dummy aura
+            // Elemental Overload
+            if (dummySpell->GetSpellIconID() == 2018 && effIndex == EFFECT_INDEX_0)            // only this spell have SpellFamily Shaman SpellIconID == 2018 and dummy aura
             {
-                if(!procSpell || GetTypeId() != TYPEID_PLAYER || !pVictim || !roll_chance_i(triggerAmount))
+                if (!procSpell || GetTypeId() != TYPEID_PLAYER || !pVictim || !roll_chance_i(triggerAmount))
                     return SPELL_AURA_PROC_FAILED;
 
                 uint32 spellId = 0;
@@ -3823,6 +3823,8 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, DamageInfo* damageI
                     case   403: spellId = 45284; break;
                     // Chain Lightning
                     case   421: spellId = 45297; break;
+                    // Lava Burst
+                    case 51505: spellId = 77451; break;
                     default:
                         sLog.outError("Unit::HandleDummyAuraProc: non handled spell id: %u (LO)", procSpell->Id);
                         return SPELL_AURA_PROC_FAILED;
