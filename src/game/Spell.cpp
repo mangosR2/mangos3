@@ -174,6 +174,12 @@ void SpellCastTargets::setSource(WorldLocation const& loc)
     m_targetMask |= TARGET_FLAG_SOURCE_LOCATION;
 }
 
+void SpellCastTargets::setSource(Position const& pos)
+{
+    m_src = pos;
+    m_targetMask |= TARGET_FLAG_SOURCE_LOCATION;
+}
+
 void SpellCastTargets::setGOTarget(GameObject *target)
 {
     m_GOTarget = target;
@@ -389,13 +395,9 @@ void SpellCastTargets::ReadAdditionalData(WorldPacket& data, uint8& cast_flags)
 
         if (moveFlag)
         {
-            ObjectGuid guid;                                // unk guid (possible - active mover) - unused
             MovementInfo movementInfo;                      // MovementInfo
-
-            data >> Unused<uint32>();                       // >> MSG_MOVE_STOP
-            data >> guid.ReadAsPacked();
             data >> movementInfo;
-            //setSource(movementInfo.GetPos());
+            setSource(movementInfo.GetPosition());
         }
     }
     else if (cast_flags & 0x08)         // has archaeology weight

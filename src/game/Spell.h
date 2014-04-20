@@ -184,6 +184,7 @@ class SpellCastTargets
 
         void setDestination(WorldLocation const& dest);
         void setSource(WorldLocation const& src);
+        void setSource(Position const& src);
 
         WorldLocation const& getDestination() const { return m_dest; }
         WorldLocation const& getSource() const { return m_src; }
