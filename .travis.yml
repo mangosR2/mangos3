@@ -53,7 +53,7 @@ script:
           $CMAKE_ARGS 
           $CMAKE_COMMON_STRING 
           ..
-  - make -j4
+  - make -j1
 
 matrix:
   exclude:
