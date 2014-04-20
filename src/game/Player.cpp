@@ -1003,8 +1003,9 @@ uint32 Player::EnvironmentalDamage(EnviromentalDamage type, uint32 damage)
         default:
             break;
     }
-    DamageInfo damageInfo = DamageInfo(this,this,spellID, damage);
-    damageInfo.damageType = SELF_DAMAGE;
+
+    DamageInfo damageInfo = DamageInfo(this, this, spellID, damage);
+    damageInfo.damageType = (type == DAMAGE_FALL && getClass() == CLASS_ROGUE) ? SELF_DAMAGE_ROGUE_FALL : SELF_DAMAGE;
 
     CalculateDamageAbsorbAndResist(this, &damageInfo);
 
