@@ -11461,7 +11461,7 @@ void Unit::SetSpeedRate(UnitMoveType mtype, float rate, bool forced, bool ignore
                     data.Initialize(SMSG_MOVE_SET_PITCH_RATE, 1 + 8 + 4 + 4 );
                     data.WriteGuidMask<1, 2, 6, 7, 0, 3, 5, 4>(guid);
 
-            data << float(GetSpeed(mtype));
+                    data << float(GetSpeed(mtype));
                     data.WriteGuidBytes<6, 4, 0>(guid);
                     data << uint32(0);
                     data.WriteGuidBytes<1, 2, 7, 3, 5>(guid);
@@ -11546,7 +11546,7 @@ void Unit::SetSpeedRate(UnitMoveType mtype, float rate, bool forced, bool ignore
                     data.Initialize(SMSG_SPLINE_MOVE_SET_FLIGHT_BACK_SPEED, 1 + 8 + 4);
                     data.WriteGuidMask<2, 1, 6, 5, 0, 3, 4, 7>(guid);
                     data.WriteGuidBytes<5>(guid);
-            data << float(GetSpeed(mtype));
+                    data << float(GetSpeed(mtype));
                     data.WriteGuidBytes<6, 1, 0, 2, 3, 7, 4>(guid);
                     break;
                 }
@@ -11555,7 +11555,7 @@ void Unit::SetSpeedRate(UnitMoveType mtype, float rate, bool forced, bool ignore
                     data.Initialize(SMSG_SPLINE_MOVE_SET_PITCH_RATE, 1 + 8 + 4);
                     data.WriteGuidMask<3, 5, 6, 1, 0, 4, 7, 2>(guid);
                     data.WriteGuidBytes<1, 5, 7, 0, 6, 3, 2>(guid);
-            data << float(GetSpeed(mtype));
+                    data << float(GetSpeed(mtype));
                     data.WriteGuidBytes<4>(guid);
                     break;
                 }
