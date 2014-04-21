@@ -6605,6 +6605,21 @@ SpellAuraProcResult Unit::HandleRemoveByDamageProc(Unit* pVictim, DamageInfo* da
     SpellAuraHolderPtr holder    = triggeredByAura->GetHolder();
     SpellEntry const*  spellInfo = triggeredByAura->GetSpellProto();
 
+    // do not proc from positives
+    if (procFlag & (PROC_FLAG_TAKEN_POSITIVE_AOE | PROC_FLAG_TAKEN_POSITIVE_SPELL) || procEx & PROC_EX_PERIODIC_POSITIVE)
+        return SPELL_AURA_PROC_OK;
+
+    uint32 fullDamage = damageInfo->damage + damageInfo->absorb;
+    if (!fullDamage)
+        return SPELL_AURA_PROC_FAILED;
+
+    if (!spellInfo->GetProcFlags())
+        return SPELL_AURA_PROC_FAILED;
+
+    // root type spells do not dispel the root effect
+    if (procSpell && triggeredByAura->GetModifier()->m_auraname == SPELL_AURA_MOD_ROOT && (GetAllSpellMechanicMask(procSpell) & (1 << (MECHANIC_ROOT-1))))
+        return SPELL_AURA_PROC_FAILED;
+
     // Polymorph
     if (GetSpellSpecific(triggeredByAura->GetId()) == SPELL_MAGE_POLYMORPH)
     {
