@@ -1131,17 +1131,17 @@ void Spell::EffectSchoolDMG(SpellEffectEntry const* effect)
                         break;
 
                     // Find Immoplate
-                    SpellAuraHolderPtr im = unitTarget->GetSpellAuraHolder(348, m_caster->GetObjectGuid());
-                    if (!im)
+                    SpellAuraHolderPtr immolate = unitTarget->GetSpellAuraHolder(348, m_caster->GetObjectGuid());
+                    if (!immolate)
                         break;
 
                     // find req. aura for damage calculation
-                    if (Aura* aura = im->GetAuraByEffectIndex(EFFECT_INDEX_2))
+                    if (Aura* aura = immolate->GetAuraByEffectIndex(EFFECT_INDEX_2))
                     {
                         damage += int32(aura->GetModifier()->m_amount * aura->GetAuraMaxTicks() * m_spellInfo->CalculateSimpleValue(EFFECT_INDEX_1) / 100.0f);
-                        DamageInfo damageInfo = DamageInfo(m_caster, unitTarget, m_spellInfo, damage);
+                        DamageInfo damageInfo = DamageInfo(m_caster, unitTarget, immolate->GetSpellProto(), damage);
                         damageInfo.damageType = SPELL_DIRECT_DAMAGE;
-                        m_caster->SpellDamageBonusDone(&damageInfo);
+                        unitTarget->SpellDamageBonusDone(&damageInfo);
                         break;
                     }
                 }
