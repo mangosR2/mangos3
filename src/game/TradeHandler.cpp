@@ -149,7 +149,7 @@ void WorldSession::SendUpdateTrade(bool trader_state /*= true*/, bool spellOnly 
             data << uint32(item->GetUInt32Value(ITEM_FIELD_DURABILITY));
                 data << uint32(item->GetItemRandomPropertyId());
                 data.WriteGuidBytes<3>(creatorGuid);
-                data << uint32(0);                                  // unk
+                data << uint32(item->GetProto()->LockID);           // unk
                 data.WriteGuidBytes<0>(creatorGuid);
                 data << uint32(item->GetSpellCharges());            // charges
                 data << uint32(item->GetItemSuffixFactor());
