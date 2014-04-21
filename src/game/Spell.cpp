@@ -10823,6 +10823,11 @@ bool Spell::FillCustomTargetMap(SpellEffectEntry const* effect, UnitList& target
 
             break;
         }
+        case 96931:                                     // Eyes of Occu'thar
+        {
+            targetUnitMap.push_back(m_caster);
+            return true;
+        }
         default:
             return false;
     }

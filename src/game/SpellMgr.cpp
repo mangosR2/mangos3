@@ -2515,6 +2515,9 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
             if (MatchedSpellIdPair(62559, 62538))
                 return false;
 
+            // Alizabal's Blade Dance and passives
+            if (spellInfo_1->GetSpellIconID() == 2782 && spellInfo_2->GetSpellIconID() == 2782)
+                return false;
             break;
         }
         case SPELLFAMILY_WARLOCK:
@@ -3080,6 +3083,9 @@ uint32 SpellMgr::GetSpellMaxTargetsWithCustom(SpellEntry const* spellInfo, Unit 
                 case 72441:
                 case 72442:
                 case 72443:
+                case 105065:                                // Seething Hate
+                case 106248:                                // Blade Dance
+                case 108090:                                // Seething Hate (H)
                     unMaxTargets = 1;
                     break;
                 case 28542:                                 // Life Drain

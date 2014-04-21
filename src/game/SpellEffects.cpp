@@ -386,6 +386,9 @@ void Spell::EffectSchoolDMG(SpellEffectEntry const* effect)
                     case 70492: case 72505:                 // Ooze Eruption
                     case 71904:                             // Chaos Bane
                     case 72624: case 72625:                 // Ooze Eruption
+                    case 88942: case 95172:                 // Meteor Slash
+                    case 96913: case 101007:                // Searing Shadows
+                    case 105069: case 108094:               // Seething Hate
                     {
                         uint32 count = 0;
                         for (TargetList::const_iterator ihit = m_UniqueTargetInfo.begin(); ihit != m_UniqueTargetInfo.end(); ++ihit)
@@ -4808,6 +4811,23 @@ void Spell::EffectDummy(SpellEffectEntry const* effect)
                         triggered_spell_id = 96929;
 
                     unitTarget->CastCustomSpell(unitTarget, triggered_spell_id, &bp, NULL, NULL, true, m_CastItem);
+                    return;
+                }
+                case 105065:                                // Seething Hate
+                case 108090:                                // Seething Hate (H)
+                {
+                    if (!unitTarget)
+                        return;
+
+                    m_caster->CastSpell(unitTarget, 105067, true);
+                    return;
+                }
+                case 106248:                                // Blade Dance
+                {
+                    if (!unitTarget)
+                        return;
+
+                    m_caster->CastSpell(unitTarget, 105726, true);
                     return;
                 }
             }
@@ -13144,6 +13164,21 @@ void Spell::EffectScriptEffect(SpellEffectEntry const* effect)
                             holder->SendAuraUpdate(false);
                         }
 
+                    return;
+                }
+                case 96931:                                 // Eyes of Occu'thar
+                {
+                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
+                        return;
+
+                    Unit* caster = m_caster->GetMap()->GetUnit(m_originalCasterGuid);
+                    if (!caster)
+                        return;
+
+                    m_caster->CastSpell(m_caster, 96932, true);
+
+                    if (Creature* eye = caster->SummonCreature(52389, m_caster->GetPositionX(), m_caster->GetPositionY(), m_caster->GetPositionZ(), m_caster->GetOrientation(), TEMPSUMMON_MANUAL_DESPAWN, 0))
+                        eye->CastSpell(m_caster, 96942, true);
                     return;
                 }
             }
