@@ -13403,8 +13403,8 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
             // Eclipse (Solar)
             else if (GetId() == 48517)
                 spellId1 = 94338;
-            // Stampede
-            else if (GetId() == 81021 || GetId() == 81022)
+            // Stampede, Tiger's Fury
+            else if (GetId() == 81021 || GetId() == 81022 || GetId() == 108566)
                 spellId1 = 109881;                          // Stampede Ravage Marker
             // Harmony
             else if (GetId() == 100977)
