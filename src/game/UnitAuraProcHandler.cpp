@@ -6048,9 +6048,9 @@ SpellAuraProcResult Unit::HandleOverrideClassScriptAuraProc(Unit *pVictim, Damag
         }
     }
 
-    // not processed
-    if(!triggered_spell_id)
-        return SPELL_AURA_PROC_FAILED;
+    // drop charges
+    if (!triggered_spell_id)
+        return SPELL_AURA_PROC_OK;
 
     // standard non-dummy case
     SpellEntry const* triggerEntry = sSpellStore.LookupEntry(triggered_spell_id);
