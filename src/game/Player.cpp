@@ -16579,7 +16579,7 @@ void Player::_LoadVoidStorage(QueryResult* result)
             continue;
         }
 
-        if (!sAccountMgr.GetPlayerAccountIdByGUID(creatorGuid))
+        if (creatorGuid && !sAccountMgr.GetPlayerAccountIdByGUID(creatorGuid))
         {
             sLog.outError("Player::_LoadVoidStorage - %s has an item with an invalid creator guid, set to 0 (item id: " UI64FMTD ", entry: %u, creatorGuid: %u).", GetGuidStr().c_str(), itemId, itemEntry, creatorGuid.GetCounter());
             creatorGuid = ObjectGuid();
