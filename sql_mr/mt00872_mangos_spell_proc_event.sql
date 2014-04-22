@@ -1115,3 +1115,11 @@ INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`,
 DELETE FROM `spell_proc_event` WHERE `entry` = 56342;
 INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`, `SpellFamilyMaskB0`, `SpellFamilyMaskC0`, `procEx`) VALUES
 (56342, 9, 24, 134217728, 131072 + 16384, 65536);
+
+### Generic spells ###
+
+-- Fulmination
+DELETE FROM `spell_proc_event` WHERE `entry` = 95774;
+INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`, `procFlags`, `CustomChance`) VALUES
+(95774, 11, 1048576, 65536, 100);
+
