@@ -91,6 +91,48 @@ DELETE FROM `spell_proc_event` WHERE `entry` = 87178;
 INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`, `procFlags`) VALUES
 (87178, 6, 8192, 131072);
 
+-- Lava surge
+DELETE FROM `spell_proc_event` WHERE `entry` IN (77755, 77756);
+INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`, `procFlags`, `CustomChance`) VALUES
+(77755, 11, 268435456, 262144, 10),
+(77756, 11, 268435456, 262144, 20);
+
+-- Feedback
+DELETE FROM `spell_proc_event` WHERE `entry` = 86183;
+INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`) VALUES
+(86183, 11, 3);
+
+-- Earth's Grasp
+DELETE FROM `spell_proc_event` WHERE `entry` IN (51483, 51485);
+INSERT INTO `spell_proc_event` (`entry`, `SchoolMask`, `procFlags`, `procEx`, `CustomChance`) VALUES
+(51483, 127, 0x4000, 0x80000, 100),
+(51485, 127, 0x4000, 0x80000, 100);
+
+-- Focused Insight
+DELETE FROM `spell_proc_event` WHERE `entry` IN (77794);
+INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`) VALUES
+(77794, 11, 0x90100000);
+
+-- Earth Shield
+DELETE FROM `spell_proc_event` WHERE `entry` = 974;
+INSERT INTO `spell_proc_event` (`entry`, `procFlags`, `Cooldown`) VALUES
+(974, 0x222A8, 3);
+
+-- Telluric Currents
+DELETE FROM `spell_proc_event` WHERE `entry` = 82984;
+INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`) VALUES
+(82984, 11, 1);
+
+-- Tidal Waves
+DELETE FROM `spell_proc_event` WHERE `entry` = 51562;
+INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskC0`) VALUES
+(51562, 11, 16);
+
+-- Earthliving
+DELETE FROM `spell_proc_event` WHERE `entry` = 52007;
+INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `CustomChance`) VALUES
+(52007, 11, 20);
+
 -- Glyph of Grounding Totem
 DELETE FROM `spell_proc_event` WHERE `entry` IN (89523);
 INSERT INTO `spell_proc_event` (`entry`, `SchoolMask`, `procEx`) VALUES
