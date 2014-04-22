@@ -398,8 +398,11 @@ inline bool IsSpellWithCasterSourceTargetsOnly(SpellEntry const* spellInfo)
     for (int i = 0; i < MAX_EFFECT_INDEX; ++i)
     {
         SpellEffectEntry const* effectEntry = spellInfo->GetSpellEffect(SpellEffectIndex(i));
-        if(!effectEntry)
+        if (!effectEntry)
             continue;
+
+        if (effectEntry->Effect == SPELL_EFFECT_TRIGGER_MISSILE)
+            return false;
 
         // All those spells - selfcasted in 3.3.5a (but not all has  standart targets set)
         if (spellInfo->HasAttribute(SPELL_ATTR_PASSIVE) && 
