@@ -886,7 +886,6 @@ void WorldSession::BuildPartyMemberStatsChangedPacket(Player* player, WorldPacke
     {
         *data << uint32(8);
         *data << uint32(0);
-        *data << uint8(0);
     }
 
     if (mask & GROUP_UPDATE_FLAG_VEHICLE_SEAT)
