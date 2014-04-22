@@ -133,6 +133,26 @@ DELETE FROM `spell_proc_event` WHERE `entry` = 52007;
 INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `CustomChance`) VALUES
 (52007, 11, 20);
 
+-- Water Shield
+DELETE FROM `spell_proc_event` WHERE `entry` = 52127;
+INSERT INTO `spell_proc_event` (`entry`, `procFlags`, `Cooldown`) VALUES
+(52127, 0x222A8, 3);
+
+-- Frozen Power
+DELETE FROM `spell_proc_event` WHERE `entry` = 63373;
+INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA1`, `procFlags`, `CustomChance`) VALUES
+(63373, 11, 2147483648, 65536, 100);
+
+-- Improved Lava Lash
+DELETE FROM `spell_proc_event` WHERE `entry` = 77700;
+INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA1`, `procFlags`, `CustomChance`) VALUES
+(77700, 11, 2147483648, 65536, 100);
+
+-- Static Shock
+DELETE FROM `spell_proc_event` WHERE `entry` = 51525;
+INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskB0`, `SpellFamilyMaskC0`) VALUES
+(51525, 11, 16777232, 131076);
+
 -- Glyph of Grounding Totem
 DELETE FROM `spell_proc_event` WHERE `entry` IN (89523);
 INSERT INTO `spell_proc_event` (`entry`, `SchoolMask`, `procEx`) VALUES
