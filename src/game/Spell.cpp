@@ -7932,9 +7932,6 @@ SpellCastResult Spell::CheckCast(bool strict)
         }
     }
 
-    if (m_caster->GetTypeId() == TYPEID_PLAYER && m_spellInfo->Id != 39870)
-        return SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW;
-
     // and some hacks, as always
 
     switch(m_spellInfo->Id)
