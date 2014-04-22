@@ -1973,7 +1973,8 @@ void InitializeOpcodes()
     OPCODE(CMSG_QUERY_BATTLEFIELD_STATE,                 STATUS_UNHANDLED,PROCESS_INPLACE,      &WorldSession::Handle_NULL             );
     OPCODE(CMSG_UNREGISTER_ALL_ADDON_PREFIXES,           STATUS_UNHANDLED,PROCESS_INPLACE,      &WorldSession::Handle_NULL             );
     OPCODE(CMSG_VOICE_SESSION_ENABLE,                    STATUS_UNHANDLED,PROCESS_INPLACE,      &WorldSession::Handle_NULL             );
-    OPCODE(CMSG_REQUEST_CATEGORY_COOLDOWNS,              STATUS_UNHANDLED,PROCESS_INPLACE,      &WorldSession::Handle_NULL             );
+    OPCODE(CMSG_REQUEST_CATEGORY_COOLDOWNS,              STATUS_UNHANDLED,PROCESS_INPLACE,      &WorldSession::HandleRequestCategoryCooldownsOpcode);
+    OPCODE(SMSG_SPELL_CATEGORY_COOLDOWN,                 STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
     OPCODE(CMSG_LOAD_SCREEN,                             STATUS_UNHANDLED,PROCESS_INPLACE,      &WorldSession::Handle_NULL             );
     OPCODE(CMSG_ENABLE_NAGLE,                            STATUS_UNHANDLED,PROCESS_INPLACE,      &WorldSession::Handle_NULL             );
     OPCODE(CMSG_LOG_DISCONNECT,                          STATUS_UNHANDLED,PROCESS_INPLACE,      &WorldSession::Handle_NULL             );

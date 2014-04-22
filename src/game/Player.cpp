@@ -20658,6 +20658,30 @@ void Player::SendCooldownEvent(SpellEntry const* spellInfo, uint32 itemId)
     SendDirectMessage(&data);
 }
 
+void Player::SendCategoryCooldownMods()
+{
+    std::map<uint32, int32> categoryMods;
+    Unit::AuraList const& categoryCooldownAuras = GetAurasByType(SPELL_AURA_MOD_SPELL_CATEGORY_COOLDOWN);
+    for (Unit::AuraList::const_iterator itr = categoryCooldownAuras.begin(); itr != categoryCooldownAuras.end(); ++itr)
+    {
+        std::map<uint32, int32>::iterator cItr = categoryMods.find((*itr)->GetMiscValue());
+        if (cItr == categoryMods.end())
+            categoryMods[(*itr)->GetMiscValue()] = (*itr)->GetModifier()->m_amount;
+        else
+            cItr->second += (*itr)->GetModifier()->m_amount;
+    }
+
+    WorldPacket data(SMSG_SPELL_CATEGORY_COOLDOWN, 11);
+    data.WriteBits(categoryMods.size(), 23);
+    for (std::map<uint32, int32>::const_iterator itr = categoryMods.begin(); itr != categoryMods.end(); ++itr)
+    {
+        data << uint32(itr->first);
+        data << int32(-itr->second);
+    }
+
+    SendDirectMessage(&data);
+}
+
 void Player::UpdatePotionCooldown(Spell* spell)
 {
     // no potion used in combat or still in combat

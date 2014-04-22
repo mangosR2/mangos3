@@ -16151,7 +16151,7 @@ void Unit::RemoveSpellCategoryCooldown(uint32 cat, bool update /* = false */)
         RemoveSpellCooldown(*itr, update);
 }
 
-void Unit::AddSpellAndCategoryCooldowns(SpellEntry const* spellInfo, uint32 itemId /*= 0*/, bool infinityCooldown  /*= false*/)
+void Unit::AddSpellAndCategoryCooldowns(SpellEntry const* spellInfo, uint32 itemId /*= 0*/, bool infinityCooldown /*= false*/)
 {
     // init cooldown values
     uint32 category   = 0;
@@ -16234,6 +16234,20 @@ void Unit::AddSpellAndCategoryCooldowns(SpellEntry const* spellInfo, uint32 item
                 recTime = ceil(recTime * GetFloatValue(UNIT_MOD_CAST_SPEED));
                 catrecTime = ceil(catrecTime * GetFloatValue(UNIT_MOD_CAST_SPEED));
                 break;
+            }
+        }
+
+        // Apply SPELL_AURA_MOD_SPELL_CATEGORY_COOLDOWN modifiers
+        // Note: This aura applies its modifiers to all cooldowns of spells with set category, not to category cooldown only
+        if (category)
+        {
+            if (int32 categoryModifier = GetTotalAuraModifierByMiscValue(SPELL_AURA_MOD_SPELL_CATEGORY_COOLDOWN, category))
+            {
+                if (cooldown > 0)
+                    cooldown += categoryModifier;
+
+                if (categorycooldown > 0)
+                    categorycooldown += categoryModifier;
             }
         }
 
