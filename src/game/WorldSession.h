@@ -966,8 +966,6 @@ class MANGOS_DLL_SPEC WorldSession
         void HandleObjectUpdateFailedOpcode(WorldPacket& recv_data);
         void HandeSetEveryoneIsAssistant(WorldPacket& recv_data);
 
-        void HandleRequestCategoryCooldownsOpcode(WorldPacket& /*recv_data*/);
-
     private:
         // private trade methods
         void moveItems(Item* myItems[], Item* hisItems[]);

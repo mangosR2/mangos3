@@ -927,10 +927,3 @@ void WorldSession::HandleUpdateMissileTrajectory(WorldPacket& recv_data)
         recv_data >> movementInfo;
     }
 }
-
-void WorldSession::HandleRequestCategoryCooldownsOpcode(WorldPacket& /*recv_data*/)
-{
-    DEBUG_FILTER_LOG(LOG_FILTER_SPELL_CAST, "WORLD: CMSG_REQUEST_CATEGORY_COOLDOWNS");
-
-    _player->SendCategoryCooldownMods();
-}

@@ -2467,8 +2467,6 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         bool m_isCreatureLinkingTrigger;
         bool m_isSpawningLinked;
 
-        SpellCooldowns m_spellCooldowns;
-
     private:
         void CleanupDeletedHolders(bool force = false);
         void UpdateSplineMovement(uint32 t_diff);
@@ -2514,6 +2512,8 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         UnitStateMgr m_stateMgr;
 
         ObjectGuid m_fixateTargetGuid;                      //< Stores the Guid of a fixated target
+
+        SpellCooldowns m_spellCooldowns;
 
     private:                                                // Error traps for some wrong args using
         // this will catch and prevent build for any cases when all optional args skipped and instead triggered used non boolean type
