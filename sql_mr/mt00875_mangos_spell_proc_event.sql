@@ -153,6 +153,16 @@ DELETE FROM `spell_proc_event` WHERE `entry` = 51525;
 INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskB0`, `SpellFamilyMaskC0`) VALUES
 (51525, 11, 16777232, 131076);
 
+-- Elemental Overload
+DELETE FROM `spell_proc_event` WHERE `entry` = 77222;
+INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`, `SpellFamilyMaskB0`) VALUES
+(77222, 11, 1+2, 4096);
+
+-- Glyph of Healing Wave
+DELETE FROM `spell_proc_event` WHERE `entry` = 55440;
+INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMaskA0`) VALUES
+(55440, 11, 64);
+
 -- Glyph of Grounding Totem
 DELETE FROM `spell_proc_event` WHERE `entry` IN (89523);
 INSERT INTO `spell_proc_event` (`entry`, `SchoolMask`, `procEx`) VALUES
