@@ -26205,7 +26205,7 @@ void Player::SendRefundInfo(Item* item)
         item->SetNotRefundable(this);
         return;
     }
-/*
+
     ItemExtendedCostEntry const* iece = sItemExtendedCostStore.LookupEntry(item->GetPaidExtendedCost());
     if (!iece)
     {
@@ -26213,20 +26213,26 @@ void Player::SendRefundInfo(Item* item)
         return;
     }
 
-    WorldPacket data(SMSG_ITEM_REFUND_INFO_RESPONSE, 8+4+4+4+4*4+4*4+4+4);
-    data << item->GetObjectGuid();                  // item guid
-    data << uint32(item->GetPaidMoney());           // money cost
-    data << uint32(iece->reqhonorpoints);           // honor point cost
-    data << uint32(iece->reqarenapoints);           // arena point cost
-    for (uint32 i = 0; i < MAX_EXTENDED_COST_ITEMS; ++i)   // item cost data
+    WorldPacket data(SMSG_SET_ITEM_PURCHASE_DATA, 8+4+4+4+4*4+4*4+4+4);
+    data.WriteGuidMask<3, 5, 7, 6, 2, 4, 0, 1>(item->GetObjectGuid()); // item guid
+    data.WriteGuidBytes<7>(item->GetObjectGuid());
+    data << uint32(item->GetPlayedTimeField());
+    for (uint8 i = 0; i < MAX_EXTENDED_COST_ITEMS; ++i)         // item cost data
     {
-        data << uint32(iece->reqitem[i]);
         data << uint32(iece->reqitemcount[i]);
+        data << uint32(iece->reqitem[i]);
     }
+    data.WriteGuidBytes<6, 4, 3, 2>(item->GetObjectGuid());
+    for (uint8 i = 0; i < MAX_EXTENDED_COST_CURRENCIES; ++i)    // currency cost data
+    {
+        data << uint32(iece->reqcurrcount[i]);
+        data << uint32(iece->reqcur[i]);
+    }
+    data.WriteGuidBytes<1, 5>(item->GetObjectGuid());
     data << uint32(0);
-    data << uint32(item->GetUInt32Value(ITEM_FIELD_CREATE_PLAYED_TIME));
+    data.WriteGuidBytes<0>(item->GetObjectGuid());
+    data << uint32(item->GetPaidMoney());                       // money cost
     GetSession()->SendPacket(&data);
-*/
 }
 
 void Player::RefundItem(Item* item)
