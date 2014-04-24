@@ -4847,6 +4847,9 @@ void Player::DeleteFromDB(ObjectGuid playerguid, uint32 accountId, bool updateRe
             CharacterDatabase.PExecute("DELETE FROM item_refund_instance WHERE playerGuid = %u", lowGuid);
             CharacterDatabase.PExecute("DELETE FROM calendar_invites WHERE inviteeGuid = %u", lowGuid);
             CharacterDatabase.PExecute("DELETE FROM calendar_invites WHERE senderGuid = %u", lowGuid);
+            CharacterDatabase.PExecute("DELETE FROM character_cuf_profiles WHERE guid = %u", lowGuid);
+            CharacterDatabase.PExecute("DELETE FROM character_archaeology WHERE guid = '%u'", lowGuid);
+            CharacterDatabase.PExecute("DELETE FROM character_archaeology_finds WHERE guid = '%u'", lowGuid);
 
             CharacterDatabase.CommitTransaction();
             break;
