@@ -467,6 +467,8 @@ void Pet::SavePetToDB(PetSaveMode mode)
         savePet.addString(ss);
 
         savePet.addUInt64((m_duration == 0) ? uint64(time(NULL)) : uint64(time(NULL) - (GetSpellDuration(sSpellStore.LookupEntry(GetCreateSpellID())) - m_duration) / IN_MILLISECONDS));
+        savePet.addUInt32(uint32(m_resetTalentsCost));
+        savePet.addUInt64(uint64(m_resetTalentsTime));
         savePet.addUInt32(GetCreateSpellID());
         savePet.addUInt32(uint32(getPetType()));
         savePet.addUInt32(uint32(m_actualSlot));
