@@ -19542,7 +19542,15 @@ void Player::AddSpellMod(Aura* aura, bool apply)
     data << uint8(mod->m_miscvalue);
     for (uint8 eff = 0; eff < 96; ++eff)
     {
-        if (aura->GetAuraSpellClassMask().test(eff))
+        uint64 _mask = 0;
+        uint32 _mask2= 0;
+
+        if (eff < 64)
+            _mask = uint64(1) << (eff - 0);
+        else
+            _mask2= uint32(1) << (eff - 64);
+
+        if (aura->GetAuraSpellClassMask().IsFitToFamilyMask(_mask, _mask2))
         {
             int32 val = 0;
             for (AuraList::const_iterator itr = m_spellMods[mod->m_miscvalue].begin(); itr != m_spellMods[mod->m_miscvalue].end(); ++itr)
@@ -19550,7 +19558,7 @@ void Player::AddSpellMod(Aura* aura, bool apply)
                 if (itr->IsEmpty())
                     continue;
 
-                if ((*itr)->GetModifier()->m_auraname == mod->m_auraname && ((*itr)->GetAuraSpellClassMask().test(eff)))
+                if ((*itr)->GetModifier()->m_auraname == mod->m_auraname && ((*itr)->GetAuraSpellClassMask().IsFitToFamilyMask(_mask, _mask2)))
                     val += (*itr)->GetModifier()->m_amount;
             }
             // Not need manually remove m_amount from total value - his already removed from calculation due to removed from SpellAuraHolder (IsEmpty() method)
