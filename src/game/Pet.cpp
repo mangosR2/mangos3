@@ -440,8 +440,8 @@ void Pet::SavePetToDB(PetSaveMode mode)
         // save pet
         static SqlStatementID insPet;
         SqlStatement savePet = CharacterDatabase.CreateStatement(insPet, "INSERT INTO character_pet ( id, entry,  owner, modelid, level, exp, Reactstate, slot, name, renamed, curhealth, "
-            "curmana, abdata, savetime, resettalents_cost, resettalents_time, CreatedBySpell, PetType, actual_slot) "
-             "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+            "curmana, abdata, savetime, CreatedBySpell, PetType, actual_slot) "
+             "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
 
         savePet.addUInt32(m_charmInfo->GetPetNumber());
         savePet.addUInt32(GetEntry());
@@ -467,8 +467,6 @@ void Pet::SavePetToDB(PetSaveMode mode)
         savePet.addString(ss);
 
         savePet.addUInt64((m_duration == 0) ? uint64(time(NULL)) : uint64(time(NULL) - (GetSpellDuration(sSpellStore.LookupEntry(GetCreateSpellID())) - m_duration) / IN_MILLISECONDS));
-        savePet.addUInt32(uint32(m_resetTalentsCost));
-        savePet.addUInt64(uint64(m_resetTalentsTime));
         savePet.addUInt32(GetCreateSpellID());
         savePet.addUInt32(uint32(getPetType()));
         savePet.addUInt32(uint32(m_actualSlot));
