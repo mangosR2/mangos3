@@ -263,6 +263,9 @@ bool DynamicMapTree::isInLineOfSight(float x1, float y1, float z1, float x2, flo
     if (!VMAP::CheckPosition(x1, y1, z1) || !VMAP::CheckPosition(x2, y2, z2))
         return false;
 
+    if (!size())
+        return true;
+
     Vector3 v1(x1, y1, z1), v2(x2, y2, z2);
 
     float maxDist = (v2 - v1).magnitude();
