@@ -21563,8 +21563,23 @@ void Player::RemoveItemDependentAurasAndCasts(Item * pItem)
             continue;
         }
 
+        // Shadowmourne visual
+        if ((itr->second->GetId() == 72521 || itr->second->GetId() == 72523) && pItem->GetEntry() == 49623)
+        {
+            RemoveAurasDueToSpell(itr->second->GetId());
+            itr = auras.begin();
+            continue;
+        }
+
         // skip if not item dependent or have alternative item
         if (HasItemFitToSpellReqirements(spellInfo,pItem))
+        {
+            ++itr;
+            continue;
+        }
+
+        // Bladestorm
+        if (itr->second->GetId() == 46924)
         {
             ++itr;
             continue;
