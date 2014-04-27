@@ -5747,6 +5747,7 @@ void Spell::SendResurrectRequest(Player* target)
     // null terminator
     data << uint8(0);
     data << uint8(m_caster->GetTypeId() == TYPEID_PLAYER ? 0 : 1); // "you'll be afflicted with resurrection sickness"
+    data << uint32(m_spellInfo->Id);
     // override delay sent with SMSG_CORPSE_RECLAIM_DELAY, set instant resurrection for spells with this attribute
     if (m_spellInfo->HasAttribute(SPELL_ATTR_EX3_IGNORE_RESURRECTION_TIMER))
         data << uint32(0);
