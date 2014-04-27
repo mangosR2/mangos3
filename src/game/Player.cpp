@@ -6134,8 +6134,8 @@ bool Player::UpdateSkillPro(uint16 SkillId, int32 Chance, uint32 step)
 
         //UpdateAllItemEnchantsAtSkill(SkillId, SkillValue, new_value);
 
-        //UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_REACH_SKILL_LEVEL,SkillId);
-        DEBUG_LOG("Player::UpdateSkillPro Chance=%3.1f%% taken", Chance/10.0);
+        UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_REACH_SKILL_LEVEL, SkillId);
+        DEBUG_LOG("Player::UpdateSkillPro Chance=%3.1f%% taken", Chance / 10.0);
         return true;
     }
 
