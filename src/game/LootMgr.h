@@ -53,7 +53,7 @@ enum LootType
     LOOT_PICKPOCKETING          = 2,
     LOOT_FISHING                = 3,
     LOOT_DISENCHANTING          = 4,
-    // ignored always by client
+    LOOT_SPELL                  = 5,                        // ignored always by client
     LOOT_SKINNING               = 6,
     LOOT_PROSPECTING            = 7,
     LOOT_MILLING                = 8,

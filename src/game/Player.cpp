@@ -23190,6 +23190,8 @@ bool Player::IsBaseRuneSlotsOnCooldown(RuneType runeType) const
 void Player::AutoStoreLoot(WorldObject const* lootTarget, uint32 loot_id, LootStore const& store, bool broadcast, uint8 bag, uint8 slot)
 {
     Loot loot(lootTarget);
+    if (store.GetName() == LootTemplates_Spell.GetName())
+        loot.loot_type = LOOT_SPELL; // group hackfix
     loot.FillLoot(loot_id, store, this, true);
 
     AutoStoreLoot(loot, broadcast, bag, slot);
