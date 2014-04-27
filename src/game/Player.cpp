@@ -23160,7 +23160,6 @@ void Player::InitRunes()
     m_runes = new Runes;
 
     m_runes->runeState = 0;
-    m_runes->needConvert = 0;
     m_runes->lastUsedRuneMask = 0;
 
     for (uint32 i = 0; i < MAX_RUNES; ++i)
@@ -23168,6 +23167,7 @@ void Player::InitRunes()
         SetBaseRune(i, runeSlotTypes[i]);                   // init base types
         SetCurrentRune(i, runeSlotTypes[i]);                // init current types
         SetRuneCooldown(i, 0);                              // reset cooldowns
+        SetRuneConvertAura(i, NULL);
         SetConvertedBy(i, 0);                               // init spellid
         SetBaseRuneCooldown(i, 0);
         m_runes->SetRuneState(i);
