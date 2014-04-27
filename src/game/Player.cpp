@@ -7253,7 +7253,6 @@ bool Player::RewardHonor(Unit* uVictim, uint32 groupsize, float honor)
     // add honor points
     ModifyCurrencyCount(CURRENCY_HONOR_POINTS, int32(honor));
 
-    // FIXME 4x ApplyModUInt32Value(PLAYER_FIELD_TODAY_CONTRIBUTION, uint32(honor), true);
     return true;
 }
 
@@ -18192,13 +18191,12 @@ void Player::SaveToDB()
     _SaveEquipmentSets();
     GetSession()->SaveTutorialsData();                      // changed only while character in game
     _SaveGlyphs();
+    _SaveCUFProfiles();
     _SaveVoidStorage();
     _SaveTalents();
     _SaveArchaeology();
 
     CharacterDatabase.CommitTransaction();
-
-    _SaveCUFProfiles();
 
     // check if stats should only be saved on logout
     // save stats can be out of transaction
