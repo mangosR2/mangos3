@@ -7924,6 +7924,23 @@ void Player::_ApplyItemBonuses(ItemPrototype const* proto, uint8 slot, bool appl
 
     if (CanModifyStats() && (damage || proto->Delay))
         UpdateDamagePhysical(attType);
+
+    // Melee damage and Attack Speed for Druids
+    if (getClass() == CLASS_DRUID && proto->Class == ITEM_CLASS_WEAPON && IsInFeralForm())
+    {
+        SpellShapeshiftFormEntry const* ssEntry = sSpellShapeshiftFormStore.LookupEntry(GetShapeshiftForm());
+        if (ssEntry && ssEntry->attackSpeed)
+        {
+            SetAttackTime(BASE_ATTACK, ssEntry->attackSpeed);
+            SetAttackTime(OFF_ATTACK, ssEntry->attackSpeed);
+            SetAttackTime(RANGED_ATTACK, BASE_ATTACK_TIME);
+        }
+        else
+            SetRegularAttackTime();
+
+        // Only BASE_ATTACK for ferals
+        UpdateDamagePhysical(BASE_ATTACK);
+    }
 }
 
 void Player::_ApplyWeaponDependentAuraMods(Item* item, WeaponAttackType attackType, bool apply)
