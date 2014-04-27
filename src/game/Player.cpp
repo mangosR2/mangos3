@@ -24428,6 +24428,7 @@ void Player::ActivateSpec(uint8 specNum)
         return;
 
     UnsummonPetTemporaryIfAny();
+    RemoveAllEnchantments(TEMP_ENCHANTMENT_SLOT);
 
     // prevent deletion of action buttons by client at spell unlearn or by player while spec change in progress
     SendLockActionButtons();
@@ -24475,7 +24476,15 @@ void Player::ActivateSpec(uint8 specNum)
             for (int r = 0; r < MAX_TALENT_RANK; ++r)
             {
                 if (talentInfo->RankID[r])
-                    removeSpell(talentInfo->RankID[r], !IsPassiveSpell(talentInfo->RankID[r]), false);
+                {
+                    removeSpell(talentInfo->RankID[r],!IsPassiveSpell(talentInfo->RankID[r]), false);
+
+                    SpellEntry const *spellInfo = sSpellStore.LookupEntry(talentInfo->RankID[r]);
+                    for (int k = 0; k < MAX_EFFECT_INDEX; ++k)
+                        if (SpellEffectEntry const * effect = spellInfo->GetSpellEffect(SpellEffectIndex(k)))
+                            if (effect->EffectTriggerSpell)
+                                removeSpell(effect->EffectTriggerSpell);
+                }
             }
 
             specIter = m_talents[m_activeSpec].begin();
