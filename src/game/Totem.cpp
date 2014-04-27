@@ -237,6 +237,13 @@ void Totem::SetTypeBySummonSpell(SpellEntry const * spellProto)
 
 bool Totem::IsImmuneToSpellEffect(SpellEntry const* spellInfo, SpellEffectIndex index) const
 {
+    if (!spellInfo)
+        return true;
+
+    // Author - Velvet. seems not fully correct, but usable.
+    if (spellInfo->GetSpellFamilyFlags().test<CF_SHAMAN_MANA_SPRING, CF_SHAMAN_HEALING_STREAM, CF_SHAMAN_MISC_TOTEM_EFFECTS>())
+        return false;
+
     SpellEffectEntry const* spellEffect = spellInfo->GetSpellEffect(index);
     if (spellEffect)
     {

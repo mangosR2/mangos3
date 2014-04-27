@@ -1027,8 +1027,9 @@ uint32 Player::EnvironmentalDamage(EnviromentalDamage type, uint32 damage)
         default:
             break;
     }
-    DamageInfo damageInfo = DamageInfo(this,this,spellID, damage);
-    damageInfo.damageType = SELF_DAMAGE;
+
+    DamageInfo damageInfo = DamageInfo(this, this, spellID, damage);
+    damageInfo.damageType = (type == DAMAGE_FALL && getClass() == CLASS_ROGUE) ? SELF_DAMAGE_ROGUE_FALL : SELF_DAMAGE;
 
     CalculateDamageAbsorbAndResist(this, &damageInfo);
 
@@ -22202,8 +22203,23 @@ void Player::RemoveItemDependentAurasAndCasts(Item * pItem)
             continue;
         }
 
+        // Shadowmourne visual
+        if ((itr->second->GetId() == 72521 || itr->second->GetId() == 72523) && pItem->GetEntry() == 49623)
+        {
+            RemoveAurasDueToSpell(itr->second->GetId());
+            itr = auras.begin();
+            continue;
+        }
+
         // skip if not item dependent or have alternative item
         if (HasItemFitToSpellReqirements(spellInfo,pItem))
+        {
+            ++itr;
+            continue;
+        }
+
+        // Bladestorm
+        if (itr->second->GetId() == 46924)
         {
             ++itr;
             continue;

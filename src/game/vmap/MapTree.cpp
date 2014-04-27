@@ -280,30 +280,41 @@ namespace VMAP
         {
             char chunk[8];
             // general info
-            if (!readChunk(rf, chunk, VMAP_MAGIC, 8)) success = false;
+            if (!readChunk(rf, chunk, VMAP_MAGIC, 8))
+                success = false;
+
             char tiled = 0;
-            if (success && fread(&tiled, sizeof(char), 1, rf) != 1) success = false;
+            if (success && fread(&tiled, sizeof(char), 1, rf) != 1)
+                success = false;
+
             iIsTiled = bool(tiled);
+
             // Nodes
-            if (success && !readChunk(rf, chunk, "NODE", 4)) success = false;
-            if (success) success = iTree.readFromFile(rf);
+            if (success && !readChunk(rf, chunk, "NODE", 4))
+                success = false;
+
+            if (success)
+                success = iTree.readFromFile(rf);
+
             if (success)
             {
                 iNTreeValues = iTree.primCount();
                 iTreeValues = new ModelInstance[iNTreeValues];
             }
 
-            if (success && !readChunk(rf, chunk, "GOBJ", 4)) success = false;
+            if (success && !readChunk(rf, chunk, "GOBJ", 4))
+                success = false;
+
             // global model spawns
             // only non-tiled maps have them, and if so exactly one (so far at least...)
             ModelSpawn spawn;
 #ifdef VMAP_DEBUG
             DEBUG_LOG("Map isTiled: %u", static_cast<uint32>(iIsTiled));
 #endif
-            if (!iIsTiled && ModelSpawn::readFromFile(rf, spawn))
+            if (success && !iIsTiled && ModelSpawn::readFromFile(rf, spawn))
             {
                 WorldModelPtr model = vm->acquireModelInstance(iBasePath, spawn.name);
-                DEBUG_FILTER_LOG(LOG_FILTER_MAP_LOADING,"StaticMapTree::InitMap(): loading %s", spawn.name.c_str());
+                DEBUG_FILTER_LOG(LOG_FILTER_MAP_LOADING, "StaticMapTree::InitMap(): loading %s", spawn.name.c_str());
                 if (model)
                 {
                     // assume that global model always is the first and only tree value (could be improved...)
@@ -312,6 +323,9 @@ namespace VMAP
                 }
                 else
                 {
+                    delete[] iTreeValues;
+                    iTreeValues = NULL;
+
                     success = false;
                     ERROR_LOG("StaticMapTree::InitMap() could not acquire WorldModel pointer for '%s'!", spawn.name.c_str());
                 }

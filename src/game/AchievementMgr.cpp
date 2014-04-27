@@ -2276,6 +2276,18 @@ void AchievementMgr<T>::UpdateAchievementCriteria(AchievementCriteriaTypes type,
                         }
                         break;
                     }
+                    case 223:                       // The Sickly Gazelle
+                    {
+                        if (!bg || !unit)
+                            continue;
+
+                        if (bg->GetTypeID(true) != BATTLEGROUND_AV)
+                            continue;
+
+                        if (unit->GetAreaId() != 3057 || !unit->IsMounted())
+                            continue;
+                        break;
+                    }
                     case 1259:                      // Not So Fast (WS)
                         if (!bg || !unit)
                             continue;
@@ -2584,6 +2596,20 @@ void AchievementMgr<T>::UpdateAchievementCriteria(AchievementCriteriaTypes type,
                 // those requirements couldn't be found in the dbc
                 switch(achievementCriteria->referredAchievement)
                 {
+                    case 229:                   // The Grim Reaper
+                    {
+                        if (!bg)
+                            continue;
+
+                        if (achievementCriteria->ID == 1823 && bg->GetTypeID(true) == BATTLEGROUND_WS ||
+                            achievementCriteria->ID == 1820 && bg->GetTypeID(true) == BATTLEGROUND_AB ||
+                            achievementCriteria->ID == 1822 && bg->GetTypeID(true) == BATTLEGROUND_EY ||
+                            achievementCriteria->ID == 1821 && bg->GetTypeID(true) == BATTLEGROUND_AV ||
+                            // achievementCriteria->ID == && bg->GetTypeID(true) == BATLLEGROUND_SA ||
+                            achievementCriteria->ID == 12579 && bg->GetTypeID(true) == BATTLEGROUND_IC)
+                            break;
+                        continue;
+                    }
                     case 252:                   // With a Little Helper from My Friends (Event: Feast of Winter Veil)
                     {
                         Player* plr = referencePlayer;
@@ -2737,7 +2763,7 @@ void AchievementMgr<T>::UpdateAchievementCriteria(AchievementCriteriaTypes type,
                     }
                     case 1490:                  // Arena Killing Blows
                     {
-                        if(!bg)
+                        if (bg || !unit || unit->GetTypeId() != TYPEID_PLAYER)
                             continue;
                         if (achievementCriteria->ID == 5533 && referencePlayer->GetMapId() == 559 ||    // Nagrand Arena
                             achievementCriteria->ID == 5534 && referencePlayer->GetMapId() == 562 ||    // Blade's Edge Arena
@@ -2749,7 +2775,7 @@ void AchievementMgr<T>::UpdateAchievementCriteria(AchievementCriteriaTypes type,
                     }
                     case 1491:                  // Battleground Killing Blows
                     {
-                        if(!bg)
+                        if (!bg || !bg->isArena() || !unit || unit->GetTypeId() != TYPEID_PLAYER)
                             continue;
                         if (achievementCriteria->ID == 5436 && referencePlayer->GetMapId() == 30 ||     // AV
                             achievementCriteria->ID == 5537 && referencePlayer->GetMapId() == 529 ||    // AB
@@ -2764,11 +2790,11 @@ void AchievementMgr<T>::UpdateAchievementCriteria(AchievementCriteriaTypes type,
                     case 1493:                  // 3v3 Arena Killing Blows
                     case 1494:                  // 5v5 Arena Killing Blows
                     {
-                        if(!bg)
+                        if (!bg || !unit || unit->GetTypeId() != TYPEID_PLAYER)
                             continue;
-                        if(!bg->isArena())
+                        if (!bg->isArena())
                             continue;
-                        if( (achievementCriteria->ID == 5441 && bg->GetArenaType() == ARENA_TYPE_2v2) ||
+                        if ((achievementCriteria->ID == 5441 && bg->GetArenaType() == ARENA_TYPE_2v2) ||
                             (achievementCriteria->ID == 5442 && bg->GetArenaType() == ARENA_TYPE_3v3) ||
                             (achievementCriteria->ID == 5443 && bg->GetArenaType() == ARENA_TYPE_5v5) )
                             break;
@@ -2777,6 +2803,8 @@ void AchievementMgr<T>::UpdateAchievementCriteria(AchievementCriteriaTypes type,
                     case 3856:                  // Demolition Derby (alliance)
                     case 4256:                  // Demolition Derby (horde)
                     {
+                        if (!unit || unit->GetTypeId() != TYPEID_UNIT)
+                            continue;
                         uint32 AchCrID = achievementCriteria->ID;
                         if( ((AchCrID == 11497 || AchCrID == 12178) && miscvalue2 == 34802) ||  // Glaive Thrower
                             ((AchCrID == 11498 || AchCrID == 12179) && miscvalue2 == 34775) ||  // Demolisher
@@ -3592,7 +3620,7 @@ uint32 AchievementMgr<T>::GetCriteriaProgressMaxCounter(AchievementCriteriaEntry
             resultValue = 9000;
             break;
 
-            // handle all statistic-only criteria here
+        // handle all statistic-only criteria here
         case ACHIEVEMENT_CRITERIA_TYPE_COMPLETE_BATTLEGROUND:
         case ACHIEVEMENT_CRITERIA_TYPE_DEATH_AT_MAP:
         case ACHIEVEMENT_CRITERIA_TYPE_DEATH:

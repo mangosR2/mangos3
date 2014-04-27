@@ -176,9 +176,10 @@ enum EnergyType
     ENERGY_TYPE_UNK1      = 1,                          // 2 vehicles in 3.3.5a
     ENERGY_TYPE_PYRITE    = 41,                         // 2 vehicles in 3.3.5a
     ENERGY_TYPE_STEAM     = 61,                         // 9 vehicles in 3.3.5a
+    ENERGY_TYPE_HEAT      = 101,
     ENERGY_TYPE_OOZE      = 121,                        // 1 vehicle  in 3.3.5a
     ENERGY_TYPE_BLOOD     = 141,                        // 1 vehicle  in 3.3.5a
-    ENERGY_TYPE_UNK142    = 142,                        // 1 vehicle  in 3.3.5a
+    ENERGY_TYPE_WRATH     = 142,                        // 1 vehicle  in 3.3.5a
 };
 
 enum SpellSchools
@@ -313,7 +314,7 @@ enum SpellAttributesEx
     SPELL_ATTR_EX_UNK11                        = 0x00000800,            // 11
     SPELL_ATTR_EX_UNK12                        = 0x00001000,            // 12
     SPELL_ATTR_EX_FARSIGHT                     = 0x00002000,            // 13 related to farsight (this not fully correct, but used in mangos. /dev/rsa)
-    SPELL_ATTR_EX_CHANNEL_TRACKING_TARGET      = 0x00004000,            // 14
+    SPELL_ATTR_EX_CHANNEL_TRACKING_TARGET      = 0x00004000,            // 14 Client automatically forces player to face target when channeling
     SPELL_ATTR_EX_DISPEL_AURAS_ON_IMMUNITY     = 0x00008000,            // 15 remove auras on immunity
     SPELL_ATTR_EX_UNAFFECTED_BY_SCHOOL_IMMUNE  = 0x00010000,            // 16 unaffected by school immunity
     SPELL_ATTR_EX_UNK17                        = 0x00020000,            // 17 for auras SPELL_AURA_TRACK_CREATURES, SPELL_AURA_TRACK_RESOURCES and SPELL_AURA_TRACK_STEALTHED select non-stacking tracking spells
@@ -526,7 +527,7 @@ enum SpellAttributesEx7
     SPELL_ATTR_EX7_UNK8                        = 0x00000100,            // 8
     SPELL_ATTR_EX7_UNK9                        = 0x00000200,            // 9
     SPELL_ATTR_EX7_DISPEL_CHARGES              = 0x00000400,            // 10 Dispel and Spellsteal individual charges instead of whole aura.
-    SPELL_ATTR_EX7_UNK11                       = 0x00000800,            // 11
+    SPELL_ATTR_EX7_INTERRUPT_ONLY_NONPLAYER    = 0x00000800,            // 11 Only non-player casts interrupt, though Feral Charge - Bear has it.
     SPELL_ATTR_EX7_UNK12                       = 0x00001000,            // 12
     SPELL_ATTR_EX7_UNK13                       = 0x00002000,            // 13
     SPELL_ATTR_EX7_UNK14                       = 0x00004000,            // 14
@@ -534,7 +535,7 @@ enum SpellAttributesEx7
     SPELL_ATTR_EX7_UNK16                       = 0x00010000,            // 16
     SPELL_ATTR_EX7_UNK17                       = 0x00020000,            // 17
     SPELL_ATTR_EX7_HAS_CHARGE_EFFECT           = 0x00040000,            // 18 Only spell with Charge effect (used for calculate traectory/delay)
-    SPELL_ATTR_EX7_UNK19                       = 0x00080000,            // 19
+    SPELL_ATTR_EX7_ZONE_TELEPORT               = 0x00080000,            // 19 Teleports to specific zones.
     SPELL_ATTR_EX7_UNK20                       = 0x00100000,            // 20
     SPELL_ATTR_EX7_UNK21                       = 0x00200000,            // 21
     SPELL_ATTR_EX7_UNK22                       = 0x00400000,            // 22
@@ -890,7 +891,7 @@ enum SpellEffects
     SPELL_EFFECT_LEAP_BACK                 = 138,
     SPELL_EFFECT_CLEAR_QUEST               = 139,
     SPELL_EFFECT_FORCE_CAST                = 140,
-    SPELL_EFFECT_141                       = 141,
+    SPELL_EFFECT_FORCE_CAST_WITH_VALUE     = 141,
     SPELL_EFFECT_TRIGGER_SPELL_WITH_VALUE  = 142,
     SPELL_EFFECT_APPLY_AREA_AURA_OWNER     = 143,
     SPELL_EFFECT_KNOCKBACK_FROM_POSITION   = 144,
@@ -1374,10 +1375,28 @@ enum DispelType
     DISPEL_SPE_NPC_ONLY = 8,
     DISPEL_ENRAGE       = 9,
     DISPEL_ZG_TICKET    = 10,
-    DESPEL_OLD_UNUSED   = 11
+    DISPEL_OLD_UNUSED   = 11
 };
 
 #define DISPEL_ALL_MASK ( (1<<DISPEL_MAGIC) | (1<<DISPEL_CURSE) | (1<<DISPEL_DISEASE) | (1<<DISPEL_POISON) )
+
+enum InvisibilityType
+{
+    INVISIBILITY_GENERAL     = 0,
+    INVISIBILITY_UNK1        = 1,
+    INVISIBILITY_UNK2        = 2,
+    INVISIBILITY_TRAP        = 3,
+    INVISIBILITY_UNK4        = 4,
+    INVISIBILITY_UNK5        = 5,
+    INVISIBILITY_DRUNK       = 6,
+    INVISIBILITY_UNK7        = 7,
+    INVISIBILITY_UNK8        = 8,
+    INVISIBILITY_UNK9        = 9,
+    INVISIBILITY_UNK10       = 10,
+    INVISIBILITY_UNK11       = 11,
+
+    TOTAL_INVISIBILITY_TYPES = 12
+};
 
 //To all Immune system,if target has immunes,
 //some spell that related to ImmuneToDispel or ImmuneToSchool or ImmuneToDamage type can't cast to it,
@@ -1600,7 +1619,8 @@ enum DamageEffectType
     DOT                     = 2,
     HEAL                    = 3,
     NODAMAGE                = 4,                            // used also in case when damage applied to health but not applied to spell channelInterruptFlags/etc
-    SELF_DAMAGE             = 5
+    SELF_DAMAGE_ROGUE_FALL  = 5,                            //< used to avoid rogue loosing stealth on falling damage
+    SELF_DAMAGE             = 6
 };
 
 enum GameobjectTypes
@@ -2537,7 +2557,7 @@ enum HolidayIds
     HOLIDAY_HARVEST_FESTIVAL         = 321,
     HOLIDAY_HALLOWS_END              = 324,
     HOLIDAY_LUNAR_FESTIVAL           = 327,
-    HOLIDAY_LOVE_IS_IN_THE_AIR       = 335,
+    //HOLIDAY_LOVE_IS_IN_THE_AIR       = 335,
     HOLIDAY_FIRE_FESTIVAL            = 341,
     HOLIDAY_CALL_TO_ARMS_EY          = 353,
     HOLIDAY_BREWFEST                 = 372,
@@ -2550,6 +2570,8 @@ enum HolidayIds
     HOLIDAY_WOTLK_LAUNCH             = 406,
     HOLIDAY_DAY_OF_DEAD              = 409,
     HOLIDAY_CALL_TO_ARMS_IC          = 420,
+    HOLIDAY_LOVE_IS_IN_THE_AIR       = 423,
+    HOLIDAY_KALU_AK_FISHING_DERBY    = 424,
     HOLIDAY_CALL_TO_ARMS_BG          = 435,
     HOLIDAY_CALL_TO_ARMS_TP          = 436,
     HOLIDAY_CALL_TO_ARMS_RBG_15v15   = 442,
@@ -3079,6 +3101,10 @@ enum DiminishingGroup
     DIMINISHING_CHARGE,
     // Other
     DIMINISHING_TAUNT,
+    DIMINISHING_DRAGONS_BREATH,
+    DIMINISHING_MIND_CONTROL,
+    DIMINISHING_ENTRAPMENT,
+    DIMINISHING_SCATTER_SHOT,
     // Don't Diminish, but limit duration to 8s
     DIMINISHING_LIMITONLY
 };
