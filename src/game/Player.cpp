@@ -20599,8 +20599,8 @@ bool Player::BuyCurrencyFromVendorSlot(ObjectGuid vendorGuid, uint32 vendorslot,
         if (GetCurrencyWeekCount(currencyId) >= weekCap)
         {
             SendBuyError(BUY_ERR_CANT_CARRY_MORE, 0, 0, 0);
-        return false;
-    }
+            return false;
+        }
     }
 
     if (crItem->ExtendedCost)
