@@ -4256,7 +4256,15 @@ bool Player::resetTalents(bool no_cost, bool all_specs)
 
         for (int j = 0; j < MAX_TALENT_RANK; ++j)
             if (talentInfo->RankID[j])
+            {
                 removeSpell(talentInfo->RankID[j], !IsPassiveSpell(talentInfo->RankID[j]), false);
+
+                SpellEntry const *spellInfo = sSpellStore.LookupEntry(talentInfo->RankID[j]);
+                for (int k = 0; k < MAX_EFFECT_INDEX; ++k)
+                    if (SpellEffectEntry const * effect = spellInfo->GetSpellEffect(SpellEffectIndex(k)))
+                        if (effect->EffectTriggerSpell)
+                            removeSpell(effect->EffectTriggerSpell);
+            }
 
         iter = m_talents[m_activeSpec].begin();
     }
