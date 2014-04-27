@@ -93,6 +93,7 @@ bool AchievementCriteriaRequirement::IsValid(AchievementCriteriaEntry const* cri
         case ACHIEVEMENT_CRITERIA_TYPE_BE_SPELL_TARGET:
         case ACHIEVEMENT_CRITERIA_TYPE_CAST_SPELL:
         case ACHIEVEMENT_CRITERIA_TYPE_WIN_ARENA:
+        case ACHIEVEMENT_CRITERIA_TYPE_PLAY_ARENA:
         case ACHIEVEMENT_CRITERIA_TYPE_WIN_RATED_ARENA:
         case ACHIEVEMENT_CRITERIA_TYPE_USE_ITEM:
         case ACHIEVEMENT_CRITERIA_TYPE_COMPLETE_DAILY_QUEST:// only children's week event
@@ -280,6 +281,7 @@ bool AchievementCriteriaRequirement::IsValid(AchievementCriteriaEntry const* cri
             sLog.outErrorDb("Table `achievement_criteria_requirement` (Entry: %u Type: %u) have data for not supported data type (%u), ignore.", criteria->ID, criteria->requiredType, requirementType);
             return false;
     }
+    return false;
 }
 
 bool AchievementCriteriaRequirement::Meets(uint32 criteria_id, Player const* source, Unit const* target, uint32 miscvalue1 /*= 0*/) const
@@ -558,39 +560,42 @@ void AchievementMgr<T>::ResetAchievementCriteria(AchievementCriteriaTypes type, 
             case ACHIEVEMENT_CRITERIA_TYPE_HONORABLE_KILL_AT_AREA:
             case ACHIEVEMENT_CRITERIA_TYPE_BE_SPELL_TARGET:
             case ACHIEVEMENT_CRITERIA_TYPE_CAST_SPELL:
+            case ACHIEVEMENT_CRITERIA_TYPE_KILL_CREATURE:
             {
                 switch(achievementCriteria->referredAchievement) // All achievements that should reset its progress.
                 {
-                    case 73:
-                    case 204:
-                    case 203:
-                    case 213:
-                    case 216:
-                    case 229:
-                    case 231:
-                    case 582:
-                    case 583:
-                    case 584:
-                    case 587:
-                    case 872:
-                    case 1153:
-                    case 1251:
-                    case 1765:
-                    case 1766:
-                    case 2189:
-                    case 2190:
-                    case 2193:
-                    case 3845:
-                    case 3848:
-                    case 3849:
-                    case 3853:
+                    case 73:        // Disgracin' The Basin
+                    case 203:       // Not In My House
+                    case 204:       // Ironman
+                    case 213:       // Stormtrooper
+                    case 216:       // Bound for Glory
+                    case 229:       // The Grim Reaper
+                    case 231:       // Wrecking Ball
+                    case 582:       // Alterac Valley All-Star
+                    case 583:       // Arathi Basin All-Star
+                    case 584:       // Arathi Basin Assassin
+                    case 587:       // Stormy Assassin
+                    case 872:       // Frenzied Defender
+                    case 1153:      // Overly Defensive
+                    case 1251:      // Not In My House
+                    case 1765:      // Steady Hands
+                    case 1766:      // Ancient Protector
+                    case 2189:      // Artillery Expert
+                    case 2190:      // Drop It Now!
+                    case 2193:      // Explosives Expert
+                    case 3845:      // Isle of Conquest All-Star
+                    case 3848:      // A-bomb-inable
+                    case 3849:      // A-bomb-ination
+                    case 3853:      // All Over the Isle
                     case 5210:      // Two-Timer
                     case 5220:      // I'm in the Black Lodge
                     case 5226:      // Cloud Nine
                     case 5227:      // Cloud Nine
                     case 5228:      // Wild Hammering
                         SetCriteriaProgress(achievementCriteria, achievement, 0, referencePlayer, PROGRESS_SET);
-                    default: continue; // Do not reset progress for other achievements.
+                        break;
+                    default:
+                        continue; // Do not reset progress for other achievements.
                 }
                 break;
             }
@@ -1261,7 +1266,7 @@ void AchievementMgr<T>::UpdateAchievementCriteria(AchievementCriteriaTypes type,
 
         switch (type)
         {
-                // std. case: increment at 1
+            // std. case: increment at 1
             case ACHIEVEMENT_CRITERIA_TYPE_NUMBER_OF_TALENT_RESETS:
             case ACHIEVEMENT_CRITERIA_TYPE_LOSE_DUEL:
             case ACHIEVEMENT_CRITERIA_TYPE_CREATE_AUCTION:
@@ -1277,7 +1282,7 @@ void AchievementMgr<T>::UpdateAchievementCriteria(AchievementCriteriaTypes type,
                 change = 1;
                 progressType = PROGRESS_ACCUMULATE;
                 break;
-                // std case: increment at miscvalue1
+            // std case: increment at miscvalue1
             case ACHIEVEMENT_CRITERIA_TYPE_MONEY_FROM_VENDORS:
             case ACHIEVEMENT_CRITERIA_TYPE_GOLD_SPENT_FOR_TALENTS:
             case ACHIEVEMENT_CRITERIA_TYPE_MONEY_FROM_QUEST_REWARD:
@@ -1294,7 +1299,7 @@ void AchievementMgr<T>::UpdateAchievementCriteria(AchievementCriteriaTypes type,
                 change = miscvalue1;
                 progressType = PROGRESS_ACCUMULATE;
                 break;
-                // std case: high value at miscvalue1
+            // std case: high value at miscvalue1
             case ACHIEVEMENT_CRITERIA_TYPE_HIGHEST_AUCTION_BID:
             case ACHIEVEMENT_CRITERIA_TYPE_HIGHEST_AUCTION_SOLD: /* FIXME: for online player only currently */
             case ACHIEVEMENT_CRITERIA_TYPE_HIGHEST_HIT_DEALT:
@@ -1308,8 +1313,7 @@ void AchievementMgr<T>::UpdateAchievementCriteria(AchievementCriteriaTypes type,
                 progressType = PROGRESS_HIGHEST;
                 break;
 
-                // specialized cases
-
+            // specialized cases
             case ACHIEVEMENT_CRITERIA_TYPE_WIN_BG:
             {
                 // AchievementMgr::UpdateAchievementCriteria might also be called on login - skip in this case
@@ -1955,14 +1959,21 @@ void AchievementMgr<T>::UpdateAchievementCriteria(AchievementCriteriaTypes type,
             }
             case ACHIEVEMENT_CRITERIA_TYPE_OWN_ITEM:
             {
-                // speedup for non-login case
-                if(miscvalue1 && achievementCriteria->own_item.itemID != miscvalue1)
-                    continue;
-
-                // check item count
-                if(!miscvalue2)
+                // item receive case
+                if (miscvalue1 && miscvalue2)
                 {
-                    continue;
+                    // speedup for non-login case
+                    if (achievementCriteria->own_item.itemID != miscvalue1)
+                        continue;
+
+                    change = miscvalue2;
+                    progressType = PROGRESS_ACCUMULATE;
+                }
+                else
+                {
+                    // item slot change case, miscvalue1 == 0 => at login
+                    if (miscvalue1 && achievementCriteria->own_item.itemID != miscvalue1)
+                        continue;
 
                     change = referencePlayer->GetItemCount(achievementCriteria->own_item.itemID, true);
                     progressType = PROGRESS_HIGHEST;
@@ -1970,30 +1981,53 @@ void AchievementMgr<T>::UpdateAchievementCriteria(AchievementCriteriaTypes type,
                 break;
             }
             case ACHIEVEMENT_CRITERIA_TYPE_WIN_ARENA:
+            case ACHIEVEMENT_CRITERIA_TYPE_PLAY_ARENA:
             {
-                //miscvalue1 = mapID
-                //miscvalue2 = ArenaType
-                if(!miscvalue1)
-                    continue;
-                if(achievementCriteria->win_arena.mapID != miscvalue1)
+                if (!miscvalue1)
                     continue;
 
                 if (achievementCriteria->win_arena.mapID != referencePlayer->GetMapId())
                     continue;
 
-                // Matches statistic for ArenaType
-                switch(achievementCriteria->referredAchievement)
+                switch(achievementCriteria->ID)
                 {
-                    case 363:
-                        if(miscvalue2!=ARENA_TYPE_5v5)
+                    case 5726: // 5v5 BE Win
+                    case 8599: // 5v5 DA Win
+                    case 8600: // 5v5 NA Win
+                    case 8601: // 5v5 RL Win
+                    case 8602: // 5v5 RV Win
+                    case 5723: // 5v5 BE Plays
+                    case 8595: // 5v5 DA Plays
+                    case 8596: // 5v5 NA Plays
+                    case 8597: // 5v5 RL Plays
+                    case 8598: // 5v5 RV Plays
+                        if (miscvalue1 != 5)
                             continue;
                         break;
-                    case 365:
-                        if(miscvalue2!=ARENA_TYPE_3v3)
+                    case 5757: // 3v3 BE Win
+                    case 8607: // 3v3 DA Win
+                    case 8608: // 3v3 NA Win
+                    case 8609: // 3v3 RL Win
+                    case 8610: // 3v3 RV Win
+                    case 5724: // 3v3 BE Plays
+                    case 8603: // 3v3 DA Plays
+                    case 8604: // 3v3 NA Plays
+                    case 8605: // 3v3 RL Plays
+                    case 8606: // 3v3 RV Plays
+                        if (miscvalue1 != 3)
                             continue;
                         break;
-                    case 367:
-                        if(miscvalue2!=ARENA_TYPE_2v2)
+                    case 5728: // 2v2 BE Win
+                    case 8615: // 2v2 DA Win
+                    case 8616: // 2v2 NA Win
+                    case 8617: // 2v2 RL Win
+                    case 8618: // 2v2 RV Win
+                    case 5725: // 2v2 BE Plays
+                    case 8611: // 2v2 DA Plays
+                    case 8612: // 2v2 NA Plays
+                    case 8613: // 2v2 RL Plays
+                    case 8614: // 2v2 RV Plays
+                        if (miscvalue1 != 2)
                             continue;
                         break;
                 }
@@ -3591,6 +3625,7 @@ uint32 AchievementMgr<T>::GetCriteriaProgressMaxCounter(AchievementCriteriaEntry
         case ACHIEVEMENT_CRITERIA_TYPE_QUEST_ABANDONED:
         case ACHIEVEMENT_CRITERIA_TYPE_FLIGHT_PATHS_TAKEN:
         case ACHIEVEMENT_CRITERIA_TYPE_ACCEPTED_SUMMONINGS:
+        case ACHIEVEMENT_CRITERIA_TYPE_PLAY_ARENA:
             resultValue = 0;
             break;
     }
@@ -4001,7 +4036,7 @@ template <class T>
 void AchievementMgr<T>::SendAllAchievementData(Player* /*player*/)
 {
     // since we don't know the exact size of the packed GUIDs this is just an approximation
-    WorldPacket data(SMSG_ALL_ACHIEVEMENT_DATA, m_completedAchievements.size() * (4 + 4) + m_criteriaProgress.size() * (4 + 9 + 9 + 4 + 4 + 4 + 4));
+    WorldPacket data(SMSG_ALL_ACHIEVEMENT_DATA, 4 * 2 + m_completedAchievements.size() * 4 * 2 + m_completedAchievements.size() * 7 * 4);
 
     ObjectGuid guid = GetOwner()->GetObjectGuid();
 
@@ -4054,7 +4089,6 @@ void AchievementMgr<T>::SendAllAchievementData(Player* /*player*/)
 
         data << uint32(now - iter->second.date);               // Timer 1
         data.AppendPackedTime(now);
-        //data << uint32(secsToTimeBitFields(now));
 
         data.WriteGuidBytes<1>(guid);
     }
@@ -4062,7 +4096,6 @@ void AchievementMgr<T>::SendAllAchievementData(Player* /*player*/)
     for (CompletedAchievementMap::const_iterator iter = m_completedAchievements.begin(); iter != m_completedAchievements.end(); ++iter)
     {
         data << uint32(iter->first);
-        // data << uint32(secsToTimeBitFields(iter->second.date));
         data.AppendPackedTime(iter->second.date);
     }
 
@@ -4137,7 +4170,6 @@ void AchievementMgr<T>::SendRespondInspectAchievements(Player* player, uint32 ac
 
         data.WriteGuidBytes<1>(counter);
 
-        //data << uint32(secsToTimeBitFields(now));
         data.AppendPackedTime(now);
 
         data.WriteGuidBytes<3, 7>(guid);
@@ -4159,7 +4191,6 @@ void AchievementMgr<T>::SendRespondInspectAchievements(Player* player, uint32 ac
     for (CompletedAchievementMap::const_iterator iter = m_completedAchievements.begin(); iter != m_completedAchievements.end(); ++iter)
     {
         data << uint32(iter->first);
-        //data << uint32(secsToTimeBitFields(iter->second.date));
         data.AppendPackedTime(iter->second.date);
     }
 
