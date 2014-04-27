@@ -1879,6 +1879,18 @@ void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, ui
                         }
                         break;
                     }
+                    case 223:                       // The Sickly Gazelle
+                    {
+                        if (!bg || !unit)
+                            continue;
+
+                        if (bg->GetTypeID(true) != BATTLEGROUND_AV)
+                            continue;
+
+                        if (unit->GetAreaId() != 3057 || !unit->IsMounted())
+                            continue;
+                        break;
+                    }
                     case 1259:                      // Not So Fast (WS)
                         if (!bg || !unit)
                             continue;
