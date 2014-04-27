@@ -434,9 +434,7 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
         if (mover->GetTypeId()==TYPEID_PLAYER)
         {
             // not have spell in spellbook or spell passive and not casted by client
-            if (((((Player*)mover)->GetUInt16Value(PLAYER_FIELD_BYTES2, 0) == 0 &&
-                (!((Player*)mover)->HasActiveSpell(spellId) && !triggered))
-                || IsPassiveSpell(spellInfo)) && spellId != 1843)
+            if ((!((Player*)mover)->HasActiveSpell(spellId) && !triggered || IsPassiveSpell(spellInfo)) && !sSpellMgr.IsAbilityOfSkillType(spellInfo, SKILL_ARCHAEOLOGY))
             {
                 sLog.outError("WorldSession::HandleCastSpellOpcode: %s casts spell %u which he shouldn't have", mover->GetObjectGuid().GetString().c_str(), spellId);
                 //cheater? kick? ban?
@@ -447,23 +445,18 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
         else
         {
             // not have spell in spellbook or spell passive and not casted by client
-            if ((!((Creature*)mover)->HasSpell(spellId) && !triggered)
-            || IsPassiveSpell(spellInfo))
+            if (!((Creature*)mover)->HasSpell(spellId) && !triggered || IsPassiveSpell(spellInfo))
             {
-                // not have spell in spellbook or spell passive and not casted by client
-                if ((!((Player*)mover)->HasActiveSpell(spellId) && !triggered || IsPassiveSpell(spellInfo)) && !sSpellMgr.IsAbilityOfSkillType(spellInfo, SKILL_ARCHAEOLOGY))
-                {
-                    sLog.outError("World: Player %u casts spell %u which he shouldn't have", mover->GetGUIDLow(), spellId);
-                    //cheater? kick? ban?
-                    recvPacket.rpos(recvPacket.wpos());                 // prevent spam at ignore packet
-                    return;
-                }
+                sLog.outError("World: Player %u casts spell %u which he shouldn't have", mover->GetGUIDLow(), spellId);
+                //cheater? kick? ban?
+                recvPacket.rpos(recvPacket.wpos());                 // prevent spam at ignore packet
+                return;
             }
         }
     }
 
-    Unit::AuraList swaps = mover->GetAurasByType(SPELL_AURA_OVERRIDE_ACTIONBAR_SPELLS);
-    Unit::AuraList const& swaps2 = mover->GetAurasByType(SPELL_AURA_OVERRIDE_ACTIONBAR_SPELLS_2);
+    Unit::AuraList swaps = _mover->GetAurasByType(SPELL_AURA_OVERRIDE_ACTIONBAR_SPELLS);
+    Unit::AuraList const& swaps2 = _mover->GetAurasByType(SPELL_AURA_OVERRIDE_ACTIONBAR_SPELLS_2);
     if (!swaps2.empty())
         swaps.insert(swaps.end(), swaps2.begin(), swaps2.end());
 
@@ -487,7 +480,7 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
     if (spellId == 33763)
     {
         // search Tree of Life (Passive)
-        if (Aura const* aura = _mover->GetAura(81098, EFFECT_INDEX_1))
+        if (Aura* aura = _mover->GetAura(81098, EFFECT_INDEX_1))
         {
             if (SpellEntry const* newInfo = sSpellStore.LookupEntry(aura->GetModifier()->m_amount))
             {
