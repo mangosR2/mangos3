@@ -24992,14 +24992,12 @@ void Player::UpdateAllItemEnchantsAtSkill(uint32 checkSkill, uint32 oldSkillValu
 // Refer-A-Friend
 void Player::SendReferFriendError(ReferAFriendError err, Player * target)
 {
-/*
-    WorldPacket data(SMSG_REFER_A_FRIEND_ERROR, 24);
+    WorldPacket data(SMSG_REFER_A_FRIEND_FAILURE, 24);
     data << uint32(err);
     if (target && (err == ERR_REFER_A_FRIEND_NOT_IN_GROUP || err == ERR_REFER_A_FRIEND_SUMMON_OFFLINE_S))
-        data << target->GetName();
+        data << (target ? target->GetName() : uint8(0));
 
     GetSession()->SendPacket(&data);
-*/
 }
 
 ReferAFriendError Player::GetReferFriendError(Player * target, bool summon)
