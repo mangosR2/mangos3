@@ -21592,6 +21592,18 @@ void Player::learnQuestRewardedSpells(Quest const* quest)
         }
     }
 
+    // do not learn spells related to primary professions if not have that one
+    SkillLineAbilityMapBounds skill_bounds = sSpellMgr.GetSkillLineAbilityMapBounds(spell_id);
+    for(SkillLineAbilityMap::const_iterator _spell_idx = skill_bounds.first; _spell_idx != skill_bounds.second; ++_spell_idx)
+    {
+        SkillLineEntry const *pSkill = sSkillLineStore.LookupEntry(_spell_idx->second->skillId);
+        if (!pSkill || pSkill->categoryId != SKILL_CATEGORY_PROFESSION)
+            continue;
+
+        if (!HasSkill(pSkill->id))
+            return;
+    }
+
     CastSpell(this, spell_id, true);
 }
 
