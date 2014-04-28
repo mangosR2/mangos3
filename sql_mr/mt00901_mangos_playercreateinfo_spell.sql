@@ -33,3 +33,13 @@ SELECT 22, class, 68996, 'Two Forms' FROM playercreateinfo_spell WHERE race = 22
 DELETE FROM `playercreateinfo_spell` WHERE `Spell` = 68975;
 INSERT IGNORE INTO playercreateinfo_spell
 SELECT 22, class, 68975, 'Viciousness' FROM playercreateinfo_spell WHERE race = 22;
+
+-- Gnome racial - Escape Artist
+DELETE FROM `playercreateinfo_spell` WHERE `Spell` = 20589;
+INSERT INTO `playercreateinfo_spell` (`race`, `class`, `Spell`, `Note`) VALUES
+(7, 1, 20589, 'Escape Artist'),
+(7, 4, 20589, 'Escape Artist'),
+(7, 5, 20589, 'Escape Artist'),
+(7, 6, 20589, 'Escape Artist'),
+(7, 8, 20589, 'Escape Artist'),
+(7, 9, 20589, 'Escape Artist');
