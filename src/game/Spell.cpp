@@ -7481,9 +7481,24 @@ SpellCastResult Spell::CheckCast(bool strict)
             case SPELL_EFFECT_SUMMON_RAID_MARKER:
             {
                 if (m_caster->GetTypeId() == TYPEID_PLAYER)
+                {
                     if (m_caster->IsOnTransport())
                         return SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW;
 
+                    if (BattleGround* bg = ((Player*)m_caster)->GetBattleGround())
+                    {
+                        if (bg->GetTypeID(true) == BATTLEGROUND_DS)
+                        {
+                            if (m_caster->GetPositionZ() > 11.3f || m_caster->GetPositionZ() < 3.0f)
+                                return SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW;
+                        }
+                        else  if (bg->GetTypeID(true) == BATTLEGROUND_RV)
+                        {
+                            if (m_caster->GetPositionZ() < 27.0f)
+                                return SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW;
+                        }
+                    }
+                }
                 break;
             }
             case SPELL_EFFECT_SUMMON_PET:
