@@ -8193,7 +8193,7 @@ SpellCastResult Spell::CheckCasterAuras() const
     // HasAttribute(SPELL_ATTR_EX3_UNK28) ?
     if (m_spellInfo->Id == 23336 ||                         // Alliance Flag Drop
         m_spellInfo->Id == 23334 ||                         // Horde Flag Drop
-        m_spellInfo->Id == 34991)                           // Summon Netherstorm Flag
+        m_spellInfo->Id == 34991 || m_spellInfo->Id == 100201)  // Summon Netherstorm Flag
         return SPELL_CAST_OK;
 
     uint8 school_immune = 0;
