@@ -6769,15 +6769,31 @@ SpellCastResult Spell::CheckCast(bool strict)
     }
 
     // check spell focus object
-    if (m_spellInfo->GetRequiresSpellFocus())
+    if (uint32 spellFocus = m_spellInfo->GetRequiresSpellFocus())
     {
         GameObject* ok = NULL;
-        MaNGOS::GameObjectFocusCheck go_check(m_caster, m_spellInfo->GetRequiresSpellFocus());
+        MaNGOS::GameObjectFocusCheck go_check(m_caster, spellFocus);
         MaNGOS::GameObjectSearcher<MaNGOS::GameObjectFocusCheck> checker(ok, go_check);
         Cell::VisitGridObjects(m_caster, checker, m_caster->GetMap()->GetVisibilityDistance());
 
         if (!ok)
-            return SPELL_FAILED_REQUIRES_SPELL_FOCUS;
+        {
+            switch (spellFocus)
+            {
+                case 1:         // Anvil
+                case 3:         // Forge
+                case 1552:      // Runeforging
+                {
+                    if (m_caster->GetTypeId() == TYPEID_PLAYER && !((Player*)m_caster)->InBattleGround() && !((Player*)m_caster)->InArena())
+                    {
+                        ok = NULL;
+                        break;
+                    }
+                }
+                default:
+                    return SPELL_FAILED_REQUIRES_SPELL_FOCUS;
+            }
+        }
 
         focusObject = ok;                                   // game object found in range
     }
