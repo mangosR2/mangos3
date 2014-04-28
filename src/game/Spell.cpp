@@ -4079,9 +4079,6 @@ void Spell::cast(bool skipCheck)
     {
         case SPELLFAMILY_GENERIC:
         {
-            if (m_spellInfo->Id == 20594)                  // Stoneskin
-                AddTriggeredSpell(65116);                  // Stoneskin - armor 10% for 8 sec
-            else if (m_spellInfo->Id == 71904)             // Chaos Bane strength buff
             // Bandages
             if (m_spellInfo->GetMechanic() == MECHANIC_BANDAGE)
                 AddPrecastSpell(11196);                     // Recently Bandaged
