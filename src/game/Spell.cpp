@@ -1909,16 +1909,16 @@ void Spell::DoSpellHitOnUnit(Unit *unit, uint32 effectMask)
         m_spellAuraHolder->setDiminishGroup(m_diminishGroup);
     }
 
-    for(int effectNumber = 0; effectNumber < MAX_EFFECT_INDEX; ++effectNumber)
+    for (int effectNumber = 0; effectNumber < MAX_EFFECT_INDEX; ++effectNumber)
     {
         if (effectMask & (1 << effectNumber))
         {
-            HandleEffects(unit, NULL, NULL, SpellEffectIndex(effectNumber));
+            HandleEffects(unit, NULL, NULL, SpellEffectIndex(effectNumber), m_damageMultipliers[effectNumber]);
             if (m_applyMultiplierMask & (1 << effectNumber))
             {
                 SpellEffectEntry const* spellEffect = m_spellInfo->GetSpellEffect(SpellEffectIndex(effectNumber));
                 // Get multiplier
-                float multiplier = spellEffect ? spellEffect->DmgMultiplier : 0.0f;
+                float multiplier = spellEffect ? spellEffect->DmgMultiplier : 1.0f;
                 // Apply multiplier mods
                 if (realCaster)
                     if (Player* modOwner = realCaster->GetSpellModOwner())
@@ -2047,14 +2047,7 @@ void Spell::HandleDelayedSpellLaunch(TargetInfo *target)
                 HandleEffects(unit, NULL, NULL, SpellEffectIndex(effectNumber), m_damageMultipliers[effectNumber]);
                 if (m_applyMultiplierMask & (1 << effectNumber))
                 {
-                    SpellEffectEntry const* spellEffect = m_spellInfo->GetSpellEffect(SpellEffectIndex(effectNumber));
-                    // Get multiplier
-                    float multiplier = spellEffect ? spellEffect->DmgMultiplier : 0.0f;
-                    // Apply multiplier mods
-                    if (real_caster)
-                        if (Player* modOwner = real_caster->GetSpellModOwner())
-                            modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_EFFECT_PAST_FIRST, multiplier);
-                    m_damageMultipliers[effectNumber] *= multiplier;
+                    update_mult[effectNumber] = true;
                 }
             }
         }
@@ -2075,7 +2068,7 @@ void Spell::HandleDelayedSpellLaunch(TargetInfo *target)
             {
                 // Get multiplier
                 SpellEffectEntry const* spellEffect = m_spellInfo->GetSpellEffect(SpellEffectIndex(effectNumber));
-                float multiplier = spellEffect ? spellEffect->DmgMultiplier : 0.0f;
+                float multiplier = spellEffect ? spellEffect->DmgMultiplier : 1.0f;
                 // Apply multiplier mods
                 if (real_caster)
                     if (Player* modOwner = real_caster->GetSpellModOwner())
