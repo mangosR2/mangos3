@@ -6372,12 +6372,12 @@ SpellCastResult Spell::CheckCast(bool strict)
 
     SpellAuraRestrictionsEntry const* auraRestrictions = m_spellInfo->GetSpellAuraRestrictions();
 
-    if (auraRestrictions && auraRestrictions->excludeCasterAuraSpell)
-    {
-        if (auraRestrictions->excludeCasterAuraSpell == 79636 ||    // No Feather Fall
-            auraRestrictions->excludeCasterAuraSpell == 96223)      // Run Speed Marker
-            AddTriggeredSpell(auraRestrictions->excludeCasterAuraSpell);
-    }
+    //if (auraRestrictions && auraRestrictions->excludeCasterAuraSpell)
+    //{
+    //    if (auraRestrictions->excludeCasterAuraSpell == 79636 ||    // No Feather Fall
+    //        auraRestrictions->excludeCasterAuraSpell == 96223)      // Run Speed Marker
+    //        AddTriggeredSpell(auraRestrictions->excludeCasterAuraSpell);
+    //}
 
     // caster state requirements
     if (auraRestrictions && auraRestrictions->CasterAuraState && !m_caster->HasAuraState(AuraState(auraRestrictions->CasterAuraState)))
@@ -6467,6 +6467,9 @@ SpellCastResult Spell::CheckCast(bool strict)
             else if (target->HasAura(auraRestrictions->excludeTargetAuraSpell))
                 return SPELL_FAILED_CASTER_AURASTATE;
         }
+
+        if (!m_IsTriggeredSpell && target == m_caster && m_spellInfo->HasAttribute(SPELL_ATTR_EX_CANT_TARGET_SELF))
+            return SPELL_FAILED_BAD_TARGETS;
 
         // totem immunity for channeled spells(needs to be before spell cast)
         // spell attribs for player channeled spells
