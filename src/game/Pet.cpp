@@ -235,7 +235,7 @@ bool Pet::LoadPetFromDB(Player* owner, uint32 petentry, uint32 petnumber, bool c
     SetUInt32Value(UNIT_FIELD_PET_NAME_TIMESTAMP, uint32(time(NULL)));
 
     uint32 savedhealth = fields[10].GetUInt32();
-    uint32 savedmana = fields[11].GetUInt32();
+    uint32 savedpower = fields[11].GetUInt32();
 
     // set current pet as current
     // 0=current
@@ -668,14 +668,15 @@ void Pet::RegenerateAll(uint32 update_diff)
     // regenerate focus for hunter pets or energy for deathknight's ghoul
     if (m_regenTimer <= update_diff)
     {
-        Regenerate(getPowerType(), REGEN_TIME_FULL);
-        m_regenTimer = REGEN_TIME_FULL;
-
         if (getPetType() == HUNTER_PET)
             Regenerate(POWER_HAPPINESS, REGEN_TIME_FULL);
 
         if (!isInCombat() || IsPolymorphed())
-            RegenerateHealth(REGEN_TIME_FULL);
+            RegenerateHealth();
+
+        RegeneratePower();
+
+        m_regenTimer = 4000;
     }
     else
         m_regenTimer -= update_diff;
