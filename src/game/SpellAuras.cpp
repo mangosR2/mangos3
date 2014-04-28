@@ -1382,7 +1382,9 @@ void Aura::HandleAddModifier(bool apply, bool Real)
             case 51124:                                     // Killing Machine
             case 54741:                                     // Firestarter
             case 57761:                                     // Fireball!
-            case 64823:                                     // Elune's Wrath (Balance druid t8 set
+            case 64823:                                     // Elune's Wrath (Balance Druid T8 Set)
+            case 63165:                                     // Decimation (Rank 1)
+            case 63167:                                     // Decimation (Rank 2)
             case 74434:                                     // Soulburn
             case 81093:                                     // Fury of Stormrage
             case 83359:                                     // Sic 'Em!
