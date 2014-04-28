@@ -8250,11 +8250,11 @@ void Unit::RemoveGuardians()
 
 }
 
-Pet* Unit::FindGuardianWithEntry(uint32 entry)
+Pet* Unit::FindGuardianWithEntry(uint32 entry, bool notdead)
 {
     for (GuidSet::const_iterator itr = m_guardianPets.begin(); itr != m_guardianPets.end(); ++itr)
         if (Pet* pet = GetMap()->GetPet(*itr))
-            if (pet->GetEntry() == entry)
+            if (pet->GetEntry() == entry && (notdead ? !pet->isDead() : true))
                 return pet;
 
     return NULL;

@@ -1830,7 +1830,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         void AddGuardian(Pet* pet);
         void RemoveGuardian(Pet* pet);
         void RemoveGuardians();
-        Pet* FindGuardianWithEntry(uint32 entry);
+        Pet* FindGuardianWithEntry(uint32 entry, bool notdead = false);
         GuidSet const& GetGuardians() const { return m_guardianPets; }
         Pet* GetProtectorPet();                             // expected single case in guardian list
 
