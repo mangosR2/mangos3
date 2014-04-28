@@ -3033,6 +3033,16 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
 
                 FillRaidOrPartyHealthPriorityTargets(targetUnitMap, m_caster, target, radius, count, true, false, true);
             }
+            // Glyph of Holy Light
+            else if (m_spellInfo->GetSpellFamilyName() == SPELLFAMILY_GENERIC && m_spellInfo->GetSpellIconID() == 963)
+            {
+                Unit* target = m_targets.getUnitTarget();
+
+                if (!target)
+                    target = m_caster;
+
+                FillRaidOrPartyHealthPriorityTargets(targetUnitMap, m_caster, target, radius, 5, true, false, true);
+            }
             // Power Word: Barrier
             else if (m_spellInfo->Id == 62618)
                 targetUnitMap.push_back(m_caster);
