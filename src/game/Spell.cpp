@@ -3005,8 +3005,20 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
             }
             break;
         case TARGET_ALL_FRIENDLY_UNITS_IN_AREA:
+            // Death Pact (in fact selection by player selection)
+            if (m_spellInfo->Id == 48743)
+            {
+                // checked in Spell::CheckCast
+                if (m_caster->GetTypeId()==TYPEID_PLAYER)
+                {
+                    if (Unit* target = (Unit*)m_caster->GetPet())
+                        targetUnitMap.push_back(target);
+                    else if (Unit* target = (Unit*)m_caster->FindGuardianWithEntry(26125, true))
+                        targetUnitMap.push_back(target);
+                }
+            }
             // Circle of Healing
-            if (m_spellInfo->GetSpellFamilyName() == SPELLFAMILY_PRIEST && m_spellInfo->GetSpellVisual() == 8253)
+            else if (m_spellInfo->GetSpellFamilyName() == SPELLFAMILY_PRIEST && m_spellInfo->GetSpellVisual() == 8253)
             {
                 Unit* target = m_targets.getUnitTarget();
                 if(!target)
