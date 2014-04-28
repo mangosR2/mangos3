@@ -4478,7 +4478,6 @@ void Spell::cast(bool skipCheck)
 
     TakePower();
     TakeReagents();                                         // we must remove reagents before HandleEffects to allow place crafted item in same slot
-    TakeAmmo();
 
     SendCastResult(castResult);
     SendSpellGo();                                          // we must send smsg_spell_go packet before m_castItem delete in TakeCastItem()...
@@ -6082,11 +6081,6 @@ void Spell::TakeRunePower(bool hit)
     }
 
     return;
-}
-
-void Spell::TakeAmmo()
-{
-    // No ammo in 4.x
 }
 
 void Spell::TakeReagents()
