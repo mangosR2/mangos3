@@ -4490,7 +4490,7 @@ void Spell::cast(bool skipCheck)
         procTarget = m_caster;
 
     // Okay, everything is prepared. Now we need to distinguish between immediate and evented delayed spells
-    if (m_spellInfo->GetSpeed() > 0.0f || GetDelayStart() > 0)
+    if (m_spellInfo->GetSpeed() > 0.0f || GetDelayStart() > 0 || m_spellInfo->Id == 14157 || m_spellInfo->Id == 64380)                // hack for Ruthlessness & Shattering Throw)
     {
 
         // Remove used for cast item if need (it can be already NULL after TakeReagents call
