@@ -5118,18 +5118,27 @@ void Spell::SendCastResult(Player* caster, SpellEntry const* spellInfo, uint8 ca
         }
         case SPELL_FAILED_REAGENTS:
             // normally client checks reagents, just some script effects here
-            if (spellInfo->Id == 46584)                      // Raise Dead
+            if (spellInfo->Id == 46584)                     // Raise Dead
                 data << uint32(37201);                      // Corpse Dust
             else
-                data << uint32(0);                              // item id
+                data << uint32(0);                          // item id
             break;
         case SPELL_FAILED_NEED_MORE_ITEMS:
             data << uint32(0);                              // item id
             data << uint32(0);                              // item count?
             break;
         case SPELL_FAILED_MIN_SKILL:
-            data << uint32(0);                              // SkillLine.dbc id
-            data << uint32(0);                              // required skill value
+            switch(spellInfo->Id)
+            {
+                case 54732:                                 // Gnomish Army Knife
+                    data << uint32(SKILL_ENGINEERING);
+                    data << uint32(350);
+                    break;
+                default:
+                    data << uint32(0);                      // SkillLine.dbc id
+                    data << uint32(0);                      // required skill value
+                    break;
+            }
             break;
         case SPELL_FAILED_TOO_MANY_OF_ITEM:
             data << uint32(0);                              // ItemLimitCategory.dbc id
