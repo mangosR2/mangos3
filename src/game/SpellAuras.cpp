@@ -2050,10 +2050,23 @@ void Aura::TriggerSpell()
 //                    case 40113: break;
 //                    // Spirit Lance
 //                    case 40157: break;
-//                    // Demon Transform 2
-//                    case 40398: break;
-//                    // Demon Transform 1
-//                    case 40511: break;
+                    case 40398:                             // Demon Transform 2
+                        switch (GetAuraTicks())
+                        {
+                            case 1:
+                                if (target->HasAura(40506))
+                                    target->RemoveAurasDueToSpell(40506);
+                                else
+                                    trigger_spell_id = 40506;
+                                break;
+                            case 2:
+                                trigger_spell_id = 40510;
+                                break;
+                        }
+                        break;
+                    case 40511:                             // Demon Transform 1
+                        trigger_spell_id = 40398;
+                        break;
 //                    // Ancient Flames
 //                    case 40657: break;
 //                    // Ethereal Ring Cannon: Cannon Aura
@@ -2085,6 +2098,18 @@ void Aura::TriggerSpell()
                     case 46736:                             // Personalized Weather
                         trigger_spell_id = 46737;
                         break;
+                    case 46924:                             // Bladestorm
+                    {
+                        if (target->GetTypeId() != TYPEID_PLAYER)
+                            break;
+
+                        if (!((Player*)target)->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND))
+                        {
+                            target->RemoveAurasDueToSpell(46924);
+                            return;
+                        }
+                        break;
+                    }
 //                    // Stay Submerged
 //                    case 46981: break;
 //                    // Dragonblight Ram
@@ -2145,6 +2170,19 @@ void Aura::TriggerSpell()
 //                    // Z Check
 //                    case 61678: break;
 //                    // isDead Check
+                    case 61719:                             // Easter Lay Noblegarden Egg Aura
+                    {
+                        if (triggerTarget->GetTypeId() != TYPEID_PLAYER)
+                            return;
+
+                        // reset tick timer
+                        if (((Player*)triggerTarget)->isMoving())
+                        {
+                            m_periodicTimer = m_modifier.periodictime;
+                            return;
+                        }
+                        break;
+                    }
 //                    case 61976: break;
 //                    // Start the Engine
 //                    case 62432: break;
@@ -2557,6 +2595,12 @@ void Aura::TriggerSpell()
                 return;
             case 38280:                                     // Static Charge (Lady Vashj in Serpentshrine Cavern)
             case 53563:                                     // Beacon of Light
+            case 52658:                                     // Static Overload (normal&heroic) (Ionar in Halls of Lightning)
+            case 59795:
+            case 63018:                                     // Searing Light (normal&heroic) (XT-002 in Ulduar)
+            case 65121:
+            case 63024:                                     // Gravity Bomb (normal&heroic) (XT-002 in Ulduar)
+            case 64234:
                 // original caster must be target
                 target->CastSpell(target, trigger_spell_id, true, NULL, this, target->GetObjectGuid());
                 return;
@@ -2623,6 +2667,19 @@ void Aura::TriggerSpell()
                 }
                 break;
             }
+            // Siege Cannon
+            case 85167:
+            {
+                VehicleKitPtr vehicle = target->GetVehicle();
+                if (!vehicle)
+                    return;
+
+                // Deploy Siege Engine
+                if (!vehicle->GetBase()->HasAura(84974))
+                    return;
+
+                break;
+            }
             // Molting
             case 99464:
             case 99504:
@@ -2635,6 +2692,13 @@ void Aura::TriggerSpell()
             case 105784:                            // Blade Dance
             {
                 if (target->HasAura(trigger_spell_id))
+                    return;
+                break;
+            }
+            case 107837:                            // Throw Totem
+            {
+                // Throw Totem
+                if (target->HasAura(101601))
                     return;
                 break;
             }
@@ -2872,6 +2936,21 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                             target->CastSpell(target, 45957, true);
                         return;
                     }
+                    case 46361:                             // Reinforced Net
+                    {
+                        if (!target)
+                            return;
+
+                        float x = target->GetPositionX();
+                        float y = target->GetPositionY();
+                        float ground = target->GetMap()->GetHeight(target->GetPhaseMask(), x, y, MAX_HEIGHT);
+
+                        if (ground <= INVALID_HEIGHT)
+                            return;
+
+                        target->MonsterMoveWithSpeed(x, y, ground, 32);
+                        return;
+                    }
                     case 47190:                             // Toalu'u's Spiritual Incense
                         target->CastSpell(target, 47189, true, NULL, this);
                         // allow script to process further (text)
@@ -2926,6 +3005,9 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                     case 54236:                             // Death Touch - Lich King kill Overlord Drakuru
                         target->CastSpell(target, 54248, false);    // Cast Drakuru Death
                         return;
+                    case 54729:                             // Winged Steed of the Ebon Blade
+                        Spell::SelectMountByAreaAndSkill(target, GetSpellProto(), 0, 0, 54726, 54727, 0);
+                        return;
                     case 55328:                                 // Stoneclaw Totem I
                         target->CastSpell(target, 5728, true);
                         return;
@@ -2967,9 +3049,6 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                     }
                     case 58983:                                 // Big Blizzard Bear
                         Spell::SelectMountByAreaAndSkill(target, GetSpellProto(), 58997, 58999, 0, 0, 0);
-                        return;
-                    case 54729:                             // Winged Steed of the Ebon Blade
-                        Spell::SelectMountByAreaAndSkill(target, GetSpellProto(), 0, 0, 54726, 54727, 0);
                         return;
                     case 60444:                                // Lost!
                         if (target && target->GetTypeId() == TYPEID_PLAYER)
@@ -3277,6 +3356,13 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                         return;
                     }
                 }
+                break;
+            }
+            case SPELLFAMILY_MAGE:
+            {
+                // Fingers of Frost stacks set to max at apply
+                if (GetId() == 74396)
+                    GetHolder()->SetAuraCharges(GetSpellProto()->GetStackAmount());
                 break;
             }
             case SPELLFAMILY_SHAMAN:
@@ -3620,6 +3706,58 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                 }
                 return;
             }
+            case 49440:                                     // Racer Slam, Slamming
+            {
+                Unit* chargeBunny = NULL;
+                Unit* racer = NULL;
+                std::list<Unit*> targets;
+
+                MaNGOS::AnyUnitInObjectRangeCheck u_check(target, 30.0f);
+                MaNGOS::UnitListSearcher<MaNGOS::AnyUnitInObjectRangeCheck> searcher(targets, u_check);
+                Cell::VisitAllObjects(target, searcher, 30.0f);
+
+                for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
+                {
+                    Unit* unit = *itr;
+                    if (unit->GetTypeId() == TYPEID_UNIT)
+                    {
+                        if (unit->GetEntry() == 27674 && unit->GetCreatorGuid() == target->GetObjectGuid())
+                            chargeBunny = unit;
+                        else if (unit != target && (unit->GetEntry() == 27664 || unit->GetEntry() == 40281))
+                        {
+                            if (target->isInFront(unit, 30.0f, 15.0f))
+                                racer = unit;
+                        }
+                    }
+                }
+
+                if (racer)
+                {
+                    racer->StopMoving();
+
+                    // Racer Slam Hit Destination
+                    target->CastSpell(racer, 49302, true);
+
+                    // Racer Slam, death: root and pacify
+                    racer->CastSpell(racer, 49439, true);
+
+                    // cast Racer Slam, death scene: debris
+                    for (uint8 i = 0; i < 3; ++i)
+                        racer->CastSpell(racer, 49327, true);
+
+                    // Racer Slam, death scene: car flip Parent
+                    racer->CastSpell(racer, 49337, true);
+
+                    // Racer Kill Counter
+                    target->CastSpell(target, 49444, true, NULL, NULL, target->GetCreatorGuid());
+                }
+                else if (chargeBunny)
+                {
+                    // Racer Slam Hit Destination
+                    target->CastSpell(chargeBunny, 49302, true);
+                }
+                return;
+            }
             case 53463:                                     // Flesh Return - Tharonja
             {
                 if (Unit* caster = GetCaster())
@@ -3731,6 +3869,16 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                 //}
                 return;
             }
+            // Lightwell die on charges end
+            case 59907:
+            {
+                Unit* caster = GetCaster();
+                if (!caster)
+                    return;
+
+                caster->CastSpell(caster, 5, true);
+                return;
+            }
             case 61900:                                     // Electrical Charge
             {
                 if (m_removeMode == AURA_REMOVE_BY_DEATH)
@@ -3750,6 +3898,20 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                     if (m_removeMode == AURA_REMOVE_BY_EXPIRE)
                         caster->CastSpell(caster, 62467, true);
                 }
+                return;
+            }
+            case 64398:                                     // Summon Scrap Bot (Ulduar, Mimiron) - for Scrap Bots
+            case 64426:                                     // Summon Scrap Bot (Ulduar, Mimiron) - for Assault Bots
+            case 64621:                                     // Summon Fire Bot (Ulduar, Mimiron)
+            {
+                uint32 triggerSpell = 0;
+                switch (GetId())
+                {
+                    case 64398: triggerSpell = 63819; break;
+                    case 64426: triggerSpell = 64427; break;
+                    case 64621: triggerSpell = 64622; break;
+                }
+                target->CastSpell(target, triggerSpell, false);
                 return;
             }
             case 68839:                                     // Corrupt Soul
@@ -3863,6 +4025,32 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                         target->RemoveAurasDueToSpell(24659);
                     return;
                 }
+                case 25673:                                 // Riding Har'koa's Kitten
+                {
+                    if (target->GetTypeId() != TYPEID_PLAYER)
+                        return;
+
+                    ((Player*)target)->SetClientControl(target, !apply);
+                    return;
+                }
+                case 71563:                                 // Deadly Precision
+                {
+                    uint32 spellId = 71564;
+                    if (apply)
+                    {
+                        SpellEntry const *spell = sSpellStore.LookupEntry(spellId);
+                        Unit* caster = GetCaster();
+                        if (!spell || !caster)
+                            return;
+
+                        for (uint32 i = 0; i < spell->GetStackAmount(); ++i)
+                            caster->CastSpell(GetTarget(), spellId, true, NULL, NULL, GetCasterGuid());
+
+                        return;
+                    }
+                    GetTarget()->RemoveAurasDueToSpell(spellId);
+                    return;
+                }
                 case 24661:                                 // Restless Strength
                 {
                     if (apply)
@@ -3927,6 +4115,38 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
 
                             target->clearUnitState(UNIT_STAT_DIED);
                         }
+                    }
+                    return;
+                }
+                case 40133:                                 //Summon Fire Elemental
+                {
+                    Unit* caster = GetCaster();
+                    if (!caster)
+                        return;
+
+                    Unit *owner = caster->GetOwner();
+                    if (owner && owner->GetTypeId() == TYPEID_PLAYER)
+                    {
+                        if (apply)
+                            owner->CastSpell(owner, 8985, true);
+                        else
+                            ((Player*)owner)->RemovePet(PET_SAVE_REAGENTS);
+                    }
+                    return;
+                }
+                case 40132:                                 //Summon Earth Elemental
+                {
+                    Unit* caster = GetCaster();
+                    if (!caster)
+                        return;
+
+                    Unit *owner = caster->GetOwner();
+                    if (owner && owner->GetTypeId() == TYPEID_PLAYER)
+                    {
+                        if (apply)
+                            owner->CastSpell(owner, 19704, true);
+                        else
+                            ((Player*)owner)->RemovePet(PET_SAVE_REAGENTS);
                     }
                     return;
                 }
