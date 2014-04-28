@@ -3756,6 +3756,12 @@ void Spell::cast(bool skipCheck)
                     m_caster->RemoveSpellsCausingAura(SPELL_AURA_HASTE_SPELLS);
                 }
             }
+            // Frostbite
+            else if (m_spellInfo->Id == 12494)
+            {
+                if (m_caster->HasAura(44543) || m_caster->HasAura(44545))
+                    AddTriggeredSpell(44544);   // Fingers of Frost
+            }
             // Fingers of Frost
             else if (m_spellInfo->Id == 44544)
                 AddPrecastSpell(74396);                     // Fingers of Frost
