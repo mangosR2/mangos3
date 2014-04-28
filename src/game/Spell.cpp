@@ -3856,7 +3856,7 @@ void Spell::prepare(SpellCastTargets const* targets, Aura const* triggeredByAura
     SpellCastResult result = CheckCast(true);
     if (result != SPELL_CAST_OK && !IsAutoRepeat())          //always cast autorepeat dummy for triggering
     {
-        if (triggeredByAura)
+        if (triggeredByAura && triggeredByAura->GetId() != 53563 && triggeredByAura->IsPeriodic() && !triggeredByAura->GetHolder()->IsPassive())
         {
             SendChannelUpdate(0);
             triggeredByAura->GetHolder()->SetAuraDuration(0);
