@@ -7049,7 +7049,12 @@ SpellCastResult Spell::CheckCast(bool strict)
                 break;
             case SPELL_EFFECT_DUMMY:
             {
-                if (m_spellInfo->Id == 34026)          // Kill Command
+                if (m_spellInfo->GetSpellIconID() == 1648)  // Execute
+                {
+                    if (!m_targets.getUnitTarget() || m_targets.getUnitTarget()->GetHealth() > m_targets.getUnitTarget()->GetMaxHealth() * 0.2 && !m_caster->IsIgnoreUnitState(m_spellInfo, IGNORE_UNIT_TARGET_STATE))
+                        return SPELL_FAILED_BAD_TARGETS;
+                }
+                else if (m_spellInfo->Id == 34026)          // Kill Command
                 {
                     Pet* pet = m_caster->GetPet();
                     if (!pet)
