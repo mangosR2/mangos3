@@ -3896,14 +3896,6 @@ void Spell::prepare(SpellCastTargets const* targets, Aura const* triggeredByAura
                 }
     }
 
-    for (uint32 i = 0; i < MAX_EFFECT_INDEX; ++i)
-        if (SpellEffectEntry const* eff = m_spellInfo->GetSpellEffect(SpellEffectIndex(i)))
-            if (m_targets.getUnitTarget())
-            {
-                m_caster->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_SPELL_ATTACK);
-                break;
-            }
-
     // add non-triggered (with cast time and without)
     if (!m_IsTriggeredSpell)
     {
