@@ -2959,7 +2959,7 @@ uint32 SpellMgr::GetSpellMaxTargetsWithCustom(SpellEntry const* spellInfo, Unit 
                 case 30572:                                 // Quake (Magtheridon)
                 case 30769:                                 // Pick Red Riding Hood
                 case 30835:                                 // Infernal Relay
-                case 31347:                                 // Doom TODO: exclude top threat target from target selection
+                case 31347:                                 // Doom (Hyjal Summit, Azgalor) TODO: exclude top threat target from target selection
                 case 32312:                                 // Move 1 (Karazhan, Chess Event)
                 case 33711:                                 // Murmur's Touch
                 case 37388:                                 // Move 2 (Karazhan, Chess Event)
@@ -3095,10 +3095,16 @@ uint32 SpellMgr::GetSpellMaxTargetsWithCustom(SpellEntry const* spellInfo, Unit 
                 case 67755:                                 // Nerubian Burrower (Mode 1) (ToCrusader, Anub'arak)
                 case 67756:                                 // Nerubian Burrower (Mode 2) (ToCrusader, Anub'arak)
                 case 68509:                                 // Penetrating Cold (10 man heroic)
+                case 69195:                                 // Pungent Blight (10 man)
                 case 69055:                                 // Bone Slice (ICC, Lord Marrowgar)
                 case 69278:                                 // Gas spore (ICC, Festergut)
                 case 70341:                                 // Slime Puddle (ICC, Putricide)
+                case 71219:                                 // Pungent Blight (10 man heroic)
                 case 71424:                                 // Slime Puddle (ICC, Putricide) Search Spell
+                case 71336:                                 // Pact of the Darkfallen
+                case 71390:                                 // Pact of the Darkfallen
+                case 73031:                                 // Pungent Blight (25 man)
+                case 73032:                                 // Pungent Blight (25 man heroic)
                 case 72615:                                 // Malleable Goo (ICC -Professor Putricide)
                 case 74281:
                     unMaxTargets = 2;
@@ -3152,13 +3158,16 @@ uint32 SpellMgr::GetSpellMaxTargetsWithCustom(SpellEntry const* spellInfo, Unit 
                 case 61694:                                 // Arcane Storm (h) (Malygos)
                     unMaxTargets = 7;
                     break;
+                case 38054:                                 // Random Rocket Missile
+                    unMaxTargets = 8;
+                    break;
                 case 54098:                                 // Poison Bolt Volley (h)
                 case 54835:                                 // Curse of the Plaguebringer (h)
                 case 66140:                                 // Light Bullet Summon Trigger 10 nonhero (correct from sniff)
                 case 67159:                                 // Light Bullet Summon Trigger 10 hero (maybe wrong amount)
                     unMaxTargets = 10;
                     break;
-                case 25991:                                 // Poison Bolt Volley (Pincess Huhuran)
+                case 25991:                                 // Poison Bolt Volley (AQ40, Pincess Huhuran)
                 case 67158:                                 // Light Bullet Summon Trigger 25 nonhero (maybe wrong amount)
                 case 67160:                                 // Light Bullet Summon Trigger 25 hero (maybe wrong amount)
                 case 85547:                                 // Jinx: Curse of the Elements
@@ -3174,6 +3183,9 @@ uint32 SpellMgr::GetSpellMaxTargetsWithCustom(SpellEntry const* spellInfo, Unit 
                     break;
                 case 63482:                                 // Lightning Whirl (h) (Ulduar, Stormcaller Brundir)
                     unMaxTargets = urand(3, 6);
+                    break;
+                case 71340:                                 // Pact of darkfallen (hack for script work)
+                    unMaxTargets = 1;
                     break;
                 case 74452:                                 // Conflagration (Saviana, Ruby Sanctum) (hack, in 25 mode spell simple casted double time)
                 {
@@ -3200,8 +3212,17 @@ uint32 SpellMgr::GetSpellMaxTargetsWithCustom(SpellEntry const* spellInfo, Unit 
         }
         case SPELLFAMILY_MAGE:
         {
-            if (spellInfo->Id == 38194)                   // Blink
-                unMaxTargets = 1;
+            switch(spellInfo->Id)
+            {
+                case 38194:                     // Blink
+                case 82734:                     // Flame Orb
+                case 84718:                     // Frostfire Orb
+                    unMaxTargets = 1;
+                    break;
+                case 83154:                     // Piercing Chill
+                    unMaxTargets = caster->HasAura(83157) ? 2 : 1;
+                    break;
+            }
             break;
         }
         case SPELLFAMILY_DRUID:
@@ -3265,9 +3286,6 @@ float SpellMgr::GetSpellRadiusWithCustom(SpellEntry const* spellInfo, Unit const
                 case 71161:
                     radius = 30;
                     break;
-                case 67732:                                 // Destroy all Frost Patches (Trial of the Crusader, Anub'arak)
-                    radius = 9.0f;
-                    break;
                 case 74086:                                 // Destroy Soul (Lich King)
                     radius = 100.0f;
                     break;
@@ -3298,10 +3316,24 @@ float SpellMgr::GetSpellRadiusWithCustom(SpellEntry const* spellInfo, Unit const
                 case 73145:                                 // Bone Spike Graveyard (during Bone Storm) (Icecrown Citadel, Lord Marrowgar encounter, 25H)
                     radius = DEFAULT_VISIBILITY_INSTANCE;
                     break;
+                case 69845:                                 // Sindragosa Frost bomb (hack!)
+                case 71053:
+                case 71054:
+                case 71055:
+                    radius = 50.0f;
+                    break;
                 case 72350:                                 // Fury of Frostmourne
                 case 72351:                                 // Fury of Frostmourne
                     radius = 300.0f;
                     break;
+                case 72754:                                 // Defile. Radius depended from scale.
+                case 73708:                                 // Defile 25
+                case 73709:                                 // Defile 10H
+                case 73710:                                 // Defile 25H
+                {
+                    radius = caster->GetObjectScale() * 6;
+                    break;
+                }
                 // Custom (calculated) radiuses here
                 case 24811:                                 // Draw Spirit (Lethon)
                 {
@@ -3327,6 +3359,9 @@ float SpellMgr::GetSpellRadiusWithCustom(SpellEntry const* spellInfo, Unit const
                     if (SpellAuraHolderPtr auraHolder = caster->GetSpellAuraHolder(66882))
                         radius = 0.5f * (60000 - auraHolder->GetAuraDuration()) * 0.001f;
                     break;
+                case 67732:                                 // Destroy all Frost Patches (Trial of the Crusader, Anub'arak)
+                    radius = 9.0f;
+                    break;
                 case 56438:                                 // Arcane Overload
                     radius = radius * caster->GetObjectScale();
                     break;
@@ -3337,6 +3372,9 @@ float SpellMgr::GetSpellRadiusWithCustom(SpellEntry const* spellInfo, Unit const
                     radius = 5.0f;
                     if (SpellAuraHolderPtr holder = caster->GetSpellAuraHolder(70347))
                         radius += holder->GetStackAmount() * 0.2f;
+                    break;
+                case 74641:                                 // Meteor Strike
+                    radius = 3.0f;
                     break;
                 default:
                     break;
@@ -3377,7 +3415,7 @@ uint32 SpellMgr::GetSpellTargetsForChainWithCustom(SpellEntry const* spellInfo, 
         case SPELLFAMILY_WARRIOR:
         {
             // Sunder Armor (triggered spell)
-            if (spellInfo->GetSpellFamilyFlags().test<CF_WARRIOR_SUNDER_ARMOR>() && spellInfo->GetSpellVisual() == 0)
+            if (spellInfo->GetSpellFamilyFlags().test<CF_WARRIOR_SUNDER_ARMOR>() && spellInfo->GetSpellVisual() == 406)
                 if (caster->HasAura(58387))               // Glyph of Sunder Armor
                     effectChainTarget = 2;
             break;
