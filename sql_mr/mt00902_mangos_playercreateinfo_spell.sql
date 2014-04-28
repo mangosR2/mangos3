@@ -19,11 +19,6 @@ DELETE FROM `playercreateinfo_spell` WHERE `Spell` = 68978;
 INSERT IGNORE INTO playercreateinfo_spell
 SELECT 22, class, 68978, 'Flayer' FROM playercreateinfo_spell WHERE race = 22;
 
--- Enable Worgen Altered Form
-DELETE FROM `playercreateinfo_spell` WHERE `Spell` = 94293;
-INSERT IGNORE INTO playercreateinfo_spell
-SELECT 22, class, 94293, 'Enable Worgen Altered Form' FROM playercreateinfo_spell WHERE race = 22;
-
 -- Two Forms
 DELETE FROM `playercreateinfo_spell` WHERE `Spell` = 68996;
 INSERT IGNORE INTO playercreateinfo_spell
