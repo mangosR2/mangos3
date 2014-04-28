@@ -4089,8 +4089,12 @@ void Spell::cast(bool skipCheck)
             else if (m_spellInfo->Id == 5728)
                 AddTriggeredSpell(55328);
             // Stoneskin
-            if (m_spellInfo->Id == 20594)
+            else if (m_spellInfo->Id == 20594)
                 AddTriggeredSpell(65116);                   // Stoneskin - armor 10% for 8 sec
+            else if(m_spellInfo->Id == 7744)                // Will of the Forsaken
+                AddTriggeredSpell(72757);                   // PvP trinket Cooldown
+            else if(m_spellInfo->Id == 42292)               // PvP trinket
+                AddTriggeredSpell(72752);                   // Will of the Forsaken Cooldown
             else if (m_spellInfo->Id == 68992)              // Darkflight
             {
                 AddPrecastSpell(96223);                     // Run Speed Marker
