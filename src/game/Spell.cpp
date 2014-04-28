@@ -1079,9 +1079,25 @@ void Spell::prepareDataForTriggerSystem()
                 else if (m_spellInfo->IsFitToFamilyMask(UI64LIT(0x0000000200000000), 0x00000008))
                     m_canTrigger = true;
                 // Replenish Mana, item spell with triggered cases (Mana Agate, etc mana gems)
-                // Fingers of Frost: triggered by Frost/Ice Armor
                 // Living Bomb - can trigger Hot Streak
                 else if (m_spellInfo->GetSpellFamilyFlags().test<CF_MAGE_CLEARCASTING, CF_MAGE_REPLENISH_MANA, CF_MAGE_CHILLED, CF_MAGE_LIVING_BOMB_AOE>())
+                    m_canTrigger = true;
+                // Winter's Chill
+                else if (m_spellInfo->IsFitToFamilyMask(UI64LIT(0x0), 0x1))
+                    m_canTrigger = true;
+                // Chilled debuffs
+                else if (m_spellInfo->Id == 6136 || m_spellInfo->Id == 6136 || m_spellInfo->Id == 18101 || m_spellInfo->Id == 31257)
+                    m_canTrigger = true;
+                break;
+            case SPELLFAMILY_WARRIOR:
+                // Deep Wounds
+                if (m_spellInfo->Id == 12721)
+                    m_canTrigger = true;
+                // Whirlwind (Bladestorm)
+                else if (m_spellInfo->Id == 50622)
+                    m_canTrigger = true;
+                // Bloodsurge
+                else if (m_spellInfo->Id == 46916)
                     m_canTrigger = true;
                 break;
             case SPELLFAMILY_WARLOCK:
@@ -1093,10 +1109,23 @@ void Spell::prepareDataForTriggerSystem()
                 // For Penance,Mind Sear,Mind Flay,Improved Devouring Plague heal/damage triggers need do it
                 if (m_spellInfo->GetSpellFamilyFlags().test<CF_PRIEST_MIND_FLAY1, CF_PRIEST_PENANCE_DMG, CF_PRIEST_PENANCE_HEAL, CF_PRIEST_IMP_DEVOURING_PLAGUE, CF_PRIEST_MIND_FLAY2>())
                     m_canTrigger = true;
+                // Empowered Renew
+                else if (m_spellInfo->Id == 63544)
+                    m_canTrigger = true;
+                break;
+            case SPELLFAMILY_DRUID:
+                // Clearcasting
+                if (m_spellInfo->IsFitToFamilyMask(UI64LIT(0x20000000000000)))
+                    m_canTrigger = true;
                 break;
             case SPELLFAMILY_ROGUE:
                 // For poisons need do it
                 if (m_spellInfo->GetSpellFamilyFlags().test<CF_ROGUE_INSTANT_POISON, CF_ROGUE_CRIPPLING_POISON, CF_ROGUE_MIND_NUMBING_POISON, CF_ROGUE_DEADLY_POISON, CF_ROGUE_WOUND_POISON, CF_ROGUE_ANESTHETIC_POISON>())
+                    m_canTrigger = true;
+                // Mutilate triggers should trigger. Main spell should not trigger
+                else if (m_spellInfo->IsFitToFamilyMask(UI64LIT(0x20000000000000)))
+                    m_canTrigger = false;
+                else if (m_spellInfo->IsFitToFamilyMask(UI64LIT(0x600000000)))
                     m_canTrigger = true;
                 // Main Gauche
                 else if (m_spellInfo->Id == 86392)
@@ -1128,8 +1157,6 @@ void Spell::prepareDataForTriggerSystem()
                 // Death Coil (heal)
                 else if (m_spellInfo->Id == 47633)
                     m_canTrigger = true;
-                break;
-            case SPELLFAMILY_WARRIOR:
                 break;
             default:
                 break;
