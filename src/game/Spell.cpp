@@ -3064,6 +3064,9 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
             // Nick of Time && Blaze of Life
             else if (m_spellInfo->Id == 96966 || m_spellInfo->Id == 97136 || m_spellInfo->Id == 108000 || m_spellInfo->Id == 109822 || m_spellInfo->Id == 109825)
                 FillRaidOrPartyHealthPriorityTargets(targetUnitMap, m_caster, m_targets.getUnitTarget(), radius, 1, true, false, true);
+            // Ancient Healer
+            else if (m_spellInfo->Id == 86678)
+                targetUnitMap.remove(m_targets.getUnitTarget());
             // Firebloom
             // Item - Druid T12 Restoration 4P Bonus
             else if (m_spellInfo->Id == 99017)
