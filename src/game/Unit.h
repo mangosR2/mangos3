@@ -1294,6 +1294,17 @@ typedef std::map<uint32, SpellCooldown> SpellCooldowns;
 #define REGEN_TIME_FULL     2000                            // For this time difference is computed regen value
 #define REGEN_TIME_PRECISE  500                             // Used in Spell::CheckPower for precise regeneration in spell cast time
 
+// Power type values defines
+enum PowerDefaults
+{
+    POWER_RAGE_DEFAULT              = 1000,
+    POWER_FOCUS_DEFAULT             = 100,
+    POWER_ENERGY_DEFAULT            = 100,
+    POWER_HAPPINESS_DEFAULT         = 1000000,
+    POWER_RUNE_DEFAULT              = 8,
+    POWER_RUNIC_POWER_DEFAULT       = 1000,
+};
+
 // delay time for evading
 #define EVADE_TIME_DELAY     500
 #define EVADE_TIME_DELAY_MIN 50
