@@ -12160,25 +12160,18 @@ void SpellAuraHolder::_AddSpellAuraHolder()
     {
         if (Aura* aura = GetAuraByEffectIndex(SpellEffectIndex(i)))
         {
-            if (aura->GetModifier()->m_amount && IsAuraApplyEffect(m_spellProto, SpellEffectIndex(i)))
+            if (IsAuraApplyEffect(m_spellProto, SpellEffectIndex(i)))
             {
-                switch (aura->GetModifier()->m_auraname)
-                {
-                    case SPELL_AURA_SCHOOL_ABSORB:
-                    case SPELL_AURA_OVERRIDE_ACTIONBAR_SPELLS:
-                    case SPELL_AURA_OVERRIDE_ACTIONBAR_SPELLS_2:
-                        flags |= AFLAG_EFFECT_AMOUNT_SEND;
-                        break;
-                    default:
-                        break;
-                }
+                flags |= (1 << i);
+                if (aura->GetModifier()->m_amount)
+                    flags |= AFLAG_EFFECT_AMOUNT_SEND;
             }
         }
     }
 
-    if (m_spellProto->HasAttribute(SPELL_ATTR_EX8_AURA_SENDS_AMOUNT) &&
-        (flags & (AFLAG_EFF_INDEX_0 | AFLAG_EFF_INDEX_1 | AFLAG_EFF_INDEX_2)))
-        flags |= AFLAG_EFFECT_AMOUNT_SEND;
+    //if (m_spellProto->HasAttribute(SPELL_ATTR_EX8_AURA_SENDS_AMOUNT) &&
+    //    (flags & (AFLAG_EFF_INDEX_0 | AFLAG_EFF_INDEX_1 | AFLAG_EFF_INDEX_2)))
+    //    flags |= AFLAG_EFFECT_AMOUNT_SEND;
 
     SetAuraFlags(flags);
 
