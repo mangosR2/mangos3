@@ -7853,7 +7853,12 @@ void Aura::HandleModTotalPercentStat(bool apply, bool /*Real*/)
         {
             target->HandleStatModifier(UnitMods(UNIT_MOD_STAT_START + i), TOTAL_PCT, float(m_modifier.m_amount), apply);
             if (target->GetTypeId() == TYPEID_PLAYER || ((Creature*)target)->IsPet())
+            {
                 target->ApplyStatPercentBuffMod(Stats(i), float(m_modifier.m_amount), apply );
+
+                if (((Creature*)target)->IsPet())
+                     ((Pet*)target)->UpdateStats(Stats(i));
+            }
         }
     }
 
