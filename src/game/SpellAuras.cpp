@@ -12890,6 +12890,30 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
                         return;
                     break;
                 }
+                case 61716:                                 // Rabbit Costume
+                case 61734:                                 // Noblegarden Bunny
+                {
+                    spellId1 = 61719;                       // Easter Lay Noblegarden Egg Aura
+
+                    if (apply)
+                        m_target->CastSpell(m_target, spellId1, true);
+                    else
+                        m_target->RemoveAurasDueToSpell(spellId1);
+                    return;
+                }
+                case 61804:                                 // A Serving of Cranberries
+                case 61805:                                 // A Serving of Pie
+                case 61806:                                 // A Serving of Stuffing
+                case 61807:                                 // A Serving of Turkey
+                case 61808:                                 // A Serving of Sweet Potatoes
+                {
+                    uint32 spellId = GetSpellProto()->CalculateSimpleValue(EFFECT_INDEX_0);
+                    if (apply)
+                        m_target->CastSpell(m_target, spellId, true);
+                    else
+                        m_target->RemoveAurasDueToSpell(spellId);
+                    return;
+                }
                 case 62056:                                 // Stone Grip (Kologarn encounter)
                 case 63985:                                 // Stone Grip (Kologarn encounter) heroic
                 {
