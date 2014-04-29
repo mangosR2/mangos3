@@ -9389,8 +9389,6 @@ void Aura::HandleSchoolAbsorb(bool apply, bool Real)
                                 customModifier *= (100.0f + aura->GetModifier()->m_amount) / 100.0f;
                     }
                     break;
-
-                    break;
                 case SPELLFAMILY_MAGE:
                     if (spellProto->IsFitToFamilyMask(UI64LIT(0x0000000100000000)))
                     {
