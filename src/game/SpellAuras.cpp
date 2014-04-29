@@ -12608,6 +12608,8 @@ bool SpellAuraHolder::IsNeedVisibleSlot(Unit const* caster) const
         return true;
     else if (IsSpellHaveAura(m_spellProto, SPELL_AURA_MOD_CD_FROM_HASTE))
         return true;
+    else if (IsSpellHaveAura(m_spellProto, SPELL_AURA_WORGEN_TRANSFORM))
+        return true;
 
     // passive auras (except totem auras) do not get placed in the slots
     return !m_isPassive || totemAura || HasAreaAuraEffect(m_spellProto);
