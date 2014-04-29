@@ -6543,12 +6543,22 @@ void Aura::HandleModMechanicImmunity(bool apply, bool /*Real*/)
 
 void Aura::HandleModMechanicImmunityMask(bool apply, bool /*Real*/)
 {
-    uint32 mechanic  = m_modifier.m_miscvalue;
+    uint32 mechanicMask  = m_modifier.m_miscvalue;
     Unit *target = GetTarget();
 
     if (apply && GetSpellProto()->HasAttribute(SPELL_ATTR_EX_DISPEL_AURAS_ON_IMMUNITY))
-        target->RemoveAurasAtMechanicImmunity(mechanic,GetId());
+        target->RemoveAurasAtMechanicImmunity(mechanicMask, GetId());
 
+    // Bladestorm
+    if (GetId() == 46924)
+    {
+        mechanicMask = IMMUNE_TO_MOVEMENT_IMPAIRMENT_AND_LOSS_CONTROL_MASK;
+        for (uint8 i = FIRST_MECHANIC - 1; i < MAX_MECHANIC - 1; ++i)
+            if (uint8 mech = (mechanicMask >> i) & 1)
+                target->ApplySpellImmune(GetId(), IMMUNITY_MECHANIC, i + 1, apply);
+
+        target->ApplySpellImmune(GetId(), IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, apply);
+    }
     // Pillar of Frost
     else if (GetId() == 51271)
     {
