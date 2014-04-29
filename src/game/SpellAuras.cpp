@@ -13241,6 +13241,13 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
 
                     break;
                 }
+                case 44614:                                 // Frostfire Bolt (Rank 1)
+                case 47610:                                 // Frostfire Bolt (Rank 2)
+                {
+                    // Permafrost
+                    spellId1 = 68391;
+                    break;
+                }
                 case 48108:                                 // Hot Streak (triggered)
                 case 57761:                                 // Fireball! (Brain Freeze triggered)
                 {
