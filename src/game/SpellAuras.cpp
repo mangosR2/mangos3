@@ -13075,6 +13075,23 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
                 default:
                     return;
             }
+            // Improved Blood Presence
+            if (GetId() == 50365 || GetId() == 50371)
+            {
+                // if presence active: Frost Presence or Unholy Presence
+                if (apply && (m_target->HasAura(48266) || m_target->HasAura(48265)))
+                {
+                    Aura* aura = GetAuraByEffectIndex(EFFECT_INDEX_0);
+                    if (!aura)
+                        return;
+
+                    int32 bp = -aura->GetModifier()->m_amount;
+                    m_target->CastCustomSpell(m_target, 61261, &bp, NULL, NULL, true, NULL, NULL, GetCasterGuid());
+                }
+                else
+                    m_target->RemoveAurasDueToSpell(61261);
+                return;
+            }
             break;
         }
         case SPELLFAMILY_MAGE:
