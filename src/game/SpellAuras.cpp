@@ -5005,8 +5005,22 @@ void Aura::HandleAuraTransform(bool apply, bool Real)
                     //break;
                 //case 51010:                               // Dire Brew
                     //break;
-                //case 53806:                               // Pygmy Oil
-                    //break;
+                case 53806:                                 // Pygmy Oil
+                {
+                    uint32 model_id;
+        
+                    CreatureInfo const * ci = ObjectMgr::GetCreatureTemplate(14883);
+                    if (!ci)
+                    {
+                        model_id = 14973;
+                        sLog.outError("Auras: unknown creature id = 14883 (only need its modelid) Form Spell Aura Transform in Spell ID = %d", GetId());
+                    }
+                    else
+                        model_id = Creature::ChooseDisplayId(ci);   // Will use the default model here
+        
+                    target->SetDisplayId(model_id);
+                    break;
+                }
                 case 62847:                                 // NPC Appearance - Valiant 02
                     target->SetDisplayId(target->getGender() == GENDER_MALE ? 26185 : 26186);
                     break;
@@ -5103,10 +5117,22 @@ void Aura::HandleAuraTransform(bool apply, bool Real)
                 case 71450:                                 // Crown Parcel Service Uniform
                     target->SetDisplayId(target->getGender() == GENDER_MALE ? 31002 : 31003);
                     break;
-                //case 75531:                               // Gnomeregan Pride
-                    //break;
-                //case 75532:                               // Darkspear Pride
-                    //break;
+                case 75531:                                 // Gnomeregan Pride
+                {
+                    if (target->getGender() == GENDER_MALE)
+                        target->SetDisplayId(31654);
+                    else
+                        target->SetDisplayId(31655);
+                    break;
+                }
+                case 75532:                                 // Darkspear Pride
+                {
+                    if (target->getGender() == GENDER_MALE)
+                        target->SetDisplayId(31737);
+                    else
+                        target->SetDisplayId(31738);
+                    break;
+                }
                 default:
                     sLog.outError("Aura::HandleAuraTransform, spell %u does not have creature entry defined, need custom defined model.", GetId());
                     break;
