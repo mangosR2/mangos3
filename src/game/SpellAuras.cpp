@@ -7334,6 +7334,13 @@ void Aura::HandlePeriodicDamage(bool apply, bool Real)
 
         switch (classOptions->SpellFamilyName)
         {
+            case SPELLFAMILY_GENERIC:
+            {
+                // Dream Funnel
+                if (GetId() == 50344)
+                    m_modifier.m_amount = caster->GetMaxHealth() * 5 / 100.0f;
+                break;
+            }
             case SPELLFAMILY_WARRIOR:
             {
                 // Rend
