@@ -14577,13 +14577,24 @@ Unit* Unit::SelectRandomFriendlyTarget(Unit* except /*= NULL*/, float radius /*=
 
 bool Unit::hasNegativeAuraWithInterruptFlag(uint32 flag)
 {
-    MAPLOCK_READ(this,MAP_LOCK_TYPE_AURAS);
+    MAPLOCK_READ(this, MAP_LOCK_TYPE_AURAS);
     for (SpellAuraHolderMap::const_iterator iter = m_spellAuraHolders.begin(); iter != m_spellAuraHolders.end(); ++iter)
     {
         if (!iter->second || iter->second->IsDeleted())
             continue;
 
         if (!iter->second->IsPositive() && iter->second->GetSpellProto()->GetAuraInterruptFlags() & flag)
+            return true;
+    }
+    return false;
+}
+
+bool Unit::hasPositiveAuraWithInterruptFlag(uint32 flag)
+{
+    MAPLOCK_READ(this, MAP_LOCK_TYPE_AURAS);
+    for (SpellAuraHolderMap::const_iterator iter = m_spellAuraHolders.begin(); iter != m_spellAuraHolders.end(); ++iter)
+    {
+        if (iter->second->IsPositive() && iter->second->GetSpellProto()->GetAuraInterruptFlags() & flag)
             return true;
     }
     return false;

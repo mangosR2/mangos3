@@ -1471,6 +1471,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         Unit* SelectRandomUnfriendlyTarget(Unit* except = NULL, float radius = ATTACK_DISTANCE) const;
         Unit* SelectRandomFriendlyTarget(Unit* except = NULL, float radius = ATTACK_DISTANCE) const;
         bool hasNegativeAuraWithInterruptFlag(uint32 flag);
+        bool hasPositiveAuraWithInterruptFlag(uint32 flag);
         void SendMeleeAttackStop(Unit* victim);
         void SendMeleeAttackStart(Unit* pVictim);
 
