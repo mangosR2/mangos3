@@ -7235,6 +7235,18 @@ void Aura::HandlePeriodicHeal(bool apply, bool /*Real*/)
             int32 add_per_tick = floor(add / GetAuraMaxTicks());
             m_modifier.m_amount += (add_per_tick > 0 ? add_per_tick : 0);
         }
+        // Lightwell
+        else if (GetSpellProto()->IsFitToFamily(SPELLFAMILY_PRIEST, UI64LIT(0x0), 0x4000))
+        {
+            Aura* cAur = caster->GetAura(59907, EFFECT_INDEX_0);
+            if (cAur && cAur->GetHolder() && cAur->GetHolder()->DropAuraCharge())
+                caster->RemoveAura(59907, EFFECT_INDEX_0);
+
+            // ToDo: DamageInfo
+            //if (caster->GetOwner())
+            //    m_modifier.m_amount = caster->GetOwner()->SpellHealingBonusDone(target, GetSpellProto(), m_modifier.m_amount, DOT, GetStackAmount());
+            return;
+        }
         // Lifeblood
         else if (GetSpellProto()->GetSpellIconID() == 3088 && GetSpellProto()->GetSpellVisual() == 8145)
         {
