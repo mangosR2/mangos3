@@ -6747,8 +6747,11 @@ void Aura::HandlePeriodicTriggerSpell(bool apply, bool /*Real*/)
         {
             case 66:                                        // Invisibility
                 if (m_removeMode == AURA_REMOVE_BY_EXPIRE)
-                    target->CastSpell(target, 32612, true, NULL, this);
-
+                {
+                    // if not channeling and doesn't have aura
+                    if (!target->GetCurrentSpell(CURRENT_CHANNELED_SPELL) && !target->hasPositiveAuraWithInterruptFlag(AURA_INTERRUPT_FLAG_NOT_SEATED))
+                        target->CastSpell(target, 32612, true, NULL, this);
+                }
                 return;
             case 28522:                                     // Icebolt (Naxxramas: Sapphiron)
                 if (target->HasAura(45776))                 // Should trigger/remove some kind of iceblock
