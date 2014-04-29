@@ -13384,6 +13384,39 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
                 else
                     return;
             }
+            // Health Funnel
+            else if (m_spellProto->IsFitToFamilyMask(0x1000000))
+            {
+                if (apply)
+                {
+                    if (Unit* caster = GetCaster())
+                    {
+                        if (m_target == caster)
+                            return;
+
+                        Unit::AuraList const& pctAuras = caster->GetAurasByType(SPELL_AURA_ADD_PCT_MODIFIER);
+                        for (Unit::AuraList::const_iterator itr = pctAuras.begin(); itr != pctAuras.end(); ++itr)
+                        {
+                            if ((*itr)->GetSpellProto()->GetSpellFamilyName() == SPELLFAMILY_WARLOCK && (*itr)->GetSpellProto()->GetSpellIconID() == 153 && (*itr)->GetEffIndex() == EFFECT_INDEX_0)
+                            {
+                                switch((*itr)->GetId())
+                                {
+                                    case 18703: spellId1 = 60955; break;
+                                    case 18704: spellId1 = 60956; break;
+                                }
+                                break;
+                            }
+                        }
+                    }
+                    else
+                        return;
+                }
+                else
+                {
+                    spellId1 = 60955;
+                    spellId2 = 60956;
+                }
+            }
             // Curse of Weakness
             else if (m_spellProto->Id == 702)
             {
@@ -13597,7 +13630,7 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
                     return;
                 }
             }
-           break;
+            break;
         }
         case SPELLFAMILY_DRUID:
         {
