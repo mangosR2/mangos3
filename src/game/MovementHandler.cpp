@@ -341,6 +341,19 @@ void WorldSession::HandleMovementOpcodes(WorldPacket & recv_data)
     if (!VerifyMovementInfo(movementInfo, movementInfo.GetGuid()))
         return;
 
+    if (mover && _player->GetObjectGuid() != mover->GetObjectGuid())
+    {
+        if (opcode == CMSG_MOVE_SET_WALK_MODE)
+            movementInfo.RemoveMovementFlag(MOVEFLAG_WALK_MODE);
+    }
+
+    if (!movementInfo.GetTransportGuid().IsEmpty())
+    {
+        //if (movementInfo.GetPos()->x != movementInfo.GetTransportPos()->x)
+        //    if (GetPlayer()->GetTransport())
+        //        GetPlayer()->GetTransport()->UpdateMovementInfo(&movementInfo);
+    }
+
     // fall damage generation (ignore in flight case that can be triggered also at lags in moment teleportation to another map).
     if (opcode == CMSG_MOVE_FALL_LAND && plMover && !plMover->IsTaxiFlying())
         plMover->HandleFall(movementInfo);
@@ -355,6 +368,10 @@ void WorldSession::HandleMovementOpcodes(WorldPacket & recv_data)
         HandlePlayerRelocation(movementInfo);
 
         plMover->UpdateFallInformationIfNeed(movementInfo, opcode);
+
+        // sometimes there is a desync and it should be done here
+        if (plMover && opcode == MSG_MOVE_HEARTBEAT && plMover->isMoving())
+            plMover->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_NOT_SEATED);
 
         if (plMover->IsSitState() && (movementInfo.GetMovementFlags() & (MOVEFLAG_MASK_MOVING | MOVEFLAG_MASK_TURNING)))
             plMover->SetStandState(UNIT_STAND_STATE_STAND);
