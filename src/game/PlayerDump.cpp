@@ -42,12 +42,18 @@ static DumpTable dumpTables[] =
     { "character_achievement_progress",   DTT_CHAR_TABLE },
     { "character_action",                 DTT_CHAR_TABLE },
     { "character_aura",                   DTT_CHAR_TABLE },
+    { "character_archaeology",            DTT_CHAR_TABLE },
+    { "character_archaeology_finds",      DTT_CHAR_TABLE },
+    { "character_currencies",             DTT_CHAR_TABLE },
     { "character_declinedname",           DTT_CHAR_NAME_TABLE },
     { "character_equipmentsets",          DTT_EQSET_TABLE},
     { "character_glyphs",                 DTT_CHAR_TABLE },
     { "character_homebind",               DTT_CHAR_TABLE },
     { "character_inventory",              DTT_INVENTORY  }, // -> item guids
     { "character_queststatus",            DTT_CHAR_TABLE },
+    { "character_queststatus_daily",      DTT_CHAR_TABLE },
+    { "character_queststatus_monthly",    DTT_CHAR_TABLE },
+    { "character_queststatus_weekly",     DTT_CHAR_TABLE },
     { "character_pet",                    DTT_PET        }, // -> pet number
     { "character_pet_declinedname",       DTT_PET_DECL   }, //                  <- pet number
     { "character_reputation",             DTT_CHAR_TABLE },
