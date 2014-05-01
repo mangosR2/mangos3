@@ -146,7 +146,7 @@ void WorldSession::HandleGuildFinderBrowseOpcode(WorldPacket& recvPacket)
 
         bufferData.WriteStringData(guild->GetName());
 
-        bufferData << uint32(0); // guild->GetAchievementMgr().GetAchievementPoints()
+        bufferData << uint32(guild->GetAchievementMgr().GetAchievementPoints());
 
         bufferData.WriteGuidBytes<7>(guildGUID);
 
