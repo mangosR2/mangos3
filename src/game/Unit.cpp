@@ -101,6 +101,12 @@ void MovementInfo::Read(ByteBuffer& data, uint16 opcode)
             continue;
         }
 
+        if (element >= MSEGuid2Bit0 && element <= MSEGuid2Bit7)
+        {
+            guid2[element - MSEGuid2Bit0] = data.ReadBit();
+            continue;
+        }
+
         if (element >= MSETransportGuidBit0 && element <= MSETransportGuidBit7)
         {
             if (hasTransportData)
@@ -112,6 +118,13 @@ void MovementInfo::Read(ByteBuffer& data, uint16 opcode)
         {
             if (guid[element - MSEGuidByte0])
                 guid[element - MSEGuidByte0] ^= data.ReadUInt8();
+            continue;
+        }
+
+        if (element >= MSEGuid2Byte0 && element <= MSEGuid2Byte7)
+        {
+            if (guid2[element - MSEGuid2Byte0])
+                guid2[element - MSEGuid2Byte0] ^= data.ReadUInt8();
             continue;
         }
 
@@ -229,23 +242,23 @@ void MovementInfo::Read(ByteBuffer& data, uint16 opcode)
                 break;
             case MSETransportPositionX:
                 if (hasTransportData)
-                data >> t_pos.x;
+                    data >> t_pos.x;
                 break;
             case MSETransportPositionY:
                 if (hasTransportData)
-                data >> t_pos.y;
+                    data >> t_pos.y;
                 break;
             case MSETransportPositionZ:
                 if (hasTransportData)
-                data >> t_pos.z;
+                    data >> t_pos.z;
                 break;
             case MSETransportTime:
                 if (hasTransportData)
-                data >> t_time;
+                    data >> t_time;
                 break;
             case MSETransportTime2:
                 if (hasTransportData && si.hasTransportTime2)
-            data >> t_time2;
+                    data >> t_time2;
                 break;
             case MSETransportTime3:
                 if (hasTransportData && si.hasTransportTime3)
@@ -253,6 +266,9 @@ void MovementInfo::Read(ByteBuffer& data, uint16 opcode)
                 break;
             case MSEMovementCounter:
                 data.read_skip<uint32>();
+                break;
+            case MSEByteParam:
+                data >> byteParam;
                 break;
             default:
                 MANGOS_ASSERT(false && "Wrong movement status element");
