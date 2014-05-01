@@ -1321,7 +1321,8 @@ void WorldSession::HandleGuildBankBuyTab(WorldPacket& recv_data)
         return;
 
     // m_PurchasedTabs = 0 when buying Tab 0, that is why this check can be made
-    if (!pGuild->IsGuildBankLoaded() || TabId != pGuild->GetPurchasedTabs())
+    // also don't allow buy tabs that are obtained through guild perks
+    if (!pGuild->IsGuildBankLoaded() || TabId != pGuild->GetPurchasedTabs() || TabId >= GUILD_BANK_MAX_BOUGHT_TABS)
         return;
 
     uint64 TabCost = GetGuildBankTabPrice(TabId) * GOLD;

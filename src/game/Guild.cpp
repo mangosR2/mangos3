@@ -322,7 +322,6 @@ bool Guild::AddMember(ObjectGuid plGuid, uint32 plRank)
     }
 
     UpdateAccountsNumber();
-    //sGuildFinderMgr.RemoveMembershipRequest(pl->GetGUIDLow(), ObjectGuid(this->GetId()));
 
     sGuildFinderMgr.RemoveMembershipRequest(lowguid, m_Id);
 
@@ -369,8 +368,10 @@ bool Guild::LoadGuildFromDB(QueryResult* guildDataResult)
     m_Level           = fields[12].GetUInt32();
     m_Experience      = fields[13].GetUInt64();
     m_TodayExperience = fields[14].GetUInt64();
+    m_PurchasedTabs   = fields[15].GetUInt32();
 
-    uint32 purchasedTabs   = fields[15].GetUInt32();
+    if (m_PurchasedTabs > GUILD_BANK_MAX_TABS)
+        m_PurchasedTabs = GUILD_BANK_MAX_TABS;
 
     return true;
 }
@@ -511,7 +512,7 @@ bool Guild::LoadMembersFromDB(QueryResult* guildMembersResult)
         newmember.Pnote                 = fields[3].GetCppString();
         newmember.OFFnote               = fields[4].GetCppString();
         newmember.BankResetTimeMoney    = fields[5].GetUInt32();
-        newmember.BankRemMoney          = fields[6].GetUInt32();
+        newmember.BankRemMoney          = fields[6].GetUInt64();
         for (int i = 0; i < GUILD_BANK_MAX_TABS; ++i)
         {
             newmember.BankResetTimeTab[i] = fields[7 + (2 * i)].GetUInt32();
@@ -1552,9 +1553,9 @@ void Guild::UnloadGuildBank(bool deleteItemsInDB /*=false*/)
         LoadGuildBankFromDB();
     }
 
-    for (int8 i = m_TabListMap.size() - 1; i >= 0; --i)
+    for (size_t i = 0; i < m_TabListMap.size(); ++i)
     {
-        for (int8 j = GUILD_BANK_MAX_SLOTS - 1 ; j >= 0; --j)
+        for (uint8 j = 0; j < GUILD_BANK_MAX_SLOTS; ++j)
         {
             if (Item* pItem = m_TabListMap[i]->Slots[j])
             {
@@ -1599,7 +1600,7 @@ void Guild::SendMoneyInfo(WorldSession* session, uint32 LowGuid)
 
 bool Guild::MemberMoneyWithdraw(uint64 amount, uint32 LowGuid)
 {
-    uint32 MoneyWithDrawRight = GetMemberMoneyWithdrawRem(LowGuid);
+    uint64 MoneyWithDrawRight = GetMemberMoneyWithdrawRem(LowGuid);
 
     if (MoneyWithDrawRight < amount || GetGuildBankMoney() < amount)
         return false;
@@ -1729,7 +1730,7 @@ void Guild::SetBankMoneyPerDay(uint32 rankId, uint64 money)
         if (itr->second.RankId == rankId)
             itr->second.BankResetTimeMoney = 0;
 
-    CharacterDatabase.PExecute("UPDATE guild_rank SET BankMoneyPerDay='%u' WHERE rid='%u' AND guildid='%u'", money, rankId, m_Id);
+    CharacterDatabase.PExecute("UPDATE guild_rank SET BankMoneyPerDay='" UI64FMTD "' WHERE rid='%u' AND guildid='%u'", money, rankId, m_Id);
     CharacterDatabase.PExecute("UPDATE guild_member SET BankResetTimeMoney='0' WHERE guildid='%u' AND rank='%u'", m_Id, rankId);
 }
 
@@ -1947,18 +1948,18 @@ void Guild::DisplayGuildBankLogs(WorldSession* session, uint8 TabId)
         data.WriteBits(m_GuildBankEventLog_Item[TabId].size(), 23);
         for (GuildBankEventLog::iterator itr = m_GuildBankEventLog_Item[TabId].begin(); itr != m_GuildBankEventLog_Item[TabId].end(); ++itr)
             itr->WriteData(data, buffer);
-            }
+    }
     if (!buffer.empty())
-            {
+    {
         data.FlushBits();
         data.append(buffer);
-        }
+    }
 
     data << uint32(TabId);
     if (hasCashFlow)
         data << uint64(0);                                  // cash flow contribution
 
-        session->SendPacket(&data);
+    session->SendPacket(&data);
 
     DEBUG_LOG("WORLD: Sent (SMSG_GUILD_BANK_LOG_QUERY_RESULT)");
 }
@@ -2920,7 +2921,7 @@ void Guild::LoadGuildNewsEventLogFromDB()
 void Guild::SendNewsEventLog(WorldSession* session)
 {
     // Sending result
-/*    WorldPacket data(SMSG_GUILD_NEWS_UPDATE, 0);
+    WorldPacket data(SMSG_GUILD_NEWS_UPDATE, 0);
     // count, max count == 100
     data.WriteBits(m_GuildNewsEventLog.size(), 21);
 
@@ -2947,13 +2948,13 @@ void Guild::SendNewsEventLog(WorldSession* session)
         data << uint32(secsToTimeBitFields(itr->second.Date));
     }
 
-    session->SendPacket(&data);*/
+    session->SendPacket(&data);
     DEBUG_LOG("WORLD: Sent (SMSG_GUILD_NEWS_UPDATE)");
 }
 
 void GuildNewsEventLogEntry::WriteData(uint32 guid, WorldPacket* data)
 {
-/*    data->Initialize(SMSG_GUILD_NEWS_UPDATE, 7 + 32);
+    data->Initialize(SMSG_GUILD_NEWS_UPDATE, 7 + 32);
     data->WriteBits(1, 21); // size, we are only sending 1 news here
 
     data->WriteBits(0, 26); // Not yet implemented used for guild achievements
@@ -2969,7 +2970,7 @@ void GuildNewsEventLogEntry::WriteData(uint32 guid, WorldPacket* data)
 
     *data << uint32(guid);
     *data << uint32(EventType);
-    *data << uint32(secsToTimeBitFields(Date));*/
+    *data << uint32(secsToTimeBitFields(Date));
 }
 
 void Guild::HandleGuildPartyRequest(WorldSession* session)

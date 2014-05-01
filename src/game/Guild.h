@@ -361,7 +361,7 @@ struct RankInfo
 
     std::string Name;
     uint32 Rights;
-    uint32 BankMoneyPerDay;
+    uint64 BankMoneyPerDay;
     uint32 TabRight[GUILD_BANK_MAX_TABS];
     uint32 TabSlotPerDay[GUILD_BANK_MAX_TABS];
 };
@@ -526,7 +526,7 @@ class Guild
         void SetGuildBankTabText(uint8 TabId, std::string text);
         void SendGuildBankTabText(WorldSession *session, uint8 TabId);
         void SetGuildBankTabInfo(uint8 TabId, std::string name, std::string icon);
-        uint8 GetPurchasedTabs() const { return m_TabListMap.size(); }
+        uint8 GetPurchasedTabs() const { return m_PurchasedTabs; }
         uint32 GetBankRights(uint32 rankId, uint8 TabId) const;
         bool IsMemberHaveRights(uint32 LowGuid, uint8 TabId,uint32 rights) const;
         bool CanMemberViewTab(uint32 LowGuid, uint8 TabId) const;
@@ -608,6 +608,7 @@ class Guild
 
         uint64 m_GuildBankMoney;
         uint8 m_PurchasedTabs;
+
         AchievementMgr<Guild> m_achievementMgr;
 
         // Guild leveling
