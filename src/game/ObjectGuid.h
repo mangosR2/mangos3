@@ -109,7 +109,7 @@ class MANGOS_DLL_SPEC ObjectGuid
 {
     public:                                                 // constructors
         ObjectGuid() : m_guid(0) {}
-        explicit ObjectGuid(uint64 guid) : m_guid(guid) {}
+        ObjectGuid(uint64 guid) : m_guid(guid) {}
         ObjectGuid(HighGuid hi, uint32 entry, uint32 counter) : m_guid(counter ? uint64(counter) | (uint64(entry) << 32) | (uint64(hi) << (IsLargeHigh(hi) ? 48 : 52)) : 0) {}
         ObjectGuid(HighGuid hi, uint32 counter) : m_guid(counter ? uint64(counter) | (uint64(hi) << (IsLargeHigh(hi) ? 48 : 52)) : 0) {}
 
