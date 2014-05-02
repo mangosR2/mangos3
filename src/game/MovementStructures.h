@@ -2740,6 +2740,10 @@ MovementStatusElements* GetMovementStatusElementsSequence(uint16 opcode)
             return MovementHeartBeatSequence;
         case SMSG_PLAYER_MOVE:
             return PlayerMoveSequence;
+        case CMSG_DISMISS_CONTROLLED_VEHICLE:
+            return DismissControlledVehicleSequence;
+        case CMSG_CHANGE_SEATS_ON_CONTROLLED_VEHICLE:
+            return ChangeSeatsOnControlledVehicleSequence;
         case CMSG_MOVE_KNOCK_BACK_ACK:
             return MoveKnockbackAckSequence;
         case SMSG_MOVE_UPDATE_KNOCK_BACK:
