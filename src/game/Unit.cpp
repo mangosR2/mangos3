@@ -10571,7 +10571,7 @@ void Unit::Mount(uint32 mount, uint32 spellId, uint32 vehicleId, uint32 creature
                 }
                 else
                 {
-                    pet->GetCharmInfo()->SetState(CHARM_STATE_ACTION,ACTIONS_DISABLE);
+                    pet->GetCharmInfo()->SetState(CHARM_STATE_ACTION, ACTIONS_DISABLE);
                     pet->SendCharmState();
                 }
             }
@@ -10586,8 +10586,18 @@ void Unit::Mount(uint32 mount, uint32 spellId, uint32 vehicleId, uint32 creature
         {
             SetVehicleId(vehicleId);
             GetVehicleKit()->Reset();
-            if (GetTypeId() != TYPEID_UNIT)
-                GetVehicleKit()->Initialize(creatureEntry);
+
+            // Send others that we now have a vehicle
+            WorldPacket data(SMSG_SET_VEHICLE_REC_ID, 8 + 4);
+            data << GetPackGUID();
+            data << uint32(vehicleId);
+            SendMessageToSet(&data, true);
+
+            data.Initialize(SMSG_ON_CANCEL_EXPECTED_RIDE_VEHICLE_AURA, 0);
+            ((Player*)this)->GetSession()->SendPacket(&data);
+
+            // mounts can also have accessories
+            GetVehicleKit()->Initialize(creatureEntry);
         }
 
         WorldPacket data(SMSG_MOVE_SET_COLLISION_HGT, GetPackGUID().size() + 4 + 4);
@@ -10622,6 +10632,14 @@ void Unit::Unmount(bool from_aura)
     {
         GetVehicleKit()->Reset();
         SetVehicleId(0);
+        if (GetTypeId() == TYPEID_PLAYER)
+        {
+            // Send other players that we are no longer a vehicle
+            WorldPacket data(SMSG_SET_VEHICLE_REC_ID, 8 + 4);
+            data << GetPackGUID();
+            data << uint32(0);
+            ((Player*)this)->SendMessageToSet(&data, true);
+        }
     }
 
     // only resummon old pet if the player is already added to a map
@@ -10639,7 +10657,7 @@ void Unit::Unmount(bool from_aura)
 
         if (Pet* pet = GetPet())
         {
-            pet->GetCharmInfo()->SetState(CHARM_STATE_ACTION,ACTIONS_ENABLE);
+            pet->GetCharmInfo()->SetState(CHARM_STATE_ACTION, ACTIONS_ENABLE);
             pet->SendCharmState();
         }
         else
