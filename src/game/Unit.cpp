@@ -11279,12 +11279,12 @@ void Unit::UpdateSpeed(UnitMoveType mtype, bool forced, float ratio, bool ignore
     }
 
     // Remove Druid Dash bonus if not in Cat Form
-    if (GetShapeshiftForm() != FORM_CAT)
+    if (GetShapeshiftForm() != FORM_CAT && !IsMounted())
     {
         AuraList const& speed_increase_auras = GetAurasByType(SPELL_AURA_MOD_INCREASE_SPEED);
         for(AuraList::const_iterator itr = speed_increase_auras.begin(); itr != speed_increase_auras.end(); ++itr)
         {
-            const SpellEntry* aura_proto = (*itr)->GetSpellProto();
+            SpellEntry const* aura_proto = (*itr)->GetSpellProto();
             if (aura_proto->GetSpellFamilyName() == SPELLFAMILY_DRUID && aura_proto->GetSpellIconID() == 959)
             {
                 main_speed_mod -= (*itr)->GetModifier()->m_amount;
