@@ -1424,6 +1424,10 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, DamageInfo* damageI
                 if (!procSpell || procSpell->Id == 44401)
                     return SPELL_AURA_PROC_FAILED;
 
+                // only on pom and clearcast
+                if (procSpell->Id != 12536 && procSpell->Id != 12043)
+                    return SPELL_AURA_PROC_FAILED;
+
                 target = this;
                 switch (dummySpell->Id)
                 {
