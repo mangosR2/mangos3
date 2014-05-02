@@ -10591,8 +10591,10 @@ void Unit::Mount(uint32 mount, uint32 spellId, uint32 vehicleId, uint32 creature
         }
 
         WorldPacket data(SMSG_MOVE_SET_COLLISION_HGT, GetPackGUID().size() + 4 + 4);
-        data << GetPackGUID();
+        data.WriteGuidMask<6, 1, 4, 7, 5, 2, 0, 3>(GetObjectGuid());
+        data.WriteGuidBytes<6, 0, 4, 3, 5>(GetObjectGuid());
         data << uint32(sWorld.GetGameTime());   // Packet counter
+        data.WriteGuidBytes<1, 2, 7>(GetObjectGuid());
         data << ((Player*)this)->GetCollisionHeight(true);
         ((Player*)this)->GetSession()->SendPacket(&data);
     }
@@ -10628,8 +10630,10 @@ void Unit::Unmount(bool from_aura)
     if (GetTypeId() == TYPEID_PLAYER)
     {
         WorldPacket data(SMSG_MOVE_SET_COLLISION_HGT, GetPackGUID().size() + 4 + 4);
-        data << GetPackGUID();
+        data.WriteGuidMask<6, 1, 4, 7, 5, 2, 0, 3>(GetObjectGuid());
+        data.WriteGuidBytes<6, 0, 4, 3, 5>(GetObjectGuid());
         data << uint32(sWorld.GetGameTime());   // Packet counter
+        data.WriteGuidBytes<1, 2, 7>(GetObjectGuid());
         data << ((Player*)this)->GetCollisionHeight(false);
         ((Player*)this)->GetSession()->SendPacket(&data);
 
