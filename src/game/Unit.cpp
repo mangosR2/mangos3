@@ -9148,6 +9148,21 @@ void Unit::SpellDamageBonusTaken(DamageInfo* damageInfo, uint32 stack)
 
                 TakenTotalMod *= (100.0f - (*i)->GetModifier()->m_amount) / 100.0f;
                 break;
+            case 45182:                                     // Cheating Death
+                if ((*i)->GetModifier()->m_miscvalue & SPELL_SCHOOL_MASK_NORMAL)
+                {
+                    if (GetTypeId() != TYPEID_PLAYER)
+                        continue;
+
+                    TakenTotalMod *= ((*i)->GetModifier()->m_amount + 100.0f) / 100.0f;
+                }
+                break;
+            case 47580:                                     // Pain and Suffering (Rank 1)      TODO: can be pct modifier aura
+            case 47581:                                     // Pain and Suffering (Rank 2)
+                // Shadow Word: Death
+                if (damageInfo->GetSpellProto()->IsFitToFamilyMask(UI64LIT(0x0000000200000000)))
+                    TakenTotalMod *= ((*i)->GetModifier()->m_amount + 100.0f) / 100.0f;
+                break;
             default:
                 TakenTotalMod *= GetTotalAuraScriptedMultiplierForDamageTaken(damageInfo->GetSpellProto());
         }
