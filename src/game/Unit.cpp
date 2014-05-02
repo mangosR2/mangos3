@@ -9673,8 +9673,6 @@ uint32 Unit::SpellCriticalDamageBonus(SpellEntry const *spellProto, uint32 damag
 
     critPctDamageMod += GetTotalAuraModifierByMiscMask(SPELL_AURA_MOD_CRIT_DAMAGE_BONUS, GetSpellSchoolMask(spellProto));
 
-    uint32 creatureTypeMask = pVictim->GetCreatureTypeMask();
-
     uint32 base_dmg = damage;
     damage += crit_bonus;
 
