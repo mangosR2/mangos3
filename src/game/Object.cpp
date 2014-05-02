@@ -1846,7 +1846,7 @@ void WorldObject::MonsterText(MangosStringLocale const* textData, Unit const* ta
 void WorldObject::SendMessageToSet(WorldPacket* data, bool /*bToSelf*/) const
 {
     //if object is in world, map for it already created!
-    if (IsInWorld())
+    if (IsInWorld() && GetMap())
         GetMap()->MessageBroadcast(this, data);
 }
 
@@ -1860,7 +1860,7 @@ void WorldObject::SendMessageToSetInRange(WorldPacket* data, float dist, bool /*
 void WorldObject::SendMessageToSetExcept(WorldPacket* data, Player const* skipped_receiver) const
 {
     //if object is in world, map for it already created!
-    if (IsInWorld())
+    if (IsInWorld() && GetMap())
     {
         MaNGOS::MessageDelivererExcept notifier(this, data, skipped_receiver);
         Cell::VisitWorldObjects(this, notifier, GetMap()->GetVisibilityDistance(this));
