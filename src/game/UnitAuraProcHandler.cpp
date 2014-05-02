@@ -748,6 +748,15 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, DamageInfo* damageI
                     RemoveAuraHolderFromStack(24659);
                     return SPELL_AURA_PROC_OK;
                 }
+                // Deadly Precision
+                case 71563:
+                {
+                    if (!procSpell || procSpell->Id == 71564)
+                        return SPELL_AURA_PROC_FAILED;
+                    // Need remove one 24659 aura
+                    RemoveAuraHolderFromStack(71564);
+                    return SPELL_AURA_PROC_OK;
+                }
                 // Restless Strength
                 case 24661:
                 {
