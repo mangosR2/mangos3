@@ -1224,7 +1224,8 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, DamageInfo* damageI
                     CastSpell(this, proc_spells[getClass()*3 + urand(0,2)], true, castItem, triggeredByAura);
 
                     if (cooldown)
-                        AddSpellCooldown(dummySpell->Id, 0, time(NULL) + cooldown);
+                        for (uint8 i = 0; i < MAX_EFFECT_INDEX; i++)
+                            AddSpellCooldown(dummySpell->Id, 0, time(NULL) + cooldown);
 
                     return SPELL_AURA_PROC_OK;
                 }
