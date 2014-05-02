@@ -10047,8 +10047,18 @@ bool Unit::IsImmuneToSpell(SpellEntry const* spellInfo, bool isFriendly) const
     {
         SpellImmuneList const& mechanicList = m_spellImmune[IMMUNITY_MECHANIC];
         for(SpellImmuneList::const_iterator itr = mechanicList.begin(); itr != mechanicList.end(); ++itr)
+        {
             if (itr->type == mechanic)
                 return true;
+
+            // Enraged Regeneration vs. Berserker Rage
+            if (spellInfo->Id == 18499 && itr->spellId == 55694)
+                return false;
+
+            // Exclude Ice Block vs. Forbearance and  Enraged Regeneration vs. Berserker Rage
+            if (itr->type == mechanic && (spellInfo->Id != 45438 || itr->spellId != 25771))
+                return true;
+        }
 
         AuraList const& immuneAuraApply = GetAurasByType(SPELL_AURA_MECHANIC_IMMUNITY_MASK);
         for(AuraList::const_iterator iter = immuneAuraApply.begin(); iter != immuneAuraApply.end(); ++iter)
