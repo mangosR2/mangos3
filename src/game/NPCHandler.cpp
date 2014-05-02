@@ -616,6 +616,7 @@ void WorldSession::SendStablePet( ObjectGuid guid )
         {
             Field *fields = result->Fetch();
 
+            data << uint32(fields[5].GetUInt32());          // pet slot
             data << uint32(fields[1].GetUInt32());          // petnumber
             data << uint32(fields[2].GetUInt32());          // creature entry
             data << uint32(fields[3].GetUInt32());          // level
