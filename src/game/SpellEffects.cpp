@@ -9967,16 +9967,16 @@ void Spell::EffectSummonObjectWild(SpellEffectEntry const* effect)
                 }
                 break;
             }
-            case 726:                                      // TP
+            case 726:                                       //TP
             {
-                if (bg && bg->GetTypeID(true) == BATTLEGROUND_TP && bg->GetStatus() == STATUS_IN_PROGRESS)
+                if(bg && bg->GetTypeID(true)==BATTLEGROUND_TP && bg->GetStatus() == STATUS_IN_PROGRESS)
                 {
                     Team team = pl->GetTeam() == ALLIANCE ? HORDE : ALLIANCE;
 
                     ((BattleGroundTP*)bg)->SetDroppedFlagGuid(pGameObj->GetObjectGuid(), team);
                 }
                 break;
-            } 
+            }
         }
     }
 
