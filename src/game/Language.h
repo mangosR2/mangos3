@@ -837,6 +837,13 @@ enum MangosStrings
     LANG_BG_BG_HAS_LOST_H_WATERWORKS    = 827,
     LANG_BG_BG_HAS_LOST_A_MINES         = 828,
     LANG_BG_BG_HAS_LOST_H_MINES         = 829,
+    // ToDo: Deprecate the following and use up langs msng
+    LANG_BG_BG_NODE_WATERWORKS          = 830,
+    LANG_BG_BG_NODE_MINE                = 831,
+    LANG_BG_BG_NODE_LIGHTHOUSE          = 832,
+    LANG_BG_BG_NODE_CLAIMED             = 833,
+    LANG_BG_BG_NODE_ASSAULTED           = 834,
+    LANG_BG_BG_NODE_TAKEN               = 835,
     // Room for in-game strings           830-999 not used
 
     // Level 4 (CLI only commands)

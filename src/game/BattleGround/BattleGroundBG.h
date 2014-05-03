@@ -15,123 +15,88 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
+#ifndef __BattleGroundBG_H
+#define __BattleGroundBG_H
 
-#ifndef __BATTLEGROUNDBG_H
-#define __BATTLEGROUNDBG_H
+#include "Common.h"
+#include "BattleGround.h"
 
-#include "Language.h"
+#define BG_BG_NODES_MAX   3
+#define BG_BG_BUFFS_MAX   5
 
-class BattleGround;
-
-#define BG_BG_FLAG_RESPAWN_TIME         (10*IN_MILLISECONDS)//10 seconds
-#define BG_BG_FPOINTS_TICK_TIME         (2*IN_MILLISECONDS) //2 seconds
+/* do NOT change the order, else wrong behaviour */
+enum BG_BG_Nodes
+{
+    BG_BG_NODE_LIGHTHOUSE       = 0,
+    BG_BG_NODE_WATERWORKS       = 1,
+    BG_BG_NODE_MINE             = 2,
+    BG_BG_NODES_ERROR           = 255
+};
 
 enum BG_BG_WorldStates
 {
-    BG_ALLIANCE_RESOURCES           = 2749,
-    BG_HORDE_RESOURCES              = 2750,
-    BG_ALLIANCE_BASE                = 2752,
-    BG_HORDE_BASE                   = 2753,
-    LIGHTHOUSE_HORDE_CONTROL        = 2733,
-    LIGHTHOUSE_ALLIANCE_CONTROL     = 2732,
-    LIGHTHOUSE_UNCONTROL            = 2731,
-    WATERWORKS_ALLIANCE_CONTROL     = 2730,
-    WATERWORKS_HORDE_CONTROL        = 2729,
-    WATERWORKS_UNCONTROL            = 2728,
-    MINES_HORDE_CONTROL             = 2727,
-    MINES_ALLIANCE_CONTROL          = 2726,
-    MINES_UNCONTROL                 = 2725,
-    BG_PROGRESS_BAR_PERCENT_GREY    = 2720,                 //100 = empty (only grey), 0 = blue|red (no grey)
-    BG_PROGRESS_BAR_STATUS          = 2719,                 //50 init!, 48 ... hordak bere .. 33 .. 0 = full 100% hordacky , 100 = full alliance
-    BG_PROGRESS_BAR_SHOW            = 2718,                 //1 init, 0 druhy send - bez messagu, 1 = controlled alliance
+    BG_BG_OP_OCCUPIED_BASES_HORDE       = 1778,
+    BG_BG_OP_OCCUPIED_BASES_ALLY        = 1779,
+    BG_BG_OP_RESOURCES_ALLY             = 1776,
+    BG_BG_OP_RESOURCES_HORDE            = 1777,
+    BG_BG_OP_RESOURCES_MAX              = 1780,
+    BG_BG_OP_RESOURCES_WARNING          = 1955,
+
+    BG_BG_OP_LIGHTHOUSE_ICON            = 1842,
+    BG_BG_OP_LIGHTHOUSE_STATE_ALLIANCE  = 1767,
+    BG_BG_OP_LIGHTHOUSE_STATE_HORDE     = 1768,
+    BG_BG_OP_LIGHTHOUSE_STATE_CON_ALI   = 1769,
+    BG_BG_OP_LIGHTHOUSE_STATE_CON_HOR   = 1770,
+
+    BG_BG_OP_WATERWORKS_ICON            = 1846,
+    BG_BG_OP_WATERWORKS_STATE_ALLIANCE  = 1782,
+    BG_BG_OP_WATERWORKS_STATE_HORDE     = 1783,
+    BG_BG_OP_WATERWORKS_STATE_CON_ALI   = 1784,
+    BG_BG_OP_WATERWORKS_STATE_CON_HOR   = 1785,
+
+    BG_BG_OP_MINE_ICON                  = 1845,
+    BG_BG_OP_MINE_STATE_ALLIANCE        = 1772,
+    BG_BG_OP_MINE_STATE_HORDE           = 1773,
+    BG_BG_OP_MINE_STATE_CON_ALI         = 1774,
+    BG_BG_OP_MINE_STATE_CON_HOR         = 1775,
 };
 
-enum BG_BG_ProgressBarConsts
+const uint32 BG_BG_OP_NODESTATES[BG_BG_NODES_MAX] =
+    { BG_BG_OP_LIGHTHOUSE_STATE_ALLIANCE, BG_BG_OP_WATERWORKS_STATE_ALLIANCE, BG_BG_OP_MINE_STATE_ALLIANCE };
+
+const uint32 BG_BG_OP_NODEICONS[BG_BG_NODES_MAX] =
+    { BG_BG_OP_LIGHTHOUSE_ICON, BG_BG_OP_WATERWORKS_ICON, BG_BG_OP_MINE_ICON };
+
+enum BG_BG_ObjectType
 {
-    BG_BG_POINT_MAX_CAPTURERS_COUNT     = 5,
-    BG_BG_POINT_RADIUS                  = 70,
-    BG_BG_PROGRESS_BAR_DONT_SHOW        = 0,
-    BG_BG_BG_PROGRESS_BAR_SHOW             = 1,
-    BG_BG_BG_PROGRESS_BAR_PERCENT_GREY     = 40,
-    BG_BG_PROGRESS_BAR_STATE_MIDDLE     = 50,
-    BG_BG_PROGRESS_BAR_HORDE_CONTROLLED = 0,
-    BG_BG_PROGRESS_BAR_NEUTRAL_LOW      = 30,
-    BG_BG_PROGRESS_BAR_NEUTRAL_HIGH     = 70,
-    BG_BG_PROGRESS_BAR_ALI_CONTROLLED   = 100
-};
-
-enum BG_BG_Sounds
-{
-    // strange ids, but sure about them
-};
-
-enum BG_BG_Spells
-{
-};
-
-enum BGBattleGroundPointsTrigger
-{
-    TR_LIGHTHOUSE_POINT        = 4516,
-    TR_LIGHTHOUSE_BUFF         = 4518,
-    TR_WATERWORKS_POINT        = 4570,
-    TR_WATERWORKS_BUFF         = 4571,
-    TR_MINES_POINT             = 4514,
-    TR_MINES_BUFF              = 4569
-};
-
-enum BGBattleGroundGaveyards
-{
-    BG_GRAVEYARD_MAIN_ALLIANCE = 1103,
-    BG_GRAVEYARD_MAIN_HORDE    = 1104,
-    BG_GRAVEYARD_LIGHTHOUSE    = 1105,
-    BG_GRAVEYARD_WATERWORKS    = 1107,
-    BG_GRAVEYARD_MINES         = 1108
-};
-
-enum BG_BG_Nodes
-{
-    BG_BG_NODE_LIGHTHOUSE      = 0,
-    BG_BG_NODE_WATERWORKS      = 1,
-    BG_BG_NODE_MINES           = 2,
-
-    // special internal node
-    BG_BG_PLAYERS_OUT_OF_POINTS   = 3,                      // used for store out of node players data
-};
-
-#define BG_BG_NODES_MAX                 3
-#define BG_BG_NODES_MAX_WITH_SPECIAL    4
-
-// node-events work like this: event1:nodeid, event2:state (0alliance,1horde,2neutral)
-#define BG_BGE_NEUTRAL_TEAM 2
-// all other event2 are just nodeids, i won't define something here
-
-// x, y, z
-// used to check, when player is in range of a node
-const float BG_BG_NodePositions[BG_BG_NODES_MAX][3] =
-{
-    {2024.600708f, 1742.819580f, 1195.157715f},             // BG_BG_NODE_LIGHTHOUSE
-    {2301.010498f, 1386.931641f, 1197.183472f},             // BG_BG_NODE_WATERWORKS
-    {2282.121582f, 1760.006958f, 1189.707153f}              // BG_BG_NODE_MINES
-};
-
-enum BGBattleGroundObjectTypes
-{
+    // TODO drop them (pool-system should be used for this)
     // buffs
-    BG_BG_OBJECT_SPEEDBUFF_LIGHTHOUSE           = 0,
-    BG_BG_OBJECT_REGENBUFF_LIGHTHOUSE           = 1,
-    BG_BG_OBJECT_BERSERKBUFF_LIGHTHOUSE         = 2,
-    BG_BG_OBJECT_SPEEDBUFF_WATERWORKS           = 3,
-    BG_BG_OBJECT_REGENBUFF_WATERWORKS           = 4,
-    BG_BG_OBJECT_BERSERKBUFF_WATERWORKS         = 5,
-    BG_BG_OBJECT_SPEEDBUFF_MINES                = 6,
-    BG_BG_OBJECT_REGENBUFF_MINES                = 7,
-    BG_BG_OBJECT_BERSERKBUFF_MINES              = 8,
-    BG_BG_OBJECT_MAX                            = 9
+    BG_BG_OBJECT_SPEEDBUFF_1                = 1,
+    BG_BG_OBJECT_REGENBUFF_1                = 2,
+    BG_BG_OBJECT_BERSERKBUFF_1              = 3,
+    BG_BG_OBJECT_SPEEDBUFF_2                = 4,
+    BG_BG_OBJECT_REGENBUFF_2                = 5,
+    BG_BG_OBJECT_BERSERKBUFF_2              = 6,
+    BG_BG_OBJECT_SPEEDBUFF_3                = 7,
+    BG_BG_OBJECT_REGENBUFF_3                = 8,
+    BG_BG_OBJECT_BERSERKBUFF_3              = 9,
+    BG_BG_OBJECT_SPEEDBUFF_4                = 10,
+    BG_BG_OBJECT_REGENBUFF_4                = 11,
+    BG_BG_OBJECT_BERSERKBUFF_4              = 12,
+    BG_BG_OBJECT_SPEEDBUFF_5                = 13,
+    BG_BG_OBJECT_REGENBUFF_5                = 14,
+    BG_BG_OBJECT_BERSERKBUFF_5              = 15,
+    BG_BG_OBJECT_MAX                        = 16,
 };
 
-#define BG_BG_NotBGWeekendHonorTicks    330
-#define BG_BG_BGWeekendHonorTicks       200
-#define BG_BG_EVENT_START_BATTLE        13180
+/* node events */
+// node-events are just event1=BG_AB_Nodes, event2=BG_AB_NodeStatus
+// so we don't need to define the constants here :)
+
+enum BG_BG_Timers
+{
+    BG_BG_FLAG_CAPTURING_TIME           = 60000,
+};
 
 enum BG_BG_Score
 {
@@ -139,132 +104,136 @@ enum BG_BG_Score
     BG_BG_MAX_TEAM_SCORE                = 2000
 };
 
-enum BGBattleGroundPointState
+enum BG_BG_NodeStatus
 {
-    BG_POINT_NO_OWNER           = 0,
-    BG_POINT_STATE_UNCONTROLLED = 0,
-    BG_POINT_UNDER_CONTROL      = 3
+    BG_BG_NODE_TYPE_NEUTRAL             = 0,
+    BG_BG_NODE_TYPE_CONTESTED           = 1,
+    BG_BG_NODE_STATUS_ALLY_CONTESTED    = 1,
+    BG_BG_NODE_STATUS_HORDE_CONTESTED   = 2,
+    BG_BG_NODE_TYPE_OCCUPIED            = 3,
+    BG_BG_NODE_STATUS_ALLY_OCCUPIED     = 3,
+    BG_BG_NODE_STATUS_HORDE_OCCUPIED    = 4
 };
 
-struct BattleGroundBGPointIconsStruct
+enum BG_BG_Sounds
 {
-    BattleGroundBGPointIconsStruct(uint32 _WorldStateControlIndex, uint32 _WorldStateAllianceControlledIndex, uint32 _WorldStateHordeControlledIndex)
-        : WorldStateControlIndex(_WorldStateControlIndex), WorldStateAllianceControlledIndex(_WorldStateAllianceControlledIndex), WorldStateHordeControlledIndex(_WorldStateHordeControlledIndex) {}
-    uint32 WorldStateControlIndex;
-    uint32 WorldStateAllianceControlledIndex;
-    uint32 WorldStateHordeControlledIndex;
+    BG_BG_SOUND_NODE_CLAIMED            = 8192,
+    BG_BG_SOUND_NODE_CAPTURED_ALLIANCE  = 8173,
+    BG_BG_SOUND_NODE_CAPTURED_HORDE     = 8213,
+    BG_BG_SOUND_NODE_ASSAULTED_ALLIANCE = 8212,
+    BG_BG_SOUND_NODE_ASSAULTED_HORDE    = 8174,
+    BG_BG_SOUND_NEAR_VICTORY            = 8456
 };
 
-struct BattleGroundBGLoosingPointStruct
+enum BG_BG_Objectives
 {
-    BattleGroundBGLoosingPointStruct(uint32 _MessageIdAlliance, uint32 _MessageIdHorde)
-        : MessageIdAlliance(_MessageIdAlliance), MessageIdHorde(_MessageIdHorde)
-    {}
-
-    uint32 MessageIdAlliance;
-    uint32 MessageIdHorde;
+    BG_OBJECTIVE_ASSAULT_BASE = 370,
+    BG_OBJECTIVE_DEFEND_BASE  = 371
 };
 
-struct BattleGroundBGCapturingPointStruct
-{
-    BattleGroundBGCapturingPointStruct(uint32 _MessageIdAlliance, uint32 _MessageIdHorde, uint32 _GraveYardId)
-        : MessageIdAlliance(_MessageIdAlliance), MessageIdHorde(_MessageIdHorde), GraveYardId(_GraveYardId)
-    {}
-    uint32 MessageIdAlliance;
-    uint32 MessageIdHorde;
-    uint32 GraveYardId;
+#define BG_NORMAL_HONOR_INTERVAL        330
+#define BG_WEEKEND_HONOR_INTERVAL       200
+#define BG_NORMAL_REPUTATION_INTERVAL   160
+#define BG_WEEKEND_REPUTATION_INTERVAL  120
+#define BG_BG_ExperiencesTicks          260
+#define BG_EVENT_START_BATTLE           9158
+
+// Tick intervals and given points: case 0,1,2,3 captured nodes
+const uint32 BG_BG_TickIntervals[4] = {0, 9000, 3000, 1000};
+const uint32 BG_BG_TickPoints[4] = {0, 10, 10, 30};
+
+// WorldSafeLocs ids for 3 nodes, and for ally, and horde starting location
+const uint32 BG_BG_GraveyardIds[5] = { 1736, 1738, 1735, 1740, 1739 };
+
+// x, y, z, o
+const float BG_BG_BuffPositions[BG_BG_BUFFS_MAX][4] = {
+    { 990.267f, 984.076f, 12.9949f, 0.0f },
+    { 1110.99f, 921.877f, 27.545f, 0.0f },
+    { 966.826f, 1044.16f, 13.1475f, 0.0f },
+    { 1195.37f, 1020.52f, 7.97874f, 0.0f },
+    { 1064.07f, 1309.32f, 4.91045f, 0.0f },
 };
 
-const uint8  BG_BG_TickPoints[BG_BG_NODES_MAX] = {1, 2, 5};
-
-// constant arrays:
-const BattleGroundBGPointIconsStruct BGPointsIconStruct[BG_BG_NODES_MAX] =
+struct BG_BG_BannerTimer
 {
-    BattleGroundBGPointIconsStruct(LIGHTHOUSE_UNCONTROL, LIGHTHOUSE_ALLIANCE_CONTROL, LIGHTHOUSE_HORDE_CONTROL),
-    BattleGroundBGPointIconsStruct(WATERWORKS_UNCONTROL, WATERWORKS_ALLIANCE_CONTROL, WATERWORKS_HORDE_CONTROL),
-    BattleGroundBGPointIconsStruct(MINES_UNCONTROL, MINES_ALLIANCE_CONTROL, MINES_HORDE_CONTROL)
-};
-const BattleGroundBGLoosingPointStruct BGLoosingPointTypes[BG_BG_NODES_MAX] =
-{
-    BattleGroundBGLoosingPointStruct(LANG_BG_BG_HAS_LOST_A_LIGHTHOUSE, LANG_BG_BG_HAS_LOST_H_LIGHTHOUSE),
-    BattleGroundBGLoosingPointStruct(LANG_BG_BG_HAS_LOST_A_WATERWORKS, LANG_BG_BG_HAS_LOST_H_WATERWORKS),
-    BattleGroundBGLoosingPointStruct(LANG_BG_BG_HAS_LOST_A_MINES, LANG_BG_BG_HAS_LOST_H_MINES)
-};
-const BattleGroundBGCapturingPointStruct BGCapturingPointTypes[BG_BG_NODES_MAX] =
-{
-    
-    BattleGroundBGCapturingPointStruct(LANG_BG_BG_HAS_TAKEN_A_LIGHTHOUSE, LANG_BG_BG_HAS_TAKEN_H_LIGHTHOUSE, BG_GRAVEYARD_LIGHTHOUSE),
-    BattleGroundBGCapturingPointStruct(LANG_BG_BG_HAS_TAKEN_A_WATERWORKS, LANG_BG_BG_HAS_TAKEN_H_WATERWORKS, BG_GRAVEYARD_WATERWORKS),
-    BattleGroundBGCapturingPointStruct(LANG_BG_BG_HAS_TAKEN_A_MINES, LANG_BG_BG_HAS_TAKEN_H_MINES, BG_GRAVEYARD_MINES)
+    uint32      timer;
+    uint8       type;
+    uint8       teamIndex;
 };
 
 class BattleGroundBGScore : public BattleGroundScore
 {
     public:
-        BattleGroundBGScore() {};
+        BattleGroundBGScore(): BasesAssaulted(0), BasesDefended(0) {};
         virtual ~BattleGroundBGScore() {};
+        uint32 BasesAssaulted;
+        uint32 BasesDefended;
 };
 
 class BattleGroundBG : public BattleGround
 {
-        friend class BattleGroundMgr;
+    friend class BattleGroundMgr;
 
     public:
         BattleGroundBG();
         ~BattleGroundBG();
-        void Update(uint32 diff) override;
 
-        /* inherited from BattlegroundClass */
-        virtual void AddPlayer(Player* plr) override;
+        void Update(uint32 diff) override;
+        void AddPlayer(Player *plr) override;
         virtual void StartingEventCloseDoors() override;
         virtual void StartingEventOpenDoors() override;
-
-        void RemovePlayer(Player* plr, ObjectGuid guid) override;
-        void HandleAreaTrigger(Player* source, uint32 trigger) override;
-        void HandleKillPlayer(Player* player, Player* killer) override;
-        virtual WorldSafeLocsEntry const* GetClosestGraveYard(Player* player) override;
+        void RemovePlayer(Player *plr, ObjectGuid guid) override;
+        void HandleAreaTrigger(Player *Source, uint32 Trigger) override;
         virtual bool SetupBattleGround() override;
         virtual void Reset() override;
-        void UpdateTeamScore(Team team);
         void EndBattleGround(Team winner) override;
-        void UpdatePlayerScore(Player* source, uint32 type, uint32 value) override;
-        void FillInitialWorldStates(WorldPacket& data, uint32& count);
-
-        /* achievement req. */
-        bool IsAllNodesControlledByTeam(Team team) const;
-
-    private:
-        void EventTeamCapturedPoint(Player* source, uint32 point);
-        void EventTeamLostPoint(Player* source, uint32 point);
-        void UpdatePointsCount(Team team);
-        void UpdatePointsIcons(Team team, uint32 point);
-
-        /* Point status updating procedures */
-        void CheckSomeoneLeftPoint();
-        void CheckSomeoneJoinedPoint();
-        void UpdatePointStatuses();
+        virtual WorldSafeLocsEntry const* GetClosestGraveYard(Player* player) override;
 
         /* Scorekeeping */
-        uint32 GetTeamScore(Team team) const { return m_TeamScores[GetTeamIndexByTeamId(team)]; }
-        void AddPoints(Team team, uint32 points);
+        virtual void UpdatePlayerScore(Player *Source, uint32 type, uint32 value) override;
 
-        void RemovePoint(Team team, uint32 points = 1) { m_TeamScores[GetTeamIndexByTeamId(team)] -= points; }
-        void SetTeamPoint(Team team, uint32 points = 0) { m_TeamScores[GetTeamIndexByTeamId(team)] = points; }
+        virtual void FillInitialWorldStates(WorldPacket& data, uint32& count) override;
 
-        uint32 m_HonorScoreTics[2];
-        uint32 m_TeamPointsCount[PVP_TEAM_COUNT];
+        /* Nodes occupying */
+        virtual void EventPlayerClickedOnFlag(Player *source, GameObject* target_obj) override;
 
-        uint32 m_Points_Trigger[BG_BG_NODES_MAX];
+        /* achievement req. */
+        bool IsAllNodesControlledByTeam(Team team) const override;
+        bool IsTeamScores500Disadvantage(Team team) const { return m_TeamScores500Disadvantage[GetTeamIndex(team)]; }
 
-        int32 m_TowerCapCheckTimer;
+        uint32 GetPlayerScore(Player *Source, uint32 type);
+    private:
+        /* Gameobject spawning/despawning */
+        void _CreateBanner(uint8 node, uint8 type, uint8 teamIndex, bool delay);
+        void _DelBanner(uint8 node, uint8 type, uint8 teamIndex);
+        void _SendNodeUpdate(uint8 node);
 
-        Team m_PointOwnedByTeam[BG_BG_NODES_MAX];
-        uint8 m_PointState[BG_BG_NODES_MAX];
-        int32 m_PointBarStatus[BG_BG_NODES_MAX];
-        GuidVector m_PlayersNearPoint[BG_BG_NODES_MAX_WITH_SPECIAL];
-        uint8 m_CurrentPointPlayersCount[2 * BG_BG_NODES_MAX];
+        /* Creature spawning/despawning */
+        // TODO: working, scripted peons spawning
+        void _NodeOccupied(uint8 node,Team team);
 
-        int32 m_PointAddingTimer;
-        uint32 m_HonorTics;
+        int32 _GetNodeNameId(uint8 node);
+
+        void CheckBuggers() override;
+
+        /* Nodes info:
+            0: neutral
+            1: ally contested
+            2: horde contested
+            3: ally occupied
+            4: horde occupied     */
+        uint8               m_Nodes[BG_BG_NODES_MAX];
+        uint8               m_prevNodes[BG_BG_NODES_MAX];   // used for performant wordlstate-updating
+        BG_BG_BannerTimer   m_BannerTimers[BG_BG_NODES_MAX];
+        uint32              m_NodeTimers[BG_BG_NODES_MAX];
+        uint32              m_lastTick[PVP_TEAM_COUNT];
+        uint32              m_honorScoreTicks[PVP_TEAM_COUNT];
+        uint32              m_ReputationScoreTics[PVP_TEAM_COUNT];
+        uint32              m_ExperiencesTicks[PVP_TEAM_COUNT];
+        bool                m_IsInformedNearVictory;
+        uint32              m_honorTicks;
+        uint32              m_ReputationTics;
+        // need for achievements
+        bool                m_TeamScores500Disadvantage[PVP_TEAM_COUNT];
 };
 #endif

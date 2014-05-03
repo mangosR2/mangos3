@@ -325,6 +325,8 @@ BattleGround/BattleGroundTP.cpp
 BattleGround/BattleGroundTP.h
 BattleGround/BattleGroundWS.cpp
 BattleGround/BattleGroundWS.h
+BattleGround/BattleGroundBG.cpp
+BattleGround/BattleGroundBG.h
 
 OutdoorPvP/OutdoorPvP.cpp
 OutdoorPvP/OutdoorPvPEP.cpp
