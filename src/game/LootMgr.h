@@ -138,6 +138,12 @@ struct LootItem
 
 typedef std::vector<LootItem> LootItemList;
 
+class PriorLootItem
+{
+    public:
+        bool operator () (LootItem const& left, LootItem const& right) const;
+};
+
 struct QuestItem
 {
     uint8   index;                                          // position in quest_items;
@@ -194,8 +200,8 @@ class LootStore
 
 class LootTemplate
 {
-        class  LootGroup;                                   // A set of loot definitions for items (refs are not allowed inside)
-        typedef std::vector<LootGroup> LootGroups;
+    class  LootGroup;                                       // A set of loot definitions for items (refs are not allowed inside)
+    typedef std::vector<LootGroup> LootGroups;
 
     public:
         // Adds an entry to the group (at loading stage)
@@ -248,6 +254,8 @@ struct LootView;
 ByteBuffer& operator<<(ByteBuffer& b, LootItem const& li);
 ByteBuffer& operator<<(ByteBuffer& b, LootView const& lv);
 
+typedef std::priority_queue<LootItem, LootItemList, PriorLootItem> PrioritizedLootItemQueque;
+
 struct Loot
 {
         friend ByteBuffer& operator<<(ByteBuffer& b, LootView const& lv);
@@ -258,6 +266,7 @@ struct Loot
         QuestItemMap const& GetPlayerNonQuestNonFFANonCurrencyConditionalItems() const { return m_playerNonQuestNonFFANonCurrencyConditionalItems; }
 
         LootItemList items;
+        PrioritizedLootItemQueque prioritized_items;
         uint32 gold;
         uint8 unlootedCount;
         LootType loot_type;                                 // required for achievement system
@@ -274,6 +283,7 @@ struct Loot
         // void clear();
         void clear()
         {
+            m_playerCurrencies.clear();
             m_playerQuestItems.clear();
             m_playerFFAItems.clear();
             m_playerNonQuestNonFFANonCurrencyConditionalItems.clear();
@@ -293,6 +303,7 @@ struct Loot
         void NotifyMoneyRemoved();
         void AddLooter(ObjectGuid guid) { m_playersLooting.insert(guid); }
         void RemoveLooter(ObjectGuid guid) { m_playersLooting.erase(guid); }
+        void FillVisualLootIfPossible();
 
         void generateMoneyLoot(uint32 minAmount, uint32 maxAmount);
         bool FillLoot(uint32 loot_id, LootStore const& store, Player* loot_owner, bool personal, bool noEmptyError = false);
