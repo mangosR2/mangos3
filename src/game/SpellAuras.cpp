@@ -12109,11 +12109,31 @@ Aura const* SpellAuraHolder::GetAura(SpellEffectIndex index) const
     return (Aura*)NULL;
 }
 
+class AuraSorter
+{
+    public:
+        bool operator() (Aura* const& left, Aura* const& right) const
+        {
+            if ((right->GetModifier()->m_auraname == SPELL_AURA_MOD_ROOT || right->GetModifier()->m_auraname == SPELL_AURA_MOD_STUN) &&
+                (left->GetModifier()->m_auraname != SPELL_AURA_MOD_ROOT && left->GetModifier()->m_auraname != SPELL_AURA_MOD_STUN))
+                return false;
+
+            return true;
+        }
+};
+
 void SpellAuraHolder::ApplyAuraModifiers(bool apply, bool real)
 {
-    for (int32 i = 0; i < MAX_EFFECT_INDEX && !IsDeleted(); ++i)
+    std::vector<Aura*> auras;
+    for (int32 i = 0; i < MAX_EFFECT_INDEX; ++i)
         if (Aura *aur = GetAuraByEffectIndex(SpellEffectIndex(i)))
-            aur->ApplyModifier(apply, real);
+            auras.push_back(aur);
+
+    AuraSorter sorter;
+    std::sort(auras.begin(), auras.end(), sorter);
+
+    for (uint32 i = 0; i < auras.size() && !IsDeleted(); ++i)
+        auras[i]->ApplyModifier(apply, real);
 }
 
 void SpellAuraHolder::_AddSpellAuraHolder()
