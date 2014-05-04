@@ -34,7 +34,7 @@ include_directories(
 
 add_library(zlib
     ../../dep/src/zlib/adler32.c
-    ../../dep/src/zlib/compress.c
+    ../../dep/src/zlib/compress_zlib.c
     ../../dep/src/zlib/crc32.c
     ../../dep/src/zlib/deflate.c
     ../../dep/src/zlib/example.c

@@ -18,7 +18,7 @@
 
 set(zlib_SRCS
   adler32.c
-  compress.c
+  compress_zlib.c
   crc32.c
   deflate.c
   example.c
