@@ -22,3 +22,4 @@ EXPORTS
 
     StormCompress          @551      ; 0x227
     StormDecompress        @552      ; 0x228
+    

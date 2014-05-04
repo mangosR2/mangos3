@@ -27,14 +27,14 @@ typedef struct _BLIZZARD_BSDIFF40_FILE
 // Local functions
 
 static bool GetDefaultPatchPrefix(
-        const TCHAR * szBaseMpqName,
-        char * szBuffer)
+    const TCHAR * szBaseMpqName,
+    char * szBuffer)
 {
     const TCHAR * szExtension;
     const TCHAR * szDash;
 
     // Ensure that both names are plain names
-    szBaseMpqName = GetPlainFileNameT(szBaseMpqName);
+    szBaseMpqName = GetPlainFileName(szBaseMpqName);
 
     // Patch prefix is for the Cataclysm MPQs, whose names
     // are like "locale-enGB.MPQ" or "speech-enGB.MPQ"
@@ -60,12 +60,11 @@ static void Decompress_RLE(LPBYTE pbDecompressed, DWORD cbDecompressed, LPBYTE p
 {
     LPBYTE pbDecompressedEnd = pbDecompressed + cbDecompressed;
     LPBYTE pbCompressedEnd = pbCompressed + cbCompressed;
-    BYTE RepeatCount;
+    BYTE RepeatCount; 
     BYTE OneByte;
 
     // Cut the initial DWORD from the compressed chunk
     pbCompressed += sizeof(DWORD);
-    cbCompressed -= sizeof(DWORD);
 
     // Pre-fill decompressed buffer with zeros
     memset(pbDecompressed, 0, cbDecompressed);
@@ -74,7 +73,7 @@ static void Decompress_RLE(LPBYTE pbDecompressed, DWORD cbDecompressed, LPBYTE p
     while(pbCompressed < pbCompressedEnd && pbDecompressed < pbDecompressedEnd)
     {
         OneByte = *pbCompressed++;
-
+        
         // Is it a repetition byte ?
         if(OneByte & 0x80)
         {
@@ -133,7 +132,7 @@ static int LoadMpqPatch_BSD0(TMPQFile * hf, TPatchHeader * pPatchHeader)
     cbCompressed = pPatchHeader->dwXfrmBlockSize - SIZE_OF_XFRM_HEADER;
     pbCompressed = STORM_ALLOC(BYTE, cbCompressed);
     if(pbCompressed == NULL)
-        nError = ERROR_SUCCESS;
+        nError = ERROR_NOT_ENOUGH_MEMORY;
 
     // Read the compressed patch data
     if(nError == ERROR_SUCCESS)
@@ -179,8 +178,8 @@ static int LoadMpqPatch_BSD0(TMPQFile * hf, TPatchHeader * pPatchHeader)
 }
 
 static int ApplyMpqPatch_COPY(
-        TMPQFile * hf,
-        TPatchHeader * pPatchHeader)
+    TMPQFile * hf,
+    TPatchHeader * pPatchHeader)
 {
     LPBYTE pbNewFileData;
     DWORD cbNewFileData;
@@ -204,8 +203,8 @@ static int ApplyMpqPatch_COPY(
 }
 
 static int ApplyMpqPatch_BSD0(
-        TMPQFile * hf,
-        TPatchHeader * pPatchHeader)
+    TMPQFile * hf,
+    TPatchHeader * pPatchHeader)
 {
     PBLIZZARD_BSDIFF40_FILE pBsdiff;
     LPDWORD pCtrlBlock;
@@ -337,17 +336,17 @@ static int LoadMpqPatch(TMPQFile * hf)
     {
         switch(PatchHeader.dwPatchType)
         {
-        case 0x59504f43:    // 'COPY'
-            nError = LoadMpqPatch_COPY(hf, &PatchHeader);
-            break;
+            case 0x59504f43:    // 'COPY'
+                nError = LoadMpqPatch_COPY(hf, &PatchHeader);
+                break;
 
-        case 0x30445342:    // 'BSD0'
-            nError = LoadMpqPatch_BSD0(hf, &PatchHeader);
-            break;
+            case 0x30445342:    // 'BSD0'
+                nError = LoadMpqPatch_BSD0(hf, &PatchHeader);
+                break;
 
-        default:
-            nError = ERROR_FILE_CORRUPT;
-            break;
+            default:
+                nError = ERROR_FILE_CORRUPT;
+                break;
         }
     }
 
@@ -355,8 +354,8 @@ static int LoadMpqPatch(TMPQFile * hf)
 }
 
 static int ApplyMpqPatch(
-        TMPQFile * hf,
-        TPatchHeader * pPatchHeader)
+    TMPQFile * hf,
+    TPatchHeader * pPatchHeader)
 {
     int nError = ERROR_SUCCESS;
 
@@ -372,17 +371,17 @@ static int ApplyMpqPatch(
     {
         switch(pPatchHeader->dwPatchType)
         {
-        case 0x59504f43:    // 'COPY'
-            nError = ApplyMpqPatch_COPY(hf, pPatchHeader);
-            break;
+            case 0x59504f43:    // 'COPY'
+                nError = ApplyMpqPatch_COPY(hf, pPatchHeader);
+                break;
 
-        case 0x30445342:    // 'BSD0'
-            nError = ApplyMpqPatch_BSD0(hf, pPatchHeader);
-            break;
+            case 0x30445342:    // 'BSD0'
+                nError = ApplyMpqPatch_BSD0(hf, pPatchHeader);
+                break;
 
-        default:
-            nError = ERROR_FILE_CORRUPT;
-            break;
+            default:
+                nError = ERROR_FILE_CORRUPT;
+                break;
         }
     }
 
@@ -431,7 +430,7 @@ int PatchFileData(TMPQFile * hf)
     int nError = ERROR_SUCCESS;
 
     // Move to the first patch
-    hf = hf->hfPatchFile;
+    hf = hf->hfPatch;
 
     // Now go through all patches and patch the original data
     while(hf != NULL)
@@ -450,7 +449,7 @@ int PatchFileData(TMPQFile * hf)
             break;
 
         // Move to the next patch
-        hf = hf->hfPatchFile;
+        hf = hf->hfPatch;
     }
 
     return nError;
@@ -478,10 +477,10 @@ int PatchFileData(TMPQFile * hf)
 //
 
 bool WINAPI SFileOpenPatchArchive(
-        HANDLE hMpq,
-        const TCHAR * szPatchMpqName,
-        const char * szPatchPathPrefix,
-        DWORD dwFlags)
+    HANDLE hMpq,
+    const TCHAR * szPatchMpqName,
+    const char * szPatchPathPrefix,
+    DWORD dwFlags)
 {
     TMPQArchive * haPatch;
     TMPQArchive * ha = (TMPQArchive *)hMpq;
@@ -493,7 +492,7 @@ bool WINAPI SFileOpenPatchArchive(
     dwFlags = dwFlags;
 
     // Verify input parameters
-    if(!IsValidMpqHandle(ha))
+    if(!IsValidMpqHandle(hMpq))
         nError = ERROR_INVALID_HANDLE;
     if(szPatchMpqName == NULL || *szPatchMpqName == 0)
         nError = ERROR_INVALID_PARAMETER;
@@ -520,7 +519,7 @@ bool WINAPI SFileOpenPatchArchive(
 
     if(nError == ERROR_SUCCESS)
     {
-        if(!FileStream_IsReadOnly(ha->pStream))
+        if(!(ha->dwFlags & MPQ_FLAG_READ_ONLY))
             nError = ERROR_ACCESS_DENIED;
     }
 
@@ -580,7 +579,7 @@ bool WINAPI SFileIsPatchedArchive(HANDLE hMpq)
     TMPQArchive * ha = (TMPQArchive *)hMpq;
 
     // Verify input parameters
-    if(!IsValidMpqHandle(ha))
+    if(!IsValidMpqHandle(hMpq))
         return false;
 
     return (ha->haPatch != NULL);

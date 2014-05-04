@@ -1,4 +1,3 @@
 [Project]
-Name=StormLib_test
 Manager=KDevCMakeManager
-VersionControl=
+Name=StormLib

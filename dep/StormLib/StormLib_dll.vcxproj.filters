@@ -2,82 +2,79 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <Filter Include="Doc Files">
-      <UniqueIdentifier>{4c9205db-fd84-4138-bf99-9762053fad24}</UniqueIdentifier>
+      <UniqueIdentifier>{85359376-4146-45ff-a6ce-225b3f103198}</UniqueIdentifier>
     </Filter>
     <Filter Include="Header Files">
-      <UniqueIdentifier>{c46bb1be-e2ee-44ed-8ccf-277792e674a5}</UniqueIdentifier>
+      <UniqueIdentifier>{02d49f0b-fc11-4b84-8ca2-0d0df0bc524e}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files">
-      <UniqueIdentifier>{f14302d2-8c36-4dd9-aa65-ada246a32592}</UniqueIdentifier>
+      <UniqueIdentifier>{c6293ab1-ea8a-42fb-ae3e-85524ad2e68d}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\adpcm">
-      <UniqueIdentifier>{0402bd47-a1d1-47d5-b192-c30d6c9fc00f}</UniqueIdentifier>
+      <UniqueIdentifier>{fd9d5cac-d0b6-4204-9160-706a03ec0c69}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\bzip2">
-      <UniqueIdentifier>{821a4034-910a-4ee0-beda-3716d7e0d4e7}</UniqueIdentifier>
+      <UniqueIdentifier>{7333e6fb-8b95-40b6-bc5e-bdfa7f15b93a}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\huffman">
-      <UniqueIdentifier>{ac0040f0-0b8f-477a-928d-b159162ddabc}</UniqueIdentifier>
+      <UniqueIdentifier>{0e473b19-e86f-4180-82b4-3c427117b6c7}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\libtomcrypt">
-      <UniqueIdentifier>{490bdd04-2b51-4cd9-a48a-804a6c5c2e66}</UniqueIdentifier>
+      <UniqueIdentifier>{cca0e168-e531-4d83-8a8e-478c2ba39323}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\libtomcrypt\hashes">
-      <UniqueIdentifier>{f26bb75a-155e-4230-aefb-bc9797199ff2}</UniqueIdentifier>
+      <UniqueIdentifier>{8b8ae872-b929-4758-ac0d-ccb28436ebb8}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\libtomcrypt\math">
-      <UniqueIdentifier>{76f65750-18e0-40d9-ba7b-7fd6e864abd9}</UniqueIdentifier>
+      <UniqueIdentifier>{c5829ed3-f34a-4cc5-b01d-b4d44ef6a07c}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\libtomcrypt\misc">
-      <UniqueIdentifier>{9f4ea0eb-a4cc-4425-8762-1530b05002a8}</UniqueIdentifier>
+      <UniqueIdentifier>{d10b97e0-dd06-440b-aa78-d7739e762511}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\libtomcrypt\pk">
-      <UniqueIdentifier>{7345615c-9ea6-4f79-ad9d-bfba3678e2df}</UniqueIdentifier>
+      <UniqueIdentifier>{bc743c98-8a6a-4eb4-bb65-2407720090ae}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\libtomcrypt\pk\asn1">
-      <UniqueIdentifier>{d100666f-35f0-4465-b5f0-48614229b2b7}</UniqueIdentifier>
+      <UniqueIdentifier>{f155fafa-653d-4638-a0a4-dc46e5581713}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\libtomcrypt\pk\ecc">
-      <UniqueIdentifier>{a08914e6-844f-4dcc-8867-b38b8f55df64}</UniqueIdentifier>
+      <UniqueIdentifier>{7478ca26-875e-4ebf-99d5-7957270bc95f}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\libtomcrypt\pk\pkcs1">
-      <UniqueIdentifier>{e2ea2efd-8853-40e6-aeee-af7a67e1dbec}</UniqueIdentifier>
+      <UniqueIdentifier>{4169e85a-6a42-47f5-a69a-34de5a13ca30}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\libtomcrypt\pk\rsa">
-      <UniqueIdentifier>{5a8af9f4-dc43-4d8d-8fea-1d24f9615100}</UniqueIdentifier>
+      <UniqueIdentifier>{df7f82be-b039-4b9b-bb1f-a48b2724957a}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\libtommath">
-      <UniqueIdentifier>{1e741e95-ab82-47d4-8faa-47e03780c4ee}</UniqueIdentifier>
+      <UniqueIdentifier>{3861070d-c4b6-45a8-8a8e-ec7ce7e12d48}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\lzma">
-      <UniqueIdentifier>{261ff9dd-b1eb-4662-99b1-9a18d82c644a}</UniqueIdentifier>
+      <UniqueIdentifier>{b25aeeef-06f4-4b47-a892-42df4354591b}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\pklib">
-      <UniqueIdentifier>{d6033939-9a98-4c26-a158-8226dbbbc1a6}</UniqueIdentifier>
+      <UniqueIdentifier>{77645fb6-77f6-4623-a67a-bc844d414aa9}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\sparse">
-      <UniqueIdentifier>{e36b055a-1636-4850-b7c8-4170a94fb162}</UniqueIdentifier>
+      <UniqueIdentifier>{e10bf121-3ed4-478c-a0d5-3eb83d0a98c7}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\zlib">
-      <UniqueIdentifier>{65341005-077a-4f02-a4af-0bb63fad4c30}</UniqueIdentifier>
+      <UniqueIdentifier>{abbf0b9a-8227-4cb1-b5f7-76306334c483}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\jenkins">
-      <UniqueIdentifier>{c33670da-5145-4e1d-b7a5-762b85b9e63a}</UniqueIdentifier>
+      <UniqueIdentifier>{66f88b55-bc43-4c10-838c-b6f27dfc7f4a}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <None Include="doc\History.txt">
+    <Text Include="doc\History.txt">
       <Filter>Doc Files</Filter>
-    </None>
-    <None Include="doc\The MoPaQ File Format 0.9.txt">
+    </Text>
+    <Text Include="doc\The MoPaQ File Format 0.9.txt">
       <Filter>Doc Files</Filter>
-    </None>
-    <None Include="doc\The MoPaQ File Format 1.0.txt">
+    </Text>
+    <Text Include="doc\The MoPaQ File Format 1.0.txt">
       <Filter>Doc Files</Filter>
-    </None>
-    <None Include="stormlib_dll\StormLib.def">
-      <Filter>Source Files</Filter>
-    </None>
+    </Text>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\StormCommon.h">
@@ -137,6 +134,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\SFileFindFile.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\SFileGetFileInfo.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\SFileListFile.cpp">
@@ -748,9 +748,6 @@
     <ClCompile Include="src\zlib\adler32.c">
       <Filter>Source Files\zlib</Filter>
     </ClCompile>
-    <ClCompile Include="src\zlib\compress2.c">
-      <Filter>Source Files\zlib</Filter>
-    </ClCompile>
     <ClCompile Include="src\zlib\crc32.c">
       <Filter>Source Files\zlib</Filter>
     </ClCompile>
@@ -775,5 +772,16 @@
     <ClCompile Include="src\jenkins\lookup3.c">
       <Filter>Source Files\jenkins</Filter>
     </ClCompile>
+    <ClCompile Include="src\zlib\compress_zlib.c">
+      <Filter>Source Files\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="src\SBaseSubTypes.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="stormlib_dll\StormLib.def">
+      <Filter>Source Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

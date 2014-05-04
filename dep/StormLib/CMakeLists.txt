@@ -15,6 +15,7 @@ set(SRC_FILES
            src/SBaseCommon.cpp
            src/SBaseDumpData.cpp
            src/SBaseFileTable.cpp
+           src/SBaseSubTypes.cpp
            src/SCompression.cpp
            src/SFileAddFile.cpp
            src/SFileAttributes.cpp
@@ -22,12 +23,15 @@ set(SRC_FILES
            src/SFileCreateArchive.cpp
            src/SFileExtractFile.cpp
            src/SFileFindFile.cpp
+           src/SFileGetFileInfo.cpp
            src/SFileListFile.cpp
            src/SFileOpenArchive.cpp
            src/SFileOpenFileEx.cpp
            src/SFilePatchArchives.cpp
            src/SFileReadFile.cpp
            src/SFileVerify.cpp
+           src/libtomcrypt/src/pk/rsa/rsa_verify_simple.c
+           src/libtomcrypt/src/misc/crypt_libc.c
 )
 
 set(TOMCRYPT_FILES
@@ -43,7 +47,6 @@ set(TOMCRYPT_FILES
            src/libtomcrypt/src/misc/crypt_find_prng.c
            src/libtomcrypt/src/misc/crypt_hash_descriptor.c
            src/libtomcrypt/src/misc/crypt_hash_is_valid.c
-           src/libtomcrypt/src/misc/crypt_libc.c
            src/libtomcrypt/src/misc/crypt_ltc_mp_descriptor.c
            src/libtomcrypt/src/misc/crypt_prng_descriptor.c
            src/libtomcrypt/src/misc/crypt_prng_is_valid.c
@@ -91,7 +94,6 @@ set(TOMCRYPT_FILES
            src/libtomcrypt/src/pk/rsa/rsa_import.c
            src/libtomcrypt/src/pk/rsa/rsa_make_key.c
            src/libtomcrypt/src/pk/rsa/rsa_verify_hash.c
-           src/libtomcrypt/src/pk/rsa/rsa_verify_simple.c
 )
 
 set(TOMMATH_FILES
@@ -224,7 +226,7 @@ set(ZLIB_BZIP2_FILES
            ../src/bzip2/huffman.c
            ../src/bzip2/randtable.c
            ../src/zlib/adler32.c
-           ../src/zlib/compress2.c
+           ../src/zlib/compress.c
            ../src/zlib/crc32.c
            ../src/zlib/deflate.c
            ../src/zlib/inffast.c
@@ -234,9 +236,9 @@ set(ZLIB_BZIP2_FILES
            ../src/zlib/zutil.c
 )
 
-# set(TEST_SRC_FILES
-#            test/Test.cpp
-# )
+#set(TEST_SRC_FILES
+#           test/StormTest.cpp
+#)
 
 add_definitions(-D_7ZIP_ST -DBZ_STRICT_ANSI)
 
@@ -271,18 +273,19 @@ endif()
 add_library(storm SHARED ${SRC_FILES} ${SRC_ADDITIONAL_FILES})
 target_link_libraries(storm ${LINK_LIBS})
 
-# option(WITH_TEST "Compile Test application" OFF)
-# if(WITH_TEST)
-#      add_executable(storm_test ${TEST_SRC_FILES})
-#      target_link_libraries(storm_test storm)
-# endif()
+#option(WITH_TEST "Compile Test application" OFF)
+#if(WITH_TEST)
+#    add_executable(storm_test ${TEST_SRC_FILES})
+#    target_link_libraries(storm_test storm)
+#endif()
 
-# option(WITH_STATIC "Compile static linked library" OFF)
-# if(WITH_STATIC)
-#     add_library(StormLib_static STATIC ${SRC_FILES} ${SRC_ADDITIONAL_FILES})
-#     target_link_libraries(StormLib_static ${LINK_LIBS})
-#     set_target_properties(StormLib_static PROPERTIES OUTPUT_NAME StormLib)
-# endif()
+#option(WITH_STATIC "Compile static linked library" OFF)
+#if(WITH_STATIC)
+#    add_library(storm_static STATIC ${SRC_FILES} ${SRC_ADDITIONAL_FILES})
+#    target_link_libraries(storm_static ${LINK_LIBS})
+#    set_target_properties(storm_static PROPERTIES OUTPUT_NAME storm)
+#    install(TARGETS storm_static RUNTIME DESTINATION bin LIBRARY DESTINATION lib ARCHIVE DESTINATION lib FRAMEWORK DESTINATION /Library/Frameworks)
+#endif()
 
 if(APPLE)
     set_target_properties(storm PROPERTIES FRAMEWORK true)
@@ -291,8 +294,8 @@ if(APPLE)
 endif()
 
 if(UNIX)
-    set_target_properties(storm PROPERTIES VERSION 8.20.0)
-    set_target_properties(storm PROPERTIES SOVERSION 8.20)
+    set_target_properties(storm PROPERTIES VERSION 9.0.0)
+    set_target_properties(storm PROPERTIES SOVERSION 9)
 endif()
 
 # On Win32, build StormLib.dll since we don't want to clash with Storm.dll

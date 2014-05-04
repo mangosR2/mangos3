@@ -259,8 +259,8 @@
 		</Configuration>
 		<Configuration
 			Name="Release|x64"
-			OutputDirectory="$(PlatformName)\$(ConfigurationName)"
-			IntermediateDirectory="$(PlatformName)\$(ConfigurationName)"
+			OutputDirectory="./bin/$(ProjectName)/$(PlatformName)/$(ConfigurationName)"
+			IntermediateDirectory="./bin/$(ProjectName)/$(PlatformName)/$(ConfigurationName)"
 			ConfigurationType="1"
 			CharacterSet="2"
 			WholeProgramOptimization="1"
@@ -523,6 +523,10 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\src\SBaseSubTypes.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\SCompression.cpp"
 				>
 				<FileConfiguration
@@ -775,6 +779,42 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\src\SFileGetFileInfo.cpp"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						WarningLevel="4"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug|x64"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						WarningLevel="4"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						WarningLevel="4"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|x64"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						WarningLevel="4"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
 				RelativePath=".\src\SFileListFile.cpp"
 				>
 				<FileConfiguration
@@ -991,7 +1031,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath=".\test\Test.cpp"
+				RelativePath=".\test\StormTest.cpp"
 				>
 				<FileConfiguration
 					Name="Debug|Win32"
@@ -1032,6 +1072,22 @@
 				<File
 					RelativePath=".\src\adpcm\adpcm.cpp"
 					>
+					<FileConfiguration
+						Name="Debug|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							WarningLevel="4"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							WarningLevel="4"
+						/>
+					</FileConfiguration>
 				</File>
 				<File
 					RelativePath=".\src\adpcm\adpcm.h"
@@ -1076,6 +1132,22 @@
 				<File
 					RelativePath=".\src\huffman\huff.cpp"
 					>
+					<FileConfiguration
+						Name="Debug|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							WarningLevel="4"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							WarningLevel="4"
+						/>
+					</FileConfiguration>
 				</File>
 				<File
 					RelativePath=".\src\huffman\huff.h"
@@ -1844,57 +1916,22 @@
 				<File
 					RelativePath=".\src\lzma\C\LzFind.c"
 					>
-					<FileConfiguration
-						Name="Debug|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-						/>
-					</FileConfiguration>
 				</File>
 				<File
 					RelativePath=".\src\lzma\C\LzFindMt.c"
 					>
-					<FileConfiguration
-						Name="Debug|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-						/>
-					</FileConfiguration>
 				</File>
 				<File
 					RelativePath=".\src\lzma\C\LzmaDec.c"
 					>
-					<FileConfiguration
-						Name="Debug|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-						/>
-					</FileConfiguration>
 				</File>
 				<File
 					RelativePath=".\src\lzma\C\LzmaEnc.c"
 					>
-					<FileConfiguration
-						Name="Debug|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-						/>
-					</FileConfiguration>
 				</File>
 				<File
 					RelativePath=".\src\lzma\C\Threads.c"
 					>
-					<FileConfiguration
-						Name="Debug|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-						/>
-					</FileConfiguration>
 				</File>
 			</Filter>
 			<Filter
@@ -1933,7 +1970,7 @@
 					>
 				</File>
 				<File
-					RelativePath=".\src\zlib\compress2.c"
+					RelativePath=".\src\zlib\compress_zlib.c"
 					>
 				</File>
 				<File
@@ -1975,6 +2012,22 @@
 				<File
 					RelativePath=".\src\jenkins\lookup3.c"
 					>
+					<FileConfiguration
+						Name="Debug|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							WarningLevel="1"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							WarningLevel="1"
+						/>
+					</FileConfiguration>
 				</File>
 			</Filter>
 		</Filter>
