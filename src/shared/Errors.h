@@ -20,7 +20,10 @@
 #define MANGOSSERVER_ERRORS_H
 
 #include "Common.h"
-#include "../../config.h"
+
+#ifndef HAVE_CONFIG_H
+#  define HAVE_ACE_STACK_TRACE_H 1
+#endif
 
 #ifdef HAVE_ACE_STACK_TRACE_H
 #  include "ace/Stack_Trace.h"
