@@ -20,10 +20,12 @@ typedef unsigned __int16   uint16;
 typedef unsigned __int8    uint8;
 #else
 #include <stdint.h>
+#ifndef uint64_t
 #if defined (__MINGW32__)
     #include <sys/types.h>
 #elif defined(__linux__)
     #include <linux/types.h>
+#endif
 #endif
 typedef int64_t            int64;
 typedef int32_t            int32;
@@ -36,12 +38,12 @@ typedef uint8_t            uint8;
 #endif
 
 typedef std::deque<HANDLE> ArchiveSet;
-typedef std::pair<ArchiveSet::const_iterator,ArchiveSet::const_iterator> ArchiveSetBounds;
+typedef std::pair<ArchiveSet::const_iterator, ArchiveSet::const_iterator> ArchiveSetBounds;
 
 bool OpenArchive(char const* mpqFileName, HANDLE* mpqHandlePtr = NULL);
 bool OpenNewestFile(char const* filename, HANDLE* fileHandlerPtr);
 ArchiveSetBounds GetArchivesBounds();
-bool ExtractFile( char const* mpq_name, std::string const& filename );
+bool ExtractFile(char const* mpq_name, std::string const& filename);
 void CloseArchives();
 
 #define FILE_FORMAT_VERSION    18
@@ -51,7 +53,8 @@ void CloseArchives();
 //
 struct file_MVER
 {
-    union{
+    union
+    {
         uint32 fcc;
         char   fcc_txt[4];
     };
@@ -59,18 +62,19 @@ struct file_MVER
     uint32 ver;
 };
 
-class FileLoader{
-    uint8  *data;
-    uint32  data_size;
-public:
-    virtual bool prepareLoadedData();
-    uint8 *GetData()     {return data;}
-    uint32 GetDataSize() {return data_size;}
+class FileLoader
+{
+        uint8*  data;
+        uint32  data_size;
+    public:
+        virtual bool prepareLoadedData();
+        uint8* GetData()     {return data;}
+        uint32 GetDataSize() {return data_size;}
 
-    file_MVER *version;
-    FileLoader();
-    ~FileLoader();
-    bool loadFile(char *filename, bool log = true);
-    virtual void free();
+        file_MVER* version;
+        FileLoader();
+        ~FileLoader();
+        bool loadFile(char* filename, bool log = true);
+        virtual void free();
 };
 #endif
