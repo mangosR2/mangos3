@@ -223,11 +223,16 @@ struct AchievementCriteriaEntry
             uint32  castCount;                              // 4
         } cast_spell;
 
-        // ACHIEVEMENT_CRITERIA_TYPE_BG_OBJECTIVE_CAPTURE = 30
+        // ACHIEVEMENT_CRITERIA_TYPE_BG_OBJECTIVE_CAPTURE   = 30
         struct
         {
             uint32 captureID;                               // 3
             uint32 captureCount;                            // 4
+            uint32 unk5;                                    // 5
+            uint32 unk6;                                    // 6
+            uint32 unk7;                                    // 7
+            uint32 unk8;                                    // 8
+            uint32 map;                                     // 9
         } objective_capture;
 
         // ACHIEVEMENT_CRITERIA_TYPE_HONORABLE_KILL_AT_AREA = 31
@@ -425,7 +430,6 @@ struct AchievementCriteriaEntry
             uint32  unused;                                 // 3
             uint32  goldInCopper;                           // 4
         } quest_reward_money;
-
 
         // ACHIEVEMENT_CRITERIA_TYPE_LOOT_MONEY             = 67
         struct
@@ -652,10 +656,10 @@ struct BattlemasterListEntry
     uint32 HolidayWorldStateId;                             // 13       m_holidayWorldState
     uint32 minLevel;                                        // 14,      m_minlevel (sync with PvPDifficulty.dbc content)
     uint32 maxLevel;                                        // 15,      m_maxlevel (sync with PvPDifficulty.dbc content)
-    uint32 maxGroupSizeRated;                               // 16 4.0.1
-    uint32 minPlayers;                                      // 17 - 4.0.6.13596
-    uint32 maxPlayers;                                      // 18 4.0.1
-    uint32 rated;                                           // 19 4.0.3, value 2 for Rated Battlegrounds
+    uint32 maxGroupSizeRated;                               // 16       4.0.1
+    uint32 minPlayers;                                      // 17       4.0.6.13596
+    uint32 maxPlayers;                                      // 18       4.0.1
+    uint32 rated;                                           // 19       4.0.3, value 2 for Rated Battlegrounds
 };
 
 /*struct Cfg_CategoriesEntry
@@ -924,7 +928,7 @@ struct DungeonEncounterEntry
 {
     uint32 Id;                                              // 0        m_ID
     uint32 mapId;                                           // 1        m_mapID
-    uint32 Difficulty;                                      // 2        m_difficulty
+    int32  Difficulty;                                      // 2        m_difficulty
     uint32 encounterData;                                   // 3        m_orderIndex
     uint32 encounterIndex;                                  // 4        m_Bit
     DBCString encounterName;                                // 5 - encounter name
@@ -1363,7 +1367,7 @@ struct ItemSetEntry
 struct LFGDungeonEntry
 {
     uint32  ID;                                             // 0     m_ID
-    //char*   name;                                         // 1     m_name
+    DBCString name;                                         // 1     m_name
     uint32  minlevel;                                       // 2     m_minLevel
     uint32  maxlevel;                                       // 3     m_maxLevel
     uint32  reclevel;                                       // 4     m_target_level
@@ -1398,6 +1402,7 @@ struct LFGDungeonExpansionEntry
     uint32  maxlevelHard;                                   // 5    m_hard_level_max
     uint32  minlevel;                                       // 6    m_target_level_min
     uint32  maxlevel;                                       // 7    m_target_level_max
+
     // Helpers
     bool IsRandom() const { return randomEntry == 0; }
 };
@@ -1493,7 +1498,11 @@ struct MapEntry
             MapID==509 || MapID==534 || MapID==560 ||       // AhnQiraj, HyjalPast, HillsbradPast
             MapID==568 || MapID==580 || MapID==595 ||       // ZulAman, Sunwell Plateau, Culling of Stratholme
             MapID==603 || MapID==615 || MapID==616 ||       // Ulduar, The Obsidian Sanctum, The Eye Of Eternity
-            MapID==658;                                     // Pit of Saron
+            MapID==631 || MapID==658 || MapID==724 ||       // Icecrown Citadel, Pit of Saron, Ruby Sanctum
+            MapID==644 || MapID==720 || MapID==721 ||       // Halls of Origination, Firelands
+            MapID==734 || MapID==755 || MapID==859 ||       // Ahn'Qiraj Terrace, Lost City of Tol'Vir, Zul'Gurub
+            MapID==938 || MapID==939 || MapID==940 ||       // End Time, Well of Eternity, Hour of Twilight
+            MapID==967;                                     // Dragon Soul
     }
 
     bool IsContinent() const
@@ -1511,13 +1520,13 @@ struct MapEntry
 
 struct MapDifficultyEntry
 {
-    //uint32      Id;                                       // 0        m_ID
+    uint32      Id;                                         // 0        m_ID
     uint32      MapId;                                      // 1        m_mapID
     uint32      Difficulty;                                 // 2        m_difficulty (for arenas: arena slot)
-    char*       areaTriggerText;                            // 3        m_message_lang (text showed when transfer to map failed)
+    DBCString   areaTriggerText;                            // 3        m_message_lang (text showed when transfer to map failed)
     uint32      resetTime;                                  // 4,       m_raidDuration in secs, 0 if no fixed reset time
     uint32      maxPlayers;                                 // 5,       m_maxPlayers some heroic versions have 0 when expected same amount as in normal version
-    //char*       difficultyString;                         // 6        m_difficultystring
+    DBCString   difficultyString;                           // 6        m_difficultystring
 };
 
 struct MountCapabilityEntry
@@ -2433,9 +2442,9 @@ struct SpellScalingEntry
 struct SpellShapeshiftEntry
 {
     //uint32    Id;                                           // 0        m_ID
-    uint32    Stances;                                      // 13       m_shapeshiftMask
+    uint32    StancesNot;                                   // 13       m_shapeshiftExclude
     // uint32 unk_320_2;                                    // 14       3.2.0
-    uint32    StancesNot;                                   // 15       m_shapeshiftExclude
+    uint32    Stances;                                      // 15       m_shapeshiftMask
     // uint32 unk_320_3;                                    // 16       3.2.0
     // uint32    StanceBarOrder;                            // 155      m_stanceBarOrder not used
 };
@@ -2460,7 +2469,7 @@ struct SpellTotemsEntry
 };
 
 // Spell.dbc
-struct SpellEntry
+struct MANGOS_DLL_SPEC SpellEntry
 {
     uint32    Id;                                           // 0        m_ID
     uint32    Attributes;                                   // 1        m_attribute
@@ -3032,6 +3041,10 @@ struct VehicleSeatEntry
                                                             // 55       m_cameraEnteringZoom"
                                                             // 56       m_cameraSeatZoomMin
                                                             // 57       m_cameraSeatZoomMax
+    //uint32 unk[6];                                        // 58-63
+    //uint32 unk2;                                          // 64 4.0.0
+    //uint32 unk3;                                          // 65 4.0.1
+
     bool IsUsable() const { return
         (m_flags & SEAT_FLAG_USABLE) ||
         (m_flags & SEAT_FLAG_CAN_CONTROL) ||

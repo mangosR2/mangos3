@@ -32,11 +32,9 @@ typedef std::list<uint32> SimpleFactionsList;
 
 SimpleFactionsList const* GetFactionTeamList(uint32 faction);
 char const* GetPetName(uint32 petfamily, uint32 dbclang);
-uint32 GetTalentSpellCost(uint32 spellId);
+MANGOS_DLL_SPEC uint32 GetTalentSpellCost(uint32 spellId);
 uint32 GetTalentSpellCost(TalentSpellPos const* pos);
 TalentSpellPos const* GetTalentSpellPos(uint32 spellId);
-SpellEffectEntry const* GetSpellEffectEntry(uint32 spellId, SpellEffectIndex effect);
-
 SpellEffectEntry const* GetSpellEffectEntry(uint32 spellId, SpellEffectIndex effect);
 
 int32 GetAreaFlagByAreaID(uint32 area_id);                  // -1 if not found
@@ -203,11 +201,11 @@ extern DBCStorage <LiquidTypeEntry>              sLiquidTypeStore;
 extern DBCStorage <LockEntry>                    sLockStore;
 extern DBCStorage <MailTemplateEntry>            sMailTemplateStore;
 extern DBCStorage <MapEntry>                     sMapStore;
-// extern DBCStorage <MapDifficultyEntry>           sMapDifficultyStore; -- use GetMapDifficultyData insteed
+extern DBCStorage <MapDifficultyEntry>           sMapDifficultyStore;
 extern MapDifficultyMap                          sMapDifficultyMap;
-extern DBCStorage <MovieEntry>                   sMovieStore;
 extern DBCStorage <MountCapabilityEntry>         sMountCapabilityStore;
 extern DBCStorage <MountTypeEntry>               sMountTypeStore;
+extern DBCStorage <MovieEntry>                   sMovieStore;
 extern DBCStorage <NumTalentsAtLevelEntry>       sNumTalentsAtLevelStore;
 extern DBCStorage <OverrideSpellDataEntry>       sOverrideSpellDataStore;
 extern DBCStorage <QuestFactionRewardEntry>      sQuestFactionRewardStore;
@@ -292,6 +290,7 @@ MANGOS_DLL_SPEC DBCStorage <SpellRangeEntry>            const* GetSpellRangeStor
 MANGOS_DLL_SPEC DBCStorage <FactionEntry>               const* GetFactionStore();
 MANGOS_DLL_SPEC DBCStorage <CreatureDisplayInfoEntry>   const* GetCreatureDisplayStore();
 MANGOS_DLL_SPEC DBCStorage <EmotesEntry>                const* GetEmotesStore();
-MANGOS_DLL_SPEC DBCStorage <AchievementEntry>           const* GetAchievementStore();
 MANGOS_DLL_SPEC DBCStorage <EmotesTextEntry>            const* GetEmotesTextStore();
+MANGOS_DLL_SPEC DBCStorage <AchievementEntry>           const* GetAchievementStore();
+MANGOS_DLL_SPEC DBCStorage <CreatureModelDataEntry>     const* GetCreatureModelDataStore();
 #endif
