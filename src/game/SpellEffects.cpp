@@ -7941,6 +7941,7 @@ void Spell::EffectSummonType(SpellEffectEntry const* effect)
                    // Snake trap exception
                     else if (effect->EffectMiscValueB == 2301)
                         DoSummonSnakes(effect);
+                    // Mirror Image
                     else if (prop_id == 1021)
                         DoSummonGuardian(effect, factionId);
                     else
@@ -8022,6 +8023,7 @@ void Spell::EffectSummonType(SpellEffectEntry const* effect)
             switch(prop_id)
             {
                 case 65:
+                case 427:
                 case 428:
                     DoSummonPossessed(effect);
                     break;
