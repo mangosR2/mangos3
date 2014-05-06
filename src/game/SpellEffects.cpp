@@ -8287,6 +8287,10 @@ void Spell::EffectDispel(SpellEffectEntry const* effect)
 
         if ((1 << itr->second->GetSpellProto()->GetDispel()) & dispelMask)
         {
+            // spells with that mechanic are not dispeled
+            if (GetAllSpellMechanicMask(itr->second->GetSpellProto()) & (1 << (MECHANIC_IMMUNE_SHIELD - 1)))
+                continue;
+
             if (itr->second->GetSpellProto()->GetDispel() == DISPEL_MAGIC)
             {
                 bool positive = true;
