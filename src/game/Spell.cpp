@@ -7714,6 +7714,18 @@ SpellCastResult Spell::CheckCast(bool strict)
                     return SPELL_FAILED_ROOTED;
                 break;
             }
+            case SPELL_EFFECT_TRANS_DOOR:
+            {
+                // Ritual of Summoning & Fishing Chair - battleground summon exploit
+                if (m_spellInfo->Id == 698 || m_spellInfo->Id == 42766)
+                {
+                    if (m_caster->GetTypeId() == TYPEID_PLAYER)
+                        if (BattleGround const *bg = ((Player*)m_caster)->GetBattleGround())
+                            if (bg->GetStatus() != STATUS_IN_PROGRESS)
+                                return SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW;
+                }
+                break;
+            }
             case SPELL_EFFECT_ADD_FARSIGHT:
             {
                 if (m_caster->GetTypeId() != TYPEID_PLAYER || ((Player*)m_caster)->HasExternalViewPoint())
