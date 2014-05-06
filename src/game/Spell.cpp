@@ -8071,6 +8071,13 @@ SpellCastResult Spell::CheckCast(bool strict)
                 return SPELL_FAILED_ROOTED;
             break;
         }
+        case 46629:     // Deathfrost
+        {
+            if (Unit* target = m_targets.getUnitTarget())
+                if (target->getLevel() >= 73)
+                    return m_IsTriggeredSpell ? SPELL_FAILED_DONT_REPORT : SPELL_FAILED_HIGHLEVEL;
+            break;
+        }
         case 88751:     // Wild Mushroom : Detonate
         {
             if (m_caster->GetTypeId() == TYPEID_PLAYER)
