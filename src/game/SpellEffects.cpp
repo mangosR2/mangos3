@@ -9479,6 +9479,13 @@ void Spell::EffectWeaponDmg(SpellEffectEntry const* effect)
                         m_caster->CastSpell(unitTarget, 58567, true);
                 }
             }
+            // Remove combopoints on overpower cast
+            else if (m_spellInfo->Id == 7384)
+            {
+                if (m_caster->GetTypeId() == TYPEID_PLAYER)
+                    ((Player*)m_caster)->ClearComboPoints();
+                break;
+            }
             break;
         }
         case SPELLFAMILY_ROGUE:
