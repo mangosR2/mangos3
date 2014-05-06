@@ -5283,6 +5283,12 @@ void Aura::HandleForceReaction(bool apply, bool Real)
                     if (BattleGround *bg = player->GetBattleGround())
                         bg->EventPlayerDroppedFlag(player);
                 break;
+            case 43450:                         // Brewfest - apple trap - friendly DND
+            {
+                if (apply)
+                    player->RemoveAurasDueToSpell(43052);   // Exhausted Ram
+                break;
+            }
             default:
                 break;
         }
