@@ -2919,6 +2919,14 @@ void Spell::EffectDummy(SpellEffectEntry const* effect)
 
                     return;
                 }
+                case 45644:                                 // Juggle Torch (Catch)
+                {
+                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
+                        return;
+
+                    m_caster->CastSpell(unitTarget, 45280, true);
+                    break;
+                }
                 case 45685:                                 // Magnataur On Death 2
                 {
                     m_caster->RemoveAurasDueToSpell(45673);
