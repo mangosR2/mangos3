@@ -21405,14 +21405,14 @@ void Player::SendInitialPacketsAfterAddToMap()
     if (GetSkillValue(SKILL_ARCHAEOLOGY) && sWorld.getConfig(CONFIG_BOOL_ARCHAEOLOGY_ENABLED))
         ShowResearchSites();
 
+    // only grid activating
+    GetMap()->ActivateGrid(GetPosition());
+
     // fix client movement freeze after teleport
     Relocate(WorldLocation(GetMap()->GetId(), GetPositionX(), GetPositionY(), GetPositionZ(), GetOrientation()));
     UpdateSpeed(MOVE_RUN, true, 1.0f, true);
     UpdateSpeed(MOVE_SWIM, true, 1.0f, true);
     UpdateSpeed(MOVE_FLIGHT, true, 1.0f, true);
-
-    // only grid activating
-    GetMap()->ActivateGrid(GetPosition());
 }
 
 void Player::SendUpdateToOutOfRangeGroupMembers()
