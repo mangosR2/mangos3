@@ -4814,11 +4814,6 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
     }
     else
     {
-        if (target->getClass() == CLASS_DRUID)
-            target->setPowerType(POWER_MANA);
-
-        target->SetShapeshiftForm(FORM_NONE);
-
         // re-apply transform display with preference negative cases
         Unit::AuraList& otherTransforms = target->GetAurasByType(SPELL_AURA_TRANSFORM);
         if (!otherTransforms.empty())
@@ -4841,6 +4836,11 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
         }
         else if (modelid > 0)
             target->SetDisplayId(target->GetNativeDisplayId());
+
+        if (target->getClass() == CLASS_DRUID)
+            target->setPowerType(POWER_MANA);
+
+        target->SetShapeshiftForm(FORM_NONE);
 
         switch(form)
         {
@@ -4873,6 +4873,10 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
     // adding/removing linked auras
     // add/remove the shapeshift aura's boosts
     HandleShapeshiftBoosts(apply);
+
+    // For druids with Dash buff, force recalculate speed bonus of shapeshift
+    if (target->getClass() == CLASS_DRUID)
+        target->UpdateSpeed(MOVE_RUN, true);
 
     target->UpdateSpeed(MOVE_RUN, true);
 
