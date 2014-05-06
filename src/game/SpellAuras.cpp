@@ -6375,9 +6375,8 @@ void Aura::HandleAuraModIncreaseFlightSpeed(bool apply, bool Real)
     // Enable Fly mode for flying mounts
     if (m_modifier.m_auraname == SPELL_AURA_MOD_FLIGHT_SPEED_MOUNTED)
     {
-        WorldPacket data(apply ? SMSG_MOVE_SET_CAN_FLY : SMSG_MOVE_UNSET_CAN_FLY, 8 + 4);
-        data << target->GetPackGUID();
-        data << uint32(0);                                      // unknown
+        WorldPacket data;
+        target->BuildMoveSetCanFlyPacket(&data, apply, 0);
         target->SendMessageToSet(&data, true);
 
         // Players on flying mounts must be immune to polymorph
