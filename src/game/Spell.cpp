@@ -7394,6 +7394,8 @@ SpellCastResult Spell::CheckCast(bool strict)
                             return SPELL_FAILED_BAD_TARGETS;
                 break;
             }
+            case SPELL_EFFECT_JUMP2:
+            case SPELL_EFFECT_TELEPORT_UNITS:
             case SPELL_EFFECT_CHARGE:
             {
                 if (m_caster->hasUnitState(UNIT_STAT_ROOT))
@@ -7403,6 +7405,36 @@ SpellCastResult Spell::CheckCast(bool strict)
                         m_caster->RemoveAurasAtMechanicImmunity(IMMUNE_TO_ROOT_AND_SNARE_MASK, 0, true);
                     else
                         return SPELL_FAILED_ROOTED;
+                }
+
+                if (!m_IsTriggeredSpell && spellEffect->Effect == SPELL_EFFECT_CHARGE)
+                {
+                    WorldLocation loc;
+                    if (m_targets.m_targetMask & TARGET_FLAG_DEST_LOCATION)
+                        loc = m_targets.GetLocation();
+                    else if (m_targets.getUnitTarget())
+                        loc = m_targets.getUnitTarget()->GetPosition();
+                    else
+                        break;
+
+                    bool ok = false;
+                    float pathDist = m_caster->GetPathLength(loc, false, &ok);
+                    // pathfinding disabled - do nothing
+                    if (!ok)
+                        break;
+
+                    float range;
+
+                    if (uint32 radiusIndex = spellEffect->GetRadiusIndex())
+                        range = GetSpellRadius(sSpellRadiusStore.LookupEntry(radiusIndex));
+                    else
+                        range = GetSpellMaxRange(sSpellRangeStore.LookupEntry(m_spellInfo->rangeIndex));
+
+                    if (Player* modOwner = m_caster->GetSpellModOwner())
+                        modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_RANGE, range, this);
+
+                    if (pathDist > range)
+                        return SPELL_FAILED_OUT_OF_RANGE;
                 }
 
                 break;
@@ -7676,7 +7708,6 @@ SpellCastResult Spell::CheckCast(bool strict)
                 break;
             }
             case SPELL_EFFECT_JUMP:
-            case SPELL_EFFECT_JUMP2:
             case SPELL_EFFECT_CHARGE2:
             {
                 if (m_caster->hasUnitState(UNIT_STAT_ROOT))

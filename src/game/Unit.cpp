@@ -15571,6 +15571,24 @@ void Unit::RemoveUnitFromHostileRefManager(Unit* pUnit)
     getHostileRefManager().deleteReference(pUnit);
 }
 
+float Unit::GetPathLength(WorldLocation loc, bool forceDest, bool* ok) const
+{
+    PathFinder path(&*this);
+    bool _ok = path.calculate(loc.getX(), loc.getY(), loc.getZ(), forceDest);
+    if (ok)
+        *ok = _ok;
+
+    Movement::PointsArray pathArray = path.getPath();
+    float dist = 0.f;
+    if (pathArray.size() > 1)
+    {
+        for (uint32 i = 1; i < pathArray.size(); ++i)
+            dist += (pathArray[i] - pathArray[i - 1]).length();
+    }
+
+    return dist;
+}
+
 SpellAuraHolderPtr Unit::_AddAura(uint32 spellID, uint32 duration, Unit* caster)
 {
     SpellEntry const *spellInfo = sSpellStore.LookupEntry( spellID );

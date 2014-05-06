@@ -2371,6 +2371,9 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
 
         bool IsVisionObscured(Unit* target) const;
 
+        // Pathfinder
+        float GetPathLength(WorldLocation loc, bool forceDest = false, bool* ok = NULL) const;
+
         // Packet builders
         void BuildForceMoveRootPacket(WorldPacket* data, bool apply, uint32 value);
         void BuildMoveWaterWalkPacket(WorldPacket* data, bool apply, uint32 value);
