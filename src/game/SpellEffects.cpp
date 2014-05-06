@@ -385,6 +385,7 @@ void Spell::EffectSchoolDMG(SpellEffectEntry const* effect)
                     case 64422: case 64688:                 // Sonic Screech
                     case 70492: case 72505:                 // Ooze Eruption
                     case 71904:                             // Chaos Bane
+                    case 71386:                             // Rimefang's Frost Breath
                     case 72624: case 72625:                 // Ooze Eruption
                     case 88942: case 95172:                 // Meteor Slash
                     case 96913: case 101007:                // Searing Shadows
@@ -402,11 +403,11 @@ void Spell::EffectSchoolDMG(SpellEffectEntry const* effect)
                     case 62598: case 62937:                 // Detonate
                     case 65279:                             // Lightning Nova
                     case 62311: case 64596:                 // Cosmic Smash
-                    case 52339:                             // Hurl Boulder
-                    case 51673:                             // Rocket Blast
+                    case 52339:                             // Hurl Boulder (SotA Demolishers)
+                    case 51673:                             // Rocket Blast (SotA cannons)
                     {
                         float distance = unitTarget->GetDistance(m_targets.getDestination());
-                        damage *= exp(-distance/15.0f);
+                        damage *= exp(-distance / 15.0f);
                         break;
                     }
                     // percent from health with min
@@ -480,17 +481,6 @@ void Spell::EffectSchoolDMG(SpellEffectEntry const* effect)
                         damage = unitTarget->GetMaxHealth() / 2;
                         break;
                     }
-                    // Ymiron Dark Slash
-                    case 48292:
-                    {
-                        damage = unitTarget->GetHealth() / 2;
-                        break;
-                    }
-                    case 51132: // Urom Clocking Bomb Damage
-                    {
-                        damage = m_caster->GetMaxHealth() - m_caster->GetHealth();
-                        break;
-                    }
                     // Explode
                     case 47496:
                     {
@@ -500,6 +490,11 @@ void Spell::EffectSchoolDMG(SpellEffectEntry const* effect)
                             // After explode the ghoul must be killed
                             unitTarget->KillSelf();
                         }
+                        break;
+                    }
+                    case 48292:                             // Ymiron Dark Slash
+                    {
+                        damage = unitTarget->GetHealth() / 2;
                         break;
                     }
                     // Touch the Nightmare
@@ -517,6 +512,11 @@ void Spell::EffectSchoolDMG(SpellEffectEntry const* effect)
                         float radius = GetSpellRadius(sSpellRadiusStore.LookupEntry(effect->EffectRadiusIndex));
 
                         damage = damage / radius * (radius - dist);
+                        break;
+                    }
+                    case 51132: // Urom Clocking Bomb Damage
+                    {
+                        damage = m_caster->GetMaxHealth() - m_caster->GetHealth();
                         break;
                     }
                     // Flame Tsunami (Sartharion encounter)
@@ -949,7 +949,7 @@ void Spell::EffectSchoolDMG(SpellEffectEntry const* effect)
                 {
                     int32 pct = m_caster->CalculateSpellDamage(unitTarget, m_spellInfo, EFFECT_INDEX_2);
                     if (pct > 0)
-                        damage+= int32(m_caster->GetTotalAttackPowerValue(BASE_ATTACK) * pct / 100);
+                        damage += int32(m_caster->GetTotalAttackPowerValue(BASE_ATTACK) * pct / 100);
                     break;
                 }
                 // Thunder Clap
