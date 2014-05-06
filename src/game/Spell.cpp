@@ -6365,6 +6365,14 @@ SpellCastResult Spell::CheckCast(bool strict)
     if (strict && !m_IsTriggeredSpell && HasGlobalCooldown())
         return SPELL_FAILED_NOT_READY;
 
+    // check unlimited channeled spells trying to overwrite each other
+    if (m_IsTriggeredSpell)
+    {
+        if (uint32 channeledSpell = m_caster->GetUInt32Value(UNIT_CHANNEL_SPELL))
+            if (channeledSpell == m_spellInfo->Id && GetSpellDuration(m_spellInfo) == -1)
+                return SPELL_FAILED_DONT_REPORT;
+    }
+
     // only allow triggered spells if at an ended battleground
     if (!m_IsTriggeredSpell && m_caster->GetTypeId() == TYPEID_PLAYER)
         if (BattleGround * bg = ((Player*)m_caster)->GetBattleGround())
