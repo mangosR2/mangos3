@@ -1197,7 +1197,7 @@ void Player::HandleDrowning(uint32 time_diff)
                     EnvironmentalDamage(DAMAGE_LAVA, damage);
                 // need to skip Slime damage in Undercity and Ruins of Lordaeron arena
                 // maybe someone can find better way to handle environmental damage
-                //else if (m_zoneUpdateId != 1497)
+                //else if (m_zoneUpdateId != 1497 && m_zoneUpdateId != 3968)
                 //    EnvironmentalDamage(DAMAGE_SLIME, damage);
             }
         }
@@ -2193,6 +2193,7 @@ void Player::ProcessDelayedOperations()
     {
         if (m_bgData.mountSpell)
         {
+            RemoveSpellsCausingAura(SPELL_AURA_MOUNTED);
             CastSpell(this, m_bgData.mountSpell, true);
             m_bgData.mountSpell = 0;
         }
