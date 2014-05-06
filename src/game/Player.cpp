@@ -2070,7 +2070,7 @@ temporarily disable precreate maps. need found reason double map creation
             if (!GetSession()->PlayerLogout())
             {
                 // send transfer packet to display load screen
-                WorldPacket data(SMSG_TRANSFER_PENDING, (4+4+4));
+                WorldPacket data(SMSG_TRANSFER_PENDING, (4 + 4 + 4));
                 data.WriteBit(0);       // unknown
                 if (IsOnTransport())
                 {
@@ -2111,7 +2111,6 @@ temporarily disable precreate maps. need found reason double map creation
             {
                 // transfer finished, inform client to start load
                 WorldPacket data(SMSG_NEW_WORLD, 20);
-                data << uint32(loc.GetMapId());
                 if (IsOnTransport())
                 {
                     data << float(m_movementInfo.GetTransportPos()->x);
@@ -2121,9 +2120,8 @@ temporarily disable precreate maps. need found reason double map creation
                 else
                 {
                     data << float(final.x);
-                    data << float(final.y);
-                    data << float(final.z);
                     data << float(final.o);
+                    data << float(final.z);
                 }
 
                 data << uint32(loc.GetMapId());
