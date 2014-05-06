@@ -3776,6 +3776,15 @@ void Spell::EffectDummy(SpellEffectEntry const* effect)
 
                     return;
                 }
+                case 52596:                                 // Medallion of Mam'toth
+                {
+                    if (!unitTarget || unitTarget->GetEntry() != 28851)
+                        return;
+
+                    unitTarget->setFaction(35);
+                    unitTarget->CombatStop();
+                    return;
+                }
                 case 52748:                                 // Voracious Appetite
                 {
                     if (!unitTarget)
