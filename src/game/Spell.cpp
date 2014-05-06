@@ -585,15 +585,18 @@ bool Spell::CheckTargetBeforeLimitation(Unit* target, SpellEffectIndex eff)
     }
 
     // Check Aura spell req (need for AoE spells)
-    SpellAuraRestrictionsEntry const* auraRestrictions = m_spellInfo->GetSpellAuraRestrictions();
-    if(auraRestrictions)
+    if (spellEffect->Effect != SPELL_EFFECT_KILL_CREDIT_PERSONAL && spellEffect->Effect != SPELL_EFFECT_KILL_CREDIT_GROUP)
     {
-        if (auraRestrictions->targetAuraSpell && !target->HasAura(auraRestrictions->targetAuraSpell))
-            return false;
-        if (auraRestrictions->excludeTargetAuraSpell && target->HasAura(auraRestrictions->excludeTargetAuraSpell))
-            return false;
-        if (auraRestrictions->TargetAuraStateNot && target->HasAura(auraRestrictions->TargetAuraStateNot))
-            return false;
+        SpellAuraRestrictionsEntry const* auraRestrictions = m_spellInfo->GetSpellAuraRestrictions();
+        if (auraRestrictions)
+        {
+            if (auraRestrictions->targetAuraSpell && !target->HasAura(auraRestrictions->targetAuraSpell))
+                return false;
+            if (auraRestrictions->excludeTargetAuraSpell && target->HasAura(auraRestrictions->excludeTargetAuraSpell))
+                return false;
+            //if (auraRestrictions->TargetAuraStateNot && target->HasAura(auraRestrictions->TargetAuraStateNot))
+            //    return false;
+        }
     }
 
     return true;
@@ -622,7 +625,7 @@ bool Spell::CheckTarget(Unit* target, SpellEffectIndex eff)
         return false;
 
     // Check targets for creature type mask and remove not appropriate (skip explicit self target case, maybe need other explicit targets)
-    if (spellEffect->EffectImplicitTargetA != TARGET_SELF)
+    if (spellEffect->EffectImplicitTargetA != TARGET_SELF || m_spellInfo->Id == 36444)
     {
         if (!SpellMgr::IsTargetMatchedWithCreatureType(m_spellInfo, target))
             return false;
@@ -635,15 +638,18 @@ bool Spell::CheckTarget(Unit* target, SpellEffectIndex eff)
         return false;
     }
     // Check Aura spell req (need for AoE spells)
-    SpellAuraRestrictionsEntry const* auraRestrictions = m_spellInfo->GetSpellAuraRestrictions();
-    if(auraRestrictions)
+    if (spellEffect->Effect != SPELL_EFFECT_KILL_CREDIT_PERSONAL && spellEffect->Effect != SPELL_EFFECT_KILL_CREDIT_GROUP)
     {
-        if (auraRestrictions->targetAuraSpell && !target->HasAura(auraRestrictions->targetAuraSpell))
-            return false;
-        if (auraRestrictions->excludeTargetAuraSpell && target->HasAura(auraRestrictions->excludeTargetAuraSpell))
-            return false;
-        if (auraRestrictions->TargetAuraStateNot && target->HasAura(auraRestrictions->TargetAuraStateNot))
-            return false;
+        SpellAuraRestrictionsEntry const* auraRestrictions = m_spellInfo->GetSpellAuraRestrictions();
+        if (auraRestrictions)
+        {
+            if (auraRestrictions->targetAuraSpell && !target->HasAura(auraRestrictions->targetAuraSpell))
+                return false;
+            if (auraRestrictions->excludeTargetAuraSpell && target->HasAura(auraRestrictions->excludeTargetAuraSpell))
+                return false;
+            //if (auraRestrictions->TargetAuraStateNot && target->HasAura(auraRestrictions->TargetAuraStateNot))
+            //    return false;
+        }
     }
 
     // Check targets for not_selectable unit flag and remove
