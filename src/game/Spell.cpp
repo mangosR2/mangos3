@@ -6392,7 +6392,7 @@ SpellCastResult Spell::CheckCast(bool strict)
                 !m_caster->GetTerrain()->IsOutdoors(m_caster->GetPositionX(), m_caster->GetPositionY(), m_caster->GetPositionZ()))
             return SPELL_FAILED_ONLY_OUTDOORS;
 
-        if(m_spellInfo->HasAttribute(SPELL_ATTR_INDOORS_ONLY) &&
+        if (m_spellInfo->HasAttribute(SPELL_ATTR_INDOORS_ONLY) &&
                 m_caster->GetTerrain()->IsOutdoors(m_caster->GetPositionX(), m_caster->GetPositionY(), m_caster->GetPositionZ()))
             return SPELL_FAILED_ONLY_INDOORS;
     }
@@ -6473,20 +6473,21 @@ SpellCastResult Spell::CheckCast(bool strict)
         if (m_spellInfo->HasAttribute(SPELL_ATTR_STOP_ATTACK_TARGET) && m_spellInfo->HasAttribute(SPELL_ATTR_EX2_UNK26) && !m_caster->isInCombat())
             return SPELL_FAILED_CASTER_AURASTATE;
 
-        if (!m_IsTriggeredSpell
+        // Disable mangos native check
+        /*if (!m_IsTriggeredSpell
             && NeedsComboPoints(m_spellInfo)
             && !m_caster->IsIgnoreUnitState(m_spellInfo, IGNORE_UNIT_TARGET_STATE)
             && (!m_targets.getUnitTarget() || m_targets.getUnitTarget()->GetObjectGuid() != m_caster->GetComboTargetGuid()))
             // warrior not have real combo-points at client side but use this way for mark allow Overpower use (need really recheck this, for pets alsO)
-            return (m_caster->GetObjectGuid().IsPet() || m_caster->getClass() == CLASS_WARRIOR) ? SPELL_FAILED_CASTER_AURASTATE : SPELL_FAILED_NO_COMBO_POINTS;
+            return (m_caster->GetObjectGuid().IsPet() || m_caster->getClass() == CLASS_WARRIOR) ? SPELL_FAILED_CASTER_AURASTATE : SPELL_FAILED_NO_COMBO_POINTS;*/
     }
 
     SpellClassOptionsEntry const* classOptions = m_spellInfo->GetSpellClassOptions();
 
-    if(Unit* target = m_targets.getUnitTarget())
+    if (Unit* target = m_targets.getUnitTarget())
     {
         // target state requirements (not allowed state), apply to self also
-        if(auraRestrictions && auraRestrictions->TargetAuraStateNot && target->HasAuraState(AuraState(auraRestrictions->TargetAuraStateNot)))
+        if (auraRestrictions && auraRestrictions->TargetAuraStateNot && target->HasAuraState(AuraState(auraRestrictions->TargetAuraStateNot)))
             return SPELL_FAILED_TARGET_AURASTATE;
 
         if (!m_IsTriggeredSpell && IsDeathOnlySpell(m_spellInfo) && target->isAlive())
@@ -6497,7 +6498,7 @@ SpellCastResult Spell::CheckCast(bool strict)
             sSpellStore.LookupEntry(auraRestrictions->targetAuraSpell))
             return SPELL_FAILED_CASTER_AURASTATE;
 
-        if(auraRestrictions && auraRestrictions->excludeTargetAuraSpell)
+        if (auraRestrictions && auraRestrictions->excludeTargetAuraSpell)
         {
             // Special cases of non existing auras handling
             if (auraRestrictions->excludeTargetAuraSpell == 61988)
@@ -6505,7 +6506,6 @@ SpellCastResult Spell::CheckCast(bool strict)
                 // Forbearance
                 if (target->HasAura(25771))
                     return SPELL_FAILED_CASTER_AURASTATE;
-
             }
             else if (target->HasAura(auraRestrictions->excludeTargetAuraSpell))
                 return SPELL_FAILED_CASTER_AURASTATE;
@@ -6653,7 +6653,7 @@ SpellCastResult Spell::CheckCast(bool strict)
         //ignore self casts (including area casts when caster selected as target)
         if (non_caster_target)
         {
-            if(!SpellMgr::IsTargetMatchedWithCreatureType(m_spellInfo, target))
+            if (!SpellMgr::IsTargetMatchedWithCreatureType(m_spellInfo, target))
             {
                 if (target->GetTypeId() == TYPEID_PLAYER)
                     return SPELL_FAILED_TARGET_IS_PLAYER;
@@ -6670,7 +6670,7 @@ SpellCastResult Spell::CheckCast(bool strict)
             for(int k = 0; k < MAX_EFFECT_INDEX;  ++k)
             {
                 SpellEffectEntry const* spellEffect = m_spellInfo->GetSpellEffect(SpellEffectIndex(k));
-                if(!spellEffect)
+                if (!spellEffect)
                     continue;
                 if (IsExplicitPositiveTarget(spellEffect->EffectImplicitTargetA))
                 {
@@ -7037,7 +7037,7 @@ SpellCastResult Spell::CheckCast(bool strict)
         }
     }
 
-    if(!m_IsTriggeredSpell)
+    if (!m_IsTriggeredSpell)
     {
         SpellCastResult castResult = CheckRange(strict);
         if (castResult != SPELL_CAST_OK)
@@ -7343,7 +7343,7 @@ SpellCastResult Spell::CheckCast(bool strict)
                     return SPELL_FAILED_NO_PET;
 
                 SpellEntry const *learn_spellproto = sSpellStore.LookupEntry(spellEffect->EffectTriggerSpell);
-                if(!learn_spellproto)
+                if (!learn_spellproto)
                     return SPELL_FAILED_NOT_KNOWN;
 
                 if(m_spellInfo->GetSpellLevel() > pet->getLevel())
