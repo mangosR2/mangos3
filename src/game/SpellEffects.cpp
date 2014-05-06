@@ -7614,6 +7614,17 @@ void Spell::EffectEnergize(SpellEffectEntry const* effect)
             m_caster->CastSpell(unitTarget,elixirs[rand_spell],true,m_CastItem);
         }
     }
+    // Crazy Alchemist Potion
+    else if (m_spellInfo->Id == 53750)
+    {
+        if (roll_chance_i(30))
+        {
+            uint32 spellIds[12] = { 43185, 43186, 53753, 53761, 53762, 53908,
+                                    53909, 53910, 53911, 53913, 53914, 53915};
+
+            m_caster->CastSpell(unitTarget, spellIds[urand(0,11)], true, m_CastItem);
+        }
+    }
 }
 
 void Spell::EffectEnergisePct(SpellEffectEntry const* effect)
