@@ -3496,6 +3496,16 @@ void Spell::EffectDummy(SpellEffectEntry const* effect)
                         case 50548: unitTarget->CastSpell(m_originalCaster, 47635, true); break;
                     }
 
+                    if (m_originalCaster->GetTypeId() != TYPEID_PLAYER)
+                        return;
+
+                    switch(m_spellInfo->Id)
+                    {
+                        case 50546: ((Player*)m_originalCaster)->KilledMonsterCredit(26773); break;
+                        case 50547: ((Player*)m_originalCaster)->KilledMonsterCredit(26831); break;
+                        case 50548: ((Player*)m_originalCaster)->KilledMonsterCredit(26887); break;
+                    }
+
                     return;
                 }
                 case 51276:                                 // Incinerate Corpse
