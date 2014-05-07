@@ -758,7 +758,7 @@ void WorldSession::BuildPartyMemberStatsChangedPacket(Player* player, WorldPacke
     if (mask & GROUP_UPDATE_FLAG_MAX_HP)
         *data << uint32(player->GetMaxHealth());
 
-    Powers powerType = player->getPowerType();
+    Powers powerType = player->GetPowerType();
 
     if (mask & GROUP_UPDATE_FLAG_POWER_TYPE)
         *data << uint8(powerType);
@@ -811,13 +811,13 @@ void WorldSession::BuildPartyMemberStatsChangedPacket(Player* player, WorldPacke
         *data << uint32(pet ? pet->GetMaxHealth() : 0);
 
     if (mask & GROUP_UPDATE_FLAG_PET_POWER_TYPE)
-        *data << uint8(pet ? pet->getPowerType() : 0);
+        *data << uint8(pet ? pet->GetPowerType() : 0);
 
     if (mask & GROUP_UPDATE_FLAG_PET_CUR_POWER)
-        *data << uint16(pet ? pet->GetPower(pet->getPowerType()) : 0);
+        *data << uint16(pet ? pet->GetPower(pet->GetPowerType()) : 0);
 
     if (mask & GROUP_UPDATE_FLAG_PET_MAX_POWER)
-        *data << uint16(pet ? pet->GetMaxPower(pet->getPowerType()) : 0);
+        *data << uint16(pet ? pet->GetMaxPower(pet->GetPowerType()) : 0);
 
     if (mask & GROUP_UPDATE_FLAG_PET_AURAS)
     {
@@ -863,7 +863,7 @@ void WorldSession::HandleRequestPartyMemberStatsOpcode(WorldPacket& recv_data)
         return;
     }
 
-    Powers powerType = player->getPowerType();
+    Powers powerType = player->GetPowerType();
 
     uint32 updateFlags = GROUP_UPDATE_FLAG_STATUS | GROUP_UPDATE_FLAG_CUR_HP | GROUP_UPDATE_FLAG_MAX_HP |
         GROUP_UPDATE_FLAG_CUR_POWER | GROUP_UPDATE_FLAG_MAX_POWER | GROUP_UPDATE_FLAG_LEVEL |
@@ -955,7 +955,7 @@ void WorldSession::HandleRequestPartyMemberStatsOpcode(WorldPacket& recv_data)
 
     if(pet)
     {
-        Powers petPowerType = pet->getPowerType();
+        Powers petPowerType = pet->GetPowerType();
         data << pet->GetObjectGuid();                       // GROUP_UPDATE_FLAG_PET_GUID
         data << pet->GetName();                             // GROUP_UPDATE_FLAG_PET_NAME
         data << uint16(pet->GetDisplayId());                // GROUP_UPDATE_FLAG_PET_MODEL_ID

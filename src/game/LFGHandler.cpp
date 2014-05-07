@@ -798,7 +798,7 @@ void WorldSession::SendLfgUpdateList(uint32 dungeonID)
                 data << uint32(player->GetTotalAttackPowerValue(BASE_ATTACK));                      // attack power
                 data << uint32(player->GetTotalStatValue(STAT_AGILITY));                            // agility
                 data << uint32(player->GetMaxHealth());                                             // health
-                data << uint32(player->GetMaxPower(player->getPowerType()));                        // power
+                data << uint32(player->GetMaxPower(player->GetPowerType()));                        // power
                 data << uint32(player->GetFreeTalentPoints());                                      // free talent points (TOM_RUS)
                 data << float(0);                                                                   // unk
                 data << uint32(player->GetRatingBonusValue(CR_DEFENSE_SKILL));                      // defence rating

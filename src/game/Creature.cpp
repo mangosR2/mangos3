@@ -292,14 +292,14 @@ bool Creature::InitEntry(uint32 Entry, CreatureData const* data /*=NULL*/, GameE
     switch (cinfo->UnitClass)
     {
         case CLASS_WARRIOR:
-            SetByteValue(UNIT_FIELD_BYTES_0, 3, POWER_RAGE);
+            SetPowerType(POWER_RAGE);
             break;
         case CLASS_PALADIN:
         case CLASS_MAGE:
-            SetByteValue(UNIT_FIELD_BYTES_0, 3, POWER_MANA);
+            SetPowerType(POWER_MANA);
             break;
         case CLASS_ROGUE:
-            SetByteValue(UNIT_FIELD_BYTES_0, 3, POWER_ENERGY);
+            SetPowerType(POWER_ENERGY);
             break;
         default:
             sLog.outErrorDb("Creature (Entry: %u) has unhandled unit class. Power type will not be set!", Entry);
@@ -623,17 +623,15 @@ void Creature::RegenerateAll(uint32 update_diff)
     if ((!isInCombat() && !IsInEvadeMode()) || IsPolymorphed())
         RegenerateHealth();
 
-    Regenerate(getPowerType());
+    RegeneratePower();
 }
 
 void Creature::RegeneratePower()
 {
-    if (!IsRegeneratingPower())
-        return;
-
-    Powers powerType = getPowerType();
+    Powers powerType = GetPowerType();
     uint32 curValue = GetPower(powerType);
     uint32 maxValue = GetMaxPower(powerType);
+
 
     if (curValue >= maxValue)
         return;
@@ -673,16 +671,16 @@ void Creature::RegeneratePower()
                         break;
                     case ENERGY_TYPE_STEAM:
                     default:
-                        addvalue = 10.0f * rate;
+                        addValue = 10.0f * rate;
                         break;
                 }
             }
             else
-                addvalue = 20.0f * rate;
+                addValue = 20.0f * rate;
             break;
         }
         case POWER_FOCUS:
-            addvalue = 24.0f * sWorld.getConfig(CONFIG_FLOAT_RATE_POWER_FOCUS);
+            addValue = 24.0f * sWorld.getConfig(CONFIG_FLOAT_RATE_POWER_FOCUS);
             break;
         default:
             return;
@@ -2129,13 +2127,13 @@ bool Creature::MeetsSelectAttackingRequirement(Unit* pTarget, SpellEntry const* 
     if ((selectFlags & SELECT_FLAG_PLAYER) && pTarget->GetTypeId() != TYPEID_PLAYER)
         return false;
 
-    if ((selectFlags & SELECT_FLAG_POWER_MANA) && pTarget->getPowerType() != POWER_MANA)
+    if (selectFlags & SELECT_FLAG_POWER_MANA && pTarget->GetPowerType() != POWER_MANA)
         return false;
-    else if ((selectFlags & SELECT_FLAG_POWER_RAGE) && pTarget->getPowerType() != POWER_RAGE)
+    else if (selectFlags & SELECT_FLAG_POWER_RAGE && pTarget->GetPowerType() != POWER_RAGE)
         return false;
-    else if ((selectFlags & SELECT_FLAG_POWER_ENERGY) && pTarget->getPowerType() != POWER_ENERGY)
+    else if (selectFlags & SELECT_FLAG_POWER_ENERGY && pTarget->GetPowerType() != POWER_ENERGY)
         return false;
-    else if ((selectFlags & SELECT_FLAG_POWER_RUNIC) && pTarget->getPowerType() != POWER_RUNIC_POWER)
+    else if (selectFlags & SELECT_FLAG_POWER_RUNIC && pTarget->GetPowerType() != POWER_RUNIC_POWER)
         return false;
 
     if ((selectFlags & SELECT_FLAG_IN_MELEE_RANGE) && !CanReachWithMeleeAttack(pTarget))

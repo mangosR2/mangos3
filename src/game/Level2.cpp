@@ -1496,7 +1496,7 @@ bool ChatHandler::HandleModifyPowerTypeCommand(char* args)
         return false;
     }
 
-    target->setPowerType(Powers(type));
+    target->SetPowerType(Powers(type));
 
     return true;
 }

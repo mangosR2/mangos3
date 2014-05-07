@@ -210,7 +210,7 @@ bool Pet::LoadPetFromDB(Player* owner, uint32 petentry, uint32 petnumber, bool c
             RemoveByteFlag(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_FFA_PVP | UNIT_BYTE2_FLAG_SANCTUARY | UNIT_BYTE2_FLAG_PVP);
             SetMaxPower(POWER_HAPPINESS, GetCreatePowers(POWER_HAPPINESS));
             SetPower(POWER_HAPPINESS, fields[12].GetUInt32());
-            setPowerType(POWER_FOCUS);
+            SetPowerType(POWER_FOCUS);
             break;
         default:
             RemoveByteFlag(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_FFA_PVP | UNIT_BYTE2_FLAG_SANCTUARY | UNIT_BYTE2_FLAG_PVP);
@@ -296,13 +296,13 @@ bool Pet::LoadPetFromDB(Player* owner, uint32 petentry, uint32 petnumber, bool c
             else
             {
                 SetHealth(savedhealth > GetMaxHealth() ? GetMaxHealth() : savedhealth);
-                SetPower(POWER_MANA, savedmana > GetMaxPower(POWER_MANA) ? GetMaxPower(POWER_MANA) : savedmana);
+                SetPower(POWER_MANA, savedpower > GetMaxPower(POWER_MANA) ? GetMaxPower(POWER_MANA) : savedpower);
             }
         }
         else
         {
             SetHealth(GetMaxHealth());
-            SetPower(getPowerType(), GetMaxPower(getPowerType()));
+            SetPower(GetPowerType(), GetMaxPower(GetPowerType()));
         }
     }
 
@@ -379,7 +379,7 @@ void Pet::SavePetToDB(PetSaveMode mode)
         }
 
         uint32 curhealth = GetHealth();
-        uint32 curmana = GetPower(POWER_MANA);
+        uint32 curpower = GetPower(GetPowerType());
 
         // stable and not in slot saves
         if (getPetType() == HUNTER_PET && mode != PET_SAVE_AS_CURRENT)
@@ -432,7 +432,7 @@ void Pet::SavePetToDB(PetSaveMode mode)
         savePet.addString(m_name);
         savePet.addUInt32(uint32(HasByteFlag(UNIT_FIELD_BYTES_2, 2, UNIT_CAN_BE_RENAMED) ? 0 : 1));
         savePet.addUInt32(curhealth < 1 ? (getPetType() == HUNTER_PET ? 0 : 1) : curhealth);
-        savePet.addUInt32(curmana);
+        savePet.addUInt32(curpower);
         savePet.addUInt32(GetPower(POWER_HAPPINESS));
 
         std::ostringstream ss;
@@ -668,11 +668,8 @@ void Pet::RegenerateAll(uint32 update_diff)
     // regenerate focus for hunter pets or energy for deathknight's ghoul
     if (m_regenTimer <= update_diff)
     {
-        if (getPetType() == HUNTER_PET)
-            Regenerate(POWER_HAPPINESS, REGEN_TIME_FULL);
-
         if (!isInCombat() || IsPolymorphed())
-            RegenerateHealth();
+            RegenerateHealth(REGEN_TIME_FULL);
 
         RegeneratePower();
 
@@ -979,7 +976,7 @@ bool Pet::InitStatsForLevel(uint32 petlevel, Unit* owner)
     createStats[MAX_STATS+5]  = int32(cinfo->MinRangedDmg * petlevel / cinfo->MaxLevel/ (1 + cinfo->Rank));
     createStats[MAX_STATS+6]  = int32(cinfo->MaxRangedDmg * petlevel / cinfo->MaxLevel/ (1 + cinfo->Rank));
     SetFloatValue(UNIT_FIELD_MAXRANGEDDAMAGE, float(cinfo->MaxRangedDmg * petlevel / cinfo->MaxLevel));
-    setPowerType(Powers(cinfo->GetPowerType()));
+    SetPowerType(Powers(cinfo->GetPowerType()));
     SetAttackTime(BASE_ATTACK, cinfo->MeleeBaseAttackTime);
     SetAttackTime(RANGED_ATTACK, cinfo->RangedBaseAttackTime);
 
@@ -989,7 +986,7 @@ bool Pet::InitStatsForLevel(uint32 petlevel, Unit* owner)
         {
             SetByteValue(UNIT_FIELD_BYTES_0, 1, CLASS_MAGE);
             if (cinfo->Family == CREATURE_FAMILY_GHOUL)
-                setPowerType(POWER_ENERGY);
+                SetPowerType(POWER_ENERGY);
             break;
         }
         case HUNTER_PET:
@@ -1017,7 +1014,7 @@ bool Pet::InitStatsForLevel(uint32 petlevel, Unit* owner)
             }
 
             SetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP, sObjectMgr.GetXPForPetLevel(petlevel));
-            setPowerType(POWER_FOCUS);
+            SetPowerType(POWER_FOCUS);
             break;
         }
         case GUARDIAN_PET:
@@ -1027,7 +1024,7 @@ bool Pet::InitStatsForLevel(uint32 petlevel, Unit* owner)
             SetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP, 1000);
             // DK ghouls have energy
             if (cinfo->Family == CREATURE_FAMILY_GHOUL)
-                setPowerType(POWER_ENERGY);
+                SetPowerType(POWER_ENERGY);
             break;
         }
         default:
@@ -1113,7 +1110,7 @@ bool Pet::InitStatsForLevel(uint32 petlevel, Unit* owner)
     UpdateAllStats();
 
     SetHealth(GetMaxHealth());
-    SetPower(getPowerType(), GetMaxPower(getPowerType()));
+    SetPower(GetPowerType(), GetMaxPower(GetPowerType()));
 
     return true;
 }
@@ -2782,7 +2779,7 @@ bool Pet::Summon()
     }
 
     SetHealth(GetMaxHealth());
-    SetPower(getPowerType(), GetMaxPower(getPowerType()));
+    SetPower(GetPowerType(), GetMaxPower(GetPowerType()));
 
     AIM_Initialize();
 

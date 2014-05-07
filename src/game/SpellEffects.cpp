@@ -4869,7 +4869,7 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
             // Mana Spring Totem
             if (m_spellInfo->GetSpellFamilyFlags().test<CF_SHAMAN_MANA_SPRING>())
             {
-                if (!unitTarget || unitTarget->getPowerType()!=POWER_MANA)
+                if (!unitTarget || unitTarget->GetPowerType() != POWER_MANA)
                     return;
 
                 m_caster->CastCustomSpell(unitTarget, 52032, &damage, 0, 0, true, 0, 0, m_originalCasterGuid);
@@ -4894,7 +4894,7 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
             }
             if (m_spellInfo->Id == 39610)                   // Mana Tide Totem effect
             {
-                if (!unitTarget || unitTarget->getPowerType() != POWER_MANA)
+                if (!unitTarget || unitTarget->GetPowerType() != POWER_MANA)
                     return;
 
                 // Glyph of Mana Tide
@@ -5868,7 +5868,7 @@ void Spell::EffectPowerDrain(SpellEffectIndex eff_idx)
     if (!unitTarget->isAlive())
         return;
 
-    if (unitTarget->getPowerType() != drain_power)
+    if (unitTarget->GetPowerType() != drain_power)
         return;
 
     if (damage < 0)
@@ -5929,7 +5929,7 @@ void Spell::EffectPowerBurn(SpellEffectIndex eff_idx)
         return;
     if (!unitTarget->isAlive())
         return;
-    if (unitTarget->getPowerType()!=powertype)
+    if (unitTarget->GetPowerType() != powertype)
         return;
     if (damage < 0)
         return;
@@ -10465,7 +10465,7 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     if (!unitTarget)
                         return;
 
-                    switch (unitTarget->getPowerType())
+                    switch (unitTarget->GetPowerType())
                     {
                         case POWER_RUNIC_POWER:
                         {
@@ -11418,7 +11418,7 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     if (unitTarget->HasAura(72371))
                     {
                         unitTarget->RemoveAurasDueToSpell(72371);
-                        int32 power = unitTarget->GetPower(unitTarget->getPowerType());
+                        int32 power = unitTarget->GetPower(unitTarget->GetPowerType());
                         unitTarget->CastCustomSpell(unitTarget, 72371, &power, &power, NULL, true);
                     }
                     return;
