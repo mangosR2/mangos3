@@ -18170,10 +18170,9 @@ void Player::SaveToDB()
                                                             // save, but in tavern/city
     uberInsert.addUInt32(m_resetTalentsCost);
     uberInsert.addUInt64(uint64(m_resetTalentsTime));
-
+    ss.str("");
     for (int i = 0; i < MAX_TALENT_SPEC_COUNT; ++i)
         ss << m_talentsPrimaryTree[i] << " ";
-
     uberInsert.addString(ss);
 
     uberInsert.addFloat(finiteAlways(m_movementInfo.GetTransportPos()->x));
