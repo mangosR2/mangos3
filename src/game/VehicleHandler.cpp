@@ -30,29 +30,37 @@
 #include "SpellMgr.h"
 #include "TemporarySummon.h"
 
-void WorldSession::HandleDismissControlledVehicle(WorldPacket& recvPacket)
+void WorldSession::HandleDismissControlledVehicle(WorldPacket& recv_data)
 {
     DEBUG_LOG("WORLD: Received CMSG_DISMISS_CONTROLLED_VEHICLE");
-    //recv_data.hexlike();
+    recv_data.hexlike();
 
-    ObjectGuid vehicleGuid;
-    MovementInfo movementInfo;                              // Not used at the moment
+    MovementInfo movementInfo;
+    recv_data >> movementInfo;
 
-    recvPacket >> vehicleGuid.ReadAsPacked();
-    recvPacket >> movementInfo;
-
-    if(!GetPlayer()->GetVehicle())
+    if (!GetPlayer()->GetVehicle())
         return;
 
-    Creature* vehicle = GetPlayer()->GetMap()->GetAnyTypeCreature(vehicleGuid);
+    bool dismiss = true;
 
-    if (!vehicle || !vehicle->IsVehicle())
+    Creature* vehicle = GetPlayer()->GetMap()->GetAnyTypeCreature(movementInfo.GetGuid());
+
+    if (!vehicle || !vehicle->IsVehicle() || !vehicle->GetVehicleKit() || !vehicle->GetEntry())
         return;
+
+    if (vehicle->GetVehicleKit()->GetEntry()->m_flags & (VEHICLE_FLAG_NOT_DISMISS | VEHICLE_FLAG_ACCESSORY))
+        dismiss = false;
+
+    // Client freezes...
+    if (vehicle->GetEntry() == 34812 || vehicle->GetEntry() == 34819 || vehicle->GetEntry() == 34822 ||
+        vehicle->GetEntry() == 34823 || vehicle->GetEntry() == 34824)
+        dismiss = false;
 
     GetPlayer()->m_movementInfo = movementInfo;
-
     GetPlayer()->ExitVehicle();
 
+    if (dismiss)
+        vehicle->ForcedDespawn();
 }
 
 void WorldSession::HandleRequestVehicleExit(WorldPacket &recv_data)
