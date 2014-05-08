@@ -826,12 +826,16 @@ bool Unit::SetPosition(Position const& pos, bool teleport)
     bool relocate = !((Position)GetPosition() == pos);
 
     if (turn)
+    {
         RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_TURNING);
+        RemoveSpellsCausingAura(SPELL_AURA_FEIGN_DEATH);
+    }
 
     if (relocate)
     {
         RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_MOVE);
 
+        RemoveSpellsCausingAura(SPELL_AURA_FEIGN_DEATH);
         if (GetTypeId() == TYPEID_PLAYER)
             GetMap()->Relocation((Player*)this, pos);
         else
