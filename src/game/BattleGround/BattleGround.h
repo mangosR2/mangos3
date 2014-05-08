@@ -403,7 +403,7 @@ class BattleGround
 
         void StartBattleGround();
 
-        void StartTimedAchievement(AchievementCriteriaTypes type, uint32 entry);
+        void StartTimedAchievement(AchievementCriteriaTypes type, uint32 entry, Team team = TEAM_NONE);
 
         /* Location */
         void SetMapId(uint32 MapID) { m_MapId = MapID; }

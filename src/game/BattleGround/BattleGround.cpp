@@ -472,7 +472,7 @@ void BattleGround::Update(uint32 diff)
             m_CountdownTimer = 0;
         }
         else
-            m_CountdownTimer += diff;		
+            m_CountdownTimer += diff;
 
         if (!(m_Events & BG_STARTING_EVENT_1))
         {
@@ -732,8 +732,8 @@ void BattleGround::RewardXpToTeam(uint32 Xp, float percentOfLevel, Team team)
     {
         if (itr->second.OfflineRemoveTime)
             continue;
-        Player *plr = sObjectMgr.GetPlayer(itr->first);
 
+        Player *plr = sObjectMgr.GetPlayer(itr->first);
         if (!plr)
         {
             sLog.outError("BattleGround:RewardXpToTeam: Player (GUID: %s) not found!", itr->first.GetString().c_str());
@@ -1006,7 +1006,7 @@ void BattleGround::EndBattleGround(Team winner)
 uint32 BattleGround::GetBonusHonorFromKill(uint32 kills) const
 {
     // variable kills means how many honorable kills you scored (so we need kills * honor_for_one_kill)
-    return (uint32)MaNGOS::Honor::hk_honor_at_level(GetMaxLevel(), kills);
+    return (uint32)(MaNGOS::Honor::hk_honor_at_level(GetMaxLevel(), kills) * sWorld.getConfig(CONFIG_FLOAT_RATE_HONOR) / m_MaxPlayers);
 }
 
 uint32 BattleGround::GetBattlemasterEntry() const
@@ -1158,6 +1158,8 @@ void BattleGround::RemovePlayerAtLeave(ObjectGuid guid, bool Transport, bool Sen
 {
     Team team = GetPlayerTeam(guid);
     bool participant = false;
+    Player* plr = sObjectMgr.GetPlayer(guid);
+
     // Remove from lists/maps
     BattleGroundPlayerMap::iterator itr = m_Players.find(guid);
     if (itr != m_Players.end())
@@ -1174,8 +1176,6 @@ void BattleGround::RemovePlayerAtLeave(ObjectGuid guid, bool Transport, bool Sen
         delete itr2->second;                                // delete player's score
         m_PlayerScores.erase(itr2);
     }
-
-    Player* plr = sObjectMgr.GetPlayer(guid);
 
     if (plr)
     {
@@ -1338,11 +1338,12 @@ void BattleGround::StartBattleGround()
     sBattleGroundMgr.AddBattleGround(GetInstanceID(), GetTypeID(), this);
 }
 
-void BattleGround::StartTimedAchievement(AchievementCriteriaTypes type, uint32 entry)
+void BattleGround::StartTimedAchievement(AchievementCriteriaTypes type, uint32 entry, Team team)
 {
     for (BattleGroundPlayerMap::const_iterator itr = GetPlayers().begin(); itr != GetPlayers().end(); ++itr)
         if (Player* pPlayer = GetBgMap()->GetPlayer(itr->first))
-            pPlayer->GetAchievementMgr().StartTimedAchievementCriteria(type, entry);
+            if (team == TEAM_NONE || pPlayer->GetTeam() == team)
+                pPlayer->GetAchievementMgr().StartTimedAchievementCriteria(type, entry);
 }
 
 void BattleGround::AddPlayer(Player* plr)
@@ -1401,7 +1402,7 @@ void BattleGround::AddPlayer(Player* plr)
     {
         plr->CastSpell(plr, SPELL_BATTLEGROUND_DAMPENING, true);
 
-        if (GetStatus() == STATUS_WAIT_JOIN)                 // not started yet
+        if (GetStatus() == STATUS_WAIT_JOIN)                // not started yet
             plr->CastSpell(plr, SPELL_PREPARATION, true);   // reduces all mana cost of spells.
 
         plr->CastSpell(plr, SPELL_BATTLEGROUND_DAMPENING, true);
@@ -1655,7 +1656,9 @@ bool BattleGround::AddObject(uint32 type, uint32 entry, float x, float y, float 
         data.animprogress   = 100;
         data.go_state       = 1;
     */
-    // add to world, so it can be later looked up from HashMapHolder
+
+    //go->SetManualAnim(manualAnim);
+
     go->AddToWorld();
     m_BgObjects[type] = go->GetObjectGuid();
     return true;
@@ -2005,7 +2008,7 @@ void BattleGround::HandleKillPlayer(Player* player, Player* killer)
         killer->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_HONORABLE_KILL_AT_AREA, 1);
 
     // add +1 kills to group and +1 killing_blows to killer
-    if (killer)
+    if (killer && killer != player)
     {
         UpdatePlayerScore(killer, SCORE_HONORABLE_KILLS, 1);
         UpdatePlayerScore(killer, SCORE_KILLING_BLOWS, 1);
