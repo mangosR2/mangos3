@@ -142,7 +142,7 @@ enum BattleGroundRandomRewards
     BG_REWARD_WINNER_HONOR_LAST         = 135,
     BG_REWARD_WINNER_CONQUEST_LAST      = 50,
     BG_REWARD_LOOSER_HONOR_FIRST        = 45,
-    BG_REWARD_LOOSER_HONOR_LAST         = 35,
+    BG_REWARD_LOOSER_HONOR_LAST         = 45,
     BG_REWARD_WINNER_HONOR_FIRST_LOW    = 90,
     BG_REWARD_WINNER_HONOR_LAST_LOW     = 45,
     BG_REWARD_LOOSER_HONOR_FIRST_LOW    = 15,
@@ -542,7 +542,7 @@ class BattleGround
         // TODO drop m_BGObjects
         GuidVector m_BgObjects;
         void SpawnBGObject(ObjectGuid guid, uint32 respawntime);
-        bool AddObject(uint32 type, uint32 entry, float x, float y, float z, float o, float rotation0, float rotation1, float rotation2, float rotation3, uint32 respawnTime = 0);
+        bool AddObject(uint32 type, uint32 entry, float x, float y, float z, float o, QuaternionData rotation, uint32 respawnTime = 0);
         void SpawnBGCreature(ObjectGuid guid, uint32 respawntime);
         bool DelObject(uint32 type);
         void MakeInteractive(uint8 event1, uint8 event2, bool interactive);

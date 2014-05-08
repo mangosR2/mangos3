@@ -511,7 +511,7 @@ bool BattleGroundSA::SetupShips()
         {
             case BG_SA_BOAT_ONE:
                 boatid = GetDefender() == ALLIANCE ? BG_SA_BOAT_ONE_H : BG_SA_BOAT_ONE_A;
-                if (!(AddObject(i, boatid, BG_SA_START_LOCATIONS[i + 5][0], BG_SA_START_LOCATIONS[i + 5][1], BG_SA_START_LOCATIONS[i + 5][2]+ (GetDefender() == ALLIANCE ? -3.750f: 0) , BG_SA_START_LOCATIONS[i + 5][3], 0.0f, 0.0f, 0.0f, 0.0f, RESPAWN_ONE_DAY)))
+                if (!(AddObject(i, boatid, BG_SA_START_LOCATIONS[i + 5][0], BG_SA_START_LOCATIONS[i + 5][1], BG_SA_START_LOCATIONS[i + 5][2]+ (GetDefender() == ALLIANCE ? -3.750f: 0) , BG_SA_START_LOCATIONS[i + 5][3], QuaternionData(0.0f, 0.0f, 0.0f, 0.0f), RESPAWN_ONE_DAY)))
                 {
                     sLog.outError("SA_ERROR: Can't spawn ships!");
                     return false;
@@ -522,14 +522,14 @@ bool BattleGroundSA::SetupShips()
                 break;
             case BG_SA_BOAT_TWO:
                 boatid = GetDefender() == ALLIANCE ? BG_SA_BOAT_TWO_H : BG_SA_BOAT_TWO_A;
-                if (!(AddObject(i, boatid, BG_SA_START_LOCATIONS[i + 5][0], BG_SA_START_LOCATIONS[i + 5][1], BG_SA_START_LOCATIONS[i + 5][2]+ (GetDefender() == ALLIANCE ? -3.750f: 0) , BG_SA_START_LOCATIONS[i + 5][3], 0.0f, 0.0f, 0.0f, 0.0f, RESPAWN_ONE_DAY)))
+                if (!(AddObject(i, boatid, BG_SA_START_LOCATIONS[i + 5][0], BG_SA_START_LOCATIONS[i + 5][1], BG_SA_START_LOCATIONS[i + 5][2]+ (GetDefender() == ALLIANCE ? -3.750f: 0) , BG_SA_START_LOCATIONS[i + 5][3], QuaternionData(0.0f, 0.0f, 0.0f, 0.0f), RESPAWN_ONE_DAY)))
                 {
                     sLog.outError("SA_ERROR: Can't spawn ships!");
                     return false;
                 }
 
                 if (GameObject* boat = GetBGObject(i))
-                    boat->SetTransportPathRotation(QuaternionData(0, 0, 1.0f, 0.00001f));
+                    boat->SetTransportPathRotation(QuaternionData(0, 0, 1.0f, i == 0 ? 0.0002f : 0.00001f));
                 break;
         }
     }

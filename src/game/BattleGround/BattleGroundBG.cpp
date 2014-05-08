@@ -429,7 +429,7 @@ bool BattleGroundBG::SetupBattleGround()
     // buffs
     for (int i = 0; i < BG_BG_BUFFS_MAX; ++i)
     {
-        // ToDo: Uncomment when Quaternions are implemented
+        // ToDo: Uncomment when battleground objects are implemented
 //        if (!AddObject(BG_BG_OBJECT_SPEEDBUFF_1 + 3 * i, Buff_Entries[0], BG_BG_BuffPositions[i][0], BG_BG_BuffPositions[i][1], BG_BG_BuffPositions[i][2], BG_BG_BuffPositions[i][3], QuaternionData(0, 0, sin(BG_BG_BuffPositions[i][3]/2), cos(BG_BG_BuffPositions[i][3]/2)), RESPAWN_ONE_DAY)
 //            || !AddObject(BG_BG_OBJECT_SPEEDBUFF_1 + 3 * i + 1, Buff_Entries[1], BG_BG_BuffPositions[i][0], BG_BG_BuffPositions[i][1], BG_BG_BuffPositions[i][2], BG_BG_BuffPositions[i][3], QuaternionData(0, 0, sin(BG_BG_BuffPositions[i][3]/2), cos(BG_BG_BuffPositions[i][3]/2)), RESPAWN_ONE_DAY)
 //            || !AddObject(BG_BG_OBJECT_SPEEDBUFF_1 + 3 * i + 2, Buff_Entries[2], BG_BG_BuffPositions[i][0], BG_BG_BuffPositions[i][1], BG_BG_BuffPositions[i][2], BG_BG_BuffPositions[i][3], QuaternionData(0, 0, sin(BG_BG_BuffPositions[i][3]/2), cos(BG_BG_BuffPositions[i][3]/2)), RESPAWN_ONE_DAY)
