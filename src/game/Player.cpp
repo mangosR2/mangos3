@@ -26923,6 +26923,114 @@ void Player::RemoveSpecDependentAuras()
         RemoveAurasDueToSpell(auras2remove[i]);
 }
 
+PetSaveMode Player::GetFreeStableSlot() const
+{
+    QueryResult* result = CharacterDatabase.PQuery("SELECT actual_slot from character_pet WHERE owner = '%u'", GetObjectGuid().GetCounter());
+    if (!result)
+        return PET_SAVE_AS_CURRENT;
+
+    uint32 usedSlots = 0;
+    do
+        usedSlots |= 1 << (*result)[0].GetUInt32();
+    while (result->NextRow());
+
+    delete result;
+
+    for (int i = 0; i < PET_SAVE_FIRST_STABLE_SLOT; ++i)
+        if ((usedSlots & (1 << i)) == 0)
+            return PetSaveMode(i);
+
+    return PET_SAVE_NOT_IN_SLOT;
+}
+
+void Player::StoreLootItem(uint8 lootSlot, Loot* loot, Item* pItem)
+{
+    QuestItem* qitem = NULL;
+    QuestItem* ffaitem = NULL;
+    QuestItem* conditem = NULL;
+    QuestItem* currency = NULL;
+
+    LootItem* item = loot->LootItemInSlot(lootSlot, this, &qitem, &ffaitem, &conditem, &currency);
+
+    if (!item)
+    {
+        SendEquipError(EQUIP_ERR_ALREADY_LOOTED, NULL, NULL);
+        return;
+    }
+
+    // questitems use the blocked field for other purposes
+    if (!qitem && item->is_blocked)
+    {
+        SendLootRelease(GetLootGuid());
+        return;
+    }
+
+    if (pItem)
+        pItem->SetLootState(ITEM_LOOT_CHANGED);
+
+    if (currency)
+    {
+        if (CurrencyTypesEntry const * currencyEntry = sCurrencyTypesStore.LookupEntry(item->itemid))
+            ModifyCurrencyCount(item->itemid, int32(item->count * currencyEntry->GetPrecision()));
+
+        SendNotifyLootItemRemoved(lootSlot, true);
+        currency->is_looted = true;
+        --loot->unlootedCount;
+        return;
+    }
+
+    ItemPosCountVec dest;
+    InventoryResult msg = CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, item->itemid, item->count);
+    if (msg == EQUIP_ERR_OK)
+    {
+        Item* newitem = StoreNewItem( dest, item->itemid, true, item->randomPropertyId, item->GetAllowedLooters());
+
+        if (qitem)
+        {
+            qitem->is_looted = true;
+            // freeforall is 1 if everyone's supposed to get the quest item.
+            if (item->freeforall || loot->GetPlayerQuestItems().size() == 1)
+                SendNotifyLootItemRemoved(lootSlot);
+            else
+                loot->NotifyQuestItemRemoved(qitem->index);
+        }
+        else
+        {
+            if (ffaitem)
+            {
+                // freeforall case, notify only one player of the removal
+                ffaitem->is_looted = true;
+                SendNotifyLootItemRemoved(lootSlot);
+            }
+            else
+            {
+                // not freeforall, notify everyone
+                if (conditem)
+                    conditem->is_looted = true;
+                loot->NotifyItemRemoved(lootSlot);
+            }
+        }
+
+        //if only one person is supposed to loot the item, then set it to looted
+        if (!item->freeforall)
+            item->is_looted = true;
+
+        --loot->unlootedCount;
+
+        SendNewItem(newitem, uint32(item->count), false, false, true);
+        UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_LOOT_ITEM, item->itemid, item->count);
+        UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_LOOT_TYPE, loot->loot_type, item->count);
+        UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_LOOT_EPIC_ITEM, item->itemid, item->count);
+
+        if (ItemPrototype const* proto = sObjectMgr.GetItemPrototype(item->itemid))
+            if (proto->Quality > ITEM_QUALITY_EPIC || (proto->Quality == ITEM_QUALITY_EPIC && proto->ItemLevel >= MinNewsItemLevel[sWorld.getConfig(CONFIG_UINT32_EXPANSION)]))
+                if (Guild* guild = sGuildMgr.GetGuildById(GetGuildId()))
+                    guild->LogNewsEvent(GUILD_NEWS_ITEM_LOOTED, time(NULL), GetObjectGuid(), 0, item->itemid);
+    }
+    else
+        SendEquipError( msg, NULL, NULL, item->itemid );
+}
+
 uint32 Player::GetChampioningFaction()
 {
     MapEntry const* storedMap = sMapStore.LookupEntry(GetMapId());
@@ -27073,110 +27181,3 @@ uint32 Player::GetChampioningFaction()
     return faction;
 }
 
-PetSaveMode Player::GetFreeStableSlot() const
-{
-    QueryResult* result = CharacterDatabase.PQuery("SELECT actual_slot from character_pet WHERE owner = '%u'", GetObjectGuid().GetCounter());
-    if (!result)
-        return PET_SAVE_AS_CURRENT;
-
-    uint32 usedSlots = 0;
-    do
-        usedSlots |= 1 << (*result)[0].GetUInt32();
-    while (result->NextRow());
-
-    delete result;
-
-    for (int i = 0; i < PET_SAVE_FIRST_STABLE_SLOT; ++i)
-        if ((usedSlots & (1 << i)) == 0)
-            return PetSaveMode(i);
-
-    return PET_SAVE_NOT_IN_SLOT;
-}
-
-void Player::StoreLootItem(uint8 lootSlot, Loot* loot, Item* pItem)
-{
-    QuestItem* qitem = NULL;
-    QuestItem* ffaitem = NULL;
-    QuestItem* conditem = NULL;
-    QuestItem* currency = NULL;
-
-    LootItem* item = loot->LootItemInSlot(lootSlot, this, &qitem, &ffaitem, &conditem, &currency);
-
-    if (!item)
-    {
-        SendEquipError(EQUIP_ERR_ALREADY_LOOTED, NULL, NULL);
-        return;
-    }
-
-    // questitems use the blocked field for other purposes
-    if (!qitem && item->is_blocked)
-    {
-        SendLootRelease(GetLootGuid());
-        return;
-    }
-
-    if (pItem)
-        pItem->SetLootState(ITEM_LOOT_CHANGED);
-
-    if (currency)
-    {
-        if (CurrencyTypesEntry const * currencyEntry = sCurrencyTypesStore.LookupEntry(item->itemid))
-            ModifyCurrencyCount(item->itemid, int32(item->count * currencyEntry->GetPrecision()));
-
-        SendNotifyLootItemRemoved(lootSlot, true);
-        currency->is_looted = true;
-        --loot->unlootedCount;
-        return;
-    }
-
-    ItemPosCountVec dest;
-    InventoryResult msg = CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, item->itemid, item->count);
-    if (msg == EQUIP_ERR_OK)
-    {
-        Item* newitem = StoreNewItem( dest, item->itemid, true, item->randomPropertyId, item->GetAllowedLooters());
-
-        if (qitem)
-        {
-            qitem->is_looted = true;
-            // freeforall is 1 if everyone's supposed to get the quest item.
-            if (item->freeforall || loot->GetPlayerQuestItems().size() == 1)
-                SendNotifyLootItemRemoved(lootSlot);
-            else
-                loot->NotifyQuestItemRemoved(qitem->index);
-        }
-        else
-        {
-            if (ffaitem)
-            {
-                // freeforall case, notify only one player of the removal
-                ffaitem->is_looted = true;
-                SendNotifyLootItemRemoved(lootSlot);
-            }
-            else
-            {
-                // not freeforall, notify everyone
-                if (conditem)
-                    conditem->is_looted = true;
-                loot->NotifyItemRemoved(lootSlot);
-            }
-        }
-
-        //if only one person is supposed to loot the item, then set it to looted
-        if (!item->freeforall)
-            item->is_looted = true;
-
-        --loot->unlootedCount;
-
-        SendNewItem(newitem, uint32(item->count), false, false, true);
-        UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_LOOT_ITEM, item->itemid, item->count);
-        UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_LOOT_TYPE, loot->loot_type, item->count);
-        UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_LOOT_EPIC_ITEM, item->itemid, item->count);
-
-        if (ItemPrototype const* proto = sObjectMgr.GetItemPrototype(item->itemid))
-            if (proto->Quality > ITEM_QUALITY_EPIC || (proto->Quality == ITEM_QUALITY_EPIC && proto->ItemLevel >= MinNewsItemLevel[sWorld.getConfig(CONFIG_UINT32_EXPANSION)]))
-                if (Guild* guild = sGuildMgr.GetGuildById(GetGuildId()))
-                    guild->LogNewsEvent(GUILD_NEWS_ITEM_LOOTED, time(NULL), GetObjectGuid(), 0, item->itemid);
-    }
-    else
-        SendEquipError( msg, NULL, NULL, item->itemid );
-}
