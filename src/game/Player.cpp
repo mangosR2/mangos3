@@ -16010,7 +16010,9 @@ bool Player::LoadFromDB(ObjectGuid guid, SqlQueryHolder* holder)
     //SetUInt64Value(PLAYER_FIELD_KNOWN_CURRENCIES, fields[??].GetUInt64());
 
     // Action bars state
-    SetByteValue(PLAYER_FIELD_BYTES, 2, fields[56].GetUInt8());
+    SetByteValue(PLAYER_FIELD_BYTES, 2, fields[57].GetUInt8());
+
+    m_slot = fields[59].GetUInt8();
 
     // cleanup inventory related item value fields (its will be filled correctly in _LoadInventory)
     for (uint8 slot = EQUIPMENT_SLOT_START; slot < EQUIPMENT_SLOT_END; ++slot)
@@ -16160,7 +16162,7 @@ bool Player::LoadFromDB(ObjectGuid guid, SqlQueryHolder* holder)
         mapEntry = sMapStore.LookupEntry(savedLocation.GetMapId());
         // if server restart after player save in BG or area
         // player can have current coordinates in to BG/Arena map, fix this
-        if (mapEntry->IsBattleGroundOrArena())
+        if (mapEntry && mapEntry->IsBattleGroundOrArena())
         {
             const WorldLocation& _loc = GetBattleGroundEntryPoint();
             if (!MapManager::IsValidMapCoord(_loc))
@@ -16272,6 +16274,16 @@ bool Player::LoadFromDB(ObjectGuid guid, SqlQueryHolder* holder)
             RelocateToHomebind();
     }
 
+    // if the player is in an instance and it has been reset in the meantime teleport him to the entrance
+    if (!player_at_bg && GetInstanceId() && !state)
+    {
+        AreaTrigger const* at = sObjectMgr.GetMapEntranceTrigger(GetMapId());
+        if (at)
+            Relocate(at->loc);
+        else
+            sLog.outError("Player %s(GUID: %u) logged in to a reset instance (map: %u) and there is no area-trigger leading to this map. Thus he can't be ported back to the entrance. This _might_ be an exploit attempt.", GetName(), GetGUIDLow(), GetMapId());
+    }
+
     SaveRecallPosition();
 
     time_t now = time(NULL);
@@ -16319,8 +16331,8 @@ bool Player::LoadFromDB(ObjectGuid guid, SqlQueryHolder* holder)
     UpdateHonorKills();
 
     m_deathExpireTime = (time_t)fields[37].GetUInt64();
-    if (m_deathExpireTime > now+MAX_DEATH_COUNT*DEATH_EXPIRE_STEP)
-        m_deathExpireTime = now+MAX_DEATH_COUNT*DEATH_EXPIRE_STEP-1;
+    if (m_deathExpireTime > now + MAX_DEATH_COUNT * DEATH_EXPIRE_STEP)
+        m_deathExpireTime = now + MAX_DEATH_COUNT * DEATH_EXPIRE_STEP - 1;
 
     std::string taxi_nodes = fields[38].GetCppString();
 
