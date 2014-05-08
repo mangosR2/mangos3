@@ -1620,14 +1620,14 @@ void BattleGround::UpdatePlayerScore(Player* Source, uint32 type, uint32 value)
     }
 }
 
-bool BattleGround::AddObject(uint32 type, uint32 entry, float x, float y, float z, float o, QuaternionData rotation, uint32 /*respawnTime*/)
+bool BattleGround::AddObject(uint32 type, uint32 entry, float x, float y, float z, float o, QuaternionData rotation, uint32 /*respawnTime*/, bool manualAnim)
 {
     // must be created this way, adding to godatamap would add it to the base map of the instance
     // and when loading it (in go::LoadFromDB()), a new guid would be assigned to the object, and a new object would be created
     // so we must create it specific for this instance
     GameObject* go = new GameObject;
     if (!go->Create(GetBgMap()->GenerateLocalLowGuid(HIGHGUID_GAMEOBJECT), entry, GetBgMap(),
-                    PHASEMASK_NORMAL, x, y, z, o, rotation))
+        PHASEMASK_NORMAL, x, y, z, o, rotation))
     {
         sLog.outErrorDb("Gameobject template %u not found in database! BattleGround not created!", entry);
         sLog.outError("Cannot create gameobject template %u! BattleGround not created!", entry);
@@ -1657,7 +1657,7 @@ bool BattleGround::AddObject(uint32 type, uint32 entry, float x, float y, float 
         data.go_state       = 1;
     */
 
-    //go->SetManualAnim(manualAnim);
+    go->SetManualAnim(manualAnim);
 
     go->AddToWorld();
     m_BgObjects[type] = go->GetObjectGuid();

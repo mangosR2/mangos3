@@ -24,6 +24,7 @@
 #include "Map.h"
 #include "ByteBuffer.h"
 #include "ObjectGuid.h"
+#include "GameObject.h"
 #include "WorldStateMgr.h"
 
 // magic event-numbers
@@ -542,7 +543,7 @@ class BattleGround
         // TODO drop m_BGObjects
         GuidVector m_BgObjects;
         void SpawnBGObject(ObjectGuid guid, uint32 respawntime);
-        bool AddObject(uint32 type, uint32 entry, float x, float y, float z, float o, QuaternionData rotation, uint32 respawnTime = 0);
+        bool AddObject(uint32 type, uint32 entry, float x, float y, float z, float o, QuaternionData rotation, uint32 respawnTime = 0, bool manualAnim = false);
         void SpawnBGCreature(ObjectGuid guid, uint32 respawntime);
         bool DelObject(uint32 type);
         void MakeInteractive(uint8 event1, uint8 event2, bool interactive);

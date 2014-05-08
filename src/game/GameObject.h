@@ -739,6 +739,13 @@ class MANGOS_DLL_SPEC GameObject : public WorldObject
         void SetPhaseMask(uint32 newPhaseMask, bool update);
         void EnableCollision(bool enable);
         bool CalculateCurrentCollisionState() const;
+        void SetManualAnim(bool apply)
+        {
+            if (apply && m_goInfo->type == GAMEOBJECT_TYPE_TRANSPORT)
+                m_updateFlag |= UPDATEFLAG_TRANSPORT_ARR;
+            else
+                m_updateFlag &= ~UPDATEFLAG_TRANSPORT_ARR;
+        }
 
         float GetObjectBoundingRadius() const override;     // overwrite WorldObject version
 

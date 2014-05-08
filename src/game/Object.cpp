@@ -322,7 +322,25 @@ void Object::BuildMovementUpdate(ByteBuffer * data, uint16 updateFlags) const
     data->WriteBit(updateFlags & UPDATEFLAG_SELF);
     data->WriteBit(updateFlags & UPDATEFLAG_VEHICLE);
     data->WriteBit(updateFlags & UPDATEFLAG_LIVING);
-    data->WriteBits(0, 24);                                     // Byte Counter
+
+    std::vector<uint32> transportFrames;
+    if (updateFlags & UPDATEFLAG_TRANSPORT_ARR)
+    {
+        const GameObjectInfo* goInfo = ((GameObject const*)this)->GetGOInfo();
+        if (goInfo->type == GAMEOBJECT_TYPE_TRANSPORT)
+        {
+            if (goInfo->transport.startFrame)
+                transportFrames.push_back(goInfo->transport.startFrame);
+            if (goInfo->transport.nextFrame1)
+                transportFrames.push_back(goInfo->transport.nextFrame1);
+            //if (goInfo->transport.nextFrame2)
+            //    transportFrames.push_back(goInfo->transport.nextFrame2);
+            //if (goInfo->transport.nextFrame3)
+            //    transportFrames.push_back(goInfo->transport.nextFrame3);
+        }
+    }
+
+    data->WriteBits(transportFrames.size(), 24);
     data->WriteBit(false);
     data->WriteBit(updateFlags & UPDATEFLAG_POSITION);                // flags & UPDATEFLAG_HAS_POSITION Game Object Position
     data->WriteBit(updateFlags & UPDATEFLAG_HAS_POSITION);            // Stationary Position
@@ -458,6 +476,9 @@ void Object::BuildMovementUpdate(ByteBuffer * data, uint16 updateFlags) const
     }
 
     data->FlushBits();
+
+    for (int i = 0; i < transportFrames.size(); ++i)
+        *data << uint32(transportFrames[i]);
 
     if (updateFlags & UPDATEFLAG_LIVING)
     {
