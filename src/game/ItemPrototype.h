@@ -656,6 +656,8 @@ struct ItemPrototype
 
     bool IsPotion() const { return Class==ITEM_CLASS_CONSUMABLE && SubClass==ITEM_SUBCLASS_POTION; }
     bool IsConjuredConsumable() const { return Class == ITEM_CLASS_CONSUMABLE && (Flags & ITEM_FLAG_CONJURED); }
+    static bool IsRestrictedByTitanGrip(uint32 InventoryType, uint32 SubClass) { return InventoryType == INVTYPE_2HWEAPON && (SubClass == ITEM_SUBCLASS_WEAPON_POLEARM || SubClass == ITEM_SUBCLASS_WEAPON_STAFF); }
+    bool IsRestrictedByTitanGrip() const { return IsRestrictedByTitanGrip(InventoryType, SubClass); }
     bool IsVellum() const
     {
         return Class == ITEM_CLASS_TRADE_GOODS && (1 << SubClass) & (1 << ITEM_SUBCLASS_VELLUM);

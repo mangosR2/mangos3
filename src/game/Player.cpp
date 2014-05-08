@@ -9236,7 +9236,12 @@ bool Player::GetSlotsForInventoryType(uint8 invType, uint8* slots, uint32 subCla
         case INVTYPE_2HWEAPON:
             slots[0] = EQUIPMENT_SLOT_MAINHAND;
             if (CanDualWield() && CanTitanGrip())
-                slots[1] = EQUIPMENT_SLOT_OFFHAND;
+            {
+                Item* mainItem = GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND);
+                if ((!mainItem || !ItemPrototype::IsRestrictedByTitanGrip(mainItem->GetProto()->InventoryType, mainItem->GetProto()->SubClass)) &&
+                    !ItemPrototype::IsRestrictedByTitanGrip(invType, subClass))
+                    slots[1] = EQUIPMENT_SLOT_OFFHAND;
+            }
             break;
         case INVTYPE_TABARD:
             slots[0] = EQUIPMENT_SLOT_TABARD;
@@ -9315,7 +9320,7 @@ uint8 Player::FindEquipSlot(ItemPrototype const* proto, uint32 slot, bool swap) 
         }
     }
 
-    return true;
+    return NULL_SLOT;
 }
 
 InventoryResult Player::CanUnequipItems(uint32 item, uint32 count) const
@@ -10680,6 +10685,13 @@ InventoryResult Player::CanEquipItem(uint8 slot, uint16& dest, Item* pItem, bool
                     if (!CanDualWield() || !CanTitanGrip())
                         return EQUIP_ERR_CANT_DUAL_WIELD;
                 }
+                else
+                {
+                    Item *mainItem = GetItemByPos( INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND );
+                    if (mainItem && mainItem->GetProto()->IsRestrictedByTitanGrip() ||
+                        pProto->IsRestrictedByTitanGrip())
+                        return EQUIP_ERR_ITEM_CANT_BE_EQUIPPED;
+                }
 
                 if (IsTwoHandUsed())
                     return EQUIP_ERR_CANT_EQUIP_WITH_TWOHANDED;
@@ -10690,13 +10702,14 @@ InventoryResult Player::CanEquipItem(uint8 slot, uint16& dest, Item* pItem, bool
             {
                 if (eslot == EQUIPMENT_SLOT_OFFHAND)
                 {
-                    if (!CanTitanGrip())
+                    Item *mainItem = GetItemByPos( INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND );                    
+                    if (!CanTitanGrip() || pProto->IsRestrictedByTitanGrip() || mainItem && mainItem->GetProto()->IsRestrictedByTitanGrip())
                         return EQUIP_ERR_ITEM_CANT_BE_EQUIPPED;
                 }
                 else if (eslot != EQUIPMENT_SLOT_MAINHAND)
                     return EQUIP_ERR_ITEM_CANT_BE_EQUIPPED;
 
-                if (!CanTitanGrip())
+                if (!CanTitanGrip() || pProto->IsRestrictedByTitanGrip())
                 {
                     // offhand item must can be stored in inventory for offhand item and it also must be unequipped
                     Item* offItem = GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND);
@@ -10771,6 +10784,9 @@ InventoryResult Player::CanBankItem(uint8 bag, uint8 slot, ItemPosCountVec& dest
     ItemPrototype const* pProto = pItem->GetProto();
     if (!pProto)
         return swap ? EQUIP_ERR_ITEMS_CANT_BE_SWAPPED : EQUIP_ERR_ITEM_NOT_FOUND;
+
+    if (pProto->Flags & ITEM_FLAG_LOOTABLE && !pItem->loot.empty())
+        return EQUIP_ERR_CANT_DO_RIGHT_NOW;
 
     // item used
     if (pItem->HasTemporaryLoot())
@@ -11256,6 +11272,8 @@ Item* Player::EquipItem(uint16 pos, Item* pItem, bool update)
                 {
                     m_weaponChangeTimer = spellProto->GetStartRecoveryTime();
 
+                    GetGlobalCooldownMgr().AddGlobalCooldown(spellProto, m_weaponChangeTimer);
+
                     WorldPacket data(SMSG_SPELL_COOLDOWN, 8 + 1 + 4);
                     data << GetObjectGuid();
                     data << uint8(1);
@@ -11550,6 +11568,14 @@ void Player::DestroyItem(uint8 bag, uint8 slot, bool update)
         if (pItem->IsBag() && pItem->IsEquipped())          // this also prevent infinity loop if empty bag stored in bag==slot
         {
             for (int i = 0; i < MAX_BAG_SIZE; ++i)
+                DestroyItem(slot, i, update);
+        }
+
+        // Also remove all contained items if the item is a bag. 
+        // This if() prevents item saving crashes if the condition for a bag to be empty before being destroyed was bypassed somehow.
+        else if (pItem->IsBag() && !((Bag*)pItem)->IsEmpty())
+        {
+            for (uint8 i = 0; i < MAX_BAG_SIZE; ++i)
                 DestroyItem(slot, i, update);
         }
 
@@ -22015,12 +22041,15 @@ void Player::AddItemDurations(Item* item)
 void Player::AutoUnequipOffhandIfNeed()
 {
     Item* offItem = GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND);
+    Item *mainItem = GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND);
     if (!offItem)
         return;
 
+    bool areRestrictionsByTitanGrip = offItem->GetProto()->IsRestrictedByTitanGrip() || mainItem && mainItem->GetProto()->IsRestrictedByTitanGrip();
+
     // need unequip offhand for 2h-weapon without TitanGrip (in any from hands)
     if ((CanDualWield() || offItem->GetProto()->InventoryType == INVTYPE_SHIELD || offItem->GetProto()->InventoryType == INVTYPE_HOLDABLE) &&
-        (CanTitanGrip() || (offItem->GetProto()->InventoryType != INVTYPE_2HWEAPON && !IsTwoHandUsed())))
+        (CanTitanGrip() || (offItem->GetProto()->InventoryType != INVTYPE_2HWEAPON && !IsTwoHandUsed())) && !areRestrictionsByTitanGrip)
         return;
 
     ItemPosCountVec off_dest;
