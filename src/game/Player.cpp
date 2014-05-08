@@ -16684,6 +16684,9 @@ bool Player::isAllowedToLoot(Creature* creature)
     if (!creature->HasFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_TAPPED))
         return false;
 
+    if (HasPendingBind())
+        return false;
+
     if (Player* recipient = creature->GetLootRecipient())
     {
         if (recipient == this)
@@ -17878,6 +17881,9 @@ DungeonPersistentState* Player::GetBoundInstanceSaveForSelfOrGroup(uint32 mapid)
 
 void Player::BindToInstance()
 {
+    if (!HasPendingBind())
+        return;
+
     WorldPacket data(SMSG_INSTANCE_SAVE_CREATED, 4);
     data << uint32(0);
     GetSession()->SendPacket(&data);
@@ -17938,7 +17944,8 @@ void Player::SendSavedInstances()
     }
 
     // Send opcode 811. true or false means, whether you have current raid/heroic instances
-    WorldPacket data(SMSG_UPDATE_INSTANCE_OWNERSHIP, 4);
+    WorldPacket data;
+    data.Initialize(SMSG_UPDATE_INSTANCE_OWNERSHIP);
     data << uint32(hasBeenSaved);
     GetSession()->SendPacket(&data);
 
