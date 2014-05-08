@@ -19925,7 +19925,7 @@ bool Player::ActivateTaxiPathTo(std::vector<uint32> const& nodes, Creature* npc 
         }
 
         // not let cheating with start flight in time of logout process || if casting not finished || while in combat || if not use Spell's with EffectSendTaxi
-        if (IsNonMeleeSpellCasted(false))
+        if (IsNonMeleeSpellCasted(false) || HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SILENCED) || HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PACIFIED))
         {
             GetSession()->SendActivateTaxiReply(ERR_TAXIPLAYERBUSY);
             return false;
@@ -20063,6 +20063,9 @@ bool Player::ActivateTaxiPathTo(std::vector<uint32> const& nodes, Creature* npc 
     RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
 
     GetSession()->SendActivateTaxiReply(ERR_TAXIOK);
+
+    DEBUG_LOG("WORLD: Sent SMSG_ACTIVATETAXIREPLY");
+
     GetSession()->SendDoFlight(mount_display_id, sourcepath);
 
     return true;
