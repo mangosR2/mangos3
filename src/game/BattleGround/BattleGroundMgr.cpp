@@ -1498,8 +1498,8 @@ void BattleGroundMgr::BuildPvpLogDataPacket(WorldPacket* data, BattleGround* bg)
         {
             if (ArenaTeam* at = sObjectMgr.GetArenaTeamById(bg->m_ArenaTeamIds[i]))
                 data->append(at->GetName().data(), at->GetName().length());
+        }
     }
-}
 
     *data << uint8(bg->GetPlayersCountByTeam(HORDE));
 
