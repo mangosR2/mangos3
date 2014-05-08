@@ -20457,7 +20457,12 @@ bool Player::BuyItemFromVendorSlot(ObjectGuid vendorGuid, uint32 vendorslot, uin
 
     // reputation discount
     if (price)
-        price = uint32(floor(price * GetReputationPriceDiscount(pCreature)));
+    {
+        float discountMod = GetReputationPriceDiscount(pCreature);
+        if (int32 auraMod = GetTotalAuraModifier(SPELL_AURA_MOD_VENDOR_PRICE))
+            discountMod *=  auraMod / 100.0f;
+        price = uint64(floor(price * discountMod));
+    }
 
     if (GetMoney() < price)
     {
