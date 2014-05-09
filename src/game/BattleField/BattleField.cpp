@@ -32,12 +32,26 @@ BattleField::BattleField(uint32 id) : OutdoorPvP(id), m_battleFieldId(0)
     m_isBattleField = true;
 
     m_defender = TeamIndex(urand(0, 1));
+
     m_state = BF_STATE_COOLDOWN;
     m_timer = 15 * MINUTE * IN_MILLISECONDS;
     m_queueUpdateTimer = 30000;
     m_scoresUpdateTimer = 5000;
 
     bAboutSend = false;
+}
+
+BattleField::~BattleField()
+{
+    for (BFPlayerScoreMap::iterator itr = m_playerScores.begin(); itr != m_playerScores.end(); ++itr)
+        delete itr->second;
+
+    for (uint32 i = 0; i < PVP_TEAM_COUNT; ++i)
+        for (std::set<Group*>::iterator itr = m_Raids[i].begin(); itr != m_Raids[i].end();)
+        {
+            delete *itr;
+            itr = m_Raids[i].begin();
+        }
 }
 
 void BattleField::KickPlayer(Player* plr)
@@ -140,7 +154,7 @@ bool BattleField::AddPlayerToRaid(Player* player)
     if (Group* group = player->GetGroup())
     {
         DEBUG_LOG("Battlefield: Player %s already has group %s, uninviting", player->GetGuidStr().c_str(), group->GetObjectGuid().GetString().c_str());
-        group->RemoveMember(player->GetObjectGuid(), 0);
+        group->RemoveMember(player->GetObjectGuid(), GROUP_REMOVEMETHOD_DEFAULT);
     }
 
     TeamIndex teamIdx = GetTeamIndex(player->GetTeam());
@@ -188,7 +202,7 @@ bool BattleField::RemovePlayerFromRaid(ObjectGuid guid)
 {
     if (Group* group = GetGroupFor(guid))
     {
-        if (group->RemoveMember(guid, 0) == 0)
+        if (group->RemoveMember(guid, GROUP_REMOVEMETHOD_DEFAULT) == 0)
             delete group;
 
         return true;
@@ -655,6 +669,8 @@ void BattleField::SendWarningToAll(int32 entry)
         data << ObjectGuid();
         data << uint32(strlen(text) + 1);
         data << text;
+        data << uint8(0);
+        data << float(0.0f);
         data << uint8(0);
         plr->GetSession()->SendPacket(&data);
     }

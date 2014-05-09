@@ -3527,6 +3527,14 @@ enum PhaseMasks
     PHASEMASK_ANYWHERE = 0xFFFFFFFF
 };
 
+enum RemoveMethod
+{
+    GROUP_REMOVEMETHOD_DEFAULT      = 0,
+    GROUP_REMOVEMETHOD_KICK         = 1,
+    GROUP_REMOVEMETHOD_LEAVE        = 2,
+    GROUP_REMOVEMETHOD_KICK_LFG     = 3
+};
+
 enum ActivateTaxiReply
 {
     ERR_TAXIOK                      = 0,
@@ -3551,6 +3559,7 @@ enum TrackedAuraType
     TRACK_AURA_TYPE_CONTROL_VEHICLE             = 2,        // relation - caster : target is N:1.
     MAX_TRACKED_AURA_TYPES
 };
+
 #define VOID_STORAGE_UNLOCK         100 * GOLD
 #define VOID_STORAGE_STORE_ITEM     25 * GOLD
 #define VOID_STORAGE_MAX_DEPOSIT    9

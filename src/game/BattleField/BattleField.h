@@ -107,6 +107,7 @@ class MANGOS_DLL_SPEC BattleField : public OutdoorPvP
 {
     public:
         BattleField(uint32 id);
+        virtual ~BattleField();
 
         virtual void HandlePlayerEnterZone(Player* pPlayer, bool isMainZone) override;
         virtual void HandlePlayerLeaveZone(Player* pPlayer, bool isMainZone) override;
