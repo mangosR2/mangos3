@@ -60,6 +60,7 @@ void WorldSession::HandleTabardVendorActivateOpcode( WorldPacket & recv_data )
         return;
     }
 
+    GetPlayer()->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_ACTION);
     // remove fake death
     if(GetPlayer()->hasUnitState(UNIT_STAT_DIED))
         GetPlayer()->RemoveSpellsCausingAura(SPELL_AURA_FEIGN_DEATH);
@@ -86,6 +87,7 @@ void WorldSession::HandleBankerActivateOpcode( WorldPacket & recv_data )
         return;
 
     // remove fake death
+    GetPlayer()->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_ACTION);
     if(GetPlayer()->hasUnitState(UNIT_STAT_DIED))
         GetPlayer()->RemoveSpellsCausingAura(SPELL_AURA_FEIGN_DEATH);
 
@@ -174,6 +176,7 @@ void WorldSession::SendTrainerList(ObjectGuid guid, const std::string& strTitle)
     }
 
     // remove fake death
+    GetPlayer()->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_ACTION);
     if (GetPlayer()->hasUnitState(UNIT_STAT_DIED))
         GetPlayer()->RemoveSpellsCausingAura(SPELL_AURA_FEIGN_DEATH);
 
@@ -290,6 +293,7 @@ void WorldSession::HandleTrainerBuySpellOpcode( WorldPacket & recv_data )
 
     uint32 trainState = 2;
 
+    GetPlayer()->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_ACTION);
     // remove fake death
     if (GetPlayer()->hasUnitState(UNIT_STAT_DIED))
         GetPlayer()->RemoveSpellsCausingAura(SPELL_AURA_FEIGN_DEATH);
@@ -382,6 +386,7 @@ void WorldSession::HandleGossipHelloOpcode(WorldPacket & recv_data)
         return;
     }
 
+    GetPlayer()->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_ACTION);
     // remove fake death
     if (GetPlayer()->hasUnitState(UNIT_STAT_DIED))
         GetPlayer()->RemoveSpellsCausingAura(SPELL_AURA_FEIGN_DEATH);
@@ -415,6 +420,7 @@ void WorldSession::HandleGossipSelectOptionOpcode( WorldPacket & recv_data )
         DEBUG_LOG("Gossip code: %s", code.c_str());
     }
 
+    GetPlayer()->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_ACTION);
     // remove fake death
     if (GetPlayer()->hasUnitState(UNIT_STAT_DIED))
         GetPlayer()->RemoveSpellsCausingAura(SPELL_AURA_FEIGN_DEATH);
@@ -465,6 +471,7 @@ void WorldSession::HandleSpiritHealerActivateOpcode( WorldPacket & recv_data )
         return;
     }
 
+    GetPlayer()->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_ACTION);
     // remove fake death
     if (GetPlayer()->hasUnitState(UNIT_STAT_DIED))
         GetPlayer()->RemoveSpellsCausingAura(SPELL_AURA_FEIGN_DEATH);
@@ -545,6 +552,7 @@ void WorldSession::HandleBinderActivateOpcode(WorldPacket& recv_data)
         return;
     }
 
+    GetPlayer()->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_ACTION);
     // remove fake death
     if(GetPlayer()->hasUnitState(UNIT_STAT_DIED))
         GetPlayer()->RemoveSpellsCausingAura(SPELL_AURA_FEIGN_DEATH);
@@ -565,7 +573,7 @@ void WorldSession::SendBindPoint(Creature *npc)
     data << npc->GetObjectGuid();
     data << uint32(3286);                                   // Bind
     data << uint32(2);
-    SendPacket( &data );
+    SendPacket(&data);
 
     _player->PlayerTalkClass->CloseGossip();
 }
@@ -583,6 +591,7 @@ void WorldSession::HandleListStabledPetsOpcode( WorldPacket & recv_data )
         return;
     }
 
+    GetPlayer()->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_ACTION);
     // remove fake death
     if(GetPlayer()->hasUnitState(UNIT_STAT_DIED))
         GetPlayer()->RemoveSpellsCausingAura(SPELL_AURA_FEIGN_DEATH);
@@ -690,6 +699,7 @@ void WorldSession::HandleRepairItemOpcode( WorldPacket & recv_data )
         return;
     }
 
+    GetPlayer()->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_ACTION);
     // remove fake death
     if(GetPlayer()->hasUnitState(UNIT_STAT_DIED))
         GetPlayer()->RemoveSpellsCausingAura(SPELL_AURA_FEIGN_DEATH);
@@ -788,7 +798,7 @@ void WorldSession::HandleSetPetSlotOpcode(WorldPacket& recv_data)
             return;
         }
 
-         CreatureInfo const* creatureInfo = ObjectMgr::GetCreatureTemplate(creatureId);
+        CreatureInfo const* creatureInfo = ObjectMgr::GetCreatureTemplate(creatureId);
         if (!creatureInfo || !creatureInfo->isTameable(_player->CanTameExoticPets()))
         {
             // if problem in exotic pet
