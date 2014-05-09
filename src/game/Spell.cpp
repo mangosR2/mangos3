@@ -959,6 +959,7 @@ void Spell::FillTargetMap()
                         default:
                             SetTargetMap(SpellEffectIndex(i), spellEffect->EffectImplicitTargetA, tmpUnitLists[i /*==effToIndex[i]*/]);
                             SetTargetMap(SpellEffectIndex(i), spellEffect->EffectImplicitTargetB, tmpUnitLists[i /*==effToIndex[i]*/]);
+                            break;
                     }
                     break;
                 case TARGET_SELF2:
@@ -2639,20 +2640,18 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
         }
         case TARGET_AREAEFFECT_INSTANT:
         {
-            SpellTargets targetB;
+            SpellTargets targetB = SPELL_TARGETS_AOE_DAMAGE;
             switch (spellEffect->Effect)
             {
                 case SPELL_EFFECT_QUEST_COMPLETE:
                 case SPELL_EFFECT_KILL_CREDIT_PERSONAL:
                 case SPELL_EFFECT_KILL_CREDIT_GROUP:
                     targetB = SPELL_TARGETS_ALL;
-                    break;
                 default:
                     // Select friendly targets for positive effect
                     if (IsPositiveEffect(m_spellInfo, effIndex))
                         targetB = SPELL_TARGETS_FRIENDLY;
-                    else
-                        targetB = SPELL_TARGETS_AOE_DAMAGE;
+                    break;
             }
 
             UnitList tempTargetUnitMap;
