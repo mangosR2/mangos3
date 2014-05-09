@@ -212,7 +212,7 @@ void Object::BuildCreateUpdateBlockForPlayer(UpdateData *data, Player *target) c
         {
             Creature* creature = (Creature*)this;
             if (creature->IsTemporarySummon() && ((TemporarySummon*)this)->GetSummonerGuid().IsPlayer())
-            updatetype = UPDATETYPE_CREATE_OBJECT2;
+                updatetype = UPDATETYPE_CREATE_OBJECT2;
             break;
         }
         case HIGHGUID_GAMEOBJECT:
@@ -254,7 +254,7 @@ void Object::BuildCreateUpdateBlockForPlayer(UpdateData *data, Player *target) c
 
     //DEBUG_LOG("BuildCreateUpdate: update-type: %u, object-type: %u got updateFlags: %X", updatetype, m_objectTypeId, updateFlags);
 
-    ByteBuffer buf;
+    ByteBuffer buf(500);
     buf << uint8(updatetype);
     buf << GetPackGUID();
     buf << uint8(m_objectTypeId);
@@ -656,6 +656,8 @@ void Object::BuildValuesUpdate(uint8 updatetype, ByteBuffer * data, UpdateMask *
         {
             if (((GameObject*)this)->ActivateToQuest(target) || target->isGameMaster())
                 IsActivateToQuest = true;
+
+            updateMask->SetBit(GAMEOBJECT_DYNAMIC);
         }
         else if (isType(TYPEMASK_UNIT))
         {
@@ -672,6 +674,8 @@ void Object::BuildValuesUpdate(uint8 updatetype, ByteBuffer * data, UpdateMask *
         {
             if (((GameObject*)this)->ActivateToQuest(target) || target->isGameMaster())
                 IsActivateToQuest = true;
+
+            updateMask->SetBit(GAMEOBJECT_DYNAMIC);
             updateMask->SetBit(GAMEOBJECT_BYTES_1);         // why do we need this here?
         }
         else if (isType(TYPEMASK_UNIT))
@@ -956,6 +960,8 @@ void Object::_SetCreateBits(UpdateMask* updateMask, Player* target) const
             ((GetUInt32Value(index) != 0) && ufd.IsUpdateFieldVisible(index)))
             updateMask->SetBit(index);
     }
+    if (GetTypeId() == TYPEID_GAMEOBJECT)
+        updateMask->SetBit(GAMEOBJECT_DISPLAYID);
 }
 
 void Object::SetInt32Value( uint16 index, int32 value )
