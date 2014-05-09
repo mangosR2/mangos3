@@ -16183,6 +16183,26 @@ void Unit::BuildMoveFeatherFallPacket(WorldPacket* data, bool apply, uint32 valu
     }
 }
 
+void Unit::BuildMoveGravityPacket(WorldPacket* data, bool apply, uint32 value)
+{
+    if (apply)
+    {
+        data->Initialize(SMSG_MOVE_GRAVITY_ENABLE);
+        data->WriteGuidMask<1, 4, 7, 5, 2, 0, 3, 6>(GetObjectGuid());
+        data->WriteGuidBytes<3>(GetObjectGuid());
+        *data << uint32(value);
+        data->WriteGuidBytes<7, 6, 4, 0, 1, 5, 2>(GetObjectGuid());
+    }
+    else
+    {
+        data->Initialize(SMSG_MOVE_GRAVITY_DISABLE);
+        data->WriteGuidMask<0, 1, 5, 7, 6, 4, 3, 2>(GetObjectGuid());
+        data->WriteGuidBytes<7, 2, 0>(GetObjectGuid());
+        *data << uint32(value);
+        data->WriteGuidBytes<5, 1, 3, 4, 6>(GetObjectGuid());
+    }
+}
+
 void Unit::AddSpellCooldown(uint32 spellid, uint32 itemid, time_t end_time)
 {
     SpellCooldown sc;

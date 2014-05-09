@@ -605,6 +605,8 @@ Player::Player(WorldSession* session): Unit(), m_mover(this), m_camera(NULL), m_
 
     memset(m_voidStorageItems, NULL, VOID_STORAGE_MAX_SLOT * sizeof(VoidStorageItem*));
 
+    m_rootTimes = 0;
+
     m_maxPersonalRatedRating = 0;
 
     m_pyromaniacCounter = 0;
@@ -1893,12 +1895,12 @@ bool Player::TeleportTo(WorldLocation const& loc, uint32 options)
             DuelComplete(DUEL_FLED);
 
     // reset movement flags at teleport, because player will continue move with these flags after teleport
-    DisableSpline();
     m_movementInfo.SetMovementFlags(MOVEFLAG_NONE);
     m_movementInfo.GetJumpInfo().Clear();
     m_movementInfo.GetStatusInfo().hasPitch = false;
     m_movementInfo.GetStatusInfo().hasSplineElevation = false;
 
+    DisableSpline();
     WorldPacket data;
     BuildForceMoveRootPacket(&data, false, 0);
     SendMessageToSet(&data, true);
@@ -4920,15 +4922,25 @@ void Player::DeleteOldCharacters(uint32 keepDays)
 
 void Player::SetRoot(bool enable, uint32 val)
 {
+    if (enable && m_rootTimes > 0)   // blizzard internal check?
+        ++m_rootTimes;
+
     WorldPacket data;
-    BuildForceMoveRootPacket(&data, enable, val);
-    GetSession()->SendPacket(&data);
+    BuildForceMoveRootPacket(&data, enable, enable ? m_rootTimes : ++m_rootTimes);
+    SendMessageToSet(&data, true);
 }
 
 void Player::SetWaterWalk(bool enable, uint32 val)
 {
     WorldPacket data;
     BuildMoveWaterWalkPacket(&data, enable, val);
+    GetSession()->SendPacket(&data);
+}
+
+void Player::SetGravity(bool enable)
+{
+    WorldPacket data;
+    BuildMoveGravityPacket(&data, enable, ++m_rootTimes);
     GetSession()->SendPacket(&data);
 }
 

@@ -2380,6 +2380,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         void BuildSendPlayVisualPacket(WorldPacket* data, uint32 value, bool impact);
         void BuildMoveSetCanFlyPacket(WorldPacket* data, bool apply, uint32 value);
         void BuildMoveFeatherFallPacket(WorldPacket* data, bool apply, uint32 value);
+        void BuildMoveGravityPacket(WorldPacket* data, bool apply, uint32 value);
 
         // Cooldown System
         static uint32 const infinityCooldownDelay = MONTH;  // used for set "infinity cooldowns" for spells and check

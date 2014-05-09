@@ -246,6 +246,8 @@ bool VehicleKit::AddPassenger(Unit* passenger, SeatId seatId)
     if (passenger->GetTypeId() == TYPEID_PLAYER)
     {
         ((Player*)passenger)->SetViewPoint(GetBase());
+        ((Player*)passenger)->SetGravity(false);
+
         passenger->SetRoot(true, (seatInfo->m_flags & (SEAT_FLAG_CAN_CAST | SEAT_FLAG_CAN_ATTACK) ? 2 : 0));
     }
 
@@ -313,8 +315,8 @@ bool VehicleKit::AddPassenger(Unit* passenger, SeatId seatId)
         if (!(((Creature*)GetBase())->GetCreatureInfo()->flags_extra & CREATURE_FLAG_EXTRA_KEEP_AI))
             ((Creature*)GetBase())->AIM_Initialize();
 
-        if (GetBase()->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE))
-            GetBase()->SetRoot(true);
+        //if (GetBase()->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE))
+        //    GetBase()->SetRoot(true);
 
         // Set owner's speedrate to vehicle at board.
         else if (passenger->IsWalking() && !GetBase()->IsWalking())
@@ -424,6 +426,7 @@ void VehicleKit::RemovePassenger(Unit* passenger, bool dismount /*false*/)
         Player* player = (Player*)passenger;
         player->SetViewPoint(NULL);
 
+        ((Player*)passenger)->SetGravity(true);
         passenger->SetRoot(false);
 
         player->SetMover(player);
