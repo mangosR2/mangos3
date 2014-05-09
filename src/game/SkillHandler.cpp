@@ -27,7 +27,7 @@
 #include "SpellMgr.h"
 #include "UpdateMask.h"
 
-void WorldSession::HandleLearnTalentOpcode( WorldPacket & recv_data )
+void WorldSession::HandleLearnTalentOpcode(WorldPacket & recv_data)
 {
     DEBUG_LOG("CMSG_LEARN_PREVIEW_TALENTS");
 
@@ -35,7 +35,7 @@ void WorldSession::HandleLearnTalentOpcode( WorldPacket & recv_data )
     recv_data >> talent_id >> requested_rank;
 
     if (_player->LearnTalent(talent_id, requested_rank))
-    _player->SendTalentsInfoData(false);
+        _player->SendTalentsInfoData(false);
     else
         sLog.outError("WorldSession::HandleLearnTalentOpcode: learn talent %u rank %u failed for %s (account %u)", talent_id, requested_rank, GetPlayerName(), GetAccountId());
 }
@@ -66,7 +66,7 @@ void WorldSession::HandleLearnPreviewTalents(WorldPacket& recvPacket)
 
     uint32 talentId, talentRank;
 
-    for(uint32 i = 0; i < talentsCount; ++i)
+    for (uint32 i = 0; i < talentsCount; ++i)
     {
         recvPacket >> talentId >> talentRank;
 
@@ -81,7 +81,7 @@ void WorldSession::HandleLearnPreviewTalents(WorldPacket& recvPacket)
     _player->SendTalentsInfoData(false);
 }
 
-void WorldSession::HandleTalentWipeConfirmOpcode( WorldPacket & recv_data )
+void WorldSession::HandleTalentWipeConfirmOpcode(WorldPacket & recv_data)
 {
     DETAIL_LOG("MSG_TALENT_WIPE_CONFIRM");
     ObjectGuid guid;
@@ -100,10 +100,10 @@ void WorldSession::HandleTalentWipeConfirmOpcode( WorldPacket & recv_data )
 
     if (!(_player->resetTalents()))
     {
-        WorldPacket data( MSG_TALENT_WIPE_CONFIRM, 8+4);    //you have not any talent
+        WorldPacket data(MSG_TALENT_WIPE_CONFIRM, 8 + 4);    //you have not any talent
         data << uint64(0);
         data << uint32(0);
-        SendPacket( &data );
+        SendPacket(&data);
         return;
     }
 
@@ -111,7 +111,7 @@ void WorldSession::HandleTalentWipeConfirmOpcode( WorldPacket & recv_data )
     unit->CastSpell(_player, 14867, true);                  //spell: "Untalent Visual Effect"
 }
 
-void WorldSession::HandleUnlearnSkillOpcode(WorldPacket & recv_data)
+void WorldSession::HandleUnlearnSkillOpcode(WorldPacket& recv_data)
 {
     uint32 skill_id;
     recv_data >> skill_id;
