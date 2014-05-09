@@ -99,8 +99,8 @@ class MANGOS_DLL_SPEC OutdoorPvP
         // Damage GO - for WG mostly
         virtual bool CanDamageGO(GameObject* pGo, Player* invoker) { return true; }
         virtual void EventPlayerDamageGO(Player* /*player*/, GameObject* /*target_obj*/, uint32 /*eventId*/, uint32 /*bySpellId*/) {}
-        
-        // send world state update to all players present
+
+        // send world state update to all players present in map
         void SendUpdateWorldStateForMap(uint32 field, uint32 value, Map* map);
         void SendUpdateWorldState(uint32 field, uint32 value);
 
