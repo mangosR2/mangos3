@@ -663,6 +663,9 @@ void WorldSession::HandleRaidReadyCheckOpcode(WorldPacket& recv_data)
             return;
 
         /** error handling **/
+        if (BattleGround* bg = GetPlayer()->GetBattleGround())
+            return;
+
         if (!group->IsLeader(GetPlayer()->GetObjectGuid()) &&
             !group->IsAssistant(GetPlayer()->GetObjectGuid()))
             return;
@@ -880,16 +883,13 @@ void WorldSession::BuildPartyMemberStatsChangedPacket(Player* player, WorldPacke
     }
 
     if (mask & GROUP_UPDATE_FLAG_VEHICLE_SEAT)
-        *data << int32(0);
+        *data << uint32(player->m_movementInfo.GetTransportDBCSeat());
 
     if (mask & GROUP_UPDATE_FLAG_PHASE)
     {
         *data << uint32(8);
         *data << uint32(0);
     }
-
-    if (mask & GROUP_UPDATE_FLAG_VEHICLE_SEAT)
-        *data << uint32(player->m_movementInfo.GetTransportDBCSeat());
 }
 
 // this procedure handles clients CMSG_REQUEST_PARTY_MEMBER_STATS request
