@@ -56,8 +56,6 @@ enum CreatureFlagsExtra
     CREATURE_FLAG_EXTRA_NO_CALL_ASSIST  = 0x00000800,       // creature shouldn't call for assistance on aggro
     CREATURE_FLAG_EXTRA_KEEP_AI         = 0x00001000,       // creature keeps ScriptedAI even after being charmed / controlled (instead of getting PetAI)
     CREATURE_FLAG_EXTRA_TAUNT_DIMINISHING = 0x00002000,     // creature will only have Taunt diminishing returns if they have been specifically flagged (http://eu.battle.net/wow/en/game/patch-notes/3-3-0)
-    CREATURE_FLAG_EXTRA_NO_TALKTO_CREDIT= 0x00004000,       // creature doesn't give quest-credits when talked to (temporarily flag)
-    CREATURE_FLAG_EXTRA_DUNGEON_BOSS    = 0x10008000,       // creature is a dungeon boss (SET DYNAMICALLY, DO NOT ADD IN DB)
 };
 
 // GCC have alternative #pragma pack(N) syntax and old gcc version not support pack(push,N), also any gcc version not support it at some platform
