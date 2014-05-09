@@ -89,7 +89,7 @@ void WorldSession::HandleGroupInviteOpcode(WorldPacket& recv_data)
     ObjectGuid guid;
 
     recv_data.read_skip<uint32>();      // cross-realm party related
-    recv_data.read_skip<uint32>();                          // roles mask?
+    recv_data.read_skip<uint32>();      // roles mask?
 
     recv_data.ReadGuidMask<2, 7>(guid);
     uint32 realmLength = recv_data.ReadBits(9);
@@ -265,6 +265,10 @@ void WorldSession::HandleGroupInviteResponseOpcode(WorldPacket& recv_data)
         else
             DEBUG_LOG("WorldSession::HandleGroupAcceptOpcode %s accept %s invite.",GetPlayer()->GetObjectGuid().GetString().c_str(), group->GetObjectGuid().GetString().c_str());
     }
+
+    // everything is fine, do it, PLAYER'S GROUP IS SET IN ADDMEMBER!!!
+    if (!group->AddMember(GetPlayer()->GetObjectGuid(), GetPlayer()->GetName()))
+        return;
 
     // Frozen Mod
     group->BroadcastGroupUpdate();
@@ -762,7 +766,6 @@ void WorldSession::BuildPartyMemberStatsChangedPacket(Player* player, WorldPacke
         *data << uint32(player->GetMaxHealth());
 
     Powers powerType = player->getPowerType();
-
     if (mask & GROUP_UPDATE_FLAG_POWER_TYPE)
         *data << uint8(powerType);
 
@@ -791,7 +794,7 @@ void WorldSession::BuildPartyMemberStatsChangedPacket(Player* player, WorldPacke
         *data << uint64(auramask);
         *data << uint32(MAX_AURAS);         // server sends here number of visible auras, but client checks
                                             // if aura is in auramask, so it seems no difference if there will be MAX_AURAS
-        for(uint32 i = 0; i < MAX_AURAS; ++i)
+        for (uint32 i = 0; i < MAX_AURAS; ++i)
         {
             if (auramask & (uint64(1) << i))
             {
@@ -845,13 +848,13 @@ void WorldSession::BuildPartyMemberStatsChangedPacket(Player* player, WorldPacke
     {
         if (pet)
         {
-            *data << uint8(0);              // if true, client clears all auras that are not in auramask and whose index is lower amount sent below
             MAPLOCK_READ(pet, MAP_LOCK_TYPE_AURAS);
+            *data << uint8(0);              // if true, client clears all auras that are not in auramask and whose index is lower amount sent below
             const uint64& auramask = pet->GetAuraUpdateMask();
             *data << uint64(auramask);
             *data << uint32(MAX_AURAS);     // server sends here number of visible auras, but client checks
                                             // if aura is in auramask, so it seems no difference if there will be MAX_AURAS
-            for(uint32 i = 0; i < MAX_AURAS; ++i)
+            for (uint32 i = 0; i < MAX_AURAS; ++i)
             {
                 if (auramask & (uint64(1) << i))
                 {
@@ -911,18 +914,12 @@ void WorldSession::HandleRequestPartyMemberStatsOpcode(WorldPacket& recv_data)
         return;
     }
 
-    Powers powerType = player->getPowerType();
 
     uint32 updateFlags = GROUP_UPDATE_FLAG_STATUS | GROUP_UPDATE_FLAG_CUR_HP | GROUP_UPDATE_FLAG_MAX_HP |
-        GROUP_UPDATE_FLAG_CUR_POWER | GROUP_UPDATE_FLAG_MAX_POWER | GROUP_UPDATE_FLAG_LEVEL |
-        GROUP_UPDATE_FLAG_ZONE | GROUP_UPDATE_FLAG_POSITION | GROUP_UPDATE_FLAG_AURAS |
-        GROUP_UPDATE_FLAG_PET_NAME | GROUP_UPDATE_FLAG_PET_MODEL_ID | GROUP_UPDATE_FLAG_PET_AURAS;
-
-    uint32 mask1 = GROUP_UPDATE_FLAG_STATUS | GROUP_UPDATE_FLAG_CUR_HP | GROUP_UPDATE_FLAG_MAX_HP |
         GROUP_UPDATE_FLAG_POWER_TYPE | GROUP_UPDATE_FLAG_CUR_POWER | GROUP_UPDATE_FLAG_MAX_POWER |
         GROUP_UPDATE_FLAG_LEVEL | GROUP_UPDATE_FLAG_ZONE | GROUP_UPDATE_FLAG_POSITION |
-        GROUP_UPDATE_FLAG_AURAS | GROUP_UPDATE_FLAG_PET_NAME | GROUP_UPDATE_FLAG_PET_AURAS |
-        GROUP_UPDATE_FLAG_PHASE;
+        GROUP_UPDATE_FLAG_AURAS | GROUP_UPDATE_FLAG_PET_NAME | GROUP_UPDATE_FLAG_PET_MODEL_ID |
+        GROUP_UPDATE_FLAG_PET_AURAS | GROUP_UPDATE_FLAG_PHASE;
 
     Pet* pet = player->GetPet();
     if (pet)
@@ -954,6 +951,7 @@ void WorldSession::HandleRequestPartyMemberStatsOpcode(WorldPacket& recv_data)
     if (player->isDND())
         playerStatus |= MEMBER_STATUS_DND;
 
+    Powers powerType = player->getPowerType();
     WorldPacket data(SMSG_PARTY_MEMBER_STATS_FULL, 255);
     data << uint8(0);                                       // only for SMSG_PARTY_MEMBER_STATS_FULL, probably arena/bg related
     data << player->GetPackGUID();
