@@ -4361,7 +4361,7 @@ void SpellMgr::LoadPetLevelupSpellMap()
         for (uint32 j = 0; j < sSkillLineAbilityStore.GetNumRows(); ++j)
         {
             SkillLineAbilityEntry const *skillLine = sSkillLineAbilityStore.LookupEntry(j);
-            if ( !skillLine )
+            if (!skillLine)
                 continue;
 
             if (skillLine->skillId!=creatureFamily->skillLine[0] &&
@@ -4381,7 +4381,7 @@ void SpellMgr::LoadPetLevelupSpellMap()
 
             spellSet.insert(PetLevelupSpellSet::value_type(spell->GetSpellLevel(),spell->Id));
             count++;
-      }
+        }
     }
 
     sLog.outString();

@@ -3753,7 +3753,7 @@ bool Player::addSpell(uint32 spell_id, bool active, bool learning, bool dependen
                 continue;
 
             if (_spell_idx->second->learnOnGetSkill == ABILITY_LEARNED_ON_GET_RACE_OR_CLASS_SKILL ||
-                // lockpicking/runeforging special case, not have ABILITY_LEARNED_ON_GET_RACE_OR_CLASS_SKILL
+                    // lockpicking/runeforging special case, not have ABILITY_LEARNED_ON_GET_RACE_OR_CLASS_SKILL
                     (pSkill->id == SKILL_RUNEFORGING && _spell_idx->second->max_value == 0))
             {
                 switch (GetSkillRangeType(pSkill, _spell_idx->second->racemask != 0))
@@ -3987,8 +3987,8 @@ void Player::removeSpell(uint32 spell_id, bool disabled, bool learn_low_rank, bo
                 continue;
 
             if ((_spell_idx->second->learnOnGetSkill == ABILITY_LEARNED_ON_GET_RACE_OR_CLASS_SKILL &&
-                pSkill->categoryId != SKILL_CATEGORY_CLASS) ||// not unlearn class skills (spellbook/talent pages)
-                // lockpicking/runeforging special case, not have ABILITY_LEARNED_ON_GET_RACE_OR_CLASS_SKILL
+                    pSkill->categoryId != SKILL_CATEGORY_CLASS) ||// not unlearn class skills (spellbook/talent pages)
+                    // lockpicking/runeforging special case, not have ABILITY_LEARNED_ON_GET_RACE_OR_CLASS_SKILL
                     (pSkill->id == SKILL_RUNEFORGING && _spell_idx->second->max_value == 0))
             {
                 // not reset skills for professions and racial abilities
@@ -5963,17 +5963,15 @@ bool Player::UpdateSkill(uint32 skill_id, uint32 step)
     if (!max || !value || value >= max)
         return false;
 
-    if (value * 512 < max * urand(0, 512))
-    {
-        uint32 new_value = value + step;
-        if (new_value > max)
-            new_value = max;
+    uint32 new_value = value + step;
+    if (new_value > max)
+        new_value = max;
 
     SetUInt16Value(PLAYER_SKILL_RANK_0 + field, offset, new_value);
     if (itr->second.uState != SKILL_NEW)
         itr->second.uState = SKILL_CHANGED;
     UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_REACH_SKILL_LEVEL, skill_id);
-    }
+
     return true;
 }
 
@@ -6198,12 +6196,12 @@ void Player::UpdateSkillsForLevel()
         /// update only level dependent max skill values
         if (max != 1)
         {
-                SetUInt16Value(PLAYER_SKILL_MAX_RANK_0 + field, offset, maxSkill);
-                if (itr->second.uState != SKILL_NEW)
-                    itr->second.uState = SKILL_CHANGED;
-            }
+            SetUInt16Value(PLAYER_SKILL_MAX_RANK_0 + field, offset, maxSkill);
+            if (itr->second.uState != SKILL_NEW)
+                itr->second.uState = SKILL_CHANGED;
         }
     }
+}
 
 void Player::UpdateSkillsToMaxSkillsForLevel()
 {
@@ -6280,6 +6278,8 @@ void Player::SetSkill(uint16 id, uint16 currVal, uint16 maxVal, uint16 step /*=0
                     if (pAbility->skillId == id)
                         removeSpell(sSpellMgr.GetFirstSpellInChain(pAbility->spellId));
         }
+        if (IsProfessionSkill(id))
+            UpdateAllItemEnchantsAtSkill(id, oldVal, currVal);
     }
     else if (currVal)                                        // add
     {
@@ -6331,6 +6331,9 @@ void Player::SetSkill(uint16 id, uint16 currVal, uint16 maxVal, uint16 step /*=0
                         if ((*j)->GetModifier()->m_miscvalue == int32(id))
                             (*j)->ApplyModifier(true);
                 }
+
+                if (IsProfessionSkill(id))
+                    UpdateAllItemEnchantsAtSkill(id, 0, GetSkillValue(id));
 
                 // Learn all spells for skill
                 learnSkillRewardedSpells(id, currVal);
