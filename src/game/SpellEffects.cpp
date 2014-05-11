@@ -14586,7 +14586,13 @@ void Spell::EffectResurrect(SpellEffectEntry const* effect)
     if (pTarget->isRessurectRequested())       // already have one active request
         return;
 
-    uint32 health = pTarget->GetMaxHealth() * damage / 100;
+    float healthPct = damage / 100.0f;
+    if (m_caster->GetTypeId() == TYPEID_PLAYER)
+    {
+        if (((Player*)m_caster)->GetGuildId() == pTarget->GetGuildId())
+            healthPct *= m_caster->GetTotalAuraMultiplier(SPELL_AURA_MOD_RESURRECTED_HEALTH_BY_GUILD_MEMBER);
+    }
+    uint32 health = uint32(pTarget->GetMaxHealth() * std::min(healthPct, 1.0f));
     uint32 mana   = pTarget->GetMaxPower(POWER_MANA) * damage / 100;
 
     pTarget->setResurrectRequestData(m_caster->GetObjectGuid(), m_caster->GetMapId(), m_caster->GetPositionX(), m_caster->GetPositionY(), m_caster->GetPositionZ(), health, mana, 0);
