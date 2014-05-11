@@ -2550,6 +2550,8 @@ void Player::RegenerateHealth(uint32 diff)
         return;
 
     float HealthIncreaseRate = sWorld.getConfig(CONFIG_FLOAT_RATE_HEALTH);
+    if (getLevel() < 15)
+        HealthIncreaseRate *= 2.066f - getLevel() * 0.066f;
 
     float addvalue = 0.0f;
 
@@ -2577,17 +2579,19 @@ void Player::RegenerateHealth(uint32 diff)
             addvalue *= GetTotalAuraModifier(SPELL_AURA_MOD_REGEN_DURING_COMBAT) / 100.0f;
 
         if (!IsStandState())
-            addvalue *= 1.5f;
+            addvalue *= 1.33f;
     }
 
     // always regeneration bonus (including combat)
     addvalue += GetTotalAuraModifier(SPELL_AURA_MOD_HEALTH_REGEN_IN_COMBAT);
-    addvalue += m_baseHealthRegen / 2.5f; //From ITEM_MOD_HEALTH_REGEN. It is correct tick amount?
 
     addvalue += m_baseHealthRegen / 2.5f;
 
     if (addvalue < 0)
         addvalue = 0;
+
+    if (HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PREPARATION))
+        addvalue = GetMaxHealth() / 3;
 
     ModifyHealth(int32(addvalue));
 }
