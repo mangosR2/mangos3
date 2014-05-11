@@ -311,12 +311,18 @@ void WorldSession::HandleGroupUninviteGuidOpcode(WorldPacket & recv_data)
 
     if (grp->IsMember(guid))
     {
+        if (grp->GetLeaderGuid() == guid)
+            return;
+
         grp->RemoveMember(guid, 0);
         return;
     }
 
     if (Player* plr = grp->GetInvited(guid))
     {
+        if (grp->GetLeaderGuid() == plr->GetObjectGuid())
+            return;
+
         plr->UninviteFromGroup();
         return;
     }
@@ -339,7 +345,6 @@ void WorldSession::HandleGroupUninviteOpcode(WorldPacket & recv_data)
         sLog.outError("WorldSession::HandleGroupUninviteOpcode: leader %s tried to uninvite himself from the group.", GetPlayer()->GetGuidStr().c_str());
         return;
     }
-
 
     Group* grp = GetPlayer()->GetGroup();
     if (!grp)
@@ -364,12 +369,18 @@ void WorldSession::HandleGroupUninviteOpcode(WorldPacket & recv_data)
 
     if (!guid.IsEmpty())
     {
+        if (grp->GetLeaderGuid() == guid)
+            return;
+
         grp->RemoveMember(guid, 0);
         return;
     }
 
     if (Player* plr = grp->GetInvited(membername))
     {
+        if (grp->GetLeaderGuid() == plr->GetObjectGuid())
+            return;
+
         plr->UninviteFromGroup();
         return;
     }
@@ -905,7 +916,7 @@ void WorldSession::HandleRequestPartyMemberStatsOpcode(WorldPacket& recv_data)
     Player* player = ObjectAccessor::FindPlayer(guid, false);
     if (!player)
     {
-        WorldPacket data(SMSG_PARTY_MEMBER_STATS_FULL, 1 + 8 + 4 + 2);
+        WorldPacket data(SMSG_PARTY_MEMBER_STATS_FULL, 3 + 4 + 2);
         data << uint8(0);                                   // only for SMSG_PARTY_MEMBER_STATS_FULL, probably arena/bg related
         data << guid.WriteAsPacked();
         data << uint32(GROUP_UPDATE_FLAG_STATUS);
