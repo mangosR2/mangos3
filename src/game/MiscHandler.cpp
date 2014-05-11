@@ -39,6 +39,7 @@
 #include "Object.h"
 #include "BattleGround/BattleGround.h"
 #include "OutdoorPvP/OutdoorPvP.h"
+#include "BattleField/BattleField.h"
 #include "Guild.h"
 #include "Pet.h"
 #include "SocialMgr.h"
@@ -1502,19 +1503,22 @@ void WorldSession::HandleHearthandResurrect(WorldPacket & /*recv_data*/)
 {
     DEBUG_LOG("WORLD: CMSG_HEARTH_AND_RESURRECT");
 
-    AreaTableEntry const* atEntry = sAreaStore.LookupEntry(_player->GetAreaId());
-    if(!atEntry || !(atEntry->flags & AREA_FLAG_CAN_HEARTH_AND_RES))
-        return;
+    bool ok = false;
+    if (OutdoorPvP* opvp = sOutdoorPvPMgr.GetScript(_player->GetCachedZoneId()))
+    {
+        if (opvp->IsBattleField() && (ok = opvp->IsMember(_player->GetObjectGuid())))
+        {
+            SendBfLeaveMessage(((BattleField*)opvp)->GetBattlefieldGuid(), BATTLEFIELD_LEAVE_REASON_EXITED);
+            ((BattleField*)opvp)->RemovePlayerFromRaid(_player->GetObjectGuid());
+        }
+    }
 
-//    bool ok = false;
-//    if (OutdoorPvP* opvp = sOutdoorPvPMgr.GetScript(_player->GetCachedZoneId()))
-//    {
-//        if (opvp->IsBattleField() && (ok = opvp->IsMember(_player->GetObjectGuid())))
-//        {
-//            SendBfLeaveMessage(((BattleField*)opvp)->GetBattlefieldGuid(), BATTLEFIELD_LEAVE_REASON_EXITED);
-//            ((BattleField*)opvp)->RemovePlayerFromRaid(_player->GetObjectGuid());
-//        }
-//    }
+    if (!ok)
+    {
+        AreaTableEntry const* atEntry = sAreaStore.LookupEntry(_player->GetAreaId());
+        if(!atEntry || !(atEntry->flags & AREA_FLAG_CAN_HEARTH_AND_RES))
+            return;
+    }
 
     // Can't use in flight
     if (_player->IsTaxiFlying())
