@@ -14928,22 +14928,67 @@ void Spell::EffectDispelMechanic(SpellEffectEntry const* effect)
     if (!unitTarget)
         return;
 
+    int32 count = damage;
+
+    if (!count && m_spellInfo->GetSpellFamilyName() == SPELLFAMILY_GENERIC)
+        count = 1;
+
     uint32 mechanic = effect->EffectMiscValue;
 
+    std::set<uint32> toRemoveSpellList;
+    std::set<uint32> failSpellList;
     Unit::SpellAuraHolderMap& Auras = unitTarget->GetSpellAuraHolderMap();
-    for(Unit::SpellAuraHolderMap::iterator iter = Auras.begin(), next; iter != Auras.end(); iter = next)
+    for (Unit::SpellAuraHolderMap::iterator iter = Auras.begin(); iter != Auras.end() && count > 0; ++iter)
     {
-        next = iter;
-        ++next;
-        SpellEntry const *spell = iter->second->GetSpellProto();
-        if (iter->second->HasMechanic(mechanic))
+        SpellAuraHolderPtr holder = iter->second;
+        if (!holder || holder->IsDeleted())
+            continue;
+
+        if (holder->HasMechanic(mechanic))
         {
-            unitTarget->RemoveAurasDueToSpell(spell->Id);
-            if (Auras.empty())
-                break;
+            bool success = false;
+            //GetDispelChance(holder->GetCaster(), unitTarget, holder->GetId(), !unitTarget->IsFriendlyTo(m_caster), &success);
+
+            if (success)
+                toRemoveSpellList.insert(holder->GetId());
             else
-                next = Auras.begin();
+                failSpellList.insert(holder->GetId());
+            --count;
         }
+    }
+
+    if (!toRemoveSpellList.empty())
+    {
+        uint32 count = toRemoveSpellList.size();
+
+        WorldPacket data(SMSG_SPELLDISPELLOG, 8 + 8 + 4 + 1 + 4 + 5 * count);
+        data << unitTarget->GetPackGUID();              // Victim GUID
+        data << m_caster->GetPackGUID();                // Caster GUID
+        data << uint32(m_spellInfo->Id);                // Dispel spell id
+        data << uint8(0);                               // not used
+        data << uint32(count);                          // count
+
+        for (std::set<uint32>::iterator itr = toRemoveSpellList.begin(); itr != toRemoveSpellList.end(); ++itr)
+        {
+            data << uint32(*itr);                       // Spell Id
+            data << uint8(0);                           // 0 - dispelled !=0 cleansed
+
+            //unitTarget->RemoveAurasDueToSpell(*itr, NULL, AURA_REMOVE_BY_DISPEL);
+        }
+
+        m_caster->SendMessageToSet(&data, true);
+    }
+
+    if (!failSpellList.empty())
+    {
+        WorldPacket data(SMSG_DISPEL_FAILED, 8 + 8 + 4 + 4 * failSpellList.size());
+        data << m_caster->GetObjectGuid();              // Caster GUID
+        data << unitTarget->GetObjectGuid();            // Victim GUID
+        data << uint32(m_spellInfo->Id);                // Dispel spell id
+        for (std::set<uint32>::iterator itr = failSpellList.begin(); itr != failSpellList.end(); ++itr)
+            data << uint32(*itr);                       // Spell Id
+
+        m_caster->SendMessageToSet(&data, true);
     }
 }
 
