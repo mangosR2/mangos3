@@ -861,7 +861,7 @@ void WorldSession::HandleRequestAccountData(WorldPacket& recv_data)
 
 void WorldSession::HandleSetActionButtonOpcode(WorldPacket& recv_data)
 {
-    DEBUG_LOG(  "WORLD: Received CMSG_SET_ACTION_BUTTON" );
+    DEBUG_LOG("WORLD: Received CMSG_SET_ACTION_BUTTON");
     uint8 button;
     uint32 packetData;
     recv_data >> button >> packetData;
@@ -1009,7 +1009,7 @@ void WorldSession::HandleInspectOpcode(WorldPacket& recv_data)
     _player->SetSelectionGuid(guid);
 
     Player *plr = sObjectMgr.GetPlayer(guid);
-    if(!plr)                                                // wrong player
+    if(!plr || !plr->IsInWorld())                           // wrong player
         return;
 
     WorldPacket data(SMSG_INSPECT_RESULTS, 50);
@@ -1063,6 +1063,8 @@ void WorldSession::HandleInspectHonorStatsOpcode(WorldPacket& recv_data)
 
 void WorldSession::HandleWorldTeleportOpcode(WorldPacket& recv_data)
 {
+    DEBUG_LOG("WORLD: Received opcode CMSG_WORLD_TELEPORT from %s", GetPlayer()->GetGuidStr().c_str());
+
     // write in client console: worldport 469 452 6454 2536 180 or /console worldport 469 452 6454 2536 180
     // Received opcode CMSG_WORLD_TELEPORT
     // Time is ***, map=469, x=452.000000, y=6454.000000, z=2536.000000, orient=3.141593
@@ -1100,7 +1102,7 @@ void WorldSession::HandleWorldTeleportOpcode(WorldPacket& recv_data)
 
 void WorldSession::HandleWhoisOpcode(WorldPacket& recv_data)
 {
-    DEBUG_LOG("Received opcode CMSG_WHOIS");
+    DEBUG_LOG("WORLD: Received opcode CMSG_WHOIS");
     std::string charname;
     recv_data >> charname;
 
@@ -1198,7 +1200,7 @@ void WorldSession::HandleComplainOpcode( WorldPacket & recv_data )
 
 void WorldSession::HandleRealmSplitOpcode( WorldPacket & recv_data )
 {
-    DEBUG_LOG("CMSG_REALM_SPLIT");
+    DEBUG_LOG("WORLD: CMSG_REALM_SPLIT");
 
     uint32 unk;
     std::string split_date = "01/01/01";
@@ -1218,6 +1220,9 @@ void WorldSession::HandleRealmSplitOpcode( WorldPacket & recv_data )
 
 void WorldSession::HandleFarSightOpcode( WorldPacket & recv_data )
 {
+    DEBUG_LOG("WORLD: Received opcode CMSG_FAR_SIGHT");
+    // recv_data.hexlike();
+
     uint8 op;
     recv_data >> op;
 
@@ -1253,7 +1258,7 @@ void WorldSession::HandleFarSightOpcode( WorldPacket & recv_data )
 
 void WorldSession::HandleSetTitleOpcode( WorldPacket & recv_data )
 {
-    DEBUG_LOG("CMSG_SET_TITLE");
+    DEBUG_LOG("WORLD: CMSG_SET_TITLE");
 
     int32 title;
     recv_data >> title;
@@ -1462,7 +1467,7 @@ void WorldSession::HandleQueryInspectAchievementsOpcode( WorldPacket & recv_data
     recv_data >> guid.ReadAsPacked();
 
     Player* player = sObjectMgr.GetPlayer(guid);
-    if(player)
+    if (player)
         player->GetAchievementMgr().SendRespondInspectAchievements(_player);
 }
 
@@ -1521,6 +1526,26 @@ void WorldSession::HandleHearthandResurrect(WorldPacket & /*recv_data*/)
     _player->TeleportToHomebind();
 }
 
+void WorldSession::HandleInstanceLockResponse(WorldPacket& recvPacket)
+{
+    DEBUG_LOG("WORLD: CMSG_INSTANCE_LOCK_WARNING_RESPONSE");
+    uint8 accept;
+    recvPacket >> accept;
+
+    if (!GetPlayer()->HasPendingBind())
+    {
+        sLog.outDetail("InstanceLockResponse: Player %s (guid %u) tried to bind himself/teleport to graveyard without a pending bind!", _player->GetName(), _player->GetGUIDLow());
+        return;
+    }
+
+    if (accept)
+        GetPlayer()->BindToInstance();
+    else
+        GetPlayer()->RepopAtGraveyard();
+
+    GetPlayer()->SetPendingBind(NULL, 0);
+}
+
 // Refer-A-Friend
 void WorldSession::HandleGrantLevel(WorldPacket& recv_data)
 {
@@ -1577,25 +1602,6 @@ void WorldSession::HandleAcceptGrantLevel(WorldPacket& recv_data)
     _player->GiveLevel(_player->getLevel() + 1);
 }
 
-void WorldSession::HandleInstanceLockResponse(WorldPacket& recvPacket)
-{
-    DEBUG_LOG("WORLD: CMSG_INSTANCE_LOCK_WARNING_RESPONSE");
-    uint8 accept;
-    recvPacket >> accept;
-
-    if (!GetPlayer()->HasPendingBind())
-    {
-        sLog.outDetail("InstanceLockResponse: Player %s (guid %u) tried to bind himself/teleport to graveyard without a pending bind!", _player->GetName(), _player->GetGUIDLow());
-        return;
-    }
-
-    if (accept)
-        GetPlayer()->BindToInstance();
-    else
-        GetPlayer()->RepopAtGraveyard();
-
-    GetPlayer()->SetPendingBind(NULL, 0);
-}
 
 void WorldSession::HandleSetSavedInstanceExtend(WorldPacket& recv_data)
 {
@@ -1627,45 +1633,6 @@ void WorldSession::HandleViolenceLevel(WorldPacket& recv_data)
     recv_data >> violenceLevel;
     DEBUG_LOG("WORLD: CMSG_VIOLENCE_LEVEL %u", violenceLevel);
     // do something?
-}
-
-void WorldSession::HandleRequestHotfix(WorldPacket& recv_data)
-{
-    uint32 type, count;
-
-    recv_data >> type;
-    count = recv_data.ReadBits(23);
-
-    UNORDERED_MAP<uint32, ObjectGuid> guids;
-    for (uint32 i = 0; i < count; ++i)
-    {
-        guids[i] = ObjectGuid();
-        ObjectGuid& guid = guids[i];
-        recv_data.ReadGuidMask<0,4,7,2,5,3,6,1>(guid);
-    }
-
-    for (uint32 i = 0; i < count; ++i)
-    {
-        uint32 entry;
-        ObjectGuid& guid = guids[i];
-        recv_data.ReadGuidBytes<5,6,7,0,1,3,4>(guid);
-        recv_data >> entry;
-        recv_data.ReadGuidBytes<2>(guid);
-
-        switch (type)
-        {
-            case DB2_REPLY_ITEM:
-                SendItemDb2Reply(entry);
-                break;
-            case DB2_REPLY_SPARSE:
-                SendItemSparseDb2Reply(entry);
-                break;
-            default:
-                sLog.outError("CMSG_REQUEST_HOTFIX: Received unknown hotfix request type: %u", type);
-                recv_data.rfinish();
-                break;
-        }
-    }
 }
 
 void WorldSession::HandleSaveCUFProfiles(WorldPacket& recv_data)
@@ -1795,6 +1762,45 @@ void WorldSession::SendLoadCUFProfiles()
     data.FlushBits();
     data.append(byteBuffer);
     SendPacket(&data);
+}
+
+void WorldSession::HandleRequestHotfix(WorldPacket& recv_data)
+{
+    uint32 type, count;
+    recv_data >> type;
+
+    count = recv_data.ReadBits(23);
+
+    UNORDERED_MAP<uint32, ObjectGuid> guids;
+    for (uint32 i = 0; i < count; ++i)
+    {
+        guids[i] = ObjectGuid();
+        ObjectGuid& guid = guids[i];
+        recv_data.ReadGuidMask<0, 4, 7, 2, 5, 3, 6, 1>(guid);
+    }
+
+    for (uint32 i = 0; i < count; ++i)
+    {
+        uint32 entry;
+        ObjectGuid& guid = guids[i];
+        recv_data.ReadGuidBytes<5, 6, 7, 0, 1, 3, 4>(guid);
+        recv_data >> entry;
+        recv_data.ReadGuidBytes<2>(guid);
+
+        switch (type)
+        {
+            case DB2_REPLY_ITEM:
+                SendItemDb2Reply(entry);
+                break;
+            case DB2_REPLY_SPARSE:
+                SendItemSparseDb2Reply(entry);
+                break;
+            default:
+                sLog.outError("CMSG_REQUEST_HOTFIX: Received unknown hotfix request type: %u", type);
+                recv_data.rfinish();
+                break;
+        }
+    }
 }
 
 void WorldSession::HandleObjectUpdateFailedOpcode(WorldPacket& recv_data)
