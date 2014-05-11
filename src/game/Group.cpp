@@ -31,6 +31,7 @@
 #include "ObjectAccessor.h"
 #include "BattleGround/BattleGround.h"
 #include "BattleGround/BattleGroundMgr.h"
+#include "BattleField/BattleField.h"
 #include "MapManager.h"
 #include "MapPersistentStateMgr.h"
 #include "Util.h"
