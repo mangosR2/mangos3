@@ -100,12 +100,19 @@ Group::~Group()
 {
     if (m_bgGroup)
     {
+        sLog.outError("Group::~Group: battleground group being deleted.");
         if (m_bgGroup->GetBgRaid(ALLIANCE) == this)
             m_bgGroup->SetBgRaid(ALLIANCE, NULL);
         else if (m_bgGroup->GetBgRaid(HORDE) == this)
             m_bgGroup->SetBgRaid(HORDE, NULL);
         else
             sLog.outError("Group::~Group: battleground group is not linked to the correct battleground.");
+    }
+    if (m_bfGroup)
+    {
+        sLog.outError("Group::~Group: battlefield group being deleted.");
+        if (!m_bfGroup->OnGroupDeleted(this))
+            sLog.outError("Group::~Group: battlefield group is not linked to the correct battlefield.");
     }
 
     for (GroupReference* itr = GetFirstMember(); itr != NULL; itr = itr->next())
@@ -141,10 +148,10 @@ Group::~Group()
         // recheck deletion in ObjectMgr (must be deleted while disband, but additional check not be bad)
         sObjectMgr.RemoveGroup(this);
     }
-    else sLog.outError("Group::~Group: not fully created group type %u has ben deleted.", m_groupType);
+    else sLog.outError("Group::~Group: not fully created group type %u has been deleted.", m_groupType);
 
     // Sub group counters clean up
-        delete[] m_subGroupsCounts;
+    delete[] m_subGroupsCounts;
 }
 
 bool Group::Create(ObjectGuid guid, const char* name)
@@ -167,7 +174,7 @@ bool Group::Create(ObjectGuid guid, const char* name)
         m_Guid = ObjectGuid(HIGHGUID_GROUP, sObjectMgr.GenerateGroupLowGuid());
 
     sObjectMgr.AddGroup(this);
-    
+
     Player* leader = sObjectMgr.GetPlayer(guid);
     if (leader)
         leader->SetFlag(PLAYER_FLAGS, PLAYER_FLAGS_GROUP_LEADER);
@@ -1424,7 +1431,7 @@ void Group::SendUpdate()
             data << uint8(onlineState);                     // online-state
             data << uint8(citr2->group);                    // groupid
             data << uint8(citr2->flags);                    // group flags
-            data << (isLFGGroup() ? uint8(citr2->roles) : uint8(0));  // 3.3, role?
+            data << uint8(isLFGGroup() ? citr2->roles : 0); // lfg roles
         }
 
         data << m_leaderGuid;                               // leader guid
@@ -1818,7 +1825,7 @@ void Group::SetGroupUniqueFlag(ObjectGuid guid, GroupFlagsAssignment assignment,
             return;
     }
 
-    if (guid)
+    if (!guid.IsEmpty())
     {
         static SqlStatementID updGroupMemb;
         SqlStatement stmt = CharacterDatabase.CreateStatement(updGroupMemb, "UPDATE group_member SET memberFlags = ? WHERE memberGuid = ?");
@@ -2380,6 +2387,7 @@ void Group::_homebindIfInstance(Player* player)
         }
     }
 }
+
 //Frozen Mod
 void Group::BroadcastGroupUpdate(void)
 {

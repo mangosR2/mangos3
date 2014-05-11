@@ -36,11 +36,11 @@ struct ItemPrototype;
 
 class WorldSession;
 class Map;
-class BattleField;
 class BattleGround;
 class DungeonPersistentState;
 class Field;
 class Unit;
+class BattleField;
 
 #define MAX_GROUP_SIZE 5
 #define MAX_RAID_SIZE 40
@@ -81,7 +81,6 @@ enum RollVoteMask
 
     ROLL_VOTE_MASK_ALL        = 0x0F,
 };
-
 
 enum GroupMemberFlags
 {
@@ -283,8 +282,8 @@ class MANGOS_DLL_SPEC Group
         uint32 RemoveMember(ObjectGuid guid, uint8 method, bool logout = false); // method: 0=just remove, 1=kick
         void   RemoveGroupBuffsOnMemberRemove(ObjectGuid guid);
         void   ChangeLeader(ObjectGuid guid);
-        void CheckLeader(ObjectGuid const& guid, bool logout);
-        bool ChangeLeaderToFirstSuitableMember(bool onlySet = false);
+        void   CheckLeader(ObjectGuid const& guid, bool logout);
+        bool   ChangeLeaderToFirstSuitableMember(bool onlySet = false);
         void   SetLootMethod(LootMethod method) { m_lootMethod = method; }
         void   SetLooterGuid(ObjectGuid guid) { m_looterGuid = guid; }
         void   UpdateLooterGuid(WorldObject* pSource, bool ifneed = false);
@@ -296,7 +295,7 @@ class MANGOS_DLL_SPEC Group
         uint32 GetId() const { return m_Guid.GetCounter(); }
         bool IsFull() const { return (m_groupType == GROUPTYPE_NORMAL || isLFGGroup()) ? (m_memberSlots.size() >= MAX_GROUP_SIZE) : (m_memberSlots.size() >= MAX_RAID_SIZE); }
         bool isRaidGroup() const { return m_groupType & GROUPTYPE_RAID; }
-        bool isBGGroup()   const { return m_bgGroup != NULL; }
+        bool isBGGroup()   const { return m_bgGroup != NULL || m_bfGroup != NULL; }
         bool IsCreated()   const { return GetMembersCount() > 0; }
         ObjectGuid GetLeaderGuid() const { return m_leaderGuid; }
         const char * GetLeaderName() const { return m_leaderName.c_str(); }
