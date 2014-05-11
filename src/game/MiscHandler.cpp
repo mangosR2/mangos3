@@ -405,6 +405,12 @@ void WorldSession::HandleSetSelectionOpcode( WorldPacket & recv_data )
     ObjectGuid guid;
     recv_data >> guid;
 
+    if (guid.IsEmpty())
+    {
+        _player->SetSelectionGuid(guid);
+        return;
+    }
+
     // update reputation list if need
     Unit* unit = ObjectAccessor::GetUnit(*_player, guid );  // can select group members at diff maps
     if (!unit)
