@@ -519,8 +519,17 @@ void BattleGround::Update(uint32 diff)
             {
                 for (BattleGroundPlayerMap::const_iterator itr = m_Players.begin(); itr != m_Players.end(); ++itr)
                 {
-                    if (Player* player = sObjectMgr.GetPlayer(itr->first))
-                        player->RemoveAurasDueToSpell(SPELL_ARENA_PREPARATION);
+                    if (Player* plr = sObjectMgr.GetPlayer(itr->first))
+                    {
+                        // BG Status packet
+                        WorldPacket status;
+                        BattleGroundQueueTypeId bgQueueTypeId = sBattleGroundMgr.BGQueueTypeId(m_TypeID, GetArenaType());
+                        uint32 queueSlot = plr->GetBattleGroundQueueIndex(bgQueueTypeId);
+                        sBattleGroundMgr.BuildBattleGroundStatusPacket(&status, this, plr, queueSlot, STATUS_IN_PROGRESS, 0, GetStartTime(), GetArenaType());
+                        plr->GetSession()->SendPacket(&status);
+
+                        plr->RemoveAurasDueToSpell(SPELL_ARENA_PREPARATION);
+                    }
                 }
 
                 CheckArenaWinConditions();
@@ -562,6 +571,16 @@ void BattleGround::Update(uint32 diff)
                 RemovePlayerAtLeave(itr->first, true, true);// remove player from BG
                 // do not change any battleground's private variables
             }
+        }
+    }
+
+    // Arena time limit
+    if(isArena() && !m_ArenaEnded)
+    {
+        if(m_StartTime > uint32(ARENA_TIME_LIMIT))
+        {
+            EndBattleGround(TEAM_NONE);
+            m_ArenaEnded = true;
         }
     }
 
@@ -934,7 +953,7 @@ void BattleGround::EndBattleGround(Team winner)
 
             if (IsRandom() || BattleGroundMgr::IsBGWeekend(GetTypeID()))
             {
-                UpdatePlayerScore(plr, SCORE_BONUS_HONOR, GetBonusHonorFromKill(win_kills*4));
+                UpdatePlayerScore(plr, SCORE_BONUS_HONOR, GetBonusHonorFromKill(win_kills * 4));
 //                plr->ModifyArenaPoints(win_arena);
                 if (!plr->IsRandomBGWinner())
                 {
@@ -984,6 +1003,21 @@ void BattleGround::EndBattleGround(Team winner)
         plr->GetSession()->SendPacket(&data);
         plr->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_COMPLETE_BATTLEGROUND, 1);
     }
+
+    Map::PlayerList const &PlList = GetBgMap()->GetPlayers();
+    if (!PlList.isEmpty())
+        for (Map::PlayerList::const_iterator i = PlList.begin(); i != PlList.end(); ++i)
+            if (Player* pPlayer = i->getSource())
+                if (pPlayer->IsSpectator())
+                {
+                    WorldPacket data;
+                    sBattleGroundMgr.BuildPvpLogDataPacket(&data, this);
+                    pPlayer->GetSession()->SendPacket(&data);
+
+                    BattleGroundQueueTypeId bgQueueTypeId = BattleGroundMgr::BGQueueTypeId(GetTypeID(), GetArenaType());
+                    sBattleGroundMgr.BuildBattleGroundStatusPacket(&data, this, pPlayer, 0, STATUS_IN_PROGRESS, TIME_TO_AUTOREMOVE, GetStartTime(), GetArenaType());
+                    pPlayer->GetSession()->SendPacket(&data);
+                }
 
     if (isArena() && isRated() && winner_arena_team && loser_arena_team && winner_arena_team->GetId() != loser_arena_team->GetId())
     {
@@ -1160,6 +1194,13 @@ void BattleGround::RemovePlayerAtLeave(ObjectGuid guid, bool Transport, bool Sen
     bool participant = false;
     Player* plr = sObjectMgr.GetPlayer(guid);
 
+    BattleGroundScoreMap::iterator itr2 = m_PlayerScores.find(guid);
+    if (itr2 != m_PlayerScores.end())
+    {
+        delete itr2->second;                                // delete player's score
+        m_PlayerScores.erase(itr2);
+    }
+
     // Remove from lists/maps
     BattleGroundPlayerMap::iterator itr = m_Players.find(guid);
     if (itr != m_Players.end())
@@ -1168,13 +1209,6 @@ void BattleGround::RemovePlayerAtLeave(ObjectGuid guid, bool Transport, bool Sen
         m_Players.erase(itr);
         // check if the player was a participant of the match, or only entered through gm command (goname)
         participant = true;
-    }
-
-    BattleGroundScoreMap::iterator itr2 = m_PlayerScores.find(guid);
-    if (itr2 != m_PlayerScores.end())
-    {
-        delete itr2->second;                                // delete player's score
-        m_PlayerScores.erase(itr2);
     }
 
     if (plr)
@@ -1369,6 +1403,15 @@ void BattleGround::AddPlayer(Player* plr)
     WorldPacket data;
     sBattleGroundMgr.BuildPlayerJoinedBattleGroundPacket(&data, plr);
     SendPacketToTeam(team, &data, plr, false);
+
+    // BG Status packet
+    WorldPacket status;
+    BattleGroundQueueTypeId bgQueueTypeId = sBattleGroundMgr.BGQueueTypeId(m_TypeID, GetArenaType());
+    uint32 queueSlot = plr->GetBattleGroundQueueIndex(bgQueueTypeId);
+    sBattleGroundMgr.BuildBattleGroundStatusPacket(&status, this, plr, queueSlot, STATUS_IN_PROGRESS, 0, GetStartTime(), GetArenaType());
+    plr->GetSession()->SendPacket(&status);
+
+    plr->RemoveSpellsCausingAura(SPELL_AURA_MOUNTED);
 
     // add arena specific auras
     if (isArena())
@@ -1932,6 +1975,13 @@ void BattleGround::SendMessageToAll(int32 entry, ChatMsg type, Player const* sou
     BroadcastWorker(bg_do);
 }
 
+void BattleGround::SendWarningToAll(int32 entry, ...)
+{
+    MaNGOS::BattleGroundWarningBuilder bg_builder(entry);
+    MaNGOS::LocalizedPacketDo<MaNGOS::BattleGroundWarningBuilder> bg_do(bg_builder);
+    BroadcastWorker(bg_do);
+}
+
 void BattleGround::SendYellToAll(int32 entry, uint32 language, ObjectGuid guid)
 {
     Creature* source = GetBgMap()->GetCreature(guid);
@@ -1968,13 +2018,6 @@ void BattleGround::SendYell2ToAll(int32 entry, uint32 language, ObjectGuid guid,
         return;
     MaNGOS::BattleGround2YellBuilder bg_builder(language, entry, source, arg1, arg2);
     MaNGOS::LocalizedPacketDo<MaNGOS::BattleGround2YellBuilder> bg_do(bg_builder);
-    BroadcastWorker(bg_do);
-}
-
-void BattleGround::SendWarningToAll(int32 entry, ...)
-{
-    MaNGOS::BattleGroundWarningBuilder bg_builder(entry);
-    MaNGOS::LocalizedPacketDo<MaNGOS::BattleGroundWarningBuilder> bg_do(bg_builder);
     BroadcastWorker(bg_do);
 }
 
