@@ -512,7 +512,7 @@ void WorldSession::HandleSetActiveMoverOpcode(WorldPacket& recv_data)
 void WorldSession::HandleMoveNotActiveMoverOpcode(WorldPacket& recv_data)
 {
     DEBUG_LOG("WORLD: Recvd CMSG_MOVE_NOT_ACTIVE_MOVER");
-    // recv_data.hexlike();
+    recv_data.hexlike();
 
     ObjectGuid old_mover_guid;
     MovementInfo movementInfo;
@@ -520,10 +520,18 @@ void WorldSession::HandleMoveNotActiveMoverOpcode(WorldPacket& recv_data)
     recv_data >> old_mover_guid.ReadAsPacked();
     recv_data >> movementInfo;
 
-    if (_player->GetMover()->GetObjectGuid() == movementInfo.GetGuid())
+    ObjectGuid moverGuid = GetPlayer()->GetMover() ? GetPlayer()->GetMover()->GetObjectGuid() : ObjectGuid();
+
+    if (moverGuid == old_mover_guid)
     {
-        DEBUG_LOG("World: CMSG_MOVE_NOT_ACTIVE_MOVER %s received, but his now is active mover!", movementInfo.GetGuid().GetString().c_str());
+/*        sLog.outError("HandleMoveNotActiveMover: incorrect mover guid: mover is %s and should be %s instead of %s",
+            _player->GetMover()->GetGuidStr().c_str(),
+            _player->GetGuidStr().c_str(),
+            old_mover_guid.GetString().c_str());
+*/
+        DEBUG_LOG("World: CMSG_MOVE_NOT_ACTIVE_MOVER %s received, but %s now is active mover!", moverGuid.GetString().c_str(), old_mover_guid.GetString().c_str());
         recv_data.rpos(recv_data.wpos());                   // prevent warnings spam
+        return;
     }
 
     _player->m_movementInfo = movementInfo;
