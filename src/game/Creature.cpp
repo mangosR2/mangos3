@@ -1152,19 +1152,17 @@ void Creature::SelectLevel(const CreatureInfo* cinfo, float percentHealth, float
     uint32 minlevel = std::min(cinfo->maxlevel, cinfo->minlevel);
     uint32 maxlevel = std::max(cinfo->maxlevel, cinfo->minlevel);
     uint32 level = minlevel == maxlevel ? minlevel : urand(minlevel, maxlevel);
-    float rellevel = maxlevel == minlevel ? 0 : (float(level - minlevel)) / (maxlevel - minlevel);
 
     SetLevel(level);
 
     uint32 health = 0;
     uint32 mana = 0;
 
-    // CreatureClassLvlStats const* cCLS = sObjectMgr.GetCreatureClassLvlStats(level, cinfo->UnitClass, cinfo->Expansion);
-    // FIXME - system currently disabled before check real usability.
-    CreatureClassLvlStats const* cCLS = NULL;
+    CreatureClassLvlStats const* cCLS = sObjectMgr.GetCreatureClassLvlStats(level, cinfo->UnitClass, cinfo->Expansion);
     if (!cCLS)
     {
         // using old way to compute stats
+        float rellevel = maxlevel == minlevel ? 0 : (float(level - minlevel)) / (maxlevel - minlevel);
 
         // health
         float healthmod = _GetHealthMod(rank);
@@ -1181,13 +1179,10 @@ void Creature::SelectLevel(const CreatureInfo* cinfo, float percentHealth, float
     {
         // using new way to compute stats
         // health
-        // FIXME
-        /*
         health = cCLS->BaseHealth * cinfo->HealthMultiplier;
 
         // mana
         mana = cCLS->BaseMana * cinfo->ManaMultiplier;
-        */
     }
 
     health *= _GetHealthMod(rank); // Apply custom config settting
