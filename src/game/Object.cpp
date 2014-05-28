@@ -546,9 +546,9 @@ void Object::BuildMovementUpdate(ByteBuffer * data, uint16 updateFlags) const
 
         *data << uint32(WorldTimer::getMSTime());
 
-        *data << float(unit->GetSpeed(MOVE_FLIGHT_BACK));
-        data->WriteGuidBytes<6>(Guid);
         *data << float(unit->GetSpeed(MOVE_TURN_RATE));
+        data->WriteGuidBytes<6>(Guid);
+        *data << float(unit->GetSpeed(MOVE_FLIGHT));
 
         if (hasOrientation)
             *data << float(NormalizeOrientation(unit->GetOrientation()));
@@ -558,7 +558,7 @@ void Object::BuildMovementUpdate(ByteBuffer * data, uint16 updateFlags) const
         if (hasPitch)
             *data << float(NormalizePitch(unit->m_movementInfo.GetPitch()));
 
-        *data << float(unit->GetSpeed(MOVE_FLIGHT));
+        *data << float(unit->GetSpeed(MOVE_FLIGHT_BACK));
     }
 
     if (updateFlags & UPDATEFLAG_VEHICLE)
