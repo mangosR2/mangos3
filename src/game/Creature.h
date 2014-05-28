@@ -143,6 +143,7 @@ struct CreatureInfo
     uint32  EquipmentTemplateId;
     uint32  VehicleTemplateId;
     uint32  GossipMenuId;
+    uint8   PowerType;
     char const* AIName;
     uint32  ScriptID;
 
@@ -180,7 +181,7 @@ struct CreatureInfo
         return exotic || !IsExotic();
     }
 
-    inline Powers GetPowerType() const { return Powers(powerType); };
+    inline Powers GetPowerType() const { return Powers(PowerType); };
 
 };
 

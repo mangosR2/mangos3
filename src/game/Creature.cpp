@@ -1161,19 +1161,18 @@ void Creature::SelectLevel(const CreatureInfo* cinfo, float percentHealth, float
     CreatureClassLvlStats const* cCLS = sObjectMgr.GetCreatureClassLvlStats(level, cinfo->UnitClass, cinfo->Expansion);
     if (!cCLS)
     {
-        // using old way to compute stats
+        // Use old style to calculate stat values
         float rellevel = maxlevel == minlevel ? 0 : (float(level - minlevel)) / (maxlevel - minlevel);
 
         // health
-        float healthmod = _GetHealthMod(rank);
-        uint32 minhealth = std::min(cinfo->maxhealth, cinfo->minhealth);
-        uint32 maxhealth = std::max(cinfo->maxhealth, cinfo->minhealth);
+        uint32 minhealth = std::min(cinfo->MaxLevelHealth, cinfo->MinLevelHealth);
+        uint32 maxhealth = std::max(cinfo->MaxLevelHealth, cinfo->MinLevelHealth);
         health = uint32(minhealth + uint32(rellevel * (maxhealth - minhealth)));
 
         // mana
-        uint32 minmana = std::min(cinfo->maxmana, cinfo->minmana);
-        uint32 maxmana = std::max(cinfo->maxmana, cinfo->minmana);
-        mana = minmana + uint32(rellevel * (maxmana- minmana));
+        uint32 minmana = std::min(cinfo->MaxLevelMana, cinfo->MinLevelMana);
+        uint32 maxmana = std::max(cinfo->MaxLevelMana, cinfo->MinLevelMana);
+        mana = minmana + uint32(rellevel * (maxmana - minmana));
     }
     else
     {
@@ -1216,7 +1215,7 @@ void Creature::SelectLevel(const CreatureInfo* cinfo, float percentHealth, float
         }
         case POWER_ENERGY:
         {
-            maxPower = uint32(GetCreatePowers(powerType) * cinfo->powerModifier);
+            maxPower = uint32(GetCreatePowers(powerType) * cinfo->ManaMultiplier);
             break;
         }
         default:
@@ -1241,7 +1240,7 @@ void Creature::SelectLevel(const CreatureInfo* cinfo, float percentHealth, float
     SetFloatValue(UNIT_FIELD_MAXRANGEDDAMAGE, cinfo->MaxRangedDmg * damagemod);
 
     SetModifierValue(UNIT_MOD_ATTACK_POWER, BASE_VALUE, cinfo->MeleeAttackPower * damagemod);
-    SetModifierValue(UNIT_MOD_ATTACK_POWER_RANGED, BASE_VALUE, cinfo->rangedattackpower * damagemod);
+    SetModifierValue(UNIT_MOD_ATTACK_POWER_RANGED, BASE_VALUE, cinfo->RangedAttackPower * damagemod);
 }
 
 float Creature::_GetHealthMod(int32 Rank)
@@ -1852,7 +1851,7 @@ void Creature::CallAssistance()
     {
         SetNoCallAssistance(true);
 
-        if (GetCreatureInfo()->flags_extra & CREATURE_FLAG_EXTRA_NO_CALL_ASSIST)
+        if (GetCreatureInfo()->ExtraFlags & CREATURE_FLAG_EXTRA_NO_CALL_ASSIST)
             return;
 
         AI()->SendAIEventAround(AI_EVENT_CALL_ASSISTANCE, pVictim, sWorld.getConfig(CONFIG_UINT32_CREATURE_FAMILY_ASSISTANCE_DELAY), sWorld.getConfig(CONFIG_FLOAT_CREATURE_FAMILY_ASSISTANCE_RADIUS));

@@ -4022,7 +4022,7 @@ void Aura::HandleAuraMounted(bool apply, bool Real)
         if (minfo)
             display_id = minfo->modelid;
 
-        target->Mount(display_id, GetId(), ci->vehicleId, GetMiscValue());
+        target->Mount(display_id, GetId(), ci->VehicleTemplateId, GetMiscValue());
     }
     else
     {
@@ -10541,7 +10541,7 @@ void Aura::HandleAuraMirrorImage(bool apply, bool Real)
             const CreatureModelInfo* minfo = sObjectMgr.GetCreatureModelInfo(pCreature->GetNativeDisplayId());
 
             pCreature->SetByteValue(UNIT_FIELD_BYTES_0, 0, 0);
-            pCreature->SetByteValue(UNIT_FIELD_BYTES_0, 1, cinfo->unit_class);
+            pCreature->SetByteValue(UNIT_FIELD_BYTES_0, 1, cinfo->UnitClass);
             pCreature->SetByteValue(UNIT_FIELD_BYTES_0, 2, minfo->gender);
             pCreature->SetByteValue(UNIT_FIELD_BYTES_0, 3, 0);
         }

@@ -941,7 +941,7 @@ bool Pet::InitStatsForLevel(uint32 petlevel, Unit* owner)
 
     PetLevelInfo const* pInfo = sObjectMgr.GetPetLevelInfo(cinfo->Entry, petlevel);
 
-    SetMeleeDamageSchool(SpellSchools(cinfo->dmgschool));
+    SetMeleeDamageSchool(SpellSchools(cinfo->DamageSchool));
 
     int32 createStats[MAX_STATS+7] =  {22,     // STAT_STRENGTH
                                        22,     // STAT_AGILITY
@@ -958,36 +958,36 @@ bool Pet::InitStatsForLevel(uint32 petlevel, Unit* owner)
 
     uint32 createResistance[MAX_SPELL_SCHOOL] = {0,0,0,0,0,0,0};
 
-    createResistance[SPELL_SCHOOL_HOLY]   = cinfo->resistance1;
-    createResistance[SPELL_SCHOOL_FIRE]   = cinfo->resistance2;
-    createResistance[SPELL_SCHOOL_NATURE] = cinfo->resistance3;
-    createResistance[SPELL_SCHOOL_FROST]  = cinfo->resistance4;
-    createResistance[SPELL_SCHOOL_SHADOW] = cinfo->resistance5;
-    createResistance[SPELL_SCHOOL_ARCANE] = cinfo->resistance6;
+    createResistance[SPELL_SCHOOL_HOLY]   = cinfo->ResistanceHoly;
+    createResistance[SPELL_SCHOOL_FIRE]   = cinfo->ResistanceFire;
+    createResistance[SPELL_SCHOOL_NATURE] = cinfo->ResistanceNature;
+    createResistance[SPELL_SCHOOL_FROST]  = cinfo->ResistanceFrost;
+    createResistance[SPELL_SCHOOL_SHADOW] = cinfo->ResistanceShadow;
+    createResistance[SPELL_SCHOOL_ARCANE] = cinfo->ResistanceArcane;
     // Armor
-    createResistance[SPELL_SCHOOL_NORMAL] = int32(cinfo->armor  * petlevel / cinfo->maxlevel / (1 +  cinfo->rank));
+    createResistance[SPELL_SCHOOL_NORMAL] = int32(cinfo->Armor  * petlevel / cinfo->MaxLevel / (1 +  cinfo->Rank));
 
     for (int i = 0; i < MAX_STATS; ++i)
         createStats[i] *= petlevel/10;
 
-    createStats[MAX_STATS]    = int32(cinfo->maxhealth * petlevel / cinfo->maxlevel / (1 +  cinfo->rank));
-    createStats[MAX_STATS+1]  = int32(cinfo->maxmana * petlevel / cinfo->maxlevel / (1 +  cinfo->rank));
-    createStats[MAX_STATS+2]  = int32(cinfo->attackpower * petlevel / cinfo->maxlevel / (1 +  cinfo->rank));
-    createStats[MAX_STATS+3]  = int32(cinfo->mindmg * petlevel / cinfo->maxlevel / (1 + cinfo->rank));
-    createStats[MAX_STATS+4]  = int32(cinfo->maxdmg * petlevel / cinfo->maxlevel / (1 + cinfo->rank));
-    createStats[MAX_STATS+5]  = int32(cinfo->minrangedmg * petlevel / cinfo->maxlevel/ (1 + cinfo->rank));
-    createStats[MAX_STATS+6]  = int32(cinfo->maxrangedmg * petlevel / cinfo->maxlevel/ (1 + cinfo->rank));
-    SetFloatValue(UNIT_FIELD_MAXRANGEDDAMAGE, float(cinfo->maxrangedmg * petlevel / cinfo->maxlevel));
+    createStats[MAX_STATS]    = int32(cinfo->MaxLevelHealth * petlevel / cinfo->MaxLevel / (1 +  cinfo->Rank));
+    createStats[MAX_STATS+1]  = int32(cinfo->MaxLevelMana * petlevel / cinfo->MaxLevel / (1 +  cinfo->Rank));
+    createStats[MAX_STATS+2]  = int32(cinfo->MeleeAttackPower * petlevel / cinfo->MaxLevel / (1 +  cinfo->Rank));
+    createStats[MAX_STATS+3]  = int32(cinfo->MinMeleeDmg * petlevel / cinfo->MaxLevel / (1 + cinfo->Rank));
+    createStats[MAX_STATS+4]  = int32(cinfo->MaxMeleeDmg * petlevel / cinfo->MaxLevel / (1 + cinfo->Rank));
+    createStats[MAX_STATS+5]  = int32(cinfo->MinRangedDmg * petlevel / cinfo->MaxLevel/ (1 + cinfo->Rank));
+    createStats[MAX_STATS+6]  = int32(cinfo->MaxRangedDmg * petlevel / cinfo->MaxLevel/ (1 + cinfo->Rank));
+    SetFloatValue(UNIT_FIELD_MAXRANGEDDAMAGE, float(cinfo->MaxRangedDmg * petlevel / cinfo->MaxLevel));
     setPowerType(Powers(cinfo->GetPowerType()));
-    SetAttackTime(BASE_ATTACK, cinfo->baseattacktime);
-    SetAttackTime(RANGED_ATTACK, cinfo->rangeattacktime);
+    SetAttackTime(BASE_ATTACK, cinfo->MeleeBaseAttackTime);
+    SetAttackTime(RANGED_ATTACK, cinfo->RangedBaseAttackTime);
 
     switch (getPetType())
     {
         case SUMMON_PET:
         {
             SetByteValue(UNIT_FIELD_BYTES_0, 1, CLASS_MAGE);
-            if (cinfo->family == CREATURE_FAMILY_GHOUL)
+            if (cinfo->Family == CREATURE_FAMILY_GHOUL)
                 setPowerType(POWER_ENERGY);
             break;
         }
@@ -1000,7 +1000,7 @@ bool Pet::InitStatsForLevel(uint32 petlevel, Unit* owner)
             SetByteValue(UNIT_FIELD_BYTES_0, 2, GENDER_NONE);
             SetSheath(SHEATH_STATE_MELEE);
 
-            CreatureFamilyEntry const* cFamily = sCreatureFamilyStore.LookupEntry(cinfo->family);
+            CreatureFamilyEntry const* cFamily = sCreatureFamilyStore.LookupEntry(cinfo->Family);
             if (cFamily && cFamily->minScale > 0.0f && getPetType()==HUNTER_PET)
             {
                 float scale;
@@ -1025,7 +1025,7 @@ bool Pet::InitStatsForLevel(uint32 petlevel, Unit* owner)
             SetUInt32Value(UNIT_FIELD_PETEXPERIENCE, 0);
             SetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP, 1000);
             // DK ghouls have energy
-            if (cinfo->family == CREATURE_FAMILY_GHOUL)
+            if (cinfo->Family == CREATURE_FAMILY_GHOUL)
                 setPowerType(POWER_ENERGY);
             break;
         }
@@ -2686,7 +2686,7 @@ bool Pet::Summon()
         case PROTECTOR_PET:
         {
             RemoveByteFlag(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_FFA_PVP | UNIT_BYTE2_FLAG_SANCTUARY | UNIT_BYTE2_FLAG_PVP);
-            SetUInt32Value(UNIT_NPC_FLAGS, GetCreatureInfo()->npcflag);
+            SetUInt32Value(UNIT_NPC_FLAGS, GetCreatureInfo()->NpcFlags);
             SetUInt32Value(UNIT_FIELD_BYTES_1, 0);
             SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE);
             SetNeedSave(false);
@@ -2736,7 +2736,7 @@ bool Pet::Summon()
         case MINI_PET:
         {
             SelectLevel(GetCreatureInfo());
-            SetUInt32Value(UNIT_NPC_FLAGS, GetCreatureInfo()->npcflag);
+            SetUInt32Value(UNIT_NPC_FLAGS, GetCreatureInfo()->NpcFlags);
             SetByteValue(UNIT_FIELD_BYTES_2, 1, 0);
             SetName("");
             SetNeedSave(false);

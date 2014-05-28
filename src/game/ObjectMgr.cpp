@@ -648,7 +648,7 @@ void ObjectMgr::LoadCreatureTemplates()
         if (cInfo->GetPowerType() >= MAX_POWERS)
         {
             sLog.outErrorDb("Creature (Entry: %u) has invalid power type (%u)", cInfo->Entry, cInfo->GetPowerType());
-            const_cast<CreatureInfo*>(cInfo)->powerType = POWER_MANA;
+            const_cast<CreatureInfo*>(cInfo)->PowerType = POWER_MANA;
         }
 
         if (!cInfo->MinLevel)
@@ -663,16 +663,16 @@ void ObjectMgr::LoadCreatureTemplates()
             const_cast<CreatureInfo*>(cInfo)->MaxLevel = cInfo->MinLevel;
         }
 
-        if (cInfo->minlevel > DEFAULT_MAX_CREATURE_LEVEL)
+        if (cInfo->MinLevel > DEFAULT_MAX_CREATURE_LEVEL)
         {
             sLog.outErrorDb("Creature (Entry: %u) `MinLevel` exceeds maximum allowed value of '%u'", cInfo->Entry, uint32(DEFAULT_MAX_CREATURE_LEVEL));
-            const_cast<CreatureInfo*>(cInfo)->minlevel = uint32(DEFAULT_MAX_CREATURE_LEVEL);
+            const_cast<CreatureInfo*>(cInfo)->MinLevel = uint32(DEFAULT_MAX_CREATURE_LEVEL);
         }
 
-        if (cInfo->maxlevel > DEFAULT_MAX_CREATURE_LEVEL)
+        if (cInfo->MaxLevel > DEFAULT_MAX_CREATURE_LEVEL)
         {
             sLog.outErrorDb("Creature (Entry: %u) `MaxLevel` exceeds maximum allowed value of '%u'", cInfo->Entry, uint32(DEFAULT_MAX_CREATURE_LEVEL));
-            const_cast<CreatureInfo*>(cInfo)->maxlevel = uint32(DEFAULT_MAX_CREATURE_LEVEL);
+            const_cast<CreatureInfo*>(cInfo)->MaxLevel = uint32(DEFAULT_MAX_CREATURE_LEVEL);
         }
 /*
         if (cInfo->Expansion > MAX_EXPANSION)
@@ -700,10 +700,10 @@ void ObjectMgr::LoadCreatureTemplates()
              }
         }
 */
-        if(cInfo->dmgschool >= MAX_SPELL_SCHOOL)
+        if(cInfo->DamageSchool >= MAX_SPELL_SCHOOL)
         {
-            sLog.outErrorDb("Creature (Entry: %u) has invalid spell school value (%u) in `dmgschool`",cInfo->Entry,cInfo->dmgschool);
-            const_cast<CreatureInfo*>(cInfo)->dmgschool = SPELL_SCHOOL_NORMAL;
+            sLog.outErrorDb("Creature (Entry: %u) has invalid spell school value (%u) in `DamageSchool`",cInfo->Entry,cInfo->DamageSchool);
+            const_cast<CreatureInfo*>(cInfo)->DamageSchool = SPELL_SCHOOL_NORMAL;
         }
 
         if (cInfo->MeleeBaseAttackTime == 0)

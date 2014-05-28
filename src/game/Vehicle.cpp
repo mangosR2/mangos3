@@ -291,7 +291,7 @@ bool VehicleKit::AddPassenger(Unit* passenger, SeatId seatId)
         }
 
         // Allow to keep AI of controlled vehicle with CREATURE_FLAG_EXTRA_KEEP_AI extra-flag
-        if (!(((Creature*)GetBase())->GetCreatureInfo()->flags_extra & CREATURE_FLAG_EXTRA_KEEP_AI))
+        if (!(((Creature*)GetBase())->GetCreatureInfo()->ExtraFlags & CREATURE_FLAG_EXTRA_KEEP_AI))
             ((Creature*)GetBase())->AIM_Initialize();
 
         if (GetBase()->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE))
@@ -396,7 +396,7 @@ void VehicleKit::RemovePassenger(Unit* passenger, bool dismount /*false*/)
         }
 
         // Allow to keep AI of controlled vehicle with CREATURE_FLAG_EXTRA_KEEP_AI extra-flag
-        if (!(((Creature*)GetBase())->GetCreatureInfo()->flags_extra & CREATURE_FLAG_EXTRA_KEEP_AI))
+        if (!(((Creature*)GetBase())->GetCreatureInfo()->ExtraFlags & CREATURE_FLAG_EXTRA_KEEP_AI))
             ((Creature*)GetBase())->AIM_Initialize();
     }
 

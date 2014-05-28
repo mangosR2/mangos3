@@ -2436,7 +2436,7 @@ void Group::RewardGroupAtKill(Unit* pVictim, Player* player_tap)
             {
                 if (CreatureInfo const* normalInfo = ObjectMgr::GetCreatureTemplate(pVictim->GetEntry()))
                 {
-                    if (uint32 normalType = normalInfo->type)
+                    if (uint32 normalType = normalInfo->CreatureType)
                         pGroupGuy->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_KILL_CREATURE_TYPE, normalType, xp);
                 }
             }
@@ -2454,7 +2454,7 @@ void Group::RewardGroupAtKill(Unit* pVictim, Player* player_tap)
             {
                 if (CreatureInfo const* normalInfo = ObjectMgr::GetCreatureTemplate(pVictim->GetEntry()))
                 {
-                    if (uint32 normalType = normalInfo->type)
+                    if (uint32 normalType = normalInfo->CreatureType)
                         player_tap->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_KILL_CREATURE_TYPE, normalType, xp);
                 }
             }

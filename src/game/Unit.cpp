@@ -8112,7 +8112,7 @@ void Unit::SpellDamageBonusDone(DamageInfo* damageInfo, uint32 stack)
 
     // Creature damage
     if (GetTypeId() == TYPEID_UNIT && !((Creature*)this)->IsPet())
-        DoneTotalMod *= ((Creature*)this)->GetSpellDamageMod(((Creature*)this)->GetCreatureInfo()->Rank);
+        DoneTotalMod *= Creature::_GetSpellDamageMod(((Creature*)this)->GetCreatureInfo()->Rank);
 
     float nonStackingPos = 0.0f;
     float nonStackingNeg = 0.0f;
@@ -10409,7 +10409,7 @@ void Unit::UpdateSpeed(UnitMoveType mtype, bool forced, float ratio)
         case MOVE_RUN:
         {
             if (GetTypeId() == TYPEID_UNIT && !isPlayerPet)
-                ratio *= ((Creature*)this)->GetCreatureInfo()->speed_run;
+                ratio *= ((Creature*)this)->GetCreatureInfo()->SpeedRun;
 
             if (IsMounted()) // Use on mount auras
             {
@@ -11221,7 +11221,7 @@ void Unit::ApplyDiminishingToDuration(DiminishingGroup group, int32 &duration,Un
             default: break;
         }
     }
-    else if (GetTypeId() == TYPEID_UNIT && (((Creature*)this)->GetCreatureInfo()->flags_extra &  CREATURE_FLAG_EXTRA_TAUNT_DIMINISHING) && GetDiminishingReturnsGroupType(group) == DRTYPE_TAUNT)
+    else if (GetTypeId() == TYPEID_UNIT && (((Creature*)this)->GetCreatureInfo()->ExtraFlags &  CREATURE_FLAG_EXTRA_TAUNT_DIMINISHING) && GetDiminishingReturnsGroupType(group) == DRTYPE_TAUNT)
     {
         DiminishingLevels diminish = Level;
         switch(diminish)
