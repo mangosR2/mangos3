@@ -286,7 +286,6 @@ bool Creature::InitEntry(uint32 Entry, CreatureData const* data /*=NULL*/, GameE
     SetDisplayId(display_id);
 
     SetByteValue(UNIT_FIELD_BYTES_0, 2, minfo->gender);
-    SetByteValue(UNIT_FIELD_BYTES_0, 3, uint8(cinfo->GetPowerType()));
 
     // set PowerType based on unit class
     switch (cinfo->UnitClass)

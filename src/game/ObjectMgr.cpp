@@ -646,12 +646,6 @@ void ObjectMgr::LoadCreatureTemplates()
         if (!displayScaleEntry)
             sLog.outErrorDb("Creature (Entry: %u) has nonexistent modelid in `ModelId1`/`ModelId2`/ModelId3`/`ModelId4`", cInfo->Entry);
 
-        if (cInfo->GetPowerType() >= MAX_POWERS)
-        {
-            sLog.outErrorDb("Creature (Entry: %u) has invalid power type (%u)", cInfo->Entry, cInfo->GetPowerType());
-            const_cast<CreatureInfo*>(cInfo)->PowerType = POWER_MANA;
-        }
-
         if (!cInfo->MinLevel)
         {
             sLog.outErrorDb("Creature (Entry: %u) has invalid `MinLevel`, set to 1", cInfo->Entry);
@@ -675,7 +669,7 @@ void ObjectMgr::LoadCreatureTemplates()
             sLog.outErrorDb("Creature (Entry: %u) `MaxLevel` exceeds maximum allowed value of '%u'", cInfo->Entry, uint32(DEFAULT_MAX_CREATURE_LEVEL));
             const_cast<CreatureInfo*>(cInfo)->MaxLevel = uint32(DEFAULT_MAX_CREATURE_LEVEL);
         }
-/*
+
         if (cInfo->Expansion > MAX_EXPANSION)
         {
             sLog.outErrorDb("Creature (Entry: %u) `Expansion(%u)` is not correct", cInfo->Entry, uint32(MAX_EXPANSION));
@@ -683,14 +677,15 @@ void ObjectMgr::LoadCreatureTemplates()
         }
 
         // use below code for 0-checks for unit_class
-        if (!cInfo->UnitClass)
-            ERROR_DB_STRICT_LOG("Creature (Entry: %u) not has proper `UnitClass(%u)` for creature_template", cInfo->Entry, cInfo->UnitClass);
-        else if (((1 << (cInfo->UnitClass - 1)) & CLASSMASK_ALL_CREATURES) == 0)
-            sLog.outErrorDb("Creature (Entry: %u) has invalid `UnitClass(%u)` for creature_template", cInfo->Entry, cInfo->UnitClass);
-
-        if (!cInfo->Expansion < 0)
+        if (!cInfo->UnitClass || (((1 << (cInfo->UnitClass - 1)) & CLASSMASK_ALL_CREATURES) == 0))
         {
-             for (uint32 level = cInfo->minlevel; level <= cInfo->maxlevel; ++level)
+            sLog.outErrorDb("Creature (Entry: %u) does not have proper `UnitClass(%u)` in creature_template", cInfo->Entry, cInfo->UnitClass);
+            const_cast<CreatureInfo*>(cInfo)->Expansion = -1;
+        }
+
+        if (cInfo->Expansion >= 0)
+        {
+             for (uint32 level = cInfo->MinLevel; level <= cInfo->MaxLevel; ++level)
              {
                  if (!GetCreatureClassLvlStats(level, cInfo->UnitClass, cInfo->Expansion))
                  {
@@ -700,10 +695,10 @@ void ObjectMgr::LoadCreatureTemplates()
                  }
              }
         }
-*/
-        if(cInfo->DamageSchool >= MAX_SPELL_SCHOOL)
+
+        if (cInfo->DamageSchool >= MAX_SPELL_SCHOOL)
         {
-            sLog.outErrorDb("Creature (Entry: %u) has invalid spell school value (%u) in `DamageSchool`",cInfo->Entry,cInfo->DamageSchool);
+            sLog.outErrorDb("Creature (Entry: %u) has invalid spell school value (%u) in `DamageSchool`", cInfo->Entry, cInfo->DamageSchool);
             const_cast<CreatureInfo*>(cInfo)->DamageSchool = SPELL_SCHOOL_NORMAL;
         }
 
@@ -715,7 +710,7 @@ void ObjectMgr::LoadCreatureTemplates()
 
         if (cInfo->NpcFlags & UNIT_NPC_FLAG_SPELLCLICK)
         {
-            sLog.outErrorDb("Creature (Entry: %u) has dynamic flag UNIT_NPC_FLAG_SPELLCLICK (%u) set, it expect to be set by code base at `npc_spellclick_spells` content.",cInfo->Entry,UNIT_NPC_FLAG_SPELLCLICK);
+            sLog.outErrorDb("Creature (Entry: %u) has dynamic flag UNIT_NPC_FLAG_SPELLCLICK (%u) set, it expect to be set by code base at `npc_spellclick_spells` content.", cInfo->Entry, UNIT_NPC_FLAG_SPELLCLICK);
             const_cast<CreatureInfo*>(cInfo)->NpcFlags &= ~UNIT_NPC_FLAG_SPELLCLICK;
         }
 
@@ -735,20 +730,20 @@ void ObjectMgr::LoadCreatureTemplates()
             const_cast<CreatureInfo*>(cInfo)->Family = 0;
         }
 
-        if(cInfo->InhabitType <= 0 || cInfo->InhabitType > INHABIT_ANYWHERE)
+        if (cInfo->InhabitType <= 0 || cInfo->InhabitType > INHABIT_ANYWHERE)
         {
-            sLog.outErrorDb("Creature (Entry: %u) has wrong value (%u) in `InhabitType`, creature will not correctly walk/swim/fly",cInfo->Entry,cInfo->InhabitType);
+            sLog.outErrorDb("Creature (Entry: %u) has wrong value (%u) in `InhabitType`, creature will not correctly walk/swim/fly", cInfo->Entry, cInfo->InhabitType);
             const_cast<CreatureInfo*>(cInfo)->InhabitType = INHABIT_ANYWHERE;
         }
 
-        if(cInfo->PetSpellDataId)
+        if (cInfo->PetSpellDataId)
         {
             CreatureSpellDataEntry const* spellDataId = sCreatureSpellDataStore.LookupEntry(cInfo->PetSpellDataId);
-            if(!spellDataId)
+            if (!spellDataId)
                 sLog.outErrorDb("Creature (Entry: %u) has non-existing `PetSpellDataId(%u)`", cInfo->Entry, cInfo->PetSpellDataId);
         }
 
-        if(cInfo->MovementType >= MAX_DB_MOTION_TYPE)
+        if (cInfo->MovementType >= MAX_DB_MOTION_TYPE)
         {
             sLog.outErrorDb("Creature (Entry: %u) has wrong movement generator type (%u) set in `MovementType`, ignore and set to IDLE.", cInfo->Entry, cInfo->MovementType);
             const_cast<CreatureInfo*>(cInfo)->MovementType = IDLE_MOTION_TYPE;
@@ -778,7 +773,7 @@ void ObjectMgr::LoadCreatureTemplates()
         /// if not set custom creature scale then load scale from CreatureDisplayInfo.dbc
         if (cInfo->Scale <= 0.0f)
         {
-            if(displayScaleEntry)
+            if (displayScaleEntry)
                 const_cast<CreatureInfo*>(cInfo)->Scale = displayScaleEntry->scale;
             else
                 const_cast<CreatureInfo*>(cInfo)->Scale = DEFAULT_OBJECT_SCALE;
@@ -1005,7 +1000,7 @@ CreatureClassLvlStats const* ObjectMgr::GetCreatureClassLvlStats(uint32 level, u
 
     CreatureClassLvlStats const* cCLS = &m_creatureClassLvlStats[level][classToIndex[unitClass]][expansion];
 
-    if (cCLS->BaseHealth != 0 && cCLS->BaseDamage != 0.0f)
+    if (cCLS->BaseHealth != 0 && cCLS->BaseDamage > 0.1f)
         return cCLS;
 
     return NULL;

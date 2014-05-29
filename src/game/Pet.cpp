@@ -976,7 +976,7 @@ bool Pet::InitStatsForLevel(uint32 petlevel, Unit* owner)
     createStats[MAX_STATS+5]  = int32(cinfo->MinRangedDmg * petlevel / cinfo->MaxLevel/ (1 + cinfo->Rank));
     createStats[MAX_STATS+6]  = int32(cinfo->MaxRangedDmg * petlevel / cinfo->MaxLevel/ (1 + cinfo->Rank));
     SetFloatValue(UNIT_FIELD_MAXRANGEDDAMAGE, float(cinfo->MaxRangedDmg * petlevel / cinfo->MaxLevel));
-    SetPowerType(Powers(cinfo->GetPowerType()));
+
     SetAttackTime(BASE_ATTACK, cinfo->MeleeBaseAttackTime);
     SetAttackTime(RANGED_ATTACK, cinfo->RangedBaseAttackTime);
 
