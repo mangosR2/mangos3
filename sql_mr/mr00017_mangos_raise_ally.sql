@@ -1,6 +1,6 @@
 -- Raise Ally
 -- Commit 8f022d171f3e383e2e77
-UPDATE `creature_template` SET `PowerType`='3', `ScriptName`='npc_risen_ally' WHERE `entry`='30230';
+UPDATE `creature_template` SET `ScriptName`='npc_risen_ally' WHERE `entry`='30230';
 DELETE FROM `creature_spell` WHERE `guid` IN (30230);
 INSERT INTO `creature_spell` (`guid`, `spell`, `index`, `active`, `disabled`, `flags`) VALUES
 (30230, 62225, 0, 0, 0, 0),

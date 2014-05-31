@@ -92,8 +92,8 @@ void VehicleKit::Initialize(uint32 creatureEntry)
     if (pVehicle->GetTypeId() == TYPEID_UNIT)
     {
         // Do not use the wrappers for setting power type in order to avoid side-effects
-        //if (PowerDisplayEntry const* powerEntry = sPowerDisplayStore.LookupEntry(GetEntry()->m_powerDisplayID))
-        //    pVehicle->SetByteValue(UNIT_FIELD_BYTES_0, 3, powerEntry->power);
+        if (PowerDisplayEntry const* powerEntry = sPowerDisplayStore.LookupEntry(GetEntry()->m_powerDisplayID))
+            pVehicle->SetByteValue(UNIT_FIELD_BYTES_0, 3, powerEntry->power);
     }
 
     m_isInitialized = true;

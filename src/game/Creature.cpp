@@ -662,7 +662,7 @@ void Creature::RegeneratePower()
 
             if (IsVehicle())
             {
-                switch (GetVehicleInfo()->m_powerType)
+                switch (GetVehicleInfo()->m_powerDisplayID)
                 {
                     case ENERGY_TYPE_PYRITE:
                     case ENERGY_TYPE_BLOOD:

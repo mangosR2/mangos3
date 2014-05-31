@@ -207,12 +207,6 @@ ALTER TABLE `vehicle_accessory`
     ADD COLUMN `offset_z` FLOAT NOT NULL DEFAULT '0' COMMENT 'custom passenger offset Z' AFTER `offset_y`,
     ADD COLUMN `offset_o` FLOAT NOT NULL DEFAULT '0' COMMENT 'custom passenger offset O' AFTER `offset_z`;
 
--- Vehicle Tables
--- Commit 3be940faa44326abc801
-
-ALTER TABLE `creature_template`
-    ADD COLUMN `PowerType` tinyint(3) unsigned NOT NULL default '0' AFTER `MaxHealth`;
-
 -- Areatrigger table format change
 
 ALTER TABLE `areatrigger_teleport`

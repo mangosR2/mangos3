@@ -8,7 +8,6 @@ UPDATE creature_template SET vehicle_id = 165 WHERE entry = 32535;
 UPDATE creature_template SET vehicle_id = 479 WHERE entry = 35634;
 UPDATE creature_template SET vehicle_id = 489 WHERE entry = 35768;
 UPDATE creature_template SET vehicle_id = 223 WHERE entry = 30248;
-UPDATE creature_template SET PowerType = 3 WHERE entry = 29884;
 UPDATE creature_template SET vehicle_id = 736 WHERE  entry = 31788;
 UPDATE creature_template SET vehicle_id = 0   WHERE  entry IN (33297,33298,33300,33301,33408,33409,33414,33416,33418,34125,36558,36557);
 UPDATE creature_template SET vehicle_id = 106 WHERE  entry = 34802;
@@ -33,19 +32,18 @@ INSERT INTO npc_spellclick_spells (`npc_entry`, `spell_id`, `quest_start`, `ques
 (33067, 65031, 0, 0, 0, 1);  -- Siege engine turret
 
 -- Salvaged Chopper
-UPDATE `creature_template` SET PowerType = 3, `AIName` = 'NullAI' WHERE `entry` IN (33062, 34045);
+UPDATE `creature_template` SET `AIName` = 'NullAI' WHERE `entry` IN (33062, 34045);
 
 -- Siege engine
-UPDATE `creature_template` SET `PowerType` = 3, `AIName` = 'NullAI' WHERE `entry` IN (33060);
+UPDATE `creature_template` SET `AIName` = 'NullAI' WHERE `entry` IN (33060);
 REPLACE INTO `creature_template_spells` SET `entry` = 33060, `spell1` = 62345, `spell2` = 62522, `spell3` = 62346;
 UPDATE `creature_template` SET `AIName` = 'NullAI' WHERE `entry` IN (33067);
 
 -- demolisher
-UPDATE `creature_template` SET `PowerType` = 3, `AIName` = 'NullAI' WHERE `entry` IN (33109);
+UPDATE `creature_template` SET `AIName` = 'NullAI' WHERE `entry` IN (33109);
 REPLACE INTO `creature_template_spells` SET `entry` = 33109, `spell1` = 62306, `spell2` = 62490, `spell3` = 62308, `spell4` = 62324;
 
 -- Salvaged Siege Turret by traponinet
-UPDATE `creature_template` SET `PowerType` = 3 WHERE `entry` = 33067;
 DELETE FROM `creature_spell` WHERE `guid` IN (33067);
 INSERT INTO `creature_spell` (`guid`, `spell`, `index`, `active`, `disabled`, `flags`) VALUES
 (33067, 62358, 0, 0, 0, 0),
@@ -53,7 +51,6 @@ INSERT INTO `creature_spell` (`guid`, `spell`, `index`, `active`, `disabled`, `f
 (33067, 64677, 2, 0, 0, 0);
 
 -- Salvaged Demolisher Mechanic Seat
-UPDATE `creature_template` SET `PowerType` = 3 WHERE `entry` = 33167;
 DELETE FROM `creature_spell` WHERE `guid` IN (33167);
 INSERT INTO `creature_spell` (`guid`, `spell`, `index`, `active`, `disabled`, `flags`) VALUES
 (33167, 62634, 0, 0, 0, 0),
@@ -374,7 +371,7 @@ INSERT INTO `npc_spellclick_spells` (`npc_entry`, `spell_id`, `quest_start`, `qu
 
 -- Wintergrasp siege Engine (Alliance)
 SET @GUID := 28312;
-UPDATE `creature_template` SET `vehicle_id` = 324, `powertype` = 3, `AIName` = 'NullAI' WHERE `entry` = @GUID;
+UPDATE `creature_template` SET `vehicle_id` = 324, `AIName` = 'NullAI' WHERE `entry` = @GUID;
 
 DELETE FROM `creature_spell` WHERE `guid` IN (@GUID);
 INSERT INTO `creature_spell` (`guid`, `spell`, `index`, `active`, `disabled`, `flags`) VALUES
@@ -383,7 +380,7 @@ INSERT INTO `creature_spell` (`guid`, `spell`, `index`, `active`, `disabled`, `f
 
 -- Wintergrasp Alliance siege turret (accessory)
 SET @GUID := 28319;
-UPDATE `creature_template` SET `powertype` = 3, AIName = 'NullAI' WHERE entry = @GUID;
+UPDATE `creature_template` SET AIName = 'NullAI' WHERE entry = @GUID;
 
 DELETE FROM `creature_spell` WHERE `guid` IN (@GUID);
 INSERT INTO `creature_spell` (`guid`, `spell`, `index`, `active`, `disabled`, `flags`) VALUES
@@ -391,7 +388,7 @@ INSERT INTO `creature_spell` (`guid`, `spell`, `index`, `active`, `disabled`, `f
 
 -- Wintergrasp siege Engine (Horde)
 SET @GUID := 32627;
-UPDATE `creature_template` SET `powertype` = 3, `AIName` = 'NullAI' WHERE `entry` = @GUID;
+UPDATE `creature_template` SET `AIName` = 'NullAI' WHERE `entry` = @GUID;
 
 DELETE FROM `creature_spell` WHERE `guid` IN (@GUID);
 INSERT INTO `creature_spell` (`guid`, `spell`, `index`, `active`, `disabled`, `flags`) VALUES
@@ -400,7 +397,7 @@ INSERT INTO `creature_spell` (`guid`, `spell`, `index`, `active`, `disabled`, `f
 
 -- Wintergrasp Horde siege turret (accessory)
 SET @GUID := 32629;
-UPDATE `creature_template` SET `powertype` = 3, AIName = 'NullAI' WHERE entry = @GUID;
+UPDATE `creature_template` SET AIName = 'NullAI' WHERE entry = @GUID;
 
 DELETE FROM `creature_spell` WHERE `guid` IN (@GUID);
 INSERT INTO `creature_spell` (`guid`, `spell`, `index`, `active`, `disabled`, `flags`) VALUES
