@@ -291,6 +291,22 @@ CREATE TABLE IF NOT EXISTS  `player_factionchange_spells` (
     PRIMARY KEY (`race_A`,`alliance_id`,`race_H`,`horde_id`)
 ) DEFAULT CHARSET=UTF8;
 
+CREATE TABLE `player_factionchange_titles` (
+  `alliance_id` int(8) NOT NULL,
+  `alliance_comment` varchar(255) NOT NULL,
+  `horde_id` int(8) NOT NULL,
+  `horde_comment` varchar(255) NOT NULL,
+  PRIMARY KEY (`alliance_id`,`horde_id`)
+) DEFAULT CHARSET=utf8;
+
+CREATE TABLE `player_factionchange_quests` (
+    `alliance_id` int(8) NOT NULL,
+    `commentA` varchar(255) DEFAULT NULL,
+    `horde_id` int(8) NOT NULL,
+    `commentH` varchar(255) DEFAULT NULL,
+    PRIMARY KEY (`alliance_id`, `horde_id`)
+) DEFAULT CHARSET=UTF8;
+
 -- Implement spell linked definitions storage
 CREATE TABLE IF NOT EXISTS `spell_linked` (
     `entry`            int(10) unsigned NOT NULL COMMENT 'Spell entry',

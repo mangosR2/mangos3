@@ -1,24 +1,4 @@
 -- Race Faction Change - Items
-
-SET FOREIGN_KEY_CHECKS=0;
--- ----------------------------
--- Table structure for `player_factionchange_items`
--- ----------------------------
-DROP TABLE IF EXISTS `player_factionchange_items`;
-
-CREATE TABLE `player_factionchange_items` (
-    `race_A` int(8) NOT NULL DEFAULT '0',
-    `alliance_id` int(8) NOT NULL,
-    `commentA` varchar(255) DEFAULT NULL,
-    `race_H` int(8) NOT NULL DEFAULT '0',
-    `horde_id` int(8) NOT NULL,
-    `commentH` varchar(255) DEFAULT NULL,
-    PRIMARY KEY (`alliance_id`,`horde_id`)
-) DEFAULT CHARSET=UTF8;
-
--- ----------------------------
--- Records of player_factionchange_items
--- ----------------------------
 INSERT INTO `player_factionchange_items` VALUES ('0', '15196', 'Private\'s Tabard', '0', '15197', 'Scout\'s Tabard');
 INSERT INTO `player_factionchange_items` VALUES ('0', '18606', 'Alliance Battle Standard', '0', '18607', 'Horde Battle Standard');
 INSERT INTO `player_factionchange_items` VALUES ('0', '19032', 'Stormpike Battle Tabard', '0', '19031', 'Frostwolf Battle Tabard');
@@ -743,11 +723,9 @@ INSERT INTO `player_factionchange_items` VALUES ('0', '17903', 'Stormpike Insign
 INSERT INTO `player_factionchange_items` VALUES ('0', '17904', 'Stormpike Insignia Rank 6', '0', '17909', 'Frostwolf Insignia Rank 6');
 INSERT INTO `player_factionchange_items` VALUES ('0', '15198', 'Knight\'s Colors', '0', '15199', 'Stone Guard\'s Herald');
 INSERT INTO `player_factionchange_items` VALUES ('0', '35467', 'Mooncloth Vestments(115)', '0', '35337', 'Mooncloth Vestments(115)');
-
-INSERT IGNORE INTO `player_factionchange_items` (`race_A`, `alliance_id`, `commentA`, `race_H`, `horde_id`, `commentH`) VALUES 
-(0, 44235, 'Reins of the Traveler\'s Tundra Mammoth', 0, 44234, 'Reins of the Traveler\'s Tundra Mammoth'),
-(0, 48073, 'Velen\'s Circlet of Conquest',   0, 48098, 'Zabra\'s Circlet of Conquest'),
-(0, 48072, 'Velen\'s Handwraps of Conquest', 0, 48097, 'Zabra\'s Handwraps of Conquest'),
-(0, 48074, 'Velen\'s Pants of Conquest',     0, 48099, 'Zabra\'s Pants of Conquest'),
-(0, 48075, 'Velen\'s Raiments of Conquest',  0, 48100, 'Zabra\'s Raiments of Conquest'),
-(0, 48076, 'Velen\'s Mantle of Conquest',    0, 48101, 'Zabra\'s Mantle of Conquest');
+INSERT INTO `player_factionchange_items` VALUES (0, 44235, 'Reins of the Traveler\'s Tundra Mammoth', 0, 44234, 'Reins of the Traveler\'s Tundra Mammoth');
+INSERT INTO `player_factionchange_items` VALUES (0, 48073, 'Velen\'s Circlet of Conquest',   0, 48098, 'Zabra\'s Circlet of Conquest');
+INSERT INTO `player_factionchange_items` VALUES (0, 48072, 'Velen\'s Handwraps of Conquest', 0, 48097, 'Zabra\'s Handwraps of Conquest');
+INSERT INTO `player_factionchange_items` VALUES (0, 48074, 'Velen\'s Pants of Conquest',     0, 48099, 'Zabra\'s Pants of Conquest');
+INSERT INTO `player_factionchange_items` VALUES (0, 48075, 'Velen\'s Raiments of Conquest',  0, 48100, 'Zabra\'s Raiments of Conquest');
+INSERT INTO `player_factionchange_items` VALUES (0, 48076, 'Velen\'s Mantle of Conquest',    0, 48101, 'Zabra\'s Mantle of Conquest');
