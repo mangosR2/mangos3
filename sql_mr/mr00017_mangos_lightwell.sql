@@ -12,7 +12,7 @@ VALUES
     (31893,59907),
     (31883,59907);
 
-UPDATE `creature_template` SET `unit_flags`='4', `flags_extra`='2' WHERE `entry` IN (31897, 31896, 31895, 31894, 31893, 31883);
+UPDATE `creature_template` SET `UnitFlags`='4', `ExtraFlags`='2' WHERE `entry` IN (31897, 31896, 31895, 31894, 31893, 31883);
 
 DELETE FROM `npc_spellclick_spells` WHERE `npc_entry` IN (31897, 31896, 31895, 31894, 31893, 31883);
 INSERT INTO `npc_spellclick_spells`

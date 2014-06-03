@@ -1,8 +1,8 @@
 -- SET Diminishing Returns for taunt
-UPDATE creature_template SET flags_extra = flags_extra|8192 WHERE rank = 3;
+UPDATE creature_template SET ExtraFlags = ExtraFlags|8192 WHERE rank = 3;
 
 -- Not Diminishing Returns for taunt
-UPDATE creature_template SET flags_extra = flags_extra&~8192 WHERE entry IN (
+UPDATE creature_template SET ExtraFlags = ExtraFlags&~8192 WHERE entry IN (
 -- Instructor Razuvious
 16061, 29940,
 -- Toravon the Ice Watcher
