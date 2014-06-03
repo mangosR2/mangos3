@@ -7,11 +7,9 @@ UPDATE `creature_template_spells` SET `spell1` = 40133 WHERE `entry` = 15439;
 UPDATE `creature_template_spells` SET `spell1` = 40132 WHERE `entry` = 15430;
 
 DELETE FROM `dbscripts_on_event` WHERE `id` IN (14859,14858);
-INSERT INTO `dbscripts_on_event`
-    (`id`, `delay`, `command`, `datalong`, `datalong2`, `buddy_entry`, `search_radius`, `data_flags`, `dataint`, `dataint2`, `x`, `y`, `z`, `o`, `comments`)
-VALUES
-    (14858, 1, 15, 33663, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 'Summon greater Earth elemental'),
-    (14859, 1, 15, 32982, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 'Summon greater Fire  elemental');
+INSERT INTO `dbscripts_on_event` (`id`, `delay`, `command`, `datalong`, `datalong2`, `buddy_entry`, `search_radius`, `data_flags`, `dataint`, `dataint2`, `x`, `y`, `z`, `o`, `comments`) VALUES
+(14858, 1, 15, 33663, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 'Summon greater Earth elemental'),
+(14859, 1, 15, 32982, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 'Summon greater Fire  elemental');
 
 -- Valkyr guardian
 UPDATE `creature_template` SET `minmana` = '6500', `maxmana` = '6500' WHERE `entry` =38391;

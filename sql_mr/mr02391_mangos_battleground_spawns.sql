@@ -1,7 +1,4 @@
--- Sql to create buff object pool for some BG
-
 -- Arathi bassin
--- -------------
 
 -- Stable
 REPLACE INTO `gameobject` VALUES (150500, 179871, 529, 1, 1, 1185.71, 1185.24, -56.36, 2.56, 0, 0, 0.022338351, 0.999750467, 180, 100, 1);
@@ -61,7 +58,6 @@ REPLACE INTO `pool_gameobject` VALUES (150513, 15004, 0, "Gold Mine : Regen buff
 REPLACE INTO `pool_gameobject` VALUES (150514, 15004, 0, "Gold Mine : Berserker buff");
 
 -- Eye of Storm
--- ------------
 
 -- Blood Elf Tower
 REPLACE INTO `gameobject` VALUES (150550, 179871, 566, 1, 1, 2050.4599609375, 1372.26000976563, 1194.56005859375, 0.907571, 0, 0, 0.438371, 0.898794, 180, 100, 1);
