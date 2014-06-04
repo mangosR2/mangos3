@@ -34,13 +34,27 @@ INSERT INTO gameobject (guid, id, map, spawnMask, phaseMask, position_x, positio
 DELETE FROM gameobject_battleground WHERE guid IN (SELECT guid FROM gameobject WHERE `map` = 618);
 INSERT INTO gameobject_battleground (guid, event1, event2) VALUES
 -- buffs
-(@GAMEOBJECT,'253','0'),
-(@GAMEOBJECT+1,'253','0'),
+(@GAMEOBJECT,   253, 0),
+(@GAMEOBJECT+1, 253, 0),
 -- elevators
-(@GAMEOBJECT+2,'254','0'),
-(@GAMEOBJECT+3,'254','0');
+(@GAMEOBJECT+2, 254, 0),
+(@GAMEOBJECT+3, 254, 0),
+-- gears
+(@GAMEOBJECT+8,   7, 0),
+(@GAMEOBJECT+9,   7, 0),
+-- pillars
+(@GAMEOBJECT+10,  6, 0),
+(@GAMEOBJECT+11,  6, 0),
+(@GAMEOBJECT+12,  6, 0),
+(@GAMEOBJECT+13,  6, 0),
+-- static go
+(@GAMEOBJECT+14,  5, 0),
+(@GAMEOBJECT+15,  5, 0);
 
 DELETE FROM battleground_events WHERE `map` = '618';
 INSERT INTO battleground_events (map, event1, event2, description) VALUES
-('618','253','0','buffs'),
-('618','254','0','doors');
+(618, 253, 0, 'buffs'),
+(618, 254, 0, 'doors'),
+(618, 5, 0, 'spawn static go'),
+(618, 6, 0, 'spawn pillars'),
+(618, 7, 0, 'spawn gears');

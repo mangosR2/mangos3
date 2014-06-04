@@ -5,7 +5,7 @@ SET @GAMEOBJECT := 540000;
 
 UPDATE gameobject_template SET faction=114, flags=32, size=1.5 WHERE entry IN (192642, 192643);
 
-DELETE FROM `gameobject` WHERE map=617;
+DELETE FROM `gameobject` WHERE map = 617;
 DELETE FROM `gameobject` WHERE `guid` BETWEEN @GAMEOBJECT AND @GAMEOBJECT+999;
 INSERT INTO gameobject (guid, id, map, spawnMask, phaseMask, position_x, position_y, position_z, orientation, rotation0, rotation1, rotation2, rotation3, spawntimesecs, animprogress, state) VALUES
 -- buffs
@@ -28,13 +28,15 @@ INSERT INTO gameobject_battleground (guid, event1, event2) VALUES
 (@GAMEOBJECT+3,254,0),
 -- waterfall
 (@GAMEOBJECT+4,250,0),
-(@GAMEOBJECT+5,250,0);
+(@GAMEOBJECT+5,249,0);
 
-DELETE FROM battleground_events WHERE map=617;
+DELETE FROM battleground_events WHERE map = 617;
 INSERT INTO battleground_events (map, event1, event2, description) VALUES
-(617,253,0,'buffs'),
-(617,254,0,'doors'),
-(617,250,0,'waterfall');
+(617, 253, 0, 'buffs'),
+(617, 254, 0, 'doors'),
+(617, 250, 0, 'waterfall visual'),
+(617, 249, 0, 'waterfall collision');
+-- (617, 248, 0, 'waterfall sprouts');
 
 -- Fix Rotation for all Objects in Map
 UPDATE gameobject SET rotation0=0, rotation1=0, rotation2=SIN(orientation*0.5), rotation3=COS(orientation*0.5) WHERE map =  617;

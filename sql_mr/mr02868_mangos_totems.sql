@@ -1,5 +1,5 @@
 /* Stoneclaw Totem */
-REPLACE INTO creature_spell (guid, spell, `index`, active, disabled, flags) VALUES 
+INSERT INTO creature_spell (guid, spell, `index`, active, disabled, flags) VALUES 
 ('3579', '55328', '1', '0', '0', '0'),
 ('3911', '55329', '1', '0', '0', '0'),
 ('3912', '55330', '1', '0', '0', '0'),
