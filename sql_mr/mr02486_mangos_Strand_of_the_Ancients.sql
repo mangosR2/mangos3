@@ -7,8 +7,6 @@ SET @GAMEOBJECT := 510000;
 DELETE FROM `creature` WHERE `guid` BETWEEN @CREATURE AND @CREATURE+9999;
 DELETE FROM `gameobject` WHERE `guid` BETWEEN @GAMEOBJECT AND @GAMEOBJECT+9999;
 
-DELETE FROM battleground_template WHERE id = 9;
-INSERT INTO battleground_template (id, MinPlayersPerTeam, MaxPlayersPerTeam, AllianceStartLoc, AllianceStartO, HordeStartLoc, HordeStartO) VALUES (9, 5, 15, 1367, 0, 1368, 0);
 -- Rigger Sparklight
 UPDATE creature_template SET npcflag = 1, ScriptName = 'npc_sa_vendor' WHERE entry IN (29260, 29262);
 -- Seaforium source
@@ -73,7 +71,7 @@ INSERT INTO creature_template_addon VALUES
 (32795, 0, 0, 0, 0, 0, 0, 52455);
 
 -- Rigger Sparklight
-DELETE FROM creature WHERE `map` = 607;
+DELETE FROM creature WHERE guid BETWEEN @CREATURE+35 AND @CREATURE;
 INSERT INTO creature (guid,id,map,spawnMask,phaseMask,modelid,equipment_id,position_x,position_y,position_z,orientation,spawntimesecs,spawndist,currentwaypoint,curhealth,curmana,DeathState,MovementType)  VALUES
 (@CREATURE, 29260, 607, 3, 1, 0, 0, 1360.81, -322.18, 36.83, 0.32, 800, 0, 0, 6986, 0, 0, 0),
 (@CREATURE+1, 29262, 607, 3, 1, 0, 0, 1363.87, 220.95, 37.06, 2.67, 800, 0, 0, 6986, 0, 0, 0),
@@ -158,7 +156,7 @@ INSERT INTO creature_battleground VALUES
 (@CREATURE+34, 4, 3),
 (@CREATURE+35, 4, 4);
 
-DELETE FROM gameobject WHERE map = 607;
+DELETE FROM gameobject WHERE guid BETWEEN @GAMEOBJECT + 182 AND @GAMEOBJECT;
 INSERT INTO gameobject VALUES
 -- Titan Relic & Doors
 (@GAMEOBJECT, 194082, 607, 3, 1, 836.502, -108.811, 111.587, 0.121379, 0, 0, 0.0606524, 0.998159, 86400, 0, 1),
