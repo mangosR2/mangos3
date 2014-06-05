@@ -7094,6 +7094,18 @@ void Player::UpdateArea(uint32 newArea)
             SetFFAPvP(false);
     }
 
+    uint32 const areaRestFlag = (GetTeam() == ALLIANCE) ? AREA_FLAG_REST_ZONE_ALLIANCE : AREA_FLAG_REST_ZONE_HORDE;
+    if (area && area->flags & areaRestFlag)
+    {
+        SetFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING);
+        SetRestType(REST_TYPE_IN_FACTION_AREA);
+    }
+    else if (HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING) && GetRestType() == REST_TYPE_IN_FACTION_AREA)
+    {
+        RemoveFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING);
+        SetRestType(REST_TYPE_NO);
+    }
+
     if (area)
     {
         // Dalaran restricted flight zone
