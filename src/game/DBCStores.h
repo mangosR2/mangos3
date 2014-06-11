@@ -213,6 +213,7 @@ extern DBCStorage <QuestPOIPointEntry>           sQuestPOIPointStore;
 extern DBCStorage <QuestSortEntry>               sQuestSortStore;
 extern DBCStorage <QuestXPLevel>                 sQuestXPLevelStore;
 extern DBCStorage <PhaseEntry>                   sPhaseStore;
+extern DBCStorage <PowerDisplayEntry>            sPowerDisplayStore;
 // extern DBCStorage <PvPDifficultyEntry>           sPvPDifficultyStore; -- use GetBattlegroundSlotByLevel for access
 extern DBCStorage <RandomPropertiesPointsEntry>  sRandomPropertiesPointsStore;
 extern DBCStorage <ResearchBranchEntry>          sResearchBranchStore;

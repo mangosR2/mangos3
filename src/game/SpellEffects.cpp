@@ -5702,6 +5702,15 @@ void Spell::EffectDummy(SpellEffectEntry const* effect)
                 }
                 return;
             }
+            // Mana Spring Totem
+            if (m_spellInfo->GetSpellFamilyFlags().test<CF_SHAMAN_MANA_SPRING>())
+            {
+                if (!unitTarget || unitTarget->GetPowerType() != POWER_MANA)
+                    return;
+
+                m_caster->CastCustomSpell(unitTarget, 52032, &damage, 0, 0, true, 0, 0, m_originalCasterGuid);
+                return;
+            }
             // Flametongue Weapon Proc, Ranks
             if (shamClassOptions && shamClassOptions->SpellFamilyFlags & UI64LIT(0x0000000000200000))
             {
@@ -5722,7 +5731,7 @@ void Spell::EffectDummy(SpellEffectEntry const* effect)
             // Unleash Elements
             if (m_spellInfo->Id == 73680)
             {
-                if (!unitTarget || m_caster->GetTypeId() != TYPEID_PLAYER)
+                if (!unitTarget || unitTarget->GetPowerType() != POWER_MANA)
                     return;
 
                 // Glyph of Mana Tide
@@ -6890,7 +6899,7 @@ void Spell::EffectPowerDrain(SpellEffectEntry const* effect)
     if (!unitTarget->isAlive())
         return;
 
-    if (unitTarget->getPowerType() != drain_power)
+    if (unitTarget->GetPowerType() != drain_power)
         return;
 
     if (damage < 0)
@@ -6953,7 +6962,7 @@ void Spell::EffectPowerBurn(SpellEffectEntry const* effect)
         return;
     if (!unitTarget->isAlive())
         return;
-    if (unitTarget->getPowerType()!=powertype)
+    if (unitTarget->GetPowerType() != powertype)
         return;
     if (damage < 0)
         return;
@@ -7963,7 +7972,7 @@ void Spell::EffectSummonType(SpellEffectEntry const* effect)
                                 return;
 
                             // FIXME: not all totems and similar cases selected by this check...
-                            if (cInfo->type == CREATURE_TYPE_TOTEM)
+                            if (cInfo->CreatureType == CREATURE_TYPE_TOTEM)
                                 DoSummonTotem(effect);
                             else
                                 DoSummonGuardian(effect, factionId);
@@ -11183,7 +11192,7 @@ void Spell::EffectScriptEffect(SpellEffectEntry const* effect)
                     }
                     else
                     {
-                        m_caster->SetUInt32Value(UNIT_NPC_FLAGS, cTemplate->npcflag);
+                        m_caster->SetUInt32Value(UNIT_NPC_FLAGS, cTemplate->NpcFlags);
                         ((Creature*)m_caster)->SetVirtualItem(VIRTUAL_ITEM_SLOT_0, 0);
                         ((Creature*)m_caster)->SetVirtualItem(VIRTUAL_ITEM_SLOT_1, 0);
 
@@ -12081,7 +12090,7 @@ void Spell::EffectScriptEffect(SpellEffectEntry const* effect)
                     if (!unitTarget)
                         return;
 
-                    switch (unitTarget->getPowerType())
+                    switch (unitTarget->GetPowerType())
                     {
                         case POWER_RUNIC_POWER:
                         {
@@ -13011,7 +13020,7 @@ void Spell::EffectScriptEffect(SpellEffectEntry const* effect)
                     if (unitTarget->HasAura(72371))
                     {
                         unitTarget->RemoveAurasDueToSpell(72371);
-                        int32 power = unitTarget->GetPower(unitTarget->getPowerType());
+                        int32 power = unitTarget->GetPower(unitTarget->GetPowerType());
                         unitTarget->CastCustomSpell(unitTarget, 72371, &power, &power, NULL, true);
                     }
                     return;

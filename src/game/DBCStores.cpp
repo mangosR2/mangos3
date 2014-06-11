@@ -185,6 +185,7 @@ DBCStorage <QuestSortEntry> sQuestSortStore(QuestSortEntryfmt);
 DBCStorage <QuestXPLevel> sQuestXPLevelStore(QuestXPLevelfmt);
 
 DBCStorage <PhaseEntry> sPhaseStore(Phasefmt);
+DBCStorage <PowerDisplayEntry> sPowerDisplayStore(PowerDisplayfmt);
 DBCStorage <PvPDifficultyEntry> sPvPDifficultyStore(PvPDifficultyfmt);
 
 DBCStorage <RandomPropertiesPointsEntry> sRandomPropertiesPointsStore(RandomPropertiesPointsfmt);

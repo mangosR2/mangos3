@@ -105,6 +105,17 @@ void VehicleKit::Initialize(uint32 creatureEntry)
 {
     InstallAllAccessories(creatureEntry ? creatureEntry : GetBase()->GetEntry());
     UpdateFreeSeatCount();
+
+    Unit* pVehicle = (Unit*)m_owner;
+
+    // Initialize power type based on DBC values (creatures only)
+    if (pVehicle->GetTypeId() == TYPEID_UNIT)
+    {
+        // Do not use the wrappers for setting power type in order to avoid side-effects
+        if (PowerDisplayEntry const* powerEntry = sPowerDisplayStore.LookupEntry(GetEntry()->m_powerDisplayID))
+            pVehicle->SetByteValue(UNIT_FIELD_BYTES_0, 3, powerEntry->power);
+    }
+
     m_isInitialized = true;
 }
 
@@ -312,7 +323,7 @@ bool VehicleKit::AddPassenger(Unit* passenger, SeatId seatId)
         }
 
         // Allow to keep AI of controlled vehicle with CREATURE_FLAG_EXTRA_KEEP_AI extra-flag
-        if (!(((Creature*)GetBase())->GetCreatureInfo()->flags_extra & CREATURE_FLAG_EXTRA_KEEP_AI))
+        if (!(((Creature*)GetBase())->GetCreatureInfo()->ExtraFlags & CREATURE_FLAG_EXTRA_KEEP_AI))
             ((Creature*)GetBase())->AIM_Initialize();
 
         //if (GetBase()->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE))
@@ -417,7 +428,7 @@ void VehicleKit::RemovePassenger(Unit* passenger, bool dismount /*false*/)
         }
 
         // Allow to keep AI of controlled vehicle with CREATURE_FLAG_EXTRA_KEEP_AI extra-flag
-        if (!(((Creature*)GetBase())->GetCreatureInfo()->flags_extra & CREATURE_FLAG_EXTRA_KEEP_AI))
+        if (!(((Creature*)GetBase())->GetCreatureInfo()->ExtraFlags & CREATURE_FLAG_EXTRA_KEEP_AI))
             ((Creature*)GetBase())->AIM_Initialize();
     }
 

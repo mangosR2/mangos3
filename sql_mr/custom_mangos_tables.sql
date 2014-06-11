@@ -207,12 +207,6 @@ ALTER TABLE `vehicle_accessory`
     ADD COLUMN `offset_z` FLOAT NOT NULL DEFAULT '0' COMMENT 'custom passenger offset Z' AFTER `offset_y`,
     ADD COLUMN `offset_o` FLOAT NOT NULL DEFAULT '0' COMMENT 'custom passenger offset O' AFTER `offset_z`;
 
--- Vehicle Tables
--- Commit 3be940faa44326abc801
-
-ALTER TABLE `creature_template`
-    ADD COLUMN `PowerType` tinyint(3) unsigned NOT NULL default '0' AFTER `MaxHealth`;
-
 -- Areatrigger table format change
 
 ALTER TABLE `areatrigger_teleport`
@@ -295,6 +289,22 @@ CREATE TABLE IF NOT EXISTS  `player_factionchange_spells` (
     `horde_id` int(8) NOT NULL,
     `commentH` varchar(255) DEFAULT NULL,
     PRIMARY KEY (`race_A`,`alliance_id`,`race_H`,`horde_id`)
+) DEFAULT CHARSET=UTF8;
+
+CREATE TABLE `player_factionchange_titles` (
+  `alliance_id` int(8) NOT NULL,
+  `alliance_comment` varchar(255) NOT NULL,
+  `horde_id` int(8) NOT NULL,
+  `horde_comment` varchar(255) NOT NULL,
+  PRIMARY KEY (`alliance_id`,`horde_id`)
+) DEFAULT CHARSET=utf8;
+
+CREATE TABLE `player_factionchange_quests` (
+    `alliance_id` int(8) NOT NULL,
+    `commentA` varchar(255) DEFAULT NULL,
+    `horde_id` int(8) NOT NULL,
+    `commentH` varchar(255) DEFAULT NULL,
+    PRIMARY KEY (`alliance_id`, `horde_id`)
 ) DEFAULT CHARSET=UTF8;
 
 -- Implement spell linked definitions storage

@@ -109,7 +109,7 @@ ReactorAI::EnterEvadeMode()
     }
 
     m_creature->ExitVehicle();
-    m_creature->RemoveAllAuras();
+    m_creature->RemoveAllAurasOnEvade();
     m_creature->DeleteThreatList();
     i_victimGuid.Clear();
     m_creature->CombatStop(true);

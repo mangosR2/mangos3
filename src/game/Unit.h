@@ -1374,6 +1374,17 @@ typedef std::map<uint32, SpellCooldown> SpellCooldowns;
 #define REGEN_TIME_PET_FOCUS    1000
 #define REGEN_TIME_PLAYER_FOCUS 1000
 
+// Power type values defines
+enum PowerDefaults
+{
+    POWER_RAGE_DEFAULT              = 1000,
+    POWER_FOCUS_DEFAULT             = 100,
+    POWER_ENERGY_DEFAULT            = 100,
+    POWER_HAPPINESS_DEFAULT         = 1000000,
+    POWER_RUNE_DEFAULT              = 8,
+    POWER_RUNIC_POWER_DEFAULT       = 1000,
+};
+
 // delay time for evading
 #define EVADE_TIME_DELAY     500
 #define EVADE_TIME_DELAY_MIN 50
@@ -1514,8 +1525,8 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         void SetHealthPercent(float percent);
         int32 ModifyHealth(int32 val);
 
-        Powers getPowerType() const { return Powers(GetByteValue(UNIT_FIELD_BYTES_0, 3)); }
-        void setPowerType(Powers power);
+        Powers GetPowerType() const { return Powers(GetByteValue(UNIT_FIELD_BYTES_0, 3)); }
+        void SetPowerType(Powers power);
         int32 GetPower(Powers power) const;
         int32 GetPowerByIndex(uint32 index) const;
         int32 GetMinPowerByIndex(uint32 index) const;
@@ -1899,6 +1910,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         void RemoveAllAuras(AuraRemoveMode mode = AURA_REMOVE_BY_DEFAULT);
         void RemoveArenaAuras(bool onleave = false);
         void RemoveAllAurasOnDeath();
+        void RemoveAllAurasOnEvade();
 
         void HandleArenaPreparation(bool apply);
         bool RemoveSpellsCausingAuraByCaster(AuraType auraType, ObjectGuid casterGuid, AuraRemoveMode mode = AURA_REMOVE_BY_DEFAULT);

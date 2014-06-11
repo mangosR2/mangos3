@@ -599,7 +599,7 @@ INSERT INTO `spell_dbc` (`Id`, `Category`, `Dispel`, `Mechanic`, `Attributes`, `
 VALUES ( 63274 , 0 , 0 , 0 , 0 , 268451844 , 4 , 0 , 0 , 0 , 1024 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 1 , 0 , 0 , 0 , 0 , 0 , 101 , 0 , 0 , 0 , 0 , 1 , 13 , 0 , -1 , 0 , 0 , 6 , 6 , 6 , 0 , 1 , 0 , 0 , 0 , 0 , 0 , -1 , 0 , 0 , 0 , 0 , 38 , 1 , 1 , 0 , 0 , 0 , 0 , 0 , 0 , 4 , 23 , 284 , 0 , 250 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 63293 , 63300 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 2281 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 1 , 1 , 1 , 0 , 1 ,'P3Wx2 Laser Barrage');
 
 UPDATE `spell_dbc` SET
-`EffectImplicitTargetA1`=1, -- old value = 38
+`EffectImplicitTargetA1`=38, -- old value = 38 # With value 1 ERROR:Table `spell_script_target`: spellId 63274 listed for TargetEntry 33576 does not have any implicit target TARGET_SCRIPT(38) or TARGET_SCRIPT_COORDINATES (46) or TARGET_FOCUS_OR_SCRIPTED_GAMEOBJECT (40).
 `Comment` = 'Replacement for spell 63274 "P3Wx2 Laser Barrage"'
 WHERE Id=63274;
 

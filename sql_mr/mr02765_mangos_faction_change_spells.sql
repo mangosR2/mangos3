@@ -1,25 +1,4 @@
 -- Race Faction Change - Spells
-
-SET FOREIGN_KEY_CHECKS=0;
--- ----------------------------
--- Table structure for `player_factionchange_spells`
--- ----------------------------
-DROP TABLE IF EXISTS  `player_factionchange_spells`;
-
-CREATE TABLE `player_factionchange_spells` (
-    `race_A` int(8) NOT NULL DEFAULT '0',
-    `alliance_id` int(8) NOT NULL,
-    `commentA` varchar(255) DEFAULT NULL,
-    `race_H` int(8) NOT NULL DEFAULT '0',
-    `horde_id` int(8) NOT NULL,
-    `commentH` varchar(255) DEFAULT NULL,
-    PRIMARY KEY (`race_A`,`alliance_id`,`race_H`,`horde_id`)
-) DEFAULT CHARSET=UTF8;
-
--- ----------------------------
--- Records of player_factionchange_spells
--- ----------------------------
-
 INSERT INTO `player_factionchange_spells` (`race_A`, `alliance_id`, `commentA`, `race_H`, `horde_id`, `commentH`) VALUES
 (0, 458, 'Brown Horse', 0, 6654, 'Brown Wolf'),
 (0, 470, 'Black Stallion', 0, 64658, 'Black Wolf'),

@@ -1,22 +1,4 @@
 -- Race Faction Change - Achievements
-
-SET FOREIGN_KEY_CHECKS=0;
--- ----------------------------
--- Table structure for `player_factionchange_achievements`
--- ----------------------------
-DROP TABLE IF EXISTS `player_factionchange_achievements`;
-
-CREATE TABLE `player_factionchange_achievements` (
-    `alliance_id` int(8) NOT NULL,
-    `horde_id` int(8) NOT NULL,
-    `CommentA` varchar(255) NOT NULL,
-    `CommentH` varchar(255) NOT NULL,
-    PRIMARY KEY (`alliance_id`,`horde_id`)
-) DEFAULT CHARSET=UTF8;
-
--- ----------------------------
--- Records of player_factionchange_achievements
--- ----------------------------
 INSERT INTO `player_factionchange_achievements` VALUES ('33', '1358', 'Complete 130 quests in Borean Tundra', 'Complete 150 quests in Borean Tundra');
 INSERT INTO `player_factionchange_achievements` VALUES ('34', '1356', 'Complete 130 quests in Howling Fjord', 'Complete 105 quests in Howling Fjord');
 INSERT INTO `player_factionchange_achievements` VALUES ('35', '1359', 'Complete 115 quests in Dragonblight', 'Complete 130 quests in Dragonblight');

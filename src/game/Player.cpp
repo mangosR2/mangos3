@@ -362,6 +362,12 @@ void TradeData::SetMoney(uint64 money)
     if (m_money == money)
         return;
 
+    if (money > m_player->GetMoney())
+    {
+        m_player->GetSession()->SendTradeStatus(TRADE_STATUS_BUSY);
+        return;
+    }
+
     m_money = money;
 
     SetAccepted(false);
@@ -824,13 +830,13 @@ bool Player::Create(uint32 guidlow, const std::string& name, uint8 race, uint8 c
     UpdateMaxHealth();                                      // Update max Health (for add bonus from stamina)
     SetHealth(GetMaxHealth());
 
-    if (getPowerType() == POWER_MANA)
+    if (GetPowerType() == POWER_MANA)
     {
         UpdateMaxPower(POWER_MANA);                         // Update max Mana (for add bonus from intellect)
         SetPower(POWER_MANA, GetMaxPower(POWER_MANA));
     }
 
-    if (getPowerType() != POWER_MANA)                        // hide additional mana bar if we have no mana
+    if (GetPowerType() != POWER_MANA)                       // hide additional mana bar if we have no mana
     {
         SetPower(POWER_MANA, 0);
         SetMaxPower(POWER_MANA, 0);
@@ -7428,6 +7434,24 @@ void Player::UpdateArea(uint32 newArea)
 
     phaseMgr->AddUpdateFlag(PHASE_UPDATE_FLAG_AREA_UPDATE);
 
+    uint32 const areaRestFlag = (GetTeam() == ALLIANCE) ? AREA_FLAG_REST_ZONE_ALLIANCE : AREA_FLAG_REST_ZONE_HORDE;
+    if (area && area->flags & areaRestFlag)
+    {
+        SetFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING);
+        SetRestType(REST_TYPE_IN_FACTION_AREA);
+    }
+    else if (HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING) && GetRestType() == REST_TYPE_IN_FACTION_AREA)
+    {
+        RemoveFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING);
+        SetRestType(REST_TYPE_NO);
+    }
+
+    if (area)
+    {
+        // Dalaran restricted flight zone
+        if ((area->flags & AREA_FLAG_CANNOT_FLY) && IsFreeFlying() && !isGameMaster() && !HasAura(58600))
+            CastSpell(this, 58600, true);                   // Restricted Flight Area
+
     UpdateAreaDependentAuras();
 
     phaseMgr->RemoveUpdateFlag(PHASE_UPDATE_FLAG_AREA_UPDATE);
@@ -8848,7 +8872,7 @@ void Player::SendLoot(ObjectGuid guid, LootType loot_type)
                     creature->lootForPickPocketed = true;
                     loot->clear();
 
-                    if (uint32 lootid = creature->GetCreatureInfo()->pickpocketLootId)
+                    if (uint32 lootid = creature->GetCreatureInfo()->PickpocketLootId)
                         loot->FillLoot(lootid, LootTemplates_Pickpocketing, this, false);
 
                     // Generate extra money for pick pocket loot
@@ -8879,10 +8903,10 @@ void Player::SendLoot(ObjectGuid guid, LootType loot_type)
                     creature->lootForBody = true;
                     loot->clear();
 
-                    if (uint32 lootid = creature->GetCreatureInfo()->lootid)
+                    if (uint32 lootid = creature->GetCreatureInfo()->LootId)
                         loot->FillLoot(lootid, LootTemplates_Creature, recipient, false);
 
-                    loot->generateMoneyLoot(creature->GetCreatureInfo()->mingold, creature->GetCreatureInfo()->maxgold);
+                    loot->generateMoneyLoot(creature->GetCreatureInfo()->MinLootGold, creature->GetCreatureInfo()->MaxLootGold);
 
                     if (Group* group = creature->GetGroupLootRecipient())
                     {
@@ -8913,7 +8937,7 @@ void Player::SendLoot(ObjectGuid guid, LootType loot_type)
                     {
                         creature->lootForSkin = true;
                         loot->clear();
-                        loot->FillLoot(creature->GetCreatureInfo()->SkinLootId, LootTemplates_Skinning, this, false);
+                        loot->FillLoot(creature->GetCreatureInfo()->SkinningLootId, LootTemplates_Skinning, this, false);
 
                         // let reopen skinning loot if will closed.
                         if (!loot->empty())
@@ -13341,7 +13365,7 @@ void Player::PrepareGossipMenu(WorldObject* pSource, uint32 menuId)
                         hasMenuItem = false;
                     break;
                 case GOSSIP_OPTION_UNLEARNPETSKILLS:
-                    if (pCreature->GetCreatureInfo()->trainer_type != TRAINER_TYPE_PETS || pCreature->GetCreatureInfo()->trainer_class != CLASS_HUNTER)
+                    if (pCreature->GetCreatureInfo()->TrainerType != TRAINER_TYPE_PETS || pCreature->GetCreatureInfo()->TrainerClass != CLASS_HUNTER)
                         hasMenuItem = false;
                     else if (Pet* pet = GetPet())
                     {
@@ -19411,7 +19435,7 @@ void Player::PetSpellInitialize()
 
     WorldPacket data(SMSG_PET_SPELLS, 8+2+4+4+4*MAX_UNIT_ACTION_BAR_INDEX+1+1);
     data << pet->GetObjectGuid();
-    data << uint16(pet->GetCreatureInfo()->family);         // creature family (required for pet talents)
+    data << uint16(pet->GetCreatureInfo()->Family);         // creature family (required for pet talents)
     data << uint32(0);
     data << uint32(charmInfo->GetState());
 
@@ -19500,7 +19524,7 @@ void Player::PossessSpellInitialize()
 
     WorldPacket data(SMSG_PET_SPELLS, 8+2+4+4+4*MAX_UNIT_ACTION_BAR_INDEX+1+1);
     data << charm->GetObjectGuid();
-    data << uint16(charm->GetObjectGuid().IsAnyTypeCreature() ? ((Creature*)charm)->GetCreatureInfo()->family : 0);
+    data << uint16(charm->GetObjectGuid().IsAnyTypeCreature() ? ((Creature*)charm)->GetCreatureInfo()->Family : 0);
     data << uint32(0);
     data << uint32(charmInfo->GetState());
 
@@ -19532,7 +19556,7 @@ void Player::VehicleSpellInitialize()
 
     WorldPacket data(SMSG_PET_SPELLS, 8+2+4+4+4*MAX_UNIT_ACTION_BAR_INDEX+1+1+cooldownsCount*(4+2+4+4));
     data << charm->GetObjectGuid();
-    data << uint16(((Creature*)charm)->GetCreatureInfo()->family);
+    data << uint16(((Creature*)charm)->GetCreatureInfo()->Family);
     data << uint32(0);
     data << uint32(charmInfo->GetState());
 
@@ -19587,7 +19611,7 @@ void Player::CharmSpellInitialize()
     if (charm->GetTypeId() != TYPEID_PLAYER)
     {
         CreatureInfo const* cinfo = ((Creature*)charm)->GetCreatureInfo();
-        if (cinfo && cinfo->type == CREATURE_TYPE_DEMON && getClass() == CLASS_WARLOCK)
+        if (cinfo && cinfo->CreatureType == CREATURE_TYPE_DEMON && getClass() == CLASS_WARLOCK)
         {
             for (uint32 i = 0; i < CREATURE_MAX_SPELLS; ++i)
             {
@@ -19599,7 +19623,7 @@ void Player::CharmSpellInitialize()
 
     WorldPacket data(SMSG_PET_SPELLS, 8+2+4+4+4*MAX_UNIT_ACTION_BAR_INDEX+1+4*addlist+1);
     data << charm->GetObjectGuid();
-    data << uint16(charm->GetObjectGuid().IsAnyTypeCreature() ? ((Creature*)charm)->GetCreatureInfo()->family : 0);
+    data << uint16(charm->GetObjectGuid().IsAnyTypeCreature() ? ((Creature*)charm)->GetCreatureInfo()->Family : 0);
     data << uint32(0);
     data << uint32(charmInfo->GetState());
 
@@ -20222,21 +20246,21 @@ void Player::InitDataForForm(bool reapplyMods)
     {
         case FORM_CAT:
         {
-            if (getPowerType()!=POWER_ENERGY)
-                setPowerType(POWER_ENERGY);
+            if (GetPowerType() != POWER_ENERGY)
+                SetPowerType(POWER_ENERGY);
             break;
         }
         case FORM_BEAR:
         {
-            if (getPowerType()!=POWER_RAGE)
-                setPowerType(POWER_RAGE);
+            if (GetPowerType() != POWER_RAGE)
+                SetPowerType(POWER_RAGE);
             break;
         }
         default:                                            // 0, for example
         {
             ChrClassesEntry const* cEntry = sChrClassesStore.LookupEntry(getClass());
-            if (cEntry && cEntry->powerType < MAX_POWERS && uint32(getPowerType()) != cEntry->powerType)
-                setPowerType(Powers(cEntry->powerType));
+            if (cEntry && cEntry->powerType < MAX_POWERS && uint32(GetPowerType()) != cEntry->powerType)
+                SetPowerType(Powers(cEntry->powerType));
             break;
         }
     }
@@ -22372,9 +22396,9 @@ bool Player::isHonorOrXPTarget(Unit* pVictim) const
 
     if (pVictim->GetTypeId() == TYPEID_UNIT)
     {
-        Creature* pCre = (Creature*)pVictim;
-        if (pCre->IsTotem() || pCre->IsPet() ||
-            (pCre->GetCreatureInfo()->flags_extra & CREATURE_FLAG_EXTRA_NO_XP_AT_KILL))
+        if (((Creature*)pVictim)->IsTotem() ||
+                ((Creature*)pVictim)->IsPet() ||
+                ((Creature*)pVictim)->GetCreatureInfo()->ExtraFlags & CREATURE_FLAG_EXTRA_NO_XP_AT_KILL)
             return false;
     }
     return true;
@@ -22409,7 +22433,7 @@ void Player::RewardSinglePlayerAtKill(Unit* pVictim)
             {
                 KilledMonster(normalInfo, pVictim->GetObjectGuid());
 
-                if (uint32 normalType = normalInfo->type)
+                if (uint32 normalType = normalInfo->CreatureType)
                     UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_KILL_CREATURE_TYPE, normalType, xp, pVictim);
             }
         }
@@ -23937,7 +23961,7 @@ void Player::LearnPetTalent(ObjectGuid petGuid, uint32 talentId, uint32 talentRa
     if (!ci)
         return;
 
-    CreatureFamilyEntry const *pet_family = sCreatureFamilyStore.LookupEntry(ci->family);
+    CreatureFamilyEntry const* pet_family = sCreatureFamilyStore.LookupEntry(ci->Family);
 
     if (!pet_family)
         return;
@@ -24216,7 +24240,7 @@ void Player::BuildPetTalentsInfoData(WorldPacket *data)
     if (!ci)
         return;
 
-    CreatureFamilyEntry const *pet_family = sCreatureFamilyStore.LookupEntry(ci->family);
+    CreatureFamilyEntry const* pet_family = sCreatureFamilyStore.LookupEntry(ci->Family);
     if (!pet_family || pet_family->petTalentType < 0)
         return;
 
@@ -24663,11 +24687,11 @@ void Player::ActivateSpec(uint8 specNum)
 
     SendInitialActionButtons();
 
-    Powers pw = getPowerType();
-    if (pw != POWER_MANA)
+    Powers powerType = GetPowerType();
+    if (powerType != POWER_MANA)
         SetPower(POWER_MANA, 0);
 
-    SetPower(pw, 0);
+    SetPower(powerType, 0);
 
     SetPower(POWER_HOLY_POWER, 0);
     SetPower(POWER_ECLIPSE, 0);

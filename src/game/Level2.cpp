@@ -1509,7 +1509,7 @@ bool ChatHandler::HandleModifyPowerTypeCommand(char* args)
         return false;
     }
 
-    target->setPowerType(Powers(type));
+    target->SetPowerType(Powers(type));
 
     return true;
 }
@@ -2277,8 +2277,8 @@ bool ChatHandler::HandleNpcFactionIdCommand(char* args)
     // update in memory
     if (CreatureInfo const* cinfo = pCreature->GetCreatureInfo())
     {
-        const_cast<CreatureInfo*>(cinfo)->faction_A = factionId;
-        const_cast<CreatureInfo*>(cinfo)->faction_H = factionId;
+        const_cast<CreatureInfo*>(cinfo)->FactionAlliance = factionId;
+        const_cast<CreatureInfo*>(cinfo)->FactionHorde = factionId;
     }
 
     // and DB

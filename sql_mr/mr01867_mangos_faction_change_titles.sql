@@ -1,22 +1,4 @@
 -- Race Faction Change - Titles
-
-SET FOREIGN_KEY_CHECKS=0;
--- ----------------------------
--- Table structure for `player_factionchange_titles`
--- ----------------------------
-
-DROP TABLE IF EXISTS `player_factionchange_titles`;
-CREATE TABLE `player_factionchange_titles` (
-  `alliance_id` int(8) NOT NULL,
-  `alliance_comment` varchar(255) NOT NULL,
-  `horde_id` int(8) NOT NULL,
-  `horde_comment` varchar(255) NOT NULL,
-  PRIMARY KEY (`alliance_id`,`horde_id`)
-) DEFAULT CHARSET=utf8;
-
--- ----------------------------
--- Records of player_factionchange_titles
--- ----------------------------
 INSERT INTO `player_factionchange_titles` VALUES ('1','Private <Name>','15','Scout <Name>');
 INSERT INTO `player_factionchange_titles` VALUES ('2','Corporal <Name>','16','Grunt <Name>');
 INSERT INTO `player_factionchange_titles` VALUES ('3','Sergeant <Name>','17','Sergeant <Name>');

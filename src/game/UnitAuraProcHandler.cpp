@@ -1087,7 +1087,7 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, DamageInfo* damageI
                 // Discerning Eye of the Beast
                 case 59915:
                 {
-                    if (getPowerType() != POWER_MANA)
+                    if (GetPowerType() != POWER_MANA)
                         return SPELL_AURA_PROC_FAILED;
 
                     triggered_spell_id = 59914;
@@ -1384,7 +1384,7 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, DamageInfo* damageI
             // Magic Absorption
             else if (dummySpell->GetSpellIconID() == 459)            // only this spell have SpellIconID == 459 and dummy aura
             {
-                if (getPowerType() != POWER_MANA)
+                if (GetPowerType() != POWER_MANA)
                     return SPELL_AURA_PROC_FAILED;
 
                 // mana reward
@@ -2041,7 +2041,7 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, DamageInfo* damageI
                         //cooldown aura
                         pCaster->CastSpell(pCaster, 63853, true);
 
-                    switch(pVictim->getPowerType())
+                    switch(pVictim->GetPowerType())
                     {
                         case POWER_RUNIC_POWER:
                             triggered_spell_id = 63652;
@@ -3146,7 +3146,7 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, DamageInfo* damageI
                     if (!damage)
                         return SPELL_AURA_PROC_FAILED;
 
-                    if (pVictim->getPowerType() == POWER_MANA)
+                    if (pVictim->GetPowerType() == POWER_MANA)
                     {
                         // 2% of maximum base mana
                         basepoints[0] = int32(pVictim->GetCreateMana() * 2 / 100);
@@ -3170,7 +3170,7 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, DamageInfo* damageI
                 case 25899:                                 // Greater Blessing of Sanctuary
                 {
                     target = this;
-                    switch (target->getPowerType())
+                    switch (target->GetPowerType())
                     {
                         case POWER_MANA:
                             triggered_spell_id = 57319;
@@ -3385,7 +3385,7 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, DamageInfo* damageI
                     if (GetTypeId() != TYPEID_PLAYER)
                         return SPELL_AURA_PROC_FAILED;
 
-                    switch (this->getPowerType())
+                    switch (this->GetPowerType())
                     {
                         case POWER_ENERGY:
                             triggered_spell_id = 71882;
@@ -3410,7 +3410,7 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, DamageInfo* damageI
                     if (GetTypeId() != TYPEID_PLAYER)
                         return SPELL_AURA_PROC_FAILED;
 
-                    switch (this->getPowerType())
+                    switch (this->GetPowerType())
                     {
                         case POWER_ENERGY:
                             triggered_spell_id = 71887;
@@ -5992,7 +5992,7 @@ SpellAuraProcResult Unit::HandleOverrideClassScriptAuraProc(Unit *pVictim, Damag
             if (!roll_chance_i(50))
                 return SPELL_AURA_PROC_FAILED;
 
-            switch (pVictim->getPowerType())
+            switch (pVictim->GetPowerType())
             {
                 case POWER_MANA:   triggered_spell_id = 28722; break;
                 case POWER_RAGE:   triggered_spell_id = 28723; break;
@@ -6008,6 +6008,26 @@ SpellAuraProcResult Unit::HandleOverrideClassScriptAuraProc(Unit *pVictim, Damag
         case 5497:                                          // Improved Mana Gems (Serpent-Coil Braid)
             CastSpell(pVictim, 37445, true);                // Mana Surge (direct because triggeredByAura has no duration)
             return SPELL_AURA_PROC_OK;
+        case 6953:                                          // Warbringer
+            RemoveAurasAtMechanicImmunity(IMMUNE_TO_ROOT_AND_SNARE_MASK,0,true);
+            return SPELL_AURA_PROC_OK;
+        case 7010:                                          // Revitalize (rank 1)
+        case 7011:                                          // Revitalize (rank 2)
+        case 7012:                                          // Revitalize (rank 3)
+        {
+            if(!roll_chance_i(triggerAmount))
+                return SPELL_AURA_PROC_FAILED;
+
+            switch (pVictim->GetPowerType())
+            {
+                case POWER_MANA:        triggered_spell_id = 48542; break;
+                case POWER_RAGE:        triggered_spell_id = 48541; break;
+                case POWER_ENERGY:      triggered_spell_id = 48540; break;
+                case POWER_RUNIC_POWER: triggered_spell_id = 48543; break;
+                default: return SPELL_AURA_PROC_FAILED;
+            }
+            break;
+        }
         case 7282:                                          // Crypt Fever & Ebon Plaguebringer
         {
             if (!procSpell || pVictim == this)
