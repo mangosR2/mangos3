@@ -2292,7 +2292,7 @@ void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, ui
                     }
                     case 1490:                  // Arena Killing Blows
                     {
-                        if (bg || !unit || unit->GetTypeId() != TYPEID_PLAYER)
+                        if (!bg || !unit || unit->GetTypeId() != TYPEID_PLAYER)
                             continue;
                         if (!bg->isArena())
                             continue;
