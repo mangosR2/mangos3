@@ -525,7 +525,7 @@ void BattleGround::Update(uint32 diff)
                         WorldPacket status;
                         BattleGroundQueueTypeId bgQueueTypeId = sBattleGroundMgr.BGQueueTypeId(m_TypeID, GetArenaType());
                         uint32 queueSlot = plr->GetBattleGroundQueueIndex(bgQueueTypeId);
-                        sBattleGroundMgr.BuildBattleGroundStatusPacket(&status, this, plr, queueSlot, STATUS_IN_PROGRESS, 0, GetStartTime(), GetArenaType());
+                        sBattleGroundMgr.BuildBattleGroundStatusPacket(&status, this, plr, queueSlot, STATUS_IN_PROGRESS, 0, GetStartTime(), GetArenaType(), plr->GetBGTeam());
                         plr->GetSession()->SendPacket(&status);
 
                         plr->RemoveAurasDueToSpell(SPELL_ARENA_PREPARATION);
@@ -575,9 +575,9 @@ void BattleGround::Update(uint32 diff)
     }
 
     // Arena time limit
-    if(isArena() && !m_ArenaEnded)
+    if (isArena() && !m_ArenaEnded)
     {
-        if(m_StartTime > uint32(ARENA_TIME_LIMIT))
+        if (m_StartTime > uint32(ARENA_TIME_LIMIT))
         {
             EndBattleGround(TEAM_NONE);
             m_ArenaEnded = true;
@@ -1004,21 +1004,6 @@ void BattleGround::EndBattleGround(Team winner)
         plr->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_COMPLETE_BATTLEGROUND, 1);
     }
 
-    Map::PlayerList const &PlList = GetBgMap()->GetPlayers();
-    if (!PlList.isEmpty())
-        for (Map::PlayerList::const_iterator i = PlList.begin(); i != PlList.end(); ++i)
-            if (Player* pPlayer = i->getSource())
-                if (pPlayer->IsSpectator())
-                {
-                    WorldPacket data;
-                    sBattleGroundMgr.BuildPvpLogDataPacket(&data, this);
-                    pPlayer->GetSession()->SendPacket(&data);
-
-                    BattleGroundQueueTypeId bgQueueTypeId = BattleGroundMgr::BGQueueTypeId(GetTypeID(), GetArenaType());
-                    sBattleGroundMgr.BuildBattleGroundStatusPacket(&data, this, pPlayer, 0, STATUS_IN_PROGRESS, TIME_TO_AUTOREMOVE, GetStartTime(), GetArenaType());
-                    pPlayer->GetSession()->SendPacket(&data);
-                }
-
     if (isArena() && isRated() && winner_arena_team && loser_arena_team && winner_arena_team->GetId() != loser_arena_team->GetId())
     {
         // update arena points only after increasing the player's match count!
@@ -1408,7 +1393,7 @@ void BattleGround::AddPlayer(Player* plr)
     WorldPacket status;
     BattleGroundQueueTypeId bgQueueTypeId = sBattleGroundMgr.BGQueueTypeId(m_TypeID, GetArenaType());
     uint32 queueSlot = plr->GetBattleGroundQueueIndex(bgQueueTypeId);
-    sBattleGroundMgr.BuildBattleGroundStatusPacket(&status, this, plr, queueSlot, STATUS_IN_PROGRESS, 0, GetStartTime(), GetArenaType());
+    sBattleGroundMgr.BuildBattleGroundStatusPacket(&status, this, plr, queueSlot, STATUS_IN_PROGRESS, 0, GetStartTime(), GetArenaType(), team);
     plr->GetSession()->SendPacket(&status);
 
     plr->RemoveSpellsCausingAura(SPELL_AURA_MOUNTED);

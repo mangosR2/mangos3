@@ -118,6 +118,7 @@ enum BattleGroundTimeIntervals
     ARENA_SPAWN_BUFF_OBJECTS        = 90000,                // ms - 90sec after start
     BATTLEGROUND_COUNTDOWN_MAX      = 120,                  // secs
     ARENA_COUNTDOWN_MAX             = 60,                   // secs
+    ARENA_TIME_LIMIT                = 2820000,              // ms - 47 minutes after start
 };
 
 enum BattleGroundStartTimeIntervals
