@@ -24,10 +24,10 @@ CREATE INDEX `idx_ref`  ON `reference_loot_template`    (`mincountOrRef`);
 
 -- Creature indexes
 CREATE INDEX `idx_loot`           ON `creature_template` (`lootid`);
-CREATE INDEX `idx_skinloot`       ON `creature_template` (`skinloot`);
-CREATE INDEX `idx_pickpocketloot` ON `creature_template` (`pickpocketloot`);
-CREATE INDEX `idx_factionA`       ON `creature_template` (`faction_A`);
-CREATE INDEX `idx_factionH`       ON `creature_template` (`faction_H`);
+CREATE INDEX `idx_skinloot`       ON `creature_template` (`SkinningLootId`);
+CREATE INDEX `idx_pickpocketloot` ON `creature_template` (`PickpocketLootId`);
+CREATE INDEX `idx_factionA`       ON `creature_template` (`FactionAlliance`);
+CREATE INDEX `idx_factionH`       ON `creature_template` (`FactionHorde`);
 
 -- Trainer
 CREATE INDEX `idx_spell`          ON `npc_trainer`       (`spell`);
