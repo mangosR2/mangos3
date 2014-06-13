@@ -1013,7 +1013,7 @@ bool Pet::UpdateStats(Stats stat)
                 case STAT_STAMINA:
                 {
                     float bonus = 0.0f;
-                    if (CreatureFamilyEntry const* pet_family = sCreatureFamilyStore.LookupEntry(GetCreatureInfo()->family))
+                    if (CreatureFamilyEntry const* pet_family = sCreatureFamilyStore.LookupEntry(GetCreatureInfo()->Family))
                     {
                         switch (pet_family->petTalentType)
                         {

@@ -122,7 +122,7 @@ void WorldSession::HandleCreatureQueryOpcode( WorldPacket & recv_data )
         data << float(ci->HealthMultiplier);                // health multiplier
         data << float(ci->PowerMultiplier);                 // power multiplier
         data << uint8(ci->RacialLeader);
-        for(uint32 i = 0; i < 6; ++i)
+        for (uint32 i = 0; i < 6; ++i)
             data << uint32(ci->QuestItems[i]);              // itemId[6], quest drop
         data << uint32(ci->MovementTemplateId);             // CreatureMovementInfo.dbc
         data << uint32(0);                                  //unk

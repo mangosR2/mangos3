@@ -1649,7 +1649,7 @@ bool Player::BuildEnumData(QueryResult* result, ByteBuffer* data, ByteBuffer* bu
         {
             petDisplayId = fields[17].GetUInt32();
             petLevel     = fields[18].GetUInt32();
-            petFamily    = cInfo->family;
+            petFamily    = cInfo->Family;
         }
     }
 
@@ -7449,8 +7449,9 @@ void Player::UpdateArea(uint32 newArea)
     if (area)
     {
         // Dalaran restricted flight zone
-        if ((area->flags & AREA_FLAG_CANNOT_FLY) && IsFreeFlying() && !isGameMaster() && !HasAura(58600))
-            CastSpell(this, 58600, true);                   // Restricted Flight Area
+        //if ((area->flags & AREA_FLAG_CANNOT_FLY) && IsFreeFlying() && !isGameMaster() && !HasAura(58600))
+        //    CastSpell(this, 58600, true);                   // Restricted Flight Area
+    }
 
     UpdateAreaDependentAuras();
 

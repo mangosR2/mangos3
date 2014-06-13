@@ -647,13 +647,10 @@ void Creature::RegeneratePower()
             // Combat and any controlled creature
             if (isInCombat() || GetCharmerOrOwnerGuid())
             {
-                if (!IsUnderLastManaUseEffect())
-                {
-                    float ManaIncreaseRate = sWorld.getConfig(CONFIG_FLOAT_RATE_POWER_MANA);
-                    float Spirit = GetStat(STAT_SPIRIT);
+                float ManaIncreaseRate = sWorld.getConfig(CONFIG_FLOAT_RATE_POWER_MANA);
+                float Spirit = GetStat(STAT_SPIRIT);
 
-                    addValue = uint32((Spirit / 5.0f + 17.0f) * ManaIncreaseRate);
-                }
+                addValue = uint32((Spirit / 5.0f + 17.0f) * ManaIncreaseRate);
             }
             else
                 addValue = maxValue / 3;
@@ -1232,7 +1229,6 @@ void Creature::SelectLevel(const CreatureInfo* cinfo, float percentHealth, float
             case POWER_RAGE:        maxValue = 0; break;
             case POWER_FOCUS:       maxValue = POWER_FOCUS_DEFAULT; break;
             case POWER_ENERGY:      maxValue = POWER_ENERGY_DEFAULT * cinfo->PowerMultiplier; break;
-            case POWER_HAPPINESS:   maxValue = POWER_HAPPINESS_DEFAULT; break;
             case POWER_RUNE:        maxValue = 0; break;
             case POWER_RUNIC_POWER: maxValue = 0; break;
         }

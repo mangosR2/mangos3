@@ -525,7 +525,7 @@ void ObjectMgr::LoadCreatureTemplates()
             if (!difficultyInfo)
             {
                 sLog.outErrorDb("Creature (Entry: %u) have `DifficultyEntry%u`=%u but creature entry %u not exist.",
-                    i, diff + 1, cInfo->DifficultyEntry[diff], cInfo->DifficultyEntry[diff]);
+                                i, diff + 1, cInfo->DifficultyEntry[diff], cInfo->DifficultyEntry[diff]);
                 continue;
             }
 
@@ -548,7 +548,7 @@ void ObjectMgr::LoadCreatureTemplates()
                 if (hasDifficultyEntries[diff2].find(cInfo->DifficultyEntry[diff]) != hasDifficultyEntries[diff2].end())
                 {
                     sLog.outErrorDb("Creature (Entry: %u) have `DifficultyEntry%u`=%u but creature entry %u have difficulty %u entry also.",
-                        i, diff + 1, cInfo->DifficultyEntry[diff], cInfo->DifficultyEntry[diff], diff2 + 1);
+                                    i, diff + 1, cInfo->DifficultyEntry[diff], cInfo->DifficultyEntry[diff], diff2 + 1);
                     continue;
                 }
                 ok2 = true;
@@ -596,14 +596,14 @@ void ObjectMgr::LoadCreatureTemplates()
             if (difficultyInfo->AIName && *difficultyInfo->AIName)
             {
                 sLog.outErrorDb("Difficulty %u mode creature (Entry: %u) has `AIName`, but in any case will used difficulty 0 mode creature (Entry: %u) AIName.",
-                    diff + 1, cInfo->DifficultyEntry[diff], i);
+                                diff + 1, cInfo->DifficultyEntry[diff], i);
                 continue;
             }
 
             if (difficultyInfo->ScriptID)
             {
                 sLog.outErrorDb("Difficulty %u mode creature (Entry: %u) has `ScriptName`, but in any case will used difficulty 0 mode creature (Entry: %u) ScriptName.",
-                    diff + 1, cInfo->DifficultyEntry[diff], i);
+                                diff + 1, cInfo->DifficultyEntry[diff], i);
                 continue;
             }
 
@@ -622,13 +622,13 @@ void ObjectMgr::LoadCreatureTemplates()
         if (!factionTemplate)
             sLog.outErrorDb("Creature (Entry: %u) has nonexistent `FactionHorde` template (%u)", cInfo->Entry, cInfo->FactionHorde);
 
-        for(int k = 0; k < MAX_KILL_CREDIT; ++k)
+        for (int k = 0; k < MAX_KILL_CREDIT; ++k)
         {
-            if(cInfo->KillCredit[k])
+            if (cInfo->KillCredit[k])
             {
-                if(!GetCreatureTemplate(cInfo->KillCredit[k]))
+                if (!GetCreatureTemplate(cInfo->KillCredit[k]))
                 {
-                    sLog.outErrorDb("Creature (Entry: %u) has nonexistent creature entry in `KillCredit%d` (%u)",cInfo->Entry,k+1,cInfo->KillCredit[k]);
+                    sLog.outErrorDb("Creature (Entry: %u) has nonexistent creature entry in `KillCredit%d` (%u)", cInfo->Entry, k + 1, cInfo->KillCredit[k]);
                     const_cast<CreatureInfo*>(cInfo)->KillCredit[k] = 0;
                 }
             }
@@ -637,17 +637,17 @@ void ObjectMgr::LoadCreatureTemplates()
         // used later for scale
         CreatureDisplayInfoEntry const* displayScaleEntry = NULL;
 
-        for(int i = 0; i < MAX_CREATURE_MODEL; ++i)
+        for (int i = 0; i < MAX_CREATURE_MODEL; ++i)
         {
             if (cInfo->ModelId[i])
             {
                 CreatureDisplayInfoEntry const* displayEntry = sCreatureDisplayInfoStore.LookupEntry(cInfo->ModelId[i]);
-                if(!displayEntry)
+                if (!displayEntry)
                 {
                     sLog.outErrorDb("Creature (Entry: %u) has nonexistent `ModelId%d` (%u), can crash client", cInfo->Entry, i + 1, cInfo->ModelId[i]);
                     const_cast<CreatureInfo*>(cInfo)->ModelId[i] = 0;
                 }
-                else if(!displayScaleEntry)
+                else if (!displayScaleEntry)
                     displayScaleEntry = displayEntry;
 
                 CreatureModelInfo const* minfo = sCreatureModelStorage.LookupEntry<CreatureModelInfo>(cInfo->ModelId[i]);
@@ -698,15 +698,15 @@ void ObjectMgr::LoadCreatureTemplates()
 
         if (cInfo->Expansion >= 0)
         {
-             for (uint32 level = cInfo->MinLevel; level <= cInfo->MaxLevel; ++level)
-             {
-                 if (!GetCreatureClassLvlStats(level, cInfo->UnitClass, cInfo->Expansion))
-                 {
-                     sLog.outErrorDb("Creature (Entry: %u), level(%u) has no data in `creature_template_classlevelstats`", cInfo->Entry, level);
-                     const_cast<CreatureInfo*>(cInfo)->Expansion = -1;
-                     break;
-                 }
-             }
+            for (uint32 level = cInfo->MinLevel; level <= cInfo->MaxLevel; ++level)
+            {
+                if (!GetCreatureClassLvlStats(level, cInfo->UnitClass, cInfo->Expansion))
+                {
+                    sLog.outErrorDb("Creature (Entry: %u), level(%u) has no data in `creature_template_classlevelstats`", cInfo->Entry, level);
+                    const_cast<CreatureInfo*>(cInfo)->Expansion = -1;
+                    break;
+                }
+            }
         }
 
         if (cInfo->DamageSchool >= MAX_SPELL_SCHOOL)

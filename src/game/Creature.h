@@ -89,6 +89,7 @@ struct CreatureInfo
     bool    RacialLeader;
     uint32  NpcFlags;
     uint32  UnitFlags;                                      // enum UnitFlags mask values
+    uint32  UnitFlags2;                                     // enum UnitFlags2 mask values
     uint32  DynamicFlags;
     uint32  ExtraFlags;
     uint32  CreatureTypeFlags;                              // enum CreatureTypeFlags mask values

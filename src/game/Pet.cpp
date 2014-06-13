@@ -999,6 +999,7 @@ bool Pet::InitStatsForLevel(uint32 petlevel, Unit* owner)
         case SUMMON_PET:
         {
             if (cinfo->Family == CREATURE_FAMILY_GHOUL)
+            {
                 SetPowerType(POWER_ENERGY);
                 SetByteValue(UNIT_FIELD_BYTES_0, 1, CLASS_ROGUE);
             }
@@ -2074,7 +2075,7 @@ bool Pet::IsPermanentPetFor(Player* owner)
                 case CLASS_DEATH_KNIGHT:
                     return GetCreatureInfo()->CreatureType == CREATURE_TYPE_UNDEAD;
                 case CLASS_MAGE:
-                    return GetCreatureInfo()->type == CREATURE_TYPE_ELEMENTAL;
+                    return GetCreatureInfo()->CreatureType == CREATURE_TYPE_ELEMENTAL;
                 default:
                     return false;
             }

@@ -1656,14 +1656,12 @@ bool ChatHandler::HandleNpcAddCommand(char* args)
     }
 
     // Pashtet: prevent some scripted NPCs spawning.
-    if (m_session->GetSecurity() < SEC_ADMINISTRATOR && (pCreature->IsWorldBoss() || (pCreature->GetCreatureInfo()->flags_extra & CREATURE_FLAG_EXTRA_INSTANCE_BIND)))
+    if (m_session->GetSecurity() < SEC_ADMINISTRATOR && (pCreature->IsWorldBoss() || (pCreature->GetCreatureInfo()->ExtraFlags & CREATURE_FLAG_EXTRA_INSTANCE_BIND)))
     {
         SendSysMessage("Can't spawn boss!");
         delete pCreature;
         return false;
     }
-
-
 
     if (Transport* trans = chr->GetTransport())
     {

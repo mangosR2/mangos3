@@ -4030,7 +4030,7 @@ SpellMissInfo Unit::MeleeSpellHitResult(Unit* pVictim, SpellEntry const* spell, 
     if (pVictim->GetTypeId()==TYPEID_UNIT)
     {
         uint32 flagEx = ((Creature*)pVictim)->GetCreatureInfo()->ExtraFlags;
-        if ( flagEx & CREATURE_FLAG_EXTRA_NO_PARRY )
+        if (flagEx & CREATURE_FLAG_EXTRA_NO_PARRY)
             canParry = false;
     }
     // Ignore combat result aura
@@ -8741,7 +8741,7 @@ void Unit::SpellDamageBonusDone(DamageInfo* damageInfo, uint32 stack)
                 DoneTotalMod *= (aura->GetModifier()->m_amount + 100.0f) / 100.0f;
     }
 
-    if (getPowerType() == POWER_MANA)
+    if (GetPowerType() == POWER_MANA)
     {
         Unit::AuraList const& doneFromManaPctAuras = GetAurasByType(SPELL_AURA_MOD_DAMAGE_DONE_FROM_PCT_POWER);
         if (!doneFromManaPctAuras.empty())
@@ -10266,7 +10266,7 @@ void Unit::MeleeDamageBonusDone(DamageInfo* damageInfo, uint32 stack)
         if (GetTypeId() == TYPEID_UNIT)
         {
             if (!((Creature*)this)->IsPet())
-                DonePercent *= ((Creature*)this)->_GetSpellDamageMod(((Creature*)this)->GetCreatureInfo()->rank);
+                DonePercent *= ((Creature*)this)->_GetSpellDamageMod(((Creature*)this)->GetCreatureInfo()->Rank);
         }
     }
 

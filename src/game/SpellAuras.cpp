@@ -4518,6 +4518,8 @@ void Aura::HandleAuraMounted(bool apply, bool Real)
 
             if (ci->VehicleTemplateId)
             {
+                //target->SetVehicleId(ci->VehicleTemplateId, ci->Entry);
+
                 if (target->GetTypeId() == TYPEID_PLAYER)
                     target->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_PLAYER_VEHICLE);
             }
@@ -4531,7 +4533,7 @@ void Aura::HandleAuraMounted(bool apply, bool Real)
         target->Unmount(true);
 
         CreatureInfo const* ci = ObjectMgr::GetCreatureTemplate(m_modifier.m_miscvalue);
-        if (ci && target->IsVehicle() && ci->vehicleId == target->GetVehicleKit()->GetEntry()->m_ID)
+        if (ci && target->IsVehicle() && ci->VehicleTemplateId == target->GetVehicleKit()->GetEntry()->m_ID)
         {
             if (target->GetTypeId() == TYPEID_PLAYER)
                 target->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_PLAYER_VEHICLE);
@@ -4837,7 +4839,7 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
             target->SetDisplayId(target->GetNativeDisplayId());
 
         if (target->getClass() == CLASS_DRUID)
-            target->setPowerType(POWER_MANA);
+            target->SetPowerType(POWER_MANA);
 
         target->SetShapeshiftForm(FORM_NONE);
 
@@ -5516,7 +5518,7 @@ void Aura::HandleModPossess(bool apply, bool Real)
         }
         else if (target->GetTypeId() == TYPEID_UNIT)
         {
-            CreatureInfo const *cinfo = ((Creature*)target)->GetCreatureInfo();
+            CreatureInfo const* cinfo = ((Creature*)target)->GetCreatureInfo();
             target->setFaction(cinfo->FactionAlliance);
         }
 
@@ -5642,7 +5644,7 @@ void Aura::HandleModCharm(bool apply, bool Real)
 
             if (caster->GetTypeId() == TYPEID_PLAYER && caster->getClass() == CLASS_WARLOCK)
             {
-                CreatureInfo const *cinfo = ((Creature*)target)->GetCreatureInfo();
+                CreatureInfo const* cinfo = ((Creature*)target)->GetCreatureInfo();
                 if (cinfo && cinfo->CreatureType == CREATURE_TYPE_DEMON)
                 {
                     // creature with pet number expected have class set
@@ -5685,7 +5687,7 @@ void Aura::HandleModCharm(bool apply, bool Real)
                 else if (cinfo)
                     target->setFaction(cinfo->FactionAlliance);
             }
-            else if (cinfo)                              // normal creature
+            else if (cinfo)                             // normal creature
                 target->setFaction(cinfo->FactionAlliance);
 
             // restore UNIT_FIELD_BYTES_0
@@ -9147,7 +9149,7 @@ void Aura::HandleAuraEmpathy(bool apply, bool /*Real*/)
     if (GetTarget()->GetTypeId() != TYPEID_UNIT)
         return;
 
-    CreatureInfo const * ci = ObjectMgr::GetCreatureTemplate(GetTarget()->GetEntry());
+    CreatureInfo const* ci = ObjectMgr::GetCreatureTemplate(GetTarget()->GetEntry());
     if (ci && ci->CreatureType == CREATURE_TYPE_BEAST)
         GetTarget()->ApplyModUInt32Value(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_SPECIALINFO, apply);
 }
