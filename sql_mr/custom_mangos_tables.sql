@@ -490,6 +490,16 @@ ALTER TABLE `mangos_string`
         ADD COLUMN `content_loc10` text AFTER `content_loc9`,
         ADD COLUMN `content_loc11` text AFTER `content_loc10`;
 
+ALTER TABLE `creature_ai_texts`
+        ADD COLUMN `content_loc9` TEXT AFTER `content_loc8`,
+        ADD COLUMN `content_loc10` TEXT AFTER `content_loc9`,
+        ADD COLUMN `content_loc11` TEXT AFTER `content_loc10`;
+
+ALTER TABLE `db_script_string`
+        ADD COLUMN `content_loc9` TEXT AFTER `content_loc8`,
+        ADD COLUMN `content_loc10` TEXT AFTER `content_loc9`,
+        ADD COLUMN `content_loc11` TEXT AFTER `content_loc10`;
+
 -- Better naming for quest_locales table
 ALTER TABLE `locales_quest`
     CHANGE `PortraitGiverName_loc1` `QuestGiverPortraitName_loc1` TEXT CHARSET utf8 COLLATE utf8_general_ci NULL,
