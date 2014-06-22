@@ -36,44 +36,44 @@ INSERT INTO mangos_string (entry, content_default, content_loc6, content_loc7, c
 -- IOC vehicles
 
 -- Alliance Gunship Cannon
-UPDATE creature_template SET VehicleTemplateId = 452, iconName = 'Gunner', AIName = 'NullAI', faction_A = 3, faction_H = 3, ScriptName = '' WHERE entry = 34929;
+UPDATE creature_template SET VehicleTemplateId = 452, IconName = 'Gunner', AIName = 'NullAI', FactionAlliance = 3, FactionHorde = 3, ScriptName = '' WHERE entry = 34929;
 -- Horde Gunship Cannon
-UPDATE creature_template SET VehicleTemplateId = 453, iconName = 'Gunner', AIName = 'NullAI', faction_A = 6, faction_H = 6, ScriptName = '' WHERE entry = 34935;
+UPDATE creature_template SET VehicleTemplateId = 453, IconName = 'Gunner', AIName = 'NullAI', FactionAlliance = 6, FactionHorde = 6, ScriptName = '' WHERE entry = 34935;
 -- Keep Cannon
 UPDATE creature_template SET ScriptName = '', AIName = 'NullAI' WHERE entry IN (34944, 35429);
-UPDATE creature_template SET VehicleTemplateId = 160, iconName = 'Gunner', faction_A = 35, faction_H = 35, unit_flags = unit_flags | 4 WHERE entry IN (34944, 35429);
+UPDATE creature_template SET VehicleTemplateId = 160, IconName = 'Gunner', FactionAlliance = 35, FactionHorde = 35, UnitFlags = UnitFlags | 4 WHERE entry IN (34944, 35429);
 
-UPDATE creature_template SET mechanic_immune_mask = mechanic_immune_mask|1|2|8|16|32|64|128|1024|2048|4096|8192|131072|262144|8388608|16777216|67108864 WHERE entry IN (34944, 35429, 34793, 35413, 34775, 35415, 34776, 35431, 35069, 35433, 34802, 35419, 35273, 35421);
+UPDATE creature_template SET MechanicImmuneMask = MechanicImmuneMask|1|2|8|16|32|64|128|1024|2048|4096|8192|131072|262144|8388608|16777216|67108864 WHERE entry IN (34944, 35429, 34793, 35413, 34775, 35415, 34776, 35431, 35069, 35433, 34802, 35419, 35273, 35421);
 
 -- Alli Glaive Thrower
 UPDATE creature_template SET AIName = 'NullAI' WHERE entry = 34802;
-UPDATE creature_template SET VehicleTemplateId = 447, iconName = 'vehichleCursor', faction_A = 3, faction_H = 3, ScriptName = '' WHERE entry IN (34802, 35419);
+UPDATE creature_template SET VehicleTemplateId = 447, IconName = 'vehichleCursor', FactionAlliance = 3, FactionHorde = 3, ScriptName = '' WHERE entry IN (34802, 35419);
 
 -- Horde Glaive Thrower
 UPDATE creature_template SET AIName = 'NullAI' WHERE entry = 35273;
-UPDATE creature_template SET VehicleTemplateId = 447, iconName = 'vehichleCursor', faction_A = 6, faction_H = 6, ScriptName = '' WHERE entry IN (35273, 35421);
+UPDATE creature_template SET VehicleTemplateId = 447, IconName = 'vehichleCursor', FactionAlliance = 6, FactionHorde = 6, ScriptName = '' WHERE entry IN (35273, 35421);
 
 -- Catapult
-UPDATE creature_template SET VehicleTemplateId = 438, iconName = 'vehichleCursor', faction_A = 35, faction_H = 35, speed_walk = 2.4, speed_run = 2.8, ScriptName = '' WHERE entry in (34793, 35413);
+UPDATE creature_template SET VehicleTemplateId = 438, IconName = 'vehichleCursor', FactionAlliance = 35, FactionHorde = 35, SpeedWalk = 2.4, SpeedRun = 2.8, ScriptName = '' WHERE entry in (34793, 35413);
 
 -- Demolisher
-UPDATE creature_template SET VehicleTemplateId = 509, iconName = 'vehichleCursor', faction_A = 35, faction_H = 35, ScriptName = '' WHERE entry IN (34775, 35415);
+UPDATE creature_template SET VehicleTemplateId = 509, IconName = 'vehichleCursor', FactionAlliance = 35, FactionHorde = 35, ScriptName = '' WHERE entry IN (34775, 35415);
 
 -- Horde Siege Engine
 UPDATE creature_template SET AIName = 'NullAI' WHERE entry = 35069;
-UPDATE creature_template SET VehicleTemplateId = 435, iconName = 'vehichleCursor', faction_A = 6, faction_H = 6, ScriptName = '' WHERE entry IN (35069, 35433);
+UPDATE creature_template SET VehicleTemplateId = 435, IconName = 'vehichleCursor', FactionAlliance = 6, FactionHorde = 6, ScriptName = '' WHERE entry IN (35069, 35433);
 
 -- Ally Siege Engine
 UPDATE creature_template SET AIName = 'NullAI' WHERE entry = 34776;
-UPDATE creature_template SET VehicleTemplateId = 435, iconName = 'vehichleCursor', faction_A = 3, faction_H = 3, ScriptName = '' WHERE entry IN (34776, 35431);
+UPDATE creature_template SET VehicleTemplateId = 435, IconName = 'vehichleCursor', FactionAlliance = 3, FactionHorde = 3, ScriptName = '' WHERE entry IN (34776, 35431);
 
 -- Ally/horde Siege Turret
 UPDATE creature_template SET AIName = 'NullAI' WHERE entry IN (34777, 36355);
-UPDATE creature_template SET iconName = 'Gunner', VehicleTemplateId = 436, ScriptName = '' WHERE entry IN (34777, 35436, 36355, 36357);
+UPDATE creature_template SET IconName = 'Gunner', VehicleTemplateId = 436, ScriptName = '' WHERE entry IN (34777, 35436, 36355, 36357);
 
 -- Horde/Ally Flame Turret
 UPDATE creature_template SET AIName = 'NullAI' WHERE entry IN (34778, 36356);
-UPDATE creature_template SET iconName = 'Gunner', VehicleTemplateId = 437, ScriptName = '' WHERE entry IN (34778, 35417, 36356, 36358);
+UPDATE creature_template SET IconName = 'Gunner', VehicleTemplateId = 437, ScriptName = '' WHERE entry IN (34778, 35417, 36356, 36358);
 
 DELETE FROM npc_spellclick_spells WHERE npc_entry IN (34929, 34935, 34944, 34793, 34775, 34776, 35069, 34802, 35273, 34778, 36356, 34777, 36355);
 INSERT INTO npc_spellclick_spells (npc_entry, spell_id, quest_start, quest_start_active, quest_end, cast_flags) VALUES
@@ -129,13 +129,13 @@ INSERT INTO creature_spell (guid, spell, `index`) VALUES
 -- /IOC vehicles by /dev/rsa
 
 -- alliance boss
-UPDATE creature_template SET faction_A = 84, faction_H = 84, difficulty_entry_1 = 35403, ScriptName = 'boss_bg_ioc' WHERE entry = 34924;
+UPDATE creature_template SET FactionAlliance = 84, FactionHorde = 84, DifficultyEntry1 = 35403, ScriptName = 'boss_bg_ioc' WHERE entry = 34924;
 -- alli boss guard faction
-UPDATE creature_template SET faction_A = 84, faction_H = 84 WHERE entry = 34919;
+UPDATE creature_template SET FactionAlliance = 84, FactionHorde = 84 WHERE entry = 34919;
 -- horde boss
-UPDATE creature_template SET faction_A = 83, faction_H = 83, difficulty_entry_1 = 35405, ScriptName = 'boss_bg_ioc' WHERE entry = 34922;
+UPDATE creature_template SET FactionAlliance = 83, FactionHorde = 83, DifficultyEntry1 = 35405, ScriptName = 'boss_bg_ioc' WHERE entry = 34922;
 -- horde boss guard faction
-UPDATE creature_template SET faction_A = 83, faction_H = 83 WHERE entry = 34918;
+UPDATE creature_template SET FactionAlliance = 83, FactionHorde = 83 WHERE entry = 34918;
 
 -- make sure doors arent clickable
 UPDATE gameobject_template SET flags = flags | 4 WHERE entry IN (195223,195703,195491,195451,195452,195437,195436);
