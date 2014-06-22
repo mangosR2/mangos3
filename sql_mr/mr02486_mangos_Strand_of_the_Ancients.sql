@@ -8,7 +8,7 @@ DELETE FROM `creature` WHERE `guid` BETWEEN @CREATURE AND @CREATURE+9999;
 DELETE FROM `gameobject` WHERE `guid` BETWEEN @GAMEOBJECT AND @GAMEOBJECT+9999;
 
 -- Rigger Sparklight
-UPDATE creature_template SET npcflag = 1, ScriptName = 'npc_sa_vendor' WHERE entry IN (29260, 29262);
+UPDATE creature_template SET NpcFlags = 1, ScriptName = 'npc_sa_vendor' WHERE entry IN (29260, 29262);
 -- Seaforium source
 -- left this to remove old bad hack
 -- DELETE FROM creature_template WHERE entry = 50000;
@@ -47,7 +47,7 @@ UPDATE gameobject_template SET flags = 0 WHERE entry IN (191309, 191310);
 
 -- Vehicles support
 -- Battleground Demolisher
-UPDATE creature_template SET npcflag = 0, minlevel = 70, maxlevel = 70, minhealth = 80000, maxhealth = 80000, mechanic_immune_mask = mechanic_immune_mask|1|2|8|16|32|64|128|1024|2048|4096|8192|131072|262144|8388608|16777216|67108864, vehicle_id = 158, ScriptName = '', AIName = 'NullAI' WHERE entry IN (28781, 32796);
+UPDATE creature_template SET NpcFlags = 0, MinLevel = 70, MaxLevel = 70, MinLevelHealth = 80000, MaxLevelHealth = 80000, MechanicImmuneMask = MechanicImmuneMask|1|2|8|16|32|64|128|1024|2048|4096|8192|131072|262144|8388608|16777216|67108864, VehicleTemplateId = 158, ScriptName = '', AIName = 'NullAI' WHERE entry IN (28781, 32796);
 DELETE FROM npc_spellclick_spells WHERE npc_entry IN (28781, 32796);
 INSERT INTO npc_spellclick_spells (`npc_entry`, `spell_id`, `quest_start`, `quest_start_active`, `quest_end`, `cast_flags`) VALUES
 (28781, 60968, 0, 0, 0, 1),
@@ -59,7 +59,7 @@ INSERT INTO creature_template_addon VALUES
 (32796, 0, 0, 0, 0, 0, 0, 52455);
 
 -- Antipersonnel Cannon
-UPDATE `creature_template` SET npcflag = 0, minlevel = 80, maxlevel = 80, iconName = 'Gunner', unit_flags=4, minhealth = 44910, maxhealth = 44910, faction_A = 35, faction_H = 35, RegenHealth=0, mechanic_immune_mask = mechanic_immune_mask|1|2|8|16|32|64|128|1024|2048|4096|8192|131072|262144|8388608|16777216|67108864, ScriptName = '', AIName = 'NullAI' WHERE entry IN (27894, 32795);
+UPDATE `creature_template` SET NpcFlags = 0, MinLevel = 80, MaxLevel = 80, iconName = 'Gunner', UnitFlags=4, MinLevelHealth = 44910, MaxLevelHealth = 44910, FactionAlliance = 35, FactionHorde = 35, RegenerateStats=0, MechanicImmuneMask = MechanicImmuneMask|1|2|8|16|32|64|128|1024|2048|4096|8192|131072|262144|8388608|16777216|67108864, ScriptName = '', AIName = 'NullAI' WHERE entry IN (27894, 32795);
 DELETE FROM npc_spellclick_spells WHERE npc_entry IN (27894, 32795);
 INSERT INTO npc_spellclick_spells (`npc_entry`, `spell_id`, `quest_start`, `quest_start_active`, `quest_end`, `cast_flags`) VALUES
 (27894, 60968, 0, 0, 0, 1),

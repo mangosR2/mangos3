@@ -2763,7 +2763,7 @@ void AchievementMgr<T>::UpdateAchievementCriteria(AchievementCriteriaTypes type,
                     }
                     case 1490:                  // Arena Killing Blows
                     {
-                        if (bg || !unit || unit->GetTypeId() != TYPEID_PLAYER)
+                        if (!bg || !unit || unit->GetTypeId() != TYPEID_PLAYER)
                             continue;
                         if (achievementCriteria->ID == 5533 && referencePlayer->GetMapId() == 559 ||    // Nagrand Arena
                             achievementCriteria->ID == 5534 && referencePlayer->GetMapId() == 562 ||    // Blade's Edge Arena
