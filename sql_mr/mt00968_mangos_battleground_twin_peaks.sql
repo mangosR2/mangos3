@@ -8,8 +8,9 @@ INSERT INTO `gameobject_template` (`entry`, `type`, `displayId`, `name`, `IconNa
 ('402364','0','10442','TWINPEAKS_ORC_GATE_01','','','','114','32','1','0','0','0','0','0','0','0','-1','0','0','0','0','-1','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0',''),
 ('402365','0','10443','TWINPEAKS_ORC_GATE_02','','','','114','32','1','0','0','0','0','0','0','0','-1','0','0','0','0','-1','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0',''),
 ('402366','0','10444','TWINPEAKS_ORC_GATE_03','','','','114','32','1','0','0','0','0','0','0','0','-1','0','0','0','0','-1','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','');
+-- Out of range value for column 'data1' at row 1
 
-UPDATE `creature_template` SET `unit_flags` = `unit_flags` | 0x02000000 | 2 WHERE `entry` IN
+UPDATE `creature_template` SET `UnitFlags` = `UnitFlags` | 0x02000000 | 2 WHERE `entry` IN
 (51128, 51126, 42615, 51130, 51127);
 
 DELETE FROM `battleground_events` WHERE `map` = 726;
@@ -99,6 +100,14 @@ INSERT INTO `mangos_string` (`entry`, `content_default`, `content_loc8`) VALUES
 (628, 'The Alliance flag is now placed at its base.', 'Флаг Альянса теперь расположен на своей базе.'),
 (629, 'The Horde flag is now placed at its base.', 'Флаг Орды теперь расположен на своей базе.');
 
+INSERT IGNORE INTO `game_graveyard_zone` VALUES
+(1750, 5031, 67),
+(1749, 5031, 469),
+(1726, 5031, 469),
+(1727, 5031, 67),
+(1729, 5031, 469),
+(1728, 5031, 67);
+
 -- Wild Hammering
 DELETE FROM `achievement_criteria_requirement` WHERE `criteria_id` = 14893;
 INSERT INTO `achievement_criteria_requirement` (`criteria_id`, `type`, `value1`, `value2`) VALUE
@@ -115,7 +124,7 @@ INSERT INTO `achievement_criteria_requirement` (`criteria_id`, `type`, `value1`,
 DELETE FROM `achievement_criteria_requirement` WHERE `criteria_id` IN (14887, 14888);
 INSERT INTO `achievement_criteria_requirement` (`criteria_id`, `type`, `value1`, `value2`) VALUE
 (14887, 5, 23451, 0),
-(14887, 5, 23505, 0),
+(14887, 5, 23505, 0),   -- Two criteria_ids with different value???
 (14888, 11, 0, 0);
 
 -- Fire, Walk With Me

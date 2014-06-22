@@ -1,5 +1,20 @@
+/*
+<n>Query: DELETE FROM `pet_levelstats`
+
+3315 row(s) affected
+
+Execution Time : 0.053 sec
+Transfer Time  : 0 sec
+Total Time     : 0.054 sec
+--------------------------------------------------
+
+Query: INSERT INTO `pet_levelstats` ( creature_entry, level, hp, mana, armor, str, agi, sta, inte, spi, mindmg, maxdmg, attackpower) VA...
+
+744 row(s) affected
+*/
+
 -- 4.3.4 15595 pet_levelstats
-DELETE FROM `pet_levelstats`;
+-- DELETE FROM `pet_levelstats`;
 INSERT INTO `pet_levelstats`
 ( creature_entry, level, hp, mana, armor, str, agi, sta, inte, spi, mindmg, maxdmg, attackpower) VALUES
 -- default pet
