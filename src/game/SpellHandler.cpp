@@ -721,10 +721,16 @@ void WorldSession::HandleSpellClick( WorldPacket & recv_data )
     {
         if (itr->second.IsFitToRequirements(_player, unit))
         {
-            Unit *caster = (itr->second.castFlags & 0x1) ? (Unit*)_player : (Unit*)unit;
-            Unit *target = (itr->second.castFlags & 0x2) ? (Unit*)_player : (Unit*)unit;
+            if (sScriptMgr.OnNpcSpellClick(_player, unit, itr->second.spellId))
+                return;
 
-            caster->CastSpell(target, itr->second.spellId, true, NULL, NULL,caster->GetObjectGuid());
+            Unit* caster = (itr->second.castFlags & 0x1) ? (Unit*)_player : (Unit*)unit;
+            Unit* target = (itr->second.castFlags & 0x2) ? (Unit*)_player : (Unit*)unit;
+
+            if (itr->second.spellId)
+                caster->CastSpell(target, itr->second.spellId, true, NULL, NULL,caster->GetObjectGuid());
+            else
+                sLog.outError("WorldSession::HandleSpellClick: npc_spell_click with entry %u has 0 in spell_id. Not handled custom case?", unit->GetEntry());
         }
     }
 }
