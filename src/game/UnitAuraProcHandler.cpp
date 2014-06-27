@@ -527,7 +527,7 @@ bool Unit::IsTriggeredAtSpellProcEvent(Unit *pVictim, SpellAuraHolderPtr holder,
         // Search Blessing of the Eternals
         Unit::AuraList const& dummyAuras = GetAurasByType(SPELL_AURA_DUMMY);
         for (Unit::AuraList::const_iterator itr = dummyAuras.begin(); itr != dummyAuras.end(); ++itr)
-            if ((*itr)->GetSpellProto()->SpellIconID == 3157 && (*itr)->GetSpellProto()->GetSpellFamilyName() == SPELLFAMILY_SHAMAN)
+            if ((*itr)->GetSpellProto()->GetSpellIconID() == 3157 && (*itr)->GetSpellProto()->GetSpellFamilyName() == SPELLFAMILY_SHAMAN)
             {
                 chance += (*itr)->GetModifier()->m_amount;
                 break;
@@ -1851,7 +1851,7 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, DamageInfo* damageI
                 break;
             }
             // Burning Embers
-            else if (dummySpell->SpellIconID == 5116)
+            else if (dummySpell->GetSpellIconID() == 5116)
             {
                 if (effIndex != EFFECT_INDEX_0)
                     return SPELL_AURA_PROC_FAILED;
@@ -3095,7 +3095,7 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, DamageInfo* damageI
             }
 
             // Divine Purpose
-            if (dummySpell->SpellIconID == 2170)
+            if (dummySpell->GetSpellIconID() == 2170)
             {
                 if (!roll_chance_i(triggerAmount))
                     return SPELL_AURA_PROC_FAILED;
@@ -3112,7 +3112,7 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, DamageInfo* damageI
                 break;
             }
             // Selfless Healer
-            else if (dummySpell->SpellIconID == 3924)
+            else if (dummySpell->GetSpellIconID() == 3924)
             {
                 target = this;
                 basepoints[0] = triggerAmount;
@@ -3752,7 +3752,7 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, DamageInfo* damageI
                 }
             }
             // Earth's Grasp
-            if (dummySpell->SpellIconID == 20)
+            if (dummySpell->GetSpellIconID() == 20)
             {
                 // Earthbind Totem summon only
                 if (!procSpell || procSpell->Id != 2484)
@@ -3765,7 +3765,7 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, DamageInfo* damageI
                 break;
             }
             // Focused Insight
-            if (dummySpell->SpellIconID == 4674)
+            if (dummySpell->GetSpellIconID() == 4674)
             {
                 if (effIndex != EFFECT_INDEX_0)
                     return SPELL_AURA_PROC_FAILED;
@@ -3795,7 +3795,7 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, DamageInfo* damageI
                 break;
             }
             // Telluric Currents
-            if (dummySpell->SpellIconID == 320)
+            if (dummySpell->GetSpellIconID() == 320)
             {
                 triggered_spell_id = 82987;
                 basepoints[0] = int32(damage * triggerAmount / 100);
@@ -3803,7 +3803,7 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, DamageInfo* damageI
                 break;
             }
             // Tidal Waves
-            if (dummySpell->SpellIconID == 3057)
+            if (dummySpell->GetSpellIconID() == 3057)
             {
                 triggered_spell_id = 53390;
                 basepoints[0] = triggerAmount;
@@ -3812,7 +3812,7 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, DamageInfo* damageI
                 break;
             }
             // Resurgence
-            if (dummySpell->SpellIconID == 2287)
+            if (dummySpell->GetSpellIconID() == 2287)
             {
                 if (!procSpell || !HasAura(52127))  // do not proc if no Water Shield aura present
                     return SPELL_AURA_PROC_FAILED;
@@ -4033,7 +4033,7 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, DamageInfo* damageI
                 return SPELL_AURA_PROC_OK;
             }
             // Feedback
-            if (dummySpell->SpellIconID == 4628)
+            if (dummySpell->GetSpellIconID() == 4628)
             {
                 if (GetTypeId() != TYPEID_PLAYER)
                     return SPELL_AURA_PROC_FAILED;
@@ -4214,7 +4214,7 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, DamageInfo* damageI
                 Unit::AuraList const& dummyAuras = GetAurasByType(SPELL_AURA_DUMMY);
                 for (Unit::AuraList::const_iterator itr = dummyAuras.begin(); itr != dummyAuras.end(); ++itr)
                 {
-                    if ((*itr)->GetSpellProto()->SpellIconID == 4068 && (*itr)->GetSpellProto()->GetSpellFamilyName() == SPELLFAMILY_DEATHKNIGHT)
+                    if ((*itr)->GetSpellProto()->GetSpellIconID() == 4068 && (*itr)->GetSpellProto()->GetSpellFamilyName() == SPELLFAMILY_DEATHKNIGHT)
                     {
                         runicCorruptionBp = (*itr)->GetModifier()->m_amount;
                         break;
@@ -4969,7 +4969,7 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(Unit *pVictim, DamageIn
                     return SPELL_AURA_PROC_FAILED;
             }
             // Soul Leech
-            else if (auraSpellInfo->SpellIconID == 2027)
+            else if (auraSpellInfo->GetSpellIconID() == 2027)
             {
                 basepoints[0] = triggerAmount;
                 basepoints[1] = triggerAmount;
@@ -4995,7 +4995,7 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(Unit *pVictim, DamageIn
                 break;
             }
             // Aftermath
-            else if (auraSpellInfo->SpellIconID == 11)
+            else if (auraSpellInfo->GetSpellIconID() == 11)
             {
                 if (!procSpell || pVictim == this)
                     return SPELL_AURA_PROC_FAILED;
@@ -5054,7 +5054,7 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(Unit *pVictim, DamageIn
                     basepoints[0] += old_aura->GetModifier()->m_amount;
             }
             // Blessed Resilience
-            else if (auraSpellInfo->SpellIconID == 2177)
+            else if (auraSpellInfo->GetSpellIconID() == 2177)
             {
                 if (damage * 100 >= GetMaxHealth() * auraSpellInfo->CalculateSimpleValue(EFFECT_INDEX_1) ||
                     (procEx & PROC_EX_CRITICAL_HIT) != 0 && (procFlags & PROC_FLAG_ON_TAKE_PERIODIC) == 0)
@@ -5063,7 +5063,7 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(Unit *pVictim, DamageIn
                 return SPELL_AURA_PROC_FAILED;
             }
             // Masochism
-            else if (auraSpellInfo->SpellIconID == 2211)
+            else if (auraSpellInfo->GetSpellIconID() == 2211)
             {
                 // If damage inflicted is less that pct health and not from SWD
                 if (damage * 100  < GetMaxHealth() * auraSpellInfo->CalculateSimpleValue(EFFECT_INDEX_1) &&
@@ -5289,7 +5289,7 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(Unit *pVictim, DamageIn
                     return SPELL_AURA_PROC_FAILED;
             }
             // Protector of the Innocent
-            if (auraSpellInfo->SpellIconID == 5014)
+            if (auraSpellInfo->GetSpellIconID() == 5014)
             {
                 // Target must not be caster and not from Holy Radiance periodic heal
                 if (pVictim == this || !procSpell || procSpell->Id == 86452)
@@ -5535,7 +5535,7 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(Unit *pVictim, DamageIn
                 target = this;
             }
             // Ancestral Healing
-            else if (auraSpellInfo->SpellIconID == 200)
+            else if (auraSpellInfo->GetSpellIconID() == 200)
             {
                 int32 bp = damage;
                 // Cast Ancestral Vigor (max hp part of talent)
@@ -6158,7 +6158,7 @@ SpellAuraProcResult Unit::HandleModCastingSpeedNotStackAuraProc(Unit* /*pVictim*
     SpellEntry const* spellProto = triggeredByAura->GetSpellProto();
 
     // Speed of Light
-    if (spellProto->GetSpellFamilyName() == SPELLFAMILY_PALADIN && spellProto->SpellIconID == 5062)
+    if (spellProto->GetSpellFamilyName() == SPELLFAMILY_PALADIN && spellProto->GetSpellIconID() == 5062)
     {
         int32 bp = triggeredByAura->GetModifier()->m_amount;
         CastCustomSpell(this, 85497, &bp, NULL, NULL, true);
@@ -6294,7 +6294,7 @@ SpellAuraProcResult Unit::HandleAddFlatModifierAuraProc(Unit* pVictim, DamageInf
         case SPELLFAMILY_WARLOCK:
         {
             // Pandemic
-            if (spellInfo->SpellIconID == 4554)
+            if (spellInfo->GetSpellIconID() == 4554)
             {
                 if (!roll_chance_i(spellInfo->CalculateSimpleValue(EFFECT_INDEX_0)) ||
                     pVictim->GetHealthPercent() > 25.0f)
@@ -7135,7 +7135,7 @@ SpellAuraProcResult Unit::HandleAuraProcOnPowerAmount(Unit* /*pVictim*/, DamageI
                 Unit::AuraList const& dummyAuras = GetAurasByType(SPELL_AURA_DUMMY);
                 for (Unit::AuraList::const_iterator itr = dummyAuras.begin(); itr != dummyAuras.end(); ++itr)
                 {
-                    if ((*itr)->GetSpellProto()->SpellIconID == 4431 && (*itr)->GetEffIndex() == EFFECT_INDEX_2 &&
+                    if ((*itr)->GetSpellProto()->GetSpellIconID() == 4431 && (*itr)->GetEffIndex() == EFFECT_INDEX_2 &&
                         (*itr)->GetSpellProto()->GetSpellFamilyName() == SPELLFAMILY_DRUID)
                     {
                         int32 basepoints = (*itr)->GetModifier()->m_amount;

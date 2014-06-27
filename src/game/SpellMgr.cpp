@@ -2573,7 +2573,7 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
                     return false;
 
                 // Hemorrhage vs. Glyph of Hemorrhage
-                if (spellInfo_1->SpellIconID == 153 && spellInfo_2->SpellIconID == 153)
+                if (spellInfo_1->GetSpellIconID() == 153 && spellInfo_2->GetSpellIconID() == 153)
                     return false;
 
                 // Glyph of Hemorrhage vs. Rupture
@@ -2615,15 +2615,15 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
                     return true;
 
                 // Spirit Link multiple checks
-                if (spellInfo_1->SpellIconID == 3062 && spellInfo_2->SpellIconID == 3062)
+                if (spellInfo_1->GetSpellIconID() == 3062 && spellInfo_2->GetSpellIconID() == 3062)
                     return false;
 
                 // Spirit Link multiple checks
-                if (spellInfo_1->SpellIconID == 3062 && spellInfo_2->SpellIconID == 3062)
+                if (spellInfo_1->GetSpellIconID() == 3062 && spellInfo_2->GetSpellIconID() == 3062)
                     return false;
 
                 // Spirit Link multiple checks
-                if (spellInfo_1->SpellIconID == 3062 && spellInfo_2->SpellIconID == 3062)
+                if (spellInfo_1->GetSpellIconID() == 3062 && spellInfo_2->GetSpellIconID() == 3062)
                     return false;
             }
             break;
@@ -2641,7 +2641,7 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
                     return true;
 
                 // Dancing Rune Weapon
-                if (spellInfo_1->SpellIconID == 2657 && spellInfo_2->SpellIconID == 2657)
+                if (spellInfo_1->GetSpellIconID() == 2657 && spellInfo_2->GetSpellIconID() == 2657)
                     return false;
             }
             break;

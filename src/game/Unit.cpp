@@ -6061,7 +6061,7 @@ void Unit::RemoveAuraHolderDueToSpellByDispel(uint32 spellId, uint32 stackAmount
             Unit::AuraList const& auras = caster->GetAurasByType(SPELL_AURA_DUMMY);
             for (Unit::AuraList::const_iterator i = auras.begin(); i != auras.end(); ++i)
             {
-                if ((*i)->GetSpellProto()->SpellIconID == 1869 && (*i)->GetSpellProto()->GetSpellFamilyName() == SPELLFAMILY_PRIEST)
+                if ((*i)->GetSpellProto()->GetSpellIconID() == 1869 && (*i)->GetSpellProto()->GetSpellFamilyName() == SPELLFAMILY_PRIEST)
                 {
                     // Cast Sin and Punishment
                     if (roll_chance_i((*i)->GetSpellProto()->CalculateSimpleValue(EFFECT_INDEX_0)))
@@ -6084,7 +6084,7 @@ void Unit::RemoveAuraHolderDueToSpellByDispel(uint32 spellId, uint32 stackAmount
             Unit::AuraList const& auras = caster->GetAurasByType(SPELL_AURA_DUMMY);
             for (Unit::AuraList::const_iterator i = auras.begin(); i != auras.end(); ++i)
             {
-                if ((*i)->GetSpellProto()->SpellIconID == 1910 && (*i)->GetSpellProto()->GetSpellFamilyName() == SPELLFAMILY_GENERIC)
+                if ((*i)->GetSpellProto()->GetSpellIconID() == 1910 && (*i)->GetSpellProto()->GetSpellFamilyName() == SPELLFAMILY_GENERIC)
                 {
                     if (roll_chance_i((*i)->GetModifier()->m_amount))
                     {
@@ -9438,7 +9438,7 @@ bool Unit::IsSpellCrit(Unit *pVictim, SpellEntry const *spellProto, SpellSchoolM
                             for(AuraList::const_iterator i = mDummyAuras.begin(); i!= mDummyAuras.end(); ++i)
                             {
                                 if ((*i)->GetSpellProto()->GetSpellFamilyName() == SPELLFAMILY_WARLOCK &&
-                                    (*i)->GetSpellProto()->SpellIconID == 816)
+                                    (*i)->GetSpellProto()->GetSpellIconID() == 816)
                                 {
                                     if (pVictim->GetHealthPercent() < float((*i)->GetSpellProto()->CalculateSimpleValue(EFFECT_INDEX_1)))
                                         crit_chance += (*i)->GetModifier()->m_amount;
@@ -9528,7 +9528,7 @@ bool Unit::IsSpellCrit(Unit *pVictim, SpellEntry const *spellProto, SpellSchoolM
                             }
                         }
                         // Word of Glory
-                        else if (spellProto->SpellIconID == 85673)
+                        else if (spellProto->GetSpellIconID() == 85673)
                         {
                             if (pVictim->GetHealthPercent() < 35.0f)
                             {
@@ -9869,7 +9869,7 @@ uint32 Unit::SpellHealingBonusDone(Unit *pVictim, SpellEntry const *spellProto, 
             // Search Nature's Blessing
             Unit::AuraList const& mDummyAuras = owner->GetAurasByType(SPELL_AURA_DUMMY);
             for (Unit::AuraList::const_iterator itr = mDummyAuras.begin(); itr != mDummyAuras.end(); ++itr)
-                if ((*itr)->GetSpellProto()->SpellIconID == 2012 && (*itr)->GetSpellEffect()->EffectMiscValue == damagetype)
+                if ((*itr)->GetSpellProto()->GetSpellIconID() == 2012 && (*itr)->GetSpellEffect()->EffectMiscValue == damagetype)
                 {
                     DoneTotalMod *= (100.0f + (*itr)->GetModifier()->m_amount) / 100.0f;
                     break;
