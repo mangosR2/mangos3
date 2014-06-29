@@ -144,10 +144,14 @@ bool ChatHandler::HandleDebugSendOpcodeCommand(char* /*args*/)
     if (ifs.bad())
         return false;
 
-    uint32 _opcode;
-    ifs >> _opcode;
+    uint32 opcode = 0;
+    if (!(ifs >> opcode))
+    {
+        ifs.close();
+        return false;
+    }
 
-    WorldPacket data(Opcodes(_opcode), 0);
+    WorldPacket data(Opcodes(opcode), 0);
 
     while(!ifs.eof())
     {
