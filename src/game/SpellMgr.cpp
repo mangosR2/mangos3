@@ -2304,6 +2304,9 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
             if (MatchedSpellIdPair(62559, 62538))
                 return false;
 
+            // Phase 2 Transform and Shadowy Barrier
+            if (MatchedSpellIdPair(65157, 64775) || MatchedSpellIdPair(65157, 64775))
+                return false;
             break;
         }
         case SPELLFAMILY_WARLOCK:
@@ -2670,10 +2673,14 @@ uint32 SpellMgr::GetSpellMaxTargetsWithCustom(SpellEntry const* spellInfo, Unit 
                 case 62577:                                 // Blizzard (Ulduar, Thorim)
                 case 62603:                                 // Blizzard (h) (Ulduar, Thorim)
                 case 62797:                                 // Storm Cloud (Ulduar, Hodir)
+                case 62978:                                 // Summon Guardian (Ulduar, Yogg Saron)
                 case 63018:                                 // Searing Light
                 case 63024:                                 // Gravity Bomb (Ulduar, XT-002)
                 case 63342:                                 // Focused Eyebeam Summon Trigger (Ulduar, Kologarn)
                 case 63545:                                 // Icicle Hodir(trigger spell from 62227)
+                case 63744:                                 // Sara's Anger (Ulduar, Yogg-Saron)
+                case 63745:                                 // Sara's Blessing (Ulduar, Yogg-Saron)
+                case 63747:                                 // Sara's Fervor (Ulduar, Yogg-Saron)
                 case 63795:                                 // Psychosis (Ulduar, Yogg-Saron)
                 case 63820:                                 // Summon Scrap Bot Trigger (Ulduar, Mimiron) use for Scrap Bots, hits npc 33856
                 case 64218:                                 // Overcharge
