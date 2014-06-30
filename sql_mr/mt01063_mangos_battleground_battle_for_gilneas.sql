@@ -1,6 +1,5 @@
 -- set non-attackable and not-selectable flag to cosmetic spawns
-UPDATE `creature_template` SET `unit_flags` = `unit_flags` | 0x02000000 | 2 WHERE `entry` IN
-(41911, 41913, 41914, 41915, 42053);
+UPDATE `creature_template` SET `UnitFlags` = `UnitFlags` | 0x02000000 | 2 WHERE `entry` IN (41911, 41913, 41914, 41915, 42053);
 
 DELETE FROM `battleground_events` WHERE `map` = 761;
 INSERT INTO `battleground_events` (`map`, `event1`, `event2`, `description`) VALUES
@@ -21,8 +20,8 @@ INSERT INTO `battleground_events` (`map`, `event1`, `event2`, `description`) VAL
 (761, 2, 4, 'Mine - horde owned'),
 (761, 254, 0, 'doors');
 
-SET @CGUID := 708000;
-SET @GGUID := 708000;
+SET @CGUID := 560000;
+SET @GGUID := 560000;
 
 DELETE FROM `creature_battleground` WHERE `guid` IN (SELECT guid FROM creature WHERE `map` = 761);
 
@@ -124,8 +123,6 @@ INSERT INTO `gameobject_battleground` VALUES
 (@GGUID+23, 2, 2),
 (@GGUID+24, 0, 2),
 (@GGUID+25, 1, 2);
-
-98322
 
 -- remove buff spawns
 DELETE FROM `gameobject` WHERE `map` = 761 AND `id` IN (180146, 180147, 180380, 180381, 180382, 180383);

@@ -1,17 +1,14 @@
 
-DELETE FROM `gameobject_template` WHERE `entry` BETWEEN '402189' AND '402191';
-DELETE FROM `gameobject_template` WHERE `entry` BETWEEN '402364' AND '402366';
+DELETE FROM `gameobject_template` WHERE `entry` IN (402189, 402190, 402191, 402364, 402365, 402366);
 INSERT INTO `gameobject_template` (`entry`, `type`, `displayId`, `name`, `IconName`, `castBarCaption`, `unk1`, `faction`, `flags`, `size`, `questItem1`, `questItem2`, `questItem3`, `questItem4`, `questItem5`, `questItem6`, `data0`, `data1`, `data2`, `data3`, `data4`, `data5`, `data6`, `data7`, `data8`, `data9`, `data10`, `data11`, `data12`, `data13`, `data14`, `data15`, `data16`, `data17`, `data18`, `data19`, `data20`, `data21`, `data22`, `data23`, `data24`, `data25`, `data26`, `data27`, `data28`, `data29`, `data30`, `data31`, `ScriptName`) VALUES
 ('402189','0','10122','TWINPEAKS_DWARVEN_GATE_03','','','','114','32','1','0','0','0','0','0','0','0','-1','0','0','0','0','-1','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0',''),
 ('402190','0','10123','TWINPEAKS_DWARVEN_GATE_01','','','','114','32','1','0','0','0','0','0','0','0','-1','0','0','0','0','-1','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0',''),
 ('402191','0','10124','TWINPEAKS_DWARVEN_GATE_02','','','','114','32','1','0','0','0','0','0','0','0','-1','0','0','0','0','-1','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0',''),
-('402364','0','10442','TWINPEAKS_ORC_GATE_01','','','','114','32','1','0','0','0','0','0','0','0','-1','0','0','0','0','-1','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0',''),
-('402365','0','10443','TWINPEAKS_ORC_GATE_02','','','','114','32','1','0','0','0','0','0','0','0','-1','0','0','0','0','-1','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0',''),
-('402366','0','10444','TWINPEAKS_ORC_GATE_03','','','','114','32','1','0','0','0','0','0','0','0','-1','0','0','0','0','-1','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','');
--- Out of range value for column 'data1' at row 1
+('402364','0','10442','TWINPEAKS_ORC_GATE_01',    '','','','114','32','1','0','0','0','0','0','0','0','-1','0','0','0','0','-1','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0',''),
+('402365','0','10443','TWINPEAKS_ORC_GATE_02',    '','','','114','32','1','0','0','0','0','0','0','0','-1','0','0','0','0','-1','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0',''),
+('402366','0','10444','TWINPEAKS_ORC_GATE_03',    '','','','114','32','1','0','0','0','0','0','0','0','-1','0','0','0','0','-1','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','');
 
-UPDATE `creature_template` SET `UnitFlags` = `UnitFlags` | 0x02000000 | 2 WHERE `entry` IN
-(51128, 51126, 42615, 51130, 51127);
+UPDATE `creature_template` SET `UnitFlags` = `UnitFlags` | 0x02000000 | 2 WHERE `entry` IN (51128, 51126, 42615, 51130, 51127);
 
 DELETE FROM `battleground_events` WHERE `map` = 726;
 INSERT INTO `battleground_events` (`map`, `event1`, `event2`, `description`) VALUES
@@ -20,8 +17,8 @@ INSERT INTO `battleground_events` (`map`, `event1`, `event2`, `description`) VAL
 (726, 2, 0, 'Spirit Guides'),
 (726, 254, 0, 'doors');
 
-SET @CGUID := 709000;
-SET @GGUID := 709000;
+SET @CGUID := 550000;
+SET @GGUID := 550000;
 
 DELETE FROM `creature_battleground` WHERE `guid` IN (SELECT guid FROM creature WHERE `map` = 726);
 
@@ -124,7 +121,7 @@ INSERT INTO `achievement_criteria_requirement` (`criteria_id`, `type`, `value1`,
 DELETE FROM `achievement_criteria_requirement` WHERE `criteria_id` IN (14887, 14888);
 INSERT INTO `achievement_criteria_requirement` (`criteria_id`, `type`, `value1`, `value2`) VALUE
 (14887, 5, 23451, 0),
-(14887, 5, 23505, 0),   -- Two criteria_ids with different value???
+-- (14887, 5, 23505, 0),   -- Two criteria_ids with different value???
 (14888, 11, 0, 0);
 
 -- Fire, Walk With Me
