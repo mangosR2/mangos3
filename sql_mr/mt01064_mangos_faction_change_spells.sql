@@ -844,4 +844,6 @@ INSERT INTO `player_factionchange_spells` (`race_A`, `alliance_id`, `commentA`, 
 (11, 65640, 'Swift Gray Steed', 2, 65639, 'Swift Red Hawkstrider'),
 (11, 65642, 'Turbostrider', 6, 65639, 'Swift Red Hawkstrider'),
 (11, 65643, 'Swift Violet Ram', 8, 65639, 'Swift Red Hawkstrider'),
-(11, 66847, 'Striped Dawnsaber', 5, 35018, 'Purple Hawkstrider');
+(11, 66847, 'Striped Dawnsaber', 5, 35018, 'Purple Hawkstrider'),
+-- Cataclysm
+(0, 92231, 'Spectral Steed', 0, 92232, 'Spectral Wolf');
