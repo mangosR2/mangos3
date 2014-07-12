@@ -1478,10 +1478,13 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         void CastStop(uint32 except_spellid = 0);
         bool AttackStop(bool targetSwitch = false);
         void RemoveAllAttackers();
-        bool isAttackingPlayer() const;
-        Unit* getVictim() const { return m_attackingGuid ? GetMap() ? GetMap()->GetUnit(m_attackingGuid) : NULL : NULL; }
+
+        bool isAttackingPlayer() const;                     //< Returns if this unit is attacking a player (or this unit's minions/pets are attacking a player)
+        bool CanAttackByItself() const;                     //< Used to check if a vehicle is allowed attack other units by itself
         virtual bool IsInEvadeMode() const { return false; };
-        void CombatStop(bool includingCast = false);
+
+        Unit* getVictim() const { return m_attackingGuid ? GetMap() ? GetMap()->GetUnit(m_attackingGuid) : NULL : NULL; } //< Returns the victim that this unit is currently attacking
+        void CombatStop(bool includingCast = false);        //< Stop this unit from combat, if includingCast==true, also interrupt casting
         void CombatStopWithPets(bool includingCast = false);
         void StopAttackFaction(uint32 faction_id);
         Unit* SelectRandomUnfriendlyTarget(Unit* except = NULL, float radius = ATTACK_DISTANCE) const;

@@ -7971,6 +7971,31 @@ bool Unit::isAttackingPlayer() const
     return CheckAllControlledUnits(IsAttackingPlayerHelper(), CONTROLLED_PET|CONTROLLED_TOTEMS|CONTROLLED_GUARDIANS|CONTROLLED_CHARM);
 }
 
+/// Returns true if a vehicle can attack other units by itself (without any controller)
+bool Unit::CanAttackByItself() const
+{
+    if (!IsVehicle())
+        return true;
+
+    VehicleKitPtr vehicle = GetVehicleKit();
+    if (!vehicle)
+        return true;
+
+    for (uint8 i = 0; i < MAX_VEHICLE_SEAT; ++i)
+    {
+        if (uint32 seatId = vehicle->GetEntry()->m_seatID[i])
+        {
+            if (VehicleSeatEntry const* seatEntry = sVehicleSeatStore.LookupEntry(seatId))
+            {
+                if (seatEntry->m_flags & SEAT_FLAG_CAN_CONTROL)
+                    return false;
+            }
+        }
+    }
+
+    return true;
+}
+
 void Unit::RemoveAllAttackers()
 {
     if (!GetMap())
@@ -11695,6 +11720,10 @@ void Unit::SetDeathState(DeathState s)
 
         if (GetVehicleKit())
             GetVehicleKit()->RemoveAllPassengers();
+
+        // Unboard from transport
+        if (GetTransportInfo() && ((Unit*)GetTransportInfo()->GetTransport())->IsVehicle())
+            ((Unit*)GetTransportInfo()->GetTransport())->RemoveSpellsCausingAura(SPELL_AURA_CONTROL_VEHICLE, GetObjectGuid());
 
         ModifyAuraState(AURA_STATE_HEALTHLESS_20_PERCENT, false);
         ModifyAuraState(AURA_STATE_HEALTHLESS_35_PERCENT, false);

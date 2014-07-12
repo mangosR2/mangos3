@@ -4240,6 +4240,14 @@ void Spell::EffectDummy(SpellEffectEntry const* effect)
                    m_caster->CastSpell(unitTarget, 62936, true);
                    return;
                 }
+                case 63030:                                 // Boil Ominously
+                {
+                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
+                        return;
+
+                    m_caster->CastSpell(unitTarget, 63031, true);
+                    return;
+                }
                 case 63499:                                 // Dispel Magic 
                 { 
                     if (!unitTarget) 
@@ -4247,13 +4255,24 @@ void Spell::EffectDummy(SpellEffectEntry const* effect)
  
                     unitTarget->RemoveAurasDueToSpell(effect->CalculateSimpleValue());
                     return; 
-                } 
-                case 63545:                                 // Icicle 
-                { 
-                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER) 
-                        return; 
- 
-                    m_caster->CastSpell(unitTarget, effect->CalculateSimpleValue(), true); 
+                }
+                case 63545:                                 // Icicle
+                {
+                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
+                        return;
+
+                    m_caster->CastSpell(unitTarget, effect->CalculateSimpleValue(), true);
+                    return;
+                }
+                case 63744:                                 // Sara's Anger
+                case 63745:                                 // Sara's Blessing
+                case 63747:                                 // Sara's Fervor
+                {
+                    if (!unitTarget)
+                        return;
+
+                    m_caster->CastSpell(unitTarget, effect->CalculateSimpleValue(), true);
+                    return;
                 }
                 case 63984:                                 // Hate to Zero (Ulduar - Yogg Saron)
                 {
