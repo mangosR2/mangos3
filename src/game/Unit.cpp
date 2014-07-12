@@ -7507,9 +7507,13 @@ bool Unit::CanAttackByItself() const
     if (!IsVehicle())
         return true;
 
+    VehicleKitPtr vehicle = GetVehicleKit();
+    if (!vehicle)
+        return true;
+
     for (uint8 i = 0; i < MAX_VEHICLE_SEAT; ++i)
     {
-        if (uint32 seatId = m_vehicleInfo->GetVehicleEntry()->m_seatID[i])
+        if (uint32 seatId = vehicle->GetEntry()->m_seatID[i])
         {
             if (VehicleSeatEntry const* seatEntry = sVehicleSeatStore.LookupEntry(seatId))
             {
