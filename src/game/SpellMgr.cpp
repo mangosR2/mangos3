@@ -2311,6 +2311,10 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
             // Phase 2 Transform and Shadowy Barrier
             if (MatchedSpellIdPair(65157, 64775) || MatchedSpellIdPair(65157, 64775))
                 return false;
+
+			// Empowered (dummy) and Empowered
+			if (MatchedSpellIdPair(64161, 65294) || MatchedSpellIdPair(64161, 65294))
+				return false;
             break;
         }
         case SPELLFAMILY_WARLOCK:

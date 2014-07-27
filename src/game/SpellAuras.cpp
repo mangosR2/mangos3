@@ -2766,6 +2766,10 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                         if (target->GetTypeId() == TYPEID_PLAYER)
                             ((Player*)target)->removeSpell(63680);
                         return;
+                    case 64132:                             // Constrictor Tentacle
+                        if (target->GetTypeId() == TYPEID_PLAYER)
+                            target->CastSpell(target, 64133, true, NULL, this);
+                        return;
                     case 68912:                             // Wailing Souls
                         if (Unit* caster = GetCaster())
                         {
@@ -10761,6 +10765,7 @@ m_permanent(false), m_isRemovedOnShapeLost(true), m_deleted(false)
         case 62519:                                         // Attuned to Nature
         case 63050:                                         // Sanity (Ulduar - Yogg Saron)
         case 64455:                                         // Feral Essence
+        case 65294:                                         // Empowered
         case 66228:                                         // Nether Power (ToC: Lord Jaraxxus)
         case 67106:                                         // Nether Power (ToC: Lord Jaraxxus)
         case 67107:                                         // Nether Power (ToC: Lord Jaraxxus)

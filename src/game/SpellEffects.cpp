@@ -3876,6 +3876,14 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     m_caster->CastSpell(m_caster, spell_id, true);
                     return;
                 }
+                case 65206:                                 // Destabilization Matrix
+                {
+                    if (!unitTarget)
+                        return;
+
+                    m_caster->CastSpell(unitTarget, m_spellInfo->CalculateSimpleValue(eff_idx), true);
+                    return;
+                }
                 case 65346:                                 // Proximity Mine
                 {
                     if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
@@ -10974,6 +10982,22 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     m_caster->CastSpell(unitTarget, 63036, true);
                     return;
                 }
+                case 64123:                                 // Lunge
+                {
+                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
+                    return;
+
+                    unitTarget->CastSpell(unitTarget, unitTarget->GetMap()->IsRegularDifficulty() ? 64125 : 64126, true);
+                    return;
+                }
+                case 64131:                                 // Lunge
+                {
+                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
+                        return;
+
+                    unitTarget->CastSpell(m_caster, m_spellInfo->CalculateSimpleValue(eff_idx), true);
+                    return;
+                }
                 case 64456:                                 // Feral Essence Application Removal
                 {
                     if (!unitTarget)
@@ -10981,6 +11005,22 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
 
                     uint32 spellId = m_spellInfo->CalculateSimpleValue(eff_idx);
                     unitTarget->RemoveAuraHolderFromStack(spellId);
+                    return;
+                }
+                case 64466:                                 // Empowering Shadows
+                {
+                    if (!unitTarget)
+                        return;
+
+                    unitTarget->CastSpell(m_caster, m_spellInfo->CalculateSimpleValue(eff_idx), true);
+                    return;
+                }
+                case 64467:                                 // Empowering Shadows
+                {
+                    if (!unitTarget)
+                        return;
+
+                    unitTarget->CastSpell(unitTarget, m_caster->GetMap()->IsRegularDifficulty() ? 64468 : 64486, true);
                     return;
                 }
                 case 64475:                                 // Strength of the Creator
