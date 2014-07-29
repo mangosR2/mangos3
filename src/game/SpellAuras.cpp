@@ -2736,6 +2736,9 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                         target->setFaction(1990);           // Ambient (hostile)
                         target->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE);
                         return;
+                    case 63122:                             // Clear Insane
+                        target->RemoveAurasDueToSpell(GetSpellProto()->CalculateSimpleValue(m_effIndex));
+                        return;
                     case 63322:                             // Saronite Vapors
                         if (Unit* caster = GetCaster())
                         {
@@ -9828,6 +9831,14 @@ void Aura::PeriodicDummyTick()
                     // cast Slag Imbued if the target survives up to the last tick
                     if (GetAuraTicks() == 10)
                         target->CastSpell(target, 63536, true, NULL, this);
+                    return;
+                }
+                case 63050:                                 // Sanity
+                {
+                    if (GetHolder()->GetStackAmount() <= 25 && !target->HasAura(63752))
+                        target->CastSpell(target, 63752, true);
+                    else if (GetHolder()->GetStackAmount() > 25 && target->HasAura(63752))
+                        target->RemoveAurasDueToSpell(63752);
                     return;
                 }
                 case 63276:                                   // Mark of the Faceless (General Vezax - Ulduar)

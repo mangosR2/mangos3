@@ -1052,7 +1052,10 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, DamageInfo* damageI
                     if (Unit* caster = triggeredByAura->GetCaster())
                     {
                         if (caster->GetEntry() != 33943 && caster->GetTypeId() == TYPEID_UNIT)
+                        {
                             ((Creature*)caster)->UpdateEntry(33943);
+                            caster->CastSpell(caster, 64017, true);
+                        }
                     }
 
                     triggered_spell_id = 64039;
