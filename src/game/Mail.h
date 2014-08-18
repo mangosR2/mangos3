@@ -111,7 +111,7 @@ enum MailAuctionAnswers
 /**
  * A class to represent the sender of a mail.
  */
-class MailSender
+class MANGOS_DLL_SPEC MailSender
 {
     public:                                                 // Constructors
         MailSender() : m_messageType(MAIL_NORMAL), m_senderId(0), m_stationery(MAIL_STATIONERY_DEFAULT) {}
@@ -150,7 +150,7 @@ class MailSender
 /**
  * A class to represent the receiver of a mail.
  */
-class MailReceiver
+class MANGOS_DLL_SPEC MailReceiver
 {
     public:                                                 // Constructors
         explicit MailReceiver(ObjectGuid receiver_guid) : m_receiver(NULL), m_receiver_guid(receiver_guid) {}
@@ -179,7 +179,7 @@ class MailReceiver
 /**
  * The class to represent the draft of a mail.
  */
-class MailDraft
+class MANGOS_DLL_SPEC MailDraft
 {
         /**
          * Holds a Map of GUIDs of items and pointers to the items.
