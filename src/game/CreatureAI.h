@@ -66,6 +66,7 @@ class MANGOS_DLL_SPEC CreatureAI
     public:
         explicit CreatureAI(Creature* creature) :
             m_creature(creature),
+            self(creature),
             m_isCombatMovement(true),
             m_attackDistance(0.0f),
             m_attackAngle(0.0f)
@@ -244,6 +245,11 @@ class MANGOS_DLL_SPEC CreatureAI
         virtual void AttackStart(Unit* /*pWho*/) {}
 
         /**
+         * Called to select / update victim
+         */
+        virtual Unit* SelectVictim();
+
+        /**
          * Called at World update tick, by default every 100ms
          * This setting is dependend on CONFIG_UINT32_INTERVAL_MAPUPDATE
          * Note: Use this function to handle Timers, Threat-Management and MeleeAttacking
@@ -329,6 +335,7 @@ class MANGOS_DLL_SPEC CreatureAI
 
         /// Pointer to the Creature controlled by this AI
         Creature* const m_creature;
+        Creature* const self;
 
         /// Combat movement currently enabled
         bool m_isCombatMovement;
