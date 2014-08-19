@@ -352,6 +352,12 @@ void WorldSession::HandleGossipSelectOptionOpcode( WorldPacket & recv_data )
 
     recv_data >> guid >> menuId >> gossipListId;
 
+    if (gossipListId >= _player->PlayerTalkClass->GetGossipMenu().MenuItemCount())
+    {
+        recv_data.rfinish();                                // prevent warnings spam
+        return;
+    }
+
     if (_player->PlayerTalkClass->GossipOptionCoded(gossipListId))
     {
         recv_data >> code;

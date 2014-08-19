@@ -275,7 +275,7 @@ void WorldSession::HandleMovementOpcodes(WorldPacket & recv_data)
     // ignore, waiting processing in WorldSession::HandleMoveWorldportAckOpcode and WorldSession::HandleMoveTeleportAck
     if (plMover && plMover->IsBeingTeleported())
     {
-        recv_data.rpos(recv_data.wpos());                   // prevent warnings spam
+        recv_data.rfinish();                                // prevent warnings spam
         return;
     }
 
@@ -364,7 +364,7 @@ void WorldSession::HandleForceSpeedChangeAckOpcodes(WorldPacket &recv_data)
     // now can skip not our packet
     if (_player->GetObjectGuid() != guid)
     {
-        recv_data.rpos(recv_data.wpos());                   // prevent warnings spam
+        recv_data.rfinish();                                // prevent warnings spam
         return;
     }
     /*----------------*/
@@ -456,7 +456,7 @@ void WorldSession::HandleMoveNotActiveMoverOpcode(WorldPacket& recv_data)
             old_mover_guid.GetString().c_str());
 */
         DEBUG_LOG("World: CMSG_MOVE_NOT_ACTIVE_MOVER %s received, but %s now is active mover!", moverGuid.GetString().c_str(), old_mover_guid.GetString().c_str());
-        recv_data.rpos(recv_data.wpos());                   // prevent warnings spam
+        recv_data.rfinish();                                // prevent warnings spam
         return;
     }
 
@@ -483,7 +483,7 @@ void WorldSession::HandleMoveKnockBackAck(WorldPacket& recv_data)
     // ignore, waiting processing in WorldSession::HandleMoveWorldportAckOpcode and WorldSession::HandleMoveTeleportAck
     if (plMover && plMover->IsBeingTeleported())
     {
-        recv_data.rpos(recv_data.wpos());                   // prevent warnings spam
+        recv_data.rfinish();                                // prevent warnings spam
         return;
     }
 
@@ -529,26 +529,30 @@ void WorldSession::HandleMoveHoverAck(WorldPacket& recv_data)
 {
     DEBUG_LOG("CMSG_MOVE_HOVER_ACK");
 
-    ObjectGuid guid;                                        // guid - unused
-    MovementInfo movementInfo;
+    recv_data.rfinish();
 
-    recv_data >> guid.ReadAsPacked();
-    recv_data >> Unused<uint32>();                          // unk1
-    recv_data >> movementInfo;
-    recv_data >> Unused<uint32>();                          // unk2
+//    ObjectGuid guid;                                        // guid - unused
+//    MovementInfo movementInfo;
+//
+//    recv_data >> guid.ReadAsPacked();
+//    recv_data >> Unused<uint32>();                          // unk1
+//    recv_data >> movementInfo;
+//    recv_data >> Unused<uint32>();                          // unk2
 }
 
 void WorldSession::HandleMoveWaterWalkAck(WorldPacket& recv_data)
 {
     DEBUG_LOG("CMSG_MOVE_WATER_WALK_ACK");
 
-    ObjectGuid guid;                                        // guid - unused
-    MovementInfo movementInfo;
+    recv_data.rfinish();
 
-    recv_data >> guid.ReadAsPacked();
-    recv_data >> Unused<uint32>();                          // unk1
-    recv_data >> movementInfo;
-    recv_data >> Unused<uint32>();                          // unk2
+//    ObjectGuid guid;                                        // guid - unused
+//    MovementInfo movementInfo;
+//
+//    recv_data >> guid.ReadAsPacked();
+//    recv_data >> Unused<uint32>();                          // unk1
+//    recv_data >> movementInfo;
+//    recv_data >> Unused<uint32>();                          // unk2
 }
 
 void WorldSession::HandleSummonResponseOpcode(WorldPacket& recv_data)

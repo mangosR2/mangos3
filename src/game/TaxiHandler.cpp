@@ -183,7 +183,7 @@ void WorldSession::HandleActivateTaxiExpressOpcode(WorldPacket& recv_data)
         if (!GetPlayer()->m_taxi.IsTaximaskNodeKnown(node) && !GetPlayer()->isTaxiCheater())
         {
             SendActivateTaxiReply(ERR_TAXINOTVISITED);
-            recv_data.rfinish();
+            recv_data.rfinish();                                // prevent warnings spam
             return;
         }
 

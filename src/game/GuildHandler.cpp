@@ -55,7 +55,7 @@ void WorldSession::HandleGuildCreateOpcode(WorldPacket& recvPacket)
 
     if (!GetPlayer()->isGameMaster())
     {
-        sLog.outError("WorldSession::HandleGuildCreateOpcode Possible hacking-attempt: %s tried to create a guild [Name: %s] using cheats!", GetPlayer()->GetObjectGuid().GetString().c_str(), gname.c_str());
+        sLog.outError("WorldSession::HandleGuildCreateOpcode Possible hacking-attempt: %s tried to create a guild [Name: %s] using cheats!", GetPlayer()->GetGuidStr().c_str(), gname.c_str());
         return;
     }
 
@@ -596,14 +596,14 @@ void WorldSession::HandleGuildRankOpcode(WorldPacket& recvPacket)
     Guild* guild = sGuildMgr.GetGuildById(GetPlayer()->GetGuildId());
     if (!guild)
     {
-        recvPacket.rpos(recvPacket.wpos());                 // set to end to avoid warnings spam
+        recvPacket.rfinish();                               // set to end to avoid warnings spam
         SendGuildCommandResult(GUILD_CREATE_S, "", ERR_GUILD_PLAYER_NOT_IN_GUILD);
         return;
     }
 
     if (GetPlayer()->GetObjectGuid() != guild->GetLeaderGuid())
     {
-        recvPacket.rpos(recvPacket.wpos());                 // set to end to avoid warnings spam
+        recvPacket.rfinish();                               // set to end to avoid warnings spam
         SendGuildCommandResult(GUILD_INVITE_S, "", ERR_GUILD_PERMISSIONS);
         return;
     }
@@ -949,7 +949,7 @@ void WorldSession::HandleGuildBankWithdrawMoney(WorldPacket& recv_data)
         return;
 
     uint32 GuildId = GetPlayer()->GetGuildId();
-    if (GuildId == 0)
+    if (!GuildId)
         return;
 
     Guild* pGuild = sGuildMgr.GetGuildById(GuildId);
@@ -1008,14 +1008,14 @@ void WorldSession::HandleGuildBankSwapItems(WorldPacket& recv_data)
     uint32 GuildId = GetPlayer()->GetGuildId();
     if (!GuildId)
     {
-        recv_data.rpos(recv_data.wpos());                   // prevent additional spam at rejected packet
+        recv_data.rfinish();                                // prevent additional spam at rejected packet
         return;
     }
 
     Guild* pGuild = sGuildMgr.GetGuildById(GuildId);
     if (!pGuild || !pGuild->IsGuildBankLoaded())
     {
-        recv_data.rpos(recv_data.wpos());                   // prevent additional spam at rejected packet
+        recv_data.rfinish();                                // prevent additional spam at rejected packet
         return;
     }
 
@@ -1035,7 +1035,7 @@ void WorldSession::HandleGuildBankSwapItems(WorldPacket& recv_data)
                 BankTab >= pGuild->GetPurchasedTabs() ||
                 BankTabDst >= pGuild->GetPurchasedTabs())
         {
-            recv_data.rpos(recv_data.wpos());               // prevent additional spam at rejected packet
+            recv_data.rfinish();                            // prevent additional spam at rejected packet
             return;
         }
     }
@@ -1062,7 +1062,7 @@ void WorldSession::HandleGuildBankSwapItems(WorldPacket& recv_data)
         if ((BankTabSlot >= GUILD_BANK_MAX_SLOTS && BankTabSlot != 0xFF) ||
                 BankTab >= pGuild->GetPurchasedTabs())
         {
-            recv_data.rpos(recv_data.wpos());               // prevent additional spam at rejected packet
+            recv_data.rfinish();                            // prevent additional spam at rejected packet
             return;
         }
     }

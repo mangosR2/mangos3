@@ -472,7 +472,7 @@ void WorldSession::HandleQuestPOIQueryOpcode(WorldPacket& recv_data)
 
     if(count > MAX_QUEST_LOG_SIZE)
     {
-        recv_data.rpos(recv_data.wpos());                   // set to end to avoid warnings spam
+        recv_data.rfinish();                                // set to end to avoid warnings spam
         return;
     }
 
