@@ -45,11 +45,14 @@
 
 void WorldSession::HandleRepopRequestOpcode( WorldPacket & recv_data )
 {
-    DEBUG_LOG( "WORLD: Recvd CMSG_REPOP_REQUEST Message" );
+    DEBUG_LOG("WORLD: Recvd CMSG_REPOP_REQUEST Message");
 
     recv_data.read_skip<uint8>();
 
-    if(GetPlayer()->isAlive() || GetPlayer()->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_GHOST))
+    if (GetPlayer()->isAlive() || GetPlayer()->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_GHOST))
+        return;
+
+    if (GetPlayer()->HasAuraType(SPELL_AURA_PREVENT_RESURRECTION))
         return;
 
     // the world update order is sessions, players, creatures
@@ -57,7 +60,7 @@ void WorldSession::HandleRepopRequestOpcode( WorldPacket & recv_data )
     // creatures can kill players
     // so if the server is lagging enough the player can
     // release spirit after he's killed but before he is updated
-    if(GetPlayer()->getDeathState() == JUST_DIED)
+    if (GetPlayer()->getDeathState() == JUST_DIED)
     {
         DEBUG_LOG("HandleRepopRequestOpcode: got request after player %s(%d) was killed and before he was updated", GetPlayer()->GetName(), GetPlayer()->GetGUIDLow());
         GetPlayer()->KillPlayer();
