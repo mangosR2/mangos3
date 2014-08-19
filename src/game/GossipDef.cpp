@@ -24,10 +24,10 @@
 #include "WorldSession.h"
 #include "Formulas.h"
 
-GossipMenu::GossipMenu(WorldSession* session) : m_session(session)
+GossipMenu::GossipMenu(WorldSession* session) :
+    m_gMenuId(0), m_senderGuid(ObjectGuid()), m_session(session)
 {
     m_gItems.reserve(16);                                   // can be set for max from most often sizes to speedup push_back and less memory use
-    m_gMenuId = 0;
 }
 
 GossipMenu::~GossipMenu()
@@ -39,7 +39,6 @@ void GossipMenu::AddMenuItem(uint8 Icon, const std::string& Message, uint32 dtSe
 {
     if (m_gItems.size() <= GOSSIP_MAX_MENU_ITEMS)
     {
-    MANGOS_ASSERT( m_gItems.size() <= GOSSIP_MAX_MENU_ITEMS  );
 
     GossipMenuItem gItem;
 
@@ -158,6 +157,8 @@ bool PlayerMenu::GossipOptionCoded(unsigned int Selection)
 
 void PlayerMenu::SendGossipMenu(uint32 TitleTextId, ObjectGuid objectGuid)
 {
+    mGossipMenu.SetSenderGuid(objectGuid);
+
     WorldPacket data(SMSG_GOSSIP_MESSAGE, (100));           // guess size
     data << ObjectGuid(objectGuid);
     data << uint32(mGossipMenu.GetMenuId());                // new 2.4.0
@@ -202,6 +203,8 @@ void PlayerMenu::SendGossipMenu(uint32 TitleTextId, ObjectGuid objectGuid)
 
 void PlayerMenu::CloseGossip()
 {
+    mGossipMenu.SetSenderGuid(ObjectGuid());
+
     WorldPacket data(SMSG_GOSSIP_COMPLETE, 0);
     GetMenuSession()->SendPacket(&data);
 

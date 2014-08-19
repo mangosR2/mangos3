@@ -364,6 +364,9 @@ void WorldSession::HandleGossipSelectOptionOpcode( WorldPacket & recv_data )
         DEBUG_LOG("Gossip code: %s", code.c_str());
     }
 
+    if (_player->PlayerTalkClass->GetGossipMenu().GetSenderGuid() != guid)
+        return;
+
     // remove fake death
     if (GetPlayer()->hasUnitState(UNIT_STAT_DIED))
         GetPlayer()->RemoveSpellsCausingAura(SPELL_AURA_FEIGN_DEATH);
