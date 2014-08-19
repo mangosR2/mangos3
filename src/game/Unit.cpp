@@ -4536,7 +4536,8 @@ Spell* Unit::FindCurrentSpellBySpellId(uint32 spell_id) const
 
 void Unit::SetInFront(Unit const* target)
 {
-    SetOrientation(GetAngle(target));
+    if (!hasUnitState(UNIT_STAT_CANNOT_TURN))
+        SetOrientation(GetAngle(target));
 }
 
 void Unit::SetFacingTo(float ori)
@@ -14422,6 +14423,9 @@ void Unit::UpdateSplineMovement(uint32 t_diff)
         m_movesplineTimer.Reset(sWorld.getConfig(CONFIG_UINT32_POSITION_UPDATE_DELAY));
         Position pos = movespline->ComputePosition();
         pos.SetPhaseMask(GetPhaseMask());
+
+        if (GetTypeId() == TYPEID_UNIT && hasUnitState(UNIT_STAT_CANNOT_TURN))
+            pos.o = GetOrientation();
 
         if (IsBoarded())
         {

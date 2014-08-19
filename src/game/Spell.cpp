@@ -3554,6 +3554,17 @@ void Spell::prepare(SpellCastTargets const* targets, Aura const* triggeredByAura
         m_caster->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_USE);
     }
 
+    // set target for proper facing
+    if (m_casttime || IsChanneledSpell(m_spellInfo))
+    {
+        if (m_caster->GetTypeId() == TYPEID_UNIT &&
+            m_targets.getUnitTarget() &&
+            m_caster != m_targets.getUnitTarget())
+        {
+            ((Creature*)m_caster)->FocusTarget(this, m_targets.getUnitTarget());
+        }
+    }
+
     // add non-triggered (with cast time and without)
     if (!m_IsTriggeredSpell)
     {
@@ -4364,6 +4375,12 @@ void Spell::finish(bool ok)
         return;
 
     m_spellState = SPELL_STATE_FINISHED;
+
+    if (m_caster->GetTypeId() == TYPEID_UNIT)
+    {
+        if (Creature* pCaster = (Creature*)m_caster)
+            pCaster->ReleaseFocus(this);
+    }
 
     // other code related only to successfully finished spells
     if (!ok)

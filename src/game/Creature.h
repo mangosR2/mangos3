@@ -36,6 +36,7 @@ struct SpellEntry;
 class CreatureAI;
 class Quest;
 class Player;
+class Spell;
 class WorldSession;
 
 struct GameEventCreatureData;
@@ -601,6 +602,10 @@ class MANGOS_DLL_SPEC Creature : public Unit
         void SetRoot(bool enable) override;
         void SetWaterWalk(bool enable) override;
 
+        void SetTargetGuid(ObjectGuid targetGuid) override;
+        void FocusTarget(Spell const* focusSpell, WorldObject* target);
+        void ReleaseFocus(Spell const* focusSpell);
+
         uint32 GetShieldBlockValue() const                  // dunno mob block value
         {
             return (getLevel() / 2 + uint32(GetStat(STAT_STRENGTH) / 20));
@@ -814,6 +819,8 @@ class MANGOS_DLL_SPEC Creature : public Unit
     private:
         GridReference<Creature> m_gridRef;
         CreatureInfo const* m_creatureInfo;                 // in difficulty mode > 0 can different from ObjMgr::GetCreatureTemplate(GetEntry())
+
+        Spell const* m_focusSpell;                          // Locks the target during spell cast for proper facing
 
         int32 m_modelInhabitType;                           // cached value
 };

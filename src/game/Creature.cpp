@@ -99,7 +99,7 @@ VendorItem const* VendorItemData::FindItemCostPair(uint32 item_id, uint32 extend
     return NULL;
 }
 
-void CreatureCreatePos::SelectFinalPoint(Creature* cr, bool checkLOS)
+void CreatureCreatePos::SelectFinalPoint(Creature* cr, bool checkLOS /*=false*/)
 {
     // if object provided then selected point at specific dist/angle from object forward look
     if (m_closeObject)
@@ -146,7 +146,7 @@ Creature::Creature(CreatureSubtype subtype) : Unit(),
     m_AlreadyCallAssistance(false), m_AlreadySearchedAssistance(false),
     m_AI_locked(false), m_isDeadByDefault(false), m_temporaryFactionFlags(TEMPFACTION_NONE),
     m_meleeDamageSchoolMask(SPELL_SCHOOL_MASK_NORMAL), m_originalEntry(0),
-    m_creatureInfo(NULL),
+    m_creatureInfo(NULL), m_focusSpell(NULL),
     m_modelInhabitType(-1)
 {
     m_regenTimer = 200;
@@ -2862,4 +2862,44 @@ bool Creature::CanFly()
         return false;
 
     return true;
+}
+
+void Creature::SetTargetGuid(ObjectGuid targetGuid)
+{
+    // not focused
+    if (!m_focusSpell)
+        Unit::SetTargetGuid(targetGuid);
+}
+
+void Creature::FocusTarget(Spell const* focusSpell, WorldObject* target)
+{
+    // already focused
+    if (m_focusSpell)
+        return;
+
+    m_focusSpell = focusSpell;
+    Unit::SetTargetGuid(target->GetObjectGuid());
+
+    if (focusSpell->m_spellInfo->HasAttribute(SPELL_ATTR_EX5_DONT_TURN_DURING_CAST))
+        addUnitState(UNIT_STAT_ROTATING);
+
+    // Set serverside orientation if needed (needs to be after attribute check)
+    SetInFront((Unit*)target);
+}
+
+void Creature::ReleaseFocus(Spell const* focusSpell)
+{
+    // focused to something else
+    if (focusSpell != m_focusSpell)
+        return;
+
+    m_focusSpell = NULL;
+
+    if (Unit* pVictim = getVictim())
+        Unit::SetTargetGuid(pVictim->GetObjectGuid());
+    else
+        Unit::SetTargetGuid(ObjectGuid());
+
+    if (focusSpell->m_spellInfo->HasAttribute(SPELL_ATTR_EX5_DONT_TURN_DURING_CAST))
+        clearUnitState(UNIT_STAT_ROTATING);
 }
