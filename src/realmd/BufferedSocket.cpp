@@ -63,12 +63,14 @@ BufferedSocket::BufferedSocket(void):
     if (!sIpListStorage.empty())
     {
         // first del expired records
-        for (TIpList::iterator itr = sIpListStorage.begin(); itr != sIpListStorage.end();)
+        TIpList::iterator i_next;
+        for (TIpList::iterator itr = sIpListStorage.begin(); itr != sIpListStorage.end(); itr = i_next)
         {
+            i_next = itr;
+            ++i_next;
+
             if (itr->second < currTime)
-                sIpListStorage.erase(itr++);
-            else
-                ++itr;
+                sIpListStorage.erase(itr);
         }
 
         // then search current connected ip
