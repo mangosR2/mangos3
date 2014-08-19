@@ -103,7 +103,7 @@ void VehicleKit::RemoveAllPassengers()
 {
     for (SeatMap::iterator itr = m_Seats.begin(); itr != m_Seats.end(); ++itr)
     {
-        if (Unit* passenger = GetBase()->GetMap()->GetUnit(itr->second.passenger))
+        if (Unit* passenger = GetBase()->GetMap()->GetUnit(itr->second.passengerGuid))
         {
             passenger->ExitVehicle();
 
