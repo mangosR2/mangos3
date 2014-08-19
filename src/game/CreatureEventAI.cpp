@@ -1002,12 +1002,15 @@ void CreatureEventAI::ProcessAction(CreatureEventAI_Action const& action, uint32
             switch (action.changeMovement.movementType)
             {
                 case IDLE_MOTION_TYPE:
+                    m_creature->GetMotionMaster()->Clear();
                     m_creature->GetMotionMaster()->MoveIdle();
                     break;
                 case RANDOM_MOTION_TYPE:
+                    m_creature->GetMotionMaster()->Clear();
                     m_creature->GetMotionMaster()->MoveRandomAroundPoint(m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ(), float(action.changeMovement.wanderDistance));
                     break;
                 case WAYPOINT_MOTION_TYPE:
+                    m_creature->GetMotionMaster()->Clear();
                     m_creature->GetMotionMaster()->MoveWaypoint();
                     break;
             }
@@ -1076,12 +1079,11 @@ void CreatureEventAI::JustReachedHome()
 
 void CreatureEventAI::EnterEvadeMode()
 {
-    m_creature->ExitVehicle();
     m_creature->RemoveAllAurasOnEvade();
     m_creature->DeleteThreatList();
     m_creature->CombatStop(true);
 
-    if (m_creature->isAlive())
+    if (m_creature->isAlive() && !m_creature->GetVehicle())
         m_creature->GetMotionMaster()->MoveTargetedHome();
 
     m_creature->SetLootRecipient(NULL);
@@ -1280,7 +1282,7 @@ void CreatureEventAI::SpellHit(Unit* pUnit, const SpellEntry* pSpell)
 void CreatureEventAI::UpdateAI(const uint32 diff)
 {
     // Check if we are in combat (also updates calls threat update code)
-    bool Combat = m_creature->SelectHostileTarget() && m_creature->getVictim();
+    Unit* pVictim = SelectVictim();
 
     // Events are only updated once every EVENT_UPDATE_TIME ms to prevent lag with large amount of events
     if (m_EventUpdateTime < diff)
@@ -1322,18 +1324,14 @@ void CreatureEventAI::UpdateAI(const uint32 diff)
                 case EVENT_T_TARGET_AURA:
                 case EVENT_T_MISSING_AURA:
                 case EVENT_T_TARGET_MISSING_AURA:
-                    if (Combat)
+                    if (pVictim)
                         ProcessEvent(*i);
                     break;
                 case EVENT_T_RANGE:
-                    if (Combat)
+                    if (pVictim && m_creature->IsInMap(pVictim))
                     {
-					    Unit* pVictim = m_creature->getVictim();
-                        if (pVictim && m_creature->IsInMap(pVictim))
-                        {
-                            if (m_creature->IsInRange(pVictim, (float)(*i).Event.range.minDist, (float)(*i).Event.range.maxDist))
-                                ProcessEvent(*i);
-                        }
+                        if (m_creature->IsInRange(pVictim, (float)(*i).Event.range.minDist, (float)(*i).Event.range.maxDist))
+                            ProcessEvent(*i);
                     }
                     break;
             }
@@ -1349,7 +1347,7 @@ void CreatureEventAI::UpdateAI(const uint32 diff)
     }
 
     // Melee Auto-Attack (recheck m_creature->getVictim in case of combat state was changed while processing events)
-    if (Combat && m_MeleeEnabled && m_creature->getVictim())
+    if (pVictim && m_MeleeEnabled && m_creature->getVictim())
         DoMeleeAttackIfReady();
 }
 

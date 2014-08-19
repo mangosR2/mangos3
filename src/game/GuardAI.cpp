@@ -97,15 +97,23 @@ void GuardAI::EnterEvadeMode()
     i_victimGuid.Clear();
     m_creature->CombatStop(true);
     i_state = STATE_NORMAL;
+
+    // Remove ChaseMovementGenerator from MotionMaster stack list, and add HomeMovementGenerator instead
+    if (m_creature->IsInUnitState(UNIT_ACTION_CHASE))
+        m_creature->GetUnitStateMgr().DropAction(UNIT_ACTION_CHASE);
+
+    if (!m_creature->GetVehicle())
+        m_creature->GetMotionMaster()->MoveTargetedHome();
 }
 
 void GuardAI::UpdateAI(const uint32 /*diff*/)
 {
     // update i_victimGuid if i_creature.getVictim() !=0 and changed
-    if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+    Unit* pVictim = SelectVictim();
+    if (!pVictim)
         return;
 
-    i_victimGuid = m_creature->getVictim()->GetObjectGuid();
+    i_victimGuid = pVictim->GetObjectGuid();
 
     DoMeleeAttackIfReady();
 }

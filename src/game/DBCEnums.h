@@ -514,7 +514,7 @@ enum VehicleSeatFlags
     SEAT_FLAG_UNK15                 = 0x00020000,
     SEAT_FLAG_UNK16                 = 0x00040000,           // "HasVehicleExitAnimForVoluntaryExit"
     SEAT_FLAG_UNK17                 = 0x00080000,           // "HasVehicleExitAnimForForcedExit"
-    SEAT_FLAG_UNK18                 = 0x00100000,
+    SEAT_FLAG_NOT_SELECTABLE        = 0x00100000,
     SEAT_FLAG_UNK19                 = 0x00200000,
     SEAT_FLAG_UNK20                 = 0x00400000,           // "RecHasVehicleEnterAnim"
     SEAT_FLAG_UNK21                 = 0x00800000,
@@ -540,6 +540,7 @@ enum VehicleSeatFlagsB
     VEHICLE_SEAT_FLAG_B_USABLE_FORCED_2          = 0x00000040,
     VEHICLE_SEAT_FLAG_B_UNK6                     = 0x00000080,
     VEHICLE_SEAT_FLAG_B_USABLE_FORCED_3          = 0x00000100,
+    VEHICLE_SEAT_FLAG_B_KEEP_PET                 = 0x00020000,
     VEHICLE_SEAT_FLAG_B_EJECTABLE_FORCED         = 0x00200000,           // seats for forced eject? 27 seats at 3.3.5a
     VEHICLE_SEAT_FLAG_B_USABLE_FORCED_4          = 0x02000000,
     VEHICLE_SEAT_FLAG_B_CANSWITCH                = 0x04000000,           // can switch seats

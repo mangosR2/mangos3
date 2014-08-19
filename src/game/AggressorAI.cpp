@@ -27,8 +27,7 @@
 
 #include <list>
 
-int
-AggressorAI::Permissible(const Creature* creature)
+int AggressorAI::Permissible(const Creature* creature)
 {
     // have some hostile factions, it will be selected by IsHostileTo check at MoveInLineOfSight
     if (!creature->IsCivilian() && !creature->IsNeutralToAll())
@@ -41,15 +40,14 @@ AggressorAI::AggressorAI(Creature* c) : CreatureAI(c), i_state(STATE_NORMAL), i_
 {
 }
 
-void
-AggressorAI::MoveInLineOfSight(Unit* u)
+void AggressorAI::MoveInLineOfSight(Unit* u)
 {
     // Ignore Z for flying creatures
     if (!m_creature->CanFly() && m_creature->GetDistanceZ(u) > CREATURE_Z_ATTACK_RANGE)
         return;
 
     if (m_creature->CanInitiateAttack() && u->isTargetableForAttack() &&
-            m_creature->IsHostileTo(u) && u->isInAccessablePlaceFor(m_creature))
+        m_creature->IsHostileTo(u) && u->isInAccessablePlaceFor(m_creature))
     {
         float attackRadius = m_creature->GetAttackDistance(u);
         if (m_creature->IsWithinDistInMap(u, attackRadius) && m_creature->IsWithinLOSInMap(u))
@@ -111,7 +109,8 @@ void AggressorAI::EnterEvadeMode()
         if (m_creature->IsInUnitState(UNIT_ACTION_CHASE))
             m_creature->GetUnitStateMgr().DropAction(UNIT_ACTION_CHASE);
 
-        m_creature->GetMotionMaster()->MoveTargetedHome();
+        if (!m_creature->GetVehicle())
+            m_creature->GetMotionMaster()->MoveTargetedHome();
     }
 
     m_creature->DeleteThreatList();
@@ -120,27 +119,25 @@ void AggressorAI::EnterEvadeMode()
     m_creature->SetLootRecipient(NULL);
 }
 
-void
-AggressorAI::UpdateAI(const uint32 /*diff*/)
+void AggressorAI::UpdateAI(const uint32 /*diff*/)
 {
-    // update i_victimGuid if m_creature->getVictim() !=0 and changed
-    if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+    // update i_victimGuid if m_creature->getVictim() != 0 and changed
+    Unit* pVictim = SelectVictim();
+    if (!pVictim)
         return;
 
-    i_victimGuid = m_creature->getVictim()->GetObjectGuid();
+    i_victimGuid = pVictim->GetObjectGuid();
 
     DoMeleeAttackIfReady();
 }
 
-bool
-AggressorAI::IsVisible(Unit* pl) const
+bool AggressorAI::IsVisible(Unit* pl) const
 {
-    return m_creature->IsWithinDist(pl, sWorld.getConfig(CONFIG_FLOAT_SIGHT_MONSTER))
-           && pl->isVisibleForOrDetect(m_creature, m_creature, true);
+    return m_creature->IsWithinDist(pl, sWorld.getConfig(CONFIG_FLOAT_SIGHT_MONSTER)) &&
+        pl->isVisibleForOrDetect(m_creature, m_creature, true);
 }
 
-void
-AggressorAI::AttackStart(Unit* u)
+void AggressorAI::AttackStart(Unit* u)
 {
     if (!u || !m_creature->CanAttackByItself())
         return;

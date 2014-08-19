@@ -34,10 +34,10 @@ struct VehicleEntry;
 
 struct VehicleSeat
 {
-    VehicleSeat(VehicleSeatEntry const* pSeatInfo = NULL) : seatInfo(pSeatInfo), passenger(ObjectGuid()), b_dismount(true) {}
+    VehicleSeat(VehicleSeatEntry const* pSeatInfo = NULL) : seatInfo(pSeatInfo), passengerGuid(ObjectGuid()), b_dismount(true) {}
 
     VehicleSeatEntry const* seatInfo;
-    ObjectGuid              passenger;
+    ObjectGuid              passengerGuid;
     bool IsProtectPassenger() const;
     bool b_dismount:1;
 };

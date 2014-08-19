@@ -146,7 +146,7 @@ enum Target
 
     TARGET_T_END,
 
-    //Vehicle-based targets (NULL if owner/target vehicle)
+    // Vehicle-based targets (NULL if owner/target vehicle)
     TARGET_T_VEHICLE_PASSENGER = 50,                        // First current passenger (NULL if not vehicle or not passenger)
     TARGET_T_VEHICLE_PASSENGER_0,                           // Passenger on seat 0 (NULL if not vehicle or not passenger)
     TARGET_T_VEHICLE_PASSENGER_1,                           // Passenger on seat 1 (NULL if not vehicle or not passenger)
@@ -637,9 +637,9 @@ class MANGOS_DLL_SPEC CreatureEventAI : public CreatureAI
             m_CreatureEventAIList.clear();
         }
 
-        void GetAIInformation(ChatHandler& reader);
+        void GetAIInformation(ChatHandler& reader) override;
 
-        void JustRespawned();
+        void JustRespawned() override;
         void Reset();
         void JustReachedHome() override;
         void EnterCombat(Unit* enemy) override;
