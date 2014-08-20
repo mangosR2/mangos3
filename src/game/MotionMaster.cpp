@@ -336,31 +336,25 @@ bool MotionMaster::empty()
 
 void MotionMaster::MoveJump(float x, float y, float z, float horizontalSpeed, float max_height, uint32 id)
 {
-    Movement::MoveSplineInit<Unit*> init(*m_owner);
-    init.MoveTo(x, y, z);
-    init.SetParabolic(max_height, 0);
-    init.SetVelocity(horizontalSpeed);
-    init.Launch();
-    Mutate(new EffectMovementGenerator(id), UNIT_ACTION_EFFECT);
+    if (horizontalSpeed <= 0.1f)
+        return;
+
+    Mutate(new JumpMovementGenerator(x, y, z, horizontalSpeed, max_height, id), UNIT_ACTION_EFFECT);
 }
 
-void MotionMaster::MoveToDestination(float x, float y, float z, float o, Unit* target, float horizontalSpeed, float max_height, uint32 id)
+void MotionMaster::MoveToDestination(float x, float y, float z, float o, Unit* target, float horizontalSpeed, float max_height, uint32 id, bool straightLine /*=false*/)
 {
-    Movement::MoveSplineInit<Unit*> init(*m_owner);
-    init.MoveTo(x, y, z, bool(target), bool(target));
-    if (max_height > M_NULL_F)
-        init.SetParabolic(max_height, 0);
-    init.SetVelocity(horizontalSpeed);
-    if (target)
-        init.SetFacing(target);
-    else
-        init.SetFacing(o);
-    init.Launch();
-    Mutate(new EffectMovementGenerator(id), UNIT_ACTION_EFFECT);
+    if (horizontalSpeed <= 0.1f)
+        return;
+
+    Mutate(new MoveToDestMovementGenerator(x, y, z, o, target, horizontalSpeed, max_height, id, straightLine), UNIT_ACTION_EFFECT);
 }
 
 void MotionMaster::MoveSkyDiving(float x, float y, float z, float o, float horizontalSpeed, float max_height, bool eject)
 {
+    if (horizontalSpeed <= 0.1f)
+        return;
+
     Movement::MoveSplineInit<Unit*> init(*m_owner);
     init.MoveTo(x, y, z, false, true);
     init.SetParabolic(max_height, 0);
@@ -374,6 +368,9 @@ void MotionMaster::MoveSkyDiving(float x, float y, float z, float o, float horiz
 
 void MotionMaster::MoveBoardVehicle(float x, float y, float z, float o, float horizontalSpeed, float max_height)
 {
+    if (horizontalSpeed <= 0.1f)
+        return;
+
     Movement::MoveSplineInit<Unit*> init(*m_owner);
     init.MoveTo(x, y, z, false, true);
     init.SetParabolic(max_height, 0);
@@ -387,11 +384,7 @@ void MotionMaster::MoveBoardVehicle(float x, float y, float z, float o, float ho
 
 void MotionMaster::MoveWithSpeed(float x, float y, float z, float speed, bool generatePath, bool forceDestination)
 {
-    Movement::MoveSplineInit<Unit*> init(*m_owner);
-    init.MoveTo(x, y, z, generatePath, forceDestination);
-    init.SetVelocity(speed);
-    init.Launch();
-    Mutate(new EffectMovementGenerator(0), UNIT_ACTION_EFFECT);
+    Mutate(new MoveWithSpeedMovementGenerator(x, y, z, speed, generatePath, forceDestination), UNIT_ACTION_EFFECT);
 }
 
 void MotionMaster::MoveFall()

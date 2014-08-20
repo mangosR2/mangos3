@@ -30,7 +30,7 @@ class Unit;
 // Creature Entry ID used for waypoints show, visible only for GMs
 #define VISUAL_WAYPOINT 1
 
-class MANGOS_DLL_SPEC MotionMaster 
+class MANGOS_DLL_SPEC MotionMaster
 {
     public:
 
@@ -55,7 +55,7 @@ class MANGOS_DLL_SPEC MotionMaster
         void MoveWaypoint();
         void MoveDistract(uint32 timeLimit);
         void MoveJump(float x, float y, float z, float horizontalSpeed, float max_height, uint32 id = 0);
-        void MoveToDestination(float x, float y, float z, float o, Unit* target, float horizontalSpeed, float max_height, uint32 id = 0);
+        void MoveToDestination(float x, float y, float z, float o, Unit* target, float horizontalSpeed, float max_height, uint32 id = 0, bool straightLine = false);
         void MoveSkyDiving(float x, float y, float z, float o, float horizontalSpeed, float max_height, bool eject = false);
         void MoveBoardVehicle(float x, float y, float z, float o, float horizontalSpeed, float max_height);
         void MoveWithSpeed(float x, float y, float z, float speed, bool generatePath = true, bool forceDestination = false);
@@ -77,8 +77,8 @@ class MANGOS_DLL_SPEC MotionMaster
     private:
         void Mutate(MovementGenerator* mgen, UnitActionId slot);                  // use Move* functions instead
 
-        Unit*       m_owner;
-        uint8       m_cleanFlag;
+        Unit* m_owner;
+        uint8 m_cleanFlag;
 };
 
 #define DEFAULT_WALK_SPEED 24.0f

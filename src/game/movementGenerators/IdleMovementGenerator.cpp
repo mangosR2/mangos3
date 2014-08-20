@@ -22,36 +22,30 @@
 
 IdleMovementGenerator si_idleMovement;
 
-void
-IdleMovementGenerator::Reset(Unit& /*owner*/)
+void IdleMovementGenerator::Reset(Unit& /*owner*/)
 {
 }
 
-void
-DistractMovementGenerator::Initialize(Unit& owner)
+void DistractMovementGenerator::Initialize(Unit& owner)
 {
     owner.addUnitState(UNIT_STAT_DISTRACTED);
 }
 
-void
-DistractMovementGenerator::Finalize(Unit& owner)
+void DistractMovementGenerator::Finalize(Unit& owner)
 {
     owner.clearUnitState(UNIT_STAT_DISTRACTED);
 }
 
-void
-DistractMovementGenerator::Reset(Unit& owner)
+void DistractMovementGenerator::Reset(Unit& owner)
 {
     Initialize(owner);
 }
 
-void
-DistractMovementGenerator::Interrupt(Unit& /*owner*/)
+void DistractMovementGenerator::Interrupt(Unit& /*owner*/)
 {
 }
 
-bool
-DistractMovementGenerator::Update(Unit& /*owner*/, const uint32& time_diff)
+bool DistractMovementGenerator::Update(Unit& /*owner*/, const uint32& time_diff)
 {
     if (time_diff > m_timer)
         return false;
@@ -60,8 +54,7 @@ DistractMovementGenerator::Update(Unit& /*owner*/, const uint32& time_diff)
     return true;
 }
 
-void
-AssistanceDistractMovementGenerator::Finalize(Unit& unit)
+void AssistanceDistractMovementGenerator::Finalize(Unit& unit)
 {
     unit.clearUnitState(UNIT_STAT_DISTRACTED);
     unit.AddEvent(new AttackResumeEvent(unit), ATTACK_DISPLAY_DELAY);

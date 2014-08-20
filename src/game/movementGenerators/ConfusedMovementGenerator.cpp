@@ -62,6 +62,10 @@ void ConfusedMovementGenerator<T>::Reset(T& unit)
 template<class T>
 bool ConfusedMovementGenerator<T>::Update(T& unit, const uint32& diff)
 {
+    // ignore in case other no reaction state
+    if (unit.hasUnitState(UNIT_STAT_CAN_NOT_REACT & ~UNIT_STAT_CONFUSED))
+        return true;
+
     if (i_nextMoveTime.Passed())
     {
         // currently moving, update location
@@ -79,9 +83,8 @@ bool ConfusedMovementGenerator<T>::Update(T& unit, const uint32& diff)
             // start moving
             unit.addUnitState(UNIT_STAT_CONFUSED_MOVE);
 
-            float x,y,z;
+            float x, y, z;
             unit.GetNearPoint(&unit, x, y, z, unit.GetObjectBoundingRadius(), 10.0f, rand_norm_f() * M_PI_F * 2.0f);
-
             unit.UpdateAllowedPositionZ(x, y, z);
 
             PathFinder path(&unit);
