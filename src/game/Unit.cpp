@@ -12776,8 +12776,17 @@ void Unit::StopMoving(bool ignoreMoveState/*=false*/)
         return;
 
     Movement::MoveSplineInit<Unit*> init(*this);
-    init.SetFacing(GetOrientation());
-    init.Launch();
+
+    if (ignoreMoveState)
+    {
+        init.SetWalk(true);
+        init.SetFacing(GetOrientation());
+        init.Launch();
+    }
+    else
+    {
+        init.Stop();
+    }
 }
 
 void Unit::InterruptMoving(bool ignoreMoveState /*=false*/)
