@@ -1123,6 +1123,8 @@ void World::LoadConfigSettings(bool reload)
     // Anounce reset of instance to whole party
     setConfig(CONFIG_BOOL_INSTANCES_RESET_GROUP_ANNOUNCE,  "InstancesResetAnnounce", false);
 
+    setConfig(CONFIG_BOOL_PATH_FIND_OPTIMIZE, "PathFinder.OptimizePath", true);
+
     setConfigMinMax(CONFIG_FLOAT_MELEE_DIST_ADDITION, "Melee.Distance.Addition", 4.0f, 0.0f, 10.0f);
 
     setConfigMinMax(CONFIG_UINT32_FIX_MOVE_PACKETS_METHOD, "Player.FixMovementPackets.Method", 0, 0, 2);

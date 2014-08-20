@@ -54,7 +54,8 @@ enum PathType
     PATHFIND_SHORTCUT       = 0x0002,   // travel through obstacles, terrain, air, etc (old behavior)
     PATHFIND_INCOMPLETE     = 0x0004,   // we have partial path to follow - getting closer to target
     PATHFIND_NOPATH         = 0x0008,   // no valid path at all or error in generating one
-    PATHFIND_NOT_USING_PATH = 0x0010    // used when we are either flying/swiming or on map w/o mmaps
+    PATHFIND_NOT_USING_PATH = 0x0010,   // used when we are either flying/swiming or on map w/o mmaps
+    PATHFIND_SHORT          = 0x0020,   // path is longer or equal to its limited path length
 };
 
 class PathFinder
@@ -65,7 +66,7 @@ class PathFinder
 
         // Calculate the path from owner to given destination
         // return: true if new path was calculated, false otherwise (no change needed)
-        bool calculate(float destX, float destY, float destZ, bool forceDest = false);
+        bool calculate(float destX, float destY, float destZ, bool forceDest = false, bool straightLine = false);
 
         // option setters - use optional
         void setUseStrightPath(bool useStraightPath) { m_useStraightPath = useStraightPath; };
@@ -89,6 +90,7 @@ class PathFinder
 
         bool           m_useStraightPath;  // type of path will be generated
         bool           m_forceDestination; // when set, we will always arrive at given point
+        bool           m_straightLine;     // use raycast if true for a straight line path
         uint32         m_pointPathLimit;   // limit point path size; min(this, MAX_POINT_PATH_LENGTH)
 
         Vector3        m_startPosition;    // {x, y, z} of current location
