@@ -36,7 +36,7 @@ void PointMovementGenerator<T>::Initialize(T& unit)
     unit.StopMoving();
 
     unit.addUnitState(UNIT_STAT_ROAMING | UNIT_STAT_ROAMING_MOVE);
-    Movement::MoveSplineInit init(unit);
+    Movement::MoveSplineInit<Unit*> init(unit);
     init.MoveTo(m_x, m_y, m_z, m_generatePath);
     init.Launch();
 }
