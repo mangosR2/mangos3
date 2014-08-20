@@ -73,12 +73,12 @@ namespace Movement
              * @param path - array of points, shouldn't be empty
              * @param pointId - Id of fisrt point of the path. Example: when third path point will be done it will notify that pointId + 3 done
              */
-            void MovebyPath(const PointsArray& path, int32 pointId = 0);
+            void MovebyPath(PointsArray const& path, int32 pointId = 0);
 
             /* Initializes simple A to B mition, A is current unit's position, B is destination
              */
-            void MoveTo(const Vector3& destination, bool generatePath = false, bool forceDestination = false);
-            void MoveTo(float x, float y, float z, bool generatePath = false, bool forceDestination = false);
+            void MoveTo(Vector3 const& destination, bool generatePath = false, bool forceDestination = false, bool straightLine = false);
+            void MoveTo(float x, float y, float z, bool generatePath = false, bool forceDestination = false, bool straightLine = false);
 
             /* Sets Id of fisrt point of the path. When N-th path point will be done ILisener will notify that pointId + N done
              * Needed for waypoint movement where path splitten into parts
@@ -147,24 +147,24 @@ namespace Movement
     inline void MoveSplineInit<Unit*>::SetBoardVehicle() { args.flags.EnableBoardVehicle(); }
     inline void MoveSplineInit<Unit*>::SetExitVehicle() { args.flags.EnableExitVehicle(); }
 
-    inline void MoveSplineInit<Unit*>::MovebyPath(const PointsArray& controls, int32 path_offset)
+    inline void MoveSplineInit<Unit*>::MovebyPath(PointsArray const& controls, int32 path_offset)
     {
         args.path_Idx_offset = path_offset;
         args.path.assign(controls.begin(), controls.end());
     }
 
-    inline void MoveSplineInit<Unit*>::MoveTo(float x, float y, float z, bool generatePath, bool forceDestination)
+    inline void MoveSplineInit<Unit*>::MoveTo(float x, float y, float z, bool generatePath, bool forceDestination, bool straightLine)
     {
         Vector3 v(x, y, z);
-        MoveTo(v, generatePath, forceDestination);
+        MoveTo(v, generatePath, forceDestination, straightLine);
     }
 
-    inline void MoveSplineInit<Unit*>::MoveTo(const Vector3& dest, bool generatePath, bool forceDestination)
+    inline void MoveSplineInit<Unit*>::MoveTo(const Vector3& dest, bool generatePath, bool forceDestination, bool straightLine)
     {
         if (generatePath)
         {
             PathFinder path(&unit);
-            path.calculate(dest.x, dest.y, dest.z, forceDestination);
+            path.calculate(dest.x, dest.y, dest.z, forceDestination, straightLine);
             MovebyPath(path.getPath());
         }
         else
@@ -184,7 +184,7 @@ namespace Movement
 
     inline void MoveSplineInit<Unit*>::SetAnimation(AnimType anim)
     {
-        args.time_perc = 0.f;
+        args.time_perc = 0.0f;
         args.flags.EnableAnimation((uint8)anim);
     }
 

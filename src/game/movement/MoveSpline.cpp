@@ -25,7 +25,7 @@ namespace Movement
 {
 
     extern float computeFallTime(float path_length, bool isSafeFall);
-    extern float computeFallElevation(float time_passed, bool isSafeFall, float start_velocy);
+    extern float computeFallElevation(float time_passed, bool isSafeFall, float start_velocity);
     extern float computeFallElevation(float time_passed);
 
     Position MoveSpline::ComputePosition() const
@@ -173,8 +173,15 @@ namespace Movement
         initialOrientation = args.initialOrientation;
 
         time_passed = 0;
-        vertical_acceleration = 0.f;
+        vertical_acceleration = 0.0f;
         effect_start_time = 0;
+
+        // detect Stop command
+        if (splineflags.done)
+        {
+            spline.clear();
+            return;
+        }
 
         init_spline(args);
 
@@ -208,14 +215,14 @@ namespace Movement
         return false;\
     }
         CHECK(path.size() > 1);
-        CHECK(velocity > 0.f);
-        CHECK(time_perc >= 0.f && time_perc <= 1.f);
+        CHECK(velocity > 0.0f);
+        CHECK(time_perc >= 0.0f && time_perc <= 1.0f);
         // CHECK(_checkPathBounds());
         return true;
 #undef CHECK
     }
 
-    // MONSTER_MOVE packet format limitation for not CatmullRom movement:   
+    // MONSTER_MOVE packet format limitation for not CatmullRom movement:
     // each vertex offset packed into 11 bytes
     bool MoveSplineInitArgs::_checkPathBounds() const
     {
@@ -270,7 +277,7 @@ namespace Movement
                 {
                     point_Idx = spline.first();
                     time_passed = time_passed % Duration();
-                    result = Result_NextSegment;
+                    result = Result_NextCycle;
                 }
                 else
                 {

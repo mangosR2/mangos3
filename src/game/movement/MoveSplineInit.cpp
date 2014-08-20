@@ -27,7 +27,7 @@ namespace Movement
 {
     UnitMoveType SelectSpeedType(uint32 moveFlags)
     {
-        if (moveFlags & MOVEFLAG_FLYING)
+        if (moveFlags & (MOVEFLAG_FLYING | MOVEFLAG_LEVITATING))
         {
             if (moveFlags & MOVEFLAG_BACKWARD /*&& speed_obj.flight >= speed_obj.flight_back*/)
                 return MOVE_FLIGHT_BACK;
@@ -57,9 +57,9 @@ namespace Movement
         MoveSpline& move_spline = *unit.movespline;
         TransportInfo* transportInfo = unit.GetTransportInfo();
 
-        Position real_position = transportInfo ?
-                                    transportInfo->GetLocalPosition() :
-                                    unit.GetPosition();
+        Position real_position = transportInfo
+            ? transportInfo->GetLocalPosition()
+            : unit.GetPosition();
 
         // there is a big chane that current position is unknown if current state is not finalized, need compute it
         // this also allows calculate spline position and update map position in much greater intervals
@@ -127,6 +127,8 @@ namespace Movement
 
     MoveSplineInit<Unit*>::MoveSplineInit(Unit& m) : unit(m)
     {
+        args.splineId = splineIdGen.NewId();
+
         // mix existing state into new
         args.flags.walkmode = unit.m_movementInfo.HasMovementFlag(MOVEFLAG_WALK_MODE);
         args.flags.flying = unit.m_movementInfo.HasMovementFlag((MovementFlags)(MOVEFLAG_FLYING | MOVEFLAG_LEVITATING));
@@ -140,12 +142,13 @@ namespace Movement
 
     void MoveSplineInit<Unit*>::SetFacing(float angle)
     {
-        args.facing.angle = G3D::wrap(angle, 0.f, (float)G3D::twoPi());
+        args.facing.angle = G3D::wrap(angle, 0.0f, (float)G3D::twoPi());
         args.flags.EnableFacingAngle();
     }
 
     MoveSplineInit<GameObject*>::MoveSplineInit(GameObject& go) : gameobject(go)
     {
+        args.splineId = splineIdGen.NewId();
     }
 
     int32 MoveSplineInit<GameObject*>::Launch()
@@ -153,9 +156,9 @@ namespace Movement
         MoveSpline& move_spline = *gameobject.movespline;
         TransportInfo* transportInfo = gameobject.GetTransportInfo();
 
-        Position real_position = transportInfo ?
-                                    transportInfo->GetLocalPosition() :
-                                    gameobject.GetPosition();
+        Position real_position = transportInfo
+            ? transportInfo->GetLocalPosition()
+            : gameobject.GetPosition();
 
         // there is a big chane that current position is unknown if current state is not finalized, need compute it
         // this also allows calculate spline position and update map position in much greater intervals

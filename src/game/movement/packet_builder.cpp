@@ -18,7 +18,7 @@
 
 #include "packet_builder.h"
 #include "MoveSpline.h"
-#include "WorldPacket.h"
+#include "ByteBuffer.h"
 
 namespace Movement
 {
@@ -32,16 +32,7 @@ namespace Movement
         b >> v.x >> v.y >> v.z;
     }
 
-    enum MonsterMoveType
-    {
-        MonsterMoveNormal       = 0,
-        MonsterMoveStop         = 1,
-        MonsterMoveFacingSpot   = 2,
-        MonsterMoveFacingTarget = 3,
-        MonsterMoveFacingAngle  = 4
-    };
-
-    void PacketBuilder::WriteCommonMonsterMovePart(const MoveSpline& move_spline, WorldPacket& data)
+    void PacketBuilder::WriteCommonMonsterMovePart(const MoveSpline& move_spline, ByteBuffer& data)
     {
         MoveSplineFlag splineflags = move_spline.splineflags;
 
@@ -129,7 +120,7 @@ namespace Movement
         data.append<Vector3>(&spline.getPoint(1), count);
     }
 
-    void PacketBuilder::WriteMonsterMove(const MoveSpline& move_spline, WorldPacket& data)
+    void PacketBuilder::WriteMonsterMove(const MoveSpline& move_spline, ByteBuffer& data)
     {
         WriteCommonMonsterMovePart(move_spline, data);
 
@@ -173,8 +164,8 @@ namespace Movement
             data << move_spline.Duration();
             data << move_spline.GetId();
 
-            data << float(1.f);                             // splineInfo.duration_mod; added in 3.1
-            data << float(1.f);                             // splineInfo.duration_mod_next; added in 3.1
+            data << float(1.0f);                            // splineInfo.duration_mod; added in 3.1
+            data << float(1.0f);                            // splineInfo.duration_mod_next; added in 3.1
 
             data << move_spline.vertical_acceleration;      // added in 3.1
             data << move_spline.effect_start_time;          // added in 3.1
