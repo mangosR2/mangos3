@@ -10760,21 +10760,6 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     m_caster->CastSpell(unitTarget, 61828, true);
                     break;
                 }
-                case 62003:                                 // Algalon - Black Hole Spawn
-                {
-                    if (!unitTarget)
-                        return;
-
-                    // Apply aura which causes black hole phase/1 sec to hostile targets
-                    unitTarget->CastSpell(m_caster, 62185, true);
-                }
-                case 62168:                                 // Algalon - Black Hole Damage
-                {
-                    if (!unitTarget)
-                        return;
-                    unitTarget->CastSpell(unitTarget, 62169, true);
-                    return;
-                }
                 case 62536:                                 // Frog Kiss (quest Blade fit for a champion)
                 {
                     if (!unitTarget)
@@ -10818,13 +10803,12 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     }
                     break;
                 }
-                case 63122:                                 // Clear Insane (Ulduar - Yogg Saron)
+                case 63122:                                 // Clear Insane
                 {
-                    if (!unitTarget)
+                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
                         return;
 
-                    unitTarget->RemoveAurasDueToSpell(63050);
-                    unitTarget->RemoveAurasDueToSpell(63120);
+                    unitTarget->RemoveAurasDueToSpell(m_spellInfo->CalculateSimpleValue(eff_idx));
                     return;
                 }
                 case 63633:                                 // Summon Rubble (Kologarn)
@@ -10871,8 +10855,7 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                             {
                                 if (unitTarget->GetPositionZ() > 245.0f)
                                     return;
-                                stacks = -100;
-                                break;
+                                stacks = -100; break;
                             }
                         }
                         int32 stackAmount = holder->GetStackAmount() + stacks;
@@ -10888,14 +10871,13 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     }
                     return;
                 }
-                case 64122:
-                case 65108:                                 // Algalon - Collapsing start explosion to summon black hole
+                case 63122:                                 // Clear Insane (Ulduar - Yogg Saron)
                 {
                     if (!unitTarget)
                         return;
 
-                    // Cast Black hole spawn
-                    m_caster->CastSpell(m_caster, 62189, true);
+                    unitTarget->RemoveAurasDueToSpell(63050);
+                    unitTarget->RemoveAurasDueToSpell(63120);
                     return;
                 }
                 case 64123:                                 // Lunge (Ulduar - Yogg Saron)
@@ -10933,6 +10915,31 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                         return;
 
                     unitTarget->RemoveAurasDueToSpell(m_spellInfo->EffectBasePoints[eff_idx]);
+                    return;
+                }
+                case 62003:                                 // Algalon - Black Hole Spawn
+                {
+                    if (!unitTarget)
+                        return;
+
+                    // Apply aura which causes black hole phase/1 sec to hostile targets
+                    unitTarget->CastSpell(m_caster, 62185, true);
+                }
+                case 62168:                                 // Algalon - Black Hole Damage
+                {
+                    if (!unitTarget)
+                        return;
+                    unitTarget->CastSpell(unitTarget, 62169, true);
+                    return;
+                }
+                case 64122:
+                case 65108:                                 // Algalon - Collapsing start explosion to summon black hole
+                {
+                    if (!unitTarget)
+                        return;
+
+                    // Cast Black hole spawn
+                    m_caster->CastSpell(m_caster, 62189, true);
                     return;
                 }
                 case 65044:                                 // Flames Ulduar
@@ -10992,6 +10999,33 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     m_caster->CastSpell(unitTarget, 63036, true);
                     return;
                 }
+                case 63795:                                 // Psychosis
+                case 65301:                                 // Psychosis (h)
+                {
+                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER || unitTarget->HasAura(m_spellInfo->CalculateSimpleValue(eff_idx)))
+                        return;
+
+                    unitTarget->RemoveAuraHolderFromStack(63050, 12);
+                    return;
+                }
+                case 63803:                                 // Brain Link
+                case 64164:                                 // Lunatic Gaze (Yogg)
+                case 64168:                                 // Lunatic Gaze (Skull)
+                {
+                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
+                        return;
+
+                    uint8 removedAmount = 0;
+                    switch (m_spellInfo->Id)
+                    {
+                        case 63803: removedAmount = 2; break;
+                        case 64164: removedAmount = 4; break;
+                        case 64168: removedAmount = 2; break;
+                    }
+
+                    unitTarget->RemoveAuraHolderFromStack(63050, removedAmount);
+                    return;
+                }
                 case 63993:                                 // Cancel Illusion Room Aura
                 {
                     if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
@@ -10999,6 +11033,14 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
 
                     unitTarget->CastSpell(unitTarget, 63992, true);
                     unitTarget->RemoveAurasDueToSpell(m_spellInfo->CalculateSimpleValue(eff_idx));
+                    return;
+                }
+                case 64059:                                 // Induce Madness
+                {
+                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER || !unitTarget->HasAura(m_spellInfo->CalculateSimpleValue(eff_idx)))
+                        return;
+
+                    unitTarget->RemoveAurasDueToSpell(63050);
                     return;
                 }
                 case 64069:                                 // Match Health (Rank 1)
