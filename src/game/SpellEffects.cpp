@@ -10900,32 +10900,11 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                 }
                 case 64123:                                 // Lunge (Ulduar - Yogg Saron)
                 {
-                    if (!unitTarget)
-                        return;
+                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
+                    return;
 
-                    uint32 spellid = 0;
-                    unitTarget->GetMap()->IsRegularDifficulty() ? spellid = 64125 : spellid = 64126;
-                    unitTarget->CastSpell(unitTarget, spellid, true);
-                    break;
-                }
-                case 64466:                                 // Empowering Shadows (Ulduar - Yogg Saron)
-                {
-                    if (!unitTarget)
-                        return;
-
-                    // effect back to caster (Immortal Guardian)
-                    unitTarget->CastSpell(m_caster, 64467, true);
-                    break;
-                }
-                case 64467:                                 // Empowering Shadows (Ulduar - Yogg Saron)
-                {
-                    if (!unitTarget)
-                        return;
-
-                    uint32 spellid = 0;
-                    unitTarget->GetMap()->IsRegularDifficulty() ? spellid = 64468 : spellid = 64469;
-                    unitTarget->CastSpell(unitTarget, spellid, true);
-                    break;
+                    unitTarget->CastSpell(unitTarget, unitTarget->GetMap()->IsRegularDifficulty() ? 64125 : 64126, true);
+                    return;
                 }
                 case 65238:                                 // Shattered Illusion (Ulduar - Yogg Saron)
                 {
@@ -11009,14 +10988,6 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     unitTarget->SetHealthPercent(m_caster->GetHealthPercent());
                     return;
                 }
-                case 64123:                                 // Lunge
-                {
-                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
-                    return;
-
-                    unitTarget->CastSpell(unitTarget, unitTarget->GetMap()->IsRegularDifficulty() ? 64125 : 64126, true);
-                    return;
-                }
                 case 64131:                                 // Lunge
                 {
                     if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
@@ -11095,14 +11066,6 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                         return;
 
                     unitTarget->CastSpell(m_caster, 63382, false);
-                    return;
-                }
-                case 65238:                                 // Shattered Illusion
-                {
-                    if (!unitTarget)
-                        return;
-
-                    unitTarget->RemoveAurasDueToSpell(m_spellInfo->CalculateSimpleValue(eff_idx));
                     return;
                 }
                 case 66477:                                 // Bountiful Feast
