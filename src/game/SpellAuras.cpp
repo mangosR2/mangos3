@@ -5295,14 +5295,50 @@ void Aura::HandleAuraModStun(bool apply, bool Real)
         return;
 
     Unit* target = GetTarget();
+    if (!target || target->IsTaxiFlying())
+        return;
 
     if (apply)
     {
+        // don't allow Seduction on CloackOnShadows
+        if (GetId() == 6358 && target->HasAura(31224, EFFECT_INDEX_0))
+            return;
+
+        // remove stealth for set target
+        if (m_spellProto->SpellFamilyName == SPELLFAMILY_ROGUE && m_spellProto->GetSpellFamilyFlags().test<CF_ROGUE_SAP>())
+        {
+            if (target->HasStealthAura())
+                target->RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
+        }
+
         // Frost stun aura -> freeze/unfreeze target
-        if (GetSpellSchoolMask(GetSpellProto()) & SPELL_SCHOOL_MASK_FROST)
+        if (GetSpellSchoolMask(m_spellProto) & SPELL_SCHOOL_MASK_FROST)
             target->ModifyAuraState(AURA_STATE_FROZEN, apply);
 
+        target->addUnitState(UNIT_STAT_STUNNED);
+        target->SetTargetGuid(ObjectGuid());
+        target->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED);
+
         target->CastStop(target->GetObjectGuid() == GetCasterGuid() ? GetId() : 0);
+        if (target->hasUnitState(UNIT_STAT_MELEE_ATTACKING))
+            target->SendMeleeAttackStop(NULL);
+
+        if (target->GetTypeId() == TYPEID_PLAYER)
+        {
+            target->SetRoot(true);
+            target->SetStandState(UNIT_STAND_STATE_STAND); // in 1.5 client
+
+            // Clear unit movement flags
+            target->m_movementInfo.SetMovementFlags(MOVEFLAG_NONE);
+        }
+        else
+        {
+            if (target->IsVehicle()) // for player controlled vehicles
+                target->SetRoot(true);
+
+            target->StopMoving();
+        }
+
         target->GetUnitStateMgr().PushAction(UNIT_ACTION_STUN);
 
         switch (GetId())
@@ -5317,7 +5353,7 @@ void Aura::HandleAuraModStun(bool apply, bool Real)
                         target->RemoveSpellsCausingAura(SPELL_AURA_PERIODIC_DAMAGE_PERCENT);
                     }
                 }
-                break;
+                return;
             }
             case 39837: // Impaling Spine
             {
@@ -5334,29 +5370,42 @@ void Aura::HandleAuraModStun(bool apply, bool Real)
                 else
                     delete pObj;
 
-                break;
+                return;
             }
             case 44572: // Deep Freeze damage part
             {
-                if (target->IsCharmerOrOwnerPlayerOrPlayerItself() || target->IsVehicle())
-                    return;
-
-                if (target->IsImmuneToSpellEffect(GetSpellProto(), EFFECT_INDEX_0))
+                if (!(target->IsCharmerOrOwnerPlayerOrPlayerItself() || target->IsVehicle()) && target->IsImmuneToSpellEffect(m_spellProto, EFFECT_INDEX_0))
                 {
-                    Unit* caster = GetCaster();
-                    if (!caster)
-                        return;
-
-                    caster->CastSpell(target, 71757, true);
+                    if (Unit* pCaster = GetCaster())
+                        pCaster->CastSpell(target, 71757, true);
                 }
-                break;
+                return;
             }
+        }
+
+        // Pound
+        if (m_spellProto->GetSpellIconID() == 66)
+        {
+            Unit* pCaster = GetCaster();
+            if (!pCaster)
+                return;
+
+            uint32 spellId = 0;
+            switch (m_spellProto->Id)
+            {
+                case 53472: spellId = 53509; break;
+                case 59433: spellId = 59432; break;
+                default: return;
+            }
+
+            pCaster->CastSpell(target, spellId, true);
+            return;
         }
     }
     else
     {
         // Frost stun aura -> freeze/unfreeze target
-        if (GetSpellSchoolMask(GetSpellProto()) & SPELL_SCHOOL_MASK_FROST)
+        if (GetSpellSchoolMask(m_spellProto) & SPELL_SCHOOL_MASK_FROST)
         {
             bool found_another = false;
             for (AuraType const* itr = &frozenAuraTypes[0]; *itr != SPELL_AURA_NONE && !found_another; ++itr)
@@ -5364,7 +5413,7 @@ void Aura::HandleAuraModStun(bool apply, bool Real)
                 Unit::AuraList const& auras = target->GetAurasByType(*itr);
                 for (Unit::AuraList::const_iterator i = auras.begin(); i != auras.end(); ++i)
                 {
-                    if (GetSpellSchoolMask((*i)->GetSpellProto()) & SPELL_SCHOOL_MASK_FROST)
+                    if (GetSpellSchoolMask((*i)->m_spellProto) & SPELL_SCHOOL_MASK_FROST)
                     {
                         found_another = true;
                         break;
@@ -5380,9 +5429,11 @@ void Aura::HandleAuraModStun(bool apply, bool Real)
         if (target->HasAuraType(SPELL_AURA_MOD_STUN))
             return;
 
-        target->GetUnitStateMgr().DropAction(UNIT_ACTION_STUN);
+        target->clearUnitState(UNIT_STAT_STUNNED);
+        target->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED);
 
-        if (!target->hasUnitState(UNIT_STAT_ROOT | UNIT_STAT_ON_VEHICLE))       // prevent allow move if have also root effect
+        // prevent allow move if have also root effect
+        if (!target->hasUnitState(UNIT_STAT_ROOT | UNIT_STAT_ON_VEHICLE))
         {
             if (target->isAlive())
             {
@@ -5391,17 +5442,24 @@ void Aura::HandleAuraModStun(bool apply, bool Real)
             }
 
             target->SetRoot(false);
+            target->m_movementInfo.RemoveMovementFlag(MOVEFLAG_ROOT);
+
+            if (target->GetTypeId() != TYPEID_PLAYER)
+                target->AddEvent(new AttackResumeEvent(*target), ATTACK_DISPLAY_DELAY);
         }
+
+        target->GetUnitStateMgr().DropAction(UNIT_ACTION_STUN);
 
         if (GetId() == 6358) // Seduction
         {
             if (Unit* caster = GetCaster())
                 caster->InterruptSpell(CURRENT_CHANNELED_SPELL, false);
+
             return;
         }
 
         // Wyvern Sting
-        if (GetSpellProto()->SpellFamilyName == SPELLFAMILY_HUNTER && GetSpellProto()->GetSpellFamilyFlags().test<CF_HUNTER_WYVERN_STING2>())
+        if (m_spellProto->SpellFamilyName == SPELLFAMILY_HUNTER && m_spellProto->GetSpellFamilyFlags().test<CF_HUNTER_WYVERN_STING2>())
         {
             Unit* caster = GetCaster();
             if (!caster || caster->GetTypeId() != TYPEID_PLAYER)
@@ -5604,32 +5662,53 @@ void Aura::HandleDetectAmore(bool apply, bool /*real*/)
 void Aura::HandleAuraModRoot(bool apply, bool Real)
 {
     // only at real add/remove aura
-    if(!Real)
+    if (!Real)
         return;
 
-    Unit *target = GetTarget();
+    Unit* target = GetTarget();
 
     if (apply)
     {
         // Frost root aura -> freeze/unfreeze target
-        if (GetSpellSchoolMask(GetSpellProto()) & SPELL_SCHOOL_MASK_FROST)
+        if (GetSpellSchoolMask(m_spellProto) & SPELL_SCHOOL_MASK_FROST)
             target->ModifyAuraState(AURA_STATE_FROZEN, apply);
 
-        target->GetUnitStateMgr().PushAction(UNIT_ACTION_ROOT);
+        target->addUnitState(UNIT_STAT_ROOT);
+        target->SetTargetGuid(ObjectGuid());
 
+        // Save last orientation
+        if (Unit* pVictim = target->getVictim())
+            target->SetOrientation(target->GetAngle(pVictim));
+
+        if (target->GetTypeId() == TYPEID_PLAYER)
+        {
+            target->SetRoot(true);
+
+            // Clear unit movement flags
+            target->m_movementInfo.SetMovementFlags(MOVEFLAG_NONE);
+        }
+        else
+        {
+            if (target->IsVehicle()) // for player controlled vehicles
+                target->SetRoot(true);
+
+            target->StopMoving();
+        }
+
+        target->GetUnitStateMgr().PushAction(UNIT_ACTION_ROOT);
     }
     else
     {
         // Frost root aura -> freeze/unfreeze target
-        if (GetSpellSchoolMask(GetSpellProto()) & SPELL_SCHOOL_MASK_FROST)
+        if (GetSpellSchoolMask(m_spellProto) & SPELL_SCHOOL_MASK_FROST)
         {
             bool found_another = false;
-            for(AuraType const* itr = &frozenAuraTypes[0]; *itr != SPELL_AURA_NONE; ++itr)
+            for (AuraType const* itr = &frozenAuraTypes[0]; *itr != SPELL_AURA_NONE; ++itr)
             {
                 Unit::AuraList const& auras = target->GetAurasByType(*itr);
-                for(Unit::AuraList::const_iterator i = auras.begin(); i != auras.end(); ++i)
+                for (Unit::AuraList::const_iterator i = auras.begin(); i != auras.end(); ++i)
                 {
-                    if ( GetSpellSchoolMask((*i)->GetSpellProto()) & SPELL_SCHOOL_MASK_FROST)
+                    if (GetSpellSchoolMask((*i)->m_spellProto) & SPELL_SCHOOL_MASK_FROST)
                     {
                         found_another = true;
                         break;
@@ -5639,7 +5718,7 @@ void Aura::HandleAuraModRoot(bool apply, bool Real)
                     break;
             }
 
-            if(!found_another)
+            if (!found_another)
                 target->ModifyAuraState(AURA_STATE_FROZEN, apply);
         }
 
@@ -5647,9 +5726,29 @@ void Aura::HandleAuraModRoot(bool apply, bool Real)
         if (target->HasAuraType(SPELL_AURA_MOD_ROOT))
             return;
 
+        target->clearUnitState(UNIT_STAT_ROOT);
+
+        // prevent allow move if have also stun effect
+        if (!target->hasUnitState(UNIT_STAT_STUNNED))
+        {
+            if (target->isAlive())
+            {
+                if (Unit* pVictim = target->getVictim())
+                    target->SetTargetGuid(pVictim->GetObjectGuid());
+            }
+
+            if (target->GetTypeId() == TYPEID_PLAYER)
+                target->SetRoot(false);
+
+            target->m_movementInfo.RemoveMovementFlag(MOVEFLAG_ROOT);
+
+            if (target->GetTypeId() != TYPEID_PLAYER)
+                target->AddEvent(new AttackResumeEvent(*target), ATTACK_DISPLAY_DELAY);
+        }
+
         target->GetUnitStateMgr().DropAction(UNIT_ACTION_ROOT);
 
-        if (GetSpellProto()->Id == 70980)                   // Web Wrap (Icecrown Citadel, trash mob Nerub'ar Broodkeeper)
+        if (m_spellProto->Id == 70980)                   // Web Wrap (Icecrown Citadel, trash mob Nerub'ar Broodkeeper)
             target->CastSpell(target, 71010, true);
     }
 }

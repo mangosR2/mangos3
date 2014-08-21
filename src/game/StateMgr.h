@@ -36,16 +36,15 @@ class UnitStateMgr;
 class ActionInfo
 {
 public:
-    ActionInfo(UnitActionId _Id, UnitActionPtr _action, UnitActionPriority _priority, bool _restoreable)
-        : Id(_Id), action(_action), priority(_priority), m_flags(0), restoreable(_restoreable)
-    {}
+    ActionInfo(UnitActionId id, UnitActionPtr action, UnitActionPriority priority, bool restoreable)
+        : m_id(id), m_action(action), m_priority(priority), m_flags(0), m_restoreable(restoreable) {}
 
-    ~ActionInfo() {};
+    ~ActionInfo() {}
 
     bool operator == (ActionInfo& val);
-    bool operator == (UnitActionPtr _action);
+    bool operator == (UnitActionPtr action);
     bool operator != (ActionInfo& val);
-    bool operator != (UnitActionPtr _action);
+    bool operator != (UnitActionPtr action);
 
     void Delete();
     void Reset(UnitStateMgr* mgr);
@@ -53,12 +52,12 @@ public:
     void Finalize(UnitStateMgr* mgr);
     void Interrupt(UnitStateMgr* mgr);
     bool Update(UnitStateMgr* mgr, uint32 diff);
-    UnitActionPtr Action() { return action; };
+    UnitActionPtr Action() { return m_action; };
 
     const char* TypeName() const;
 
-    UnitActionId GetId() const             { return Id; };
-    UnitActionPriority GetPriority() const { return priority; };
+    UnitActionId GetId() const             { return m_id; };
+    UnitActionPriority GetPriority() const { return m_priority; };
 
     uint32 const&  GetFlags();
     void           SetFlags(uint32 flags);
@@ -66,21 +65,20 @@ public:
     void           RemoveFlag(ActionUpdateState state) { m_flags &= ~(1 << state); };
     bool           HasFlag(ActionUpdateState state) const { return (m_flags & (1 << state)); };
 
-    UnitActionId       Id;
-    UnitActionPtr      action;
-    UnitActionPriority priority;
+    UnitActionId       m_id;
+    UnitActionPtr      m_action;
+    UnitActionPriority m_priority;
     uint32             m_flags;
-    bool               restoreable;
+    bool               m_restoreable;
 
-    private:
+private:
     // Don't must be created uninitialized
-    ActionInfo() {};
-//    ActionInfo(ActionInfo const& _action) {};
+    ActionInfo() {}
 };
 
 typedef std::map<UnitActionPriority, ActionInfo> UnitActionStorage;
 
-class UnitStateMgr
+class MANGOS_DLL_SPEC UnitStateMgr
 {
 
 protected:
@@ -110,7 +108,7 @@ public:
     void PushAction(UnitActionId actionId, UnitActionPtr state, UnitActionPriority priority, eActionType restoreable);
 
     ActionInfo* GetAction(UnitActionPriority priority);
-    ActionInfo* GetAction(UnitActionPtr _action);
+    ActionInfo* GetAction(UnitActionPtr action);
     ActionInfo* GetAction(UnitActionId actionId);
 
     UnitActionStorage const& GetActions() { return m_actions; };
@@ -133,7 +131,6 @@ private:
     UnitActionPtr     m_oldAction;
     uint32            m_stateCounter[UNIT_ACTION_END];
     bool              m_needReinit;
-
 };
 
 #endif
