@@ -15018,6 +15018,21 @@ void Aura::HandleInitializeImages(bool apply, bool real)
     }
 }
 
+void Aura::HandlePreventResurrection(bool apply, bool real)
+{
+    if (!real)
+        return;
+
+    Unit* target = GetTarget();
+    if (!target || target->GetTypeId() != TYPEID_PLAYER)
+        return;
+
+    if (apply)
+        target->RemoveByteFlag(PLAYER_FIELD_BYTES, 0, PLAYER_FIELD_BYTE_RELEASE_TIMER);
+    else if (!target->GetMap()->Instanceable())
+        target->SetByteFlag(PLAYER_FIELD_BYTES, 0, PLAYER_FIELD_BYTE_RELEASE_TIMER);
+}
+
 void Aura::HandleModIncreaseSpellPowerPct(bool apply, bool Real)
 {
     if (GetTarget()->GetTypeId() != TYPEID_PLAYER)
@@ -15069,13 +15084,6 @@ void Aura::HandleAuraForceWeather(bool apply, bool Real)
     }
 }
 
-void Aura::HandleAuraPreventResurrection(bool apply, bool Real)
-{
-    if (apply)
-        GetTarget()->RemoveByteFlag(PLAYER_FIELD_BYTES, 0, PLAYER_FIELD_BYTE_RELEASE_TIMER);
-    else if (!GetTarget()->GetMap()->Instanceable())
-        GetTarget()->SetByteFlag(PLAYER_FIELD_BYTES, 0, PLAYER_FIELD_BYTE_RELEASE_TIMER);
-}
 
 void Aura::HandleAuraOverrideActionbarSpells(bool apply, bool Real)
 {

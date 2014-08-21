@@ -169,8 +169,8 @@ void WorldSession::SendAuctionOutbiddedMail(AuctionEntry* auction)
             oldBidder->GetSession()->SendAuctionBidderNotification(auction);
 
         MailDraft(msgAuctionOutbiddedSubject.str(), "")     // TODO: fix body
-        .SetMoney(auction->bid)
-        .SendMailTo(MailReceiver(oldBidder, oldBidder_guid), auction, MAIL_CHECK_MASK_COPIED);
+            .SetMoney(auction->bid)
+            .SendMailTo(MailReceiver(oldBidder, oldBidder_guid), auction, MAIL_CHECK_MASK_COPIED);
     }
 }
 
@@ -194,8 +194,8 @@ void WorldSession::SendAuctionCancelledToBidderMail(AuctionEntry* auction)
             bidder->GetSession()->SendAuctionRemovedNotification(auction);
 
         MailDraft(msgAuctionCancelledSubject.str(), "")     // TODO: fix body
-        .SetMoney(auction->bid)
-        .SendMailTo(MailReceiver(bidder, bidder_guid), auction, MAIL_CHECK_MASK_COPIED);
+            .SetMoney(auction->bid)
+            .SendMailTo(MailReceiver(bidder, bidder_guid), auction, MAIL_CHECK_MASK_COPIED);
     }
 }
 
@@ -247,7 +247,7 @@ void WorldSession::HandleAuctionSellItem(WorldPacket& recv_data)
 
     if (itemCount > MAX_BAG_SIZE * 5)
     {
-        recv_data.rpos(recv_data.wpos());                   // should not happen
+        recv_data.rfinish();                                // prevent warnings spam
         return;
     }
 
@@ -282,9 +282,9 @@ void WorldSession::HandleAuctionSellItem(WorldPacket& recv_data)
     // client understand only 3 auction time
     switch (etime)
     {
-        case 1*MIN_AUCTION_TIME:
-        case 2*MIN_AUCTION_TIME:
-        case 4*MIN_AUCTION_TIME:
+        case 1 * MIN_AUCTION_TIME:
+        case 2 * MIN_AUCTION_TIME:
+        case 4 * MIN_AUCTION_TIME:
             break;
         default:
             return;
@@ -343,7 +343,7 @@ void WorldSession::HandleAuctionSellItem(WorldPacket& recv_data)
         if (GetSecurity() > SEC_PLAYER && sWorld.getConfig(CONFIG_BOOL_GM_LOG_TRADE))
         {
             sLog.outCommand(GetAccountId(), "GM %s (Account: %u) create auction: %s (Entry: %u Count: %u)",
-                            GetPlayerName(), GetAccountId(), it->GetProto()->Name1, it->GetEntry(), it->GetCount());
+                GetPlayerName(), GetAccountId(), it->GetProto()->Name1, it->GetEntry(), it->GetCount());
         }
 
         if (stackSize == 0)
@@ -364,7 +364,7 @@ void WorldSession::HandleAuctionSellItem(WorldPacket& recv_data)
         AuctionEntry* AH = auctionHouse->AddAuction(auctionHouseEntry, newItem, etime, bid, buyout, deposit, pl);
 
         DETAIL_LOG("selling %s to auctioneer %s with initial bid " UI64FMTD " with buyout " UI64FMTD " and with time %u (in sec) in auctionhouse %u",
-                   itemGuid.GetString().c_str(), auctioneerGuid.GetString().c_str(), bid, buyout, etime, auctionHouseEntry->houseId);
+           itemGuid.GetString().c_str(), auctioneerGuid.GetString().c_str(), bid, buyout, etime, auctionHouseEntry->houseId);
 
         SendAuctionCommandResult(AH, AUCTION_STARTED, AUCTION_OK);
 
@@ -428,7 +428,7 @@ void WorldSession::HandleAuctionPlaceBid(WorldPacket& recv_data)
 
     // price too low for next bid if not buyout
     if ((price < auction->buyout || auction->buyout == 0) &&
-            price < auction->bid + auction->GetAuctionOutBid())
+        price < auction->bid + auction->GetAuctionOutBid())
     {
         // client test but possible in result lags
         SendAuctionCommandResult(auction, AUCTION_BID_PLACED, AUCTION_ERR_BID_INCREMENT);
@@ -510,9 +510,9 @@ void WorldSession::HandleAuctionRemoveItem(WorldPacket& recv_data)
     msgAuctionCanceledOwner << auction->itemTemplate << ":" << auction->itemRandomPropertyId << ":" << AUCTION_CANCELED << ":" << auction->Id << ":" << auction->itemCount;
 
     // item will deleted or added to received mail list
-    MailDraft(msgAuctionCanceledOwner.str(), "")            // TODO: fix body
-    .AddItem(pItem)
-    .SendMailTo(pl, auction, MAIL_CHECK_MASK_COPIED);
+    MailDraft(msgAuctionCanceledOwner.str(), "")    // TODO: fix body
+        .AddItem(pItem)
+        .SendMailTo(pl, auction, MAIL_CHECK_MASK_COPIED);
 
     // inform player, that auction is removed
     SendAuctionCommandResult(auction, AUCTION_REMOVED, AUCTION_OK);

@@ -3953,6 +3953,17 @@ void Spell::prepare(SpellCastTargets const* targets, Aura const* triggeredByAura
                 }
     }
 
+    // set target for proper facing
+    if (m_casttime || IsChanneledSpell(m_spellInfo))
+    {
+        if (m_caster->GetTypeId() == TYPEID_UNIT &&
+            m_targets.getUnitTarget() &&
+            m_caster != m_targets.getUnitTarget())
+        {
+            ((Creature*)m_caster)->FocusTarget(this, m_targets.getUnitTarget());
+        }
+    }
+
     // add non-triggered (with cast time and without)
     if (!m_IsTriggeredSpell)
     {
@@ -4914,6 +4925,12 @@ void Spell::finish(bool ok)
         return;
 
     m_spellState = SPELL_STATE_FINISHED;
+
+    if (m_caster->GetTypeId() == TYPEID_UNIT)
+    {
+        if (Creature* pCaster = (Creature*)m_caster)
+            pCaster->ReleaseFocus(this);
+    }
 
     // other code related only to successfully finished spells
     if (!ok)
@@ -7649,6 +7666,26 @@ SpellCastResult Spell::CheckCast(bool strict)
                     if ( instance->levelMax && instance->levelMax < target->getLevel() )
                         return SPELL_FAILED_HIGHLEVEL;
                 }
+                break;
+            }
+            case SPELL_EFFECT_RESURRECT:
+            case SPELL_EFFECT_RESURRECT_NEW:
+            case SPELL_EFFECT_SELF_RESURRECT:
+            {
+                if (m_caster->isInCombat())
+                    return SPELL_FAILED_AFFECTING_COMBAT;
+
+                if (m_spellInfo->Effect[i] == SPELL_EFFECT_SELF_RESURRECT)
+                {
+                    if (m_caster->HasAuraType(SPELL_AURA_PREVENT_RESURRECTION))
+                        return SPELL_FAILED_TARGET_CANNOT_BE_RESURRECTED;
+                }
+                else if (unitTarget && unitTarget->HasAuraType(SPELL_AURA_PREVENT_RESURRECTION))
+                    return SPELL_FAILED_TARGET_CANNOT_BE_RESURRECTED;
+
+                if (m_caster->GetTypeId() == TYPEID_PLAYER && ((Player*)m_caster)->isTotalImmune())
+                    return SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW;
+
                 break;
             }
             case SPELL_EFFECT_FRIEND_SUMMON:

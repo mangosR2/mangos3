@@ -51,64 +51,64 @@ void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
     // ignore for remote control state
     if (!pUser->IsSelfMover())
     {
-        recvPacket.rpos(recvPacket.wpos());                 // prevent spam at not read packet tail
+        recvPacket.rfinish();                               // prevent spam at not read packet tail
         return;
     }
 
     // reject fake data
     if (glyphIndex >= MAX_GLYPH_SLOT_INDEX)
     {
-        recvPacket.rpos(recvPacket.wpos());                 // prevent spam at not read packet tail
-        pUser->SendEquipError(EQUIP_ERR_ITEM_NOT_FOUND, NULL, NULL );
+        recvPacket.rfinish();                               // prevent spam at not read packet tail
+        pUser->SendEquipError(EQUIP_ERR_ITEM_NOT_FOUND, NULL, NULL);
         return;
     }
 
-    Item *pItem = pUser->GetItemByPos(bagIndex, slot);
+    Item* pItem = pUser->GetItemByPos(bagIndex, slot);
     if (!pItem)
     {
-        recvPacket.rpos(recvPacket.wpos());                 // prevent spam at not read packet tail
-        pUser->SendEquipError(EQUIP_ERR_ITEM_NOT_FOUND, NULL, NULL );
+        recvPacket.rfinish();                               // prevent spam at not read packet tail
+        pUser->SendEquipError(EQUIP_ERR_ITEM_NOT_FOUND, NULL, NULL);
         return;
     }
 
     if (pItem->GetObjectGuid() != itemGuid)
     {
-        recvPacket.rpos(recvPacket.wpos());                 // prevent spam at not read packet tail
-        pUser->SendEquipError(EQUIP_ERR_ITEM_NOT_FOUND, NULL, NULL );
+        recvPacket.rfinish();                               // prevent spam at not read packet tail
+        pUser->SendEquipError(EQUIP_ERR_ITEM_NOT_FOUND, NULL, NULL);
         return;
     }
 
     DETAIL_LOG("WORLD: CMSG_USE_ITEM packet, bagIndex: %u, slot: %u, cast_count: %u, spellid: %u, Item: %u, glyphIndex: %u, unk_flags: %u, data length = " SIZEFMTD, bagIndex, slot, cast_count, spellid, pItem->GetEntry(), glyphIndex, cast_flags, recvPacket.size());
 
-    ItemPrototype const *proto = pItem->GetProto();
+    ItemPrototype const* proto = pItem->GetProto();
     if (!proto)
     {
-        recvPacket.rpos(recvPacket.wpos());                 // prevent spam at not read packet tail
-        pUser->SendEquipError(EQUIP_ERR_ITEM_NOT_FOUND, pItem, NULL );
+        recvPacket.rfinish();                               // prevent spam at not read packet tail
+        pUser->SendEquipError(EQUIP_ERR_ITEM_NOT_FOUND, pItem, NULL);
         return;
     }
 
     // some item classes can be used only in equipped state
     if (proto->InventoryType != INVTYPE_NON_EQUIP && !pItem->IsEquipped())
     {
-        recvPacket.rpos(recvPacket.wpos());                 // prevent spam at not read packet tail
-        pUser->SendEquipError(EQUIP_ERR_ITEM_NOT_FOUND, pItem, NULL );
+        recvPacket.rfinish();                               // prevent spam at not read packet tail
+        pUser->SendEquipError(EQUIP_ERR_ITEM_NOT_FOUND, pItem, NULL);
         return;
     }
 
     InventoryResult msg = pUser->CanUseItem(pItem);
     if (msg != EQUIP_ERR_OK)
     {
-        recvPacket.rpos(recvPacket.wpos());                 // prevent spam at not read packet tail
-        pUser->SendEquipError( msg, pItem, NULL );
+        recvPacket.rfinish();                               // prevent spam at not read packet tail
+        pUser->SendEquipError(msg, pItem, NULL);
         return;
     }
 
     // not allow use item from trade (cheat way only)
     if (pItem->IsInTrade())
     {
-        recvPacket.rpos(recvPacket.wpos());                 // prevent spam at not read packet tail
-        pUser->SendEquipError(EQUIP_ERR_ITEM_NOT_FOUND, pItem, NULL );
+        recvPacket.rfinish();                               // prevent spam at not read packet tail
+        pUser->SendEquipError(EQUIP_ERR_ITEM_NOT_FOUND, pItem, NULL);
         return;
     }
 
@@ -117,14 +117,15 @@ void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
         !(proto->Flags & ITEM_FLAG_USEABLE_IN_ARENA) &&
         pUser->InArena())
     {
-        recvPacket.rpos(recvPacket.wpos());                 // prevent spam at not read packet tail
-        pUser->SendEquipError(EQUIP_ERR_NOT_DURING_ARENA_MATCH,pItem,NULL);
+        recvPacket.rfinish();                               // prevent spam at not read packet tail
+        pUser->SendEquipError(EQUIP_ERR_NOT_DURING_ARENA_MATCH, pItem, NULL);
         return;
     }
 
     if ((proto->Area && proto->Area != pUser->GetAreaId()) ||
         (proto->Map && proto->Map != pUser->GetMapId()))
     {
+        recvPacket.rfinish();                               // prevent spam at not read packet tail
         if (SpellEntry const* spellInfo = sSpellStore.LookupEntry(spellid))
             Spell::SendCastResult(pUser, spellInfo, cast_count, SPELL_FAILED_INCORRECT_AREA);
         return;
@@ -132,13 +133,13 @@ void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
 
     if (pUser->isInCombat())
     {
-        for(int i = 0; i < MAX_ITEM_PROTO_SPELLS; ++i)
+        for (int i = 0; i < MAX_ITEM_PROTO_SPELLS; ++i)
         {
-            if (SpellEntry const *spellInfo = sSpellStore.LookupEntry(proto->Spells[i].SpellId))
+            if (SpellEntry const* spellInfo = sSpellStore.LookupEntry(proto->Spells[i].SpellId))
             {
                 if (IsNonCombatSpell(spellInfo))
                 {
-                    recvPacket.rpos(recvPacket.wpos());     // prevent spam at not read packet tail
+                    recvPacket.rfinish();                   // prevent spam at not read packet tail
                     pUser->SendEquipError(EQUIP_ERR_NOT_IN_COMBAT,pItem,NULL);
                     return;
                 }
@@ -148,19 +149,19 @@ void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
         // Prevent potion drink if another potion in processing (client have potions disabled in like case)
         if (pItem->IsPotion() && pUser->GetLastPotionId())
         {
-            recvPacket.rpos(recvPacket.wpos());             // prevent spam at not read packet tail
+            recvPacket.rfinish();                           // prevent spam at not read packet tail
             pUser->SendEquipError(EQUIP_ERR_OBJECT_IS_BUSY,pItem,NULL);
             return;
         }
     }
 
     // check also  BIND_WHEN_PICKED_UP and BIND_QUEST_ITEM for .additem or .additemset case by GM (not binded at adding to inventory)
-    if( pItem->GetProto()->Bonding == BIND_WHEN_USE || pItem->GetProto()->Bonding == BIND_WHEN_PICKED_UP || pItem->GetProto()->Bonding == BIND_QUEST_ITEM )
+    if (pItem->GetProto()->Bonding == BIND_WHEN_USE || pItem->GetProto()->Bonding == BIND_WHEN_PICKED_UP || pItem->GetProto()->Bonding == BIND_QUEST_ITEM)
     {
         if (!pItem->IsSoulBound())
         {
             pItem->SetState(ITEM_CHANGED, pUser);
-            pItem->SetBinding( true );
+            pItem->SetBinding(true);
         }
     }
 
@@ -365,7 +366,7 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
     Unit* _mover = GetPlayer()->GetMover();
     if (_mover != GetPlayer() && _mover->GetTypeId()==TYPEID_PLAYER)
     {
-        recvPacket.rpos(recvPacket.wpos());                 // prevent spam at ignore packet
+        recvPacket.rfinish();                               // prevent spam at ignore packet
         return;
     }
 
@@ -381,7 +382,7 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
     if(!spellInfo)
     {
         sLog.outError("WORLD: unknown spell id %u", spellId);
-        recvPacket.rpos(recvPacket.wpos());                 // prevent spam at ignore packet
+        recvPacket.rfinish();                               // prevent spam at ignore packet
         return;
     }
 
@@ -438,7 +439,7 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
             {
                 sLog.outError("WorldSession::HandleCastSpellOpcode: %s casts spell %u which he shouldn't have", mover->GetObjectGuid().GetString().c_str(), spellId);
                 //cheater? kick? ban?
-                recvPacket.rpos(recvPacket.wpos());                 // prevent spam at ignore packet
+                recvPacket.rfinish();                               // prevent spam at ignore packet
                 return;
             }
         }
@@ -449,7 +450,7 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
             {
                 sLog.outError("World: Player %u casts spell %u which he shouldn't have", mover->GetGUIDLow(), spellId);
                 //cheater? kick? ban?
-                recvPacket.rpos(recvPacket.wpos());                 // prevent spam at ignore packet
+                recvPacket.rfinish();                               // prevent spam at ignore packet
                 return;
             }
         }
@@ -756,10 +757,10 @@ void WorldSession::HandleUpdateProjectilePosition(WorldPacket& recvPacket)
 
     SpellEntry const *spellInfo = sSpellStore.LookupEntry(spellId);
 
-    if(!spellInfo)
+    if (!spellInfo)
     {
         sLog.outError("CMSG_UPDATE_PROJECTILE_POSITION: unknown spell id %u", spellId);
-        recvPacket.rpos(recvPacket.wpos());                 // prevent spam at ignore packet
+        recvPacket.rfinish();                               // prevent spam at ignore packet
         return;
     }
 
@@ -779,6 +780,7 @@ void WorldSession::HandleUpdateProjectilePosition(WorldPacket& recvPacket)
         if (spellEffect->EffectTriggerSpell)
             if (SpellEntry const* spellInfoT = sSpellStore.LookupEntry(spellEffect->EffectTriggerSpell))
                 pCaster->CastSpell(m_targetX, m_targetY, m_targetZ, spellInfoT, true);
+        }
     }
 }
 

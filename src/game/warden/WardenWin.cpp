@@ -161,7 +161,7 @@ void WardenWin::RequestHash()
 
 void WardenWin::HandleHashResult(ByteBuffer &buff)
 {
-    buff.rpos(buff.wpos());
+    buff.rfinish();
 
     const uint8 validHash[20] = { 0x56, 0x8C, 0x05, 0x4C, 0x78, 0x1A, 0x97, 0x2A, 0x60, 0x37, 0xA2, 0x29, 0x0C, 0x22, 0xB5, 0x25, 0x71, 0xA0, 0x6F, 0x4E };
 
@@ -344,7 +344,8 @@ void WardenWin::HandleData(ByteBuffer &buff)
 
     if (!IsValidCheckSum(Checksum, buff.contents() + buff.rpos(), Length))
     {
-        buff.rpos(buff.wpos());
+        buff.rfinish();
+
         if (Client->GetPlayer())
             Client->GetPlayer()->GetAntiCheat()->DoAntiCheatCheck(CHECK_WARDEN_CHECKSUM, 0, true);
         return;

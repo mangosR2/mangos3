@@ -173,6 +173,9 @@ class MANGOS_DLL_SPEC GossipMenu
         void SetMenuId(uint32 menu_id) { m_gMenuId = menu_id; }
         uint32 GetMenuId() { return m_gMenuId; }
 
+        void SetSenderGuid(ObjectGuid const& guid) { m_senderGuid = guid; }
+        ObjectGuid const& GetSenderGuid() const { return m_senderGuid; }
+
         void AddGossipMenuItemData(int32 action_menu, uint32 action_poi, uint32 action_script);
 
         unsigned int MenuItemCount() const
@@ -207,7 +210,8 @@ class MANGOS_DLL_SPEC GossipMenu
         GossipMenuItemList      m_gItems;
         GossipMenuItemDataList  m_gItemsData;
 
-        uint32 m_gMenuId;
+        uint32     m_gMenuId;
+        ObjectGuid m_senderGuid;
 
     private:
         WorldSession* m_session;

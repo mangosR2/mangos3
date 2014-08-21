@@ -131,6 +131,10 @@ void MotionMaster::MoveTargetedHome()
 
 void MotionMaster::MoveConfused()
 {
+    // ignore movement request if owner has disable move flag
+    if (m_owner->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE))
+        return;
+
     DEBUG_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS, "MotionMaster: %s move confused", m_owner->GetGuidStr().c_str());
 
     if (m_owner->GetTypeId() == TYPEID_PLAYER)
@@ -208,7 +212,7 @@ void MotionMaster::MoveSeekAssistanceDistract(uint32 time)
 void MotionMaster::MoveFleeing(Unit* enemy, uint32 time)
 {
     // ignore movement request if enemy not exist or owner has disable move flag
-    if (!enemy || enemy == m_owner || m_owner->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE))
+    if (!enemy || m_owner->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE))
         return;
 
     DEBUG_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS, "MotionMaster: %s flee from %s", m_owner->GetGuidStr().c_str(), enemy->GetGuidStr().c_str());
@@ -230,13 +234,13 @@ void MotionMaster::MoveWaypoint()
     {
         if (GetCurrentMovementGeneratorType() == WAYPOINT_MOTION_TYPE)
         {
-            sLog.outError("MotionMaster: Creature %s (Entry %u) attempt to MoveWaypoint() but creature is already using waypoint", m_owner->GetGuidStr().c_str(), m_owner->GetEntry());
+            sLog.outError("MotionMaster: %s attempt to MoveWaypoint() but creature is already using waypoint", m_owner->GetGuidStr().c_str());
             return;
         }
 
         Creature* creature = (Creature*)m_owner;
 
-        DEBUG_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS, "MotionMaster: Creature %s (Entry %u) start MoveWaypoint()", m_owner->GetGuidStr().c_str(), m_owner->GetEntry());
+        DEBUG_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS, "MotionMaster: %s start MoveWaypoint()", m_owner->GetGuidStr().c_str());
         Mutate(new WaypointMovementGenerator<Creature>(*creature), UNIT_ACTION_DOWAYPOINTS);
     }
     else
@@ -291,7 +295,7 @@ MotionMaster::MotionMaster(Unit* unit) : m_owner(unit)
 }
 
 /** Does nothing */
-void MotionMaster::Clear(bool reset /*= true*/, bool all /*= false*/)
+void MotionMaster::Clear(bool reset /*=true*/, bool all /*=false*/)
 {
     if (all)
         GetUnitStateMgr()->InitDefaults();

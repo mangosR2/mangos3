@@ -405,12 +405,12 @@ class MANGOS_DLL_SPEC Aura
         void HandleAuraFactionChange(bool apply, bool real);
         void HandleAuraStopNaturalManaRegen(bool apply, bool Real);
         void HandleInitializeImages(bool apply, bool Real);
+        void HandlePreventResurrection(bool apply, bool real);
         void HandleAuraMastery(bool apply, bool Real);
         void HandleAuraModBlockCritChance(bool apply, bool Real);
         void HandleModIncreaseSpellPowerPct(bool apply, bool Real);
         void HandleOverrideSpellPowerByAp(bool apply, bool Real);
         void HandleAuraForceWeather(bool apply, bool Real);
-        void HandleAuraPreventResurrection(bool apply, bool Real);
         void HandleAuraOverrideActionbarSpells(bool apply, bool Real);
         void HandleAuraInterfereTargeting(bool apply, bool Real);
         void HandleAuraSeeWhileInvisible(bool apply, bool Real);

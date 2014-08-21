@@ -123,7 +123,7 @@ void VehicleKit::RemoveAllPassengers()
 {
     for (SeatMap::iterator itr = m_Seats.begin(); itr != m_Seats.end(); ++itr)
     {
-        if (Unit* passenger = GetBase()->GetMap()->GetUnit(itr->second.passenger))
+        if (Unit* passenger = GetBase()->GetMap()->GetUnit(itr->second.passengerGuid))
         {
             passenger->ExitVehicle();
 
@@ -149,7 +149,7 @@ bool VehicleKit::HasEmptySeat(SeatId seatId) const
     if (seat == m_Seats.end())
         return false;
 
-    return !seat->second.passenger;
+    return !seat->second.passengerGuid;
 }
 
 /*
@@ -165,13 +165,13 @@ SeatId VehicleKit::GetNextEmptySeatWithFlag(SeatId seatId, bool next /*= true*/,
     if (next)
     {
         for (SeatMap::const_iterator seat = m_Seats.begin(); seat != m_Seats.end(); ++seat)
-            if ((seatId < 0 || seat->first >= seatId) && !seat->second.passenger && (!vehicleSeatFlag || (seat->second.seatInfo->m_flags & vehicleSeatFlag)))
+            if ((seatId < 0 || seat->first >= seatId) && !seat->second.passengerGuid && (!vehicleSeatFlag || (seat->second.seatInfo->m_flags & vehicleSeatFlag)))
                 return seat->first;
     }
     else
     {
         for (SeatMap::const_reverse_iterator seat = m_Seats.rbegin(); seat != m_Seats.rend(); ++seat)
-            if ((seatId < 0 || seat->first <= seatId) && !seat->second.passenger && (!vehicleSeatFlag || (seat->second.seatInfo->m_flags & vehicleSeatFlag)))
+            if ((seatId < 0 || seat->first <= seatId) && !seat->second.passengerGuid && (!vehicleSeatFlag || (seat->second.seatInfo->m_flags & vehicleSeatFlag)))
                 return seat->first;
     }
 
@@ -181,11 +181,13 @@ SeatId VehicleKit::GetNextEmptySeatWithFlag(SeatId seatId, bool next /*= true*/,
 Unit* VehicleKit::GetPassenger(SeatId seatId) const
 {
     SeatMap::const_iterator seat = m_Seats.find(seatId);
-
     if (seat == m_Seats.end())
         return NULL;
 
-    return GetBase()->GetMap()->GetUnit(seat->second.passenger);
+    if (!seat->second.passengerGuid)
+        return NULL;
+    else
+        return GetBase()->GetMap()->GetUnit(seat->second.passengerGuid);
 }
 
 // Helper function to undo the turning of the vehicle to calculate a relative position of the passenger when boarding
@@ -222,7 +224,7 @@ bool VehicleKit::AddPassenger(Unit* passenger, SeatId seatId)
     {
         for (seat = m_Seats.begin(); seat != m_Seats.end(); ++seat)
         {
-            if (!seat->second.passenger && (seat->second.seatInfo->IsUsable() || (seat->second.seatInfo->m_flags & SEAT_FLAG_UNCONTROLLED)))
+            if (!seat->second.passengerGuid && (seat->second.seatInfo->IsUsable() || (seat->second.seatInfo->m_flags & SEAT_FLAG_UNCONTROLLED)))
                 break;
         }
 
@@ -236,12 +238,12 @@ bool VehicleKit::AddPassenger(Unit* passenger, SeatId seatId)
         if (seat == m_Seats.end())
             return false;
 
-        if (seat->second.passenger)
+        if (seat->second.passengerGuid)
             return false;
     }
 
     VehicleSeatEntry const* seatInfo = seat->second.seatInfo;
-    seat->second.passenger = passenger->GetObjectGuid();
+    seat->second.passengerGuid = passenger->GetObjectGuid();
     seat->second.b_dismount = true;
 
     if (!(seatInfo->m_flags & SEAT_FLAG_FREE_ACTION))
@@ -267,6 +269,7 @@ bool VehicleKit::AddPassenger(Unit* passenger, SeatId seatId)
         // make passenger attackable in some vehicles and allow him to cast when sitting on vehicle
         switch (GetBase()->GetEntry())
         {
+            case 29625:        // Hyldsmeet Proto-Drake
             case 30234:        // Nexus Lord's Hover Disk (Eye of Eternity, Malygos Encounter)
             case 30248:        // Scion's of Eternity Hover Disk (Eye of Eternity, Malygos Encounter)
             case 33118:        // Ignis (Ulduar)
@@ -280,6 +283,12 @@ bool VehicleKit::AddPassenger(Unit* passenger, SeatId seatId)
                 break;
         }
         passenger->RemoveSpellsCausingAura(SPELL_AURA_MOD_SHAPESHIFT);
+    }
+
+    if (passenger->GetTypeId() == TYPEID_UNIT)
+    {
+        if (seatInfo->m_flags & SEAT_FLAG_NOT_SELECTABLE)
+            passenger->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
     }
 
     if ((seatInfo->m_flags & SEAT_FLAG_CAN_CONTROL) && GetBase()->GetTypeId() == TYPEID_UNIT)
@@ -326,9 +335,12 @@ bool VehicleKit::AddPassenger(Unit* passenger, SeatId seatId)
         if (!(((Creature*)GetBase())->GetCreatureInfo()->ExtraFlags & CREATURE_FLAG_EXTRA_KEEP_AI))
             ((Creature*)GetBase())->AIM_Initialize();
 
-        //if (GetBase()->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE))
-        //    GetBase()->SetRoot(true);
-
+        if (GetBase()->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE))
+        {
+            GetBase()->SetRoot(true);
+            // save player's walk mode for further use in dismount
+            ((Creature*)GetBase())->SetWalk(passenger->IsWalking(), true);
+        }
         // Set owner's speedrate to vehicle at board.
         else if (passenger->IsWalking() && !GetBase()->IsWalking())
             ((Creature*)GetBase())->SetWalk(true, true);
@@ -348,6 +360,13 @@ bool VehicleKit::AddPassenger(Unit* passenger, SeatId seatId)
         0.0f);
 
     UpdateFreeSeatCount();
+
+    if (passenger->GetTypeId() == TYPEID_PLAYER)
+    {
+        // group update
+        if (((Player*)passenger)->GetGroup())
+            ((Player*)passenger)->SetGroupUpdateFlag(GROUP_UPDATE_FLAG_VEHICLE_SEAT);
+    }
 
     if (GetBase()->GetTypeId() == TYPEID_UNIT)
     {
@@ -392,23 +411,32 @@ void VehicleKit::RemovePassenger(Unit* passenger, bool dismount /*false*/)
     SeatMap::iterator seat;
     for (seat = m_Seats.begin(); seat != m_Seats.end(); ++seat)
     {
-        if (seat->second.passenger == passenger->GetObjectGuid())
+        if (seat->second.passengerGuid == passenger->GetObjectGuid())
             break;
     }
 
     if (seat == m_Seats.end())
         return;
 
-    seat->second.passenger.Clear();
+    seat->second.passengerGuid.Clear();
 
     passenger->clearUnitState(UNIT_STAT_ON_VEHICLE);
 
     UnBoardPassenger(passenger);                            // Use TransportBase to remove the passenger from storage list
 
+    passenger->m_movementInfo.ClearTransportData();
+    passenger->m_movementInfo.RemoveMovementFlag(MOVEFLAG_ONTRANSPORT);
+
     if (seat->second.IsProtectPassenger())
     {
         if (passenger->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE))
             passenger->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+    }
+
+    if (passenger->GetTypeId() == TYPEID_UNIT)
+    {
+        if (seat->second.seatInfo->m_flags & SEAT_FLAG_NOT_SELECTABLE)
+            passenger->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
     }
 
     if (seat->second.seatInfo->m_flags & SEAT_FLAG_CAN_CONTROL && GetBase()->GetTypeId() == TYPEID_UNIT)
@@ -419,6 +447,7 @@ void VehicleKit::RemovePassenger(Unit* passenger, bool dismount /*false*/)
         GetBase()->SetCharmerGuid(ObjectGuid());
         GetBase()->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED);
         GetBase()->clearUnitState(UNIT_STAT_CONTROLLED);
+        GetBase()->StopMoving();
 
         if (passenger->GetTypeId() == TYPEID_PLAYER)
         {
@@ -443,6 +472,10 @@ void VehicleKit::RemovePassenger(Unit* passenger, bool dismount /*false*/)
         player->SetMover(player);
         player->m_movementInfo.RemoveMovementFlag(MOVEFLAG_ROOT);
 
+        // restore player's walk mode
+        if (GetBase()->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE) && !GetBase()->IsWalking())
+            player->m_movementInfo.RemoveMovementFlag(MOVEFLAG_WALK_MODE);
+
         if ((GetBase()->HasAuraType(SPELL_AURA_FLY) || GetBase()->HasAuraType(SPELL_AURA_MOD_FLIGHT_SPEED) ||
             (GetBase()->GetTypeId() == TYPEID_UNIT && ((Creature*)GetBase())->CanFly())) &&
             (!player->HasAuraType(SPELL_AURA_FLY) && !player->HasAuraType(SPELL_AURA_MOD_FLIGHT_SPEED)))
@@ -456,7 +489,14 @@ void VehicleKit::RemovePassenger(Unit* passenger, bool dismount /*false*/)
         }
 
         if (GetBase()->IsLevitating())
+        {
             player->m_movementInfo.RemoveMovementFlag(MOVEFLAG_LEVITATING);
+            player->m_movementInfo.RemoveMovementFlag(MOVEFLAG_HOVER);
+        }
+
+        // group update
+        if (player->GetGroup())
+            player->SetGroupUpdateFlag(GROUP_UPDATE_FLAG_VEHICLE_SEAT);
     }
 
     UpdateFreeSeatCount();
@@ -482,6 +522,12 @@ void VehicleKit::RemovePassenger(Unit* passenger, bool dismount /*false*/)
         // only for flyable vehicles
         if (GetBase()->m_movementInfo.HasMovementFlag(MOVEFLAG_FLYING))
             GetBase()->CastSpell(passenger, 45472, true);    // Parachute
+    }
+    else
+    {
+        // Force update passenger position to base position
+        WorldLocation const& pos = GetBase()->GetPosition();
+        passenger->SetPosition(pos);
     }
 }
 
@@ -571,7 +617,7 @@ void VehicleKit::UpdateFreeSeatCount()
 
     for (SeatMap::const_iterator itr = m_Seats.begin(); itr != m_Seats.end(); ++itr)
     {
-        if (!itr->second.passenger && itr->second.seatInfo->IsUsable())
+        if (!itr->second.passengerGuid && itr->second.seatInfo->IsUsable())
             ++m_uiNumFreeSeats;
     }
 
@@ -595,7 +641,7 @@ VehicleSeatEntry const* VehicleKit::GetSeatInfo(ObjectGuid const& guid)
 {
     for (SeatMap::const_iterator itr = m_Seats.begin(); itr != m_Seats.end(); ++itr)
     {
-        if (guid == itr->second.passenger)
+        if (guid == itr->second.passengerGuid)
             return itr->second.seatInfo;
     }
     return NULL;
@@ -612,7 +658,7 @@ SeatId VehicleKit::GetSeatId(ObjectGuid const& guid)
 {
     for (SeatMap::const_iterator itr = m_Seats.begin(); itr != m_Seats.end(); ++itr)
     {
-        if (guid == itr->second.passenger)
+        if (guid == itr->second.passengerGuid)
             return itr->first;
     }
     return -1;
@@ -632,11 +678,10 @@ void VehicleKit::Dismount(Unit* passenger, VehicleSeatEntry const* seatInfo)
         tRadius = 1.0f;
 
     // Force update passenger position to base position
+    passenger->SetPosition(pos);
+
     if (passenger->GetTypeId() == TYPEID_PLAYER)
-    {
-        passenger->SetPosition(pos);
         ((Player*)passenger)->SetFallInformation(0, pos.z + 0.5f);
-    }
 
     // FIXME temp method for unmount on transport
     if (GetBase()->IsOnTransport())
@@ -653,29 +698,28 @@ void VehicleKit::Dismount(Unit* passenger, VehicleSeatEntry const* seatInfo)
     {
         // parabolic traectory (catapults, explode, other effects). mostly set destination in DummyEffect.
         // destination Z not checked in this case! only limited on 8.0 delta. requred full correct set in spelleffects.
-        float speed = ((m_dst_speed > M_NULL_F) ? m_dst_speed : ((seatInfo && seatInfo->m_exitSpeed > M_NULL_F) ? seatInfo->m_exitSpeed : BASE_CHARGE_SPEED));
-        float verticalSpeed = speed * sin(m_dst_elevation);
-        float horisontalSpeed = speed * cos(m_dst_elevation);
-        float moveTimeHalf =  verticalSpeed / ((seatInfo && seatInfo->m_exitGravity > 0.0f) ? seatInfo->m_exitGravity : Movement::gravity);
-        float max_height = - Movement::computeFallElevation(moveTimeHalf, false, -verticalSpeed);
 
         // Check for tru move unit/creature to unloaded grid (for players check maked in Map class)
         if (passenger->GetTypeId() != TYPEID_PLAYER && !GetBase()->GetMap()->IsLoaded(m_dst_x, m_dst_y))
         {
             passenger->Relocate(pos);
         }
-        else if (!GetBase()->m_movementInfo.HasMovementFlag(MOVEFLAG_FLYING))
+        else if (passenger->GetTypeId() != TYPEID_PLAYER || !GetBase()->m_movementInfo.HasMovementFlag(MOVEFLAG_FLYING))
+        {
+            float speed = ((m_dst_speed > M_NULL_F) ? m_dst_speed : ((seatInfo && seatInfo->m_exitSpeed > M_NULL_F) ? seatInfo->m_exitSpeed : BASE_CHARGE_SPEED));
+            float verticalSpeed = speed * sin(m_dst_elevation);
+            float horisontalSpeed = speed * cos(m_dst_elevation);
+            float moveTimeHalf =  verticalSpeed / ((seatInfo && seatInfo->m_exitGravity > 0.0f) ? seatInfo->m_exitGravity : Movement::gravity);
+            float max_height = -Movement::computeFallElevation(moveTimeHalf, false, -verticalSpeed);
+
             passenger->GetMotionMaster()->MoveSkyDiving(m_dst_x, m_dst_y, m_dst_z, passenger->GetOrientation(), horisontalSpeed, max_height, true);
+        }
         else
             DismountFromFlyingVehicle(passenger);
     }
     else if (seatInfo)
     {
         // half-parabolic traectory (unmount)
-        float horisontalSpeed = seatInfo->m_exitSpeed;
-
-        if (horisontalSpeed < M_NULL_F)
-            horisontalSpeed = BASE_CHARGE_SPEED;
 
         // may be under water
         base->GetClosePoint(m_dst_x, m_dst_y, m_dst_z, tRadius, frand(2.0f, 3.0f), frand(M_PI_F / 2.0f, 3.0f * M_PI_F / 2.0f), passenger);
@@ -686,8 +730,15 @@ void VehicleKit::Dismount(Unit* passenger, VehicleSeatEntry const* seatInfo)
         {
             passenger->Relocate(pos);
         }
-        else if (!GetBase()->m_movementInfo.HasMovementFlag(MOVEFLAG_FLYING))
+        else if (passenger->GetTypeId() != TYPEID_PLAYER || !GetBase()->m_movementInfo.HasMovementFlag(MOVEFLAG_FLYING))
+        {
+            float horisontalSpeed = seatInfo->m_exitSpeed;
+
+            if (horisontalSpeed < M_NULL_F)
+                horisontalSpeed = BASE_CHARGE_SPEED;
+
             passenger->GetMotionMaster()->MoveSkyDiving(m_dst_x, m_dst_y, m_dst_z + 0.1f, passenger->GetOrientation(), horisontalSpeed, 0.0f);
+        }
         else
             DismountFromFlyingVehicle(passenger);
     }
@@ -703,7 +754,7 @@ void VehicleKit::Dismount(Unit* passenger, VehicleSeatEntry const* seatInfo)
         {
             passenger->Relocate(pos);
         }
-        else if (!GetBase()->m_movementInfo.HasMovementFlag(MOVEFLAG_FLYING))
+        else if (passenger->GetTypeId() != TYPEID_PLAYER || !GetBase()->m_movementInfo.HasMovementFlag(MOVEFLAG_FLYING))
             passenger->GetMotionMaster()->MoveSkyDiving(m_dst_x, m_dst_y, m_dst_z + 0.1f, passenger->GetOrientation(), BASE_CHARGE_SPEED, 0.0f);
         else
             DismountFromFlyingVehicle(passenger);
@@ -714,6 +765,7 @@ void VehicleKit::Dismount(Unit* passenger, VehicleSeatEntry const* seatInfo)
         base->GetGuidStr().c_str(),
         pos.x, pos.y, pos.z,
         m_dst_x, m_dst_y, m_dst_z);
+
     SetDestination();
 }
 
@@ -766,7 +818,7 @@ Aura* VehicleKit::GetControlAura(Unit* passenger)
 
     ObjectGuid casterGuid = passenger->GetObjectGuid();
 
-    MAPLOCK_READ(GetBase(),MAP_LOCK_TYPE_AURAS);
+    MAPLOCK_READ(GetBase(), MAP_LOCK_TYPE_AURAS);
     Unit::AuraList& auras = GetBase()->GetAurasByType(SPELL_AURA_CONTROL_VEHICLE);
     for (Unit::AuraList::iterator itr = auras.begin(); itr != auras.end(); ++itr)
     {

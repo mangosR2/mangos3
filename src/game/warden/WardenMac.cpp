@@ -141,7 +141,7 @@ void WardenMac::HandleHashResult(ByteBuffer &buff)
     keyOut[3] = 0x1337F00D * keyIn[3];
     // end test
 
-    buff.rpos(buff.wpos());
+    buff.rfinish();
 
     Sha1Hash sha1;
     sha1.UpdateData((uint8*)keyIn, 16);
@@ -216,7 +216,7 @@ void WardenMac::HandleData(ByteBuffer &buff)
 
     //if (!IsValidCheckSum(Checksum, buff.contents() + buff.rpos(), Length))
     //{
-    //    buff.rpos(buff.wpos());
+    //    buff.rfinish();
     //    if (sWorld.getConfig(CONFIG_BOOL_WARDEN_KICK))
     //        Client->KickPlayer();
     //    return;

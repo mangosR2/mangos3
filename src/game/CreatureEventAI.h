@@ -146,7 +146,7 @@ enum Target
 
     TARGET_T_END,
 
-    //Vehicle-based targets (NULL if owner/target vehicle)
+    // Vehicle-based targets (NULL if owner/target vehicle)
     TARGET_T_VEHICLE_PASSENGER = 50,                        // First current passenger (NULL if not vehicle or not passenger)
     TARGET_T_VEHICLE_PASSENGER_0,                           // Passenger on seat 0 (NULL if not vehicle or not passenger)
     TARGET_T_VEHICLE_PASSENGER_1,                           // Passenger on seat 1 (NULL if not vehicle or not passenger)

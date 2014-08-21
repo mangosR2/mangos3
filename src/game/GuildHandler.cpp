@@ -58,7 +58,7 @@ void WorldSession::HandleGuildCreateOpcode(WorldPacket& recvPacket)
 
     if (!GetPlayer()->isGameMaster())
     {
-        sLog.outError("WorldSession::HandleGuildCreateOpcode Possible hacking-attempt: %s tried to create a guild [Name: %s] using cheats!", GetPlayer()->GetObjectGuid().GetString().c_str(), gname.c_str());
+        sLog.outError("WorldSession::HandleGuildCreateOpcode Possible hacking-attempt: %s tried to create a guild [Name: %s] using cheats!", GetPlayer()->GetGuidStr().c_str(), gname.c_str());
         return;
     }
 
@@ -1155,7 +1155,7 @@ void WorldSession::HandleGuildBankWithdrawMoney(WorldPacket& recv_data)
         return;
 
     uint32 GuildId = GetPlayer()->GetGuildId();
-    if (GuildId == 0)
+    if (!GuildId)
         return;
 
     Guild* pGuild = sGuildMgr.GetGuildById(GuildId);

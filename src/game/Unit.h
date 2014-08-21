@@ -449,6 +449,8 @@ enum UnitState
     // custom MMGen (may be removed)
     UNIT_STAT_ON_VEHICLE      = 0x00080000,                     // Unit is on vehicle
 
+    UNIT_STAT_ROTATING        = 0x00100000,
+
     // More room for other MMGens
 
     // High-Level states (usually only with Creatures)
@@ -481,6 +483,8 @@ enum UnitState
 
     // above 2 state cases
     UNIT_STAT_CAN_NOT_REACT_OR_LOST_CONTROL  = UNIT_STAT_CAN_NOT_REACT | UNIT_STAT_LOST_CONTROL,
+
+    UNIT_STAT_CANNOT_TURN     = UNIT_STAT_CAN_NOT_REACT_OR_LOST_CONTROL | UNIT_STAT_ROTATING,
 
     // masks (for check or reset)
 
@@ -1800,7 +1804,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         ObjectGuid const& GetCharmGuid() const { return GetGuidValue(UNIT_FIELD_CHARM); }
         void SetCharmGuid(ObjectGuid charm) { SetGuidValue(UNIT_FIELD_CHARM, charm); }
         ObjectGuid const& GetTargetGuid() const { return GetGuidValue(UNIT_FIELD_TARGET); }
-        void SetTargetGuid(ObjectGuid targetGuid) { SetGuidValue(UNIT_FIELD_TARGET, targetGuid); }
+        virtual void SetTargetGuid(ObjectGuid targetGuid) { SetGuidValue(UNIT_FIELD_TARGET, targetGuid); }
         ObjectGuid const& GetChannelObjectGuid() const { return GetGuidValue(UNIT_FIELD_CHANNEL_OBJECT); }
         void SetChannelObjectGuid(ObjectGuid targetGuid) { SetGuidValue(UNIT_FIELD_CHANNEL_OBJECT, targetGuid); }
 
