@@ -46,6 +46,7 @@
 #include "Util.h"
 #include "Vehicle.h"
 #include "Chat.h"
+#include "PathFinder.h"
 #include "DB2Stores.h"
 #include "SQLStorages.h"
 #include "Vehicle.h"
@@ -7436,41 +7437,28 @@ SpellCastResult Spell::CheckCast(bool strict)
                 {
                     // Intervene with Warbringer talent
                     if (m_spellInfo->Id == 3411 && m_caster->HasAura(57499))
+                    {
                         m_caster->RemoveAurasAtMechanicImmunity(IMMUNE_TO_ROOT_AND_SNARE_MASK, 0, true);
-                    else
-                        return SPELL_FAILED_ROOTED;
+                        return SPELL_FAILED_DONT_REPORT;
+                    }
+                    return SPELL_FAILED_ROOTED;
                 }
 
-                if (!m_IsTriggeredSpell && spellEffect->Effect == SPELL_EFFECT_CHARGE)
+                if (Unit* target = m_targets.getUnitTarget())
                 {
-                    WorldLocation loc;
-                    if (m_targets.m_targetMask & TARGET_FLAG_DEST_LOCATION)
-                        loc = m_targets.GetLocation();
-                    else if (m_targets.getUnitTarget())
-                        loc = m_targets.getUnitTarget()->GetPosition();
-                    else
-                        break;
+                    float range = GetSpellMaxRange(sSpellRangeStore.LookupEntry(m_spellInfo->GetRangeIndex()));
+                    float x, y, z;
+                    target->GetContactPoint(m_caster, x, y, z);
 
-                    bool ok = false;
-                    float pathDist = m_caster->GetPathLength(loc, false, &ok);
-                    // pathfinding disabled - do nothing
-                    if (!ok)
-                        break;
+                    PathFinder pathFinder(m_caster);
+                    pathFinder.setPathLengthLimit(range * 1.5f);
+                    bool result = pathFinder.calculate(x, y, z, false, true);
 
-                    float range;
-
-                    if (uint32 radiusIndex = spellEffect->GetRadiusIndex())
-                        range = GetSpellRadius(sSpellRadiusStore.LookupEntry(radiusIndex));
-                    else
-                        range = GetSpellMaxRange(sSpellRangeStore.LookupEntry(m_spellInfo->rangeIndex));
-
-                    if (Player* modOwner = m_caster->GetSpellModOwner())
-                        modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_RANGE, range, this);
-
-                    if (pathDist > range)
+                    if (pathFinder.getPathType() & PATHFIND_SHORT)
                         return SPELL_FAILED_OUT_OF_RANGE;
+                    else if (!result || pathFinder.getPathType() & PATHFIND_NOPATH)
+                        return SPELL_FAILED_NOPATH;
                 }
-
                 break;
             }
             case SPELL_EFFECT_SKINNING:
@@ -7668,14 +7656,14 @@ SpellCastResult Spell::CheckCast(bool strict)
                 }
                 break;
             }
-            case SPELL_EFFECT_RESURRECT:
+			case SPELL_EFFECT_RESURRECT:
             case SPELL_EFFECT_RESURRECT_NEW:
             case SPELL_EFFECT_SELF_RESURRECT:
             {
                 if (m_caster->isInCombat())
                     return SPELL_FAILED_AFFECTING_COMBAT;
 
-                if (m_spellInfo->Effect[i] == SPELL_EFFECT_SELF_RESURRECT)
+                if (spellEffect->Effect == SPELL_EFFECT_SELF_RESURRECT)
                 {
                     if (m_caster->HasAuraType(SPELL_AURA_PREVENT_RESURRECTION))
                         return SPELL_FAILED_TARGET_CANNOT_BE_RESURRECTED;
@@ -7683,9 +7671,8 @@ SpellCastResult Spell::CheckCast(bool strict)
                 else if (unitTarget && unitTarget->HasAuraType(SPELL_AURA_PREVENT_RESURRECTION))
                     return SPELL_FAILED_TARGET_CANNOT_BE_RESURRECTED;
 
-                if (m_caster->GetTypeId() == TYPEID_PLAYER && ((Player*)m_caster)->isTotalImmune())
+				if (m_caster->GetTypeId() == TYPEID_PLAYER && ((Player*)m_caster)->isTotalImmune())
                     return SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW;
-
                 break;
             }
             case SPELL_EFFECT_FRIEND_SUMMON:
@@ -7806,22 +7793,6 @@ SpellCastResult Spell::CheckCast(bool strict)
                 uint8 slot = uint8(spellEffect->CalculateSimpleValue() - 1);
                 if (slot != guild->GetPurchasedTabs())
                     return SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW;
-                break;
-            }
-            case SPELL_EFFECT_RESURRECT:
-            case SPELL_EFFECT_RESURRECT_NEW:
-            case SPELL_EFFECT_SELF_RESURRECT:
-            {
-                if (m_caster->isInCombat())
-                    return SPELL_FAILED_AFFECTING_COMBAT;
-
-                if (spellEffect->Effect == SPELL_EFFECT_SELF_RESURRECT)
-                {
-                    if (m_caster->HasAuraType(SPELL_AURA_PREVENT_RESURRECTION))
-                        return SPELL_FAILED_TARGET_CANNOT_BE_RESURRECTED;
-                }
-                else if (unitTarget && unitTarget->HasAuraType(SPELL_AURA_PREVENT_RESURRECTION))
-                    return SPELL_FAILED_TARGET_CANNOT_BE_RESURRECTED;
                 break;
             }
             case SPELL_EFFECT_ADD_COMBO_POINTS:
@@ -8229,25 +8200,31 @@ SpellCastResult Spell::CheckCast(bool strict)
 
 SpellCastResult Spell::CheckPetCast(Unit* target)
 {
-    if(!m_caster->isAlive() && !m_spellInfo->HasAttribute(SPELL_ATTR_CASTABLE_WHILE_DEAD))
+    if (!m_caster->isAlive() && !m_spellInfo->HasAttribute(SPELL_ATTR_CASTABLE_WHILE_DEAD))
         return SPELL_FAILED_CASTER_DEAD;
 
-    if (m_caster->IsNonMeleeSpellCasted(false))              //prevent spellcast interruption by another spellcast
-        return SPELL_FAILED_SPELL_IN_PROGRESS;
+    if (m_caster->IsNonMeleeSpellCasted(false))              // prevent spellcast interruption by another spellcast
+    {
+        if (this->m_spellInfo->Id == 33395)                  // Water Elemental's Freeze should overcast Waterbolt
+            m_caster->InterruptNonMeleeSpells(false);
+        else
+            return SPELL_FAILED_SPELL_IN_PROGRESS;
+    }
+
     if (m_caster->isInCombat() && IsNonCombatSpell(m_spellInfo))
         return SPELL_FAILED_AFFECTING_COMBAT;
 
-    if (m_caster->GetTypeId()==TYPEID_UNIT && (((Creature*)m_caster)->IsPet() || m_caster->isCharmed()))
+    if (m_caster->GetTypeId() == TYPEID_UNIT && (((Creature*)m_caster)->IsPet() || m_caster->isCharmed()))
     {
-                                                            //dead owner (pets still alive when owners ressed?)
+                                                            // dead owner (pets still alive when owners ressed?)
         if (m_caster->GetCharmerOrOwner() && (!m_caster->GetCharmerOrOwner()->isAlive() && !(m_caster->GetCharmerOrOwner()->getDeathState() == GHOULED)))
             return SPELL_FAILED_CASTER_DEAD;
 
-        if(!target && m_targets.getUnitTarget())
+        if (!target && m_targets.getUnitTarget())
             target = m_targets.getUnitTarget();
 
         bool need = false;
-        for(int i = 0; i < MAX_EFFECT_INDEX; ++i)
+        for (uint8 i = 0; i < MAX_EFFECT_INDEX; ++i)
         {
             SpellEffectEntry const* spellEffect = m_spellInfo->GetSpellEffect(SpellEffectIndex(i));
             if(!spellEffect)
@@ -8260,10 +8237,13 @@ SpellCastResult Spell::CheckPetCast(Unit* target)
                 spellEffect->EffectImplicitTargetA == TARGET_SINGLE_PARTY ||
                 spellEffect->EffectImplicitTargetA == TARGET_CURRENT_ENEMY_COORDINATES)
             {
+                if (IsJumpSpell(m_spellInfo))
+                    continue;
+
                 need = true;
-                if(!target)
+                if (!target)
                 {
-                    DEBUG_LOG("Spell::CheckPetCast Charmed creature %s attempt to cast spell %u, but no required target",m_caster->GetObjectGuid().GetString().c_str(),m_spellInfo->Id);
+                    DEBUG_LOG("Spell::CheckPetCast Charmed %s attempt to cast spell %u, but no required target", m_caster->GetGuidStr().c_str(), m_spellInfo->Id);
                     return SPELL_FAILED_BAD_IMPLICIT_TARGETS;
                 }
                 break;
@@ -8280,7 +8260,7 @@ SpellCastResult Spell::CheckPetCast(Unit* target)
             {
                 if (m_caster->IsHostileTo(_target))
                 {
-                    DEBUG_LOG("Spell::CheckPetCast Charmed creature %s attempt to cast positive spell %u, but target %s is hostile",m_caster->GetObjectGuid().GetString().c_str(),m_spellInfo->Id, target->GetObjectGuid().GetString().c_str());
+                    DEBUG_LOG("Spell::CheckPetCast Charmed %s attempt to cast positive spell %u, but target %s is hostile", m_caster->GetGuidStr().c_str(), m_spellInfo->Id, target->GetGuidStr().c_str());
                     return SPELL_FAILED_BAD_TARGETS;
                 }
             }
@@ -8288,13 +8268,13 @@ SpellCastResult Spell::CheckPetCast(Unit* target)
             (!m_IsTriggeredSpell &&
             (!_target->isVisibleForOrDetect(m_caster,m_caster,true) && (m_caster->GetCharmerOrOwner() && !target->isVisibleForOrDetect(m_caster->GetCharmerOrOwner(),m_caster->GetCharmerOrOwner(),true)))))
             {
-                DEBUG_LOG("Spell::CheckPetCast Charmed creature %s attempt to cast spell %u, but target %s is not targetable or not detectable",m_caster->GetObjectGuid().GetString().c_str(),m_spellInfo->Id,target->GetObjectGuid().GetString().c_str());
+                DEBUG_LOG("Spell::CheckPetCast Charmed %s attempt to cast spell %u, but target %s is not targetable or not detectable", m_caster->GetGuidStr().c_str(), m_spellInfo->Id, target->GetGuidStr().c_str());
                 return SPELL_FAILED_BAD_TARGETS;            // guessed error
             }
             else
             {
                 bool dualEffect = false;
-                for(int j = 0; j < MAX_EFFECT_INDEX; ++j)
+                for (uint8 j = 0; j < MAX_EFFECT_INDEX; ++j)
                 {
                                                             // This effects is positive AND negative. Need for vehicles cast.
                     SpellEffectEntry const* spellEffect = m_spellInfo->GetSpellEffect(SpellEffectIndex(j));
@@ -8309,30 +8289,31 @@ SpellCastResult Spell::CheckPetCast(Unit* target)
                                    || spellEffect->EffectImplicitTargetA == TARGET_EFFECT_SELECT
                                    || spellEffect->EffectImplicitTargetA == TARGET_CASTER_COORDINATES);
                 }
+
                 if (!dualEffect && m_caster->getVictim() && (!IsPositiveSpell(m_spellInfo->Id) || IsDispelSpell(m_spellInfo)))
                 {
                     if (!m_caster->IsHostileTo(_target) && (m_caster->GetCharmerOrOwner() && m_caster->GetCharmerOrOwner()->IsFriendlyTo(_target)))
                     {
-                        DEBUG_LOG("Spell::CheckPetCast Charmed creature %s attempt to cast negative spell %u, but target %s is friendly",m_caster->GetObjectGuid().GetString().c_str(),m_spellInfo->Id, target->GetObjectGuid().GetString().c_str());
+                        DEBUG_LOG("Spell::CheckPetCast Charmed %s attempt to cast negative spell %u, but target %s is friendly", m_caster->GetGuidStr().c_str(), m_spellInfo->Id, target->GetGuidStr().c_str());
                         return SPELL_FAILED_BAD_TARGETS;
                     }
                 }
                 else if (!m_caster->GetVehicleKit() && m_caster->IsFriendlyTo(_target) && !(!m_caster->GetCharmerOrOwner() || !m_caster->GetCharmerOrOwner()->IsFriendlyTo(_target))
                      && !dualEffect && !IsDispelSpell(m_spellInfo))
                 {
-                    DEBUG_LOG("Spell::CheckPetCast Charmed creature %s attempt to cast spell %u, but target %s is not valid",m_caster->GetObjectGuid().GetString().c_str(),m_spellInfo->Id,_target->GetObjectGuid().GetString().c_str());
+                    DEBUG_LOG("Spell::CheckPetCast Charmed %s attempt to cast spell %u, but target %s is not valid", m_caster->GetGuidStr().c_str(), m_spellInfo->Id, _target->GetGuidStr().c_str());
                     return SPELL_FAILED_BAD_TARGETS;
                 }
 
                 if (m_caster->GetObjectGuid() == _target->GetObjectGuid() && !dualEffect && !IsPositiveSpell(m_spellInfo->Id))
                 {
-                    DEBUG_LOG("Spell::CheckPetCast Charmed creature %s attempt to cast negative spell %u on self!",m_caster->GetObjectGuid().GetString().c_str(), m_spellInfo->Id);
+                    DEBUG_LOG("Spell::CheckPetCast Charmed %s attempt to cast negative spell %u on self!", m_caster->GetGuidStr().c_str(), m_spellInfo->Id);
                     return SPELL_FAILED_BAD_TARGETS;
                 }
             }
         }
                                                             //cooldown
-        if(m_caster->HasSpellCooldown(m_spellInfo))
+        if (m_caster->HasSpellCooldown(m_spellInfo))
             return SPELL_FAILED_NOT_READY;
     }
 

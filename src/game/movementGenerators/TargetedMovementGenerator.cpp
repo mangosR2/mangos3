@@ -306,9 +306,9 @@ float ChaseMovementGenerator<T>::GetDynamicTargetDistance(T& owner, bool forRang
     float dist;
 
     if (forRangeCheck)
-        dist = CHASE_RECHASE_RANGE_FACTOR * this->m_target->GetCombatReach(&owner) - this->m_target->GetObjectBoundingRadius();
+        dist = CHASE_RECHASE_RANGE_FACTOR * this->m_target->GetCombatReach(&owner, true) - this->m_target->GetObjectBoundingRadius();
     else
-        dist = CHASE_DEFAULT_RANGE_FACTOR * this->m_target->GetCombatReach(&owner);
+        dist = CHASE_DEFAULT_RANGE_FACTOR * this->m_target->GetCombatReach(&owner, true);
 
     return dist + this->m_offset;
 }

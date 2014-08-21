@@ -16,19 +16,20 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+#include "RandomMovementGenerator.h"
 #include "Creature.h"
 #include "MapManager.h"
-#include "RandomMovementGenerator.h"
 #include "Map.h"
 #include "Util.h"
 #include "movement/MoveSplineInit.h"
 #include "movement/MoveSpline.h"
 
 template<>
-RandomMovementGenerator<Creature>::RandomMovementGenerator(const Creature & creature)
+RandomMovementGenerator<Creature>::RandomMovementGenerator(const Creature& creature)
 {
     float respX, respY, respZ, respO, wander_distance;
     creature.GetRespawnCoord(respX, respY, respZ, &respO, &wander_distance);
+
     i_nextMoveTime = ShortTimeTracker(0);
     i_x = respX;
     i_y = respY;
@@ -39,7 +40,7 @@ RandomMovementGenerator<Creature>::RandomMovementGenerator(const Creature & crea
 }
 
 template<>
-void RandomMovementGenerator<Creature>::_setRandomLocation(Creature &creature)
+void RandomMovementGenerator<Creature>::_setRandomLocation(Creature& creature)
 {
     const float angle = rand_norm_f() * (M_PI_F*2.0f);
     const float range = rand_norm_f() * i_radius;
@@ -82,23 +83,24 @@ void RandomMovementGenerator<Creature>::_setRandomLocation(Creature &creature)
 }
 
 template<>
-void RandomMovementGenerator<Creature>::Initialize(Creature &creature)
+void RandomMovementGenerator<Creature>::Initialize(Creature& creature)
 {
     if (!creature.isAlive())
         return;
 
-    creature.addUnitState(UNIT_STAT_ROAMING|UNIT_STAT_ROAMING_MOVE);
+    creature.addUnitState(UNIT_STAT_ROAMING | UNIT_STAT_ROAMING_MOVE);
+
     _setRandomLocation(creature);
 }
 
 template<>
-void RandomMovementGenerator<Creature>::Reset(Creature &creature)
+void RandomMovementGenerator<Creature>::Reset(Creature& creature)
 {
     Initialize(creature);
 }
 
 template<>
-void RandomMovementGenerator<Creature>::Interrupt(Creature &creature)
+void RandomMovementGenerator<Creature>::Interrupt(Creature& creature)
 {
     creature.InterruptMoving();
     creature.clearUnitState(UNIT_STAT_ROAMING | UNIT_STAT_ROAMING_MOVE);
@@ -106,14 +108,14 @@ void RandomMovementGenerator<Creature>::Interrupt(Creature &creature)
 }
 
 template<>
-void RandomMovementGenerator<Creature>::Finalize(Creature &creature)
+void RandomMovementGenerator<Creature>::Finalize(Creature& creature)
 {
     creature.clearUnitState(UNIT_STAT_ROAMING | UNIT_STAT_ROAMING_MOVE);
-    creature.SetWalk(!creature.hasUnitState(UNIT_STAT_RUNNING_STATE), false);
+    creature.SetWalk(!creature.hasUnitState(UNIT_STAT_RUNNING_STATE) && !creature.IsLevitating(), false);
 }
 
 template<>
-bool RandomMovementGenerator<Creature>::Update(Creature &creature, const uint32 &diff)
+bool RandomMovementGenerator<Creature>::Update(Creature& creature, const uint32& diff)
 {
     if (creature.hasUnitState(UNIT_STAT_NOT_MOVE))
     {

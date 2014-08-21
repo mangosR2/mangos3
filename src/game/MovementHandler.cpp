@@ -600,8 +600,6 @@ void WorldSession::HandleMoveHoverAck(WorldPacket& recv_data)
     DEBUG_LOG("CMSG_MOVE_HOVER_ACK");
 
     recv_data.rfinish();
-    /*
-    MovementInfo movementInfo;
 
 //    ObjectGuid guid;                                        // guid - unused
 //    MovementInfo movementInfo;

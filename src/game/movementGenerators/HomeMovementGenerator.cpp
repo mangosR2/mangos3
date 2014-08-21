@@ -40,6 +40,7 @@ void HomeMovementGenerator<Creature>::_setTargetLocation(Creature& owner)
 
     Movement::MoveSplineInit<Unit*> init(owner);
     float x, y, z, o;
+
     // at apply we can select more nice return points base at current movegen
     if (owner.GetMotionMaster()->empty() || !owner.GetMotionMaster()->CurrentMovementGenerator()->GetResetPosition(owner, x, y, z))
     {
@@ -48,27 +49,32 @@ void HomeMovementGenerator<Creature>::_setTargetLocation(Creature& owner)
     }
 
     init.MoveTo(x, y, z, true);
-    init.SetWalk(false);
+    init.SetSmooth(); // fix broken fly movement for old creatures
+    //init.SetWalk(false);
+    // hack for old creatures with bugged fly animation
+    bool bSetWalk = (owner.GetTypeId() == TYPEID_UNIT && owner.IsLevitating() && owner.GetFloatValue(UNIT_FIELD_HOVERHEIGHT) == 0.0f);
+    init.SetWalk(bSetWalk);
     init.Launch();
 
-    arrived = false;
+    m_arrived = false;
     owner.clearUnitState(UNIT_STAT_ALL_DYN_STATES);
 }
 
 bool HomeMovementGenerator<Creature>::Update(Creature& owner, const uint32& time_diff)
 {
-    arrived = owner.movespline->Finalized();
-    return !arrived;
+    m_arrived = owner.movespline->Finalized();
+    return !m_arrived;
 }
 
 void HomeMovementGenerator<Creature>::Finalize(Creature& owner)
 {
-    if (arrived)
+    if (m_arrived)
     {
         if (owner.GetTemporaryFactionFlags() & TEMPFACTION_RESTORE_REACH_HOME)
             owner.ClearTemporaryFaction();
 
         owner.SetWalk(!owner.hasUnitState(UNIT_STAT_RUNNING_STATE) && !owner.IsLevitating(), false);
+        owner.SetHealthPercent(100.0f);
         owner.LoadCreatureAddon(true);
         owner.AI()->JustReachedHome();
     }

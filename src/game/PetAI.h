@@ -57,25 +57,26 @@ enum PetAutoSpellType
 
 enum
 {
-    ALLIES_UPDATE_TIME = 10*IN_MILLISECONDS,
+    ALLIES_UPDATE_TIME = 10 * IN_MILLISECONDS
 };
 
 class MANGOS_DLL_DECL PetAI : public CreatureAI
 {
     public:
 
-        explicit PetAI(Creature *c);
+        explicit PetAI(Creature* c);
 
         void Reset();
 
         void MoveInLineOfSight(Unit*) override;
+        void MovementInform(uint32, uint32) override;
         void AttackStart(Unit*) override;
         void EnterEvadeMode() override;
         void AttackedBy(Unit*) override;
         bool IsVisible(Unit*) const override;
 
         void UpdateAI(const uint32) override;
-        static int Permissible(const Creature *);
+        static int Permissible(const Creature*);
         void JustDied(Unit* pKiller) override;
 
         bool UpdateAIType();
@@ -88,7 +89,7 @@ class MANGOS_DLL_DECL PetAI : public CreatureAI
         Unit* GetPrimaryTarget();
 
     private:
-        bool _isVisible(Unit *) const;
+        bool _isVisible(Unit*) const;
         bool _needToStop(void) const;
         void _stopAttack(void);
 
@@ -104,10 +105,12 @@ class MANGOS_DLL_DECL PetAI : public CreatureAI
         IntervalTimer   m_updateAlliesTimer;
         IntervalTimer   m_attackDistanceRecheckTimer;
 
-        PetAIType       m_AIType;
-        PetAIType       m_savedAIType;
-        float           m_attackDistance;
-        ObjectGuid      m_savedTargetGuid;
-        Unit::SpellIdSet      m_spellType[PET_SPELL_MAX]; //Classified autospell storage
+        PetAIType         m_AIType;
+        PetAIType         m_savedAIType;
+        float             m_attackDistance;
+        float             m_fMaxRadiusToOwner;
+        ObjectGuid        m_savedTargetGuid;
+        Unit::SpellIdSet  m_spellType[PET_SPELL_MAX]; // Classified autospell storage
 };
+
 #endif

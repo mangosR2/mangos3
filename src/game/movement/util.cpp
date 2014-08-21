@@ -23,6 +23,7 @@
 namespace Movement
 {
     double gravity = 19.29110527038574;
+    UInt32Counter splineIdGen;
 
     /// Velocity bounds that makes fall speed limited
     float terminalVelocity = 60.148003f;
@@ -30,12 +31,13 @@ namespace Movement
 
     const float terminal_length = float(terminalVelocity* terminalVelocity) / (2.f* gravity);
     const float terminal_savefall_length = (terminalSavefallVelocity* terminalSavefallVelocity) / (2.f* gravity);
-    const float terminalFallTime = float(terminalVelocity / gravity); // the time that needed to reach terminalVelocity
+    const float terminal_fallTime = float(terminalVelocity / gravity); // the time that needed to reach terminalVelocity
+    const float terminal_safeFall_fallTime = float(terminalSavefallVelocity / gravity); // the time that needed to reach terminalVelocity with safefall
 
     float computeFallTime(float path_length, bool isSafeFall)
     {
-        if (path_length < 0.f)
-            return 0.f;
+        if (path_length < 0.0f)
+            return 0.0f;
 
         float time;
         if (isSafeFall)
@@ -43,12 +45,12 @@ namespace Movement
             if (path_length >= terminal_savefall_length)
                 time = (path_length - terminal_savefall_length) / terminalSavefallVelocity + terminalSavefallVelocity / gravity;
             else
-                time = sqrtf(2.f * path_length / gravity);
+                time = sqrtf(2.0f * path_length / gravity);
         }
         else
         {
             if (path_length >= terminal_length)
-                time = (path_length - terminal_length) / terminalVelocity + terminalFallTime;
+                time = (path_length - terminal_length) / terminalVelocity + terminal_fallTime;
             else
                 time = sqrtf(2.f * path_length / gravity);
         }
@@ -69,11 +71,11 @@ namespace Movement
         if (start_velocity > termVel)
             start_velocity = termVel;
 
-        float terminal_time = terminalFallTime - start_velocity / gravity; // the time that needed to reach terminalVelocity
+        float terminal_time = (isSafeFall ? terminal_safeFall_fallTime : terminal_fallTime) - start_velocity / gravity; // the time that needed to reach terminalVelocity
 
         if (t_passed > terminal_time)
         {
-            result = terminalVelocity * (t_passed - terminal_time) +
+            result = termVel * (t_passed - terminal_time) +
                      start_velocity * terminal_time + gravity * terminal_time * terminal_time * 0.5f;
         }
         else
@@ -86,11 +88,11 @@ namespace Movement
     {
         float result;
 
-        if (t_passed > terminalFallTime)
+        if (t_passed > terminal_fallTime)
         {
             // result = terminalVelocity * (t_passed - terminal_time) + gravity*terminal_time*terminal_time*0.5f;
             // simplified view:
-            result = terminalVelocity * (t_passed - terminalFallTime) + terminal_length;
+            result = terminalVelocity * (t_passed - terminal_fallTime) + terminal_length;
         }
         else
             result = t_passed * t_passed * gravity * 0.5f;

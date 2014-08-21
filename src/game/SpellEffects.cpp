@@ -4325,6 +4325,15 @@ void Spell::EffectDummy(SpellEffectEntry const* effect)
                     m_caster->CastSpell(m_caster, 64540, true);
                     return;
                 }
+                case 64555:                                 // Insane Periodic
+                {
+                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER || unitTarget->HasAura(63050) || unitTarget->HasAura(m_spellInfo->CalculateSimpleValue(eff_idx)))
+                        return;
+
+                    m_caster->CastSpell(unitTarget, 64464, true);
+                    m_caster->CastSpell(unitTarget, m_spellInfo->CalculateSimpleValue(eff_idx), true);
+                    return;
+                }
                 case 64673:                                 // Feral Rush (h)
                 {
                     if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
@@ -4345,6 +4354,14 @@ void Spell::EffectDummy(SpellEffectEntry const* effect)
                     }
 
                     m_caster->CastSpell(m_caster, spell_id, true);
+                    return;
+                }
+                case 65206:                                 // Destabilization Matrix
+                {
+                    if (!unitTarget)
+                        return;
+
+                    m_caster->CastSpell(unitTarget, m_spellInfo->CalculateSimpleValue(eff_idx), true);
                     return;
                 }
                 case 65346:                                 // Proximity Mine
@@ -6562,7 +6579,7 @@ void Spell::EffectJump(SpellEffectEntry const* effect)
     }
     else
     {
-        sLog.outError( "Spell::EffectJump - unsupported target mode for spell ID %u", m_spellInfo->Id );
+        sLog.outError("Spell::EffectJump - unsupported target mode for spell ID %u", m_spellInfo->Id);
         return;
     }
 
@@ -6640,7 +6657,7 @@ void Spell::EffectTeleportUnits(SpellEffectEntry const* effect)
             if (st->GetMapId() == unitTarget->GetMapId())
                 unitTarget->NearTeleportTo(st->x, st->y, st->z, st->orientation,unitTarget == m_caster);
             else if (unitTarget->GetTypeId()==TYPEID_PLAYER)
-                ((Player*)unitTarget)->TeleportTo(*st, unitTarget == m_caster ? TELE_TO_SPELL : 0);
+                ((Player*)unitTarget)->TeleportTo(*st, unitTarget == m_caster ? TELE_TO_SPELL | TELE_TO_NOT_LEAVE_COMBAT : 0);
             break;
         }
         case TARGET_EFFECT_SELECT:
@@ -8490,10 +8507,27 @@ void Spell::EffectDualWield(SpellEffectEntry const* /*effect*/)
         ((Player*)unitTarget)->SetCanDualWield(true);
 }
 
-void Spell::EffectPull(SpellEffectEntry const* /*effect*/)
+void Spell::EffectPull(SpellEffectIndex eff_idx)
 {
     // TODO: create a proper pull towards distract spell center for distract
-    DEBUG_LOG("WORLD: Spell Effect DUMMY");
+    //DEBUG_LOG("WORLD: Spell Effect DUMMY");
+
+    // this needs proper handling
+    // only pulling to caster supported
+    if (!unitTarget || unitTarget->IsTaxiFlying() || !unitTarget->isAlive() || !m_caster->isAlive())
+        return;
+
+    WorldLocation loc = m_caster->GetPosition();
+    loc.SetOrientation(unitTarget->GetOrientation());
+
+    int32 speed_z = m_spellInfo->EffectMiscValue[eff_idx];
+    if (!speed_z)
+        speed_z = 100;
+    int32 speed_xy = m_spellInfo->EffectMiscValueB[eff_idx];
+    if (!speed_xy)
+        speed_xy = 150;
+
+    m_caster->MonsterMoveToDestination(loc.x, loc.y, loc.z, loc.o, float(speed_xy) / 2, float(speed_z) / 10);
 }
 
 void Spell::EffectDistract(SpellEffectEntry const* /*effect*/)
@@ -12382,6 +12416,35 @@ void Spell::EffectScriptEffect(SpellEffectEntry const* effect)
                     m_caster->CastSpell(unitTarget, 61828, true);
                     break;
                 }
+                case 62003:                                 // Algalon - Black Hole Spawn
+                {
+                    if (!unitTarget)
+                        return;
+
+                    // Apply aura which causes black hole phase/1 sec to hostile targets
+                    unitTarget->CastSpell(m_caster, 62185, true);
+                }
+                case 62168:                                 // Algalon - Black Hole Damage
+                {
+                    if (!unitTarget)
+                        return;
+                    unitTarget->CastSpell(unitTarget, 62169, true);
+                    return;
+                }
+                case 62536:                                 // Frog Kiss (quest Blade fit for a champion)
+                {
+                    if (!unitTarget)
+                        return;
+                                                            // remove Warts!
+                    unitTarget->RemoveAurasDueToSpell(62581);
+                    if (!unitTarget->HasAura(62574))        // if not protected by potion cast Warts!
+                        m_caster->CastSpell(unitTarget, 62581, true);
+                                                            // remove protective aura
+                    unitTarget->RemoveAurasDueToSpell(62574);
+
+                    m_caster->GetMotionMaster()->MoveFollow(unitTarget, PET_FOLLOW_DIST, unitTarget->GetAngle(m_caster));
+                    break;
+                }
                 case 62705:                                 // Auto-repair (Ulduar: RX-214)
                 {
                     if (!unitTarget || !unitTarget->IsVehicle())
@@ -12410,6 +12473,15 @@ void Spell::EffectScriptEffect(SpellEffectEntry const* effect)
                         unitTarget->CastSpell(unitTarget, 65347, true);
                     }
                     break;
+                }
+                case 63122:                                 // Clear Insane (Ulduar - Yogg Saron)
+                {
+                    if (!unitTarget)
+                        return;
+
+                    unitTarget->RemoveAurasDueToSpell(63050);
+                    unitTarget->RemoveAurasDueToSpell(63120);
+                    return;
                 }
                 case 63633:                                 // Summon Rubble (Kologarn)
                 {
@@ -12455,7 +12527,8 @@ void Spell::EffectScriptEffect(SpellEffectEntry const* effect)
                             {
                                 if (unitTarget->GetPositionZ() > 245.0f)
                                     return;
-                                stacks = -100; break;
+                                stacks = -100;
+                                break;
                             }
                         }
                         int32 stackAmount = holder->GetStackAmount() + stacks;
@@ -12471,67 +12544,6 @@ void Spell::EffectScriptEffect(SpellEffectEntry const* effect)
                     }
                     return;
                 }
-                case 63122:                                 // Clear Insane (Ulduar - Yogg Saron)
-                {
-                    if (!unitTarget)
-                        return;
-
-                    unitTarget->RemoveAurasDueToSpell(63050);
-                    unitTarget->RemoveAurasDueToSpell(63120);
-                    return;
-                }
-                case 64123:                                 // Lunge (Ulduar - Yogg Saron)
-                {
-                    if (!unitTarget)
-                        return;
-
-                    uint32 spellid = 0;
-                    unitTarget->GetMap()->IsRegularDifficulty() ? spellid = 64125 : spellid = 64126;
-                    unitTarget->CastSpell(unitTarget, spellid, true);
-                    break;
-                }
-                case 64466:                                 // Empowering Shadows (Ulduar - Yogg Saron)
-                {
-                    if (!unitTarget)
-                        return;
-
-                    // effect back to caster (Immortal Guardian)
-                    unitTarget->CastSpell(m_caster, 64467, true);
-                    break;
-                }
-                case 64467:                                 // Empowering Shadows (Ulduar - Yogg Saron)
-                {
-                    if (!unitTarget)
-                        return;
-
-                    uint32 spellid = 0;
-                    unitTarget->GetMap()->IsRegularDifficulty() ? spellid = 64468 : spellid = 64469;
-                    unitTarget->CastSpell(unitTarget, spellid, true);
-                    break;
-                }
-                case 65238:                                 // Shattered Illusion (Ulduar - Yogg Saron)
-                {
-                    if (!unitTarget)
-                        return;
-
-                    unitTarget->RemoveAurasDueToSpell(effect->EffectBasePoints);
-                    return;
-                }
-                case 62003:                                 // Algalon - Black Hole Spawn
-                {
-                    if (!unitTarget)
-                        return;
-
-                    // Apply aura which causes black hole phase/1 sec to hostile targets
-                    unitTarget->CastSpell(m_caster, 62185, true);
-                }
-                case 62168:                                 // Algalon - Black Hole Damage
-                {
-                    if (!unitTarget)
-                        return;
-                    unitTarget->CastSpell(unitTarget, 62169, true);
-                    return;
-                }
                 case 64122:
                 case 65108:                                 // Algalon - Collapsing start explosion to summon black hole
                 {
@@ -12540,6 +12552,22 @@ void Spell::EffectScriptEffect(SpellEffectEntry const* effect)
 
                     // Cast Black hole spawn
                     m_caster->CastSpell(m_caster, 62189, true);
+                    return;
+                }
+                case 64123:                                 // Lunge (Ulduar - Yogg Saron)
+                {
+                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
+                    return;
+
+                    unitTarget->CastSpell(unitTarget, unitTarget->GetMap()->IsRegularDifficulty() ? 64125 : 64126, true);
+                    return;
+                }
+                case 65238:                                 // Shattered Illusion (Ulduar - Yogg Saron)
+                {
+                    if (!unitTarget)
+                        return;
+
+                    unitTarget->RemoveAurasDueToSpell(effect->EffectBasePoints);
                     return;
                 }
                 case 65044:                                 // Flames Ulduar
@@ -12599,6 +12627,31 @@ void Spell::EffectScriptEffect(SpellEffectEntry const* effect)
                     m_caster->CastSpell(unitTarget, 63036, true);
                     return;
                 }
+                case 63993:                                 // Cancel Illusion Room Aura
+                {
+                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
+                        return;
+
+                    unitTarget->CastSpell(unitTarget, 63992, true);
+                    unitTarget->RemoveAurasDueToSpell(m_spellInfo->CalculateSimpleValue(eff_idx));
+                    return;
+                }
+                case 64069:                                 // Match Health (Rank 1)
+                {
+                    if (!unitTarget)
+                        return;
+
+                    unitTarget->SetHealthPercent(m_caster->GetHealthPercent());
+                    return;
+                }
+                case 64131:                                 // Lunge
+                {
+                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
+                        return;
+
+                    unitTarget->CastSpell(m_caster, m_spellInfo->CalculateSimpleValue(eff_idx), true);
+                    return;
+                }
                 case 64456:                                 // Feral Essence Application Removal
                 {
                     if (!unitTarget)
@@ -12606,6 +12659,22 @@ void Spell::EffectScriptEffect(SpellEffectEntry const* effect)
 
                     uint32 spellId = effect->CalculateSimpleValue();
                     unitTarget->RemoveAuraHolderFromStack(spellId);
+                    return;
+                }
+                case 64466:                                 // Empowering Shadows
+                {
+                    if (!unitTarget)
+                        return;
+
+                    unitTarget->CastSpell(m_caster, m_spellInfo->CalculateSimpleValue(eff_idx), true);
+                    return;
+                }
+                case 64467:                                 // Empowering Shadows
+                {
+                    if (!unitTarget)
+                        return;
+
+                    unitTarget->CastSpell(unitTarget, m_caster->GetMap()->IsRegularDifficulty() ? 64468 : 64486, true);
                     return;
                 }
                 case 64475:                                 // Strength of the Creator
@@ -14829,19 +14898,26 @@ void Spell::EffectCharge(SpellEffectEntry const* /*effect*/)
 
     if (unitTarget->GetTypeId() != TYPEID_PLAYER)
         ((Creature*)unitTarget)->StopMoving();
+    else
+    {   // Delay attack, otherwise player makes instant attack after cast
+        if (m_caster->GetAttackTime(BASE_ATTACK) < 300)
+            m_caster->setAttackTimer(BASE_ATTACK, m_caster->GetAttackTime(BASE_ATTACK) + 20 * m_caster->GetDistance(unitTarget));
+        if (m_caster->GetAttackTime(OFF_ATTACK) < 300)
+            m_caster->setAttackTimer(OFF_ATTACK,  m_caster->GetAttackTime(OFF_ATTACK)  + 20 * m_caster->GetDistance(unitTarget));
+    }
 
     float speed = m_spellInfo->GetSpeed() ? m_spellInfo->GetSpeed() : BASE_CHARGE_SPEED;
 
     DEBUG_FILTER_LOG(LOG_FILTER_SPELL_CAST, "Spell::EffectCharge spell %u caster %s target %s speed %f dest. point %f %f %f",
              m_spellInfo->Id,
-             m_caster ? m_caster->GetObjectGuid().GetString().c_str() : "<none>",
-             unitTarget ? unitTarget->GetObjectGuid().GetString().c_str() : "<none>",
+             m_caster ? m_caster->GetGuidStr().c_str() : "<none>",
+             unitTarget ? unitTarget->GetGuidStr().c_str() : "<none>",
              speed, loc.x, loc.y, loc.z);
 
     if (m_caster->IsFalling())
         m_caster->MonsterMoveWithSpeed(loc.x, loc.y, loc.z, speed, false, false);
     else
-        m_caster->MonsterMoveToDestination(loc.x, loc.y, loc.z, loc.o, speed, 0, false, unitTarget);
+        m_caster->MonsterMoveToDestination(loc.x, loc.y, loc.z, loc.o, speed, 0, false, unitTarget, true);
 
     // not all charge effects used in negative spells
     if (unitTarget != m_caster && !IsPositiveSpell(m_spellInfo->Id))
@@ -14876,7 +14952,7 @@ void Spell::EffectCharge2(SpellEffectEntry const* /*effect*/)
     if (m_caster->IsFalling())
         m_caster->MonsterMoveWithSpeed(loc.x, loc.y, loc.z, speed, false, false);
     else
-        m_caster->MonsterMoveToDestination(loc.x, loc.y, loc.z, loc.o, speed, 0, false, unitTarget);
+        m_caster->MonsterMoveToDestination(loc.x, loc.y, loc.z, loc.o, speed, 0, false, unitTarget, true);
 
     // not all charge effects used in negative spells
     if (unitTarget && unitTarget != m_caster && !IsPositiveSpell(m_spellInfo->Id))

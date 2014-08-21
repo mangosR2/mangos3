@@ -39,7 +39,7 @@ static const class staticActionInfo
         actionInfo[UNIT_ACTION_ASSISTANCE](UNIT_ACTION_PRIORITY_ASSISTANCE,ACTION_TYPE_NONRESTOREABLE);
         actionInfo[UNIT_ACTION_CONTROLLED](UNIT_ACTION_PRIORITY_CONTROLLED,ACTION_TYPE_NONRESTOREABLE);
         actionInfo[UNIT_ACTION_CONFUSED](UNIT_ACTION_PRIORITY_CONFUSED,ACTION_TYPE_NONRESTOREABLE);
-        actionInfo[UNIT_ACTION_FEARED]( UNIT_ACTION_PRIORITY_FEARED,ACTION_TYPE_NONRESTOREABLE);
+        actionInfo[UNIT_ACTION_FEARED](UNIT_ACTION_PRIORITY_FEARED,ACTION_TYPE_NONRESTOREABLE);
         actionInfo[UNIT_ACTION_ROOT](UNIT_ACTION_PRIORITY_ROOT,ACTION_TYPE_RESTOREABLE);
         actionInfo[UNIT_ACTION_STUN](UNIT_ACTION_PRIORITY_STUN,ACTION_TYPE_RESTOREABLE);
         actionInfo[UNIT_ACTION_FEIGNDEATH](UNIT_ACTION_PRIORITY_FEIGNDEATH,ACTION_TYPE_NONRESTOREABLE);
@@ -57,101 +57,27 @@ static const class staticActionInfo
 // derived from IdleState_ to not write new GetMovementGeneratorType, Update
 class StunnedState : public IdleMovementGenerator
 {
-public:
-
-    const char* Name() const { return "<Stunned>"; }
-    void Interrupt(Unit &u) {Finalize(u);}
-    void Reset(Unit &u) {Initialize(u);}
-    void Initialize(Unit &u)
-    {
-        Unit* const target = &u;
-        if (!target)
-            return;
-
-        target->addUnitState(UNIT_STAT_STUNNED);
-        target->SetTargetGuid(ObjectGuid());
-
-        target->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED);
-        //Clear unit movement flags
-        target->m_movementInfo.RemoveMovementFlag(movementFlagsMask);
-        target->m_movementInfo.AddMovementFlag(MOVEFLAG_ROOT);
-
-        // Creature specific
-        if (target->GetTypeId() != TYPEID_PLAYER)
-            target->StopMoving();
-        else
-        {
-            target->SetStandState(UNIT_STAND_STATE_STAND);// in 1.5 client
-        }
-
-        target->SendMeleeAttackStop(NULL);
-        target->SetRoot(true);
-    }
-
-    void Finalize(Unit &u)
-    {
-        Unit* const target = &u;
-        if (!target)
-            return;
-        target->clearUnitState(UNIT_STAT_STUNNED);
-        target->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED);
-
-        if (Unit* pVictim = target->getVictim())
-            target->SetTargetGuid(pVictim->GetObjectGuid());
-
-        target->SetRoot(false);
-        target->m_movementInfo.RemoveMovementFlag(MOVEFLAG_ROOT);
-        target->AddEvent(new AttackResumeEvent(*target), ATTACK_DISPLAY_DELAY);
-    }
-
+    public:
+        const char* Name() const { return "<Stunned>"; }
+        void Interrupt(Unit& u) { Finalize(u); }
+        void Reset(Unit& u) { Initialize(u); }
+        void Initialize(Unit& u) {}
+        void Finalize(Unit& u) {}
 };
 
 class RootState : public IdleMovementGenerator
 {
-public:
-
-    const char* Name() const { return "<Rooted>"; }
-    void Interrupt(Unit &u) {Finalize(u);}
-    void Reset(Unit &u) {Initialize(u);}
-    void Initialize(Unit &u)
-    {
-        Unit* const target = &u;
-        if (!target)
-            return;
-        target->StopMoving();
-        target->addUnitState(UNIT_STAT_ROOT);
-        target->SetTargetGuid(ObjectGuid());
-        //Save last orientation
-        if (Unit* pVictim = target->getVictim())
-            target->SetOrientation(target->GetAngle(pVictim));
-
-        //Clear unit movement flags
-        target->m_movementInfo.RemoveMovementFlag(movementFlagsMask);
-        target->m_movementInfo.AddMovementFlag(MOVEFLAG_ROOT);
-        target->SendMeleeAttackStop(NULL);
-        target->SetRoot(true);
-
-    }
-
-    void Finalize(Unit &u)
-    {
-        Unit* const target = &u;
-        if (!target)
-            return;
-        target->clearUnitState(UNIT_STAT_ROOT);
-        target->SetRoot(false);
-        target->m_movementInfo.RemoveMovementFlag(MOVEFLAG_ROOT);
-
-        if (Unit* pVictim = target->getVictim())
-            target->SetTargetGuid(pVictim->GetObjectGuid());
-        target->AddEvent(new AttackResumeEvent(*target), ATTACK_DISPLAY_DELAY);
-    }
+    public:
+        const char* Name() const { return "<Rooted>"; }
+        void Interrupt(Unit& u) { Finalize(u); }
+        void Reset(Unit& u) { Initialize(u); }
+        void Initialize(Unit& u) {}
+        void Finalize(Unit& u) {}
 };
 
 class FeignDeathState : public IdleMovementGenerator
 {
 public:
-
     const char* Name() const { return "<FeignDeath>"; }
     void Interrupt(Unit &u) {Finalize(u);}
     void Reset(Unit &u) {Initialize(u);}
@@ -161,9 +87,11 @@ public:
         if (!target)
             return;
 
-        target->StopMoving();
+        if (target->GetTypeId() != TYPEID_PLAYER)
+            target->StopMoving(true);
+        else
+            target->m_movementInfo.SetMovementFlags(MOVEFLAG_NONE);
 
-        target->m_movementInfo.RemoveMovementFlag(movementFlagsMask);
         target->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNK_29);
         target->SetFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_FEIGN_DEATH);
         target->SetFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_DEAD);
@@ -173,7 +101,6 @@ public:
         target->getHostileRefManager().deleteReferences();
         target->addUnitState(UNIT_STAT_DIED);
         target->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_IMMUNE_OR_LOST_SELECTION);
-
     }
 
     void Finalize(Unit &u)
@@ -193,31 +120,30 @@ class TaxiState : public FlightPathMovementGenerator
 {
 public:
     TaxiState(uint32 mountDisplayId, uint32 path, uint32 startNode = 0) :
-        FlightPathMovementGenerator(sTaxiPathNodesByPath[path], startNode), m_displayId(mountDisplayId), m_previewDisplayId(0)
-    {
-    };
+        FlightPathMovementGenerator(sTaxiPathNodesByPath[path], startNode), m_displayId(mountDisplayId), m_previewDisplayId(0) {}
 
 public:
     const char* Name() const { return "<FlightPath>"; }
-    void Interrupt(Player &u) 
+    void Interrupt(Player& u)
     {
         _Interrupt(u);
+
         u.clearUnitState(UNIT_STAT_TAXI_FLIGHT);
         if (m_displayId)
             u.Unmount();
-        u.RemoveFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_DISABLE_MOVE | UNIT_FLAG_TAXI_FLIGHT);
-        if (m_previewDisplayId)
-        {
-            u.Mount(m_previewDisplayId);
-        }
-    };
 
-    void Reset(Player &u) 
+        u.RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE | UNIT_FLAG_TAXI_FLIGHT);
+
+        if (m_previewDisplayId)
+            u.Mount(m_previewDisplayId);
+    }
+
+    void Reset(Player &u)
     {
         Initialize(u);
-    };
+    }
 
-    void Initialize(Player &u)
+    void Initialize(Player& u)
     {
         if (m_displayId)
         {
@@ -225,11 +151,13 @@ public:
                 m_previewDisplayId = u.GetUInt32Value(UNIT_FIELD_MOUNTDISPLAYID);
             u.Mount(m_displayId);
         }
+
         u.getHostileRefManager().setOnlineOfflineState(false);
         u.addUnitState(UNIT_STAT_TAXI_FLIGHT);
-        u.SetFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_DISABLE_MOVE | UNIT_FLAG_TAXI_FLIGHT);
+        u.SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE | UNIT_FLAG_TAXI_FLIGHT);
+
         _Initialize(u);
-    };
+    }
 
     void Finalize(Player &u)
     {
@@ -237,18 +165,13 @@ public:
         if (m_displayId)
             u.Unmount();
         u.clearUnitState(UNIT_STAT_TAXI_FLIGHT);
-        u.RemoveFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_DISABLE_MOVE | UNIT_FLAG_TAXI_FLIGHT);
-        u.getHostileRefManager().setOnlineOfflineState(true);
-        if(u.pvpInfo.inHostileArea)
-            u.CastSpell(&u, SPELL_ID_HONORLESS_TARGET, true);
+        u.RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE | UNIT_FLAG_TAXI_FLIGHT);
 
         _Finalize(u);
 
         if (m_previewDisplayId)
-        {
             u.Mount(m_previewDisplayId);
-        }
-    };
+    }
 
 private:
     uint32 m_displayId;
@@ -258,25 +181,13 @@ private:
 class OnVehicleState : public IdleMovementGenerator
 {
 public:
-    OnVehicleState(int32 _type) : m_seatId(int8(_type))
-    {};
+    OnVehicleState(int32 _type) : m_seatId(int8(_type)) {}
 
     const char* Name() const { return "<OnVehicle>"; }
-    void Interrupt(Unit &u) {Finalize(u);}
-    void Reset(Unit &u) {Initialize(u);}
-    void Initialize(Unit &u)
-    {
-        Unit* const target = &u;
-        if (!target)
-            return;
-    }
-
-    void Finalize(Unit &u)
-    {
-        Unit* const target = &u;
-        if (!target)
-            return;
-    }
+    void Interrupt(Unit& u) { Finalize(u); }
+    void Reset(Unit& u) { Initialize(u); }
+    void Initialize(Unit& u) {}
+    void Finalize(Unit& u) {}
 
 private:
     int8 m_seatId;
@@ -285,25 +196,13 @@ private:
 class ControlledState : public IdleMovementGenerator
 {
 public:
-    ControlledState(int32 _type) : m_state(uint8(_type))
-    {};
+    ControlledState(int32 _type) : m_state(uint8(_type)) {}
 
     const char* Name() const { return "<Controlled>"; }
-    void Interrupt(Unit &u) {Finalize(u);}
-    void Reset(Unit &u) {Initialize(u);}
-    void Initialize(Unit &u)
-    {
-        Unit* const target = &u;
-        if (!target)
-            return;
-    }
-
-    void Finalize(Unit &u)
-    {
-        Unit* const target = &u;
-        if (!target)
-            return;
-    }
+    void Interrupt(Unit& u) { Finalize(u); }
+    void Reset(Unit& u) { Initialize(u); }
+    void Initialize(Unit& u) {}
+    void Finalize(Unit& u) {}
 
 private:
     uint8 m_state;
@@ -347,9 +246,9 @@ UnitActionPtr UnitStateMgr::CreateStandartState(UnitActionId stateId, ...)
         }
         case UNIT_ACTION_TAXI:
         {
-            uint32 mountDisplayId = va_arg(vargs,uint32);
-            uint32 path           = va_arg(vargs,uint32);
-            uint32 startNode      = va_arg(vargs,uint32);
+            uint32 mountDisplayId = va_arg(vargs, uint32);
+            uint32 path           = va_arg(vargs, uint32);
+            uint32 startNode      = va_arg(vargs, uint32);
             state = UnitActionPtr(new TaxiState(mountDisplayId, path, startNode));
             break;
         }
@@ -378,6 +277,10 @@ UnitStateMgr::UnitStateMgr(Unit* owner) : m_owner(owner), m_needReinit(false)
 
 UnitStateMgr::~UnitStateMgr()
 {
+    for (UnitActionStorage::reverse_iterator itr = m_actions.rbegin(); itr != m_actions.rend(); ++itr)
+        itr->second.m_action = UnitActionPtr(NULL);
+
+    m_actions.clear();
 }
 
 void UnitStateMgr::InitDefaults(bool immediate)
@@ -419,7 +322,7 @@ void UnitStateMgr::Update(uint32 diff)
     if (!state->Update(this, diff))
     {
         DEBUG_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS, "UnitStateMgr: %s finished action %s", GetOwnerStr().c_str(), state->TypeName());
-        DropAction(state->priority);
+        DropAction(state->m_priority);
     }
 }
 
@@ -434,8 +337,10 @@ void UnitStateMgr::DropAction(UnitActionId actionId, UnitActionPriority priority
     {
         std::vector<UnitActionPriority> priorityToDrop;
         for (UnitActionStorage::const_iterator itr = m_actions.begin(); itr != m_actions.end(); ++itr)
-            if (itr->first <= priority && itr->second.Id == actionId)
+        {
+            if (itr->first <= priority && itr->second.m_id == actionId)
                 priorityToDrop.push_back(itr->first);
+        }
 
         while (!priorityToDrop.empty())
         {
@@ -489,7 +394,7 @@ void UnitStateMgr::DropActionHigherThen(UnitActionPriority priority)
 void UnitStateMgr::PushAction(UnitActionId actionId)
 {
     UnitActionPtr state = CreateStandartState(actionId);
-    PushAction(actionId, state, staticActionInfo[actionId].priority, staticActionInfo[actionId].restoreable); 
+    PushAction(actionId, state, staticActionInfo[actionId].priority, staticActionInfo[actionId].restoreable);
 }
 
 void UnitStateMgr::PushAction(UnitActionId actionId, UnitActionPriority priority)
@@ -500,22 +405,24 @@ void UnitStateMgr::PushAction(UnitActionId actionId, UnitActionPriority priority
 
 void UnitStateMgr::PushAction(UnitActionId actionId, UnitActionPtr state)
 {
-    PushAction(actionId, state, staticActionInfo[actionId].priority, staticActionInfo[actionId].restoreable); 
+    PushAction(actionId, state, staticActionInfo[actionId].priority, staticActionInfo[actionId].restoreable);
 }
 
 void UnitStateMgr::PushAction(UnitActionId actionId, UnitActionPtr state, UnitActionPriority priority, eActionType restoreable)
 {
     ActionInfo* oldInfo = CurrentState();
-    UnitActionPriority _priority = oldInfo ? oldInfo->priority : UNIT_ACTION_PRIORITY_IDLE;
+    UnitActionPriority oldPriority = oldInfo ? oldInfo->m_priority : UNIT_ACTION_PRIORITY_IDLE;
 
     // Only interrupt action, if not drop his below and action lower by priority
     if (oldInfo &&
-        oldInfo->HasFlag(ACTION_STATE_ACTIVE) && 
-        oldInfo->Id != actionId &&
-        _priority < priority)
+        oldInfo->HasFlag(ACTION_STATE_ACTIVE) &&
+        oldInfo->m_id != actionId &&
+        oldPriority < priority)
+    {
         oldInfo->Interrupt(this);
+    }
 
-    if (_priority > UNIT_ACTION_PRIORITY_IDLE)
+    if (oldPriority > UNIT_ACTION_PRIORITY_IDLE)
     {
         // Some speedup - testing - not need drop Idle/None actions
         DropAction(actionId, priority);
@@ -530,7 +437,7 @@ void UnitStateMgr::PushAction(UnitActionId actionId, UnitActionPtr state, UnitAc
         UnitActionStorage::iterator itr = m_actions.find(priority);
         if (itr != m_actions.end())
         {
-            if (itr->second.Id == actionId)
+            if (itr->second.m_id == actionId)
             {
                 itr->second.Reset(this);
                 needInsert = false;
@@ -539,9 +446,10 @@ void UnitStateMgr::PushAction(UnitActionId actionId, UnitActionPtr state, UnitAc
     }
 
     if (needInsert)
-        m_actions.insert(UnitActionStorage::value_type(priority,ActionInfo(actionId, state, priority, restoreable)));
+        m_actions.insert(UnitActionStorage::value_type(priority, ActionInfo(actionId, state, priority, restoreable)));
 
     IncreaseCounter(actionId);
+
 /*
     ActionInfo* newInfo = CurrentState();
     if (newInfo && newInfo != oldInfo)
@@ -555,24 +463,30 @@ void UnitStateMgr::PushAction(UnitActionId actionId, UnitActionPtr state, UnitAc
 ActionInfo* UnitStateMgr::GetAction(UnitActionPriority priority)
 {
     for (UnitActionStorage::reverse_iterator itr = m_actions.rbegin(); itr != m_actions.rend(); ++itr)
+    {
         if (itr->first == priority)
             return &itr->second;
+    }
     return NULL;
 }
 
-ActionInfo* UnitStateMgr::GetAction(UnitActionPtr _action)
+ActionInfo* UnitStateMgr::GetAction(UnitActionPtr action)
 {
     for (UnitActionStorage::iterator itr = m_actions.begin(); itr != m_actions.end(); ++itr)
-        if (itr->second.Action() == _action)
+    {
+        if (itr->second.Action() == action)
             return &itr->second;
+    }
     return NULL;
 }
 
 ActionInfo* UnitStateMgr::GetAction(UnitActionId actionId)
 {
     for (UnitActionStorage::reverse_iterator itr = m_actions.rbegin(); itr != m_actions.rend(); ++itr)
-        if (itr->second.Id == actionId)
+    {
+        if (itr->second.m_id == actionId)
             return &itr->second;
+    }
     return NULL;
 }
 
@@ -590,7 +504,7 @@ ActionInfo* UnitStateMgr::CurrentState()
 void UnitStateMgr::DropAllStates()
 {
     // Assume, that if only one action - that IDLE appears (rechecked later).
-    if (m_actions.size() > 1 )
+    if (m_actions.size() > 1)
     {
         DEBUG_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS, "UnitStateMgr:DropAllStates %s drop all active states (count = %u)", GetOwnerStr().c_str(), m_actions.size());
         DropActionHigherThen(UNIT_ACTION_PRIORITY_IDLE);
@@ -600,9 +514,9 @@ void UnitStateMgr::DropAllStates()
         PushAction(UNIT_ACTION_IDLE);
 }
 
-std::string const UnitStateMgr::GetOwnerStr() 
+std::string const UnitStateMgr::GetOwnerStr()
 {
-    return GetOwner()->IsInWorld() ? GetOwner()->GetGuidStr() : "<Uninitialized>"; 
+    return GetOwner()->IsInWorld() ? GetOwner()->GetGuidStr() : "<Uninitialized>";
 };
 
 bool ActionInfo::operator == (ActionInfo& val)
@@ -610,9 +524,9 @@ bool ActionInfo::operator == (ActionInfo& val)
     return (Action() == val.Action());
 };
 
-bool ActionInfo::operator == (UnitActionPtr _action)
+bool ActionInfo::operator == (UnitActionPtr action)
 {
-    return (Action() == _action);
+    return (Action() == action);
 };
 
 bool ActionInfo::operator != (ActionInfo& val)
@@ -620,9 +534,9 @@ bool ActionInfo::operator != (ActionInfo& val)
     return (Action() != val.Action());
 };
 
-bool ActionInfo::operator != (UnitActionPtr _action)
+bool ActionInfo::operator != (UnitActionPtr action)
 {
-    return (Action() != _action);
+    return (Action() != action);
 };
 
 void ActionInfo::Delete()
@@ -653,7 +567,7 @@ void ActionInfo::Initialize(UnitStateMgr* mgr)
 
 void ActionInfo::Finalize(UnitStateMgr* mgr)
 {
-    if (!HasFlag(ACTION_STATE_INITIALIZED) || 
+    if (!HasFlag(ACTION_STATE_INITIALIZED) ||
         HasFlag(ACTION_STATE_FINALIZED))
         return;
 
@@ -669,7 +583,7 @@ void ActionInfo::Finalize(UnitStateMgr* mgr)
 
 void ActionInfo::Interrupt(UnitStateMgr* mgr)
 {
-    if (!HasFlag(ACTION_STATE_INITIALIZED) || 
+    if (!HasFlag(ACTION_STATE_INITIALIZED) ||
         HasFlag(ACTION_STATE_FINALIZED) ||
         HasFlag(ACTION_STATE_INTERRUPTED))
         return;
@@ -689,7 +603,7 @@ void ActionInfo::Reset(UnitStateMgr* mgr)
     if (!HasFlag(ACTION_STATE_INITIALIZED))
         return;
 
-    if (!HasFlag(ACTION_STATE_INTERRUPTED) && 
+    if (!HasFlag(ACTION_STATE_INTERRUPTED) &&
         HasFlag(ACTION_STATE_ACTIVE))
         Interrupt(mgr);
 
@@ -699,22 +613,21 @@ void ActionInfo::Reset(UnitStateMgr* mgr)
 
 bool ActionInfo::Update(UnitStateMgr* mgr, uint32 diff)
 {
-    if (Action() && 
+    if (Action() &&
         (!HasFlag(ACTION_STATE_INITIALIZED) ||
         HasFlag(ACTION_STATE_INTERRUPTED)))
+    {
         Initialize(mgr);
+    }
 
     AddFlag(ACTION_STATE_ACTIVE);
 
     // DEBUG_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS, "ActionInfo: %s update action %s", mgr->GetOwnerStr().c_str(), TypeName());
 
-    if (Action())
-        return Action()->Update(*mgr->GetOwner(), diff);
-    else
-        return false;
+    return Action() ? Action()->Update(*mgr->GetOwner(), diff) : false;
 }
 
-const char* ActionInfo::TypeName() const 
+const char* ActionInfo::TypeName() const
 {
-    return (action ? action->Name() : "<empty>");
+    return (m_action ? m_action->Name() : "<empty>");
 }

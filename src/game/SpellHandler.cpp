@@ -714,7 +714,7 @@ void WorldSession::HandleSpellClick( WorldPacket & recv_data )
     if (!unit)
         return;
 
-    if (_player->isInCombat() && !unit->IsVehicle())                              // client prevent click and set different icon at combat state
+    if (_player->isInCombat() && !_player->GetMap()->IsDungeon() && !unit->IsVehicle())                              // client prevent click and set different icon at combat state
         return;
 
     SpellClickInfoMapBounds clickPair = sObjectMgr.GetSpellClickInfoMapBounds(unit->GetEntry());

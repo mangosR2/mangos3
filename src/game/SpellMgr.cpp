@@ -901,6 +901,8 @@ bool IsPositiveEffect(SpellEntry const* spellproto, SpellEffectIndex effIndex)
                 case 54530:                                 // Opening
                 case 56099:                                 // Throw Ice
                 case 62105:                                 // To'kini's Blowgun
+                case 63745:                                 // Sara's Blessing
+                case 63747:                                 // Sara's Fervor
                 case 64402:                                 // Rocket Strike
                     return true;
                 default:
@@ -1273,6 +1275,44 @@ bool IsNonPositiveSpell(SpellEntry const* spellProto)
         return false;
 
     return true;
+}
+
+bool IsJumpEffect(SpellEntry const* spellProto, SpellEffectIndex effIndex)
+{
+    if (!spellProto)
+        return false;
+
+    switch (spellProto->Effect[effIndex])
+    {
+        case SPELL_EFFECT_LEAP:
+        case SPELL_EFFECT_JUMP:
+        case SPELL_EFFECT_JUMP2:
+        case SPELL_EFFECT_LEAP_BACK:
+            return true;
+    }
+
+    return false;
+}
+
+bool IsJumpSpell(SpellEntry const* spellProto)
+{
+    // spells with at least one jump effect are considered jump
+    for (uint8 i = 0; i < MAX_EFFECT_INDEX; ++i)
+    {
+        if (spellProto->Effect[i] && IsJumpEffect(spellProto, SpellEffectIndex(i)))
+            return true;
+    }
+
+    return false;
+}
+
+bool IsJumpSpell(uint32 spellId)
+{
+    SpellEntry const* spellProto = sSpellStore.LookupEntry(spellId);
+    if (!spellProto)
+        return false;
+
+    return IsJumpSpell(spellProto);
 }
 
 bool IsSingleTargetSpell(SpellEntry const *spellInfo)
@@ -2526,6 +2566,10 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
             // Phase 2 Transform and Shadowy Barrier
             if (MatchedSpellIdPair(65157, 64775) || MatchedSpellIdPair(65157, 64775))
                 return false;
+
+			// Empowered (dummy) and Empowered
+			if (MatchedSpellIdPair(64161, 65294) || MatchedSpellIdPair(64161, 65294))
+				return false;
             break;
         }
         case SPELLFAMILY_WARLOCK:

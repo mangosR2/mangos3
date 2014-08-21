@@ -242,6 +242,11 @@ BindIP = "0.0.0.0"
 #        Min:     100 ( 1 MapUpdate cycle)
 #        Max:     2000( 2s)
 #
+#    PathFinder.OptimizePath
+#        Use or not path finder optimize (cut calculated points).
+#                 0  (disable)
+#        Default: 1  (enable)
+#
 ###################################################################################################################
 
 UseProcessors = 0
@@ -277,6 +282,7 @@ ObjectLoadingSplitter.MaxAllowedTime = 10
 Calendar.RemoveExpiredEvents = -1
 MapUpdate.PositionUpdateDelay = 400
 vmap.Dynamic.DoubleCheck = 0
+PathFinder.OptimizePath = 1
 
 ###################################################################################################################
 # SERVER LOGGING

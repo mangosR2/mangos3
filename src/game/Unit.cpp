@@ -13536,7 +13536,7 @@ void CharmInfo::SetSpellAutocast( uint32 spell_id, bool state )
 void Unit::DoPetAction(Player* owner, uint8 flag, uint32 spellid, ObjectGuid petGuid, ObjectGuid targetGuid)
 {
     if (!IsInWorld() ||
-    (GetTypeId() == TYPEID_UNIT && ((Creature*)this)->IsPet() &&  !GetCharmInfo()))
+        (GetTypeId() == TYPEID_UNIT && ((Creature*)this)->IsPet() &&  !GetCharmInfo()))
         return;
 
     if (!isAlive())
@@ -13545,16 +13545,15 @@ void Unit::DoPetAction(Player* owner, uint8 flag, uint32 spellid, ObjectGuid pet
         return;
     }
 
-    switch(flag)
+    switch (flag)
     {
         case ACT_COMMAND:                                   //0x07
         {
-        // Maybe exists some flag that disable it at client side
+            // Maybe exists some flag that disable it at client side
             if (petGuid.IsVehicle())
                 return;
 
-
-            switch(spellid)
+            switch (spellid)
             {
                 case COMMAND_STAY:                          //flat=1792  //STAY
                 {
@@ -13563,7 +13562,7 @@ void Unit::DoPetAction(Player* owner, uint8 flag, uint32 spellid, ObjectGuid pet
                     AttackStop();
                     StopMoving();
                     GetMotionMaster()->Clear(true);
-                    GetCharmInfo()->SetState(CHARM_STATE_COMMAND,COMMAND_STAY);
+                    GetCharmInfo()->SetState(CHARM_STATE_COMMAND, COMMAND_STAY);
                     GetMotionMaster()->MoveTargetedHome();
                     SendCharmState();
                     break;
@@ -13574,7 +13573,7 @@ void Unit::DoPetAction(Player* owner, uint8 flag, uint32 spellid, ObjectGuid pet
                         InterruptNonMeleeSpells(false);
                     AttackStop();
                     GetMotionMaster()->Clear(true);
-                    GetCharmInfo()->SetState(CHARM_STATE_COMMAND,COMMAND_FOLLOW);
+                    GetCharmInfo()->SetState(CHARM_STATE_COMMAND, COMMAND_FOLLOW);
                     GetMotionMaster()->MoveTargetedHome();
                     SendCharmState();
                     break;
@@ -13582,7 +13581,7 @@ void Unit::DoPetAction(Player* owner, uint8 flag, uint32 spellid, ObjectGuid pet
                 case COMMAND_ATTACK:                        //spellid=1792  //ATTACK
                 {
                     Unit* TargetUnit = owner->GetMap()->GetUnit(targetGuid);
-                    if(!TargetUnit)
+                    if (!TargetUnit)
                     {
                         SendPetActionFeedback(FEEDBACK_NOTHING_TO_ATT);
                         return;
@@ -13596,7 +13595,7 @@ void Unit::DoPetAction(Player* owner, uint8 flag, uint32 spellid, ObjectGuid pet
                     }
 
                     // Not let attack through obstructions
-                    if(!IsWithinLOSInMap(TargetUnit) && !owner->IsWithinLOSInMap(TargetUnit) && !TargetUnit->isInAccessablePlaceFor(this))
+                    if (!IsWithinLOSInMap(TargetUnit) && !owner->IsWithinLOSInMap(TargetUnit) && !TargetUnit->isInAccessablePlaceFor(this))
                     {
                         SendPetActionFeedback(FEEDBACK_CANT_ATT_TARGET);
                         return;
@@ -13624,7 +13623,7 @@ void Unit::DoPetAction(Player* owner, uint8 flag, uint32 spellid, ObjectGuid pet
                                 ((Creature*)this)->AI()->AttackStart(TargetUnit);
 
                             // 10% chance to play special pet attack talk, else growl
-                            if(((Creature*)this)->IsPet() && ((Pet*)this)->getPetType() == SUMMON_PET && roll_chance_i(10))
+                            if (((Creature*)this)->IsPet() && ((Pet*)this)->getPetType() == SUMMON_PET && roll_chance_i(10))
                                 SendPetTalk((uint32)PET_TALK_ATTACK);
                             else
                             {
@@ -13643,7 +13642,7 @@ void Unit::DoPetAction(Player* owner, uint8 flag, uint32 spellid, ObjectGuid pet
                     StopMoving();
                     GetMotionMaster()->Clear(true);
 
-                    if(((Creature*)this)->IsPet())
+                    if (((Creature*)this)->IsPet())
                     {
                         Pet* p = (Pet*)this;
                         if (p->getPetType() == HUNTER_PET)
@@ -13668,7 +13667,7 @@ void Unit::DoPetAction(Player* owner, uint8 flag, uint32 spellid, ObjectGuid pet
         }
         case ACT_REACTION:                                  // 0x6
         {
-            switch(spellid)
+            switch (spellid)
             {
                 case REACT_PASSIVE:                         //passive
                 case REACT_DEFENSIVE:                       //recovery
@@ -13714,8 +13713,8 @@ void Unit::DoPetCastSpell(Unit* target, uint32 spellId)
     }
 
     // do not cast unknown spells
-    SpellEntry const *spellInfo = sSpellStore.LookupEntry(spellId);
-    if(!spellInfo)
+    SpellEntry const* spellInfo = sSpellStore.LookupEntry(spellId);
+    if (!spellInfo)
     {
         sLog.outError("WORLD: unknown PET spell id %i", spellInfo->Id);
         return;
@@ -13732,7 +13731,6 @@ void Unit::DoPetCastSpell(Unit* target, uint32 spellId)
         powner->CallForAllControlledUnits(DoPetCastWithHelper(powner, cast_count, &targets, spellInfo),CONTROLLED_PET|CONTROLLED_GUARDIANS|CONTROLLED_CHARM);
     else
         DoPetCastSpell(NULL, cast_count, &targets, spellInfo);
-
 }
 
 void Unit::DoPetCastSpell(Player* owner, uint8 cast_count, SpellCastTargets* targets, SpellEntry const* spellInfo )
@@ -13768,7 +13766,7 @@ void Unit::DoPetCastSpell(Player* owner, uint8 cast_count, SpellCastTargets* tar
         // do not cast passive and not learned spells
         if (IsPassiveSpell(spellInfo->Id))
             return;
-        else if((GetObjectGuid().IsPet() && !((Pet*)this)->HasSpell(spellInfo->Id)))
+        else if ((GetObjectGuid().IsPet() && !((Pet*)this)->HasSpell(spellInfo->Id)))
             return;
         else if ((GetObjectGuid().IsCreatureOrVehicle() && !((Creature*)this)->HasSpell(spellInfo->Id)))
             return;
@@ -13796,8 +13794,10 @@ void Unit::DoPetCastSpell(Player* owner, uint8 cast_count, SpellCastTargets* tar
     // autosearch for target
     if (!unit_target)
     {
-        unit_target =  GetObjectGuid().IsPet() ? ((Pet*)this)->SelectPreferredTargetForSpell(spellInfo) :
-                                                   pet->SelectPreferredTargetForSpell(spellInfo);
+        unit_target = GetObjectGuid().IsPet()
+            ? ((Pet*)this)->SelectPreferredTargetForSpell(spellInfo)
+            : pet->SelectPreferredTargetForSpell(spellInfo);
+
         targets->setUnitTarget(unit_target);
     }
 
@@ -13816,20 +13816,20 @@ void Unit::DoPetCastSpell(Player* owner, uint8 cast_count, SpellCastTargets* tar
                             unit_target2 ? unit_target2->GetObjectGuid().GetString().c_str() : "<none>",
                             result);
 
-    //auto turn to target unless possessed
+    // auto turn to target unless possessed
     if (result == SPELL_FAILED_UNIT_NOT_INFRONT && !HasAuraType(SPELL_AURA_MOD_POSSESS))
     {
         if (unit_target)
         {
             SetInFront(unit_target);
             if (unit_target->GetTypeId() == TYPEID_PLAYER)
-                SendCreateUpdateToPlayer( (Player*)unit_target );
+                SendCreateUpdateToPlayer((Player*)unit_target);
         }
         else if (unit_target2)
         {
             SetInFront(unit_target2);
             if (unit_target2->GetTypeId() == TYPEID_PLAYER)
-                SendCreateUpdateToPlayer( (Player*)unit_target2 );
+                SendCreateUpdateToPlayer((Player*)unit_target2);
         }
 
         if (owner)
@@ -13848,19 +13848,20 @@ void Unit::DoPetCastSpell(Player* owner, uint8 cast_count, SpellCastTargets* tar
     {
         if (GetObjectGuid().IsPet())
         {
-            //10% chance to play special pet attack talk, else growl
-            //actually this only seems to happen on special spells, fire shield for imp, torment for voidwalker, but it's stupid to check every spell
-            if(((Pet*)this)->getPetType() == SUMMON_PET && (urand(0, 100) < 10))
+            // 10% chance to play special pet attack talk, else growl
+            // actually this only seems to happen on special spells, fire shield for imp, torment for voidwalker, but it's stupid to check every spell
+            if (((Pet*)this)->getPetType() == SUMMON_PET && (urand(0, 100) < 10))
                 SendPetTalk((uint32)PET_TALK_SPECIAL_SPELL);
             else
                 SendPetAIReaction();
         }
 
-        if (unit_target && owner && !owner->IsFriendlyTo(unit_target) && !HasAuraType(SPELL_AURA_MOD_POSSESS))
+        if (unit_target && owner && !owner->IsFriendlyTo(unit_target) && !HasAuraType(SPELL_AURA_MOD_POSSESS) &&
+            !IsPositiveSpell(spellInfo))
         {
             // This is true if pet has no target or has target but targets differs.
             Unit* pVictim = getVictim();
-            if (pVictim != unit_target)
+            if (pVictim != unit_target && !IsJumpSpell(spellInfo))
             {
                 if (pVictim)
                     AttackStop();
@@ -14283,8 +14284,17 @@ void Unit::StopMoving(bool ignoreMoveState/*=false*/)
         return;
 
     Movement::MoveSplineInit<Unit*> init(*this);
-    init.SetFacing(GetOrientation());
-    init.Launch();
+
+    if (ignoreMoveState)
+    {
+        init.SetWalk(true);
+        init.SetFacing(GetOrientation());
+        init.Launch();
+    }
+    else
+    {
+        init.Stop();
+    }
 }
 
 void Unit::InterruptMoving(bool ignoreMoveState /*=false*/)
@@ -15037,11 +15047,12 @@ void Unit::MonsterMoveWithSpeed(float x, float y, float z, float speed, bool gen
     MaNGOS::NormalizeMapCoord(x);
     MaNGOS::NormalizeMapCoord(y);
 
+    SetFallInformation(0, z);
+
     GetMotionMaster()->MoveWithSpeed(x, y, z, speed, generatePath, forceDestination);
-    SetFallInformation(0,z);
 }
 
-void Unit::MonsterMoveToDestination(float x, float y, float z, float o, float speed, float height, bool isKnockBack, Unit* target)
+void Unit::MonsterMoveToDestination(float x, float y, float z, float o, float speed, float height, bool isKnockBack, Unit* target /*=NULL*/, bool straightLine /*=false*/)
 {
     MaNGOS::NormalizeMapCoord(x);
     MaNGOS::NormalizeMapCoord(y);
@@ -15052,8 +15063,9 @@ void Unit::MonsterMoveToDestination(float x, float y, float z, float o, float sp
         InterruptNonMeleeSpells(false);
     }
 
-    SetFallInformation(0,z);
-    GetMotionMaster()->MoveToDestination(x, y, z, o, target, speed, height, 0);
+    SetFallInformation(0, z);
+
+    GetMotionMaster()->MoveToDestination(x, y, z, o, target, speed, height, 0, straightLine);
 }
 
 struct SetPvPHelper
@@ -15407,20 +15419,25 @@ void Unit::KnockBackWithAngle(float angle, float horizontalSpeed, float vertical
     }
     else
     {
-        float vsin = sin(angle);
-        float vcos = cos(angle);
-        float moveTimeHalf = verticalSpeed / Movement::gravity;
-        float max_height = -Movement::computeFallElevation(moveTimeHalf,false,-verticalSpeed);
+        if (((Creature*)this)->GetCreatureInfo()->MechanicImmuneMask & MECHANIC_KNOCKOUT)
+            return;
+        if (horizontalSpeed <= 0.1f)
+            return;
 
+        float moveTimeHalf = verticalSpeed / Movement::gravity;
+        float max_height = -Movement::computeFallElevation(moveTimeHalf, false, -verticalSpeed);
         float dis = 2 * moveTimeHalf * horizontalSpeed;
+
         float ox, oy, oz;
         GetPosition(ox, oy, oz);
-        float fx = ox + dis * vcos;
-        float fy = oy + dis * vsin;
+
+        float fx = ox + (dis * cos(angle));
+        float fy = oy + (dis * sin(angle));
         float fz = oz;
 
         SetFallInformation(0, fz);
-        MonsterMoveToDestination(fx,fy,fz,GetOrientation(),horizontalSpeed,max_height, true);
+
+        MonsterMoveToDestination(fx, fy, fz, angle, horizontalSpeed, max_height, true);
     }
 }
 

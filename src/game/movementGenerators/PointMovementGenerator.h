@@ -24,87 +24,133 @@
 #include "Creature.h"
 
 template<class T>
-class MANGOS_DLL_SPEC PointMovementGenerator
-: public MovementGeneratorMedium< T, PointMovementGenerator<T> >
+class MANGOS_DLL_SPEC PointMovementGenerator: public MovementGeneratorMedium<T, PointMovementGenerator<T> >
 {
     public:
-        PointMovementGenerator(uint32 _id, float _x, float _y, float _z, bool _generatePath) :
-          id(_id), i_x(_x), i_y(_y), i_z(_z), m_generatePath(_generatePath), i_recalculateTravel(false) {}
+        PointMovementGenerator(uint32 id, float x, float y, float z, bool generatePath) :
+            m_id(id), m_x(x), m_y(y), m_z(z), m_generatePath(generatePath) {}
 
-        void Initialize(T &);
-        void Finalize(T &);
-        void Interrupt(T &);
-        void Reset(T &unit);
-        bool Update(T &, const uint32 &diff);
+        void Initialize(T&);
+        void Finalize(T&);
+        void Interrupt(T&);
+        void Reset(T&);
+        bool Update(T&, uint32 const&);
 
         void unitSpeedChanged() { i_recalculateTravel=true; }
 
-        void MovementInform(T &);
+        void MovementInform(T&);
 
         MovementGeneratorType GetMovementGeneratorType() const override { return POINT_MOTION_TYPE; }
-        const char* Name() const { return "<Point>"; }
+        char const* Name() const { return "<Point>"; }
 
-        bool GetDestination(float& x, float& y, float& z) const { x=i_x; y=i_y; z=i_z; return true; }
+        bool GetDestination(float& x, float& y, float& z) const { x = m_x; y = m_y; z = m_z; return true; }
+
     private:
-        uint32 id;
-        float i_x,i_y,i_z;
+        uint32 m_id;
+        float m_x, m_y, m_z;
         bool m_generatePath;
         bool i_recalculateTravel;
 };
 
-class MANGOS_DLL_SPEC AssistanceMovementGenerator
-: public PointMovementGenerator<Creature>
+class MANGOS_DLL_SPEC AssistanceMovementGenerator : public PointMovementGenerator<Creature>
 {
     public:
-        AssistanceMovementGenerator(float _x, float _y, float _z) :
-            PointMovementGenerator<Creature>(0, _x, _y, _z, true) {}
+        AssistanceMovementGenerator(float x, float y, float z) :
+            PointMovementGenerator<Creature>(0, x, y, z, true) {}
+
+        void Finalize(Unit&) override;
 
         MovementGeneratorType GetMovementGeneratorType() const override { return ASSISTANCE_MOTION_TYPE; }
-        void Finalize(Unit&) override;
-};
-
-// Does almost nothing - just doesn't allows previous movegen interrupt current effect. Can be reused for charge effect
-class EffectMovementGenerator : public MovementGenerator
-{
-    public:
-        explicit EffectMovementGenerator(uint32 Id) : m_Id(Id) {}
-        void Initialize(Unit &) override {}
-        void Finalize(Unit &unit) override;
-        void Interrupt(Unit &) override {}
-        void Reset(Unit &) override {}
-        bool Update(Unit &u, const uint32 &) override;
-        MovementGeneratorType GetMovementGeneratorType() const override { return EFFECT_MOTION_TYPE; }
-        const char* Name() const override { return "<Effect>"; }
-    private:
-        uint32 m_Id;
-};
-
-// Does same es Effect, but cleanup transport flags after finalize.
-class EjectMovementGenerator : public MovementGenerator
-{
-    public:
-        explicit EjectMovementGenerator(uint32 Id) : m_Id(Id) {}
-        void Initialize(Unit& unit);
-        void Finalize(Unit& unit);
-        void Interrupt(Unit &) {}
-        void Reset(Unit &) {}
-        bool Update(Unit &u, const uint32 &);
-        MovementGeneratorType GetMovementGeneratorType() const { return EFFECT_MOTION_TYPE; }
-        const char* Name() const { return "<Eject>"; }
-    private:
-        uint32 m_Id;
 };
 
 class MANGOS_DLL_SPEC FlyOrLandMovementGenerator : public PointMovementGenerator<Creature>
 {
     public:
-        FlyOrLandMovementGenerator(uint32 _id, float _x, float _y, float _z, bool liftOff) :
-            PointMovementGenerator<Creature>(_id, _x, _y, _z, false),
+        FlyOrLandMovementGenerator(uint32 id, float x, float y, float z, bool liftOff) :
+            PointMovementGenerator<Creature>(id, x, y, z, false),
             m_liftOff(liftOff) {}
 
         void Initialize(Unit& unit) override;
+
     private:
         bool m_liftOff;
+};
+
+// -----------------------------------------------------------------------------------------
+
+// Used as base class for effect MGens.
+class EffectMovementGenerator : public MovementGenerator
+{
+    public:
+        explicit EffectMovementGenerator(uint32 id) : m_id(id) {}
+
+        void Initialize(Unit&) override {}
+        void Finalize(Unit&) override;
+        void Interrupt(Unit&) override {}
+        void Reset(Unit&) override {}
+        bool Update(Unit&, const uint32&) override;
+        MovementGeneratorType GetMovementGeneratorType() const override { return EFFECT_MOTION_TYPE; }
+        char const* Name() const { return "<Effect>"; }
+
+    protected:
+        uint32 m_id;
+};
+
+class EjectMovementGenerator : public EffectMovementGenerator
+{
+    public:
+        explicit EjectMovementGenerator(uint32 id) : EffectMovementGenerator(id) {}
+
+        void Initialize(Unit& unit) override;
+        void Finalize(Unit& unit) override;
+};
+
+class JumpMovementGenerator : public EffectMovementGenerator
+{
+    public:
+        explicit JumpMovementGenerator(float x, float y, float z, float horizontalSpeed, float max_height, uint32 id) :
+            EffectMovementGenerator(id),
+            m_x(x), m_y(y), m_z(z), m_horizontalSpeed(horizontalSpeed), m_maxHeight(max_height) {}
+
+        void Initialize(Unit&) override;
+
+    private:
+        float m_x, m_y, m_z;
+        float m_horizontalSpeed;
+        float m_maxHeight;
+};
+
+class MoveToDestMovementGenerator : public EffectMovementGenerator
+{
+    public:
+        explicit MoveToDestMovementGenerator(float x, float y, float z, float o, Unit* target, float horizontalSpeed, float maxHeight, uint32 id, bool straightLine = false) :
+            EffectMovementGenerator(id),
+            m_x(x), m_y(y), m_z(z), m_o(o), m_target(target), m_horizontalSpeed(horizontalSpeed), m_maxHeight(maxHeight), m_straightLine(straightLine) {}
+
+        void Initialize(Unit&) override;
+
+    private:
+        float m_x, m_y, m_z, m_o;
+        Unit* m_target;
+        float m_horizontalSpeed;
+        float m_maxHeight;
+        bool  m_straightLine;
+};
+
+class MoveWithSpeedMovementGenerator : public EffectMovementGenerator
+{
+    public:
+        explicit MoveWithSpeedMovementGenerator(float x, float y, float z, float speed, bool generatePath, bool forceDestination) :
+            EffectMovementGenerator(0),
+            m_x(x), m_y(y), m_z(z), m_speed(speed), m_generatePath(generatePath), m_forceDestination(forceDestination) {}
+
+        void Initialize(Unit&) override;
+
+    private:
+        float m_x, m_y, m_z;
+        float m_speed;
+        bool  m_generatePath;
+        bool  m_forceDestination;
 };
 
 #endif

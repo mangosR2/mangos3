@@ -630,7 +630,7 @@ class MANGOS_DLL_SPEC Creature : public Unit
         void FocusTarget(Spell const* focusSpell, WorldObject* target);
         void ReleaseFocus(Spell const* focusSpell);
 
-        uint32 GetShieldBlockValue() const                  // dunno mob block value
+        uint32 GetShieldBlockDamageValue() const override // dunno mob block value
         {
             return uint32(BASE_BLOCK_DAMAGE_PERCENT);
         }
