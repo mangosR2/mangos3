@@ -5305,14 +5305,14 @@ void Aura::HandleAuraModStun(bool apply, bool Real)
             return;
 
         // remove stealth for set target
-        if (m_spellProto->SpellFamilyName == SPELLFAMILY_ROGUE && m_spellProto->GetSpellFamilyFlags().test<CF_ROGUE_SAP>())
+        if (GetSpellProto()->SpellFamilyName == SPELLFAMILY_ROGUE && GetSpellProto()->GetSpellFamilyFlags().test<CF_ROGUE_SAP>())
         {
             if (target->HasStealthAura())
                 target->RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
         }
 
         // Frost stun aura -> freeze/unfreeze target
-        if (GetSpellSchoolMask(m_spellProto) & SPELL_SCHOOL_MASK_FROST)
+        if (GetSpellSchoolMask(GetSpellProto()) & SPELL_SCHOOL_MASK_FROST)
             target->ModifyAuraState(AURA_STATE_FROZEN, apply);
 
         target->addUnitState(UNIT_STAT_STUNNED);
@@ -5374,7 +5374,7 @@ void Aura::HandleAuraModStun(bool apply, bool Real)
             }
             case 44572: // Deep Freeze damage part
             {
-                if (!(target->IsCharmerOrOwnerPlayerOrPlayerItself() || target->IsVehicle()) && target->IsImmuneToSpellEffect(m_spellProto, EFFECT_INDEX_0))
+                if (!(target->IsCharmerOrOwnerPlayerOrPlayerItself() || target->IsVehicle()) && target->IsImmuneToSpellEffect(GetSpellProto(), EFFECT_INDEX_0))
                 {
                     if (Unit* pCaster = GetCaster())
                         pCaster->CastSpell(target, 71757, true);
@@ -5384,14 +5384,14 @@ void Aura::HandleAuraModStun(bool apply, bool Real)
         }
 
         // Pound
-        if (m_spellProto->GetSpellIconID() == 66)
+        if (GetSpellProto()->GetSpellIconID() == 66)
         {
             Unit* pCaster = GetCaster();
             if (!pCaster)
                 return;
 
             uint32 spellId = 0;
-            switch (m_spellProto->Id)
+            switch (GetSpellProto()->Id)
             {
                 case 53472: spellId = 53509; break;
                 case 59433: spellId = 59432; break;
@@ -5405,7 +5405,7 @@ void Aura::HandleAuraModStun(bool apply, bool Real)
     else
     {
         // Frost stun aura -> freeze/unfreeze target
-        if (GetSpellSchoolMask(m_spellProto) & SPELL_SCHOOL_MASK_FROST)
+        if (GetSpellSchoolMask(GetSpellProto()) & SPELL_SCHOOL_MASK_FROST)
         {
             bool found_another = false;
             for (AuraType const* itr = &frozenAuraTypes[0]; *itr != SPELL_AURA_NONE && !found_another; ++itr)
@@ -5413,7 +5413,7 @@ void Aura::HandleAuraModStun(bool apply, bool Real)
                 Unit::AuraList const& auras = target->GetAurasByType(*itr);
                 for (Unit::AuraList::const_iterator i = auras.begin(); i != auras.end(); ++i)
                 {
-                    if (GetSpellSchoolMask((*i)->m_spellProto) & SPELL_SCHOOL_MASK_FROST)
+                    if (GetSpellSchoolMask((*i)->GetSpellProto()) & SPELL_SCHOOL_MASK_FROST)
                     {
                         found_another = true;
                         break;
@@ -5459,7 +5459,7 @@ void Aura::HandleAuraModStun(bool apply, bool Real)
         }
 
         // Wyvern Sting
-        if (m_spellProto->SpellFamilyName == SPELLFAMILY_HUNTER && m_spellProto->GetSpellFamilyFlags().test<CF_HUNTER_WYVERN_STING2>())
+        if (GetSpellProto()->SpellFamilyName == SPELLFAMILY_HUNTER && GetSpellProto()->GetSpellFamilyFlags().test<CF_HUNTER_WYVERN_STING2>())
         {
             Unit* caster = GetCaster();
             if (!caster || caster->GetTypeId() != TYPEID_PLAYER)
@@ -5670,7 +5670,7 @@ void Aura::HandleAuraModRoot(bool apply, bool Real)
     if (apply)
     {
         // Frost root aura -> freeze/unfreeze target
-        if (GetSpellSchoolMask(m_spellProto) & SPELL_SCHOOL_MASK_FROST)
+        if (GetSpellSchoolMask(GetSpellProto()) & SPELL_SCHOOL_MASK_FROST)
             target->ModifyAuraState(AURA_STATE_FROZEN, apply);
 
         target->addUnitState(UNIT_STAT_ROOT);
@@ -5700,7 +5700,7 @@ void Aura::HandleAuraModRoot(bool apply, bool Real)
     else
     {
         // Frost root aura -> freeze/unfreeze target
-        if (GetSpellSchoolMask(m_spellProto) & SPELL_SCHOOL_MASK_FROST)
+        if (GetSpellSchoolMask(GetSpellProto()) & SPELL_SCHOOL_MASK_FROST)
         {
             bool found_another = false;
             for (AuraType const* itr = &frozenAuraTypes[0]; *itr != SPELL_AURA_NONE; ++itr)
@@ -5708,7 +5708,7 @@ void Aura::HandleAuraModRoot(bool apply, bool Real)
                 Unit::AuraList const& auras = target->GetAurasByType(*itr);
                 for (Unit::AuraList::const_iterator i = auras.begin(); i != auras.end(); ++i)
                 {
-                    if (GetSpellSchoolMask((*i)->m_spellProto) & SPELL_SCHOOL_MASK_FROST)
+                    if (GetSpellSchoolMask((*i)->GetSpellProto()) & SPELL_SCHOOL_MASK_FROST)
                     {
                         found_another = true;
                         break;
@@ -5748,7 +5748,7 @@ void Aura::HandleAuraModRoot(bool apply, bool Real)
 
         target->GetUnitStateMgr().DropAction(UNIT_ACTION_ROOT);
 
-        if (m_spellProto->Id == 70980)                   // Web Wrap (Icecrown Citadel, trash mob Nerub'ar Broodkeeper)
+        if (GetSpellProto()->Id == 70980)                   // Web Wrap (Icecrown Citadel, trash mob Nerub'ar Broodkeeper)
             target->CastSpell(target, 71010, true);
     }
 }
