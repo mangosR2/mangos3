@@ -13485,11 +13485,12 @@ void Unit::MonsterMoveWithSpeed(float x, float y, float z, float speed, bool gen
     MaNGOS::NormalizeMapCoord(x);
     MaNGOS::NormalizeMapCoord(y);
 
+    SetFallInformation(0, z);
+
     GetMotionMaster()->MoveWithSpeed(x, y, z, speed, generatePath, forceDestination);
-    SetFallInformation(0,z);
 }
 
-void Unit::MonsterMoveToDestination(float x, float y, float z, float o, float speed, float height, bool isKnockBack, Unit* target)
+void Unit::MonsterMoveToDestination(float x, float y, float z, float o, float speed, float height, bool isKnockBack, Unit* target /*=NULL*/, bool straightLine /*=false*/)
 {
     MaNGOS::NormalizeMapCoord(x);
     MaNGOS::NormalizeMapCoord(y);
@@ -13500,8 +13501,9 @@ void Unit::MonsterMoveToDestination(float x, float y, float z, float o, float sp
         InterruptNonMeleeSpells(false);
     }
 
-    SetFallInformation(0,z);
-    GetMotionMaster()->MoveToDestination(x, y, z, o, target, speed, height, 0);
+    SetFallInformation(0, z);
+
+    GetMotionMaster()->MoveToDestination(x, y, z, o, target, speed, height, 0, straightLine);
 }
 
 struct SetPvPHelper
@@ -13854,21 +13856,26 @@ void Unit::KnockBackWithAngle(float angle, float horizontalSpeed, float vertical
     }
     else
     {
-        float vsin = sin(angle);
-        float vcos = cos(angle);
+        if (((Creature*)this)->GetCreatureInfo()->MechanicImmuneMask & MECHANIC_KNOCKOUT)
+            return;
+
+        if (horizontalSpeed <= 0.1f)
+            return;
 
         float moveTimeHalf = verticalSpeed / Movement::gravity;
-        float max_height = -Movement::computeFallElevation(moveTimeHalf,false,-verticalSpeed);
-
+        float max_height = -Movement::computeFallElevation(moveTimeHalf, false, -verticalSpeed);
         float dis = 2 * moveTimeHalf * horizontalSpeed;
+
         float ox, oy, oz;
         GetPosition(ox, oy, oz);
-        float fx = ox + dis * vcos;
-        float fy = oy + dis * vsin;
+
+        float fx = ox + (dis * cos(angle));
+        float fy = oy + (dis * sin(angle));
         float fz = oz;
 
         SetFallInformation(0, fz);
-        MonsterMoveToDestination(fx,fy,fz,GetOrientation(),horizontalSpeed,max_height, true);
+
+        MonsterMoveToDestination(fx, fy, fz, angle, horizontalSpeed, max_height, true);
     }
 }
 
