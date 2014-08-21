@@ -243,6 +243,21 @@ void PetAI::MoveInLineOfSight(Unit* pWho)
     float attackRadius = m_creature->GetAttackDistance(pWho);
     if (m_creature->IsWithinDistInMap(pWho, attackRadius) && m_creature->GetDistanceZ(pWho) <= CREATURE_Z_ATTACK_RANGE)
         AttackStart(pWho);
+
+void PetAI::MovementInform(uint32 uiMovementType, uint32 /*uiData*/)
+{
+    // restore MGen after jumps
+    if (uiMovementType != EFFECT_MOTION_TYPE)
+        return;
+
+    if (!m_creature->GetCharmInfo() ||
+        m_creature->GetCharmInfo()->HasState(CHARM_STATE_ACTION, ACTIONS_DISABLE))
+        return;
+
+    if (Unit* pVictim = m_creature->getVictim())
+        MoveToVictim(pVictim);
+    else
+        m_creature->GetMotionMaster()->MoveTargetedHome();
 }
 
 void PetAI::AttackStart(Unit* pTarget)
@@ -365,7 +380,9 @@ void PetAI::EnterEvadeMode()
 {
     Reset();
     UpdateAIType();
-    m_creature->GetMotionMaster()->MoveTargetedHome();
+
+    if (!m_creature->IsInUnitState(UNIT_ACTION_HOME))
+        m_creature->GetMotionMaster()->MoveTargetedHome();
 }
 
 bool PetAI::IsVisible(Unit* pl) const

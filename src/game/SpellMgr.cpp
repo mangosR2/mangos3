@@ -1123,6 +1123,44 @@ bool IsNonPositiveSpell(SpellEntry const* spellProto)
     return true;
 }
 
+bool IsJumpEffect(SpellEntry const* spellProto, SpellEffectIndex effIndex)
+{
+    if (!spellProto)
+        return false;
+
+    switch (spellProto->Effect[effIndex])
+    {
+        case SPELL_EFFECT_LEAP:
+        case SPELL_EFFECT_JUMP:
+        case SPELL_EFFECT_JUMP2:
+        case SPELL_EFFECT_LEAP_BACK:
+            return true;
+    }
+
+    return false;
+}
+
+bool IsJumpSpell(SpellEntry const* spellProto)
+{
+    // spells with at least one jump effect are considered jump
+    for (uint8 i = 0; i < MAX_EFFECT_INDEX; ++i)
+    {
+        if (spellProto->Effect[i] && IsJumpEffect(spellProto, SpellEffectIndex(i)))
+            return true;
+    }
+
+    return false;
+}
+
+bool IsJumpSpell(uint32 spellId)
+{
+    SpellEntry const* spellProto = sSpellStore.LookupEntry(spellId);
+    if (!spellProto)
+        return false;
+
+    return IsJumpSpell(spellProto);
+}
+
 bool IsSingleTargetSpell(SpellEntry const *spellInfo)
 {
     // all other single target spells have if it has AttributesEx5
