@@ -245,6 +245,7 @@ void PetAI::MoveInLineOfSight(Unit* pWho)
     float attackRadius = m_creature->GetAttackDistance(pWho);
     if (m_creature->IsWithinDistInMap(pWho, attackRadius) && m_creature->GetDistanceZ(pWho) <= CREATURE_Z_ATTACK_RANGE)
         AttackStart(pWho);
+}
 
 void PetAI::MovementInform(uint32 uiMovementType, uint32 /*uiData*/)
 {
