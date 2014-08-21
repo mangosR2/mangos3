@@ -107,6 +107,7 @@ class MANGOS_DLL_DECL PetAI : public CreatureAI
         PetAIType         m_AIType;
         PetAIType         m_savedAIType;
         float             m_attackDistance;
+        float             m_fMaxRadiusToOwner;
         ObjectGuid        m_savedTargetGuid;
         Unit::SpellIdSet  m_spellType[PET_SPELL_MAX]; // Classified autospell storage
 };

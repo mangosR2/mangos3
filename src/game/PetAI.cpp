@@ -56,8 +56,10 @@ void PetAI::Reset()
         m_spellType[i].clear();
 
     m_AIType = PET_AI_PASSIVE;
-    m_attackDistance  = 0.0f;
-    float f_range   = 0.0f;
+    m_attackDistance = 0.0f;
+    float f_range    = 0.0f;
+
+    m_fMaxRadiusToOwner = std::min(100.0f, m_creature->GetMap()->GetVisibilityDistance() - 10.0f);
 
     if (!m_creature->GetCharmInfo())
         return;
@@ -444,6 +446,18 @@ void PetAI::UpdateAI(const uint32 diff)
         m_updateAlliesTimer.Reset();
     }
 
+    Unit* owner = m_creature->GetCharmerOrOwner();
+
+    if (owner && !m_creature->IsWithinDistInMap(owner, m_fMaxRadiusToOwner) && !m_creature->IsInUnitState(UNIT_ACTION_HOME))
+    {
+        if (owner->GetTypeId() == TYPEID_PLAYER && (m_creature->IsPet() || m_creature->isCharmed()))
+        {
+            owner->CallForAllControlledUnits(DoPetActionWithHelper((Player*)owner, ACT_REACTION, REACT_PASSIVE, m_creature->GetObjectGuid(), ObjectGuid()), CONTROLLED_PET | CONTROLLED_GUARDIANS | CONTROLLED_CHARM);
+            owner->CallForAllControlledUnits(DoPetActionWithHelper((Player*)owner, ACT_COMMAND, COMMAND_FOLLOW, m_creature->GetObjectGuid(), ObjectGuid()), CONTROLLED_PET | CONTROLLED_GUARDIANS | CONTROLLED_CHARM);
+            return;
+        }
+    }
+
     if (!inCombat && m_savedTargetGuid)
     {
         if (Unit* savedTarget = m_creature->GetMap()->GetUnit(m_savedTargetGuid))
@@ -469,8 +483,6 @@ void PetAI::UpdateAI(const uint32 diff)
         UpdateAIType();
         return;
     }
-
-    Unit* owner = m_creature->GetCharmerOrOwner();
 
     // i_pet.getVictim() can't be used for check in case stop fighting, i_pet.getVictim() clear at Unit death etc.
     if (pVictim)
@@ -980,7 +992,7 @@ bool PetAI::IsInCombat()
 
 bool PetAI::SetPrimaryTarget(ObjectGuid const& guid)
 {
-    if (!guid || (m_primaryTargetGuid.IsEmpty() || !GetPrimaryTarget()))
+    if (!guid || (!m_primaryTargetGuid || !GetPrimaryTarget()))
     {
         m_primaryTargetGuid = guid;
         return true;
@@ -990,7 +1002,7 @@ bool PetAI::SetPrimaryTarget(ObjectGuid const& guid)
 
 Unit* PetAI::GetPrimaryTarget()
 {
-    if (m_primaryTargetGuid.IsEmpty() || !m_primaryTargetGuid.IsUnit())
+    if (!m_primaryTargetGuid || !m_primaryTargetGuid.IsUnit())
         return NULL;
 
     Unit* target = m_creature->GetMap()->GetUnit(m_primaryTargetGuid);
