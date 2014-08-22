@@ -736,7 +736,6 @@ void WorldSession::HandleSpellClick( WorldPacket & recv_data )
     }
 }
 
-
 void WorldSession::HandleUpdateProjectilePosition(WorldPacket& recvPacket)
 {
     ObjectGuid casterGuid;  // actually target ?
@@ -780,7 +779,6 @@ void WorldSession::HandleUpdateProjectilePosition(WorldPacket& recvPacket)
         if (spellEffect->EffectTriggerSpell)
             if (SpellEntry const* spellInfoT = sSpellStore.LookupEntry(spellEffect->EffectTriggerSpell))
                 pCaster->CastSpell(m_targetX, m_targetY, m_targetZ, spellInfoT, true);
-        }
     }
 }
 

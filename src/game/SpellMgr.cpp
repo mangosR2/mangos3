@@ -1282,7 +1282,7 @@ bool IsJumpEffect(SpellEntry const* spellProto, SpellEffectIndex effIndex)
     if (!spellProto)
         return false;
 
-    switch (spellProto->Effect[effIndex])
+    switch (spellProto->GetSpellEffectIdByIndex(effIndex))
     {
         case SPELL_EFFECT_LEAP:
         case SPELL_EFFECT_JUMP:
@@ -1299,7 +1299,7 @@ bool IsJumpSpell(SpellEntry const* spellProto)
     // spells with at least one jump effect are considered jump
     for (uint8 i = 0; i < MAX_EFFECT_INDEX; ++i)
     {
-        if (spellProto->Effect[i] && IsJumpEffect(spellProto, SpellEffectIndex(i)))
+        if (spellProto->GetSpellEffect(SpellEffectIndex(i)) && IsJumpEffect(spellProto, SpellEffectIndex(i)))
             return true;
     }
 

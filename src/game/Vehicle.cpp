@@ -425,7 +425,6 @@ void VehicleKit::RemovePassenger(Unit* passenger, bool dismount /*false*/)
     UnBoardPassenger(passenger);                            // Use TransportBase to remove the passenger from storage list
 
     passenger->m_movementInfo.ClearTransportData();
-    passenger->m_movementInfo.RemoveMovementFlag(MOVEFLAG_ONTRANSPORT);
 
     if (seat->second.IsProtectPassenger())
     {

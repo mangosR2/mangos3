@@ -4327,11 +4327,11 @@ void Spell::EffectDummy(SpellEffectEntry const* effect)
                 }
                 case 64555:                                 // Insane Periodic
                 {
-                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER || unitTarget->HasAura(63050) || unitTarget->HasAura(m_spellInfo->CalculateSimpleValue(eff_idx)))
+                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER || unitTarget->HasAura(63050) || unitTarget->HasAura(effect->CalculateSimpleValue()))
                         return;
 
                     m_caster->CastSpell(unitTarget, 64464, true);
-                    m_caster->CastSpell(unitTarget, m_spellInfo->CalculateSimpleValue(eff_idx), true);
+                    m_caster->CastSpell(unitTarget, effect->CalculateSimpleValue(), true);
                     return;
                 }
                 case 64673:                                 // Feral Rush (h)
@@ -4361,7 +4361,7 @@ void Spell::EffectDummy(SpellEffectEntry const* effect)
                     if (!unitTarget)
                         return;
 
-                    m_caster->CastSpell(unitTarget, m_spellInfo->CalculateSimpleValue(eff_idx), true);
+                    m_caster->CastSpell(unitTarget, effect->CalculateSimpleValue(), true);
                     return;
                 }
                 case 65346:                                 // Proximity Mine
@@ -8507,7 +8507,7 @@ void Spell::EffectDualWield(SpellEffectEntry const* /*effect*/)
         ((Player*)unitTarget)->SetCanDualWield(true);
 }
 
-void Spell::EffectPull(SpellEffectIndex eff_idx)
+void Spell::EffectPull(SpellEffectEntry const* effect)
 {
     // TODO: create a proper pull towards distract spell center for distract
     //DEBUG_LOG("WORLD: Spell Effect DUMMY");
@@ -8520,10 +8520,10 @@ void Spell::EffectPull(SpellEffectIndex eff_idx)
     WorldLocation loc = m_caster->GetPosition();
     loc.SetOrientation(unitTarget->GetOrientation());
 
-    int32 speed_z = m_spellInfo->EffectMiscValue[eff_idx];
+    int32 speed_z = effect->EffectMiscValue;
     if (!speed_z)
         speed_z = 100;
-    int32 speed_xy = m_spellInfo->EffectMiscValueB[eff_idx];
+    int32 speed_xy = effect->EffectMiscValueB;
     if (!speed_xy)
         speed_xy = 150;
 
@@ -12431,20 +12431,6 @@ void Spell::EffectScriptEffect(SpellEffectEntry const* effect)
                     unitTarget->CastSpell(unitTarget, 62169, true);
                     return;
                 }
-                case 62536:                                 // Frog Kiss (quest Blade fit for a champion)
-                {
-                    if (!unitTarget)
-                        return;
-                                                            // remove Warts!
-                    unitTarget->RemoveAurasDueToSpell(62581);
-                    if (!unitTarget->HasAura(62574))        // if not protected by potion cast Warts!
-                        m_caster->CastSpell(unitTarget, 62581, true);
-                                                            // remove protective aura
-                    unitTarget->RemoveAurasDueToSpell(62574);
-
-                    m_caster->GetMotionMaster()->MoveFollow(unitTarget, PET_FOLLOW_DIST, unitTarget->GetAngle(m_caster));
-                    break;
-                }
                 case 62705:                                 // Auto-repair (Ulduar: RX-214)
                 {
                     if (!unitTarget || !unitTarget->IsVehicle())
@@ -12633,7 +12619,7 @@ void Spell::EffectScriptEffect(SpellEffectEntry const* effect)
                         return;
 
                     unitTarget->CastSpell(unitTarget, 63992, true);
-                    unitTarget->RemoveAurasDueToSpell(m_spellInfo->CalculateSimpleValue(eff_idx));
+                    unitTarget->RemoveAurasDueToSpell(effect->CalculateSimpleValue());
                     return;
                 }
                 case 64069:                                 // Match Health (Rank 1)
@@ -12649,7 +12635,7 @@ void Spell::EffectScriptEffect(SpellEffectEntry const* effect)
                     if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
                         return;
 
-                    unitTarget->CastSpell(m_caster, m_spellInfo->CalculateSimpleValue(eff_idx), true);
+                    unitTarget->CastSpell(m_caster, effect->CalculateSimpleValue(), true);
                     return;
                 }
                 case 64456:                                 // Feral Essence Application Removal
@@ -12666,7 +12652,7 @@ void Spell::EffectScriptEffect(SpellEffectEntry const* effect)
                     if (!unitTarget)
                         return;
 
-                    unitTarget->CastSpell(m_caster, m_spellInfo->CalculateSimpleValue(eff_idx), true);
+                    unitTarget->CastSpell(m_caster, effect->CalculateSimpleValue(), true);
                     return;
                 }
                 case 64467:                                 // Empowering Shadows
